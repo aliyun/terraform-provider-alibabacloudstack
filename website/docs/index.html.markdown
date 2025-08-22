@@ -3,16 +3,32 @@ layout: "alibabacloudstack"
 page_title: "Provider: alibabacloudstack"
 sidebar_current: "docs-alibabacloudstack-index"
 description: |-
-  The AlibabacloudStack provider is used to interact with many resources supported by Alibaba Cloud ApsaraStack. The provider must be configured with valid authentication credentials before it can be used.
+  AlibabaCloudStack Provider Configuration Guide.
 ---
 
 # AlibabacloudStack Provider
 
-The AlibabacloudStack provider is used to interact with resources supported by Alibaba Cloud ApsaraStack. The provider must be configured with valid authentication credentials before it can be used.
+The AlibabacloudStack Provider is a Terraform plugin for managing resources in Alibaba Cloud ApsaraStack. 
 
-## Example Code
+Before using this provider, you must properly configure parameters to set up environment information and access credentials for Alibaba Cloud ApsaraStack.
+
+## Parameter Configuration
+
+The AlibabacloudStack Provider supports two configuration methods, which can be used together:
+
+- **Static Configuration**  
+- **Environment Variable Configuration**  
+
+> **Note:**  
+> If a parameter is configured using both methods, the **static configuration takes precedence over environment variable configuration**.
+
+For configurable parameters, please refer to the **[Parameter Specifications](#parameter-specifications)** section.
+
+## Parameter Configuration
 
 ### Static Configuration
+
++ Create `provider.tf` file
 
 ```hcl
 # Declare AlibabacloudStack Provider source and version
@@ -20,6 +36,7 @@ terraform {
   required_providers {
     alibabacloudstack = {
       source  = "aliyun/alibabacloudstack"
+      # Unspecified versions default to the latest release.
       # version = ">= 3.18.0"
     }
   }
@@ -33,7 +50,7 @@ provider "alibabacloudstack" {
   # security_token         = "Your STS Token"
   region                   = "Region Name"
   insecure                 = true
-  # proxy                  = "http://IP:Port"
+  proxy                  = "http://IP:Port"
   resource_group_set_name  = "Your Resource Group Set Name"
   popgw_domain             = "xxx.xxx.com"
   protocol                 = "HTTPS"
@@ -41,18 +58,6 @@ provider "alibabacloudstack" {
 ```
 
 ### Environment Variable Configuration
-
-> The Provider supports configuring parameters through environment variables.  
-> Environment variables such as `ALIBABACLOUDSTACK_ACCESS_KEY`, `ALIBABACLOUDSTACK_SECRET_KEY` and `ALIBABACLOUDSTACK_ASSUME_ROLE_ARN` provide platform access credentials for the AlibabacloudStack Provider.  
-> For other configurable environment variables, please refer to the **[Parameter Specifications](#parameter-specifications)** section.
-
-
-+ `main.tf` Configuration
-```hcl
-provider "alibabacloudstack" {
-    resource_group_set_name ="${var.resource_group_set_name}"
-}
-```
 
 + Terminal Environment Configuration
 
@@ -64,7 +69,6 @@ export ALIBABACLOUDSTACK_REGION="Region Name"
 export ALIBABACLOUDSTACK_INSECURE= true
 export ALIBABACLOUDSTACK_PROXY= "http://IP:Port"
 export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxx.xxx.com"
-terraform plan
 ```
 
 ## Parameter Specifications
@@ -73,7 +77,7 @@ terraform plan
 
 | Parameter Name       | Environment Variable              | Type     | Description                              | How to Obtain                                                                                 | Remarks                                                              |
 |----------------------|------------------------------------|----------|------------------------------------------|------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| popgw_domain         | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | AlibabaCloud ApsaraStack platform Service Endpoint suffix   | Apsara Uni-manager Operations Console >> Top Profile Icon >> *User Information* >> **Apsara Stack API calls** >> **Internet Domain** | **Required**                                                        |
+| popgw_domain         | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | Alibaba Cloud ApsaraStack Service Endpoint Suffix   | Apsara Uni-manager Operations Console >> Top Profile Icon >> *User Information* >> **Apsara Stack API calls** >> **Internet Domain** | **Required**                                                        |
 | region               | ALIBABACLOUDSTACK_REGION          | string   | Platform Region information              | Apsara Uni-manager Operations Console >> Top Region Information                                                        | **Required**                                                        |
 | is_center_region     | ALIBABACLOUDSTACK_CENTER_REGION   | bool     | Specifies whether current region is central region | Apsara Uni-manager Operations Console >> Top Profile Icon >> *User Information* >> **Apsara Stack API calls** >> **Central Region or Not** | Default: `true`                                                     |
 | protocol             | ALIBABACLOUDSTACK_PROTOCOL        | string   | The Network protocol used to access the environment      | Determined by environment configuration                                                       | Default: `HTTP`    (Valid values: `HTTP` or `HTTPS`)                                                 |
@@ -82,15 +86,31 @@ terraform plan
 
 ### Credential Parameters
 
-> AlibabacloudStack Provider supports multiple credential types. Choose based on requirements.
+AlibabacloudStack supports two authentication methods: STS Token and AK/SK. **STS Token authentication is generally recommended**.
 
-#### 1. Role Assumption
+- STS Token Authentication
+  STS Tokens are temporary credentials obtained through role assumption, valid only within their expiration period. Two acquisition methods are available:
+  - **Automatic STS Token Retrieval**  
+    When configuring `access_key`, `secret_key`, and `role_arn`, AlibabacloudStack automatically performs role assumption and authenticates using the generated STS Token.
+  - **Manual STS Token Acquisition**  
+    Manually call the "Sts 2015-04-01 AssumeRole" API to assume roles. Use the obtained temporary credentials (`access_key`, `secret_key`, and `security_token`) for STS Token authentication.
 
-> **Note**:  
-> - Provider determines whether role assumption is needed based on `role_arn` configuration.  
-> - The `role_arn` can be obtained by accessing the *User Information* page in Apsara Uni-manager Management Console, clicking *View Current Role Policy*, and retrieving the **RAM Role** for the user under a specific organization.
-> - Role assumption validity period: 3600 seconds.
+- AK/SK Authentication
+  AK/SK (Access Key/Secret Key) are permanent credentials that pose **significant security risks** if compromised:
+  - **Account AK/SK Authentication**  
+    Activated when configuring `access_key` and `secret_key` directly.
+
+
+Detailed Configuration:
+
+#### Automatic STS Token Retrieval
+
+> **Note:**  
+> - Configure the `role_arn` parameter to enable automatic role assumption and generate STS Token for authentication.  
+> - The `role_arn` can be obtained by accessing the Apsara Uni-manager Management Console >> Top Profile Icon >> *User Information* >> *View Current Role Policy*, and Switch organizations in *Organization* and retrieve the **RAM Role** value.  
+> - Account AK/SK parameters can be queried on the Apsara Uni-manager Management Console >> Top Profile Icon >> *User Information* >> **AccessKey Pair** .
 > - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group parameters` as replacements for `resource_group_set_name`.
+
 
 | Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
 |------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
@@ -101,11 +121,12 @@ terraform plan
 | resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
 | resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        | e.g. `ResourceSet(xxxx)`                                    |
 
-#### 2. Account STS Token
+#### Manual STS Token Acquisition
+
 
 > **Note**:  
 > - Provider identifies AK/SK type by `security_token` configuration.  
-> - Requires invoking the "Sts 2015-04-01 AssumeRole" API to obtain temporary credentials through role assumption.
+> - Manually call the "Sts 2015-04-01 AssumeRole" API with `access_key`, `secret_key`, and `role_arn` to complete role assumption. Configure the obtained STS Token.  
 > - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group` parameters as replacements for `resource_group_set_name`.
 
 | Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
@@ -117,11 +138,10 @@ terraform plan
 | resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
 | resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        | e.g. `ResourceSet(xxxx)`                                    |
 
-#### 3. Account AK/SK
+#### Account AK/SK Authentication
 
 > **Note**:  
-> - AK/SK parameters can be queried in Apsara Uni-manager Management Console.  
-> - Use `department` and `resource_group` instead of `resource_group_set_name` when resource group names are not unique.
+> - Account AK/SK parameters can be queried on the Apsara Uni-manager Management Console >> Top Profile Icon >> *User Information* >> **AccessKey Pair** .
 > - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group` parameters as replacements for `resource_group_set_name`.
 
 | Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
