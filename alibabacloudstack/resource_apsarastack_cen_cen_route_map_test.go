@@ -135,11 +135,26 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 					}),
 				),
 			},
-
 			{
 				Config: testAccConfig(map[string]interface{}{
 
 					"destination_route_table_ids": REMOVEKEY,
+					"source_route_table_ids": []string{"ddddd"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"source_route_table_ids.#": "1",
+						"source_route_table_ids.0": "ddddd",
+						"destination_route_table_ids.#": "0",
+						"destination_route_table_ids.0": REMOVEKEY,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"source_route_table_ids": REMOVEKEY,
 					"source_child_instance_types": []string{"VBR", "VPC"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -148,8 +163,8 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 						"source_child_instance_types.#": "2",
 						"source_child_instance_types.0": "VBR",
 						"source_child_instance_types.1": "VPC",
-						"destination_route_table_ids.#": "0",
-						"destination_route_table_ids.0": REMOVEKEY,
+						"source_route_table_ids.#": "0",
+						"source_route_table_ids.0": REMOVEKEY,
 					}),
 				),
 			},
