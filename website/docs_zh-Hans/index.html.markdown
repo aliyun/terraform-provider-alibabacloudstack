@@ -83,20 +83,27 @@ export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxx.xxx.com"
 
 ### 凭证参数
 
-AlibabacloudStack支持STS Token和AK/SK两种认证方式，一般建议使用STS Token认证。
+AlibabacloudStack支持STS Token和AK/SK两种认证方式，**一般建议使用STS Token认证**。
 
-- STS Token为临时凭证，通过角色扮演获取，仅在有效期内有效，可通过以下两种方式获取。
-  - STS Token（自动获取）
+- **STS Token**：STS Token为临时凭证，通过角色扮演获取，仅在有效期内有效，可通过以下两种方式获取。
+  
+  - **STS Token（自动获取）**
+    
     当配置`access_key`、`secret_key`和`role_arn`时，由AlibabacloudStack进行角色扮演，并使用扮演产生的STS Token进行认证。
-  - STS Token（手动接口获取）
+    
+  - **STS Token（手动接口获取）**
+    
     手动调用API "Sts 2015-04-01 AssumeRole"接口完成角色扮演后获得STS Token。使用获取的STS Token配置AlibabacloudStack进行STS Token认证。
-- AK/SK是永久凭证，一旦泄漏会存在较大的安全风险。
-  - 账号 AK/SK
+    
+- **AK/SK**：AK/SK是永久凭证，一旦泄漏会存在较大的安全风险。
+  
+  - **账号 AK/SK**
+    
     当配置`access_key`和`secret_key`时使用AK/SK认证。
 
 详细配置如下：
 
-#### 1. STS Token（自动获取）
+#### STS Token（自动获取）
 
 > **注意**：  
 > - 通过配置`role_arn`参数开启自动角色扮演，并生成STS Token进行认证。
@@ -128,10 +135,10 @@ AlibabacloudStack支持STS Token和AK/SK两种认证方式，一般建议使用S
 | resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集ID      | `resource_group_set_name`不可用(冲突)或未配置时必填                      |
 | resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |  示例值：`ResourceSet(xxxx)`                                            |
 
-#### 3. 账号 AK/SK
+#### 账号 AK/SK
 
 > **注意**：  
-> - 账号 AK/SK 可在统一云管平台>>顶部个人头像 >>*个人信息*>>**AccessKey**处获取
+> - 账号 AK/SK 可在统一云管平台>>顶部个人头像>>*个人信息*>>**AccessKey**处获取
 > - 若Region下资源集名称不唯一，需使用 `department` 和 `resource_group` 替代 `resource_group_set_name`。
 
 | 参数名                  | 环境变量名                        | 参数类型 | 参数含义                | 备注                                                                 |
