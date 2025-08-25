@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/PaesslerAG/jsonpath"
@@ -15,47 +14,105 @@ type MaxcomputeService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
-func (s *MaxcomputeService) DescribeMaxcomputeProject(name string) (object *MaxComputeProject, err error) {
+func (s *MaxcomputeService) DescribeMaxcomputeProject(id string) (object *MaxComputeProject, err error) {
 	client := s.client
-
-	roleId, err := client.RoleIds()
+	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "ListCalcEnginesForAscm", "")
+	request.QueryParams["ProjectId"] = id
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-		return nil, err
+		errmsg := ""
+		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "ListCalcEnginesForAscm", errmsg)
 	}
 
-	request := make(map[string]interface{})
-	request["ResourceGroupId"] = client.ResourceGroup
-	request["CalcEngineType"] = "ODPS" // 固定值
-	request["OrganizationId"] = client.Department
-	request["Department"] = client.Department
-	request["ResourceGroup"] = client.ResourceGroup
-	request["CurrentRoleId"] = strconv.Itoa(roleId)
-
-	if strings.Trim(name, " ") != "" {
-		request["Name"] = name
-	}
-
-	response, err := client.DoTeaRequest("POST", "dataworks-private-cloud", "2019-01-17", "ListCalcEnginesForAscm", "", nil, nil, request)
-	addDebug("ListCalcEnginesForAscm", response, request)
+	response := &MaxComputeProjectDetailResponse{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
-		return nil, err
+		return nil, errmsgs.WrapError(err)
 	}
+	for _, v := range response.Data.CalcEngines {
+		// EngineStatus == 0 is running   1 is deleted
+		if fmt.Sprint(v.EngineId) == id && v.EngineStatus == 0 {
+			return &v, nil
+		}
+	}
+	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("Maxcompute Project", id))
+}
 
-	resp := &MaxComputeProject{}
-	body, ok := response["Body"].(string)
-	if !ok {
-		return resp, errmsgs.WrapError(err)
-	}
-	err = json.Unmarshal([]byte(body), resp)
+func (s *MaxcomputeService) DescribeMaxcomputeProjectEngine(id string) (object *MaxComputeProjectEngineData, err error) {
+	client := s.client
+	request := client.NewCommonRequest("GET", "dataworks-private-cloud", "2019-01-17", "GetCalcEngineForAscm", "")
+	request.QueryParams["EngineId"] = id
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		return resp, errmsgs.WrapError(err)
+		errmsg := ""
+		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "GetCalcEngineForAscm", errmsg)
+	}
+	response := MaxComputeProjectEngineDetailResponse{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	return &response.Data, nil
+}
+
+func (s *MaxcomputeService) DescribeMaxProjectPropertiesForAscm(id string) (map[string]interface{}, error) {
+	client := s.client
+	request := client.NewCommonRequest("GET", "dataworks-private-cloud", "2019-01-17", "GetOdpsProjectPropertiesForAscm", "")
+	request.QueryParams = map[string]string{
+		"ProjectName":        "tf_testAcck3043",
+		"Properties":         "ENCRYPTION,odps.security.vpc.whitelist",
+		"EngineId":           "53",
+		"doReplaceTunnelIds": "true",
+	}
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		errmsg := ""
+		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "GetOdpsProjectPropertiesForAscm", errmsg)
+	}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	v, err := jsonpath.Get("$.Data", response)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)
+	}
+	return v.(map[string]interface{}), nil
+}
+
+func (s *MaxcomputeService) DescribeMaxcomputeQuota(cluster_id string) (object map[string]interface{}, err error) {
+	request := map[string]interface{}{
+		"Region":      s.client.RegionId,
+		"Action":      "GetOdpsQuotaForAscm",
+		"AccessKeyId": s.client.AccessKey,
+		"Cluster":     cluster_id,
+		"Project":     "odps",
 	}
 
-	if resp.TotalCount < 1 || resp.Code == "200" {
-		return resp, errmsgs.WrapError(err)
+	response, err := s.client.DoTeaRequest("GET", "dataworks-private-cloud", "2019-01-17", "GetOdpsQuotaForAscm", "", nil, request, nil)
+	addDebug("ListOdpsCusForAscm", response, request)
+	if err != nil {
+		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_project", "GetOdpsQuotaForAscm", errmsgs.AlibabacloudStackSdkGoERROR)
+		return
 	}
-	return resp, nil
+	if fmt.Sprintf(`%v`, response["HttpStatusCode"]) != "200" {
+		err = errmsgs.Error("ListOdpsCusForAscm failed for " + response["asapiErrorMessage"].(string))
+		return object, err
+	}
+
+	v, err := jsonpath.Get("$.Data.data", response)
+	if err != nil {
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, cluster_id, "$", response)
+	}
+	object = v.(map[string]interface{})
+	return object, nil
 }
 
 func (s *MaxcomputeService) DescribeMaxcomputeCu(id string) (object map[string]interface{}, err error) {
@@ -72,11 +129,6 @@ func (s *MaxcomputeService) DescribeMaxcomputeCu(id string) (object map[string]i
 		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_cu", "ListOdpsCusForAscm", errmsgs.AlibabacloudStackSdkGoERROR)
 		return
 	}
-	if fmt.Sprintf(`%v`, response["HttpStatusCode"]) != "200" {
-		err = errmsgs.Error("ListOdpsCusForAscm failed for " + response["asapiErrorMessage"].(string))
-		return object, err
-	}
-
 	v, err := jsonpath.Get("$.Data.data", response)
 	if err != nil {
 		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)

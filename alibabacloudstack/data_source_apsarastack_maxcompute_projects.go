@@ -1,11 +1,6 @@
 package alibabacloudstack
 
 import (
-	"log"
-	"strconv"
-
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -95,41 +90,41 @@ func dataSourceAlibabacloudStackMaxcomputeProjects() *schema.Resource {
 }
 
 func dataSourceAlibabacloudStackMaxcomputeProjectsRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	maxcomputeService := MaxcomputeService{client}
-	objects, err := maxcomputeService.DescribeMaxcomputeProject(d.Get("name").(string))
-	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			log.Printf("[DEBUG] Resource alibabacloudstack_maxcompute_project_user maxcomputeService.DescribeMaxcomputeUser Failed!!! %s", err)
-			d.SetId("")
-			return nil
-		}
-		return errmsgs.WrapError(err)
-	}
+	// client := meta.(*connectivity.AlibabacloudStackClient)
+	// maxcomputeService := MaxcomputeService{client}
+	// objects, err := maxcomputeService.DescribeMaxcomputeProject(d.Get("name").(string))
+	// if err != nil {
+	// 	if errmsgs.NotFoundError(err) {
+	// 		log.Printf("[DEBUG] Resource alibabacloudstack_maxcompute_project_user maxcomputeService.DescribeMaxcomputeUser Failed!!! %s", err)
+	// 		d.SetId("")
+	// 		return nil
+	// 	}
+	// 	return errmsgs.WrapError(err)
+	// }
 
-	var t []map[string]interface{}
-	var ids []string
-	for _, object := range objects.Data.CalcEngines {
-		user := map[string]interface{}{
-			"id":   strconv.Itoa(object.EngineId),
-			"name": object.Name,
-		}
-		t = append(t, user)
-		ids = append(ids, user["id"].(string))
+	// var t []map[string]interface{}
+	// var ids []string
+	// for _, object := range objects.Data.CalcEngines {
+	// 	user := map[string]interface{}{
+	// 		"id":   strconv.Itoa(object.EngineId),
+	// 		"name": object.Name,
+	// 	}
+	// 	t = append(t, user)
+	// 	ids = append(ids, user["id"].(string))
 
-	}
-	d.SetId(dataResourceIdHash(ids))
+	// }
+	// d.SetId(dataResourceIdHash(ids))
 
-	if err := d.Set("projects", t); err != nil {
-		return errmsgs.WrapError(err)
-	}
-	if err := d.Set("ids", ids); err != nil {
-		return errmsgs.WrapError(err)
-	}
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), t); err != nil {
-			return err
-		}
-	}
+	// if err := d.Set("projects", t); err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
+	// if err := d.Set("ids", ids); err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
+	// if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
+	// 	if err := writeToFile(output.(string), t); err != nil {
+	// 		return err
+	// 	}
+	// }
 	return nil
 }

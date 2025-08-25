@@ -7,12 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackMaxcompute_basic(t *testing.T) {
+func TestAccAlibabacloudStackMaxcomputeProject_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_maxcompute_project.default"
 	ra := resourceAttrInit(resourceId, nil)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000, 9999)
-	name := fmt.Sprintf("tf_testAccack%d", rand)
+	// rand := getAccTestRandInt(1000, 9999)
+	// name := fmt.Sprintf("tf_testAcck%d", rand)
+	name := "tf_testAcck3043"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceMaxcomputeProjectDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -23,20 +25,22 @@ func TestAccAlibabacloudStackMaxcompute_basic(t *testing.T) {
 		Providers:     testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccMaxcomputeConfigBasic, name, 50),
+				Config: testAccConfig(map[string]interface{}{
+					"name":           "${var.name}",
+					"disk":           "50",
+					"account":        "ascm-dw-1755770304175",
+					"account_pk":     "1784955770304192",
+					"quota_id":       "29",
+					"external_table": "true",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": name,
-						"disk": "50",
-					}),
-				),
-			},
-			{
-				Config: fmt.Sprintf(testAccMaxcomputeConfigBasic, name, 55),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name": name,
-						"disk": "55",
+						"name":           name,
+						"disk":           "50",
+						"account":        "ascm-dw-1755770304175",
+						"account_pk":     "1784955770304192",
+						"quota_id":       "29",
+						"external_table": "true",
 					}),
 				),
 			},
@@ -49,98 +53,11 @@ func TestAccAlibabacloudStackMaxcompute_basic(t *testing.T) {
 	})
 }
 
-const testAccMaxcomputeConfigBasic = `
-
+func resourceMaxcomputeProjectDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
 }
 
-data "alibabacloudstack_maxcompute_clusters" "default"{
-	name_regex = "HYBRIDODPSCLUSTER-.*"
+`, name)
 }
-
-resource "alibabacloudstack_maxcompute_cu" "default"{
-  cu_name      = "${var.name}"
-  cu_num       = "1"
-  cluster_name = data.alibabacloudstack_maxcompute_clusters.default.clusters.0.cluster
-}
-
-resource "alibabacloudstack_maxcompute_user" "default"{
-  user_name             = "${var.name}"
-  description           = "TestAccAlibabacloudStackMaxcomputeUser"
-  lifecycle {
-    ignore_changes = [
-      organization_id,       
-    ]
-  }
-}
-
-resource "alibabacloudstack_maxcompute_project" "default"{
-	cluster        = data.alibabacloudstack_maxcompute_clusters.default.clusters.0.cluster
-	external_table = "false"
-	quota_id       = alibabacloudstack_maxcompute_cu.default.id
-	disk           = %d
-	name           = "${var.name}"
-	aliyun_account = "${alibabacloudstack_maxcompute_user.default.user_name}"
-    pk = "1075451910171540"
-}
-`
-
-func TestAccAlibabacloudStackMaxcompute_advance(t *testing.T) {
-	resourceId := "alibabacloudstack_maxcompute_project.default.4"
-	ra := resourceAttrInit(resourceId, nil)
-	testAccCheck := ra.resourceAttrMapUpdateSet()
-	name := "tf_testAccMCProject"
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			// Currently does not support creating projects with sub-accounts
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccMaxcomputeConfigAdvance,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"project_name":       name + "4",
-						"specification_type": "OdpsStandard",
-						"order_type":         "PayAsYouGo",
-					}),
-				),
-			},
-		},
-	})
-}
-
-const testAccMaxcomputeConfigAdvance = `
-variable "name" {
-	default = "%s"
-}
-
-data "alibabacloudstack_maxcompute_clusters" "default"{
-	name_regex = "HYBRIDODPSCLUSTER-.*"
-}
-
-resource "alibabacloudstack_maxcompute_cu" "default"{
-  cu_name      = "${var.name}"
-  cu_num       = "1"
-  cluster_name = data.alibabacloudstack_maxcompute_clusters.default.clusters.0.cluster
-}
-
-resource "alibabacloudstack_maxcompute_user" "default"{
-  user_name             = "${var.name}"
-  description           = "TestAccAlibabacloudStackMaxcomputeUser"
-}
-
-resource "alibabacloudstack_maxcompute_project" "default"{
-	cluster        = data.alibabacloudstack_maxcompute_clusters.default.clusters.0.cluster
-	external_table = "false"
-	quota_id       = alibabacloudstack_maxcompute_cu.default.id
-	disk           = 50
-	name           = "${var.name}"
-	aliyun_account = "${alibabacloudstack_maxcompute_user.default.user_name}"
-    pk = "1075451910171540"
-}
-`

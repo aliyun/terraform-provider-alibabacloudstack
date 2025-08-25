@@ -1,16 +1,17 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
+	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
@@ -24,6 +25,20 @@ func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"account": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"account_pk": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
 			"quota_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -32,9 +47,39 @@ func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"name": {
+			"core_arch": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "x86_64",
+			},
+			"cpu_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "Intel",
+			},
+			"external_table": {
+				Type:     schema.TypeBool,
+				Default:  false,
+				Optional: true,
+			},
+			"encryption": {
+				Type:     schema.TypeBool,
+				Default:  false,
+				Optional: true,
+			},
+			"encrypt_algorithm": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"SM4", "RC4", "AES256", "AESCTR"}, false),
+			},
+			"encryption_key": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 	}
@@ -45,109 +90,94 @@ func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
 func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	roleId, err := client.RoleIds()
+	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "CreateCalcEngineForAscm", "")
+
+	maxcomputeService := MaxcomputeService{client}
+	quote_id := d.Get("quota_id").(string)
+	cu, err := maxcomputeService.DescribeMaxcomputeCu(quote_id)
 	if err != nil {
-		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-		return err
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_project", "DescribeMaxcomputeCu", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	clusters := []map[string]string{
+		{
+			"cluster":   cu["cluster"].(string),
+			"core_arch": d.Get("core_arch").(string),
+			"project":   "odps",
+			"region":    client.RegionId,
+			"aliasName": cu["cluster"].(string),
+		},
+	}
+	clusterStr, _ := json.Marshal(clusters)
+	engineInfo := map[string]interface{}{
+		"taskAk": map[string]interface{}{
+			"kp":            d.Get("account_pk").(string),
+			"aliyunAccount": d.Get("account").(string),
+		},
+		"clusters": []map[string]interface{}{
+			{
+				"name":      cu["cluster"].(string),
+				"quota":     quote_id,
+				"isDefault": 1,
+			},
+		},
+		"odpsProjectName":         d.Get("name").(string),
+		"needToCreateOdpsProject": true,
+		"defaultClusterArch":      d.Get("core_arch").(string),
+		"isOdpsDev":               false,
+	}
+	engineInfoStr, _ := json.Marshal(engineInfo)
+	body := map[string]string{
+		"Region":         client.RegionId,
+		"Action":         "CreateCalcEngineForAscm",
+		"AccessKeyId":    client.AccessKey,
+		"cpuType":        "intel",
+		"Clusters":       string(clusterStr),
+		"isNewFeature":   "true",
+		"ExternalTable":  fmt.Sprint(d.Get("external_table")),
+		"organizationId": client.Department,
+		"Department":     client.Department,
+		"odpsName":       "testtf",
+		"clusterName":    fmt.Sprintf("[\"%s\"]", cu["cluster"].(string)),
+		"taskPk":         d.Get("account_pk").(string),
+		"CalcEngineType": "ODPS",
+		"EnvType":        "PRD",
+		"Name":           d.Get("name").(string),
+		"RegionId":       "cn-wulan-env149-d01",
+		"diskForQuota":   fmt.Sprint(d.Get("disk")),
+		"EngineInfo":     string(engineInfoStr),
 	}
 
-	cluster_name := d.Get("cluster").(string)
-	clusters, err := DescribeMaxcomputeProject(meta)
+	if d.Get("encryption").(bool) {
+		body["EnabledMcEncrypt"] = "1"
+		body["McEncryptAlgorithm"] = d.Get("encryption_algorithm").(string)
+		body["McEncryptKey"] = d.Get("encryption_key").(string)
+	}
+	mergeMaps(request.QueryParams, body)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		errmsg := ""
+		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "Create", errmsg)
+	}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	var cluster map[string]interface{}
-	for _, object := range clusters {
-		cluster = object.(map[string]interface{})
-		if cluster["cluster"].(string) == cluster_name {
-			break
-		}
-	}
-	if cluster == nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_cluster", "getCluster", cluster_name)
-	}
-
-	disk_size := d.Get("disk").(int)
-	name := d.Get("name").(string)
-	pk := d.Get("pk").(string)
-
-	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "CreateCalcEngineForAscm", "")
-	mergeMaps(request.QueryParams, map[string]string{
-		"KmsRegion":       string(client.Region),
-		"ResourceGroupId":  client.ResourceGroup,
-		"Product":          "dataworks-private-cloud",
-		"CalcEngineType":   "ODPS",
-		"OrganizationId":   client.Department,
-		"EnvType":          "PRD",
-		"Name":             name,
-		"EngineInfo":       "{\"taskAk\":{\"kp\":\"" + pk + "\",\"aliyunAccount\":\"ascm-dw-1637809230710\"},\"clusters\":[{\"name\":\"" + cluster_name + "\",\"quota\":" + d.Get("quota_id").(string) + ",\"disk\":" + fmt.Sprintf("%f", float64(disk_size)/1024) + ",\"isDefault\":1,\"projectQuota\":{\"fileLength\":" + strconv.Itoa(disk_size*1024*1024*1024) + ",\"fileNumber\":null}}],\"odpsProjectName\":\"" + name + "\",\"needToCreateOdpsProject\":true,\"defaultClusterArch\":\"" + cluster["core_arch"].(string) + "\",\"isOdpsDev\":false}",
-		"Department":       client.Department,
-		"Version":          "2019-01-17",
-		"ClusterItem":      "{\"cluster\":\"" + cluster_name + "\",\"core_arch\":\"" + cluster["core_arch"].(string) + "\",\"project\":\"" + cluster["project"].(string) + "\",\"region\":\"" + cluster["region"].(string) + "\"}",
-		"ClusterName":      cluster_name,
-		"ResourceGroup":    client.ResourceGroup,
-		"ExternalTable":    strconv.FormatBool(d.Get("external_table").(bool)),
-		"TaskPk":          pk,
-		"OdpsName":        name,
-		"RegionId":        client.RegionId,
-		"CurrentRoleId":   strconv.Itoa(roleId),
-	})
-
-	if v, ok := d.GetOk("enabled_mc_encrypt"); ok && v.(bool) {
-		request.QueryParams["EnabledMcEncrypt"] = "1"
-		if _, ok := d.GetOk("mc_encrypt_algorithm"); !ok {
-			log.Printf("mc_encrypt_algorithm not set while enable me encrypt")
-			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_maxcompute_project", "mc_encrypt_algorithm", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		request.QueryParams["McEncryptAlgorithm"] = d.Get("mc_encrypt_algorithm").(string)
-		if _, ok := d.GetOk("mc_encrypt_key"); !ok {
-			log.Printf("mc_encrypt_key not set while enable me encrypt")
-			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_maxcompute_project", "mc_encrypt_algorithm", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		request.QueryParams["McEncryptKey"] = d.Get("mc_encrypt_key").(string)
-	}
-
-	if v, ok := d.GetOk("vpc_tunnel_ids"); ok {
-		vpc_tunnel_ids := ""
-		for _, id := range v.([]interface{}) {
-			vpc_tunnel_ids += id.(string)
-		}
-		request.QueryParams["McEncryptKey"] = vpc_tunnel_ids
-	}
-
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	log.Printf("response of raw create maxcomputecluster is : %s", raw)
-
-	bresponse, ok := raw.(*responses.CommonResponse)
+	id, err := jsonpath.Get("$.Data", response)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "Create", errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "alibabacloudstack_maxcompute_project", "$", response)
 	}
-
-	addDebug("MaxcomputeProjectCreate", raw, request)
-
-	if bresponse.GetHttpStatus() != 200 {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "Create", errmsg)
-	}
-	addDebug("MaxcomputeProjectCreate", raw, request, bresponse.GetHttpContentString())
-
+	d.SetId(fmt.Sprint(id))
+	// d.SetId("53")
 	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeProjectRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	maxcomputeService := MaxcomputeService{client}
-	objects, err := maxcomputeService.DescribeMaxcomputeProject(d.Get("name").(string))
+	project, err := maxcomputeService.DescribeMaxcomputeProject(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_maxcompute_project_user maxcomputeService.DescribeMaxcomputeUser Failed!!! %s", err)
@@ -156,57 +186,87 @@ func resourceAlibabacloudStackMaxcomputeProjectRead(d *schema.ResourceData, meta
 		}
 		return errmsgs.WrapError(err)
 	}
-
-	project := objects.Data.CalcEngines[0]
-	d.SetId(strconv.Itoa(project.EngineId))
+	d.Set("name", project.Name)
+	d.Set("quota_id", fmt.Sprint(project.Data[0].QuotaId))
+	d.Set("disk", project.Data[0].Disk)
+	d.Set("core_arch", project.EngineInfo.DefaultClusterArch)
+	d.Set("external_table", project.EngineInfo.ExternalProjectCnt == 1)
+	Properties, err := maxcomputeService.DescribeMaxProjectPropertiesForAscm(d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	encryption := make(map[string]interface{})
+	err = json.Unmarshal(Properties["ENCRYPTION"].([]byte), &encryption)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	vpcData := make([]string, 0)
+	err = json.Unmarshal(Properties["odps.security.vpc.whitelist"].([]byte), &vpcData)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.Set("encryption", encryption["ENCRYPTION_ENABLE"].(bool))
+	d.Set("encrypt_algorithm", encryption["ENCRYPTION_ALGORITHM"].(string))
+	d.Set("encryption", encryption["ENCRYPTION_KEY"].(string))
+	vpc := strings.Split(vpcData[0], "_")
+	if len(vpc) == 2 {
+		d.Set("encryption", vpc[0])
+	}
 	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeProjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
-	if d.HasChanges("cluster", "disk") {
-		roleId, err := client.RoleIds()
-		if err != nil {
-			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateOdpsQuota", "/ascm/manage/resource_mgmt/updateOdpsQuota")
-		request.Headers["x-acs-roleid"] = strconv.Itoa(roleId)
+	if !d.IsNewResource() && d.HasChanges("encryption", "encrypt_algorithm", "encryption_key") {
+		request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "UpdateOdpsProjectPropertiesForAscm", "")
+		encrypt_algorithm := d.Get("encrypt_algorithm").(string)
+		encryption_key := d.Get("encryption_key").(string)
+		encryption := fmt.Sprintf("{\"ENCRYPTION_ENABLE\":\"true\",\"ENCRYPTION_ALGORITHM\":\"%s\",\"ENCRYPTION_KEY\":\"%s\"}", encrypt_algorithm, encryption_key)
+		propertyMap := map[string]interface{}{"ENCRYPTION": encryption}
+		propertyStr, _ := json.Marshal(propertyMap)
 		mergeMaps(request.QueryParams, map[string]string{
-			"Cluster":           d.Get("cluster").(string),
-			"Product":           "ascm",
-			"Cu":                d.Get("quota_id").(string),
-			"Format":            "JSON",
-			"Forwardedregionid": client.RegionId,
-			"Version":           "2019-05-10",
-			"RegionId":          client.RegionId,
-			"Id":                d.Get("id").(string),
-			"Disk":              fmt.Sprintf("%f", float64(d.Get("disk").(int))/1024),
+			"engineId":    d.Get("name").(string),
+			"ProjectName": d.Get("name").(string),
+			"propertyMap": string(propertyStr),
 		})
-
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			if errmsgs.IsExpectedErrors(err, []string{"ErrorOdpsQuota Not Found"}) {
-				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Get("user_name").(string), "UpdateOdpsQuota", errmsg)
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "UpdateOdpsProjectPropertiesForAscm", errmsg)
 		}
-		addDebug("UpdateOdpsQuota", raw, request)
 	}
-
+	if d.HasChange("vpc_id") && d.Get("vpc_id") != "" {
+		request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "UpdateOdpsProjectVpcForAscm", "")
+		vpcIdList := fmt.Sprintf("[\"%s_%s\"]", client.RegionId, d.Get("vpc_id").(string))
+		mergeMaps(request.QueryParams, map[string]string{
+			"engineId":    d.Get("name").(string),
+			"vpcIdList":   vpcIdList,
+			"ProjectName": d.Get("name").(string),
+			"RegionIds":   client.RegionId,
+		})
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			errmsg := ""
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "UpdateOdpsProjectVpcForAscm", errmsg)
+		}
+	}
 	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeProjectDelete(d *schema.ResourceData, meta interface{}) error {
-	// 不支持删除
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "DeleteCalcEngineForAscm", "")
+	request.QueryParams["EngineId"] = d.Id()
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		errmsg := ""
+		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "DeleteCalcEngineForAscm", errmsg)
+	}
 	return nil
 }
