@@ -157,16 +157,16 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 		name = name[:30]
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
-	password := getAccTestPassword(12)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
 		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -175,8 +175,8 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 					"scene":               "normal",
 					"description":         name,
 					"version":             EsVersion,
-					"password":            getAccTestPassword(12),
-					"monitor_password":    getAccTestPassword(12),
+					"password":            "${random_password.password.0.result}",
+					"monitor_password":    "${random_password.password.1.result}",
 					"data_node_spec":      DataNodeSpec,
 					"data_node_amount":    DataNodeAmount,
 					"data_node_disk_size": DataNodeDisk,
@@ -206,10 +206,10 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"vpc_whitelist": []map[string]interface{}{ 
+					"vpc_whitelist": []map[string]interface{}{
 						map[string]interface{}{
 							"vpc_id": "${alibabacloudstack_vpc_vswitch.default.vpc_id}",
-							"ips" : []string{"${alibabacloudstack_vpc_vswitch.default.cidr_block}"},
+							"ips":    []string{"${alibabacloudstack_vpc_vswitch.default.cidr_block}"},
 						},
 					},
 				}),
@@ -261,22 +261,18 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"password": password,
+					"password": "${random_password.password.2.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"password": password,
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"monitor_password": password,
+					"monitor_password": "${random_password.password.3.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"monitor_password": password,
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
@@ -393,7 +389,6 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 		name = name[:30]
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
-	password := getAccTestPassword(12)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -416,7 +411,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 					"data_node_disk_size":   DataNodeDisk,
 					"data_node_disk_type":   EsDiskType,
 					"kibana_node_spec":      KibanaNodeSpec,
-					"kibana_password":       getAccTestPassword(12),
+					"kibana_password":       "${random_password.password.0.result}",
 					"master_node_amount":    MasterNodeAmount,
 					"master_node_spec":      MasterNodeSpec,
 					"master_node_disk_size": "100",
@@ -424,8 +419,8 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 					"client_node_amount":    ClientNodeAmount,
 					"client_node_spec":      ClientNodeSpec,
 					"vswitch_id":            "${alibabacloudstack_vpc_vswitch.default.id}",
-					"password":              getAccTestPassword(12),
-					"monitor_password":      getAccTestPassword(12),
+					"password":              "${random_password.password.1.result}",
+					"monitor_password":      "${random_password.password.2.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -440,12 +435,10 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"kibana_password": password,
+					"kibana_password": "${random_password.password.3.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"kibana_password": password,
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
@@ -605,9 +598,9 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 					"data_node_spec":      DataNodeSpec,
 					"data_node_disk_size": DataNodeDisk,
 					"data_node_disk_type": EsDiskType,
-					"vswitch_id":            "${alibabacloudstack_vpc_vswitch.default.id}",
-					"password":              getAccTestPassword(12),
-					"monitor_password":      getAccTestPassword(12),
+					"vswitch_id":          "${alibabacloudstack_vpc_vswitch.default.id}",
+					"password":            "${random_password.password.0.result}",
+					"monitor_password":    "${random_password.password.1.result}",
 					"setting_config": map[string]string{
 						"\"action.auto_create_index\"":         "+.*,-*",
 						"\"action.destructive_requires_name\"": "false",
@@ -670,6 +663,8 @@ func resourceElasticsearchInstanceConfigDependence(name string) string {
 	}
 
 %s
+
+%s
 		
-	`, name, VSwitchCommonTestCase)
+	`, name, VSwitchCommonTestCase, RandomPasswordTestCase(12, 4))
 }
