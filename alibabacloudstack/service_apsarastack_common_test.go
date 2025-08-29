@@ -538,9 +538,9 @@ func (dsa *dataSourceAttr) dataSourceTestCheck(t *testing.T, rand int, configs .
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		Steps:     steps,
+		Steps:             steps,
 	})
 }
 
@@ -933,6 +933,7 @@ resource "alibabacloudstack_polardbx_instance" "default" {
 	dn_node_class  = "${data.alibabacloudstack_polardbx_instance_types.dn.instance_types.0.id}"
 	dn_node_count  = "2"
 }
+
 locals {
 	polardbx_instance = length(data.alibabacloudstack_polardbx_instances.default.polardbx_instances) == 0 ? alibabacloudstack_polardbx_instance.default.0 : data.alibabacloudstack_polardbx_instances.default.polardbx_instances.0
 }

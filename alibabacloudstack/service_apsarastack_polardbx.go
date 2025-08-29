@@ -1092,3 +1092,26 @@ func (s *PolardbXService) ModifyAccountDescription(instanceId, accountName, desc
 	}
 	return nil
 }
+
+func (s *PolardbXService) DescribePolardbxReadWriteSplittingConfig(id string) (map[string]interface{}, error) {
+	query := map[string]interface{}{
+		"DBInstanceName": id,
+		"ConfigName":     "htap",
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstanceConfig", "", nil, query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if success, ok := response["asapiSuccess"].(bool); !ok || !success {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDBX read write splitting config not found for instance %s", id))
+	}
+
+	data, ok := response["Data"].(map[string]interface{})
+	if !ok || data == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDBX read write splitting config not found for instance %s", id))
+	}
+
+	return data, nil
+}
