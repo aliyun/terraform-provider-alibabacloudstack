@@ -7,6 +7,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackPolardbxReadWriteSplittingConfig() *schema.Resource {
@@ -29,9 +30,10 @@ func resourceAlibabacloudStackPolardbxReadWriteSplittingConfig() *schema.Resourc
 				Optional: true,
 			},
 			"delay_execution_strategy": {
-				Type:     schema.TypeInt,
-				Computed: true,
-				Optional: true,
+				Type:         schema.TypeInt,
+				Computed:     true,
+				Optional:     true,
+				ValidateFunc: validation.IntInSlice([]int{0, 1}),
 			},
 			"enable_consistent_replica_read": {
 				Type:     schema.TypeBool,
@@ -163,10 +165,7 @@ func resourceAlibabacloudStackPolardbxReadWriteSplittingConfigUpdate(d *schema.R
 		configValue["autoAttendHtap"] = d.Get("auto_attend_htap").(bool)
 		configValue["enableHtap"] = d.Get("enable_htap").(bool)
 		configValue["enableConsistentReplicaRead"] = d.Get("enable_consistent_replica_read").(bool)
-
-		if v, ok := d.GetOk("delay_execution_strategy"); ok {
-			configValue["delayExecutionStrategy"] = v.(int)
-		}
+		configValue["delayExecutionStrategy"] = d.Get("delay_execution_strategy").(int)
 
 		if v, ok := d.GetOk("master_read_weight"); ok {
 			configValue["masterReadWeight"] = v.(int)
