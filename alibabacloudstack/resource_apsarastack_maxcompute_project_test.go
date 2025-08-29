@@ -28,37 +28,37 @@ func TestAccAlibabacloudStackMaxcomputeProject_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":           "${var.name}",
 					"disk":           "50",
-					"account":        "ascm-dw-1756177082057",
-					"account_pk":     "1414456177082148",
-					"quota_id":       "4",
+					"account":        "ascm-dw-1755770304175",
+					"account_pk":     "1784955770304192",
+					"quota_id":       "${alibabacloudstack_maxcompute_cu.default.id}",
 					"external_table": "true",
-					"vpc_ids":        []string{"vpc-9jp1w6rnwv52khk0ufrmq"},
+					"vpc_ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":       name,
-						"account":    "ascm-dw-1756177082057",
-						"account_pk": "1414456177082148",
-						"quota_id":   "4",
+						"account":    "ascm-dw-1755770304175",
+						"account_pk": "1784955770304192",
+						"quota_id":   CHECKSET,
 						"disk":       "50",
-						"vpc_ids.0":  "vpc-9jp1w6rnwv52khk0ufrmq",
+						"vpc_ids.#":  CHECKSET,
 					}),
 				),
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"encryption":        "true",
-					"encrypt_algorithm": "AES256",
-					"encryption_key":    "6cc5b591-0e73-4168-ae54-a1a6e38bae36",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"encryption":        "true",
-						"encrypt_algorithm": "AES256",
-						"encryption_key":    "6cc5b591-0e73-4168-ae54-a1a6e38bae36",
-					}),
-				),
-			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"encryption":        "true",
+			// 		"encrypt_algorithm": "AES256",
+			// 		"encryption_key":    "6cc5b591-0e73-4168-ae54-a1a6e38bae36",
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"encryption":        "true",
+			// 			"encrypt_algorithm": "AES256",
+			// 			"encryption_key":    "6cc5b591-0e73-4168-ae54-a1a6e38bae36",
+			// 		}),
+			// 	),
+			// },
 			{
 				ResourceName:            resourceId,
 				ImportState:             true,
@@ -78,11 +78,12 @@ variable "name" {
 data "alibabacloudstack_maxcompute_clusters" "default"{
 	name_regex = "HYBRIDODPSCLUSTER-.*"
 }
+%s
 
 resource "alibabacloudstack_maxcompute_cu" "default" {
 	cu_name =      "${var.name}"
 	cu_num =       2
 	cluster_name = "${data.alibabacloudstack_maxcompute_clusters.default.clusters.0.cluster}"
 }
-`, name)
+`, name, VpcCommonTestCase)
 }

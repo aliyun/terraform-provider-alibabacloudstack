@@ -30,6 +30,12 @@ The following arguments are supported:
 * `name` - (Required, ForceNew) It has been deprecated from provider version 1.110.0 and `project_name` instead.
 * `quota_id` - (Required) The quota ID of the maxcompute project. 
 * `disk` - (Required) The disk size of the maxcompute project. 
+* `account` - (Required, ForceNew) The account of the maxcompute project.
+* `account_pk` - (Required, ForceNew) The account pk of the maxcompute project.
+* `external_table` - (Optional) Whether to enable joint computing.
+* `vpc_ids` - (Optional) The vpc ids of the maxcompute project.
+* `core_arch` - (Optional) The core arch of the maxcompute project.
+* `cpu_type` - (Optional) The cpu type of the maxcompute project.
 
 ## Attributes Reference
 

@@ -34,7 +34,7 @@ The following arguments are supported:
 ## Attributes Reference
 
 The following attributes are exported:
-* `id` - The ID of the maxcompute cu. <!--  AI CREATE  -->
+* `id` - The ID of the maxcompute cu.
 
 ## Import
 

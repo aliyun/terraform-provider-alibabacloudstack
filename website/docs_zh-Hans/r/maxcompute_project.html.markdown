@@ -30,8 +30,12 @@ resource "alibabacloudstack_maxcompute_project" "example" {
 * `project_name` - (必填，变更时重建) MaxCompute 项目的名称。
 * `quota_id` - (必填) MaxCompute 项目的配额 ID。
 * `disk` - (必填) MaxCompute 项目的磁盘大小。
-* `specification_type` - (必填) MaxCompute 项目的规格类型，例如 `OdpsStandard`。
-* `order_type` - (必填) MaxCompute 项目的计费类型，例如 `PayAsYouGo`（按量付费）。
+* `account` - （必填，强制新建）MaxCompute 项目的账户。
+* `account_pk` - （必填，强制新建）MaxCompute 项目的账户主键。
+* `external_table` - （可选）是否启用联合计算。
+* `vpc_ids` - （可选）MaxCompute 项目的 VPC ID 列表。
+* `core_arch` - （可选）MaxCompute 项目的核心架构。
+* `cpu_type` - （可选）MaxCompute 项目的 CPU 类型。
 
 ## 属性说明
 

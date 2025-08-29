@@ -1,8 +1,9 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAscmMaxcomputeProjectDataSource(t *testing.T) {
@@ -27,6 +28,6 @@ func TestAccAlibabacloudStackAscmMaxcomputeProjectDataSource(t *testing.T) {
 const datasourceAlibabacloudstackMaxcomputeProjects = `
 
 data "alibabacloudstack_maxcompute_projects" "default"{
-	name = "tf_testAccAlibabacloudStack5610"
+	name = "testttt"
 }
 `

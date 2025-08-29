@@ -206,18 +206,21 @@ func resourceAlibabacloudStackMaxcomputeProjectRead(d *schema.ResourceData, meta
 	// if err != nil {
 	// 	return errmsgs.WrapError(err)
 	// }
-	vpcData := make([]string, 0)
-	err = json.Unmarshal([]byte(Properties["odps.security.vpc.whitelist"].(string)), &vpcData)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 	// d.Set("encryption", encryption["ENCRYPTION_ENABLE"].(string) == "true")
 	// d.Set("encrypt_algorithm", encryption["ENCRYPTION_ALGORITHM"].(string))
 	// d.Set("encryption_key", encryption["ENCRYPTION_KEY"].(string))
+	vpcData := make([]string, 0)
 	vpcs := make([]string, 0)
-	for _, v := range vpcData {
-		vpc := strings.Split(v, "_")
-		vpcs = append(vpcs, vpc[1])
+	vpcStr := Properties["odps.security.vpc.whitelist"].(string)
+	if vpcStr != "" {
+		err = json.Unmarshal([]byte(Properties["odps.security.vpc.whitelist"].(string)), &vpcData)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		for _, v := range vpcData {
+			vpc := strings.Split(v, "_")
+			vpcs = append(vpcs, vpc[1])
+		}
 	}
 	d.Set("vpc_ids", vpcs)
 	return nil
