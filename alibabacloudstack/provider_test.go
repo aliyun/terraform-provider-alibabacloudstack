@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 
@@ -20,11 +21,14 @@ import (
 	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	schemaHelper "github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/schema"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testAccProviders map[string]*schema.Provider
@@ -483,4 +487,39 @@ func ResourceTest(t *testing.T, c resource.TestCase) {
 	} else {
 		resource.Test(t, c)
 	}
+}
+
+func TestProviderSchema(t *testing.T) {
+	outputDir := filepath.Join("dryrun_provider")
+	outputPath := filepath.Join(outputDir, "TestProviderSchema.json")
+
+	// Prepare test environment
+	require.NoError(t, os.MkdirAll(outputDir, 0755), "Failed to create directory")
+
+	// Generate schema
+	providerSchema := schemaHelper.ConvertAndWrapProviderSchema(DefaultProviderName, testAccProvider)
+
+	data, err := json.MarshalIndent(providerSchema, "", "  ")
+	require.NoError(t, err, "JSON formatting failed")
+	require.NoError(t, os.WriteFile(outputPath, data, 0644), "Failed to write file")
+
+	// Validate output
+	fileInfo, err := os.Stat(outputPath)
+	require.NoError(t, err, "File not found")
+	require.True(t, fileInfo.Mode().IsRegular(), "Not a regular file")
+	require.Greater(t, fileInfo.Size(), int64(100), "File content too short")
+
+	jsonData, err := os.ReadFile(outputPath)
+	require.NoError(t, err, "Failed to read JSON file")
+
+	var parsed map[string]interface{}
+	require.NoError(t, json.Unmarshal(jsonData, &parsed), "JSON parsing failed")
+
+	assert.Contains(t, parsed, "format_version", "Missing format_version field")
+	assert.Equal(t, "1.0", parsed["format_version"], "Version mismatch")
+
+	assert.Contains(t, parsed, "provider_schemas", "Missing provider_schemas")
+	providerSchemas := parsed["provider_schemas"].(map[string]interface{})
+	assert.Contains(t, providerSchemas, DefaultProviderName, "Provider entry missing")
+
 }

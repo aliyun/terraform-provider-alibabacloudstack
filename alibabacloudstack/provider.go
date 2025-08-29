@@ -23,6 +23,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
+const DefaultProviderName = "registry.terraform.io/aliyun/alibabacloudstack"
+
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
