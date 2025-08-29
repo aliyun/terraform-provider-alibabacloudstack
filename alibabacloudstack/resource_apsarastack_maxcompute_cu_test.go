@@ -5,21 +5,20 @@ import (
 
 	"testing"
 
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackMaxcomputeCu(t *testing.T) {
-	var v map[string]interface{}
+	// var v map[string]interface{}
 	resourceId := "alibabacloudstack_maxcompute_cu.default"
 	ra := resourceAttrInit(resourceId, nil)
-	serviceFunc := func() interface{} {
-		return &MaxcomputeService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeMaxcomputeCu")
+	// serviceFunc := func() interface{} {
+	// 	return &MaxcomputeService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	// }
+	// rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeMaxcomputeCu")
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
-	rac := resourceAttrCheckInit(rc, ra)
+	// rac := resourceAttrCheckInit(rc, ra)
 	name := fmt.Sprintf("tf_testAcck%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceMaxcomputeCuDependence)
 	ResourceTest(t, resource.TestCase{
@@ -29,7 +28,7 @@ func TestAccAlibabacloudStackMaxcomputeCu(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{

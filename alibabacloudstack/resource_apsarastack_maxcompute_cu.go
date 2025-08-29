@@ -47,14 +47,15 @@ func resourceAlibabacloudStackMaxcomputeCuCreate(d *schema.ResourceData, meta in
 	response := make(map[string]interface{})
 	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", action, "")
 	mergeMaps(request.QueryParams, map[string]string{
-		"Region":      client.RegionId,
-		"Action":      "CreateUpdateOdpsCuForAscm",
-		"AccessKeyId": client.AccessKey,
-		"CuName":      d.Get("cu_name").(string),
-		"CuNum":       fmt.Sprintf("%v", d.Get("cu_num").(int)),
-		"Cluster":     d.Get("cluster_name").(string),
-		"ClusterName": d.Get("cluster_name").(string),
-		"Share":       "0",
+		"Region":       client.RegionId,
+		"Action":       "CreateUpdateOdpsCuForAscm",
+		"AccessKeyId":  client.AccessKey,
+		"CuName":       d.Get("cu_name").(string),
+		"IsNewFeature": "false",
+		"CuNum":        fmt.Sprintf("%v", d.Get("cu_num").(int)),
+		"Cluster":      d.Get("cluster_name").(string),
+		"ClusterName":  d.Get("cluster_name").(string),
+		"Share":        "0",
 	})
 
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -139,12 +140,15 @@ func resourceAlibabacloudStackMaxcomputeCuDelete(d *schema.ResourceData, meta in
 	action := "DeleteOdpsCuForAscm"
 	request := map[string]interface{}{
 		"Region":      client.RegionId,
-		"Action":      "CreateUpdateOdpsCuForAscm",
+		"Action":      "DeleteOdpsCuForAscm",
 		"AccessKeyId": client.AccessKey,
-		"CuName":      d.Get("cu_name").(string),
-		"CuNum":       d.Get("cu_num").(int),
+		"RegionName":  client.RegionId,
+		"RegionId":    client.RegionId,
+		"ClusterName": d.Get("cluster_name").(string),
 		"Cluster":     d.Get("cluster_name").(string),
+		"CuName":      d.Get("cu_name").(string),
 		"CuId":        d.Id(),
+		"Department":  client.Department,
 	}
 
 	_, err := client.DoTeaRequest("POST", "dataworks-private-cloud", "2019-01-17", action, "", nil, request, nil)

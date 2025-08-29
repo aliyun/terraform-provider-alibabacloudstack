@@ -17,7 +17,6 @@ type MaxcomputeService struct {
 func (s *MaxcomputeService) DescribeMaxcomputeProject(id string) (object *MaxComputeProject, err error) {
 	client := s.client
 	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "ListCalcEnginesForAscm", "")
-	request.QueryParams["ProjectId"] = id
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
@@ -59,14 +58,36 @@ func (s *MaxcomputeService) DescribeMaxcomputeProjectEngine(id string) (object *
 	return &response.Data, nil
 }
 
-func (s *MaxcomputeService) DescribeMaxProjectPropertiesForAscm(id string) (map[string]interface{}, error) {
+func (s *MaxcomputeService) ListOdpsEngineQuotaForAscm(id, name string) (object *OdpsEngineQuotaData, err error) {
+	client := s.client
+	request := client.NewCommonRequest("GET", "dataworks-private-cloud", "2019-01-17", "ListOdpsEngineQuotaForAscm", "")
+	request.QueryParams = map[string]string{
+		"Id":          id,
+		"ProjectName": name,
+	}
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		errmsg := ""
+		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "ListOdpsEngineQuotaForAscm", errmsg)
+	}
+	response := ListOdpsEngineQuotaForAscmResponse{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	return &response.Data[0], nil
+}
+
+func (s *MaxcomputeService) DescribeMaxProjectPropertiesForAscm(id, name string) (map[string]interface{}, error) {
 	client := s.client
 	request := client.NewCommonRequest("GET", "dataworks-private-cloud", "2019-01-17", "GetOdpsProjectPropertiesForAscm", "")
 	request.QueryParams = map[string]string{
-		"ProjectName":        "tf_testAcck3043",
+		"ProjectName":        name,
 		"Properties":         "ENCRYPTION,odps.security.vpc.whitelist",
-		"EngineId":           "53",
-		"doReplaceTunnelIds": "true",
+		"EngineId":           id,
+		"DoReplaceTunnelIds": "true",
 	}
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)

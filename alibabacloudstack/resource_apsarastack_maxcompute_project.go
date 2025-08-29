@@ -11,7 +11,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
@@ -20,11 +19,6 @@ func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
-				ForceNew: true,
-			},
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -62,24 +56,25 @@ func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
 				Default:  false,
 				Optional: true,
 			},
-			"encryption": {
-				Type:     schema.TypeBool,
-				Default:  false,
+			// "encryption": {
+			// 	Type:     schema.TypeBool,
+			// 	Default:  false,
+			// 	Optional: true,
+			// },
+			// "encrypt_algorithm": {
+			// 	Type:         schema.TypeString,
+			// 	Optional:     true,
+			// 	Computed:     true,
+			// 	ValidateFunc: validation.StringInSlice([]string{"SM4", "RC4", "AES256", "AESCTR"}, false),
+			// },
+			// "encryption_key": {
+			// 	Type:     schema.TypeString,
+			// 	Optional: true,
+			// },
+			"vpc_ids": {
+				Type:     schema.TypeList,
 				Optional: true,
-			},
-			"encrypt_algorithm": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"SM4", "RC4", "AES256", "AESCTR"}, false),
-			},
-			"encryption_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"vpc_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -108,6 +103,7 @@ func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, me
 		},
 	}
 	clusterStr, _ := json.Marshal(clusters)
+	disk_size := float64(d.Get("disk").(int)) / 1024.0
 	engineInfo := map[string]interface{}{
 		"taskAk": map[string]interface{}{
 			"kp":            d.Get("account_pk").(string),
@@ -118,6 +114,11 @@ func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, me
 				"name":      cu["cluster"].(string),
 				"quota":     quote_id,
 				"isDefault": 1,
+				"disk":      disk_size,
+				"projectQuota": map[string]interface{}{
+					"fileLength": d.Get("disk").(int) * 1024 * 1024 * 1024,
+					"fileNumber": nil,
+				},
 			},
 		},
 		"odpsProjectName":         d.Get("name").(string),
@@ -130,28 +131,24 @@ func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, me
 		"Region":         client.RegionId,
 		"Action":         "CreateCalcEngineForAscm",
 		"AccessKeyId":    client.AccessKey,
-		"cpuType":        "intel",
+		"ResourceGroup":  client.ResourceGroup,
+		"CpuType":        d.Get("cpu_type").(string),
 		"Clusters":       string(clusterStr),
-		"isNewFeature":   "true",
 		"ExternalTable":  fmt.Sprint(d.Get("external_table")),
-		"organizationId": client.Department,
-		"Department":     client.Department,
-		"odpsName":       "testtf",
-		"clusterName":    fmt.Sprintf("[\"%s\"]", cu["cluster"].(string)),
-		"taskPk":         d.Get("account_pk").(string),
+		"OrganizationId": client.Department,
+		"TaskPk":         d.Get("account_pk").(string),
 		"CalcEngineType": "ODPS",
 		"EnvType":        "PRD",
 		"Name":           d.Get("name").(string),
-		"RegionId":       "cn-wulan-env149-d01",
-		"diskForQuota":   fmt.Sprint(d.Get("disk")),
+		"RegionId":       client.RegionId,
 		"EngineInfo":     string(engineInfoStr),
 	}
 
-	if d.Get("encryption").(bool) {
-		body["EnabledMcEncrypt"] = "1"
-		body["McEncryptAlgorithm"] = d.Get("encryption_algorithm").(string)
-		body["McEncryptKey"] = d.Get("encryption_key").(string)
-	}
+	// if d.Get("encryption").(bool) {
+	// 	body["EnabledMcEncrypt"] = "1"
+	// 	body["McEncryptAlgorithm"] = d.Get("encrypt_algorithm").(string)
+	// 	body["McEncryptKey"] = d.Get("encryption_key").(string)
+	// }
 	mergeMaps(request.QueryParams, body)
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -170,7 +167,7 @@ func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, me
 		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "alibabacloudstack_maxcompute_project", "$", response)
 	}
 	d.SetId(fmt.Sprint(id))
-	// d.SetId("53")
+	// d.SetId("21")
 	return nil
 }
 
@@ -187,86 +184,111 @@ func resourceAlibabacloudStackMaxcomputeProjectRead(d *schema.ResourceData, meta
 		return errmsgs.WrapError(err)
 	}
 	d.Set("name", project.Name)
-	d.Set("quota_id", fmt.Sprint(project.Data[0].QuotaId))
-	d.Set("disk", project.Data[0].Disk)
 	d.Set("core_arch", project.EngineInfo.DefaultClusterArch)
-	d.Set("external_table", project.EngineInfo.ExternalProjectCnt == 1)
-	Properties, err := maxcomputeService.DescribeMaxProjectPropertiesForAscm(d.Id())
+	quota, err := maxcomputeService.ListOdpsEngineQuotaForAscm(d.Id(), project.Name)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	encryption := make(map[string]interface{})
-	err = json.Unmarshal(Properties["ENCRYPTION"].([]byte), &encryption)
+	d.Set("quota_id", fmt.Sprint(quota.QuotaId))
+	d.Set("disk", int(quota.Disk*1024))
+	account, err := maxcomputeService.DescribeMaxcomputeProjectEngine(d.Id())
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
+	d.Set("account", account.EngineInfo.TaskAk.AliyunAccount)
+	d.Set("account_pk", fmt.Sprint(account.EngineInfo.TaskAk.Kp))
+	Properties, err := maxcomputeService.DescribeMaxProjectPropertiesForAscm(d.Id(), project.Name)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	// encryption := make(map[string]interface{})
+	// err = json.Unmarshal([]byte(Properties["ENCRYPTION"].(string)), &encryption)
+	// if err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
 	vpcData := make([]string, 0)
-	err = json.Unmarshal(Properties["odps.security.vpc.whitelist"].([]byte), &vpcData)
+	err = json.Unmarshal([]byte(Properties["odps.security.vpc.whitelist"].(string)), &vpcData)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	d.Set("encryption", encryption["ENCRYPTION_ENABLE"].(bool))
-	d.Set("encrypt_algorithm", encryption["ENCRYPTION_ALGORITHM"].(string))
-	d.Set("encryption", encryption["ENCRYPTION_KEY"].(string))
-	vpc := strings.Split(vpcData[0], "_")
-	if len(vpc) == 2 {
-		d.Set("encryption", vpc[0])
+	// d.Set("encryption", encryption["ENCRYPTION_ENABLE"].(string) == "true")
+	// d.Set("encrypt_algorithm", encryption["ENCRYPTION_ALGORITHM"].(string))
+	// d.Set("encryption_key", encryption["ENCRYPTION_KEY"].(string))
+	vpcs := make([]string, 0)
+	for _, v := range vpcData {
+		vpc := strings.Split(v, "_")
+		vpcs = append(vpcs, vpc[1])
 	}
+	d.Set("vpc_ids", vpcs)
 	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeProjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	if !d.IsNewResource() && d.HasChanges("encryption", "encrypt_algorithm", "encryption_key") {
-		request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "UpdateOdpsProjectPropertiesForAscm", "")
-		encrypt_algorithm := d.Get("encrypt_algorithm").(string)
-		encryption_key := d.Get("encryption_key").(string)
-		encryption := fmt.Sprintf("{\"ENCRYPTION_ENABLE\":\"true\",\"ENCRYPTION_ALGORITHM\":\"%s\",\"ENCRYPTION_KEY\":\"%s\"}", encrypt_algorithm, encryption_key)
-		propertyMap := map[string]interface{}{"ENCRYPTION": encryption}
-		propertyStr, _ := json.Marshal(propertyMap)
-		mergeMaps(request.QueryParams, map[string]string{
-			"engineId":    d.Get("name").(string),
-			"ProjectName": d.Get("name").(string),
-			"propertyMap": string(propertyStr),
-		})
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		if err != nil {
-			errmsg := ""
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "UpdateOdpsProjectPropertiesForAscm", errmsg)
+	// if !d.IsNewResource() && d.HasChanges("encryption", "encrypt_algorithm", "encryption_key") {
+	// 	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "UpdateOdpsProjectPropertiesForAscm", "")
+	// 	encrypt_algorithm := d.Get("encrypt_algorithm").(string)
+	// 	encryption_key := d.Get("encryption_key").(string)
+	// 	encryption := fmt.Sprintf("{\"ENCRYPTION_ENABLE\":\"true\",\"ENCRYPTION_ALGORITHM\":\"%s\",\"ENCRYPTION_KEY\":\"%s\"}", encrypt_algorithm, encryption_key)
+	// 	propertyMap := map[string]interface{}{"ENCRYPTION": encryption}
+	// 	propertyStr, _ := json.Marshal(propertyMap)
+	// 	mergeMaps(request.QueryParams, map[string]string{
+	// 		"Region":      client.RegionId,
+	// 		"Action":      "UpdateOdpsProjectPropertiesForAscm",
+	// 		"AccessKeyId": client.AccessKey,
+	// 		"EngineId":    d.Get("name").(string),
+	// 		"ProjectName": d.Get("name").(string),
+	// 		"PropertyMap": string(propertyStr),
+	// 	})
+	// 	bresponse, err := client.ProcessCommonRequest(request)
+	// 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	// 	if err != nil {
+	// 		errmsg := ""
+	// 		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "UpdateOdpsProjectPropertiesForAscm", errmsg)
+	// 	}
+	// }
+	if d.HasChange("vpc_ids") && !(d.IsNewResource() && len(d.Get("vpc_ids").([]interface{})) == 0) {
+		vpc := make([]string, 0)
+		for _, vpc_id := range d.Get("vpc_ids").([]interface{}) {
+			vpcitem := fmt.Sprintf("%s_%s", client.RegionId, vpc_id.(string))
+			vpc = append(vpc, vpcitem)
 		}
-	}
-	if d.HasChange("vpc_id") && d.Get("vpc_id") != "" {
-		request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "UpdateOdpsProjectVpcForAscm", "")
-		vpcIdList := fmt.Sprintf("[\"%s_%s\"]", client.RegionId, d.Get("vpc_id").(string))
-		mergeMaps(request.QueryParams, map[string]string{
-			"engineId":    d.Get("name").(string),
-			"vpcIdList":   vpcIdList,
+		vpcData, _ := json.Marshal(vpc)
+		request := map[string]interface{}{
+			"Region":      client.RegionId,
+			"Action":      "UpdateOdpsProjectVpcForAscm",
+			"AccessKeyId": client.AccessKey,
+			"EngineId":    d.Get("name").(string),
+			"VpcIdList":   string(vpcData),
 			"ProjectName": d.Get("name").(string),
 			"RegionIds":   client.RegionId,
-		})
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		}
+		response, err := client.DoTeaRequest("POST", "dataworks-private-cloud", "2019-01-17", "UpdateOdpsProjectVpcForAscm", "", nil, request, nil)
 		if err != nil {
 			errmsg := ""
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "UpdateOdpsProjectVpcForAscm", errmsg)
+			errmsg = errmsgs.GetAsapiErrorMessage(response)
+			if errmsg != "" {
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "UpdateOdpsProjectVpcForAscm", errmsg)
+			}
 		}
+	}
+	if !d.IsNewResource() && d.HasChange("disk") {
+		return errmsgs.Error("[ERROR] The disk attribute cannot be modified after the project is created.")
 	}
 	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeProjectDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "DeleteCalcEngineForAscm", "")
-	request.QueryParams["EngineId"] = d.Id()
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		errmsg := ""
-		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "DeleteCalcEngineForAscm", errmsg)
-	}
+	// client := meta.(*connectivity.AlibabacloudStackClient)
+	// request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "DeleteCalcEngineForAscm", "")
+	// request.QueryParams["EngineId"] = d.Id()
+	// bresponse, err := client.ProcessCommonRequest(request)
+	// addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	// if err != nil {
+	// 	errmsg := ""
+	// 	errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "DeleteCalcEngineForAscm", errmsg)
+	// }
 	return nil
 }

@@ -138,3 +138,32 @@ type MaxComputeProjectEngineData struct {
 	EnvType          string `json:"EnvType"`
 	Name             string `json:"Name"`
 }
+
+type ListOdpsEngineQuotaForAscmResponse struct {
+	EagleEyeTraceId string                `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool                  `json:"asapiSuccess"`
+	ResponseVersion string                `json:"responseVersion"`
+	RequestId       string                `json:"RequestId"`
+	Success         bool                  `json:"success"`
+	HttpStatusCode  int                   `json:"HttpStatusCode"`
+	Data            []OdpsEngineQuotaData `json:"Data"`
+}
+
+type OdpsEngineQuotaData struct {
+	Cluster   string  `json:"cluster"`
+	IsDefault int     `json:"isDefault"`
+	Cu        int     `json:"cu"`
+	Disk      float64 `json:"disk"`
+	QuotaName string  `json:"quotaName"`
+	Original  struct {
+		IsDefault    int `json:"isDefault"`
+		ProjectQuota struct {
+			FileLength int `json:"fileLength"`
+		} `json:"projectQuota"`
+		Quota int    `json:"quota"`
+		Name  string `json:"name"`
+	} `json:"original"`
+	RegionId string `json:"regionId"`
+	Project  string `json:"project"`
+	QuotaId  int    `json:"quotaId"`
+}
