@@ -283,15 +283,15 @@ func resourceAlibabacloudStackMaxcomputeProjectUpdate(d *schema.ResourceData, me
 }
 
 func resourceAlibabacloudStackMaxcomputeProjectDelete(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*connectivity.AlibabacloudStackClient)
-	// request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "DeleteCalcEngineForAscm", "")
-	// request.QueryParams["EngineId"] = d.Id()
-	// bresponse, err := client.ProcessCommonRequest(request)
-	// addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	// if err != nil {
-	// 	errmsg := ""
-	// 	errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-	// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "DeleteCalcEngineForAscm", errmsg)
-	// }
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "DeleteCalcEngineForAscm", "")
+	request.QueryParams["EngineId"] = d.Id()
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		errmsg := ""
+		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_project", "DeleteCalcEngineForAscm", errmsg)
+	}
 	return nil
 }
