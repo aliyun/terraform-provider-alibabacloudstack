@@ -3,13 +3,14 @@ package alibabacloudstack
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAscmMaxcomputeCuDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
-	name := fmt.Sprintf("tf_testAccAlibabacloudStack%d", rand)
+	name := fmt.Sprintf("tf_testAcc%d", rand)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -42,6 +43,6 @@ resource "alibabacloudstack_maxcompute_cu" "default"{
 }
 
 data "alibabacloudstack_maxcompute_cus" "default"{
-	name_regex = "tf_testAccAlibabacloudStack"
+	name_regex = "tf_testAcc"
 }
 `

@@ -2,7 +2,8 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"fmt"
+	"regexp"
+	"strconv"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -31,11 +32,6 @@ func dataSourceAlibabacloudStackMaxcomputeCus() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"cus": {
 				Type:     schema.TypeList,
@@ -71,70 +67,67 @@ func dataSourceAlibabacloudStackMaxcomputeCus() *schema.Resource {
 
 func dataSourceAlibabacloudStackMaxcomputeCusRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
-	if d.Get("name_regex").(string) != "" && d.Get("cluster_name").(string) != "" {
-		err := errmsgs.Error("Only one filter condition can be set")
-		return err
-	}
-	if d.Get("name_regex").(string) == "" && d.Get("cluster_name").(string) == "" {
-		err := errmsgs.Error("At least one filter condition needs to be set.")
-		return err
-	}
-
-	action := "ListOdpsCus"
-
 	request := map[string]interface{}{
-		"RegionName":      client.RegionId,
-		"Product":         "ascm",
-		"OrganizationId":  client.Department,
-		"ResourceGroupId": client.ResourceGroup,
+		"Region":      client.RegionId,
+		"Action":      "ListOdpsCusForAscm",
+		"AccessKeyId": client.AccessKey,
 	}
-
-	filter_query := ""
-	if d.Get("name_regex").(string) != "" {
-		request["Type"] = "cuName"
-		request["CuName"] = d.Get("name_regex").(string)
-		filter_query = d.Get("name_regex").(string)
+	if v, ok := d.GetOk("cluster_name"); ok {
+		request["Cluster"] = v.(string)
 	}
-
-	if d.Get("cluster_name").(string) != "" {
-		request["Type"] = "clusterName"
-		request["ClusterName"] = d.Get("cluster_name").(string)
-		filter_query = d.Get("cluster_name").(string)
-	}
-
-	response, err := client.DoTeaRequest("POST", "ASCM", "2019-05-10", action, "/ascm/manage/odps/list_cus", nil, nil, request)
-
+	response, err := client.DoTeaRequest("GET", "dataworks-private-cloud", "2019-01-17", "ListOdpsCusForAscm", "", nil, request, nil)
+	addDebug("ListOdpsCusForAscm", response, request)
 	if err != nil {
+		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_cu", "ListOdpsCusForAscm", errmsgs.AlibabacloudStackSdkGoERROR)
 		return err
+	}
+	objects, err := jsonpath.Get("$.Data.data", response)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "maxcompute_cu", "$.Data.data", response)
 	}
 
-	if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
-		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("MaxcomputeProject", filter_query)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-		return err
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			idsMap[Trim(vv.(string))] = Trim(vv.(string))
+		}
 	}
-	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		err = errmsgs.Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
-		return err
-	}
-	v, err := jsonpath.Get("$", response)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, filter_query, "$", response)
-	}
-	objects := v.(map[string]interface{})["data"].([]interface{})
 
 	var t []map[string]interface{}
 	var ids []string
-	for _, object := range objects {
+	for _, object := range objects.([]interface{}) {
 		cu_raw := object.(map[string]interface{})
-		max_cu, err := cu_raw["max_cu"].(json.Number).Float64()
-		if err != nil {
-			return errmsgs.WrapError(errmsgs.Error("illegal max_cu value"))
+		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
+			r := regexp.MustCompile(description_regex.(string))
+			if !r.MatchString(cu_raw["quota_name"].(string)) {
+				continue
+			}
+		}
+		var cu_num int
+		switch v := cu_raw["max_cu"].(type) {
+		case string:
+			cu_num, err = strconv.Atoi(v)
+			if err != nil {
+				return errmsgs.WrapError(errmsgs.Error("illegal max_cu value"))
+			}
+		case json.Number:
+			var floatVal float64
+			floatVal, err = v.Float64()
+			if err != nil {
+				return errmsgs.WrapError(errmsgs.Error("illegal max_cu value"))
+			}
+			cu_num = int(floatVal)
+		case int:
+			cu_num = v
+		case float64:
+			cu_num = int(v)
+		default:
+			return errmsgs.WrapError(errmsgs.Error("illegal max_cu value type"))
 		}
 		cu := map[string]interface{}{
 			"id":           cu_raw["id"].(string),
 			"cu_name":      cu_raw["quota_name"].(string),
-			"cu_num":       int64(max_cu),
+			"cu_num":       cu_num,
 			"cluster_name": cu_raw["cluster"].(string),
 		}
 		t = append(t, cu)
