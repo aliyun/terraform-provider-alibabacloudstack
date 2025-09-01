@@ -28,8 +28,8 @@ func TestAccAlibabacloudStackMaxcomputeProject_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":           "${var.name}",
 					"disk":           "50",
-					"account":        "ascm-dw-1755770304175",
-					"account_pk":     "1784955770304192",
+					"account":        "${alibabacloudstack_maxcompute_user.default.user_id}",
+					"account_pk":     "${alibabacloudstack_maxcompute_user.default.user_pk}",
 					"quota_id":       "${alibabacloudstack_maxcompute_cu.default.id}",
 					"external_table": "true",
 					"vpc_ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}"},
@@ -37,8 +37,6 @@ func TestAccAlibabacloudStackMaxcomputeProject_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":       name,
-						"account":    "ascm-dw-1755770304175",
-						"account_pk": "1784955770304192",
 						"quota_id":   CHECKSET,
 						"disk":       "50",
 						"vpc_ids.#":  CHECKSET,
@@ -79,6 +77,11 @@ data "alibabacloudstack_maxcompute_clusters" "default"{
 	name_regex = "HYBRIDODPSCLUSTER-.*"
 }
 %s
+
+resource "alibabacloudstack_maxcompute_user" "default"{
+  user_name             = var.name
+  description           = "maxcomput project test"
+}
 
 resource "alibabacloudstack_maxcompute_cu" "default" {
 	cu_name =      "${var.name}"
