@@ -155,7 +155,7 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"Open", "Close", "Update"}, false),
 				Optional:     true,
-				Computed:     true,
+				Default:      "Close",
 			},
 			"retention_period": {
 				Type:     schema.TypeInt,

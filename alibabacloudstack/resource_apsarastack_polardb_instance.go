@@ -66,6 +66,7 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 			"enable_ssl": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 			},
 			"storage_type": {
 				Type:          schema.TypeString,
@@ -667,7 +668,7 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 		}
 	}
 
-	if !d.IsNewResource() && d.HasChange("enable_ssl") {
+	if d.HasChange("enable_ssl") {
 		ssl := d.Get("enable_ssl").(bool)
 		ssl_req := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceSSL", "")
 		ssl_req.QueryParams["DBInstanceId"] = d.Id()
@@ -868,6 +869,7 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 		}
 		log.Print("Updated TDE")
 	}
+
 	return nil
 }
 
