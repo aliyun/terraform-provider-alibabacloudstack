@@ -1,3 +1,32 @@
+# 3.18.13
+
+## Additions
+
+1. Added support for managing instances of Enterprise Cloud Network CEN (cen_instance)
+2. Added support for CEN transit router route tables (cen_transit_router_route_table)
+3. Added support for CEN transit router route entries (cen_transit_router_route_entry)
+4. Added support for managing VPC-type transit router attachments in CEN (cen_transit_router_vpc_attachment)
+5. Added support for associating CEN transit router route tables (cen_transit_router_route_table_association)
+6. Added support for propagating routes in CEN transit router route tables (cen_transit_router_route_table_propagation)
+7. Added support for CEN route maps (alibabacloudstack_cen_route_map)
+8. Added support for CEN multicast domains (cen_transit_router_multicast_domain)
+9. Added support for binding multicast switches in CEN (cen_transit_router_multicast_domain_association)
+10. Added support for CEN multicast domain sources (cen_transit_router_multicast_domain_source)
+11. Added support for querying Polardbx 2.0 instance specifications (instance_type)
+12. Added support for managing Polardbx 2.0 instances (polardbx_instance)
+13. Added support for managing Polardbx 2.0 read-only instances (polardbx_readonly_instance)
+14. Added support for managing Polardbx 2.0 user accounts (polardbx_account)
+15. Added support for configuring Polardbx 2.0 super accounts (including three-tier separation) (polardbx_super_account)
+16. Added support for managing Polardbx 2.0 database tables (polardbx_database)
+17. Added support for managing Polardbx 2.0 backups (polardbx_backup)
+18. Added support for configuring Polardbx 2.0 backup policies (polardbx_backup_policy)
+19. Added support for binding accounts and databases in Polardbx 2.0 (polardbx_account_database_binding)
+20. Added support for configuring Polardbx 2.0 instance log engines (polardbx_log_engine)
+21. Added support for configuring read/write splitting in Polardbx 2.0 (polardbx_read_write_splitting_config)
+
+
+---
+
 # 3.18.12
 
 ## Additions

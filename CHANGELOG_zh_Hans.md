@@ -1,3 +1,31 @@
+# 3.18.13
+
+## 新增
+
+1. 新增支持企业云网络Cen的实例管理能力(cen_instance)
+2. 新增支持企业云网络Cen的转发路由表(cen_transit_router_route_table)
+3. 新增支持企业云网络Cen的转发路由表条目(cen_transit_router_route_entry)
+4. 新增支持企业云网络Cen的转发路由链接管理VPC类型(cen_transit_router_vpc_attachment)
+5. 新增支持企业云网络Cen的转发路由关联转发(cen_transit_router_route_table_association)
+6. 新增支持企业云网络Cen的转发路由路由学习(cen_transit_router_route_table_propagation)
+7. 新增支持企业云网络Cen的转发路由路由策略(alibabacloudstack_cen_route_map)
+8. 新增支持企业云网络Cen的组播(cen_transit_router_multicast_domain)
+9. 新增支持企业云网络Cen的组播交换机绑定(cen_transit_router_multicast_domain_association)
+10. 新增支持企业云网络Cen的组播源(cen_transit_router_multicast_domain_source)
+11. 新增支持Polardbx 2.0的实例规格查询能力(instance_type)
+12. 新增支持Polardbx 2.0的实例管理能力(polardbx_instance)
+13. 新增支持Polardbx 2.0的只读实例管理能力(polardbx_readonly_instance)
+14. 新增支持Polardbx 2.0的用户帐号管理能力(polardbx_account)
+15. 新增支持Polardbx 2.0的超级帐号（含三权分立）配置能力(polardbx_super_account)
+16. 新增支持Polardbx 2.0的数据库表管理能力(polardbx_database)
+17. 新增支持Polardbx 2.0的备份管理能力(polardbx_backup)
+18. 新增支持Polardbx 2.0的备份规则配置能力(backup_policy)
+19. 新增支持Polardbx 2.0的帐号和数据库绑定能力(polardbx_account_database_binding)
+20. 新增支持Polardbx 2.0的实例日志引擎配置能力(polardbx_log_engine)
+21. 新增支持Polardbx 2.0的读写分离配置能力(polardbx_read_write_splitting_config)
+
+---
+
 # 3.18.12
 
 ## 新增
