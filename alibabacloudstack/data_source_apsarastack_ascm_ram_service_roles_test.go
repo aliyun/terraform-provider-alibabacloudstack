@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackAscm_RamServiceRoles_DataSource(t *testing.T) {
+func TestAccAlibabacloudStackAscmRamServiceRoles_DataSource(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)

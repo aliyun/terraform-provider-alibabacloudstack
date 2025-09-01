@@ -164,7 +164,7 @@ func resourceAlibabacloudStackAscmServiceRamRoleCreate(d *schema.ResourceData, m
 	request["organizationIdList"] = []string{organization_id}
 	_, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "BatchCreateRAMServiceRole", "/ascm/auth/ramServiceRole/batchCreateRAMServiceRole", nil, nil, request)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_service_ram_role", "BatchCreateRAMServiceRole", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_service_role", "BatchCreateRAMServiceRole", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	d.SetId(id)
 	return nil

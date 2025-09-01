@@ -18,10 +18,41 @@ The project is the basic unit of operation in maxcompute.
 Basic Usage
 
 ```terraform
-resource "alibabacloudstack_maxcompute_project" "example" {
-  project_name       = "tf_maxcompute_project"
-  specification_type = "OdpsStandard"
-  order_type         = "PayAsYouGo"
+variable "name" {
+}
+
+data "alibabacloudstack_maxcompute_clusters" "default"{
+	name_regex = "HYBRIDODPSCLUSTER-.*"
+}
+
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name = "${var.name}_vpc"
+  cidr_block = "172.16.0.0/16"
+}
+
+
+resource "alibabacloudstack_maxcompute_user" "default"{
+  user_name             = var.name
+  description           = "maxcomput project test"
+}
+
+resource "alibabacloudstack_maxcompute_cu" "default" {
+	cu_name =      "${var.name}"
+	cu_num =       2
+	cluster_name = "${data.alibabacloudstack_maxcompute_clusters.default.clusters.0.cluster}"
+}
+
+
+resource "alibabacloudstack_maxcompute_project" "default" {
+  account_pk = "${alibabacloudstack_maxcompute_user.default.user_pk}"
+  quota_id = "${alibabacloudstack_maxcompute_cu.default.id}"
+  external_table = "true"
+  vpc_ids = [
+              "${alibabacloudstack_vpc_vpc.default.id}"
+            ]
+  name = "${var.name}"
+  disk = "50"
+  account = "${alibabacloudstack_maxcompute_user.default.user_id}"
 }
 ```
 ## Argument Reference

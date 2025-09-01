@@ -1,13 +1,13 @@
 ---
 subcategory: "ASCM"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_ascm_service_ram_role"
-sidebar_current: "docs-alibabacloudstack-resource-ascm-service-ram-role"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_ram_service_role"
+sidebar_current: "docs-alibabacloudstack-resource-ascm-ram-service-role"
 description: |-
   Provides Ascm service ram role.
 ---
 
-# alibabacloudstack_ascm_service_ram_role
+# alibabacloudstack_ascm_ram_service_role
 
 Provides Ascm service ram role.
 
@@ -18,7 +18,7 @@ resource "alibabacloudstack_ascm_organization" "default" {
   name = "Tf-testingresource-org2"
   parent_id = "1"
 } 
- resource "alibabacloudstack_ascm_service_ram_role" "default" {
+ resource "alibabacloudstack_ascm_ram_service_role" "default" {
   organization_id = "${alibabacloudstack_ascm_organization.default.id}"
   product_name = "ECS"
 }

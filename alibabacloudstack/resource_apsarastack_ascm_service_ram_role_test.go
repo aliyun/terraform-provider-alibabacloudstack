@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAscmServiceRamRoleBasic(t *testing.T) {
+func TestAccAlibabacloudStackAscmRamServiceRoleBasic(t *testing.T) {
 	var v *ListRAMServiceRolesResponse
-	resourceId := "alibabacloudstack_ascm_service_ram_role.default"
+	resourceId := "alibabacloudstack_ascm_ram_service_role.default"
 	ra := resourceAttrInit(resourceId, testAccCheckAscmServiceRamRole)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &AscmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -47,7 +47,7 @@ resource "alibabacloudstack_ascm_organization" "default" {
   name = "Tf-testingresource-org2"
   parent_id = "1"
 } 
- resource "alibabacloudstack_ascm_service_ram_role" "default" {
+ resource "alibabacloudstack_ascm_ram_service_role" "default" {
   organization_id = "${alibabacloudstack_ascm_organization.default.id}"
   product_name = "ECS"
 }`

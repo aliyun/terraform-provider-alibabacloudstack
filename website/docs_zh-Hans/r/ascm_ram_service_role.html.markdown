@@ -3,13 +3,13 @@ ascm_service_ram_role_zh.html.markdown
 ---
 subcategory: "ASCM"
 layout: "alibabacloudstack"
-page_title: "阿里云专有云: alibabacloudstack_ascm_service_ram_role"
-sidebar_current: "docs-alibabacloudstack-resource-ascm-service-ram-role"
+page_title: "阿里云专有云: alibabacloudstack_ascm_ram_service_role"
+sidebar_current: "docs-alibabacloudstack-resource-ascm-ram-service-role"
 description: |-
   提供AscmRAM服务角色。
 ---
 
-# alibabacloudstack_ascm_service_ram_role
+# alibabacloudstack_ascm_ram_service_role
 
 提供AscmRAM服务角色。
 
@@ -20,7 +20,7 @@ resource "alibabacloudstack_ascm_organization" "default" {
   name = "Tf-testingresource-org2"
   parent_id = "1"
 } 
- resource "alibabacloudstack_ascm_service_ram_role" "default" {
+ resource "alibabacloudstack_ascm_ram_service_role" "default" {
   organization_id = "${alibabacloudstack_ascm_organization.default.id}"
   product_name = "ECS"
 }
