@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 
@@ -27,10 +28,6 @@ func dataSourceAlibabacloudStackMaxcomputeUsers() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"organization_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"users": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -56,14 +53,6 @@ func dataSourceAlibabacloudStackMaxcomputeUsers() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"organization_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"organization_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"description": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -77,22 +66,21 @@ func dataSourceAlibabacloudStackMaxcomputeUsers() *schema.Resource {
 
 func dataSourceAlibabacloudStackMaxcomputeUsersRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := make(map[string]interface{})
-	if v, ok := d.GetOk("organization_id"); ok {
-		request["Department"] = v.(string)
-	}
-	request["Region"] = client.RegionId
-	request["Action"] = "GetOdpsUserList"
-	request["AccessKeyId"] = client.AccessKey
+	action := "GetOdpsUserList"
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", action, "")
+	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 
-	responseData, err := client.DoTeaRequest("GET", "ascm", "2019-05-10", "GetOdpsUserList", "", nil, request, nil)
-	addDebug("GetOdpsUserList", responseData, request, request)
+	response := make(map[string]interface{})
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(action, bresponse, request, request.QueryParams)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return err
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok {
 		for _, vv := range v.([]interface{}) {
@@ -101,7 +89,7 @@ func dataSourceAlibabacloudStackMaxcomputeUsersRead(d *schema.ResourceData, meta
 	}
 	users := make([]map[string]interface{}, 0)
 	ids := make([]string, 0)
-	datas, err := jsonpath.Get("$.data", responseData)
+	datas, err := jsonpath.Get("$.data", response)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -125,8 +113,6 @@ func dataSourceAlibabacloudStackMaxcomputeUsersRead(d *schema.ResourceData, meta
 			"user_id":           object["userId"].(string),
 			"user_name":         object["userName"].(string),
 			"user_type":         object["userType"].(string),
-			"organization_id":   fmt.Sprint(object["organizationId"]),
-			"organization_name": object["organizationName"].(string),
 			"description":       object["description"].(string),
 			"user_pk":           object["aasPk"].(string),
 		}

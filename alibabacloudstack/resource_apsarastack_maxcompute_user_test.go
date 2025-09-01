@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackMaxcomputeUser(t *testing.T) {
+func TestAccAlibabacloudStackMaxcomputeUser_basic0(t *testing.T) {
 	resourceId := "alibabacloudstack_maxcompute_user.default"
 	ra := resourceAttrInit(resourceId, nil)
 	testAccCheck := ra.resourceAttrMapUpdateSet()

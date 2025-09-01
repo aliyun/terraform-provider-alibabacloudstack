@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAscmMaxcomputeCuDataSource(t *testing.T) {
+func TestAccAlibabacloudStackMaxcomputeCu_DataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf_testAcc%d", rand)
 	ResourceTest(t, resource.TestCase{

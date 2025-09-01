@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackMaxcomputeCu(t *testing.T) {
+func TestAccAlibabacloudStackMaxcomputeCu_basic0(t *testing.T) {
 	// var v map[string]interface{}
 	resourceId := "alibabacloudstack_maxcompute_cu.default"
 	ra := resourceAttrInit(resourceId, nil)

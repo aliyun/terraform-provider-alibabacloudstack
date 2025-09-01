@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -163,25 +162,25 @@ func (s *MaxcomputeService) DescribeMaxcomputeCu(id string) (object map[string]i
 	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("Maxcompute", id))
 }
 
-func (s *MaxcomputeService) DescribeMaxcomputeUsers(organization_id string) (response []interface{}, err error) {
-	request := make(map[string]interface{})
-	request["Department"] = organization_id
-	request["Region"] = s.client.RegionId
-	request["Action"] = "GetOdpsUserList"
-	request["AccessKeyId"] = s.client.AccessKey
+func (s *MaxcomputeService) DescribeMaxcomputeUsers() ([]interface{}, error) {
+	action := "GetOdpsUserList"
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", action, "")
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 
-	responseData, err := s.client.DoTeaRequest("GET", "ascm", "2019-05-10", "GetOdpsUserList", "", nil, request, nil)
-	addDebug("GetOdpsUserList", responseData, request, request)
+	response := make(map[string]interface{})
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(action, bresponse, request, request.QueryParams)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return nil, err
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	datas, err := jsonpath.Get("$.data", responseData)
+	datas, err := jsonpath.Get("$.data", response)
 	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, organization_id, "$.data", response)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "$.data", response)
 	}
 	if datas != nil {
 		return datas.([]interface{}), nil
@@ -189,31 +188,30 @@ func (s *MaxcomputeService) DescribeMaxcomputeUsers(organization_id string) (res
 	return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 }
 
-func (s *MaxcomputeService) DescribeMaxcomputeUser(id string) (response map[string]interface{}, err error) {
-	params := strings.Split(id, ":")
-	request := make(map[string]interface{})
-	request["Department"] = params[0]
-	request["Id"] = params[1]
-	request["Region"] = s.client.RegionId
-	request["Action"] = "GetOdpsUserList"
-	request["AccessKeyId"] = s.client.AccessKey
+func (s *MaxcomputeService) DescribeMaxcomputeUser(id string) (map[string]interface{}, error) {
+	action := "GetOdpsUserList"
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", action, "")
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
+	request.QueryParams["Id"] = id
 
-	responseData, err := s.client.DoTeaRequest("GET", "ascm", "2019-05-10", "GetOdpsUserList", "", nil, request, nil)
-	addDebug("GetOdpsUserList", responseData, request, request)
+	response := make(map[string]interface{})
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(action, bresponse, request, request.QueryParams)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return nil, err
+		return response, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return response, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	datas, err := jsonpath.Get("$.data", responseData)
+	datas, err := jsonpath.Get("$.data", response)
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.data", response)
 	}
 	for _, v := range datas.([]interface{}) {
 		data := v.(map[string]interface{})
-		if fmt.Sprint(data["id"]) == params[1] {
+		if fmt.Sprint(data["id"]) == id {
 			return data, nil
 		}
 	}

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -43,15 +42,6 @@ func resourceAlibabacloudStackMaxcomputeUser() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-			"organization_id": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-			},
-			"organization_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"description": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -66,19 +56,12 @@ func resourceAlibabacloudStackMaxcomputeUser() *schema.Resource {
 func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	organization_id := client.Department
-	if v, ok := d.GetOk("organization_id"); ok {
-		organization_id = fmt.Sprint(v.(int))
-	}
 	user_name := d.Get("user_name").(string)
 	action := "CreateOdpsUser"
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", action, "")
+	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 	mergeMaps(request.QueryParams, map[string]string{
-		"Region":         client.RegionId,
-		"Action":         action,
-		"AccessKeyId":    client.AccessKey,
 		"UserName":       user_name,
-		"OrganizationId": organization_id,
 		"Description":    d.Get("description").(string),
 	})
 	response := make(map[string]interface{})
@@ -92,19 +75,19 @@ func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	maxcomputeService := MaxcomputeService{client}
-	users, err := maxcomputeService.DescribeMaxcomputeUsers(organization_id)
+	users, err := maxcomputeService.DescribeMaxcomputeUsers()
 	if err != nil || len(users) == 0 {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	var userid json.Number
+	var userid float64
 	for _, user := range users {
 		user_map := user.(map[string]interface{})
 		if user_map["userName"].(string) == user_name {
-			userid = user_map["id"].(json.Number)
+			userid = user_map["id"].(float64)
 			break
 		}
 	}
-	id := fmt.Sprintf("%s:%v", organization_id, userid)
+	id := fmt.Sprintf("%v", userid)
 	d.SetId(id)
 	return
 }
@@ -121,13 +104,11 @@ func resourceAlibabacloudStackMaxcomputeUserRead(d *schema.ResourceData, meta in
 		}
 		return errmsgs.WrapError(err)
 	}
-	d.Set("account_id", object["id"].(json.Number))
+	d.Set("account_id", int(object["id"].(float64)))
 	d.Set("user_id", object["userId"].(string))
 	d.Set("user_pk", object["aasPk"].(string))
 	d.Set("user_name", object["userName"].(string))
 	d.Set("user_type", object["userType"].(string))
-	d.Set("organization_id", object["organizationId"].(json.Number))
-	d.Set("organization_name", object["organizationName"].(string))
 	d.Set("description", object["description"].(string))
 	return nil
 }
@@ -135,18 +116,14 @@ func resourceAlibabacloudStackMaxcomputeUserRead(d *schema.ResourceData, meta in
 func resourceAlibabacloudStackMaxcomputeUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	if !d.IsNewResource() && d.HasChanges("user_name", "description") {
-		params := strings.Split(d.Id(), ":")
 		action := "UpdateOdpsUser"
 		user_name := d.Get("user_name").(string)
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", action, "")
+		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 		mergeMaps(request.QueryParams, map[string]string{
-			"Region":         client.RegionId,
-			"Action":         action,
-			"AccessKeyId":    client.AccessKey,
 			"UserName":       user_name,
-			"Id":             params[1],
+			"Id":             d.Id(),
 			"UserId":         d.Get("user_id").(string),
-			"OrganizationId": params[0],
 			"Description":    d.Get("description").(string),
 		})
 
