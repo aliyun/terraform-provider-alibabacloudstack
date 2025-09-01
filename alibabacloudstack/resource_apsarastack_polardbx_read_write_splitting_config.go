@@ -46,9 +46,10 @@ func resourceAlibabacloudStackPolardbxReadWriteSplittingConfig() *schema.Resourc
 				Optional: true,
 			},
 			"master_read_weight": {
-				Type:     schema.TypeInt,
-				Computed: true,
-				Optional: true,
+				Type:         schema.TypeInt,
+				Computed:     true,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(0, 100),
 			},
 			"storage_delay_threshold": {
 				Type:     schema.TypeInt,
