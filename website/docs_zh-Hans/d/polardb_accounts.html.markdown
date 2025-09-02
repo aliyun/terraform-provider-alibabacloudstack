@@ -17,6 +17,9 @@ variable "name" {
 	default = "tf-testAccPolardbAccounts19559"
 }
 
+variable "password" {
+}
+
 data  "alibabacloudstack_zones" "default" {
 	available_resource_creation = "PolarDB"
 }
@@ -33,7 +36,7 @@ resource "alibabacloudstack_polardb_account" "default" {
 	data_base_instance_id = "${alibabacloudstack_polardb_dbinstance.instance.id}"
 	account_description = "test"
 	account_name        = "polardb_account"
-	account_password = "NyCc0x6b!rH^"
+	account_password = "${var.password}"
 	account_type ="Normal"
 }
 

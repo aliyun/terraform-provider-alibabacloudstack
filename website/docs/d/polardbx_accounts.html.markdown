@@ -40,7 +40,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
   zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 
-resource "alibabacloudstack_polardbxx_instance" "default" {
+resource "alibabacloudstack_polardbx_instance" "default" {
   description = "testtf1111"
 	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 	engine_version = "5.7"
@@ -54,14 +54,14 @@ resource "alibabacloudstack_polardbxx_instance" "default" {
 	dn_node_count = "2"
 }
 
-resource "alibabacloudstack_polardbxx_account" "default" {
+resource "alibabacloudstack_polardbx_account" "default" {
 	instance_id = alibabacloudstack_polardbxx_instance.default.id
 	account_name = var.name
 	password = "${var.password}"
 	description = var.name
 }
 
-data "alibabacloudstack_polardbxx_accounts" "default" {
+data "alibabacloudstack_polardbx_accounts" "default" {
 }
 ```
 
