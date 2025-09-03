@@ -1675,6 +1675,39 @@ func (s *PolardbService) DoDescribeDBProxyEndpointRequest(instanceId string) (*P
 	return dBProxyEndpoint, nil
 }
 
+func (s *PolarDBService) DescribePolarDBSharedInstance(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{"DBClusterId": id}
+	response, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterAttribute", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if response["DBClusterId"] == nil || response["DBClusterId"].(string) == "" {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB shared instance %s was not found", id))
+	}
+
+	return response, nil
+}
+
+func (s *PolarDBService) PolardbSharedInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribePolarDBSharedInstance(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object["DBClusterStatus"] == failState {
+				return object, object["DBClusterStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["DBClusterStatus"]))
+			}
+		}
+		return object, object["DBClusterStatus"].(string), nil
+	}
+}
 
 func (s *PolardbService) CheckCloudResourceAuthorized() (string, error) {
 	req := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "CheckCloudResourceAuthorized", "")
