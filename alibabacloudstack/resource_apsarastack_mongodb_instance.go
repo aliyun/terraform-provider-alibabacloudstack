@@ -183,10 +183,6 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"ssl_status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			// need ascm api
 			//			"tags": tagsSchema(),
 			"audit_status": {
@@ -265,7 +261,7 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				MinItems: 2,
 				MaxItems: 2,
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-					if ! d.Get("enable_public_connection").(bool) {
+					if !d.Get("enable_public_connection").(bool) {
 						return true
 					}
 					return oldValue == newValue
@@ -432,7 +428,14 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	if sslAction, err := ddsService.DescribeDBInstanceSSL(d.Id()); err != nil {
 		return errmsgs.WrapError(err)
 	} else {
-		d.Set("ssl_status", sslAction.SSLStatus)
+		switch sslAction.SSLStatus {
+		case "Closed":
+			d.Set("ssl_action", "Close")
+		case "Open":
+			d.Set("ssl_action", "Open")
+		case "Update":
+			d.Set("ssl_action", "Update")
+		}
 	}
 
 	if tdeInfo, err := ddsService.DescribeMongoDBTDEInfo(d.Id()); err != nil {
@@ -565,6 +568,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 			return client.ModifyDBInstanceTDE(request)
 		})
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		if err != nil {
 			errmsg := ""
 			if bresponse, ok := raw.(*dds.ModifyDBInstanceTDEResponse); ok {
@@ -572,8 +576,37 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		stateConf := BuildStateConf([]string{"TDEModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapError(err)
+		}
 		//d.SetPartial("tde_status")
+	}
+
+	if d.HasChange("ssl_action") && !(d.IsNewResource() && d.Get("ssl_action") == "Close") {
+		request := dds.CreateModifyDBInstanceSSLRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.DBInstanceId = d.Id()
+		request.SSLAction = d.Get("ssl_action").(string)
+
+		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
+			return ddsClient.ModifyDBInstanceSSL(request)
+		})
+
+		if err != nil {
+			errmsg := ""
+			if bresponse, ok := raw.(*dds.ModifyDBInstanceSSLResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		stateConf := BuildStateConf([]string{"SSLModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapError(err)
+		}
+
+		//d.SetPartial("ssl_action")
 	}
 
 	if d.HasChanges("maintain_start_time", "maintain_end_time") {
@@ -621,27 +654,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 	//	if err := ddsService.setInstanceTags(d); err != nil {
 	//		return errmsgs.WrapError(err)
 	//	}
-
-	if d.HasChange("ssl_action") {
-		request := dds.CreateModifyDBInstanceSSLRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.DBInstanceId = d.Id()
-		request.SSLAction = d.Get("ssl_action").(string)
-
-		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-			return ddsClient.ModifyDBInstanceSSL(request)
-		})
-
-		if err != nil {
-			errmsg := ""
-			if bresponse, ok := raw.(*dds.ModifyDBInstanceSSLResponse); ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("ssl_action")
-	}
 
 	enablePublicConnection := false
 	if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeReplicaSetRole", "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {

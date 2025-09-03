@@ -89,6 +89,8 @@ The following arguments are supported:
   * `parameters` - (Optional) A mapping of parameters to the resource.
   * `force_restart` - (Optional) Specifies whether to force restart the instance.
   * `tags` - (Optional) A mapping of tags to assign to the resource.
+  * `acl` - (Optional) The ACL of the instance. Valid values:*`prefer`, `require`, `verify-ca`, `verify-full`, `cert`.
+  * `cpu_type` - (Optional) The CPU type of the instance.
 
 ## Attributes Reference
 
