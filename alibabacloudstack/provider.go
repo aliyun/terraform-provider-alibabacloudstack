@@ -932,6 +932,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_multicast_domain":             resourceAlibabacloudStackCenTransitMulticastDomain(),
 		"alibabacloudstack_cen_transit_router_multicast_domain_association": resourceAlibabacloudStackCenTransitMulticastDomainAssociation(),
 		"alibabacloudstack_cen_transit_router_multicast_domain_source":      resourceAlibabacloudStackCenTransitMulticastDomainSource(),
+		"alibabacloudstack_polardb_shared_instance":                         resourceAlibabacloudStackPolardbSharedInstance(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

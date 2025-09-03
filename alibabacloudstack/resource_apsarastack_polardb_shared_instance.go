@@ -2,11 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
@@ -17,23 +19,8 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"tde_status": {
+			"tde_enabled": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-			},
-			"department": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-			},
-			"region_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"resource_group": {
-				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 			},
@@ -58,9 +45,10 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 				ForceNew: true,
 			},
 			"cpu_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"intel", "hygon"}, false),
 			},
 			"db_version": {
 				Type:     schema.TypeString,
@@ -70,16 +58,16 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 			"sub_category": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"db_node_class": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			"db_node_num": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntAtLeast(1),
 			},
 			"proxy_type": {
 				Type:     schema.TypeString,
@@ -101,12 +89,12 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"vpc_id": {
+			"vswitch_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"vswitch_id": {
+			"vpc_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -146,9 +134,10 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 				ForceNew: true,
 			},
 			"deletion_lock": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(0, 1),
 			},
 			"category": {
 				Type:     schema.TypeString,
@@ -311,13 +300,22 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"security_ips": {
-				Type:     schema.TypeString,
+			"security_ips_groups": {
+				Type: schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 				Optional: true,
+				Computed: true,
 			},
-			"db_cluster_ip_array_name": {
-				Type:     schema.TypeString,
+			"security_groups": {
+				Type: schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 				Optional: true,
+				Computed: true,
+				MaxItems: 10,
 			},
 			"ssl_enabled": {
 				Type:     schema.TypeString,
@@ -343,37 +341,21 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 
 func resourceAlibabacloudStackPolardbSharedInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolarDBService{client}
+	polardbService := PolardbService{client}
 
 	request := make(map[string]interface{})
-
+	request["PayType"] = "Postpaid"
+	request["VPCId"] = d.Get("vpc_id").(string)
+	request["VSwitchId"] = d.Get("vswitch_id").(string)
+	request["DBVersion"] = d.Get("db_version").(string)
+	request["ZoneId"] = d.Get("zone_id").(string)
+	request["DBType"] = d.Get("db_type").(string)
+	request["DBNodeClass"] = d.Get("db_node_class").(string)
+	request["DBNodeNum"] = d.Get("db_node_num").(int)
+	request["DBClusterDescription"] = d.Get("db_cluster_description").(string)
 	// Required and optional parameters from schema
-	if v, ok := d.GetOk("pay_type"); ok {
-		request["PayType"] = v.(string)
-	}
-	if v, ok := d.GetOkExists("tde_status"); ok {
-		request["TDEStatus"] = v.(bool)
-	}
-	if v, ok := d.GetOk("region_id"); ok {
-		request["RegionId"] = v.(string)
-	}
-	if v, ok := d.GetOk("zone_id"); ok {
-		request["ZoneId"] = v.(string)
-	}
-	if v, ok := d.GetOk("creation_option"); ok {
-		request["CreationOption"] = v.(string)
-	}
-	if v, ok := d.GetOk("db_type"); ok {
-		request["DBType"] = v.(string)
-	}
-	if v, ok := d.GetOk("db_version"); ok {
-		request["DBVersion"] = v.(string)
-	}
-	if v, ok := d.GetOk("db_node_class"); ok {
-		request["DBNodeClass"] = v.(string)
-	}
-	if v, ok := d.GetOk("db_node_num"); ok {
-		request["DBNodeNum"] = v.(string)
+	if v := d.Get("tde_enabled"); v.(bool) {
+		request["TDEStatus"] = true
 	}
 	if v, ok := d.GetOk("proxy_type"); ok {
 		request["ProxyType"] = v.(string)
@@ -384,17 +366,6 @@ func resourceAlibabacloudStackPolardbSharedInstanceCreate(d *schema.ResourceData
 	if v, ok := d.GetOk("storage_space"); ok {
 		request["StorageSpace"] = v.(int)
 	}
-	if v, ok := d.GetOk("vpc_id"); ok {
-		request["VPCId"] = v.(string)
-	}
-	if v, ok := d.GetOk("vswitch_id"); ok {
-		request["VSwitchId"] = v.(string)
-	}
-	if v, ok := d.GetOk("db_cluster_description"); ok {
-		request["DBClusterDescription"] = v.(string)
-	}
-
-	// Additional parameters from the example that may not be in schema but required by API
 	if v, ok := d.GetOk("sub_category"); ok {
 		request["SubCategory"] = v.(string)
 	}
@@ -403,12 +374,6 @@ func resourceAlibabacloudStackPolardbSharedInstanceCreate(d *schema.ResourceData
 	}
 	if v, ok := d.GetOk("multi_zone"); ok {
 		request["MultiZone"] = v.(string)
-	}
-	if v, ok := d.GetOk("department"); ok {
-		request["Department"] = v.(int)
-	}
-	if v, ok := d.GetOk("resource_group"); ok {
-		request["ResourceGroup"] = v.(int)
 	}
 	if v, ok := d.GetOk("db_instance_net_type"); ok {
 		request["DBInstanceNetType"] = v.(int)
@@ -448,7 +413,7 @@ func resourceAlibabacloudStackPolardbSharedInstanceCreate(d *schema.ResourceData
 	d.SetId(dbClusterId)
 
 	// Wait for the cluster to be in Running state
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, polardbService.PolardbSharedInstanceStateRefreshFunc(dbClusterId, []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polardbService.PolardbSharedInstanceStateRefreshFunc(dbClusterId, []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("waiting for PolarDB shared instance %s to be Running failed: %v", dbClusterId, err)
 	}
@@ -461,7 +426,7 @@ func resourceAlibabacloudStackPolardbSharedInstanceCreate(d *schema.ResourceData
 
 func resourceAlibabacloudStackPolardbSharedInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolarDBService{client}
+	polardbService := PolardbService{client}
 
 	object, err := polardbService.DescribePolarDBSharedInstance(d.Id())
 	if err != nil {
@@ -475,7 +440,6 @@ func resourceAlibabacloudStackPolardbSharedInstanceRead(d *schema.ResourceData, 
 	d.Set("db_cluster_id", object["DBClusterId"])
 	d.Set("deletion_lock", object["DeletionLock"])
 	d.Set("category", object["Category"])
-	d.Set("resource_group_id", object["ResourceGroupId"])
 	d.Set("storage_pay_type", object["StoragePayType"])
 	d.Set("db_type", object["DBType"])
 	d.Set("db_cluster_network_type", object["DBClusterNetworkType"])
@@ -524,9 +488,8 @@ func resourceAlibabacloudStackPolardbSharedInstanceRead(d *schema.ResourceData, 
 	}
 
 	d.Set("blktag_total", object["BlktagTotal"])
-	d.Set("storage_type", object["StorageType"])
+	d.Set("storage_type", strings.ToUpper(object["StorageType"].(string)))
 	d.Set("architecture", object["Architecture"])
-	d.Set("vpc_id", object["VPCId"])
 	d.Set("db_cluster_status", object["DBClusterStatus"])
 	d.Set("vswitch_id", object["VSwitchId"])
 	d.Set("db_cluster_description", object["DBClusterDescription"])
@@ -535,48 +498,115 @@ func resourceAlibabacloudStackPolardbSharedInstanceRead(d *schema.ResourceData, 
 	d.Set("lock_mode", object["LockMode"])
 	d.Set("storage_used", object["StorageUsed"])
 	d.Set("inode_total", object["InodeTotal"])
-	d.Set("storage_space", object["StorageSpace"])
+	storage_space := object["StorageSpace"].(float64) / 1024 / 1024 / 1024
+	d.Set("storage_space", storage_space)
 	d.Set("db_version_status", object["DBVersionStatus"])
 	d.Set("creation_time", object["CreationTime"])
-	d.Set("sub_category", object["SubCategory"])
+	if object["SubCategory"].(string) == "Exclusive" {
+		d.Set("sub_category", "normal_exclusive")
+	}
 	d.Set("sql_size", object["SQLSize"])
-	d.Set("region_id", object["RegionId"])
 	d.Set("proxy_type", object["ProxyType"])
 	d.Set("expire_time", object["ExpireTime"])
 	d.Set("vip", object["Vip"])
 
 	// Get security IPs from DescribeDBClusterAccessWhitelist
 	reqQuery := map[string]interface{}{"DBClusterId": d.Id()}
-	response, err := client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterAccessWhitelist", "", nil, reqQuery, nil)
+	response, err := client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterAccessWhiteList", "", nil, reqQuery, nil)
 	if err != nil {
 		return err
 	}
-
-	if items, ok := response["Items"].([]interface{}); ok && len(items) > 0 {
-		for _, item := range items {
+	security_ips_groups := make(map[string]string)
+	security_ips := response["Items"].(map[string]interface{})["DBClusterIPArray"].([]interface{})
+	if len(security_ips) > 0 {
+		for _, item := range security_ips {
 			ipArray := item.(map[string]interface{})
-			if ipArray["DBClusterIPArrayName"] == d.Get("db_cluster_ip_array_name") ||
-				(d.Get("db_cluster_ip_array_name").(string) == "" && ipArray["DBClusterIPArrayName"] == "default") {
-				d.Set("security_ips", ipArray["SecurityIps"])
-				d.Set("db_cluster_ip_array_name", ipArray["DBClusterIPArrayName"])
-				break
+			if ipArray["DBClusterIPArrayName"].(string) == "default" {
+				continue
 			}
+			security_ips_groups[ipArray["DBClusterIPArrayName"].(string)] = ipArray["SecurityIps"].(string)
 		}
 	}
+	security_groups := response["DBClusterSecurityGroups"].(map[string]interface{})["DBClusterSecurityGroup"]
+	d.Set("security_groups", security_groups)
 
 	return nil
 }
 
 func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolarDBService{client}
+	polardbService := PolardbService{client}
+
+	if d.HasChange("security_ips_groups") {
+		old, new := d.GetChange("security_ips_groups")
+		err := polardbService.ModifySecurityIps(d.Id(), old, new)
+		if err != nil {
+			return err
+		}
+	}
+
+	if d.HasChange("security_groups") {
+		security_groups := d.Get("security_groups").(*schema.Set).List()
+		err := polardbService.ModifySecurityGroups(d.Id(), security_groups)
+		if err != nil {
+			return err
+		}
+	}
+
+	if d.HasChange("ssl_enabled") {
+
+		// endpointId := ""
+		// if endpointsResponse, err := polardbService.DescribeDBClusterEndpoints(d.Id()); err == nil {
+		// 	endpoint, err := jsonpath.Get("$.Items.0.DBEndpointId", endpointsResponse)
+		// 	if err != nil {
+		// 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_shared_instance", "DescribeDBClusterEndpoints", errmsgs.AlibabacloudStackSdkGoERROR)
+		// 	}
+		// 	endpointId = endpoint.(string)
+		// } else {
+		// 	return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_shared_instance", "DescribeDBClusterAttribute", "Endpoint not found")
+		// }
+
+		reqQuery := map[string]interface{}{
+			"DBClusterId": d.Id(),
+			"SSLEnabled":  d.Get("ssl_enabled"),
+			// "DBEndpointId": endpointId,
+			"NetType": "Private",
+		}
+
+		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterSSL", "", nil, reqQuery, nil); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterSSL", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+
+		stateConf := BuildStateConf([]string{"SSLModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbSharedInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
+
+	if d.HasChange("tde_enabled") {
+		if o, n := d.GetChange("tde_enabled"); o.(bool) && !n.(bool) {
+			return errmsgs.Error("TDE cannot be disabled after enabled, please disable TDE in console.")
+		}
+		reqQuery := map[string]interface{}{
+			"DBClusterId":      d.Id(),
+			"TDEStatus":        "Enable",
+			"RoleArn":          d.Get("role_arn"),
+			"EncryptionKey":    d.Get("encryption_key"),
+			"EncryptAlgorithm": d.Get("encrypt_algorithm"),
+		}
+		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterTDE", "", nil, reqQuery, nil); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterTDE", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+
+		stateConf := BuildStateConf([]string{"TDEModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbSharedInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
 
 	if d.IsNewResource() {
 		return resourceAlibabacloudStackPolardbSharedInstanceRead(d, meta)
 	}
-
-	d.Partial(true)
-
 	if d.HasChange("db_node_class") {
 		// Get the current DBNodes to find the writer node
 		object, err := polardbService.DescribePolarDBSharedInstance(d.Id())
@@ -623,7 +653,6 @@ func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-		d.SetPartial("db_node_class")
 	}
 
 	if d.HasChange("deletion_lock") {
@@ -636,7 +665,6 @@ func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData
 		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterDeletion", "", nil, reqQuery, nil); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterDeletion", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		d.SetPartial("deletion_lock")
 	}
 
 	if d.HasChange("db_cluster_description") {
@@ -648,88 +676,13 @@ func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData
 		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterDescription", "", nil, reqQuery, nil); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterDescription", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		d.SetPartial("db_cluster_description")
 	}
-
-	if d.HasChange("security_ips") || d.HasChange("db_cluster_ip_array_name") {
-		reqQuery := map[string]interface{}{
-			"DBClusterId":          d.Id(),
-			"SecurityIps":          d.Get("security_ips"),
-			"DBClusterIPArrayName": d.Get("db_cluster_ip_array_name"),
-		}
-
-		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterAccessWhiteList", "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterAccessWhiteList", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		d.SetPartial("security_ips")
-		d.SetPartial("db_cluster_ip_array_name")
-	}
-
-	if d.HasChange("ssl_enabled") {
-		// Get endpoint ID
-		object, err := polardbService.DescribePolarDBSharedInstance(d.Id())
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_shared_instance", "DescribeDBClusterAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
-		endpointId := ""
-		if endpoints, ok := object["Endpoints"].([]interface{}); ok && len(endpoints) > 0 {
-			endpointId = endpoints[0].(map[string]interface{})["DBEndpointId"].(string)
-		} else {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_shared_instance", "DescribeDBClusterAttribute", "Endpoint not found")
-		}
-
-		reqQuery := map[string]interface{}{
-			"RegionId":     d.Get("region_id"),
-			"DBClusterId":  d.Id(),
-			"SSLEnabled":   d.Get("ssl_enabled"),
-			"DBEndpointId": endpointId,
-			"NetType":      "Private",
-		}
-
-		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterSSL", "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterSSL", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
-		stateConf := BuildStateConf([]string{"SSLModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbSharedInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		d.SetPartial("ssl_enabled")
-	}
-
-	if d.HasChange("tde_status") {
-		reqQuery := map[string]interface{}{
-			"RegionId":         d.Get("region_id"),
-			"DBClusterId":      d.Id(),
-			"TDEStatus":        "Enable",
-			"RoleArn":          d.Get("role_arn"),
-			"EncryptionKey":    d.Get("encryption_key"),
-			"EncryptAlgorithm": d.Get("encrypt_algorithm"),
-		}
-
-		if !d.Get("tde_status").(bool) {
-			reqQuery["TDEStatus"] = "Disable"
-		}
-
-		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterTDE", "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterTDE", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
-		stateConf := BuildStateConf([]string{"TDEModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbSharedInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		d.SetPartial("tde_status")
-	}
-
-	d.Partial(false)
 	return resourceAlibabacloudStackPolardbSharedInstanceRead(d, meta)
 }
 
 func resourceAlibabacloudStackPolardbSharedInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolarDBService{client}
+	polardbService := PolardbService{client}
 
 	reqQuery := map[string]interface{}{
 		"DBClusterId": d.Id(),
