@@ -1,3 +1,22 @@
+# 3.18.14
+
+## 新增
+
+1. polardb 新增支持ACL功能配置
+2. 新增服务角色的授权资源 
+
+
+## 修复
+
+1. polardb PG数据库创建后，芯片类型为空
+2. polardb database 绑定用户后无法查询到，也不能正常使用
+3. mongodb_instance  ssl 开启状态检查修复
+4. maxcompute_cu 资源适配3.18
+5. maxcompute_user 资源适配3.18
+6. maxcompute_project 资源适配3.18
+  
+---
+
 # 3.18.13
 
 ## 新增

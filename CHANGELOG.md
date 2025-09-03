@@ -1,3 +1,22 @@
+# 3.18.14
+
+## Additions
+
+1. Added support for ACL functionality configuration in PolarDB  
+2. Added authorization resources for service roles  
+  
+
+## Fixes
+
+1. Fixed empty chip type display after PolarDB PG database creation  
+2. Fixed issue where bound users couldn't be queried or used normally after PolarDB database user binding  
+3. Fixed SSL enablement status check for MongoDB instances  
+4. MaxCompute CU resource adaptation for version 3.18  
+5. MaxCompute User resource adaptation for version 3.18  
+6. MaxCompute Project resource adaptation for version 3.18  
+
+---
+
 # 3.18.13
 
 ## Additions
