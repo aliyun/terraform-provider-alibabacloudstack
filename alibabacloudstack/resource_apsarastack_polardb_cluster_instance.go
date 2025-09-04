@@ -1,28 +1,31 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
+func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"pay_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"tde_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
 			},
 			"multi_zone": {
 				Type:     schema.TypeString,
@@ -32,11 +35,6 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 			"zone_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
-			},
-			"creation_option": {
-				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: true,
 			},
 			"db_type": {
@@ -72,7 +70,7 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 			"proxy_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"storage_type": {
 				Type:     schema.TypeString,
@@ -143,10 +141,6 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"storage_pay_type": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"db_cluster_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -157,10 +151,6 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 			},
 			"db_cluster_network_type": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"is_latest_version": {
-				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"storage_max": {
@@ -231,10 +221,6 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 					},
 				},
 			},
-			"host_arch": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"zone_ids": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -242,16 +228,13 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 			"maintain_time": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"engine": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"tags": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
+			"tags": caseInsensitiveTagsSchema(),
 			"blktag_total": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -272,16 +255,8 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"storage_used": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
 			"inode_total": {
 				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"db_version_status": {
-				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"creation_time": {
@@ -296,17 +271,91 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"expire_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"security_ips_groups": {
-				Type: schema.TypeMap,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+				Type:     schema.TypeMap,
+				Elem:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Set: func(v interface{}) int {
+					ipsMap := v.(map[string]interface{})
+					keys := make([]string, 0, len(ipsMap))
+					for k := range ipsMap {
+						keys = append(keys, k)
+					}
+					// 对键进行排序
+					sort.Strings(keys)
+
+					sortedMap := make(map[string]interface{})
+					for _, k := range keys {
+						value := ipsMap[k].(string)
+
+						// 按逗号分割IP列表
+						parts := strings.Split(value, ",")
+
+						// 过滤空字符串
+						filteredParts := make([]string, 0)
+						for _, part := range parts {
+							trimmed := strings.TrimSpace(part)
+							if trimmed != "" {
+								filteredParts = append(filteredParts, trimmed)
+							}
+						}
+
+						// 排序
+						sort.Strings(filteredParts)
+
+						// 重新组合
+						sortedValue := strings.Join(filteredParts, ",")
+						sortedMap[k] = sortedValue
+					}
+
+					// 序列化为JSON并计算哈希
+					bytes, _ := json.Marshal(sortedMap)
+					return hashcode.String(string(bytes))
+				},
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					o, n := d.GetChange("security_ips_groups")
+					oldMap := o.(map[string]interface{})
+					newMap := n.(map[string]interface{})
+
+					if len(oldMap) != len(newMap) {
+						return false
+					}
+
+					for k, v := range oldMap {
+						nv, ok := newMap[k]
+						if !ok {
+							return false
+						}
+
+						// 处理旧值
+						ovs := strings.Split(v.(string), ",")
+						filteredOvs := make([]string, 0)
+						for _, part := range ovs {
+							trimmed := strings.TrimSpace(part)
+							if trimmed != "" {
+								filteredOvs = append(filteredOvs, trimmed)
+							}
+						}
+						sort.Strings(filteredOvs)
+
+						// 处理新值
+						nvs := strings.Split(nv.(string), ",")
+						filteredNvs := make([]string, 0)
+						for _, part := range nvs {
+							trimmed := strings.TrimSpace(part)
+							if trimmed != "" {
+								filteredNvs = append(filteredNvs, trimmed)
+							}
+						}
+						sort.Strings(filteredNvs)
+
+						if strings.Join(filteredOvs, ",") != strings.Join(filteredNvs, ",") {
+							return false
+						}
+					}
+					return true
+				},
 			},
 			"security_groups": {
 				Type: schema.TypeSet,
@@ -318,7 +367,7 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 				MaxItems: 10,
 			},
 			"ssl_enabled": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
 			},
 			"role_arn": {
@@ -333,13 +382,30 @@ func resourceAlibabacloudStackPolardbSharedInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"parameters": {
+				Type: schema.TypeSet,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackPolardbSharedInstanceCreate, resourceAlibabacloudStackPolardbSharedInstanceRead, resourceAlibabacloudStackPolardbSharedInstanceUpdate, resourceAlibabacloudStackPolardbSharedInstanceDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackPolardbClusterInstanceCreate, resourceAlibabacloudStackPolardbClusterInstanceRead, resourceAlibabacloudStackPolardbClusterInstanceUpdate, resourceAlibabacloudStackPolardbClusterInstanceDelete)
 	return resource
 }
 
-func resourceAlibabacloudStackPolardbSharedInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbClusterInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	polardbService := PolardbService{client}
 
@@ -413,22 +479,19 @@ func resourceAlibabacloudStackPolardbSharedInstanceCreate(d *schema.ResourceData
 	d.SetId(dbClusterId)
 
 	// Wait for the cluster to be in Running state
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polardbService.PolardbSharedInstanceStateRefreshFunc(dbClusterId, []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polardbService.PolardbClusterInstanceStateRefreshFunc(dbClusterId, []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("waiting for PolarDB shared instance %s to be Running failed: %v", dbClusterId, err)
 	}
-
-	// Set the final ID
-	d.SetId(dbClusterId)
-
+	// d.SetId("pc-c3dhutn89e0h7bprc")
 	return nil
 }
 
-func resourceAlibabacloudStackPolardbSharedInstanceRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbClusterInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	polardbService := PolardbService{client}
 
-	object, err := polardbService.DescribePolarDBSharedInstance(d.Id())
+	object, err := polardbService.DescribePolardbClusterInstance(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -440,10 +503,8 @@ func resourceAlibabacloudStackPolardbSharedInstanceRead(d *schema.ResourceData, 
 	d.Set("db_cluster_id", object["DBClusterId"])
 	d.Set("deletion_lock", object["DeletionLock"])
 	d.Set("category", object["Category"])
-	d.Set("storage_pay_type", object["StoragePayType"])
 	d.Set("db_type", object["DBType"])
 	d.Set("db_cluster_network_type", object["DBClusterNetworkType"])
-	d.Set("is_latest_version", object["IsLatestVersion"])
 	d.Set("storage_max", object["StorageMax"])
 	d.Set("db_version", object["DBVersion"])
 
@@ -473,20 +534,18 @@ func resourceAlibabacloudStackPolardbSharedInstanceRead(d *schema.ResourceData, 
 	}
 
 	d.Set("zone_ids", object["ZoneIds"])
-	d.Set("host_arch", object["HostArch"])
 	d.Set("maintain_time", object["MaintainTime"])
 	d.Set("engine", object["Engine"])
 
 	// Handle tags if needed
+	tags := make(map[string]interface{}, 0)
 	if v, ok := object["Tags"].([]interface{}); ok && len(v) > 0 {
-		tags := make([]string, 0)
 		for _, tag := range v {
 			tagMap := tag.(map[string]interface{})
-			tags = append(tags, fmt.Sprintf("%s:%s", tagMap["Key"], tagMap["Value"]))
+			tags[tagMap["Key"].(string)] = tagMap["Value"]
 		}
-		d.Set("tags", tags)
 	}
-
+	d.Set("tags", tags)
 	d.Set("blktag_total", object["BlktagTotal"])
 	d.Set("storage_type", strings.ToUpper(object["StorageType"].(string)))
 	d.Set("architecture", object["Architecture"])
@@ -496,18 +555,18 @@ func resourceAlibabacloudStackPolardbSharedInstanceRead(d *schema.ResourceData, 
 	d.Set("proxy_cpu_cores", object["ProxyCpuCores"])
 	d.Set("pay_type", object["PayType"])
 	d.Set("lock_mode", object["LockMode"])
-	d.Set("storage_used", object["StorageUsed"])
 	d.Set("inode_total", object["InodeTotal"])
-	storage_space := object["StorageSpace"].(float64) / 1024 / 1024 / 1024
-	d.Set("storage_space", storage_space)
-	d.Set("db_version_status", object["DBVersionStatus"])
+	storageSpace := object["StorageSpace"].(json.Number)
+	if spaceValue, err := storageSpace.Int64(); err == nil {
+		storage_space := spaceValue / 1024 / 1024 / 1024
+		d.Set("storage_space", int(storage_space))
+	}
 	d.Set("creation_time", object["CreationTime"])
-	if object["SubCategory"].(string) == "Exclusive" {
+	if object["SubCategory"] != nil && object["SubCategory"].(string) == "Exclusive" {
 		d.Set("sub_category", "normal_exclusive")
 	}
 	d.Set("sql_size", object["SQLSize"])
 	d.Set("proxy_type", object["ProxyType"])
-	d.Set("expire_time", object["ExpireTime"])
 	d.Set("vip", object["Vip"])
 
 	// Get security IPs from DescribeDBClusterAccessWhitelist
@@ -527,16 +586,29 @@ func resourceAlibabacloudStackPolardbSharedInstanceRead(d *schema.ResourceData, 
 			security_ips_groups[ipArray["DBClusterIPArrayName"].(string)] = ipArray["SecurityIps"].(string)
 		}
 	}
+	d.Set("security_ips_groups", security_ips_groups)
 	security_groups := response["DBClusterSecurityGroups"].(map[string]interface{})["DBClusterSecurityGroup"]
 	d.Set("security_groups", security_groups)
-
+	if err = polardbService.RefreshClusterParameters(d); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	tdeStatus, encryptionKey, err := polardbService.DescribeDBClusterTDE(d.Id())
+	if err != nil {
+		return err
+	}
+	d.Set("tde_enabled", tdeStatus == "Enabled")
+	d.Set("encryption_key", encryptionKey)
+	ssl_enabled, err := polardbService.DescribeDBClusterSSL(d.Id())
+	if err != nil {
+		return err
+	}
+	d.Set("ssl_enabled", ssl_enabled)
 	return nil
 }
 
-func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	polardbService := PolardbService{client}
-
 	if d.HasChange("security_ips_groups") {
 		old, new := d.GetChange("security_ips_groups")
 		err := polardbService.ModifySecurityIps(d.Id(), old, new)
@@ -553,31 +625,35 @@ func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData
 		}
 	}
 
-	if d.HasChange("ssl_enabled") {
+	if d.HasChange("ssl_enabled") && !(d.IsNewResource() && !d.Get("ssl_enabled").(bool)) {
 
-		// endpointId := ""
-		// if endpointsResponse, err := polardbService.DescribeDBClusterEndpoints(d.Id()); err == nil {
-		// 	endpoint, err := jsonpath.Get("$.Items.0.DBEndpointId", endpointsResponse)
-		// 	if err != nil {
-		// 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_shared_instance", "DescribeDBClusterEndpoints", errmsgs.AlibabacloudStackSdkGoERROR)
-		// 	}
-		// 	endpointId = endpoint.(string)
-		// } else {
-		// 	return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_shared_instance", "DescribeDBClusterAttribute", "Endpoint not found")
-		// }
-
+		endpointId := ""
+		if endpointsResponse, err := polardbService.DescribeDBClusterEndpoints(d.Id()); err == nil {
+			endpoint, err := jsonpath.Get("$.Items.0.DBEndpointId", endpointsResponse)
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterEndpoints", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+			endpointId = endpoint.(string)
+		} else {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterAttribute", "Endpoint not found")
+		}
+		enabled := d.Get("ssl_enabled").(bool)
 		reqQuery := map[string]interface{}{
-			"DBClusterId": d.Id(),
-			"SSLEnabled":  d.Get("ssl_enabled"),
-			// "DBEndpointId": endpointId,
-			"NetType": "Private",
+			"DBClusterId":  d.Id(),
+			"DBEndpointId": endpointId,
+			"NetType":      "Private",
+		}
+		if enabled {
+			reqQuery["SSLEnabled"] = "Enable"
+		} else {
+			reqQuery["SSLEnabled"] = "Disable"
 		}
 
 		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterSSL", "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterSSL", errmsgs.AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBClusterSSL", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
-		stateConf := BuildStateConf([]string{"SSLModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbSharedInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"SSLModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -587,31 +663,44 @@ func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData
 		if o, n := d.GetChange("tde_enabled"); o.(bool) && !n.(bool) {
 			return errmsgs.Error("TDE cannot be disabled after enabled, please disable TDE in console.")
 		}
+		role_arn, err := polardbService.CheckCloudResourceAuthorized()
+		if err != nil {
+			return err
+		}
 		reqQuery := map[string]interface{}{
-			"DBClusterId":      d.Id(),
-			"TDEStatus":        "Enable",
-			"RoleArn":          d.Get("role_arn"),
-			"EncryptionKey":    d.Get("encryption_key"),
-			"EncryptAlgorithm": d.Get("encrypt_algorithm"),
+			"DBClusterId": d.Id(),
+			"TDEStatus":   "Enable",
+			"RoleArn":     role_arn,
+		}
+		if v, ok := d.GetOk("encryption_key"); ok {
+			reqQuery["EncryptionKey"] = v.(string)
+		}
+		if v, ok := d.GetOk("encrypt_algorithm"); ok {
+			reqQuery["EncryptAlgorithm"] = v.(string)
 		}
 		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterTDE", "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterTDE", errmsgs.AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBClusterTDE", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
-		stateConf := BuildStateConf([]string{"TDEModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbSharedInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"TDEModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
+	if d.HasChange("parameters") {
+		if err := polardbService.ModifyClusterParameters(d); err != nil {
+			return err
+		}
+	}
 
 	if d.IsNewResource() {
-		return resourceAlibabacloudStackPolardbSharedInstanceRead(d, meta)
+		return resourceAlibabacloudStackPolardbClusterInstanceRead(d, meta)
 	}
 	if d.HasChange("db_node_class") {
 		// Get the current DBNodes to find the writer node
-		object, err := polardbService.DescribePolarDBSharedInstance(d.Id())
+		object, err := polardbService.DescribePolardbClusterInstance(d.Id())
 		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_shared_instance", "DescribeDBClusterAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
 		dbNodes := object["DBNodes"].([]interface{})
@@ -625,7 +714,7 @@ func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData
 		}
 
 		if writerNode == nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_shared_instance", "DescribeDBClusterAttribute", "Writer node not found")
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterAttribute", "Writer node not found")
 		}
 
 		oldClass, newClass := d.GetChange("db_node_class")
@@ -646,10 +735,10 @@ func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData
 		}
 
 		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBNodesClass", "", nil, nil, reqBody); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBNodesClass", errmsgs.AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBNodesClass", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
-		stateConf := BuildStateConf([]string{"ClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbSharedInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"ClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -663,7 +752,7 @@ func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData
 		}
 
 		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterDeletion", "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterDeletion", errmsgs.AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBClusterDeletion", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
 
@@ -674,31 +763,32 @@ func resourceAlibabacloudStackPolardbSharedInstanceUpdate(d *schema.ResourceData
 		}
 
 		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterDescription", "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_shared_instance", "ModifyDBClusterDescription", errmsgs.AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBClusterDescription", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
-	return resourceAlibabacloudStackPolardbSharedInstanceRead(d, meta)
+	return resourceAlibabacloudStackPolardbClusterInstanceRead(d, meta)
 }
 
-func resourceAlibabacloudStackPolardbSharedInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolardbService{client}
+func resourceAlibabacloudStackPolardbClusterInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+	return nil
+	// client := meta.(*connectivity.AlibabacloudStackClient)
+	// polardbService := PolardbService{client}
 
-	reqQuery := map[string]interface{}{
-		"DBClusterId": d.Id(),
-	}
+	// reqQuery := map[string]interface{}{
+	// 	"DBClusterId": d.Id(),
+	// }
 
-	// Call DeleteDBCluster API
-	_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
-			return nil
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteDBCluster", errmsgs.AlibabacloudStackSdkGoERROR, "")
-	}
+	// // Call DeleteDBCluster API
+	// _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
+	// if err != nil {
+	// 	if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
+	// 		return nil
+	// 	}
+	// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteDBCluster", errmsgs.AlibabacloudStackSdkGoERROR, "")
+	// }
 
-	// Wait for the cluster to be fully deleted
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbSharedInstanceStateRefreshFunc(d.Id(), []string{}))
-	_, err = stateConf.WaitForState()
-	return errmsgs.WrapError(err)
+	// // Wait for the cluster to be fully deleted
+	// stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{}))
+	// _, err = stateConf.WaitForState()
+	// return errmsgs.WrapError(err)
 }

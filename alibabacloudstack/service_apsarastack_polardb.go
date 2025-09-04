@@ -1675,40 +1675,6 @@ func (s *PolardbService) DoDescribeDBProxyEndpointRequest(instanceId string) (*P
 	return dBProxyEndpoint, nil
 }
 
-func (s *PolarDBService) DescribePolarDBSharedInstance(id string) (map[string]interface{}, error) {
-	reqQuery := map[string]interface{}{"DBClusterId": id}
-	response, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterAttribute", "", nil, reqQuery, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if response["DBClusterId"] == nil || response["DBClusterId"].(string) == "" {
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB shared instance %s was not found", id))
-	}
-
-	return response, nil
-}
-
-func (s *PolarDBService) PolardbSharedInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DescribePolarDBSharedInstance(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		for _, failState := range failStates {
-			if object["DBClusterStatus"] == failState {
-				return object, object["DBClusterStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["DBClusterStatus"]))
-			}
-		}
-		return object, object["DBClusterStatus"].(string), nil
-	}
-}
-
 func (s *PolardbService) CheckCloudResourceAuthorized() (string, error) {
 	req := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "CheckCloudResourceAuthorized", "")
 	req.QueryParams["TargetRegionId"] = s.client.RegionId
@@ -1759,7 +1725,7 @@ func (s *PolardbService) DescribeDBInstanceEncryptionKey(id string) string {
 	return encryptionKey.(string)
 }
 
-func (s *PolarDBService) DescribePolarDBSharedInstance(id string) (map[string]interface{}, error) {
+func (s *PolardbService) DescribePolardbClusterInstance(id string) (map[string]interface{}, error) {
 	reqQuery := map[string]interface{}{"DBClusterId": id}
 	response, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterAttribute", "", nil, reqQuery, nil)
 	if err != nil {
@@ -1773,15 +1739,26 @@ func (s *PolarDBService) DescribePolarDBSharedInstance(id string) (map[string]in
 	return response, nil
 }
 
-func (s *PolarDBService) PolardbSharedInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+func (s *PolardbService) PolardbClusterInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		object, err := s.DescribePolarDBSharedInstance(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
+		var object map[string]interface{}
+		var err error
+		retry := 0
+		for retry < 5 {
+			object, err = s.DescribePolardbClusterInstance(id)
+			if err != nil {
+				if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM"}) {
+					retry++
+					time.Sleep(time.Duration(retry) * time.Second)
+					continue
+				}
+				if errmsgs.NotFoundError(err) {
+					// Set this to nil as if we didn't find anything.
+					return nil, "", nil
+				}
+				return nil, "", errmsgs.WrapError(err)
 			}
-			return nil, "", errmsgs.WrapError(err)
+			break
 		}
 
 		for _, failState := range failStates {
@@ -1791,4 +1768,308 @@ func (s *PolarDBService) PolardbSharedInstanceStateRefreshFunc(id string, failSt
 		}
 		return object, object["DBClusterStatus"].(string), nil
 	}
+}
+
+func (s *PolardbService) DescribeDBClusterEndpoints(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{"DBClusterId": id}
+	response, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterEndpoints", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (s *PolardbService) ModifySecurityIps(instance_id string, old, new interface{}) error {
+	var oldMap, newMap map[string]interface{}
+	if old != nil {
+		oldMap = old.(map[string]interface{})
+	}
+	if new != nil {
+		newMap = new.(map[string]interface{})
+	}
+	if _, ok := newMap["default"]; ok {
+		return errmsgs.WrapError(errmsgs.Error("Security IP group name cannot be `default`!"))
+	}
+	requests := make([]map[string]interface{}, 0)
+	for old_group_name, old_ips := range oldMap {
+		new_ips, ok := newMap[old_group_name]
+		if !ok {
+			requests = append(requests, map[string]interface{}{
+				"DBClusterIPArrayName": old_group_name,
+				"SecurityIps":          "",
+				"DBClusterId":          instance_id,
+			})
+		} else {
+			if old_ips != new_ips {
+				requests = append(requests, map[string]interface{}{
+					"DBClusterIPArrayName": old_group_name,
+					"SecurityIps":          new_ips,
+					"DBClusterId":          instance_id,
+				})
+			}
+		}
+	}
+	for new_group_name, new_ips := range newMap {
+		_, ok := oldMap[new_group_name]
+		if !ok {
+			requests = append(requests, map[string]interface{}{
+				"DBClusterIPArrayName": new_group_name,
+				"SecurityIps":          new_ips,
+				"DBClusterId":          instance_id,
+			})
+		}
+	}
+	for _, request := range requests {
+		_, err := s.client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterAccessWhiteList", "", nil, request, nil)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *PolardbService) ModifySecurityGroups(instance_id string, securityGroups []interface{}) error {
+	var securityGroupIds string
+	if len(securityGroups) > 0 {
+		s := make([]string, len(securityGroups))
+		for _, v := range securityGroups {
+			s = append(s, v.(string))
+		}
+		securityGroupIds = strings.Join(s, ",")
+	}
+	request := map[string]interface{}{
+		"DBClusterId":      instance_id,
+		"WhiteListType":    "SecurityGroup",
+		"SecurityGroupIds": securityGroupIds,
+	}
+	_, err := s.client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterAccessWhiteList", "", nil, request, nil)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBClusterAccessWhiteList => ModifySecurityGroups", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return nil
+}
+
+func (s *PolardbService) DoPolardbxDescribeClusterParametersRequest(id string) (map[string]interface{}, error) {
+	// api: polardb - 2017-08-01 - DescribeParameters
+	request := s.client.NewCommonRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterParameters", "")
+	request.QueryParams["DBClusterId"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DoPolardbxDescribeClusterParametersRequest", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DoPolardbxDescribeClusterParametersRequest", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return response, nil
+}
+
+func (s *PolardbService) DescribeClusterParameters(d *schema.ResourceData) (map[string]interface{}, error) {
+	diffParameters := make(map[string]interface{})
+	if response, err := s.DoPolardbxDescribeClusterParametersRequest(d.Id()); err != nil {
+		return nil, errmsgs.WrapError(err)
+	} else {
+		tf_parameters := d.Get("parameters").(*schema.Set).List()
+		tf_map := make(map[string]string)
+		for _, v := range tf_parameters {
+			m := v.(map[string]interface{})
+			tf_map[m["name"].(string)] = m["value"].(string)
+		}
+		parameters, err := jsonpath.Get("$.RunningParameters.Parameter", response)
+		if err != nil {
+			return nil, errmsgs.WrapError(err)
+		}
+		for _, parameter := range parameters.([]interface{}) {
+			parameter_map := parameter.(map[string]interface{})
+			parameterName := parameter_map["ParameterName"].(string)
+			if _, ok := tf_map[parameterName]; ok && parameterName != "" {
+				diffParameters[parameterName] = parameter_map["ParameterValue"]
+			}
+		}
+	}
+	return diffParameters, nil
+}
+
+func (s *PolardbService) RefreshClusterParameters(d *schema.ResourceData) error {
+
+	parameters := make([]map[string]string, 0)
+	if diffParameters, err := s.DescribeClusterParameters(d); err != nil {
+		return errmsgs.WrapError(err)
+	} else {
+		for name := range diffParameters {
+			param := map[string]string{
+				"name":  name,
+				"value": diffParameters[name].(string),
+			}
+			parameters = append(parameters, param)
+		}
+	}
+	if err := d.Set("parameters", parameters); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	return nil
+}
+
+func (s *PolardbService) PolardbClusterParametersStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		response, err := s.DoPolardbxDescribeClusterParametersRequest(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		parameters, err := jsonpath.Get("$.RunningParameters.Parameter", response)
+		if err != nil {
+			return nil, "", errmsgs.WrapError(err)
+		}
+		status := "Normal"
+		var object map[string]interface{}
+		for _, v := range parameters.([]interface{}) {
+			parameter := v.(map[string]interface{})
+			if parameter["ParameterStatus"].(string) == "Modifying" {
+				status = "Modifying"
+				object = parameter
+				break
+			}
+		}
+
+		for _, failState := range failStates {
+			if status == failState {
+				return object, status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, status))
+			}
+		}
+		return object, status, nil
+	}
+}
+
+func (s *PolardbService) ModifyClusterParameters(d *schema.ResourceData) error {
+	request := s.client.NewCommonRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterParameters", "")
+	request.QueryParams["DBClusterId"] = d.Id()
+	config := make(map[string]string)
+	o, n := d.GetChange("parameters")
+	os, ns := o.(*schema.Set), n.(*schema.Set)
+	add := ns.Difference(os).List()
+	var parameters map[string]interface{}
+	if diffParameters, err := s.DescribeClusterParameters(d); err != nil {
+		return errmsgs.WrapError(err)
+	} else {
+		parameters = diffParameters
+	}
+	if len(add) > 0 {
+		for _, i := range add {
+			key := i.(map[string]interface{})["name"].(string)
+			value := i.(map[string]interface{})["value"].(string)
+			if parameters[key].(string) == value {
+				continue
+			}
+			config[key] = value
+		}
+		if len(config) == 0 {
+			return nil
+		}
+		cfg, _ := json.Marshal(config)
+		request.QueryParams["Parameters"] = string(cfg)
+		// wait instance status is Normal before modifying
+		bresponse, err := s.client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Normal"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, s.PolardbClusterParametersStateRefreshFunc(d.Id(), []string{""}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
+	//d.SetPartial(attribute)
+	return nil
+}
+
+func (s *PolardbService) DescribeDBClusterTDE(id string) (string, string, error) {
+	req := s.client.NewCommonRequest("POST", "polardb", "2017-08-01", "DescribeDBClusterTDE", "")
+	req.QueryParams["DBClusterId"] = id
+	bresponse, err := s.client.ProcessCommonRequest(req)
+	addDebug(req.GetActionName(), bresponse, req, req.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return "", "", errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return "", "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+			"polardbService", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return "", "", errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+			"polardbService", "DescribeDBClusterTDE", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	tdeStatus := response["TDEStatus"].(string)
+	encryptionKey := response["EncryptionKey"].(string)
+	return tdeStatus, encryptionKey, nil
+}
+
+func (s *PolardbService) DescribeDBClusterSSL(id string) (bool, error) {
+	req := s.client.NewCommonRequest("POST", "polardb", "2017-08-01", "DescribeDBClusterSSL", "")
+	req.QueryParams["DBClusterId"] = id
+	bresponse, err := s.client.ProcessCommonRequest(req)
+	addDebug(req.GetActionName(), bresponse, req, req.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return false, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return false, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+			"polardbService", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return false, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+			"polardbService", "DescribeDBClusterSSL", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	items := response["Items"].([]interface{})
+	if len(items) == 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (s *PolardbService) GetPolardbClusterClassData(dbClass string) (classData map[string]interface{}, err error) {
+	reqQuery := map[string]interface{}{
+		"pageStart":       1,
+		"pageSize":        500,
+		"label":           "true",
+		"resourceType":    "POLARDB",
+		"status":          "Available",
+		"dbInstanceClass": dbClass,
+	}
+	reqHeader := map[string]string{
+		"x-acs-territory": "US",
+		"x-acs-lang":      "EN",
+	}
+	response, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", reqHeader, reqQuery, nil)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "polardbService", "GetPolardbClusterClassData", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if len(response["data"].([]interface{})) == 0 {
+		return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("polardb_cluster_instance_type", dbClass))
+	}
+	for _, v := range response["data"].([]interface{}) {
+		data := v.(map[string]interface{})
+		if data["dbNodeClass"].(string) == dbClass {
+			return data, nil
+		}
+	}
+	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("polardb_cluster_instance_type", dbClass))
 }
