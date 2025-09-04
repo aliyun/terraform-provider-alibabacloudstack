@@ -282,17 +282,12 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 					for k := range ipsMap {
 						keys = append(keys, k)
 					}
-					// 对键进行排序
 					sort.Strings(keys)
 
 					sortedMap := make(map[string]interface{})
 					for _, k := range keys {
 						value := ipsMap[k].(string)
-
-						// 按逗号分割IP列表
 						parts := strings.Split(value, ",")
-
-						// 过滤空字符串
 						filteredParts := make([]string, 0)
 						for _, part := range parts {
 							trimmed := strings.TrimSpace(part)
@@ -300,16 +295,11 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 								filteredParts = append(filteredParts, trimmed)
 							}
 						}
-
-						// 排序
 						sort.Strings(filteredParts)
-
-						// 重新组合
 						sortedValue := strings.Join(filteredParts, ",")
 						sortedMap[k] = sortedValue
 					}
 
-					// 序列化为JSON并计算哈希
 					bytes, _ := json.Marshal(sortedMap)
 					return hashcode.String(string(bytes))
 				},
@@ -327,8 +317,6 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 						if !ok {
 							return false
 						}
-
-						// 处理旧值
 						ovs := strings.Split(v.(string), ",")
 						filteredOvs := make([]string, 0)
 						for _, part := range ovs {
@@ -339,7 +327,6 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 						}
 						sort.Strings(filteredOvs)
 
-						// 处理新值
 						nvs := strings.Split(nv.(string), ",")
 						filteredNvs := make([]string, 0)
 						for _, part := range nvs {
@@ -483,7 +470,6 @@ func resourceAlibabacloudStackPolardbClusterInstanceCreate(d *schema.ResourceDat
 	if _, err := stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("waiting for PolarDB shared instance %s to be Running failed: %v", dbClusterId, err)
 	}
-	// d.SetId("pc-c3dhutn89e0h7bprc")
 	return nil
 }
 
@@ -770,25 +756,25 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 }
 
 func resourceAlibabacloudStackPolardbClusterInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	return nil
-	// client := meta.(*connectivity.AlibabacloudStackClient)
-	// polardbService := PolardbService{client}
+	// return nil
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	polardbService := PolardbService{client}
 
-	// reqQuery := map[string]interface{}{
-	// 	"DBClusterId": d.Id(),
-	// }
+	reqQuery := map[string]interface{}{
+		"DBClusterId": d.Id(),
+	}
 
-	// // Call DeleteDBCluster API
-	// _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
-	// if err != nil {
-	// 	if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
-	// 		return nil
-	// 	}
-	// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteDBCluster", errmsgs.AlibabacloudStackSdkGoERROR, "")
-	// }
+	// Call DeleteDBCluster API
+	_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
+			return nil
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteDBCluster", errmsgs.AlibabacloudStackSdkGoERROR, "")
+	}
 
-	// // Wait for the cluster to be fully deleted
-	// stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{}))
-	// _, err = stateConf.WaitForState()
-	// return errmsgs.WrapError(err)
+	// Wait for the cluster to be fully deleted
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{}))
+	_, err = stateConf.WaitForState()
+	return errmsgs.WrapError(err)
 }
