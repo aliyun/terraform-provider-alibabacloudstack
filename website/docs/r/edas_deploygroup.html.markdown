@@ -4,13 +4,13 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_deploygroup"
 sidebar_current: "docs-Alibabacloudstack-edas-deploygroup"
 description: |- 
-  使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Deploygroup resource.
+  Provides a Edas Deploygroup resource.
 ---
 
 # alibabacloudstack_edas_deploygroup
 -> **NOTE:** Alias name has: `alibabacloudstack_edas_deploy_group`
 
-使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Deploygroup resource.
+Provides a Edas Deploygroup resource.
 
 ## Example Usage
 

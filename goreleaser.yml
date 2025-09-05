@@ -78,6 +78,6 @@ signs:
       - "${artifact}"
 
 release:
-  # 手动指定要上传的文件
+  # Manually specify the file to upload
   extra_files:
     - glob: '*.zip'

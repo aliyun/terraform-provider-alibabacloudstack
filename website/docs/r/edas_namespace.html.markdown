@@ -4,12 +4,12 @@ layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_edas_namespace"
 sidebar_current: "docs-Alibabacloudstack-edas-namespace"
 description: |- 
-  使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Namespace resource.
+  Provides a Edas Namespace resource.
 ---
 
 # alibabacloudstack_edas_namespace
 
-使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Namespace resource.
+Provides a Edas Namespace resource.
 
 For information about EDAS Namespace and how to use it, see [What is Namespace](https://www.alibabacloud.com/help/en/enterprise-distributed-application-service/latest/insertorupdateregion).
 

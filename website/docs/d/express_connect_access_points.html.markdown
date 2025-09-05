@@ -26,7 +26,7 @@ output "express_connect_access_point_id_1" {
 }
 
 data "alibabacloudstack_express_connect_access_points" "nameRegex" {
-  name_regex = "^杭州-"
+  name_regex = "^HZ-"
 }
 output "express_connect_access_point_id_2" {
   value = data.alibabacloudstack_express_connect_access_points.nameRegex.points.0.id

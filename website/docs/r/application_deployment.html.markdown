@@ -4,13 +4,13 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_applicationpackageattachment"
 sidebar_current: "docs-Alibabacloudstack-edas-applicationpackageattachment"
 description: |-
-  使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Applicationpackageattachment resource.
+  Provides a Edas Applicationpackageattachment resource.
 ---
 
 # alibabacloudstack_edas_applicationpackageattachment
 -> **NOTE:** Alias name has: `alibabacloudstack_application_deployment`
 
-使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Applicationpackageattachment resource.
+Provides a Edas Applicationpackageattachment resource.
 
 ## Example Usage
 ```

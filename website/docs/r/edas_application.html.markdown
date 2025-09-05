@@ -4,12 +4,12 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_application"
 sidebar_current: "docs-Alibabacloudstack-edas-application"
 description: |- 
-  使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Application resource.
+  Provides a Edas Application resource.
 ---
 
 # alibabacloudstack_edas_application
 
-使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） application resource.
+Provides a Edas application resource.
 
 ## Example Usage
 
