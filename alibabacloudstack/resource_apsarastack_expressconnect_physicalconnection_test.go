@@ -45,7 +45,7 @@ func TestAccAlibabacloudStackExpressconnectPhysicalconnection0(t *testing.T) {
 
 					"type": "VPC",
 
-					"peer_location": "XX街道",
+					"peer_location": "XX Street",
 
 					"access_point_id": "ap-cn-hangzhou-jg-B",
 
@@ -60,7 +60,7 @@ func TestAccAlibabacloudStackExpressconnectPhysicalconnection0(t *testing.T) {
 
 						"type": "VPC",
 
-						"peer_location": "XX街道",
+						"peer_location": "XX Street",
 
 						"access_point_id": "ap-cn-hangzhou-jg-B",
 

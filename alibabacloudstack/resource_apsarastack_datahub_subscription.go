@@ -121,7 +121,7 @@ func resourceAlibabacloudStackDatahubSubscriptionRead(d *schema.ResourceData, me
 	d.Set("project_name", projectName)
 	d.Set("topic_name", TopicName)
 	d.Set("sub_id", SubId)
-	//d.Set("comment", object.Comment) //专有云无法获取comment
+	//d.Set("comment", object.Comment) // Cannot get comment in private cloud
 	d.Set("create_time", strconv.FormatInt(object.CreateTime, 10))
 	d.Set("last_modify_time", strconv.FormatInt(object.LastModifyTime, 10))
 	return nil

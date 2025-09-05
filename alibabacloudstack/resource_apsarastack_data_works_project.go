@@ -93,6 +93,6 @@ func resourceAlibabacloudStackDataWorksProjectUpdate(d *schema.ResourceData, met
 }
 
 func resourceAlibabacloudStackDataWorksProjectDelete(d *schema.ResourceData, meta interface{}) error {
-	// 没有对应 API
+	// No corresponding API
 	return nil
 }

@@ -225,7 +225,7 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 					}),
 				),
 			},
-			// v3.16.2版本oss暂时不支持tags的delete方法，无法将tags删空
+			// In version v3.16.2, OSS does not temporarily support the delete method for tags, so tags cannot be deleted completely
 			// {
 			// 	Config: testAccConfig(map[string]interface{}{
 			// 		"tags": REMOVEKEY,
@@ -358,7 +358,7 @@ func TestAccAlibabacloudStackOssBucketVpc(t *testing.T) {
 	})
 }
 
-func testAccCheckOssBucketDestroy(s *terraform.State) error { //destroy function
+func testAccCheckOssBucketDestroy(s *terraform.State) error { // destroy function
 	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 

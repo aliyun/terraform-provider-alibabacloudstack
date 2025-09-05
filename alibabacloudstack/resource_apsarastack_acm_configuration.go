@@ -106,7 +106,7 @@ func resourceAlibabacloudStackAcmConfigurationCreate(d *schema.ResourceData, met
 	// api: acm - 2020-02-06 - CreateConfiguration
 	request := client.NewCommonRequest("POST", "acm", "2020-02-06", "CreateConfiguration", "/diamond-ops/pop/configuration")
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["Content"] = d.Get("content").(string)
 

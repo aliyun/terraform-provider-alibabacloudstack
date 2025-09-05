@@ -134,7 +134,7 @@ func testSweepDBInstances(region string) error {
 		}
 	}
 	if sweeped {
-		// Waiting 30 seconds to eusure these DB instances have been deleted.
+		// Waiting 30 seconds to ensure these DB instances have been deleted.
 		time.Sleep(30 * time.Second)
 	}
 	return nil
@@ -188,8 +188,8 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// 专有云不支持 period, auto_renew 参数 encryption参数不支持回读, force_restart为执行控制参数
-				ImportStateVerifyIgnore: []string{"encryption", "period", "auto_renew", 	"force_restart"},
+				// Private cloud does not support period, auto_renew parameters. encryption parameter cannot be read back, force_restart is an execution control parameter
+				ImportStateVerifyIgnore: []string{"encryption", "period", "auto_renew", "force_restart"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

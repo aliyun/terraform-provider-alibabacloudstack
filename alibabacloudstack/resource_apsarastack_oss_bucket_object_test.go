@@ -71,8 +71,8 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// source是本地属性，无法从远端加载
-				// acl需要特殊权限，当前无法在测试时调整
+				// source is a local attribute, cannot be loaded from remote
+				// acl requires special permissions, currently cannot be adjusted during testing
 				ImportStateVerifyIgnore: []string{"source", "acl"},
 			},
 			/*

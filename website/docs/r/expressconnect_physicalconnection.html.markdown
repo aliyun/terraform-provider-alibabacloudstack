@@ -25,7 +25,7 @@ resource "alibabacloudstack_expressconnect_physicalconnection" "default" {
   device_name              = var.name
   access_point_id          = "ap-cn-hangzhou-jg-B"
   line_operator            = "CO"
-  peer_location            = "XX街道"
+  peer_location            = "XX Street"
   physical_connection_name = var.name
   type                     = "VPC"
   description              = "abcabc"

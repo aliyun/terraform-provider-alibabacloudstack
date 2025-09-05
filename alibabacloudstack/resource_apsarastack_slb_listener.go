@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -267,7 +268,6 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 			"tls_cipher_policy": {
 				Type:             schema.TypeString,
 				Default:          "tls_cipher_policy_1_0",
-				ValidateFunc:     validation.StringInSlice([]string{"tls_cipher_policy_1_0", "tls_cipher_policy_1_1", "tls_cipher_policy_1_2", "tls_cipher_policy_1_2_strict"}, false),
 				Optional:         true,
 				DiffSuppressFunc: httpsDiffSuppressFunc,
 			},
@@ -309,8 +309,35 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				},
 			},
 		},
+		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+			client := meta.(*connectivity.AlibabacloudStackClient)
+			
+			if v, ok := d.GetOk("tls_cipher_policy"); ok {
+				policyMatched := false
+				value := v.(string)
+				availableValue := []string{}
+				if request, err := client.DoTeaRequest("GET","Slb","2014-05-15" ,"DescribeTLSCipherPolicies","", nil, nil, nil); err != nil {
+					return err
+				} else {
+					for _, v := range request["TLSCipherPolicies"].(map[string]interface{})["TLSCipherPolicy"].([]interface{}) {
+						policy := v.(map[string]interface{})
+						if policy["TLSCipherPolicy"].(string) == value {
+							policyMatched = true
+							break
+						} else {
+							availableValue = append(availableValue, policy["TLSCipherPolicy"].(string))
+						}
+					}
+				}
+				if ! policyMatched {
+					return fmt.Errorf(" expected tls_cipher_policy to be one of %v, got %s", availableValue, value )
+				}
+			}
+			
+			return nil
+		},
 	}
-	// XXX: 逻辑特殊，不建议合并
+	// XXX: Special logic, not recommended to merge
 	//setResourceFunc(resource, resourceAlibabacloudStackSlbListenerCreate, resourceAlibabacloudStackSlbListenerRead, resourceAlibabacloudStackSlbListenerUpdate, resourceAlibabacloudStackSlbListenerDelete)
 	//return resource
 }

@@ -11,7 +11,7 @@ description: |-
 
 Provides a expressconnect Bgpnetwork resource.
 
-## 示例用法
+## Example Usage
 ```
 variable "name" {
   default = "tf-testaccexpressconnect-bgp-group1106"
@@ -35,13 +35,13 @@ resource "alibabacloudstack_expressconnect_bgp_network" "default" {
 }
 ```
 
-## 参数参考
+## Argument Reference
 
-支持以下参数：
-  * `dst_cidr_block` - (必填) - 已宣告的BGP网络。
-  * `router_id` - (必填, 强制新建) - 路由器的ID。
+The following arguments are supported:
+  * `dst_cidr_block` - (Require) - expressconnect Bgpnetwork cidr block。
+  * `router_id` - (Require, ForceNew) - vbr router id。
 
-## 属性参考
+## Attributes Reference
 
-除了上述所有参数外，还导出了以下属性：
-  * `status` - 已宣告的BGP网络状态。
+The following attributes are exported in addition to the arguments listed above:
+  * `status` - expressconnect Bgpnetwork resource status。

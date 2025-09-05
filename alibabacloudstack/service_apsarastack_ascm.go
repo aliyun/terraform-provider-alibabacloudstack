@@ -698,7 +698,7 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 }
 
 func (s *AscmService) ExportInitPasswordByLoginName(loginname string) (initPassword string, err error) {
-	// 该接口不支持pop网关
+	// This interface does not support pop gateway
 	var loginnamelist []string
 	loginnamelist = append(loginnamelist, loginname)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ExportInitPasswordByLoginNameList", "/ascm/auth/user/exportInitPasswordByLoginNameList")

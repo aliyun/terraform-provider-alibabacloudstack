@@ -100,7 +100,7 @@ func testSweepKVStoreInstances(region string) error {
 		}
 	}
 	if sweeped {
-		// Waiting 30 seconds to eusure these KVStore instances have been deleted.
+		// Waiting 30 seconds to ensure these KVStore instances have been deleted.
 		time.Sleep(30 * time.Second)
 	}
 	return nil
@@ -138,7 +138,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstanceclassictest(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// password敏感字段设置后不回显
+				// password sensitive field does not echo after setting
 				ImportStateVerifyIgnore: []string{"password", "cpu_type"},
 			},
 		},
@@ -177,7 +177,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// password敏感字段设置后不回显
+				// password sensitive field does not echo after setting
 				ImportStateVerifyIgnore: []string{"password"},
 			},
 		},
@@ -397,9 +397,9 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	engine_version = "%s"
     cpu_type = "intel"
 
-	// 只有企业版可以开启TDS
+	// Only enterprise edition can enable TDE
 	tde_status = true
-	// 只有集群版可以打开SSL
+	// Only cluster edition can enable SSL
 	enable_ssl = true
 	encryption_key = alibabacloudstack_kms_key.key.id
 }

@@ -81,7 +81,7 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead(d *schema.Reso
 	
 	id_infos := strings.Split(d.Id(), ":")
 	if len(id_infos) == 1 {
-		// 此时为老数据d.SetId(resourceSetId)， 强制修改一次数据的格式
+		// At this point, it's old data d.SetId(resourceSetId), forcibly modify the data format once
 		d.SetId(fmt.Sprintf("%s:%s:%s",d.Get("resource_set_id").(string), d.Get("user_group_id").(string), d.Get("ascm_role_id").(string)))
 	}
 
@@ -94,7 +94,7 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead(d *schema.Reso
 		}
 		return errmsgs.WrapError(err)
 	}
-	// 确保import动作时可以正常加载
+	// Ensure that import actions can load normally
 	id_infos = strings.Split(d.Id(), ":")
 	d.Set("resource_set_id", id_infos[0])
 	d.Set("user_group_id", id_infos[1])

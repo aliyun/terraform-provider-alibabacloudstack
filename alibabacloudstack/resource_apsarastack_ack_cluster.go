@@ -673,7 +673,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 
 	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "CreateCluster", "/clusters")
 	request.SetContentType("application/json")
-	request.SetContent([]byte("{}")) // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
+	request.SetContent([]byte("{}")) // Must be specified, otherwise the SDK will change the type to www-form, which will eventually cause the cr to fail with a certain random probability
 
 	request.QueryParams = map[string]string{
 		"Action":    "CreateCluster",

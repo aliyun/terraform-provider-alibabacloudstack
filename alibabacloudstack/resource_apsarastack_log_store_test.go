@@ -63,7 +63,7 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				// Read时不返回这个参数，只能从数据库查询
+				// This parameter is not returned during Read, can only be queried from the database
 				ImportStateVerifyIgnore: []string{"encrypt_type"},
 			},
 			{

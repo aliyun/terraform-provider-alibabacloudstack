@@ -91,7 +91,7 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 	ZoneId := d.Get("zone_id").(string)
 
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZoneRecords", "")
-	request.Scheme = "HTTP" // CloudDns不支持HTTPS
+	request.Scheme = "HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["ZoneId"] = ZoneId
 
 	response := DnsRecord{}

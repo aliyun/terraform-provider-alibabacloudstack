@@ -107,7 +107,7 @@ func testSweepAdbDbInstances(region string) error {
 	return nil
 }
 
-// 316 基础版 ClusterType:analyticdb
+// 316 Basic Edition ClusterType:analyticdb
 func TestAccAlibabacloudStackAdbDbCluster_basic(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_adb_db_cluster.default"
@@ -276,7 +276,7 @@ func TestAccAlibabacloudStackAdbDbCluster_basic(t *testing.T) {
 	})
 }
 
-// 316 集群版 ClusterType:AnalyticdbOnPanguHybrid
+// 316 Cluster Edition ClusterType:AnalyticdbOnPanguHybrid
 func TestAccAlibabacloudStackAdbDbCluster_flexible(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_adb_db_cluster.default"

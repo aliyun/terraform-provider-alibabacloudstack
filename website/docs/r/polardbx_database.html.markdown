@@ -4,14 +4,14 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_database"
 sidebar_current: "docs-Alibabacloudstack-polardbx-database"
 description: |-
-  提供 PolarDBX 数据库资源。
+  Provide PolarDBX database resources.
 ---
 
 # alibabacloudstack_polardbx_database
 
-提供 PolarDBX 数据库资源。
+Provide PolarDBX database resources.
 
-## 示例用法
+## Example Usage
 
 ```
 variable "name" {
@@ -62,11 +62,13 @@ resource "alibabacloudstack_polardbx_database" "default0" {
 }
 
 ```
-## 参数参考
+## Argument Reference
 
-支持以下参数：
-  * `encode` - (必填) - 字符集。更多信息请参见[字符集表](~~ 99716 ~~)。
-  * `description` - (可选) - 数据库的描述。
-  * `instance_id` - (必填) - 数据库将关联的 PolarDBX 实例的 ID。
-  * `database_name` - (必填) - 数据库的名称。
-  * `mode` - (可选) - 数据库的模式。有效值：`auto` 和 `drds`。
+The following arguments are supported:
+
+  * `encode` - (Required) - Character set. For more information, refer to the [Character Set Table](~~ 99716 ~~).
+  * `description` - (Optional) - Description of the database.
+  * `instance_id` - (Required) - ID of the PolarDBX instance to which the database will be associated.
+  * `database_name` - (Required) - Name of the database.
+  * `mode` - (Optional) - Mode of the database. Valid values: `auto` and `drds`.
+

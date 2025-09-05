@@ -54,7 +54,7 @@ func TestAccAlibabacloudStackDBAccountUpdate(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// password敏感字段设置后不回显
+				// password is a sensitive field and will not be displayed after setting
 				ImportStateVerifyIgnore: []string{"password"},
 			},
 			{

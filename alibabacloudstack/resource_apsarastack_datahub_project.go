@@ -28,7 +28,7 @@ func resourceAlibabacloudStackDatahubProject() *schema.Resource {
 			"comment": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true, // 当前专有云不支持修改comment
+				ForceNew:     true, // Currently, Alibaba Cloud does not support modifying the comment
 				Default:      "project added by terraform",
 				ValidateFunc: validation.StringLenBetween(0, 255),
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {

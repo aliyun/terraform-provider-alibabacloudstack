@@ -158,7 +158,7 @@ func TestAccAlibabacloudStackRosStack_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"stack_policy_body": `{\"Statement\": [{\"Action\": \"Update:*\", \"Resource\": \"*\", \"Effect\": \"Allow\", \"Principal\": \"*\"}]}`,
-					"template_body":     `{\"ROSTemplateFormatVersion\":\"2015-09-01\", \"Description\" : \"模板描述信息，可用于说明模板的适用场景、架构说明等。\", \"Parameters\": {\"VpcName\": {\"Type\": \"String\"},\"InstanceType\": {\"Type\": \"String\"}}}`,
+					"template_body":     `{\"ROSTemplateFormatVersion\":\"2015-09-01\", \"Description\" : \"Template description information, which can be used to explain the applicable scenarios and architecture of the template.\", \"Parameters\": {\"VpcName\": {\"Type\": \"String\"},\"InstanceType\": {\"Type\": \"String\"}}}`,
 					"parameters": []map[string]interface{}{
 						{
 							"parameter_key":   "VpcName",
@@ -224,7 +224,7 @@ func TestAccAlibabacloudStackRosStack_basic(t *testing.T) {
 					},
 					"timeout_in_minutes": "60",
 					"stack_policy_body":  `{\"Statement\": [{\"Action\": \"Update:*\", \"Resource\": \"*\", \"Effect\": \"Allow\", \"Principal\": \"*\"}]}`,
-					"template_body":      `{\"ROSTemplateFormatVersion\":\"2015-09-01\", \"Description\" : \"模板描述信息，可用于说明模板的适用场景、架构说明等。\", \"Parameters\": {\"VpcName\": {\"Type\": \"String\"},\"InstanceType\": {\"Type\": \"String\"}}}`,
+					"template_body":      `{\"ROSTemplateFormatVersion\":\"2015-09-01\", \"Description\" : \"Template description information, which can be used to explain the applicable scenarios and architecture of the template.\", \"Parameters\": {\"VpcName\": {\"Type\": \"String\"},\"InstanceType\": {\"Type\": \"String\"}}}`,
 					"parameters": []map[string]interface{}{
 						{
 							"parameter_key":   "VpcName",

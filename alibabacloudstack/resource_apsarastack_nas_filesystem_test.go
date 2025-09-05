@@ -72,7 +72,7 @@ func testSweepNasFileSystem(region string) error {
 				log.Printf("[INFO] Skipping FileSystem: %s (%s)", description, item["FileSystemId"])
 				continue
 			}
-			// 删除 fileSystem 时需要先删除其挂载关系
+			// When deleting a fileSystem, its mount targets must be deleted first
 			if v, ok := item["MountTargets"].(map[string]interface{})["MountTarget"].([]interface{}); ok && len(v) > 0 {
 				log.Printf("[INFO] Delete mount targets with filesystem: %v", item["FileSystemId"])
 				for _, domain := range v {

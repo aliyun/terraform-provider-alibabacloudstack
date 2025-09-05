@@ -92,6 +92,7 @@ func TestAccAlibabacloudStackDmsEnterprisesDataSource(t *testing.T) {
 	DmsEnterpriseInstancesCheckInfo.dataSourceTestCheck(t, rand, searchkeyConf, instancealiasRegexConfConf, nameRegexConfConf)
 }
 
+// dataSourceDmsEnterpriseInstancesConfigDependence returns the configuration for dependent resources required by the data source test
 func dataSourceDmsEnterpriseInstancesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 	data "alibabacloudstack_account" "current" {
@@ -137,7 +138,7 @@ func dataSourceDmsEnterpriseInstancesConfigDependence(name string) string {
 	  host              =  "${alibabacloudstack_db_instance.instance.connection_string}"
 	  port              =  "3306"
 	  network_type      =	"CLASSIC"
-	  safe_rule         =	"自由操作"
+	  safe_rule         =	"Free Operations"
 	  tid               =  "1"
 	  instance_type     =	 "mysql"
 	  instance_source   =	 "RDS"
@@ -154,3 +155,4 @@ func dataSourceDmsEnterpriseInstancesConfigDependence(name string) string {
 	}
 `, name, os.Getenv("ALIBABACLOUDSTACK_REGION"), getAccTestPassword(12))
 }
+

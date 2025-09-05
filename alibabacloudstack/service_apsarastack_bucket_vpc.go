@@ -28,7 +28,7 @@ type VpcListResult struct {
 }
 
 func (s *BucketVpcService) BucketVpcList(bucketName string) (vpclist *VpcListResult, err error) {
-	// TODO: 该接口为asapi接口，未对pop开放
+	// TODO: This interface is an asapi interface and is not open to pop
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListBucketVpc", "/ascm/manage/saleconf/ossIsolationVpc/select")
 	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	mergeMaps(request.QueryParams, map[string]string{

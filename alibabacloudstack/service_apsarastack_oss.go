@@ -148,7 +148,7 @@ func getBucketListResponseBuckets(response *responses.CommonResponse) ([]BucketL
 
 	var bucketList BucketList
 	err := json.Unmarshal(response.GetHttpContentBytes(), &bucketList)
-	// 3.16.2 会发返回，但3.18.x不返回
+	// 3.16.2 will return, but 3.18.x does not return
 	if err != nil || (bucketList.Code != "" && bucketList.Code != "200") {
 		return buckets, errmsgs.WrapError(err)
 	}
@@ -166,7 +166,7 @@ func getBucketListResponseBuckets(response *responses.CommonResponse) ([]BucketL
 
 	switch v := bucketInterface.(type) {
 	case map[string]interface{}:
-		// 单个 Bucket 结构体
+		// Single Bucket structure
 		bucket := BucketListBucket{
 			Comment:          v["Comment"].(string),
 			CreationDate:     v["CreationDate"].(string),
@@ -178,7 +178,7 @@ func getBucketListResponseBuckets(response *responses.CommonResponse) ([]BucketL
 		}
 		buckets = append(buckets, bucket)
 	case []interface{}:
-		// 多个 Bucket 结构体
+		// Multiple Bucket structures
 		for _, vv := range v {
 			vvv, ok := vv.(map[string]interface{})
 			if !ok {

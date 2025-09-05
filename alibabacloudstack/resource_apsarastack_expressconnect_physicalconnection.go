@@ -271,7 +271,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 func resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-	// Canceled 状态才可以删除
+	// Only Canceled status can be deleted
 	object, err := vpcService.DescribeExpressConnectPhysicalConnection(d.Id())
 	if object["Status"].(string) != "Canceled" {
 		request := map[string]interface{}{

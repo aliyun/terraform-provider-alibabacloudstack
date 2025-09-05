@@ -491,7 +491,7 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
-	// 查询 ipv6地址集
+	// Query IPv6 address set
 	// request := ecs.CreateDescribeNetworkInterfacesRequest()
 	// client.InitRpcRequest(*request.RpcRequest)
 	// request.InstanceId = d.Id()
@@ -1370,13 +1370,13 @@ func getOnlySystemTags(d *schema.ResourceData, tags []ecs.Tag) []ecs.Tag {
 	old_s_tags := d.Get("system_disk_tags").(map[string]interface{})
 	ecs_tags := d.Get("tags").(map[string]interface{})
 	only_ecs_tags := make([]string, 0)
-	// 获取只属于ecs的tags 的key列表
+	// Get the list of tag keys that belong only to ECS
 	for k, _ := range ecs_tags {
 		if _, ok := old_s_tags[k]; !ok {
 			only_ecs_tags = append(only_ecs_tags, k)
 		}
 	}
-	// 剔除只属于ecs的tags
+	// Exclude tags that belong only to ECS
 	for _, tag := range tags {
 		in_only_ecs_tags := false
 		for _, only_ecs_tag := range only_ecs_tags {

@@ -101,7 +101,7 @@ func resourceAlibabacloudStackDtsSynchronizationInstanceCreate(d *schema.Resourc
 	var response map[string]interface{}
 	action := "CreateDtsInstance"
 	request := client.NewCommonRequest("POST", "Dts", "2020-01-01", action, "")
-	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-type"] = "application/json"
 	mergeMaps(request.QueryParams, map[string]string{
@@ -211,7 +211,7 @@ func resourceAlibabacloudStackDtsSynchronizationInstanceUpdate(d *schema.Resourc
 func resourceAlibabacloudStackDtsSynchronizationInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	if v, ok := d.GetOk("payment_type"); ok {
 		if v.(string) == "Subscription" {
-			log.Printf("[WARN] Cannot destroy resource: alibabacloudstack_dts_synchronization_job because it's s. Terraform will remove this resource from the state file, however resources may remain.")
+			log.Printf("[WARN] Cannot destroy resource: alibabacloudstack_dts_synchronization_job because it's subscription-based. Terraform will remove this resource from the state file, however resources may remain.")
 			return nil
 		}
 	}

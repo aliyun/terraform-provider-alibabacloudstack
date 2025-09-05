@@ -4,13 +4,13 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_instanceclusterattachment"
 sidebar_current: "docs-Alibabacloudstack-edas-instanceclusterattachment"
 description: |- 
-  使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Instanceclusterattachment resource.
+  Provides a Edas Instanceclusterattachment resource.
 ---
 
 # alibabacloudstack_edas_instanceclusterattachment
 -> **NOTE:** Alias name has: `alibabacloudstack_edas_instance_cluster_attachment`
 
-使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Instanceclusterattachment resource.
+Provides a Edas Instanceclusterattachment resource.
 
 ## Example Usage
 

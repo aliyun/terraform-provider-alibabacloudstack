@@ -119,14 +119,14 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 }
 
 func removeRepByMap(slc []string) []string {
-	result := []string{}         //存放返回的不重复切片
-	tempMap := map[string]byte{} // 存放不重复主键
+	result := []string{}         // Store the returned non-duplicate slice
+	tempMap := map[string]byte{} // Store non-duplicate keys
 	for _, e := range slc {
 		l := len(tempMap)
-		tempMap[e] = 0 //当e存在于tempMap中时，再次添加是添加不进去的，，因为key不允许重复
-		//如果上一行添加成功，那么长度发生变化且此时元素一定不重复
-		if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
-			result = append(result, e) //当元素不重复时，将元素添加到切片result中
+		tempMap[e] = 0 // When e exists in tempMap, it cannot be added again because keys are not allowed to be duplicated
+		// If the above line is successfully added, the length changes and the element is definitely not duplicated
+		if len(tempMap) != l { // After adding to the map, if the map length changes, the element is not duplicated
+			result = append(result, e) // When the element is not duplicated, add the element to the result slice
 		}
 	}
 	return result
@@ -135,7 +135,7 @@ func removeRepByMap(slc []string) []string {
 func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	// TODO: 该接口为asapi接口，未对pop开放
+	// TODO: This interface is an asapi interface and is not open to pop
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "")
 	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 	mergeMaps(request.QueryParams, map[string]string{

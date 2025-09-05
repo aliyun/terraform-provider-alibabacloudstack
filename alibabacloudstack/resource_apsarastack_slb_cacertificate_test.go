@@ -55,7 +55,7 @@ func TestAccAlibabacloudStackSlbCacertificate0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// ca_certificate上传设置后不回显
+				// ca_certificate does not echo back after being set
 				ImportStateVerifyIgnore: []string{"ca_certificate",},
 			},
 		},

@@ -7,8 +7,6 @@ import (
 )
 
 func TestAccAlibabacloudStackEcsSecurityGroupsDataSource(t *testing.T) {
-	// 根据test_meta自动生成的tasecase
-
 	rand := getAccTestRandInt(10000, 99999)
 
 	idsConf := dataSourceTestAccConfig{

@@ -103,7 +103,7 @@ func resourceAlibabacloudStackEipAssociationCreate(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackEipAssociationUpdate(d *schema.ResourceData, meta interface{}) error {
-	// force是个删除时的动作参数，允许修改
+	// force is a delete-time action parameter, modification is allowed
 	return nil
 }
 

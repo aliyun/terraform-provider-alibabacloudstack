@@ -72,7 +72,7 @@ resource "alibabacloudstack_dms_enterprise_instance" "default" {
     database_password = "${alibabacloudstack_db_account.account.password}"
     instance_name     = "tf-testAccDmsEnterpriseInstance4641"
     dba_uid           = "${alibabacloudstack_dms_enterprise_user.default.uid}"
-    safe_rule         = "自由操作"
+    safe_rule         = "Free"
     query_timeout     = 70
     export_timeout    = 2000
     ecs_region        = "cn-shanghai"

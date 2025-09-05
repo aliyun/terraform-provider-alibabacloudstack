@@ -76,7 +76,7 @@ data "alibabacloudstack_instance_types" "all" {
 }
 
 data "alibabacloudstack_instance_types" "default" {
-  count = 8  # 遍历 1-8 核CPU配置
+  count = 8
 
   availability_zone    = data.alibabacloudstack_zones.default.zones[0].id
   cpu_core_count       = count.index + 1  # 1-8

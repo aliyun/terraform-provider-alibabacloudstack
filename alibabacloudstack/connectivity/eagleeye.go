@@ -55,7 +55,7 @@ func getLocalIP() string {
     }
 
     for _, addr := range addrs {
-        // 检查地址类型并确保它不是 loopback 地址
+        // Check the address type and ensure it is not a loopback address
         ipNet, ok := addr.(*net.IPNet)
         if ok && !ipNet.IP.IsLoopback() {
             if ipNet.IP.To4() != nil {

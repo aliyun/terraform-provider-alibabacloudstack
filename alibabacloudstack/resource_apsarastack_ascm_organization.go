@@ -80,7 +80,7 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organization", "CreateOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		// TODO: 父组织未找到这里不会报错，因为HttpStatus依旧为200
+		// TODO: Parent organization not found will not report an error here, because HttpStatus is still 200
 		addDebug("CreateOrganization", bresponse, requestInfo, bresponse.GetHttpContentString())
 	}
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {

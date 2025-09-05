@@ -4,12 +4,12 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_cluster"
 sidebar_current: "docs-Alibabacloudstack-edas-cluster"
 description: |- 
-  使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Cluster resource.
+  Provides a Edas Cluster resource.
 ---
 
 # alibabacloudstack_edas_cluster
 
-使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Cluster resource.
+Provides a Edas Cluster resource.
 
 ## Example Usage
 

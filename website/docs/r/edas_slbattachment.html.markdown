@@ -4,13 +4,13 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_slbattachment"
 sidebar_current: "docs-Alibabacloudstack-edas-slbattachment"
 description: |- 
-  使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Slbattachment resource.
+  Orchestrate the Enterprise Distributed Application Service (EDAS) SLBAttachment resource under the specified resource set using credentials configured in the Provider.
 ---
 
 # alibabacloudstack_edas_slbattachment
 -> **NOTE:** Alias name has: `alibabacloudstack_edas_slb_attachment`
 
-使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Slbattachment resource.
+Orchestrate the Enterprise Distributed Application Service (EDAS) SLBAttachment resource under the specified resource set using credentials configured in the Provider.
 
 ## Example Usage
 

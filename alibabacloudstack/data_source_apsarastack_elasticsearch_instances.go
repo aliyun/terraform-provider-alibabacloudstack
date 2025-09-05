@@ -37,11 +37,11 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			// Zone过滤存在问题
-			// 			"zone_id": {
-			// 				Type:     schema.TypeString,
-			// 				Optional: true,
-			// 			},
+// There is an issue with Zone filtering
+// 			"zone_id": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,

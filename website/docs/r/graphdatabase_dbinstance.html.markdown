@@ -25,7 +25,7 @@ resource "alibabacloudstack_graphdatabase_dbinstance" "default" {
   vswitch_id              = "vsw-bp152wgftimgq80eiii6k"
   zone_id                 = "cn-hangzhou-h"
   db_instance_storage_type = "cloud_ssd"
-  db_instance_description  = "ssd测试"
+  db_instance_description  = "SSD Test"
   db_node_class           = "gdb.r.2xlarge"
   db_instance_category    = "ha"
   vpc_id                  = "vpc-bp1bvsykm9f9hkfeikfi5"

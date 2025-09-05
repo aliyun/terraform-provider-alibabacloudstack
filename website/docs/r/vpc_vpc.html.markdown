@@ -24,7 +24,7 @@ variable "name" {
 resource "alibabacloudstack_vpc_vpc" "default" {
   cidr_block      = "172.16.0.0/12"
   vpc_name        = var.name
-  description     = "RDK更新"
+  description     = "RDK Update"
   enable_ipv6     = true
   resource_group_id = "rg-abc123xyz"
   secondary_cidr_blocks = ["192.168.0.0/16"]

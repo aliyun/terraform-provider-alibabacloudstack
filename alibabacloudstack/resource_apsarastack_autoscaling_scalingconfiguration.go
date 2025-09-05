@@ -560,7 +560,7 @@ func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData
 	d.Set("override", d.Get("override").(bool))
 	d.Set("host_name", object.HostName)
 	if object.ZoneId != "" {
-		// 在专有云的实际环境中可能不会返回相关值
+		// In private cloud environments, related values may not be returned
 		d.Set("zone_id", object.ZoneId)
 	}
 	if sg, ok := d.GetOk("security_group_ids"); ok && len(sg.([]interface{})) >= 0 {

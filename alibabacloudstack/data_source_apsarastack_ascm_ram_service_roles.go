@@ -30,7 +30,7 @@ func dataSourceAlibabacloudStackAscmRamServiceRoles() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			// 后续未消费参数
+			// Subsequent unconsumed parameter
 			// 			"names": {
 			// 				Type:     schema.TypeList,
 			// 				Computed: true,

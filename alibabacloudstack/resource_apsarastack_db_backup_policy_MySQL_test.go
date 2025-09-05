@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+// testAccCheckDBBackupPolicyDestroy checks if the DB backup policy has been destroyed.
 func testAccCheckDBBackupPolicyDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
 	for _, rs := range s.RootModule().Resources {
@@ -41,6 +42,7 @@ func testAccCheckDBBackupPolicyDestroy(s *terraform.State) error {
 	return nil
 }
 
+// TestAccAlibabacloudStackDBBackupPolicy_mysql tests the MySQL DB backup policy resource.
 func TestAccAlibabacloudStackDBBackupPolicy_mysql(t *testing.T) {
 	var v *rds.DescribeBackupPolicyResponse
 	resourceId := "alibabacloudstack_db_instance.default"
@@ -81,13 +83,14 @@ func TestAccAlibabacloudStackDBBackupPolicy_mysql(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				// 4.22新增
+				// Added in version 4.22
 				ImportStateVerifyIgnore: []string{"force_restart", "encryption", "period", "auto_renew"},
 			},
 		},
 	})
 }
 
+// resourceDBBackupPolicyMysqlConfigDependence provides the configuration dependencies for MySQL backup policy testing.
 func resourceDBBackupPolicyMysqlConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {

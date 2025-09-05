@@ -130,7 +130,7 @@ func testSweepElasticsearch(region string) error {
 	}
 
 	if sweeped {
-		// Waiting 30 seconds to eusure these instances have been deleted.
+		// Waiting 30 seconds to ensure these instances have been deleted.
 		time.Sleep(30 * time.Second)
 	}
 
@@ -442,7 +442,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				// kibana node 升配
+				// Upgrade kibana node configuration
 				Config: testAccConfig(map[string]interface{}{
 					"kibana_node_spec": KibanaNodeSpecForUpdate,
 				}),
@@ -451,7 +451,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				// kibana node 降配
+				// Downgrade kibana node configuration
 				Config: testAccConfig(map[string]interface{}{
 					"kibana_node_spec": KibanaNodeSpec,
 				}),
@@ -460,13 +460,13 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				// kibana node 下线
+				// Remove kibana node
 				Config: testAccConfig(map[string]interface{}{
 					"kibana_node_spec": REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						// FIXME: TF 无法识别
+						// FIXME: TF cannot recognize
 						"kibana_node_spec": REMOVEKEY,
 						"kibana_domain":    REMOVEKEY,
 						"kibana_protocol":  REMOVEKEY,
@@ -475,7 +475,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				// client node 升配
+				// Upgrade client node configuration
 				Config: testAccConfig(map[string]interface{}{
 					"client_node_amount": ClientNodeAmountForUpdate,
 					"client_node_spec":   ClientNodeSpecForUpdate,
@@ -485,7 +485,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				// client node 降配
+				// Downgrade client node configuration
 				Config: testAccConfig(map[string]interface{}{
 					"client_node_amount": ClientNodeAmount,
 					"client_node_spec":   ClientNodeSpec,
@@ -495,7 +495,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				// client node 下线
+				// Remove client node
 				Config: testAccConfig(map[string]interface{}{
 					"client_node_amount": REMOVEKEY,
 					"client_node_spec":   REMOVEKEY,
@@ -508,7 +508,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				// data node 升配
+				// Upgrade data node configuration
 				Config: testAccConfig(map[string]interface{}{
 					"data_node_amount": DataNodeAmountForUpdate,
 					"data_node_spec":   DataNodeSpecForUpdate,
@@ -518,7 +518,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				// data node 降配
+				// Downgrade data node configuration
 				Config: testAccConfig(map[string]interface{}{
 					"data_node_amount": DataNodeAmount,
 					"data_node_spec":   DataNodeSpec,
@@ -528,7 +528,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				// master node 升配
+				// Upgrade master node configuration
 				Config: testAccConfig(map[string]interface{}{
 					"master_node_amount": MasterNodeAmountForUpdate,
 					"master_node_spec":   MasterNodeSpecForUpdate,
@@ -538,7 +538,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				// master node 降配
+				// Downgrade master node configuration
 				Config: testAccConfig(map[string]interface{}{
 					"master_node_amount": MasterNodeAmount,
 					"master_node_spec":   MasterNodeSpec,

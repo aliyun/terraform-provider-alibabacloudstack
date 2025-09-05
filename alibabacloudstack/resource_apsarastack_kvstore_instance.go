@@ -117,7 +117,7 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 			"private_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
-				// Optional: true, ASCM不支持设定
+				// Optional: true, ASCM does not support setting
 			},
 			"backup_id": {
 				Type:     schema.TypeString,
@@ -677,7 +677,7 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 
 	connectivity.SetResourceData(d, object.InstanceName, "tair_instance_name", "instance_name")
 	d.Set("instance_class", object.InstanceClass)
-	// 目前查询接口没有返回是否为企业版本，只能从类型判断
+	// Currently, the query interface does not return whether it is an enterprise version, can only judge from the type
 	if strings.HasPrefix(object.InstanceClass, strings.ToLower(object.InstanceType)+".amber.") {
 		d.Set("series", "enterprise")
 	} else {
@@ -698,7 +698,7 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 	if err != nil {
 		if e, ok := err.(*errmsgs.ComplexError); ok && (
 				strings.Contains(e.Error(), "errorCode: InstanceType.NotSupport")  || strings.Contains(e.Error(), "errorCode: RestoreEngineVersion.NotSupport") ){
-			// 部分类型不支持开启TDE
+			// Some types do not support enabling TDE
 			//d.Set("tde_status", "Disabled")
 		} else {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "DescribeInstanceTDEStatus", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -714,7 +714,7 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 	ssl_obj, err := kvstoreService.DescribeInstanceSSL(d.Id())
 	if err != nil {
 		if e, ok := err.(*errmsgs.ComplexError); ok && strings.Contains(e.Error(), "ErrorCode: IncorrectEngineVersion") {
-			// 部分类型不支持开启SSL
+			// Some types do not support enabling SSL
 			//d.Set("enable_ssl", "Disabled")
 		} else {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "DescribeInstanceSSL", errmsgs.AlibabacloudStackSdkGoERROR)

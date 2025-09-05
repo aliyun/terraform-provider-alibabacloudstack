@@ -107,7 +107,7 @@ func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta i
 	if _, ok := d.GetOk("role_ids"); ok && !d.IsNewResource(){
 		oldV, newV := d.GetChange("role_ids")
 
-		// 转换新旧值（确保类型安全）
+		// Convert old and new values (ensure type safety)
 		newSet, okNew   := newV.(*schema.Set)
 		if !okNew {
 			return fmt.Errorf("unexpected type for new role_ids")

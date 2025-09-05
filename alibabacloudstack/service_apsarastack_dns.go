@@ -29,7 +29,7 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 		recordId = ""
 	}
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZoneRecords", "")
-	request.Scheme = "HTTP" // CloudDns不支持HTTPS
+	request.Scheme = "HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["ZoneId"] = zoneId
 	var resp = &DnsRecord{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -55,7 +55,7 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 		return resp, errmsgs.WrapErrorf(err, "record id is Empty, and mutple records found")
 	}
 
-	filtered := resp.Data[:0] // 复用底层数组
+	filtered := resp.Data[:0] // Reuse underlying array
 	for _, data := range resp.Data {
 		if data.Id == recordId {
 			filtered = append(filtered, data)
@@ -252,7 +252,7 @@ func (s *DnsService) SetResourceTags(d *schema.ResourceData, resourceType string
 func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZones", "")
-	request.Scheme = "HTTP" // CloudDns不支持HTTPS
+	request.Scheme = "HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["Name"] = did[0]
 	request.QueryParams["Forwardedregionid"] = s.client.RegionId
 	request.QueryParams["SignatureVersion"] = "2.1"

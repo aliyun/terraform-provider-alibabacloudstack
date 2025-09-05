@@ -61,7 +61,7 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 	}
 	if check == nil || len(check.Data) == 0 {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "AddGlobalZone", "")
-		request.Scheme="HTTP" // CloudDns不支持HTTPS
+		request.Scheme="HTTP" // CloudDns does not support HTTPS
 		request.QueryParams["Name"] = DomainName
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
@@ -130,7 +130,7 @@ func resourceAlibabacloudStackDnsDomainUpdate(d *schema.ResourceData, meta inter
 
 	if remarkUpdate {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "UpdateGlobalZoneRemark", "")
-		request.Scheme="HTTP" // CloudDns不支持HTTPS
+		request.Scheme="HTTP" // CloudDns does not support HTTPS
 		request.QueryParams["Name"] = did[0]
 		request.QueryParams["Id"] = did[1]
 		request.QueryParams["Remark"] = desc
@@ -161,7 +161,7 @@ func resourceAlibabacloudStackDnsDomainDelete(d *schema.ResourceData, meta inter
 
 	if len(check.Data) != 0 {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DeleteGlobalZone", "")
-		request.Scheme="HTTP" // CloudDns不支持HTTPS
+		request.Scheme="HTTP" // CloudDns does not support HTTPS
 		request.QueryParams["Id"] = did[1]
 		response, err := client.ProcessCommonRequest(request)
 		if err != nil {

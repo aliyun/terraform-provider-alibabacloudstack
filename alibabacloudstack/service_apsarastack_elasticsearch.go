@@ -139,7 +139,7 @@ func (s *ElasticsearchService) ModifyWhiteIps(d *schema.ResourceData, content ma
 				response, err = s.client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "ModifyWhiteIps", "", nil, nil, request)
 				if err != nil {
 					if errmsgs.IsExpectedErrors(err, []string{"InvalidAction.NotFound"}) {
-						// 老版本 3.16.2不支持修改
+						// Old version 3.16.2 does not support modification
 						return nil
 					}
 					if errmsgs.IsExpectedErrors(err, []string{"ConcurrencyUpdateInstanceConflict", "InstanceStatusNotSupportCurrentAction", "InternalServerError"}) || errmsgs.NeedRetry(err) {
@@ -254,7 +254,7 @@ func updateInstanceTags(d *schema.ResourceData, meta interface{}) error {
 	n := nraw.(map[string]interface{})
 	remove, add := elasticsearchService.diffElasticsearchTags(o, n)
 
-	// 对系统 Tag 进行过滤
+	// Filter system tags
 	removeTagKeys := make([]string, 0)
 	for _, v := range remove {
 		if !elasticsearchTagIgnored(v, "") {
@@ -329,17 +329,17 @@ func updateInstanceTags(d *schema.ResourceData, meta interface{}) error {
 func esSpecUpDownGrade(oldSpec, newSpec string) (string, string, error) {
 	re := regexp.MustCompile(`^(\d+)C\s+(\d+)Gi$`)
 
-	// 匹配输入字符串
+	// Match input strings
 	matches := re.FindStringSubmatch(oldSpec)
-	if len(matches) != 3 { // 完整匹配 + 2 个捕获组
-		return "", "", fmt.Errorf("格式不匹配: %s", oldSpec)
+	if len(matches) != 3 { // Full match + 2 capture groups
+		return "", "", fmt.Errorf("format mismatch: %s", oldSpec)
 	}
 	old_cpu, _ := strconv.Atoi(matches[1])
 	old_memory, _ := strconv.Atoi(matches[2])
 
 	matches = re.FindStringSubmatch(newSpec)
-	if len(matches) != 3 { // 完整匹配 + 2 个捕获组
-		return "", "", fmt.Errorf("格式不匹配: %s", newSpec)
+	if len(matches) != 3 { // Full match + 2 capture groups
+		return "", "", fmt.Errorf("format mismatch: %s", newSpec)
 	}
 	new_cpu, _ := strconv.Atoi(matches[1])
 	new_memory, _ := strconv.Atoi(matches[2])
@@ -450,7 +450,7 @@ func updateNodes(d *schema.ResourceData, meta interface{}) error {
 		response, err := client.DoTeaRequest("PUT", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", fmt.Sprintf("/openapi/instances/%s", d.Id()), nil, nil, content)
 		addDebug("UpdateInstance", response, content)
 		if err != nil && errmsgs.IsExpectedErrors(err, []string{"UpdateInstanceNoChange"}) {
-			// 当前配置没有修改，忽略错误
+			// Current configuration has not changed, ignore the error
 			continue
 		}
 		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {

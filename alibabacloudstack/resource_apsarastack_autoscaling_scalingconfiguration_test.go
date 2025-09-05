@@ -57,7 +57,7 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 				ImportState:  true,
 
 				ImportStateVerify: true,
-				// force_delete 代码逻辑参数，不存在回读情况
+				// force_delete is a code logic parameter, does not exist in readback
 				ImportStateVerifyIgnore: []string{"force_delete"},
 			},
 			{

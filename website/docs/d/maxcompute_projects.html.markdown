@@ -17,12 +17,10 @@ This data source provides Max Compute Project available to the user.[What is Pro
 variable "name" {
   default = "tf_example_acc"
 }
-
 resource "alibabacloudstack_maxcompute_project" "default" {
-  default_quota = "默认后付费Quota"
-  project_name  = var.name
-  comment       = var.name
-  product_type  = "PayAsYouGo"
+  project_name       = "tf_maxcompute_project"
+  specification_type = "OdpsStandard"
+  order_type         = "PayAsYouGo"
 }
 
 data "alibabacloudstack_maxcompute_projects" "default" {

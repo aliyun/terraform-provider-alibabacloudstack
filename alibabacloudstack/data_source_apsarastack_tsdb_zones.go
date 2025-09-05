@@ -36,7 +36,7 @@ func dataSourceAlibabacloudStackTsdbZones() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						// 3.16 不支持该参数
+						// 3.16 does not support this parameter
 						//						"local_name": {
 						//							Type:     schema.TypeString,
 						//							Computed: true,

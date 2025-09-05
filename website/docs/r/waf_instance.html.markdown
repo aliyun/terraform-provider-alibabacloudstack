@@ -50,25 +50,23 @@ variable "name" {
   default = "terraform_test"
 }
 
-# 查询可用域
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
   provider = alibabacloudstack.provider2
 
 }
 
-#创建vpc
 resource "alibabacloudstack_vpc" "vpc" {
   vpc_name = var.name
-  cidr_block = "192.168.0.0/16" #vpc口段
+  cidr_block = "192.168.0.0/16" 
   provider = alibabacloudstack.provider2
 }
-#创建vsw
+
 resource "alibabacloudstack_vswitch" "vsw" {
   provider = alibabacloudstack.provider2
   vpc_id = alibabacloudstack_vpc.vpc.id
-  cidr_block = "192.168.0.0/16" #⽹段
-  availability_zone = data.alibabacloudstack_zones.default.zones.0.id #可⽤区
+  cidr_block = "192.168.0.0/16"
+  availability_zone = data.alibabacloudstack_zones.default.zones.0.id
 }
 
 

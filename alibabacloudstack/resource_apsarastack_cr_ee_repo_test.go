@@ -168,7 +168,7 @@ resource "alibabacloudstack_cr_ee_namespace" "default" {
 }
 
 resource "alibabacloudstack_cr_ee_repo" "fake" {
-  # 干扰项测试
+  # Interference item test
   instance_id = "${alibabacloudstack_cr_ee_namespace.default.instance_id}"
   name = "${var.name}_fake"
   summary = "summary"

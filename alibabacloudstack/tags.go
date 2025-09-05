@@ -48,7 +48,7 @@ func caseInsensitiveTagsSchema() *schema.Schema {
 			var errs []error
 
 			for key := range m {
-				// 直接检查键是否为小写
+				// Directly check if the key is lowercase
 				if key != strings.ToLower(key) {
 					errs = append(errs, fmt.Errorf(
 						"key '%s' Must be lowercase",
@@ -57,7 +57,7 @@ func caseInsensitiveTagsSchema() *schema.Schema {
 				}
 			}
 			return nil, errs
-		}, // 关键校验函数
+		}, // Key validation function
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			if strings.ToLower(old) == strings.ToLower(new) {
 				return true
