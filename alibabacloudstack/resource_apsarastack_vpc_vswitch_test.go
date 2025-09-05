@@ -48,7 +48,7 @@ func TestAccAlibabacloudStackVpcVswitch_basic(t *testing.T) {
 
 					"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
 
-					"cidr_block": "192.168.0.0/16",
+					"cidr_block": "172.16.1.0/24",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -173,7 +173,7 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 
 					"vpc_id": "${alibabacloudstack_vpc.vpc.id}",
 
-					"cidr_block": "192.168.0.0/16",
+					"cidr_block": "172.16.1.0/24",
 
 					"enable_ipv6": "true",
 				}),
@@ -199,6 +199,7 @@ variable "name" {
 
 resource "alibabacloudstack_vpc" "vpc" {
   vpc_name     = "${var.name}_vpc"
+  cidr_block = "172.16.0.0/16"
   enable_ipv6  = true
 }
 
