@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -54,13 +55,17 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 				ForceNew: true,
 			},
 			"sub_category": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"General", "Exclusive"}, false),
 			},
 			"db_node_class": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"db_read_node_class": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"db_node_num": {
 				Type:         schema.TypeInt,
@@ -68,9 +73,10 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 				ValidateFunc: validation.IntAtLeast(1),
 			},
 			"proxy_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"proxy_exclusive", "proxy_off"}, false),
 			},
 			"storage_type": {
 				Type:     schema.TypeString,
@@ -420,7 +426,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceCreate(d *schema.ResourceDat
 		request["StorageSpace"] = v.(int)
 	}
 	if v, ok := d.GetOk("sub_category"); ok {
-		request["SubCategory"] = v.(string)
+		request["SubCategory"] = GetSubCategory(v)
 	}
 	if v, ok := d.GetOk("cpu_type"); ok {
 		request["CpuType"] = v.(string)
@@ -548,9 +554,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceRead(d *schema.ResourceData,
 		d.Set("storage_space", int(storage_space))
 	}
 	d.Set("creation_time", object["CreationTime"])
-	if object["SubCategory"] != nil && object["SubCategory"].(string) == "Exclusive" {
-		d.Set("sub_category", "normal_exclusive")
-	}
+	// d.Set("sub_category", object["SubCategory"])
 	d.Set("sql_size", object["SQLSize"])
 	d.Set("proxy_type", object["ProxyType"])
 	d.Set("vip", object["Vip"])
@@ -678,58 +682,6 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 			return err
 		}
 	}
-
-	if d.IsNewResource() {
-		return resourceAlibabacloudStackPolardbClusterInstanceRead(d, meta)
-	}
-	if d.HasChange("db_node_class") {
-		// Get the current DBNodes to find the writer node
-		object, err := polardbService.DescribePolardbClusterInstance(d.Id())
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
-		dbNodes := object["DBNodes"].([]interface{})
-		var writerNode map[string]interface{}
-		for _, node := range dbNodes {
-			nodeMap := node.(map[string]interface{})
-			if nodeMap["DBNodeRole"].(string) == "Writer" {
-				writerNode = nodeMap
-				break
-			}
-		}
-
-		if writerNode == nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterAttribute", "Writer node not found")
-		}
-
-		oldClass, newClass := d.GetChange("db_node_class")
-		modifyType := "Upgrade"
-		if oldClass.(string) > newClass.(string) {
-			modifyType = "Downgrade"
-		}
-
-		reqBody := map[string]interface{}{
-			"DBClusterId": d.Id(),
-			"ZoneId":      d.Get("zone_id"),
-			"SubCategory": d.Get("sub_category"),
-			"DBNode": map[string]interface{}{
-				"TargetClass": newClass,
-				"DBNodeId":    writerNode["DBNodeId"],
-			},
-			"ModifyType": modifyType,
-		}
-
-		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBNodesClass", "", nil, nil, reqBody); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBNodesClass", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
-		stateConf := BuildStateConf([]string{"ClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-	}
-
 	if d.HasChange("deletion_lock") {
 		reqQuery := map[string]interface{}{
 			"DBClusterId": d.Id(),
@@ -742,6 +694,56 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 		}
 	}
 
+	if d.IsNewResource() {
+		return resourceAlibabacloudStackPolardbClusterInstanceRead(d, meta)
+	}
+	if d.HasChange("db_node_class") {
+		// Get the current DBNodes to find the writer node
+		var oldClassid, newClassid string
+		newClassid = d.Get("db_node_class").(string)
+
+		nodes := d.Get("db_nodes").([]interface{})
+		for _, n := range nodes {
+			node := n.(map[string]interface{})
+			if node["db_node_role"].(string) == "Writer" {
+				oldClassid = node["db_node_class"].(string)
+			}
+		}
+		newClass, err := polardbService.GetPolardbClusterClassData(newClassid)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		oldClass, err := polardbService.GetPolardbClusterClassData(oldClassid)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+
+		modifyType := GetPolardbClusterInstanceModifyType(oldClass, newClass)
+
+		dbNodeDatas := make([]map[string]interface{}, 0)
+		reqBody := map[string]interface{}{
+			"DBClusterId": d.Id(),
+			"ZoneId":      d.Get("zone_id"),
+			"SubCategory": GetSubCategory(d.Get("sub_category")),
+			"ModifyType":  modifyType,
+		}
+		for _, n := range nodes {
+			node := n.(map[string]interface{})
+			dbNodeDatas = append(dbNodeDatas, map[string]interface{}{
+				"TargetClass": newClassid,
+				"DBNodeId":    node["db_node_id"].(string),
+			})
+		}
+		reqBody["DBNode"] = dbNodeDatas
+		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBNodesClass", "", nil, nil, reqBody); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBNodesClass", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+
+		stateConf := BuildStateConf([]string{"ClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
 	if d.HasChange("db_cluster_description") {
 		reqQuery := map[string]interface{}{
 			"DBClusterId":          d.Id(),
@@ -752,29 +754,85 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBClusterDescription", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
+	if d.HasChange("db_node_num") {
+		o, n := d.GetChange("db_node_num")
+		add := n.(int) - o.(int)
+		action := "CreateDBNodes"
+		reqQuery := map[string]interface{}{
+			"DBClusterId": d.Id(),
+		}
+		if add < 0 {
+			action = "DeleteDBNodes"
+			standbyNodes := make([]string, 0)
+			for _, v := range d.Get("db_nodes").([]interface{}) {
+				node := v.(map[string]interface{})
+				if node["db_node_role"].(string) == "Reader" {
+					standbyNodes = append(standbyNodes, node["db_node_id"].(string))
+				}
+			}
+			if len(standbyNodes) < add*-1 {
+				return errmsgs.WrapError(errmsgs.Error("The number of standby nodes cannot be less than the number of nodes to be deleted."))
+			}
+			reqQuery["DBNodeId"] = standbyNodes[:add*-1]
+		} else {
+			count := add
+			for count > 0 {
+				dbNodeZones := make([]string, 0)
+				dbNodeZones = append(dbNodeZones, d.Get("zone_id").(string))
+				reqQuery["DBNode"] = dbNodeZones
+			}
+		}
+
+		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+	}
 	return resourceAlibabacloudStackPolardbClusterInstanceRead(d, meta)
 }
 
 func resourceAlibabacloudStackPolardbClusterInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	// return nil
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolardbService{client}
+	return nil
+	// client := meta.(*connectivity.AlibabacloudStackClient)
+	// polardbService := PolardbService{client}
 
-	reqQuery := map[string]interface{}{
-		"DBClusterId": d.Id(),
+	// reqQuery := map[string]interface{}{
+	// 	"DBClusterId": d.Id(),
+	// }
+
+	// // Call DeleteDBCluster API
+	// _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
+	// if err != nil {
+	// 	if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
+	// 		return nil
+	// 	}
+	// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteDBCluster", errmsgs.AlibabacloudStackSdkGoERROR, "")
+	// }
+
+	// // Wait for the cluster to be fully deleted
+	// stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{}))
+	// _, err = stateConf.WaitForState()
+	// return errmsgs.WrapError(err)
+}
+
+func GetPolardbClusterInstanceModifyType(oldClass, newClass map[string]interface{}) string {
+	var modifyType = "Upgrade"
+	oldcpu, _ := strconv.Atoi(oldClass["cpu"].(string))
+	newcpu, _ := strconv.Atoi(newClass["cpu"].(string))
+	oldmemory, _ := strconv.Atoi(oldClass["memory"].(string))
+	newmemory, _ := strconv.Atoi(newClass["memory"].(string))
+	if newcpu < oldcpu || (newcpu == oldcpu && newmemory < oldmemory) {
+		modifyType = "Downgrade"
 	}
+	return modifyType
+}
 
-	// Call DeleteDBCluster API
-	_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
-			return nil
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteDBCluster", errmsgs.AlibabacloudStackSdkGoERROR, "")
+func GetSubCategory(subCategory interface{}) string {
+	switch subCategory.(string) {
+	case "General":
+		return "normal_general"
+	case "Exclusive":
+		return "normal_exclusive"
+	default:
+		return ""
 	}
-
-	// Wait for the cluster to be fully deleted
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{}))
-	_, err = stateConf.WaitForState()
-	return errmsgs.WrapError(err)
 }
