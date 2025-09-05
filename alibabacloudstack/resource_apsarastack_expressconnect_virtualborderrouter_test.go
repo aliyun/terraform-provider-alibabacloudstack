@@ -235,7 +235,7 @@ func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 					}),
 				),
 			},
-			// 终止 恢复 功能可用，环境问题一直处于恢复中 查询状态超时 注释掉
+			// The terminate and recover functions are available, but due to environment issues, the status remains in recovery and the query status times out. Commented out.
 			//{
 			//	Config: testAccConfig(map[string]interface{}{
 			//		"status": "terminated",

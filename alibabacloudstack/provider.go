@@ -273,10 +273,10 @@ func Provider() *schema.Provider {
 var providerConfig map[string]interface{}
 
 func stringToBool(value string) (bool, error) {
-	// 将字符串转换为小写以便于比较
+	// Convert string to lowercase for comparison
 	value = strings.ToLower(value)
 
-	// 检查常见的布尔值表示
+	// Check common boolean representations
 	switch value {
 	case "true", "1", "yes", "on":
 		return true, nil
@@ -961,7 +961,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		if strings.Contains(domain, "/") && d.Get("proxy").(string) != "" {
 			return nil, fmt.Errorf("[Error]Domain containing the character '/' is not supported for proxy configuration.")
 		}
-		// 没有生成popgw地址的，继续使用asapi
+		// If popgw address is not generated, continue using asapi
 		var setEndpointIfEmpty = func(endpoint string, domain string) string {
 			if endpoint == "" {
 				return domain
@@ -970,11 +970,11 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		}
 		for popcode := range connectivity.PopEndpoints {
 			if popcode == connectivity.OssDataCode {
-				// oss的数据网关不做配置
+				// oss data gateway is not configured
 				continue
 			}
 			if popcode == connectivity.SlSDataCode {
-				// SLS的数据网关不做配置
+				// SLS data gateway is not configured
 				continue
 			}
 			config.Endpoints[popcode] = setEndpointIfEmpty(config.Endpoints[popcode], domain)
@@ -983,7 +983,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if v, ok := d.GetOk("popgw_domain"); !d.Get("force_use_asapi").(bool) && ok && v.(string) != "" {
 		popgw_domain := v.(string)
 		log.Printf("Generator Popgw Endpoint: %s", popgw_domain)
-		// 使用各云产品的endpoint的规则生成popgw地址
+		// Use the endpoint rules of each cloud product to generate popgw address
 		is_center_region := d.Get("is_center_region").(bool)
 		for popcode := range connectivity.PopEndpoints {
 			endpoint := connectivity.GeneratorEndpoint(popcode, region, popgw_domain, is_center_region)
@@ -1246,7 +1246,7 @@ func getAssumeRoleAK(config *connectivity.Config) (string, string, string, error
 	}
 	request := sts.CreateAssumeRoleRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	request.Scheme = "https" // sts必须是https连接
+	request.Scheme = "https" // sts must be https connection
 	request.RoleArn = config.RamRoleArn
 	request.RoleSessionName = config.RamRoleSessionName
 	//request.DurationSeconds = requests.NewInteger(config.RamRoleSessionExpiration)
@@ -1358,7 +1358,7 @@ func getResourceCredentials(config *connectivity.Config) (string, string, int, e
 }
 
 func waitSecondsIfWithTest(second int) {
-	// 测试模式下休眠一秒，防止数据缓存导致二次plan失败
+	// Sleep for one second in test mode to prevent data caching from causing secondary plan failures
 	if os.Getenv("TF_ACC") == "1" {
 		time.Sleep(time.Duration(second) * time.Second)
 	}

@@ -77,7 +77,7 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				// init_password只会在创建时返回一次，后续import不会返回
+				// init_password is only returned once during creation, and will not be returned during subsequent imports
 				ImportStateVerifyIgnore: []string{"init_password"},
 			},
 		},
@@ -85,7 +85,7 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 
 }
 
-func testAccCheckAscm_UserDestroy(s *terraform.State) error { //destroy function
+func testAccCheckAscm_UserDestroy(s *terraform.State) error { // destroy function
 	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 

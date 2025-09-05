@@ -102,7 +102,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
 				Deprecated:   "Field 'internet_slb_protocol' is deprecated and will be removed in a future release. Please use new field 'internet_service_port_infos' instead.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					//  3.16环境回读时，protocol均为 TCP
+					//  3.16 environment returns protocol as TCP when reading back
 					if old == "TCP" && new == "HTTP" {
 						return true
 					}
@@ -133,7 +133,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								//  3.16环境回读时，protocol均为 TCP
+								//  3.16 environment returns protocol as TCP when reading back
 								if old == "TCP" && new == "HTTP" {
 									return true
 								}
@@ -175,7 +175,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
 				Deprecated:   "Field 'intranet_slb_protocol' is deprecated and will be removed in a future release. Please use new field 'intranet_service_port_infos' instead.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					//  3.16环境回读时，protocol均为 TCP
+					//  3.16 environment returns protocol as TCP when reading back
 					if old == "TCP" && new == "HTTP" {
 						return true
 					}
@@ -206,7 +206,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								//  3.16环境回读时，protocol均为 TCP
+								//  3.16 environment returns protocol as TCP when reading back
 								if old == "TCP" && new == "HTTP" {
 									return true
 								}
@@ -1159,7 +1159,7 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 	edasService := EdasService{client}
 	var partialKeys []string
 
-	// 检查该app是否已经绑定了slb
+	// Check if the app has already bound an SLB
 	appobj, err := edasService.DescribeEdasK8sApplication(d.Id())
 	if err != nil {
 		return errmsgs.WrapError(err)

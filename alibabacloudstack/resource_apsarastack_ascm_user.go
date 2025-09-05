@@ -83,13 +83,13 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 	mobnationcode := d.Get("mobile_nation_code").(string)
 	loginpolicyid := d.Get("login_policy_id").(int)
 	var organizationId string
-	if _, ok:= d.GetOk("organization_id"); ok {
+	if _, ok := d.GetOk("organization_id"); ok {
 		organizationId = d.Get("organization_id").(string)
 	} else {
 		organizationId = client.Department
 	}
 
-	roleIds, err:=getRoleIdsAsString(d)
+	roleIds, err := getRoleIdsAsString(d)
 	if err != nil {
 		return err
 	}
@@ -191,11 +191,11 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 			return errmsgs.WrapError(err)
 		}
 	}
-	if _, ok := d.GetOk("role_ids"); ok && !d.IsNewResource(){
+	if _, ok := d.GetOk("role_ids"); ok && !d.IsNewResource() {
 		oldV, newV := d.GetChange("role_ids")
 
-		// 转换新旧值（确保类型安全）
-		newSet, okNew   := newV.(*schema.Set)
+		// Convert old and new values (ensure type safety)
+		newSet, okNew := newV.(*schema.Set)
 		if !okNew {
 			return fmt.Errorf("unexpected type for new role_ids")
 		}
@@ -223,7 +223,7 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 			addDebug("AddRoleToUser", bresponse, request, request.QueryParams)
 			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
 		}
-		
+
 		for _, roleId := range remove {
 			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUser", "/ascm/auth/role/removeRoleFromUser")
 			request.QueryParams["loginName"] = lname

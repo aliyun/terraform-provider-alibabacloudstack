@@ -784,7 +784,7 @@ func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interf
 	connectivity.SetResourceData(d, instance.DBInstanceStorage, "db_instance_storage", "instance_storage")
 	d.Set("zone_id", instance.ZoneId)
 	if instance.PayType != "" {
-		// 专有云场景下不会返回pay type
+		// In private cloud scenarios, the pay type will not be returned.
 		connectivity.SetResourceData(d, instance.PayType, "payment_type", "instance_charge_type")
 	}
 	d.Set("period", d.Get("period"))

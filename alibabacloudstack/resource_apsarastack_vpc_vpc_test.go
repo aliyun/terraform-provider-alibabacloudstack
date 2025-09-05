@@ -13,7 +13,7 @@ func TestAccAlibabacloudStackVpcVpc_basic(t *testing.T) {
 
 	var v map[string]interface{}
 
-	// TODO Describe method，v 的类型
+	// TODO Describe method, type of v
 
 	resourceId := "alibabacloudstack_vpc_vpc.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVpcCheckmap)
@@ -42,13 +42,13 @@ func TestAccAlibabacloudStackVpcVpc_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"description": "RDK更新",
+					"description": "RDK update",
 					"cidr_block":  "192.168.0.0/16",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"description": "RDK更新",
+						"description": "RDK update",
 						"cidr_block":  "192.168.0.0/16",
 					}),
 				),
@@ -56,12 +56,12 @@ func TestAccAlibabacloudStackVpcVpc_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"description": "RDK更新1",
+					"description": "RDK update1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"description": "RDK更新1",
+						"description": "RDK update1",
 					}),
 				),
 			},
@@ -121,7 +121,7 @@ func TestAccAlibabacloudStackVpcVpc1(t *testing.T) {
 
 	var v map[string]interface{}
 
-	// TODO Describe method，v 的类型
+	// TODO Describe method, type of v
 
 	resourceId := "alibabacloudstack_vpc_vpc.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVpcCheckmap)
@@ -178,7 +178,7 @@ func TestAccAlibabacloudStackVpcVpc2(t *testing.T) {
 
 	var v map[string]interface{}
 
-	// TODO Describe method，v 的类型
+	// TODO Describe method, type of v
 
 	resourceId := "alibabacloudstack_vpc_vpc.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVpcCheckmap)
@@ -235,7 +235,7 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 
 	var v map[string]interface{}
 
-	// TODO Describe method，v 的类型
+	// TODO Describe method, type of v
 
 	resourceId := "alibabacloudstack_vpc_vpc.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVpcCheckmap)
@@ -289,7 +289,7 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 }
 
 var AlibabacloudTestAccVpcVpcCheckmap = map[string]string{
-	//  TODO  checkmap 和 case的资源对齐
+	//  TODO align checkmap with resource cases
 
 	// "name": CHECKSET,
 
@@ -305,7 +305,7 @@ var AlibabacloudTestAccVpcVpcCheckmap = map[string]string{
 
 func AlibabacloudTestAccVpcVpcBasicdependence(name string) string {
 
-	//  TODO  检查依赖变量
+	//  TODO check dependency variables
 
 	return fmt.Sprintf(`
 variable "name" {

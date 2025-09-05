@@ -70,7 +70,7 @@ func TestAccAlibabacloudStackSlbServercertificate0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// server_certificate和private_key上传设置后不回显
+				// server_certificate and private_key are not echoed after being set
 				ImportStateVerifyIgnore: []string{"server_certificate", "private_key"},
 			},
 		},

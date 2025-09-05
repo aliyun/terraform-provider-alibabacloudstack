@@ -207,6 +207,6 @@ func resourceAlibabacloudStackMaxcomputeProjectUpdate(d *schema.ResourceData, me
 }
 
 func resourceAlibabacloudStackMaxcomputeProjectDelete(d *schema.ResourceData, meta interface{}) error {
-	// 不支持删除
+	// Deletion is not supported
 	return nil
 }

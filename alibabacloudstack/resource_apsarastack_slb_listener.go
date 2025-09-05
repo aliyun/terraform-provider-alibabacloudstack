@@ -336,7 +336,7 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 			return nil
 		},
 	}
-	// XXX: 逻辑特殊，不建议合并
+	// XXX: Special logic, not recommended to merge
 	//setResourceFunc(resource, resourceAlibabacloudStackSlbListenerCreate, resourceAlibabacloudStackSlbListenerRead, resourceAlibabacloudStackSlbListenerUpdate, resourceAlibabacloudStackSlbListenerDelete)
 	//return resource
 }

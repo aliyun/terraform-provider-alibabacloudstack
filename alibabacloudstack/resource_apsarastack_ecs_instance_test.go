@@ -151,7 +151,7 @@ func testSweepInstances(region string) error {
 		}
 	}
 	if sweeped {
-		// Waiting 20 seconds to eusure these instances have been deleted.
+		// Waiting 20 seconds to ensure these instances have been deleted.
 		time.Sleep(20 * time.Second)
 	}
 	return nil

@@ -77,7 +77,7 @@ func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta inter
 	line_ids_json, _ := json.Marshal(line_ids)
 	line_ids_str := string(line_ids_json)
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "AddGlobalZoneRecord", "")
-	request.Scheme = "HTTP" // CloudDns不支持HTTPS
+	request.Scheme = "HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["LineIds"] = line_ids_str
 	request.QueryParams["Type"] = Type
 	request.QueryParams["Ttl"] = fmt.Sprintf("%d", TTL)
@@ -124,7 +124,7 @@ func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interfa
 		}
 		return errmsgs.WrapError(err)
 	}
-	// 强制重新设置id，为了实现后续主键的迁移
+	// Force reset id to implement subsequent primary key migration
 	if d.Get("record_id").(string) == "" {
 		d.SetId(fmt.Sprintf("%s:%s", object.Data[0].ZoneId, d.Get("record_id").(string)))
 	}
@@ -164,7 +164,7 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		}
 		check.Data[0].Remark = desc
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "UpdateGlobalZoneRecordRemark", "")
-		request.Scheme = "HTTP" // CloudDns不支持HTTPS
+		request.Scheme = "HTTP" // CloudDns does not support HTTPS
 		request.QueryParams["Id"] = ID
 		request.QueryParams["Remark"] = desc
 		response, err := client.ProcessCommonRequest(request)
@@ -243,7 +243,7 @@ func resourceAlibabacloudStackDnsRecordDelete(d *schema.ResourceData, meta inter
 	ID := d.Get("record_id").(string)
 	ZoneId := SplitDnsZone(d.Get("zone_id").(string))
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DeleteGlobalZoneRecord", "")
-	request.Scheme = "HTTP" // CloudDns不支持HTTPS
+	request.Scheme = "HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["Id"] = ID
 	request.QueryParams["ZoneId"] = ZoneId
 	bresponse, err := client.ProcessCommonRequest(request)

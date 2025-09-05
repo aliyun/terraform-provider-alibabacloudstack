@@ -124,7 +124,7 @@ func resourceAlibabacloudStackDataWorksConnectionRead(d *schema.ResourceData, me
 	d.Set("name", parts[2])
 	d.Set("connection_type", object["ConnectionType"].(string))
 
-	// 由于密码返回为 *** 与原来不符，注释掉下面代码
+	// Since the password is returned as *** which does not match the original, the following code is commented out
 	//var tempMap map[string]interface{}
 	//err = json.Unmarshal([]byte(object["Content"].(string)), &tempMap)
 	//d.Set("content", tempMap)

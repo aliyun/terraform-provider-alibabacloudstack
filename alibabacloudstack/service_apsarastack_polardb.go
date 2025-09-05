@@ -84,7 +84,7 @@ func (s *PolardbService) DescribeDBAccount(id string) (*PolardbDescribeaccountsR
 
 	request.QueryParams["AccountName"] = parts[1]
 
-	// 常规参数填充
+	// Regular parameter filling
 	request.QueryParams["DBInstanceId"] = parts[0]
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -117,31 +117,31 @@ func (s *PolardbService) DoPolardbDescribeaccountsRequest(d *schema.ResourceData
 	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeAccounts", "")
 	PolardbDescribeaccountsResponse := &PolardbDescribeaccountsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
-	// 常规参数填充
+	// Regular parameter filling
 	if v, ok := d.GetOk("account_name"); ok && v != "" {
-		//调用requestin_handler
+		// Call requestin_handler
 		request.QueryParams["AccountName"] = v.(string)
 	}
 
-	// 常规参数填充
+	// Regular parameter filling
 	if v, ok := d.GetOk("data_base_instance_id"); ok && v != "" {
-		//调用requestin_handler
+		// Call requestin_handler
 		request.QueryParams["DBInstanceId"] = v.(string)
 	} else {
 		return nil, fmt.Errorf("DataBaseInstanceId is required")
 	}
 
-	// 常规参数填充
+	// Regular parameter filling
 	if v, ok := d.GetOk("page_number"); ok {
-		//调用requestin_handler
+		// Call requestin_handler
 		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
 	}
 
-	// 常规参数填充
+	// Regular parameter filling
 	if v, ok := d.GetOk("page_size"); ok {
-		//调用requestin_handler
+		// Call requestin_handler
 		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
 	}
 
@@ -228,37 +228,37 @@ func (s *PolardbService) DoPolardbDescribedatabasesRequest(d *schema.ResourceDat
 	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDatabases", "")
 	PolardbDescribedatabasesResponse := &PolardbDescribedatabasesResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
-	// 常规参数填充
+	// Regular parameter filling
 	if v, ok := d.GetOk("data_base_instance_id"); ok && v != "" {
-		//调用requestin_handler
+		// Call requestin_handler
 		request.QueryParams["DBInstanceId"] = v.(string)
 	} else {
 		return nil, fmt.Errorf("DataBaseInstanceId is required")
 	}
 
-	// 常规参数填充
+	// Regular parameter filling
 	if v, ok := d.GetOk("data_base_name"); ok && v != "" {
-		//调用requestin_handler
+		// Call requestin_handler
 		request.QueryParams["DBName"] = v.(string)
 	}
 
-	// 常规参数填充
+	// Regular parameter filling
 	if v, ok := d.GetOk("page_number"); ok {
-		//调用requestin_handler
+		// Call requestin_handler
 		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
 	}
 
-	// 常规参数填充
+	// Regular parameter filling
 	if v, ok := d.GetOk("page_size"); ok {
-		//调用requestin_handler
+		// Call requestin_handler
 		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
 	}
 
-	// 常规参数填充
+	// Regular parameter filling
 	if v, ok := d.GetOk("status"); ok && v != "" {
-		//调用requestin_handler
+		// Call requestin_handler
 		request.QueryParams["DBStatus"] = v.(string)
 	}
 
@@ -321,7 +321,7 @@ func (s *PolardbService) DoPolardbDescribebackuppolicyRequest(id string) (*Polar
 	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeBackupPolicy", "")
 	PolardbDescribebackuppolicyResponse := &PolardbDescribebackuppolicyResponse{}
 
-	//调用requestin_handler
+	// Call requestin_handler
 	request.QueryParams["DBInstanceId"] = id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -416,7 +416,7 @@ func (s *PolardbService) DoPolardbDescribedbinstancenetinfoRequest(d *schema.Res
 	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceNetInfo", "")
 	PolardbDescribedbinstancenetinfoResponse := &PolardbDescribedbinstancenetinfoResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceId"] = id
 
@@ -551,7 +551,7 @@ func (s *PolardbService) DoPolardbDescribedbinstanceattributeRequest(id string, 
 	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceAttribute", "")
 	PolardbDescribedbinstanceattributeResponse := &PolardbDescribedbinstanceattributeResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceId"] = id
 
@@ -633,7 +633,7 @@ func (s *PolardbService) DoPolardbDescribeparametersRequest(d *schema.ResourceDa
 	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeParameters", "")
 	PolardbDescribeparametersResponse := &PolardbDescribeparametersResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 	request.QueryParams["DBInstanceId"] = d.Id()
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
@@ -680,10 +680,10 @@ func (s *PolardbService) DoPolardbDescribeParameterTemplatesRequest(d *schema.Re
 	}
 
 	result := make([]PolardbParametersTemplateRecord, 0)
-	// 将 map 转换为 JSON
+	// Convert map to JSON
 	jsonData, _ := json.Marshal(templates)
 
-	// 将 JSON 解析到结构体
+	// Parse JSON into struct
 	if err := json.Unmarshal(jsonData, &result); err != nil {
 		return nil, err
 	}
@@ -709,7 +709,7 @@ func (s *PolardbService) DoPolardbDescribedbinstanceiparraylistRequest(d *schema
 	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceIPArrayList", "")
 	PolardbDescribedbinstanceiparraylistResponse := &PolardbDescribedbinstanceiparraylistResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceId"] = d.Id()
 
@@ -939,7 +939,7 @@ func (s *PolardbService) ModifyParameters(d *schema.ResourceData, client *connec
 	if _, ok := d.GetOk("parameters"); !ok {
 		return nil
 	} else {
-		// FIXME: d.HasChange("parameters") 异常，开始手动判断
+		// FIXME: d.HasChange("parameters") is abnormal, start manual judgment
 		rawConfig := d.GetRawConfig()
 		if parametersVal := rawConfig.GetAttr("parameters"); !parametersVal.IsNull() {
 			parametersSet := parametersVal.AsValueSet()
@@ -949,7 +949,7 @@ func (s *PolardbService) ModifyParameters(d *schema.ResourceData, client *connec
 				value := item["value"].AsString()
 				id := fmt.Sprintf("parameters.%d.value", hashcode.String(key))
 				old, _ := d.GetChange(id)
-				// FIXME: d.GetChange("parameters") 无法取到正确的new值
+				// FIXME: d.GetChange("parameters") cannot get the correct new value
 				if old.(string) != value {
 					changed[key] = value
 				}
@@ -1230,7 +1230,7 @@ func (s *PolardbService) DescribeDBSecurityIps(instanceId string) (*PolardbDescr
 	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceIPArrayList", "")
 	PolardbDescribedbinstanceiparraylistResponse := &PolardbDescribedbinstanceiparraylistResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceId"] = instanceId
 
@@ -1269,7 +1269,7 @@ func (s *PolardbService) DescribeDBConnection(id string) (*PolardbDescribedbinst
 	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceNetInfo", "")
 	PolardbDescribedbinstancenetinfoResponse := &PolardbDescribedbinstancenetinfoResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceId"] = parts[0]
 

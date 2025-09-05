@@ -65,7 +65,7 @@ func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
 func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZones", "")
-	request.Scheme="HTTP" // CloudDns不支持HTTPS
+	request.Scheme="HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["PageNumber"] = fmt.Sprint(1)
 	request.QueryParams["PageSize"] = fmt.Sprint(PageSizeLarge)
 	request.QueryParams["Name"] = d.Get("domain_name").(string)
@@ -74,7 +74,7 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 
 	var addDomains = DnsDomains{}
 	for {
-		// FIXME: 分页逻辑错误
+		// FIXME: Pagination logic is incorrect
 		response, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			if response == nil {

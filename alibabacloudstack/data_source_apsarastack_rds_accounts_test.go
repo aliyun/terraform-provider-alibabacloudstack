@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccAlibabacloudStackRdsAccountsDataSource(t *testing.T) {
-	// 根据test_meta自动生成的tasecase
+	// testcase automatically generated based on test_meta
 
 	rand := getAccTestRandInt(10000, 99999)
 

@@ -18,34 +18,34 @@ func resourceAlibabacloudStackSlbAcl() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'acl_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'acl_name' instead.",
 				ConflictsWith: []string{"acl_name"},
 			},
 			"acl_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 			"ip_version": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
-				Deprecated:   "Field 'ip_version' is deprecated and will be removed in a future release. Please use new field 'address_ip_version' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
+				Deprecated:    "Field 'ip_version' is deprecated and will be removed in a future release. Please use new field 'address_ip_version' instead.",
 				ConflictsWith: []string{"address_ip_version"},
 			},
 			"address_ip_version": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
 				ConflictsWith: []string{"ip_version"},
 			},
 			"entry_list": {
@@ -112,12 +112,12 @@ func resourceAlibabacloudStackSlbAclRead(d *schema.ResourceData, meta interface{
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 
-// 	slb-acl的tags由ascm实现，3162相关接口没有注册到pop
-// 	tags, err := slbService.DescribeTags(d.Id(), nil, TagResourceAcl)
-// 	if err != nil {
-// 		return errmsgs.WrapError(err)
-// 	}
-// 	d.Set("tags", slbService.tagsToMap(tags))
+	// Tags for slb-acl are implemented by ascm, and the related interfaces of 3162 have not been registered to pop
+	// 	tags, err := slbService.DescribeTags(d.Id(), nil, TagResourceAcl)
+	// 	if err != nil {
+	// 		return errmsgs.WrapError(err)
+	// 	}
+	// 	d.Set("tags", slbService.tagsToMap(tags))
 
 	object, err := slbService.DescribeSlbAcl(d.Id())
 	if err != nil {

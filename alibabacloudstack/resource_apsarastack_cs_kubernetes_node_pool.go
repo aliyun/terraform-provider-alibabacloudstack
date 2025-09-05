@@ -405,16 +405,16 @@ type scalingGroup struct {
 	SystemDiskCategory string `json:"system_disk_category"`
 	SystemDiskSize     int64  `json:"system_disk_size"`
 
-	DataDisks []nodePoolDataDisk `json:"data_disks"` //支持多个数据盘
+	DataDisks []nodePoolDataDisk `json:"data_disks"` // Support multiple data disks
 	Tags      []Tag              `json:"tags"`
 	ImageId   string             `json:"image_id"`
 	Platform  string             `json:"platform"`
-	// 支持包年包月
+	// Support yearly/monthly subscription
 	InstanceChargeType string `json:"instance_charge_type"`
 
 	ScalingPolicy string `json:"scaling_policy"`
 
-	// 公网ip
+	// Public IP
 	InternetChargeType      string `json:"internet_charge_type"`
 	InternetMaxBandwidthOut int    `json:"internet_max_bandwidth_out"`
 }
@@ -1392,17 +1392,17 @@ type NodePoolDetail struct {
 		SystemDiskCategory         string             `json:"system_disk_category"`
 		SystemDiskSize             int64              `json:"system_disk_size"`
 		SystemDiskPerformanceLevel string             `json:"system_disk_performance_level"`
-		DataDisks                  []NodePoolDataDisk `json:"data_disks"` //支持多个数据盘
+		DataDisks                  []NodePoolDataDisk `json:"data_disks"` // Support multiple data disks
 		Tags                       []Tag              `json:"tags"`
 		ImageId                    string             `json:"image_id"`
 		Platform                   string             `json:"platform"`
-		// 支持包年包月
+		// Support yearly/monthly subscription
 		InstanceChargeType string `json:"instance_charge_type"`
 		Period             int    `json:"period"`
 		PeriodUnit         string `json:"period_unit"`
 		AutoRenew          bool   `json:"auto_renew"`
 		AutoRenewPeriod    int    `json:"auto_renew_period"`
-		// spot实例
+		// Spot instance
 		SpotStrategy   string      `json:"spot_strategy"`
 		SpotPriceLimit []SpotPrice `json:"spot_price_limit"`
 
@@ -1411,7 +1411,7 @@ type NodePoolDetail struct {
 		ScalingGroupId string   `json:"scaling_group_id"`
 
 		WorkerSnapshotPolicyId string `json:"worker_system_disk_snapshot_policy_id"`
-		// 公网ip
+		// Public IP
 		InternetChargeType      string `json:"internet_charge_type"`
 		InternetMaxBandwidthOut int    `json:"internet_max_bandwidth_out"`
 		// Operating system hardening

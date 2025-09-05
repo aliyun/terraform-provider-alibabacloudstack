@@ -413,7 +413,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 	adbService := AdbService{client}
 	d.Partial(true)
 
-	//专有云 没有 UntagResources 接口
+	//Private cloud does not have UntagResources interface
 	/*if d.HasChange("tags") {
 		if err := adbService.SetResourceTags(d, "ALIYUN::ADB::CLUSTER"); err != nil {
 			return errmsgs.WrapError(err)
@@ -432,7 +432,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		}
 		//d.SetPartial("description")
 	}
-	//专有云 没有 ModifyDBClusterMaintainTime 接口
+	//Private cloud does not have ModifyDBClusterMaintainTime interface
 	/*if d.HasChange("maintain_time") {
 		request := map[string]interface{}{
 			"DBClusterId": d.Id(),
@@ -463,7 +463,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		}
 		d.SetPartial("maintain_time")
 	}*/
-	//专有云 没有 ModifyDBClusterResourceGroup 接口
+	//Private cloud does not have ModifyDBClusterResourceGroup interface
 	/*if !d.IsNewResource() && d.HasChange("resource_group_id") {
 		request := map[string]interface{}{
 			"DBClusterId": d.Id(),
@@ -497,7 +497,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 
 	update := false
 
-	//专有云 316 版本没有 ModifyAutoRenewAttribute 接口
+	//Private cloud version 316 does not have ModifyAutoRenewAttribute interface
 	/*request := map[string]interface{}{
 		"DBClusterId": d.Id(),
 	}
@@ -548,7 +548,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		//d.SetPartial("security_ips")
 	}
 	update = false
-	// 目前 316 版本页面 仅支持 变配 节点数量
+	//Currently, version 316 only supports scaling node count
 	modifyDBClusterReq := map[string]interface{}{
 		"DBClusterId": d.Id(),
 	}

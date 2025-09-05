@@ -127,7 +127,7 @@ func dataSourceAlibabacloudStackAcmConfigurationsRead(d *schema.ResourceData, me
 	request := client.NewCommonRequest("GET", "acm", "2020-02-06", "DescribeConfigurations", "/diamond-ops/pop/configuration/list")
 	AcmDescribeconfigurationsResponseObj := AcmDescribeconfigurationsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("app_name"); ok {
 		request.QueryParams["AppName"] = v.(string)

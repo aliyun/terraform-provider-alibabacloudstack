@@ -120,7 +120,7 @@ func resourceAlibabacloudStackDBBackupPolicy() *schema.Resource {
 			},
 		},
 	}
-	// XXX: 逻辑特殊，不建议合并
+	// XXX: Special logic, not recommended to merge
 	setResourceFunc(resource, resourceAlibabacloudStackDBBackupPolicyCreate,
 		resourceAlibabacloudStackDBBackupPolicyRead, resourceAlibabacloudStackDBBackupPolicyUpdate, resourceAlibabacloudStackDBBackupPolicyDelete)
 	return resource

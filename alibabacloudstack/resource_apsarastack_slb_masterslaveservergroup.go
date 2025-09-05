@@ -127,7 +127,7 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d *schema.ResourceDa
 
 	connectivity.SetResourceData(d, object.MasterSlaveServerGroupName, "master_slave_server_group_name", "name")
 	if object.LoadBalancerId != "" {
-		// 在专有云的实际环境中可能不会返回相关值导致每次apply都会去销毁资源后重建
+		// In private cloud environments, related values may not be returned, causing resources to be destroyed and recreated on every apply
 		d.Set("load_balancer_id", object.LoadBalancerId)
 	}
 
@@ -151,7 +151,7 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d *schema.ResourceDa
 }
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-	// XXX: delete_protection_validation是一个本地保护属性，允许修改
+	// XXX: delete_protection_validation is a local protection attribute that allows modification
 	//noUpdateAllowedFields := []string{"delete_protection_validation"}
 	//return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 	return nil

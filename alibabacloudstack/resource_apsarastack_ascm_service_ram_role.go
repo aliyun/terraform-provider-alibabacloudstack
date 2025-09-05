@@ -179,7 +179,7 @@ func resourceAlibabacloudStackAscmServiceRamRoleRead(d *schema.ResourceData, met
 	}
 	var ram_roles []map[string]interface{}
 	for _, v := range object.Data {
-		// 设置 policies 列表
+		// Set policies list
 		var policies []map[string]interface{}
 		if len(v.Policies) > 0 {
 			for _, policy := range v.Policies {

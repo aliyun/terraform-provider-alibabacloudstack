@@ -443,7 +443,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// "intranet_scheduler", "internet_scheduler" 无法回读
+				// "intranet_scheduler", "internet_scheduler" cannot be read back
 				ImportStateVerifyIgnore: []string{"intranet_scheduler", "internet_scheduler"},
 			},
 		},
@@ -517,7 +517,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// "intranet_scheduler", "internet_scheduler" 无法回读
+				// "intranet_scheduler", "internet_scheduler" cannot be read back
 				ImportStateVerifyIgnore: []string{"intranet_scheduler", "internet_scheduler"},
 			},
 			{

@@ -26,7 +26,7 @@ func (s *MaxcomputeService) DescribeMaxcomputeProject(name string) (object *MaxC
 
 	request := make(map[string]interface{})
 	request["ResourceGroupId"] = client.ResourceGroup
-	request["CalcEngineType"] = "ODPS" // 固定值
+	request["CalcEngineType"] = "ODPS" // Fixed value
 	request["OrganizationId"] = client.Department
 	request["Department"] = client.Department
 	request["ResourceGroup"] = client.ResourceGroup

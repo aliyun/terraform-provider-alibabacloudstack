@@ -22,7 +22,7 @@ func resourceAlibabacloudStackEdasNamespace() *schema.Resource {
 			Delete: schema.DefaultTimeout(1 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			// FIXME: edas缺少查询接口
+			// FIXME: edas lacks query interface
 			// 			"debug_enable": {
 			// 				Type:     schema.TypeBool,
 			// 				Optional: true,
@@ -83,7 +83,7 @@ func resourceAlibabacloudStackEdasNamespaceCreate(d *schema.ResourceData, meta i
 		} else if v, ok := code.(string); ok && v != "200" {
 			return resource.NonRetryableError(errmsgs.Error("%s", response["Message"].(string)))
 		} else if vv, ok := code.(json.Number); !ok {
-			return resource.NonRetryableError(errmsgs.Error("Unknow Code type in body of InsertOrUpdateRegion"))
+			return resource.NonRetryableError(errmsgs.Error("Unknown Code type in body of InsertOrUpdateRegion"))
 		} else if string(vv) != "200" {
 			return resource.NonRetryableError(errmsgs.Error("%s", response["Message"].(string)))
 		}

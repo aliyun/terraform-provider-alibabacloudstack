@@ -185,7 +185,7 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 	var requestInfo *oss.Client
 	var bucketName, key string
 	if id_info := strings.SplitN(d.Id(), ":", 2) ; len(id_info) == 1 {
-		// 兼容老的Id d.SetId(key)
+		// Compatible with old ID d.SetId(key)
 		bucketName = d.Get("bucket").(string)
 		key = d.Get("key").(string)
 		d.SetId(fmt.Sprintf("%s:%s", bucketName, key))
@@ -222,7 +222,7 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 	})
 	
 	if acl, err := bucket.GetObjectACL(key, options...); err == nil {
-		// 需要特殊权限，可能会失败，失败时暂时不覆盖该属性
+		// Requires special permissions, may fail. Do not overwrite the attribute when it fails.
 		d.Set("acl", acl.ACL)
 	}
 	

@@ -362,7 +362,7 @@ func dataSourceAlibabacloudStackAdbDbClustersRead(d *schema.ResourceData, meta i
 
 		adbService := AdbService{client}
 		id := fmt.Sprint(object["DBClusterId"])
-		// 预付费 专有云没有细分 没有 DescribeAutoRenewAttribute 接口
+		// Prepaid dedicated cloud does not have detailed classification, no DescribeAutoRenewAttribute interface
 		//if object["PayType"].(string) == string(Prepaid) {
 		//	getResp, err := adbService.DescribeAutoRenewAttribute(id)
 		//	if err != nil {

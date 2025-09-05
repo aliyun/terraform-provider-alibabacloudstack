@@ -39,7 +39,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceAlarmcontact0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"describe": "报警联系人信息",
+					"describe": "Alarm contact information",
 
 					"alarm_contact_name": "Alice122",
 
@@ -50,7 +50,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceAlarmcontact0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"describe": "报警联系人信息",
+						"describe": "Alarm contact information",
 
 						"alarm_contact_name": "Alice122",
 
@@ -69,7 +69,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceAlarmcontact0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"describe": "报警联系人信息111",
+					"describe": "Alarm contact information111",
 
 					"channels_ali_im": "Lon",
 
@@ -78,7 +78,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceAlarmcontact0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"describe": "报警联系人信息111",
+						"describe": "Alarm contact information111",
 
 						"channels_ali_im": "Lon",
 

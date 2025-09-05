@@ -59,8 +59,8 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 						"db_instance_storage": CHECKSET,
 					}),
 					resource.TestCheckTypeSetElemNestedAttrs(
-						resourceId,     // 资源地址
-						"parameters.*", // TypeSet 属性路径（通配符 `*` 表示集合中的任意元素）
+						resourceId,     // Resource address
+						"parameters.*", // TypeSet attribute path (wildcard `*` represents any element in the collection)
 						map[string]string{
 							"name":  "show_old_temporals",
 							"value": "ON",

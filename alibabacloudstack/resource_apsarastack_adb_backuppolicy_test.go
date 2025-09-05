@@ -28,12 +28,12 @@ func TestAccAlibabacloudStackAdbBackupPolicy(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		//该功能没有 删除接口，只是恢复默认
+		// This feature does not have a delete interface, only restore to default
 		//CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					// 已有 实例 使用给定 id 测试
+					// Use given id to test with existing instance
 					//"db_cluster_id":    "am-3rq9uva152cn34drs",
 					"db_cluster_id":           "${alibabacloudstack_adb_db_cluster.default.id}",
 					"preferred_backup_period": []string{"Tuesday", "Wednesday"},
@@ -112,7 +112,7 @@ func resourceAdbBackupPolicyConfigDependence(name string) string {
 	}`, AdbCommonTestCase, name)
 }
 
-// 已有 实例创建测试使用
+// Create test using existing instance
 /*func resourceAdbBackupPolicyConfigDependence(name string) string {
 	return fmt.Sprintf(`
 

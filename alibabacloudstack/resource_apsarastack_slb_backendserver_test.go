@@ -55,7 +55,7 @@ func TestAccAlibabacloudStackSlbBackendServers_vpc(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				// delete_protection_validation是本地属性，无法从远端加载
+				// delete_protection_validation is a local attribute and cannot be loaded from the remote
 				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
 			},
 		},
@@ -165,7 +165,7 @@ func TestAccAlibabacloudStackSlbBackendServers_classic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				// delete_protection_validation是本地属性，无法从远端加载
+				// delete_protection_validation is a local attribute and cannot be loaded from the remote
 				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
 			},
 			{

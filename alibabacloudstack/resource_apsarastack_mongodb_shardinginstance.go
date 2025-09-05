@@ -415,7 +415,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 	}
 
 	d.Set("security_ip_list", ips)
-	// 混合云不支持
+	// Hybrid cloud does not support
 	//	groupIp, err := ddsService.DescribeMongoDBSecurityGroupId(d.Id())
 	//	if err != nil {
 	//		return errmsgs.WrapError(err)

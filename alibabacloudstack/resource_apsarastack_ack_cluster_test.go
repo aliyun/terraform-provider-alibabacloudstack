@@ -351,7 +351,7 @@ func TestAccAlibabacloudStackCsK8sKeyName(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// cs k8s 暂不支持部分属性回读
+				// cs k8s does not support reading back some attributes for now
 				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids"},
 			},
 		},

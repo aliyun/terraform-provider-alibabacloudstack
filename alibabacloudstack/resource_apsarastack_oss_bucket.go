@@ -114,7 +114,7 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 			},
 			"tags": tagsSchema(),
 		},
-		// 使用 CustomizeDiff 来添加条件验证
+		// Use CustomizeDiff to add conditional validation
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
 			sseAlgorithm := diff.Get("sse_algorithm").(string)
 			kmsID := diff.Get("kms_key_id").(string)
@@ -274,7 +274,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 
 	bucketName := d.Get("bucket").(string)
 
-	// 获取同城容灾信息
+	// Get disaster recovery information
 	request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetBucketSync"
 	request.QueryParams["ProductName"] = "oss"
@@ -296,13 +296,13 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	d.Set("bucket_sync", true)
 	for _, rule := range bucketSync.Data.ReplicationConfiguration.Rule {
 		if rule.Status == "closing" {
-			// 容灾关系是成对出现的
+			// Disaster recovery relationships appear in pairs
 			d.Set("bucket_sync", false)
 			break
 		}
 	}
 
-	// 获取acl信息
+	// Get ACL information
 	request = client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetBucketAcl"
 	request.QueryParams["ProductName"] = "oss"
@@ -323,7 +323,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	json.Unmarshal([]byte(bresponse.GetHttpContentString()), &bucketAcl)
 	d.Set("acl", bucketAcl.Data.AccessControlPolicy.AccessControlList.Grant)
 
-	// 获取容量限制信息
+	// Get storage capacity information
 	request = client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetBucketStorageCapacity"
 	request.QueryParams["ProductName"] = "oss"
@@ -348,7 +348,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 		return errmsgs.WrapErrorf(err, "Get storage capacity failed")
 	}
 
-	// 获取加密信息
+	// Get encryption information
 	request = client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetBucketEncryption"
 	request.QueryParams["ProductName"] = "oss"
@@ -535,7 +535,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 		}
 	}
 	if d.HasChange("vpclist") {
-		// FIXME: 调用该接口会，会添加一条所有权限拒绝的规则
+		// FIXME: Calling this interface will add a rule that denies all permissions
 		o, n := d.GetChange("vpclist")
 		oldlist := o.([]interface{})
 		newlist := n.([]interface{})

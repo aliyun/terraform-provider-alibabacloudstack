@@ -44,7 +44,7 @@ const (
 	DDSCode              = ServiceCode("DDS")
 	GPDBCode             = ServiceCode("GPDB")
 	CENCode              = ServiceCode("CEN")
-	KVSTORECode          = ServiceCode("R_KVSTORE") // 不允许出现-，schema不接受，以_代替
+	KVSTORECode          = ServiceCode("R_KVSTORE") // Hyphens are not allowed, schema does not accept them, use _ instead
 	POLARDBCode          = ServiceCode("POLARDB")
 	MNSCode              = ServiceCode("MNS")
 	CLOUDAPICode         = ServiceCode("CLOUDAPI")
@@ -66,7 +66,7 @@ const (
 	DatahubCode          = ServiceCode("DATAHUB")
 	STSCode              = ServiceCode("STS")
 	ACMCode              = ServiceCode("ACM")
-	//undefined code 先添加
+	// undefined code, add first
 	GDBCode             = ServiceCode("GDB")
 	ARMSCode            = ServiceCode("ARMS")
 	CSBCode             = ServiceCode("CSB")
@@ -78,7 +78,7 @@ const (
 	QuickbiCode         = ServiceCode("QUICKBI")
 	DataworkspublicCode = ServiceCode("DATAWORKSPUBLIC")
 	OneRouterCode       = ServiceCode("ONEROUTER")
-	//自建网关虚假Code
+	// Self-built gateway fake Code
 	OssDataCode  = ServiceCode("OSSDATA")
 	SlSDataCode  = ServiceCode("SLSDATA")
 	ALIKAFKACode = ServiceCode("ALIKAFKADATA")
@@ -147,7 +147,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"adb.{{.region}}.{{.domain}}",
 	},
 	//apigateway endpoint
-	//中心化部署
+	//centralized deployment
 	CLOUDAPICode: PopEndpoint{
 		"apigateway.{{.region}}.{{.domain}}",
 		"apigateway.{{.region}}.{{.domain}}",
@@ -319,7 +319,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"dncs-api.console.{{.region}}.{{.domain}}",
 		"dncs-api.console.{{.region}}.{{.domain}}",
 	},
-	// 3.18.3新局点将不会开放
+	// New sites after 3.18.3 will no longer be open
 	OneRouterCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",

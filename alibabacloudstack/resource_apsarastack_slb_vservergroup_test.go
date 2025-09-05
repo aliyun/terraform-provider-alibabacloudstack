@@ -66,8 +66,8 @@ func TestAccAlibabacloudStackSlbVservergroup0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// delete_protection_validation是本地属性，无法从远端加载
-				// load_balancer_id专有云侧暂时无法回读
+				// delete_protection_validation is a local attribute and cannot be loaded from the remote
+				// load_balancer_id cannot be read back on the private cloud side temporarily
 				ImportStateVerifyIgnore: []string{"delete_protection_validation", "load_balancer_id"},
 			},
 		},

@@ -97,7 +97,7 @@ func dataSourceAlibabacloudStackAscmResourceGroupsRead(d *schema.ResourceData, m
 	bresponse, err := client.ProcessCommonRequest(request)
 	log.Printf(" response of raw ListResourceGroup : %s", bresponse)
 
-	// TODO: 需要考虑数据超过一页时的数据获取
+	// TODO: Need to consider data retrieval when data exceeds one page
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")

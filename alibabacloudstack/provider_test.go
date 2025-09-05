@@ -382,7 +382,7 @@ func getAccTestRandInt(min, max int) int {
 	return acctest.RandIntRange(min, max)
 }
 
-// shuffle 函数：随机打乱字符顺序
+// shuffle function: randomly shuffle character order
 func shuffle(chars []rune) []rune {
 	copyChars := make([]rune, len(chars))
 	copy(copyChars, chars)
@@ -401,7 +401,7 @@ func GeneratePassword(length int) string {
 		return "<YOUR PASSWORD>"
 	}
 	
-	// 定义字符集
+	// Define character sets
 	const (
 		upperLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		lowerLetters = "abcdefghijklmnopqrstuvwxyz"
@@ -409,7 +409,7 @@ func GeneratePassword(length int) string {
 		symbols      = "!@#$^&*()_"
 	)
 
-	// 转换为 rune 数组
+	// Convert to rune arrays
 	var (
 		upperRunes  = []rune(upperLetters)
 		lowerRunes  = []rune(lowerLetters)
@@ -418,28 +418,28 @@ func GeneratePassword(length int) string {
 		allRunes    = append(upperRunes, append(lowerRunes, append(digitRunes, symbolRunes...)...)...)
 	)
 
-	// 首字符：强制大写字母
+	// First character: force uppercase letter
 	firstChar := upperRunes[rand.Intn(len(upperRunes))]
 
-	// 必须包含的字符（数字、小写字母、符号）
+	// Required characters (digit, lowercase letter, symbol)
 	mustHave := []rune{
-		digitRunes[rand.Intn(len(digitRunes))],   // 数字
-		lowerRunes[rand.Intn(len(lowerRunes))],   // 小写字母
-		symbolRunes[rand.Intn(len(symbolRunes))], // 符号
+		digitRunes[rand.Intn(len(digitRunes))],   // digit
+		lowerRunes[rand.Intn(len(lowerRunes))],   // lowercase letter
+		symbolRunes[rand.Intn(len(symbolRunes))], // symbol
 	}
 
-	// 剩余字符（可选所有类型）
-	remaining := length - 1 - 3 //  - 1(首字母) - 3(必须字符)
+	// Remaining characters (optional all types)
+	remaining := length - 1 - 3 //  - 1(first character) - 3(required characters)
 	others := make([]rune, remaining)
 	for i := range others {
 		others[i] = allRunes[rand.Intn(len(allRunes))]
 	}
 
-	// 合并必须字符和随机字符
+	// Merge required characters and random characters
 	allChars := append(mustHave, others...)
 	shuffled := shuffle(allChars)
 
-	// 组合最终密码
+	// Combine final password
 	password := append([]rune{firstChar}, shuffled...)
 	return string(password)
 }

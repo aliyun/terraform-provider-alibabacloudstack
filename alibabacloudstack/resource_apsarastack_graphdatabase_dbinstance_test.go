@@ -49,7 +49,7 @@ func TestAccAlibabacloudStackGraphdatabaseDbinstance0(t *testing.T) {
 
 					"db_instance_storage_type": "cloud_ssd",
 
-					"db_instance_description": "ssd测试",
+					"db_instance_description": "ssd test",
 
 					"db_node_class": "gdb.r.2xlarge",
 
@@ -74,7 +74,7 @@ func TestAccAlibabacloudStackGraphdatabaseDbinstance0(t *testing.T) {
 
 						"db_instance_storage_type": "cloud_ssd",
 
-						"db_instance_description": "ssd测试",
+						"db_instance_description": "ssd test",
 
 						"db_node_class": "gdb.r.2xlarge",
 

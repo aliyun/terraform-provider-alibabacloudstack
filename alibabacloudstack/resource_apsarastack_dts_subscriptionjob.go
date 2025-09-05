@@ -201,7 +201,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobCreate(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "CreateDtsInstance"
 	request := client.NewCommonRequest("POST", "Dts", "2020-01-01", action, "")
-	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	request.Headers["x-acs-regionid"] = client.RegionId
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-type"] = "application/json"
@@ -280,7 +280,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobCreate(d *schema.ResourceData, m
 	}
 	d.Set("dts_instance_id", response["InstanceId"])
 	configureSubscriptionReq := client.NewCommonRequest("POST", "Dts", "2020-01-01", "ConfigureSubscription", "")
-	configureSubscriptionReq.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+	configureSubscriptionReq.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	configureSubscriptionReq.QueryParams["DbList"] = d.Get("db_list").(string)
 	configureSubscriptionReq.QueryParams["SubscriptionInstanceNetworkType"] = d.Get("subscription_instance_network_type").(string)
 	configureSubscriptionReq.QueryParams["DtsInstanceId"] = d.Get("dts_instance_id").(string)
@@ -463,7 +463,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobUpdate(d *schema.ResourceData, m
 	}
 	update := false
 	request := client.NewCommonRequest("POST", "Dts", "2020-01-01", "", "")
-	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	request.Headers["x-acs-regionid"] = client.RegionId
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.QueryParams["DtsJobId"] = d.Id()
@@ -514,7 +514,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobUpdate(d *schema.ResourceData, m
 	update = false
 	modifyDtsJobPasswordReq := client.NewCommonRequest("POST", "Dts", "2020-01-01", "ModifyDtsJobPassword", "")
 	modifyDtsJobPasswordReq.QueryParams["DtsJobId"] = d.Id()
-	modifyDtsJobPasswordReq.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+	modifyDtsJobPasswordReq.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	modifyDtsJobPasswordReq.Headers["x-acs-regionid"] = client.RegionId
 	modifyDtsJobPasswordReq.Headers["x-acs-content-type"] = "application/json"
 	modifyDtsJobPasswordReq.Headers["Content-type"] = "application/json"
@@ -581,7 +581,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobUpdate(d *schema.ResourceData, m
 	update = false
 	configureSubscriptionReq := client.NewCommonRequest("POST", "Dts", "2020-01-01", "ConfigureSubscription", "")
 	configureSubscriptionReq.QueryParams["DtsJobId"] = d.Id()
-	configureSubscriptionReq.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+	configureSubscriptionReq.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	configureSubscriptionReq.Headers["x-acs-regionid"] = client.RegionId
 	configureSubscriptionReq.Headers["x-acs-content-type"] = "application/json"
 	configureSubscriptionReq.Headers["Content-type"] = "application/json"
@@ -807,7 +807,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobDelete(d *schema.ResourceData, m
 	}
 	request := client.NewCommonRequest("POST", "Dts", "2020-01-01", action, "")
 	request.QueryParams["DtsJobId"] = d.Id()
-	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	request.Headers["x-acs-regionid"] = client.RegionId
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-type"] = "application/json"
@@ -866,7 +866,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobStatusFlow(d *schema.ResourceDat
 		if target == "NotConfigured" {
 			action := "ResetDtsJob"
 			request := client.NewCommonRequest("POST","Dts","2020-01-01","ResetDtsJob","")
-			request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+			request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 			request.Headers["x-acs-content-type"] = "application/json"
 			request.Headers["Content-type"] = "application/json"
 			request.QueryParams["DtsJobId"] = d.Id()
@@ -905,7 +905,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobStatusFlow(d *schema.ResourceDat
 		if target == "Normal" || (target == "Abnormal" && object["Status"].(string) == "NotStarted") {
 			action := "StartDtsJob"
 			request := client.NewCommonRequest("POST","Dts","2020-01-01","StartDtsJob","")
-			request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+			request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 			request.Headers["x-acs-content-type"] = "application/json"
 			request.Headers["Content-type"] = "application/json"
 			request.QueryParams["DtsJobId"] =       d.Id()
@@ -944,7 +944,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobStatusFlow(d *schema.ResourceDat
 		if target == "Abnormal" {
 			action := "SuspendDtsJob"
 			request := client.NewCommonRequest("POST","Dts","2020-01-01",action,"")
-			request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+			request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 			request.Headers["x-acs-content-type"] = "application/json"
 			request.Headers["Content-type"] = "application/json"
 			request.QueryParams["DtsJobId"] = d.Id()

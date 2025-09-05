@@ -39,7 +39,7 @@ func TestAccAlibabacloudStackRosTemplate0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"description": "模板的描述",
+					"description": "Description of the template",
 
 					"template_name": "MyTemplateTest12",
 
@@ -48,7 +48,7 @@ func TestAccAlibabacloudStackRosTemplate0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"description": "模板的描述",
+						"description": "Description of the template",
 
 						"template_name": "MyTemplateTest12",
 
@@ -60,7 +60,7 @@ func TestAccAlibabacloudStackRosTemplate0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"description": "模板的描述123",
+					"description": "Description of the template 123",
 
 					"template_name": "TemplateName123",
 
@@ -71,7 +71,7 @@ func TestAccAlibabacloudStackRosTemplate0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"description": "模板的描述123",
+						"description": "Description of the template 123",
 
 						"template_name": "TemplateName123",
 

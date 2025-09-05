@@ -182,7 +182,7 @@ func (client *AlibabacloudStackClient) NewTeaSDkClient(productCode string, endpo
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
 	}
 	sdkConfig := client.teaRpcSdkConfig
-	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
+	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) // Unit: milliseconds
 	conn, err := rpc.NewClient(&sdkConfig)
 	for key, value := range client.defaultHeaders(productCode) {
 		conn.Headers[key] = &value
@@ -201,7 +201,7 @@ func (client *AlibabacloudStackClient) WithProductSDKClient(popcode ServiceCode)
 
 	ramSupported := true
 	if popcode == STSCode {
-		ramSupported = false // TODO: STS不支持NewRamRoleArnWithPolicyCredential，待排查
+		ramSupported = false // TODO: STS does not support NewRamRoleArnWithPolicyCredential, need to investigate
 	}
 	conn, err := sdk.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true, ramSupported))
 	if err != nil {
@@ -774,7 +774,7 @@ func (client *AlibabacloudStackClient) WithSlsDataClient(do func(*sls.Client) (i
 			return nil, fmt.Errorf("unable to initialize the log client: endpoint or domain is not provided for log service")
 		}
 		if client.Config.Proxy != "" {
-			// FIXME: 修改环境变量会存在风险
+			// FIXME: Modifying environment variables may pose risks
 			os.Setenv("http_proxy", client.Config.Proxy)
 			os.Setenv("https_proxy", client.Config.Proxy)
 		}
@@ -1086,7 +1086,7 @@ func (client *AlibabacloudStackClient) defaultHeaders(popcode string) map[string
 		"EagleEye-TraceId":      client.Eagleeye.GetTraceId(),
 		"EagleEye-RpcId":        client.Eagleeye.GetRpcId(),
 		//"x-acs-caller-sdk-source": "Terraform"
-		//"x-acs-asapi-gateway-version": "3.0"  这个是指定走ASAPI的v3网关流程，目前在维护的是v4，默认会走v4，指定了走v3。不建议走v3，除非有不兼容的地方必须走
+		//"x-acs-asapi-gateway-version": "3.0"  This specifies to use the ASAPI v3 gateway process, currently maintained is v4, by default it will use v4. Specifying to use v3 is not recommended unless there are compatibility issues that require it.
 	}
 }
 
@@ -1184,7 +1184,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 		protocol = "http"
 	}
 	if popcode == "CloudDns" {
-		// CloudDns不支持HTTPS
+		// CloudDns does not support HTTPS
 		protocol = "http"
 	}
 	authType := "AK"
@@ -1194,18 +1194,18 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 		runtime.HttpProxy = &client.Config.Proxy
 		runtime.HttpsProxy = &client.Config.Proxy
 	}
-	runtime.SetAutoretry(false) // 使用ASAPI时，Tea包不能重试，他会修改endpoint
+	runtime.SetAutoretry(false) // When using ASAPI, the Tea package cannot retry, as it will modify the endpoint
 
 	var response map[string]interface{}
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 
 		var err error
-		// conn 必须在每次请求前初始化，因为DoRequest会修改conn的内容，会导致下次conn的配置失效
+		// conn must be initialized before each request, as DoRequest will modify the content of conn, which will cause the configuration of conn to be invalid for the next request
 		if pathpattern != "" {
 			response, err = func() (map[string]interface{}, error) {
 				sdkConfig := client.teaRoaSdkConfig
-				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
+				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) // Unit: milliseconds
 				conn, err := roa.NewClient(&sdkConfig)
 				if err != nil {
 					return nil, err
@@ -1226,7 +1226,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 		} else {
 			response, err = func() (map[string]interface{}, error) {
 				sdkConfig := client.teaRpcSdkConfig
-				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
+				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) // Unit: milliseconds
 				conn, err := rpc.NewClient(&sdkConfig)
 				if err != nil {
 					return nil, err
@@ -1281,8 +1281,8 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		domain = conn.Domain
 	}
 	if strings.HasPrefix(domain, "internal.asapi.") || strings.HasPrefix(domain, "public.asapi.") {
-		// asapi兼容逻辑
-		// # asapi 使用common SDK时不能拼接pathpattern，否则会报错
+		// asapi compatibility logic
+		// # asapi When using common SDK, pathpattern cannot be concatenated, otherwise an error will be reported
 		if request.PathPattern != "" {
 			var r []string = strings.SplitN(domain, "/", 2)
 			request.Domain = r[0]
@@ -1292,14 +1292,14 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			request.QueryParams["x-acs-body"] = string(request.Content)
 		}
 		if popcode == OneRouterCode {
-			request.QueryParams["AccountInfo"] = "terraform-provider" //TODO: 3162 ~ 3180 onerouter必传，后续版本移除
+			request.QueryParams["AccountInfo"] = "terraform-provider" //TODO: 3162 ~ 3180 onerouter is required, will be removed in subsequent versions
 		}
 		request.Method = "POST"
 		if strings.HasPrefix(domain, "public.asapi.") {
-			// 如果public的asapi网关，强制使用https
+			// If it's a public asapi gateway, force HTTPS
 			request.SetScheme("https")
 		} else {
-			// 如果internal的asapi网关，强制使用http
+			// If it's an internal asapi gateway, force HTTP
 			request.SetScheme("http")
 		}
 	}
@@ -1307,7 +1307,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 	var response *responses.CommonResponse
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	resource.Retry(5*time.Minute, func() *resource.RetryError {
-		//仅在请求无正常返回时重试
+		// Retry only when the request does not return normally
 		response, err = conn.ProcessCommonRequest(request)
 		if err == nil {
 			return nil
@@ -1376,7 +1376,7 @@ func retryDo(do func() (interface{}, error)) (interface{}, error) {
 	var err error
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	resource.Retry(5*time.Minute, func() *resource.RetryError {
-		//仅在请求无正常返回时重试
+		// Retry only when the request does not return normally
 		response, err = do()
 		if err == nil {
 			return nil

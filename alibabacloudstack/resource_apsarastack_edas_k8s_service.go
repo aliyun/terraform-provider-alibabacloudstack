@@ -103,7 +103,7 @@ func resourceAlibabacloudStackEdasK8sServiceCreate(d *schema.ResourceData, meta 
 	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "CreateK8sService", "/pop/v5/k8s/service/service")
 	request.QueryParams["AppId"] = d.Get("app_id").(string)
 
-	request.QueryParams["Act"] = "1" // 创建接口默认值
+	request.QueryParams["Act"] = "1" // Default value for create interface
 	request.QueryParams["ServiceName"] = d.Get("service_name").(string)
 	request.QueryParams["Type"] = service_type
 	port_mappings := d.Get("port_mappings").([]interface{})
@@ -204,7 +204,7 @@ func resourceAlibabacloudStackEdasK8sServiceUpdate(d *schema.ResourceData, meta 
 	request.QueryParams["AppId"] = d.Get("app_id").(string)
 	request.QueryParams["Name"] = d.Get("service_name").(string)
 	request.QueryParams["Type"] = d.Get("type").(string)
-	request.QueryParams["Act"] = "2" // 更新接口默认值
+	request.QueryParams["Act"] = "2" // Default value for update interface
 	port_mappings, err := edasService.GetK8sServicePorts(d.Get("port_mappings").([]interface{}))
 	if err != nil {
 		return errmsgs.WrapError(err)

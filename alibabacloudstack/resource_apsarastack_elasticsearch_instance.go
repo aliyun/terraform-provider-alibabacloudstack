@@ -179,7 +179,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(12, 32),
 			},
 
-			// 只读属性
+			// Read-only attributes
 			"slb_address": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -217,7 +217,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Computed: true,
 			},
 
-			// 3.16.2不支持修改参数
+			// 3.16.2 does not support parameter modification
 
 			"private_whitelist": {
 				Type: schema.TypeSet,
@@ -483,7 +483,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 		if nil != https {
 			if err := https(d, meta); err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidAction.NotFound"}) {
-				// 3162 老版本不支持HTTPS -> HTTP
+				// 3162 old version does not support HTTPS -> HTTP
 				return errmsgs.WrapError(err)
 			}
 		}

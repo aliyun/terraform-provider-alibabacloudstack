@@ -50,7 +50,7 @@ func TestAccAlibabacloudStackDataWorksRemind_basic0(t *testing.T) {
 					}),
 				),
 			},
-			//测试时, 只留一个 remind_unit 类型单独测试，其余注释掉
+			// During testing, only keep one remind_unit type for individual testing, comment out the rest
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"remind_unit":  "BASELINE",
