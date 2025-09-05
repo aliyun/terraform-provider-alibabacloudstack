@@ -2260,7 +2260,7 @@ func (s *EcsService) DoEcsDescribeinvocationresultsRequest(id string) (*EcsDescr
 	request := s.client.NewCommonRequest("POST", "Ecs", "2014-05-26", "DescribeInvocationResults", "")
 	EcsDescribeinvocationresultsResponseObj := &EcsDescribeinvocationresultsResponse{}
 
-	//调用request_params_handler
+	// Call request request_params_handler
 
 	request.QueryParams["InvokeId"] = id
 
@@ -2348,7 +2348,7 @@ func (s *EcsService) DoEcsDescribeinvocationsRequest(d *schema.ResourceData, cli
 	request := s.client.NewCommonRequest("POST", "Ecs", "2014-05-26", "DescribeInvocations", "")
 	EcsDescribeinvocationsResponseObj := &EcsDescribeinvocationsResponse{}
 
-	//调用request_params_handler
+	// Call request request_params_handler
 
 	if v, ok := d.GetOk("command_id"); ok {
 		request.QueryParams["CommandId"] = v.(string)

@@ -1131,7 +1131,7 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 	edasService := EdasService{client}
 	var partialKeys []string
 
-	// 检查该app是否已经绑定了slb
+	// Check whether the app has already bound an SLB
 	appobj, err := edasService.DescribeEdasK8sApplication(d.Id())
 	if err != nil {
 		return errmsgs.WrapError(err)

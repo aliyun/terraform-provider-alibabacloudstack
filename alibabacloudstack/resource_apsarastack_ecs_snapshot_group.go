@@ -88,7 +88,7 @@ func resourceAlibabacloudStackEcsSnapshotgroupCreate(d *schema.ResourceData, met
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", "CreateSnapshotGroup", "")
 	EcsCreatesnapshotgroupResponseObj := EcsCreatesnapshotgroupResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("description"); ok {
 		request.QueryParams["Description"] = v.(string)

@@ -125,7 +125,7 @@ func (s *DrdsService) DescribeDrdsDatabase(id string) (*DrdsDescribedrdsdbRespon
 	request := s.client.NewCommonRequest("GET", "Drds", "2019-01-23", "DescribeDrdsDB", "")
 	DrdsDescribedrdsdbResponse := &DrdsDescribedrdsdbResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DbName"] = databaseName
 
@@ -242,7 +242,7 @@ func (s *DrdsService) DoDrdsDescribedrdsdbipwhitelistRequest(id string) (*DrdsDe
 	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeDrdsDBIpWhiteList", "")
 	DrdsDescribedrdsdbipwhitelistResponse := &DrdsDescribedrdsdbipwhitelistResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DbName"] = databaseName
 
@@ -341,7 +341,7 @@ func (s *DrdsService) DescribeDrdsAccount(id string) (*DrdsDescribeinstanceAccou
 	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeInstanceAccounts", "")
 	drdsDescribeinstanceaccountsResponse := &DrdsDescribeinstanceaccountsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 	request.QueryParams["DrdsInstanceId"] = instanceId
 
 	bresponse, err := s.client.ProcessCommonRequest(request)

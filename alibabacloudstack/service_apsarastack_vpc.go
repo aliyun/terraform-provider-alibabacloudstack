@@ -1670,7 +1670,7 @@ func (s *VpcService) SetIpv6CidrBlocks(d *schema.ResourceData) error {
 				"IpVersion": "IPV6",
 			}
 			for _, ivp6 := range added {
-				// 预设ipv6_cidr_block
+				// Pre-allocate ipv6_cidr_block
 				err := s.AllocateVpcIpv6Cidr(ivp6["ipv6_cidr_block"].(string), ivp6["ipv6_isp"].(string))
 				if err != nil {
 					log.Println(fmt.Sprintf("Warning: %s: %s allocate err: %v", ivp6["ipv6_cidr_block"], ivp6["ipv6_isp"], err))
@@ -1934,7 +1934,7 @@ func (s *VpcService) DoDescribeRouteTableListRequest(id string) (*DescribeRouteT
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Vpc", "2016-04-28", "DescribeRouteTableList", "")
 	CbnDescribeRouterRouteTablesResponseObj := &DescribeRouteTableListResponse{}
-	//调用request_params_handler
+	//call request_params_handler
 	request.QueryParams["VpcId"] = id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -2030,7 +2030,7 @@ func (s *VpcService) DoVpcRouteEntryListRequest(id string) (*VpcRouteEntryListRe
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeRouteEntryList", "")
 	VpcRouteEntryListResponseObj := &VpcRouteEntryListResponse{}
-	//调用request_params_handler
+	//call request_params_handler
 	parts := strings.Split(id, ":")
 	route_table_id := parts[0]
 	attachment_id := parts[1]
@@ -2082,7 +2082,7 @@ func (s *NatgatewayService) DoVpcDescribebandwidthpackagemonitordataRequest(id s
 	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBandwidthPackageMonitorData", "")
 	VpcDescribebandwidthpackagemonitordataResponseObj := &VpcDescribebandwidthpackagemonitordataResponse{}
 
-	//调用request_params_handler
+	//call request_params_handler
 
 	request.QueryParams["BandwidthPackageId"] = id
 
@@ -2142,7 +2142,7 @@ func (s *NatgatewayService) DoVpcDescribebandwidthpackagesRequest(id string) (*V
 	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBandwidthPackages", "")
 	VpcDescribebandwidthpackagesResponseObj := &VpcDescribebandwidthpackagesResponse{}
 
-	//调用request_params_handler
+	//call request_params_handler
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse)

@@ -142,7 +142,7 @@ func dataSourceAlibabacloudStackMongodbBackupsRead(d *schema.ResourceData, meta 
 	request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeBackups", "")
 	DdsDescribebackupsResponseObj := DdsDescribebackupsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("backup_id"); ok {
 		request.QueryParams["BackupId"] = strconv.Itoa(v.(int))
@@ -157,14 +157,14 @@ func dataSourceAlibabacloudStackMongodbBackupsRead(d *schema.ResourceData, meta 
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "FormatMongodbTime", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	layout := "2006-01-02T15:04Z" // 匹配 "YYYY-MM-DDTHH:MMZ" 格式
+	layout := "2006-01-02T15:04Z" // Match "YYYY-MM-DDTHH:MMZ" format
 	t, err := time.Parse(layout, end_time)
 	if err != nil {
 		panic(err)
 	}
 	nextMinute := t.Add(time.Minute)
 
-	// 3. 格式化输出
+	// 3. Format output
 	end_time = nextMinute.Format(layout)
 	request.QueryParams["EndTime"] = end_time
 	request.QueryParams["StartTime"] = start_time

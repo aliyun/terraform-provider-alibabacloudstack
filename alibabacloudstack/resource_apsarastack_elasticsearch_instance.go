@@ -259,7 +259,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Computed: true,
 			},
 
-			// 只读属性
+			// Read-only attributes
 			"slb_address": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -297,7 +297,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Computed: true,
 			},
 
-			// 3.16.2不支持修改参数
+			// Parameters not supported for modification in version 3.16.2
 
 			"private_whitelist": {
 				Type: schema.TypeSet,
@@ -665,7 +665,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 		if nil != https {
 			if err := https(d, meta); err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidAction.NotFound"}) {
-				// 3162 老版本不支持HTTPS -> HTTP
+				// 3162 old version does not support HTTPS -> HTTP
 				return errmsgs.WrapError(err)
 			}
 		}
@@ -679,7 +679,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		content := map[string]interface{}{}
 		config := d.Get("setting_config").(map[string]interface{})
 		content["esConfig"] = config
-		// 不可修改项
+		// Non-modifiable items
 		config["cluster.routing.allocation.awareness.attributes"] = "node_name,zone"
 		config["cluster.routing.allocation.awareness.force.node_name.values"] = "abcd"
 		config["opendistro_security.unsupported.restore.securityindex.enabled"] = "true"
@@ -755,7 +755,7 @@ func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta i
 	action := "DeleteInstance"
 
 	if _, ok := d.GetOk("vswitch_id"); ok {
-		// Instance will be completed deleted in 5 minutes, so deleting vswitch is available after the time.
+		// Instance will be completely deleted in 5 minutes, so deleting vswitch is available after the time.
 		defer time.Sleep(3 * time.Minute)
 	}
 

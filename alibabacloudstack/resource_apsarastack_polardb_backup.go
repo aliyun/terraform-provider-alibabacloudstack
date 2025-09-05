@@ -124,7 +124,7 @@ func resourceAlibabacloudStackPolardbBackupCreate(d *schema.ResourceData, meta i
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "CreateBackup", "")
 	PolardbCreatebackupResponseObj := PolardbCreatebackupResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceId"] = d.Get("db_instance_id").(string)
 

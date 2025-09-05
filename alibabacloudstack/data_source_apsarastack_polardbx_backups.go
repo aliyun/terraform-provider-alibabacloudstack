@@ -173,7 +173,7 @@ func dataSourceAlibabacloudStackPolardbxBackupsRead(d *schema.ResourceData, meta
 func DateTimeToTimeStamp(timeStr string) (string, error) {
 	t, err := time.Parse("2006-01-02T15:04Z", timeStr)
 	if err != nil {
-		fmt.Println("解析错误:", err)
+		fmt.Println("Parse error:", err)
 		return "", err
 	}
 	timestampMs := t.UnixNano() / 1000000

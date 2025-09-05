@@ -130,7 +130,7 @@ func dataSourceAlibabacloudStackVpcDhcpOptionsSetsRead(d *schema.ResourceData, m
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ListDhcpOptionsSets", "")
 	VpcListdhcpoptionssetsResponseObj := VpcListdhcpoptionssetsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("dhcp_options_set_id"); ok {
 		request.QueryParams["DhcpOptionsSetId"] = fmt.Sprintf("[\"%v\"]", v.(string))

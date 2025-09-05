@@ -482,13 +482,13 @@ data "alibabacloudstack_zones" "default" {
 resource "alibabacloudstack_vpc" "vpc" {	
 	provider = alibabacloudstack-common
 	vpc_name = var.name
-	cidr_block = "192.168.0.0/16" #vpc口段
+	cidr_block = "192.168.0.0/16" # VPC CIDR block
 }
 resource "alibabacloudstack_vswitch" "vsw" {
 	provider = alibabacloudstack-common
 	vpc_id = alibabacloudstack_vpc.vpc.id
-	cidr_block = "192.168.0.0/16" #⽹段
-	availability_zone = data.alibabacloudstack_zones.default.zones.0.id #可⽤区
+	cidr_block = "192.168.0.0/16" # Subnet CIDR block
+	availability_zone = data.alibabacloudstack_zones.default.zones.0.id # Availability zone
 }
 `, name)
 }

@@ -64,7 +64,7 @@ func TestAccAlibabacloudStackEcsSnapshotGroup_basic0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// exclude_disk_ids 无回读
+				// exclude_disk_ids has no read back
 				ImportStateVerifyIgnore: []string{"exclude_disk_ids"},
 			},
 		},

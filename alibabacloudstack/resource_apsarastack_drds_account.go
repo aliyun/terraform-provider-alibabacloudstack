@@ -258,7 +258,7 @@ func resourceAlibabacloudStackDrdsAccountDelete(d *schema.ResourceData, meta int
 	if err != nil {
 		return err
 	}
-	//调用request_params_handler
+	// Call request_params_handler
 	request.QueryParams["DrdsInstanceId"] = parts[0]
 	request.QueryParams["AccountName"] = parts[1]
 

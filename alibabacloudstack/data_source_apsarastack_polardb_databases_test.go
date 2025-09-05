@@ -90,7 +90,7 @@ resource "alibabacloudstack_polardb_dbinstance" "instance" {
 }
 resource "alibabacloudstack_polardb_database" "default" {
 	data_base_instance_id = "${alibabacloudstack_polardb_dbinstance.instance.id}"
-	data_base_description = "自动化生成测试"
+	data_base_description = "Automatically generated test"
 	data_base_name        = "tftest"
 	character_set_name = "utf8"
 }

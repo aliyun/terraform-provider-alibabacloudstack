@@ -60,6 +60,7 @@ func TestAccAlibabacloudStackDataWorksFolder_basic0(t *testing.T) {
 	})
 }
 
+// AlibabacloudStackDataWorksFolderMap0 is the expected state map for the DataWorks folder resource
 var AlibabacloudStackDataWorksFolderMap0 = map[string]string{
 	"folder_id":          CHECKSET,
 	"folder_path":        "",
@@ -67,6 +68,7 @@ var AlibabacloudStackDataWorksFolderMap0 = map[string]string{
 	"project_id":         "10023",
 }
 
+// AlibabacloudStackDataWorksFolderBasicDependence0 returns the basic dependencies for the DataWorks folder resource test
 func AlibabacloudStackDataWorksFolderBasicDependence0(name string) string {
 	return fmt.Sprintf(` 
 variable "name" {

@@ -243,7 +243,7 @@ func resourceAlibabacloudStackVpcDhcpoptionssetRead(d *schema.ResourceData, meta
 
 func resourceAlibabacloudStackVpcDhcpoptionssetDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	// 需要先解绑所有vpc 才可删除dhcpoptionsset
+	// Need to unbind all VPCs before deleting the dhcpoptionsset
 	associate_vpcs := d.Get("associate_vpcs")
 	vpcs := expandStringList(associate_vpcs.(*schema.Set).List())
 	remove_request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DetachDhcpOptionsSetFromVpc", "")

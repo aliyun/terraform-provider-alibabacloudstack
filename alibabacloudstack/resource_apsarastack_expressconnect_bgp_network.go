@@ -47,7 +47,7 @@ func resourceAlibabacloudStackExpressconnectBgpnetworkCreate(d *schema.ResourceD
 	// api: Vpc - 2016-04-28 - AddBgpNetwork
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "AddBgpNetwork", "")
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DstCidrBlock"] = d.Get("dst_cidr_block").(string)
 
@@ -133,7 +133,7 @@ func resourceAlibabacloudStackExpressconnectBgpnetworkDelete(d *schema.ResourceD
 	route_id := parts[1]
 	dst_cidr_block := parts[0]
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DstCidrBlock"] = dst_cidr_block
 

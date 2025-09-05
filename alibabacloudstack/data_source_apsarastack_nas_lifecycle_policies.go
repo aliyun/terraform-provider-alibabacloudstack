@@ -99,7 +99,7 @@ func dataSourceAlibabacloudStackNasLifecyclePoliciesRead(d *schema.ResourceData,
 	request := client.NewCommonRequest("GET", "NAS", "2017-06-26", "DescribeLifecyclePolicies", "")
 	NasDescribelifecyclepoliciesResponseObj := NasDescribelifecyclepoliciesResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("file_system_id"); ok {
 		request.QueryParams["FileSystemId"] = v.(string)

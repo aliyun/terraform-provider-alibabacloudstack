@@ -78,7 +78,7 @@ func TestAccAlibabacloudStackVpngatewayVpnPbrRouteEntry_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// overlay_mode 不支持回读
+				// overlay_mode does not support read back
 				ImportStateVerifyIgnore: []string{"overlay_mode"},
 			},
 		},

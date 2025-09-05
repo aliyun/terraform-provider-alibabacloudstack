@@ -189,13 +189,13 @@ func dataSourceAlibabacloudStackPolardbxInstanceTypesRead(d *schema.ResourceData
 }
 
 func ExtractNumbers(input string) ([]int, error) {
-	// 定义正则表达式模式，匹配一个或多个数字
+	// Define a regular expression pattern to match one or more digits
 	re := regexp.MustCompile(`\d+`)
 
-	// 查找所有匹配的字符串
+	// Find all matching strings
 	matches := re.FindAllString(input, -1)
 
-	// 将字符串转换为整数
+	// Convert strings to integers
 	var numbers []int
 	for _, match := range matches {
 		num, err := strconv.Atoi(match)

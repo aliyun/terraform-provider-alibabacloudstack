@@ -58,7 +58,7 @@ func resourceAlibabacloudStackEbsDiskreplicagroup() *schema.Resource {
 			// 	Optional: true,
 			// 	Computed: true,
 			// },
-			// 环境测试中，属性设置和修改无效
+			// Attribute setting and modification are invalid during environment testing
 
 			"rpo": {
 				Type:     schema.TypeInt,
@@ -114,7 +114,7 @@ func resourceAlibabacloudStackEbsDiskreplicagroupCreate(d *schema.ResourceData, 
 	request := client.NewCommonRequest("POST", "ebs", "2021-07-30", "CreateDiskReplicaGroup", "")
 	EbsCreatediskreplicagroupResponse := &EbsCreatediskreplicagroupResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("description"); ok {
 		request.QueryParams["Description"] = v.(string)
@@ -387,7 +387,7 @@ func resourceAlibabacloudStackEbsDiskreplicagroupDelete(d *schema.ResourceData, 
 	request := client.NewCommonRequest("POST", "ebs", "2021-07-30", "DeleteDiskReplicaGroup", "")
 	// EbsDeletediskreplicagroupResponse := &EbsDeletediskreplicagroupResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 	request.QueryParams["ReplicaGroupId"] = d.Id()
 	request.QueryParams["RegionId"] = d.Get("source_region_id").(string)
 	bresponse, err := client.ProcessCommonRequest(request)

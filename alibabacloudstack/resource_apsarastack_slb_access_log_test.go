@@ -46,7 +46,7 @@ func TestAccAlibabacloudStackSlbAccessLog_basic0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// 该参数无回读信息
+				// This parameter has no readback information
 				ImportStateVerifyIgnore: []string{"role_name"},
 			},
 		},

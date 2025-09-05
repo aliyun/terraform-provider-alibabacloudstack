@@ -108,7 +108,7 @@ func resourceAlibabacloudStackExpressconnectBgpgroupCreate(d *schema.ResourceDat
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "CreateBgpGroup", "")
 	VpcCreatebgpgroupResponseObj := VpcCreatebgpgroupResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("auth_key"); ok {
 		request.QueryParams["AuthKey"] = v.(string)

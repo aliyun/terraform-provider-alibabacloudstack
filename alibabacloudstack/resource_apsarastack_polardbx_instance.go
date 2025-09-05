@@ -314,7 +314,7 @@ func resourceAlibabacloudStackPolardbxInstanceCreate(d *schema.ResourceData, met
 		request.QueryParams["IsReadDBInstance"] = "false"
 	}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["EngineVersion"] = d.Get("engine_version").(string)
 
@@ -560,7 +560,7 @@ func resourceAlibabacloudStackPolardbxInstanceUpdate(d *schema.ResourceData, met
 		}
 	}
 	if d.Get("enable_public_connection").(bool) && d.HasChanges("enable_public_connection", "public_connection_string_prefix", "public_connection_port") {
-		// AllocateInstancePublicConnection在会ConnectionString后增加-pub,因此需要重新设置一遍
+		// AllocateInstancePublicConnection will add -pub to the ConnectionString, so it needs to be reset
 		var connectionString, newPrefix string
 		if response, err := polardbxService.DoPolardbxDescribedbinstanceattributeRequest(d.Id()); err != nil {
 			return err

@@ -13,7 +13,7 @@ import (
 func resourceAlibabacloudStackSlbAccesslog() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			// 没有对应得api调用该属性
+			// No corresponding API call for this attribute
 			// "listener_extended_attributes": {
 			// 	Type:     schema.TypeList,
 			// 	Optional: true,

@@ -36,14 +36,14 @@ func TestAccAlibabacloudStackEcsInvocationsDataSource(t *testing.T) {
 		}),
 	}
 
-	// 平台可能会自行启动一些Agent安装的命令，因此需要组合查找
+	// The platform may automatically start some commands for Agent installation, so a combined search is needed
 	instanceIdConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"command_id": "${alibabacloudstack_ecs_command.default.id}",
+			"command_id":   "${alibabacloudstack_ecs_command.default.id}",
 			"instance_id": "${alibabacloudstack_ecs_instance.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"command_id": "${alibabacloudstack_ecs_command.default.id}",
+			"command_id":   "${alibabacloudstack_ecs_command.default.id}",
 			"instance_id": "${alibabacloudstack_ecs_instance.default.id}_fake",
 		}),
 	}

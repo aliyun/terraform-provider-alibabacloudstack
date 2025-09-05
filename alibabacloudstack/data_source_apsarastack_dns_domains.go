@@ -75,7 +75,7 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 
 	var addDomains = DnsDomains{}
 	for {
-		// FIXME: 分页逻辑错误
+		// FIXME: pagination logic error
 		response, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			if response == nil {

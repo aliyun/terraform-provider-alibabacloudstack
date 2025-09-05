@@ -56,7 +56,7 @@ func dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntries() *schema.Resource 
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						// 接口无next_hop_tunnel_id, overlay_mode, publish_vpc属性
+						// Interface does not have next_hop_tunnel_id, overlay_mode, publish_vpc attributes
 						// "next_hop_tunnel_id": {
 						// 	TypeString
 						// 	Type:     schema.TypeString,

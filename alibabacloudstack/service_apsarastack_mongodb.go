@@ -122,8 +122,8 @@ func (s *MongoDBService) MongoDbInstanceNodeAddressStateRefreshFunc(nodeid, netT
 		}
 		if object["enable_"+netType+"_connection"].(bool) {
 			return object, "Enable", nil
-		}else {
-		return object, "Disable", nil
+		} else {
+			return object, "Disable", nil
 		}
 
 	}
@@ -676,7 +676,7 @@ func (s *MongoDBService) DoDdsDescribeaccountsRequest(id string) (*DdsDescribeac
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Dds", "2022-11-21", "DescribeAccounts", "")
 	DdsDescribeaccountsResponseObj := &DdsDescribeaccountsResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, COLON_SEPARATED)
 	instance_id := parts[1]
 	request.QueryParams["DBInstanceId"] = instance_id
@@ -709,7 +709,7 @@ func (s *MongoDBService) DoDdsDescribeauditpolicyRequest(id string) (*DdsDescrib
 	request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeAuditPolicy", "")
 	DdsDescribeauditpolicyResponseObj := &DdsDescribeauditpolicyResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceId"] = id
 
@@ -744,11 +744,11 @@ func (s *MongoDBService) doDdsDescribeauditlogfilterRequest(id string) (*DdsDesc
 		return nil, errmsgs.WrapError(err)
 	}
 
-	// 使用最终获取的 instance 变量
+	// Use the final obtained instance variable
 	request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeAuditLogFilter", "")
 	DdsDescribeauditlogfilterResponseObj := &DdsDescribeauditlogfilterResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceId"] = id
 
@@ -810,7 +810,7 @@ func (s *MongoDBService) DoDdsDescribebackupsRequest(id string) (*DdsDescribebac
 	instance_id := parts[1]
 	start_time := parts[2]
 	end_time := time.Now().UTC().Add(time.Hour).Format("2006-01-02T15:04Z")
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceId"] = instance_id
 	request.QueryParams["StartTime"] = start_time
@@ -933,7 +933,7 @@ func (s *MongoDBService) DoDdsDescribeshardingnetworkaddressRequest(id string) (
 	request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeShardingNetworkAddress", "")
 	DdsDescribeshardingnetworkaddressResponseObj := &DdsDescribeshardingnetworkaddressResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, COLON_SEPARATED)
 	db_instance_id := parts[0]
 	request.QueryParams["DBInstanceId"] = db_instance_id

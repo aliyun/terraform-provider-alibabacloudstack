@@ -84,7 +84,7 @@ func resourceAlibabacloudStackNasLifecyclepolicyCreate(d *schema.ResourceData, m
 	// api: NAS - 2017-06-26 - CreateLifecyclePolicy
 	request := client.NewCommonRequest("POST", "NAS", "2017-06-26", "CreateLifecyclePolicy", "")
 
-	//调用request_params_handler
+	// Call request_params_handler
 	request.QueryParams["LifecyclePolicyName"] = d.Get("lifecycle_policy_name").(string)
 	request.QueryParams["StorageType"] = d.Get("storage_type").(string)
 	request.QueryParams["FileSystemId"] = d.Get("file_system_id").(string)

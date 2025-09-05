@@ -62,7 +62,7 @@ func resourceAlibabacloudStackEcsDedicatedhostclusterCreate(d *schema.ResourceDa
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", "CreateDedicatedHostCluster", "")
 	// EcsCreatededicatedhostclusterResponse := EcsCreatededicatedhostclusterResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("dedicated_host_cluster_name"); ok {
 		request.QueryParams["DedicatedHostClusterName"] = v.(string)
@@ -183,7 +183,7 @@ func resourceAlibabacloudStackEcsDedicatedhostclusterDelete(d *schema.ResourceDa
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", "DeleteDedicatedHostCluster", "")
 	// EcsDeletededicatedhostclusterResponse := EcsDeletededicatedhostclusterResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DedicatedHostClusterId"] = d.Id()
 
@@ -218,3 +218,4 @@ type EcsUntagresourcesResponse struct {
 type EcsDeletededicatedhostclusterResponse struct {
 	RequestId string `json:"RequestId"`
 }
+

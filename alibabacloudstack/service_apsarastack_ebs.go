@@ -109,7 +109,7 @@ func (s *EbsService) DescribeEbsDiskreplicagroups(id string) (*EbsReplicaGroup, 
 	data := &EbsReplicaGroup{}
 	EbsDescribediskreplicagroupsResponse := &EbsDescribediskreplicagroupsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["GroupIds"] = id
 	bresponse, err := s.client.ProcessCommonRequest(request)

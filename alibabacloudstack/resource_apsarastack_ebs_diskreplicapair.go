@@ -22,7 +22,7 @@ func resourceAlibabacloudStackEbsDiskreplicapair() *schema.Resource {
 			// 	Optional: true,
 			// 	Computed: true,
 			// },
-			// 环境测试中，属性设置和修改无效
+			// In the environment testing phase, attribute setting and modification are invalid
 
 			"description": {
 				Type:     schema.TypeString,
@@ -101,7 +101,7 @@ func resourceAlibabacloudStackEbsDiskreplicapair() *schema.Resource {
 				Computed: true,
 			},
 
-			// TODO: ResourceMeta有定义改属性，但没有定义相关API
+			// TODO: ResourceMeta defines this attribute, but no related API is defined
 			//"tags": tagsSchema(),
 		},
 	}
@@ -119,7 +119,7 @@ func resourceAlibabacloudStackEbsDiskreplicapairCreate(d *schema.ResourceData, m
 	request := client.NewCommonRequest("POST", "ebs", "2021-07-30", "CreateDiskReplicaPair", "")
 	EbsCreatediskreplicapairResponse := EbsCreatediskreplicapairResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	// if v, ok := d.GetOk("bandwidth"); ok {
 	// 	request.QueryParams["Bandwidth"] = strconv.Itoa(v.(int))

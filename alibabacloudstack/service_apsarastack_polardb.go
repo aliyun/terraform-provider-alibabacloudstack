@@ -1331,7 +1331,7 @@ type DescribeBackupTasksResponse struct {
 	ResponseVersion string `json:"responseVersion"`
 	RequestId       string `json:"RequestId"`
 	Success         bool   `json:"success"`
-	RequestID       string `json:"requestId"` // 注意字段大小写可能不一致，需确认是否与[RequestId](file://d:\terraform\terraform-provider-apsarastack\alibabacloudstack\resource_apsarastack_ack_cluster.go#L657-L657)相同
+	RequestID       string `json:"requestId"` // Note that field case may not match [RequestId](file://d:\terraform\terraform-provider-apsarastack\alibabacloudstack\resource_apsarastack_ack_cluster.go#L657-L657)
 	Items           struct {
 		BackupJob []PolardbBackupJob `json:"BackupJob"`
 	} `json:"Items"`
@@ -1550,7 +1550,7 @@ func (s *PolardbService) ignoreTag(t Tag) bool {
 		log.Printf("[DEBUG] Matching prefix %v with %v\n", v, t.Key)
 		ok, _ := regexp.MatchString(v, t.Key)
 		if ok {
-			log.Printf("[DEBUG] Found Alibaba Cloud specific t %s (val: %s), ignoring.\n", t.Key, t.Value)
+			log.Printf("[DEBUG] Found Alibaba Cloud specific tag %s (val: %s), ignoring.\n", t.Key, t.Value)
 			return true
 		}
 	}

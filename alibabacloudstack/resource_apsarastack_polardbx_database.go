@@ -144,7 +144,7 @@ func resourceAlibabacloudStackPolardbxDatabaseDelete(d *schema.ResourceData, met
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteDB", "")
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
 		return err

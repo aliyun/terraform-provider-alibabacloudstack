@@ -186,7 +186,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceCreate(d *schema.ResourceDa
 	engine := d.Get("engine").(string)
 	request.QueryParams["Engine"] = engine
 	request.QueryParams["EngineVersion"] = Trim(d.Get("engine_version").(string))
-	//待测
+	// To be tested
 	request.QueryParams["DBInstanceStorage"] = strconv.Itoa(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
 	if err := errmsgs.CheckEmpty(request.QueryParams["DBInstanceStorage"], schema.TypeInt, "db_instance_storage", "instance_storage"); err != nil {
 		return errmsgs.WrapError(err)
@@ -344,7 +344,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 	if d.HasChange("enable_ssl") {
 		ssl := d.Get("enable_ssl").(bool)
 		if d.IsNewResource() && ssl == false {
-			// 新资源默认false
+			// New resource defaults to false
 			return nil
 		}
 		ssl_req := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceSSL", "")

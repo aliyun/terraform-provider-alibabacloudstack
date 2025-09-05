@@ -114,7 +114,7 @@ func dataSourceAlibabacloudStackEcsDedicatedHostClustersRead(d *schema.ResourceD
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", "DescribeDedicatedHostClusters", "")
 	EcsDescribededicatedhostclustersResponse := EcsDescribededicatedhostclustersResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("dedicated_host_cluster_name"); ok {
 		request.QueryParams["DedicatedHostClusterName"] = v.(string)

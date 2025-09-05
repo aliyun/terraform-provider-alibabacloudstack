@@ -106,21 +106,21 @@ func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData,
 		var create []map[string]interface{}
 
 		if value, ok := d.GetOk("resources"); ok {
-			// 检查类型是否为 *schema.Set
+			// Check if the type is *schema.Set
 			if set, ok := value.(*schema.Set); ok {
-				// 将 Set 转换为 []interface{}
+				// Convert Set to []interface{}
 				items := set.List()
-				// 验证每个元素是否为 map[string]interface{}
+				// Validate that each element is a map[string]interface{}
 				for _, item := range items {
 					if m, ok := item.(map[string]interface{}); ok {
 						create = append(create, m)
 					} else {
-						// 处理类型不匹配的元素（可选）
+						// Handle type mismatch for an element (optional)
 						log.Printf("Invalid resource item type: %T", item)
 					}
 				}
 			} else {
-				// 处理 resources 字段类型不匹配的情况（例如用户误传为字符串）
+				// Handle case where 'resources' field type does not match (e.g., user mistakenly passed a string)
 				log.Printf("Expected *schema.Set for 'resources', got %T", value)
 			}
 		}

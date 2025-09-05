@@ -76,7 +76,7 @@ func dataSourceAlibabacloudStackExpressconnectBgpNetworksRead(d *schema.Resource
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBgpNetworks", "")
 	VpcDescribebgpnetworksResponseObj := VpcDescribebgpnetworksResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["RouterId"] = d.Get("router_id").(string)
 	idsMap := make(map[string]string)

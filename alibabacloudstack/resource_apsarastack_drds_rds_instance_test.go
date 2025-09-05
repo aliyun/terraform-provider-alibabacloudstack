@@ -62,8 +62,8 @@ func TestAccAlibabacloudStackDrdsRdsInstance_basic0(t *testing.T) {
 			{
 				ResourceName: resourceId,
 				ImportState:  true,
-				// "zone_id", "db_instance_class", "storage_type" 不支持回读
-				// "force_remove" 为本地控制属性
+				// "zone_id", "db_instance_class", "storage_type" do not support read back
+				// "force_remove" is a local control attribute
 				ImportStateVerifyIgnore: []string{"zone_id", "storage_type", "db_instance_class", "force_remove"},
 			},
 			{

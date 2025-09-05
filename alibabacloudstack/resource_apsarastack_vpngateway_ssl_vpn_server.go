@@ -101,7 +101,7 @@ func resourceAlibabacloudStackVpngatewaySslvpnserverCreate(d *schema.ResourceDat
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "CreateSslVpnServer", "")
 	VpcCreatesslvpnserverResponseObj := VpcCreatesslvpnserverResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("cipher"); ok {
 		request.QueryParams["Cipher"] = v.(string)
@@ -264,7 +264,7 @@ func resourceAlibabacloudStackVpngatewaySslvpnserverDelete(d *schema.ResourceDat
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteSslVpnServer", "")
 	// VpcDeletesslvpnserverResponseObj := VpcDeletesslvpnserverResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["SslVpnServerId"] = d.Id()
 	var errmsg string

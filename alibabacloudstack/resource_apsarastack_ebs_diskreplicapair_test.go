@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackEbsDiskReplicaPair_basic0(t *testing.T) {
 					"destination_region_id":  "${var.region}",
 					"destination_disk_id":    "${alibabacloudstack_ecs_disk.disk2.id}",
 					"rpo":                    "300",
-					// "bandwidth": 				1000,  属性不支持修改
+					// "bandwidth": 				1000,  Attribute does not support modification
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -115,3 +115,4 @@ resource "alibabacloudstack_ecs_disk" "disk2" {
 
 `, name, region, DataAlibabacloudstackVswitchZones)
 }
+

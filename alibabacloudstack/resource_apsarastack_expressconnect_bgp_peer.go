@@ -281,7 +281,7 @@ func resourceAlibabacloudStackExpressconnectBgppeerDelete(d *schema.ResourceData
 	// api: Vpc - 2016-04-28 - DeleteBgpPeer
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteBgpPeer", "")
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["BgpPeerId"] = d.Get("bgp_peer_id").(string)
 

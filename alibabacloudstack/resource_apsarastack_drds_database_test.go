@@ -68,7 +68,7 @@ func TestAccAlibabacloudStackDrdsDatabase_basic0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// encode和password无法回读
+				// encode and password cannot be read back
 				ImportStateVerifyIgnore: []string{"encode", "password"},
 			},
 

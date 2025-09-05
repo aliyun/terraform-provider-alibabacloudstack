@@ -84,7 +84,7 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryCreate(d *schema.Resourc
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "CreateVpnPbrRouteEntry", "")
 	VpcCreatevpnpbrrouteentryResponseObj := VpcCreatevpnpbrrouteentryResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["NextHop"] = d.Get("next_hop").(string)
 

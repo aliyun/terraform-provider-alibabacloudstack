@@ -175,7 +175,7 @@ func dataSourceAlibabacloudStackVpcHaVipsRead(d *schema.ResourceData, meta inter
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeHaVips", "")
 	VpcDescribehavipsResponseObj := VpcDescribehavipsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("filter"); ok {
 		filter := v.([]interface{})

@@ -205,7 +205,7 @@ func resourceAlibabacloudStackDrdsRdsInstnaceDelete(d *schema.ResourceData, meta
 	// api: Drds - 2019-01-23 - RemoveDrdsDb
 	request := client.NewCommonRequest("POST", "Drds", "2019-01-23", "RemoveDrdsMysql", "")
 
-	//调用request_params_handler
+	// Call request_params_handler
 	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
 		return err
 	} else {

@@ -318,7 +318,7 @@ resource "alibabacloudstack_alikafka_instance" "default" {
 	spec = "Broker4C16G"
 	
 	provisioner "local-exec" {
-		//防止broker未就绪导致的失败
+		// Prevent failure due to broker not being ready
 		command = "sleep 300"
 	}
 }

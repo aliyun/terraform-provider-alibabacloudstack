@@ -88,7 +88,7 @@ func dataSourceAlibabacloudStackPolardbxDatabasesRead(d *schema.ResourceData, me
 	polardbxService := PolardbXService{client}
 
 	if _, err := polardbxService.DoPolardbxDescribedbinstanceattributeRequest(d.Get("instance_id").(string)); err != nil {
-		// 需要先判断drds_instance_id，不存在时直接返回空
+		// Need to first check drds_instance_id, return empty if it does not exist
 		ids := []string{}
 		datas := []interface{}{}
 		d.SetId(dataResourceIdHash(ids))

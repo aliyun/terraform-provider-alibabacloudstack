@@ -62,7 +62,7 @@ func resourceAlibabacloudStackMongodbAccountCreate(d *schema.ResourceData, meta 
 	request := client.NewCommonRequest("POST", "Dds", "2022-11-21", "CreateAccount", "")
 	DdsCreateaccountResponseObj := DdsCreateaccountResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["AccountName"] = d.Get("account_name").(string)
 

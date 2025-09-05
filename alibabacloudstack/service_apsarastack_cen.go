@@ -287,7 +287,7 @@ func (s *CenService) DoCbnDescribecensRequest(id string) (*CenInstance, error) {
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DescribeCens", "")
 	cbnDescribecensResponseObj := &CbnDescribecensResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	request.QueryParams["Filter.1.Key"] = "CenId"
 	request.QueryParams["Filter.1.Value.1"] = id
 
@@ -318,7 +318,7 @@ func (s *CenService) DoCbnDescribeTransitRoutersRequest(id string) (*TransitRout
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouters", "")
 	TransitRouterResponseObj := &TransitRouterResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	request.QueryParams["CenId"] = id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -463,7 +463,7 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteEntriesRequest(id string) (*
 
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterRouteEntries", "")
 	CbnDescribeRouterRouteEntriesResponseObj := &CbnDescribeTransitRouterRouteEntriesResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, ":")
 	route_table_id := parts[0]
 	request.QueryParams["TransitRouterRouteTableId"] = route_table_id
@@ -491,7 +491,7 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablesRequest(id string) (*C
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterRouteTables", "")
 	CbnDescribeRouterRouteTablesResponseObj := &CbnDescribeTransitRouterRouteTablesResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, ":")
 	transit_router_id := parts[0]
 	request.QueryParams["TransitRouterId"] = transit_router_id
@@ -519,7 +519,7 @@ func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainsRequest(id strin
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterMulticastDomains", "")
 	CbnDescribeRouterMulticastDomainResponseObj := &CbnDescribeTransitRouterMulticastDomainsResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, ":")
 	transit_router_id := parts[0]
 	request.QueryParams["TransitRouterId"] = transit_router_id
@@ -547,7 +547,7 @@ func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainSourceRequest(id 
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterMulticastGroups", "")
 	CbnDescribeRouterMulticastDomainSourceResponseObj := &CbnDescribeTransitRouterMulticastDomainSourceResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, ":")
 	transit_router_multicast_domain_id := parts[2]
 	request.QueryParams["TransitRouterMulticastDomainId"] = transit_router_multicast_domain_id
@@ -575,7 +575,7 @@ func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainAssociationsReque
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterMulticastDomainAssociations", "")
 	CbnDescribeRouterMulticastDomainAssociationResponseObj := &CbnDescribeTransitRouterMulticastDomainAssociationsResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, ":")
 	domain_id := parts[1]
 	request.QueryParams["TransitRouterMulticastDomainId"] = domain_id
@@ -670,7 +670,7 @@ func (s *CenService) DoCbnDescribeTransitRouterAttachmentsRequest(id string) (*T
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterAttachments", "")
 	DescribeRouterattachmentsResponseObj := &TransitRouterAttachmentsResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, ":")
 	cen_id := parts[0]
 	transit_router_id := parts[1]
@@ -704,7 +704,7 @@ func (s *CenService) DoCbnDescribeTransitRouterVpcAttachmentsRequest(id string) 
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterVpcAttachments", "")
 	CbnDescribeRouterVpcattachmentsResponseObj := &CbnDescribeTransitRouterVpcAttachmentsResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, ":")
 	cen_id := parts[0]
 	transit_router_id := parts[1]
@@ -736,7 +736,7 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTableAssociationsRequest(id 
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterRouteTableAssociations", "")
 	TransitRouterRouteTableAssociationsResponseObj := &TransitRouterRouteTableAssociationsResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, ":")
 	transit_router_table := parts[0]
 	if len(parts) > 1 {
@@ -767,7 +767,7 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablePropagationsRequest(id 
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterRouteTablePropagations", "")
 	TransitRouterRouteTablePropagationsResponseObj := &TransitRouterRouteTablePropagationsResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, ":")
 	transit_router_table := parts[0]
 	if len(parts) > 1 {
@@ -889,7 +889,7 @@ func (s *CenService) DoCbnDescribeCenRouteMapsRequest(id string) (*CbnDescribeCe
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DescribeCenRouteMaps", "")
 	CbnDescribeRouteMapsResponseObj := &CbnDescribeCenRouteMapsResponse{}
-	//调用request_params_handler
+	// Call request_params_handler
 	parts := strings.Split(id, ":")
 	cen_id := parts[0]
 	route_table_id := parts[2]

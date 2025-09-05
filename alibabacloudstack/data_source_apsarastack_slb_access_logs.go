@@ -44,7 +44,7 @@ func dataSourceAlibabacloudStackSlbAccessLogs() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						// 没有api接口
+						// No API interface
 						// "listener_extended_attributes": {
 						// 	// TypeList
 						// 	Type:     schema.TypeList,
@@ -120,7 +120,7 @@ func dataSourceAlibabacloudStackSlbAccessLogs() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						// 无api支持该属性
+						// No API support for this attribute
 						// "role_name": {
 						// 	// TypeString
 						// 	Type:     schema.TypeString,
@@ -140,7 +140,7 @@ func dataSourceAlibabacloudStackSlbAccessLogsRead(d *schema.ResourceData, meta i
 	request := client.NewCommonRequest("POST", "Slb", "2014-05-15", "DescribeAccessLogsDownloadAttribute", "")
 	SlbDescribeaccesslogsdownloadattributeResponseObj := SlbDescribeaccesslogsdownloadattributeResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("load_balancer_id"); ok {
 		request.QueryParams["LoadBalancerId"] = v.(string)

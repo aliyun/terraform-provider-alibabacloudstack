@@ -49,7 +49,7 @@ func (s *PolardbXService) DoPolardbxDescribeAccountRequest(id string) (*Polardbx
 	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeAccountList", "")
 	DoPolardbxDescribeAccountListResponseObj := &DoPolardbxDescribeAccountListResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceName"] = instanceId
 
@@ -192,7 +192,7 @@ func (s *PolardbXService) DoPolardbxDescribedbinstanceattributeRequest(id string
 	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstanceAttribute", "")
 	PolardbxDescribedbinstanceattributeResponseObj := &PolardbxDescribedbinstanceattributeResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceName"] = id
 
@@ -698,7 +698,7 @@ func (s *PolardbXService) DoPolardbxDescribeSecurityIpsRequest(id string) (*[]Po
 	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeAccountList", "")
 	DescribeSecurityIpsResponseObj := &DescribeSecurityIpsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceName"] = id
 
@@ -793,7 +793,7 @@ func (s *PolardbXService) DescribePolardbXDBSecurityIPGroup(instance_id string) 
 	PolardbXDBSecurityIPGroupResponseObj := PolardbXDBSecurityIPGroupResponse{}
 	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeSecurityIps", "")
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceName"] = instance_id
 
@@ -816,7 +816,7 @@ func (s *PolardbXService) DescribePolardbXDBSecurityIPGroup(instance_id string) 
 	return PolardbXDBSecurityIPGroupResponseObj.Data.GroupItems, nil
 }
 
-// BackupResponse 备份响应结构体
+// BackupResponse Backup response structure
 type PolarDbXBackupResponse struct {
 	EagleEyeTraceId string               `json:"eagleEyeTraceId"`
 	AsapiSuccess    bool                 `json:"asapiSuccess"`
@@ -830,7 +830,7 @@ type PolarDbXBackupResponse struct {
 	Success         bool                 `json:"Success"`
 }
 
-// BackupData 备份数据结构体
+// BackupData Backup data structure
 type PolarDbXBackupData struct {
 	BackupModel   int    `json:"BackupModel"`
 	Status        int    `json:"Status"`

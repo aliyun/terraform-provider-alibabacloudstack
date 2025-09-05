@@ -59,7 +59,7 @@ func dataSourceAlibabacloudStackDrdsRdsInstancesRead(d *schema.ResourceData, met
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdsService := DrdsService{client}
 	if _,  err := drdsService.DescribeDrdsInstance(d.Get("drds_instance_id").(string)); err != nil {
-		// 需要先判断drds_instance_id，不存在时直接返回空
+		// Need to check drds_instance_id first, return empty if not exist
 		ids := []string{}
 		datas := []interface{}{}
 		d.SetId(dataResourceIdHash(ids))
@@ -104,7 +104,7 @@ func dataSourceAlibabacloudStackDrdsRdsInstancesRead(d *schema.ResourceData, met
 			return err
 		} else {
 			if int(v) < 0 || int(v) == 4 {
-				// 不显示删除中的资源
+				// Do not show resources that are being deleted
 				continue
 			}
 		}

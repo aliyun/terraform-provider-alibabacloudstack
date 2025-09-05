@@ -118,7 +118,7 @@ func dataSourceAlibabacloudStackDrdsAccountsRead(d *schema.ResourceData, meta in
 	drdsService :=DrdsService{client}
 
 	if _,  err := drdsService.DescribeDrdsInstance(d.Get("instance_id").(string)); err != nil {
-		// 需要先判断drds_instance_id，不存在时直接返回空
+		// Need to check drds_instance_id first, return empty if not exist
 		ids := []string{}
 		datas := []interface{}{}
 		d.SetId(dataResourceIdHash(ids))
@@ -139,7 +139,7 @@ func dataSourceAlibabacloudStackDrdsAccountsRead(d *schema.ResourceData, meta in
 	request := client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeInstanceAccounts", "")
 	DrdsDescribeinstanceaccountsResponse := DrdsDescribeinstanceaccountsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DrdsInstanceId"] = d.Get("instance_id").(string)
 

@@ -18,7 +18,7 @@ func resourceAlibabacloudStackCenTransitMulticastDomainSource() *schema.Resource
 			"group_ip_address": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "组播IP地址。",
+				Description: "Multicast IP address.",
 			},
 			"network_interface_id": {
 				Type:     schema.TypeString,
@@ -33,7 +33,7 @@ func resourceAlibabacloudStackCenTransitMulticastDomainSource() *schema.Resource
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "转发路由器组播域ID。",
+				Description: "Forwarding router multicast domain ID.",
 			},
 			"vswitch_id": {
 				Type:     schema.TypeString,

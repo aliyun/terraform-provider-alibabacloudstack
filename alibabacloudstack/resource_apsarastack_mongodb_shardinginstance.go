@@ -519,7 +519,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
 
-	// 第一阶段：获取基础实例信息（串行）
+	// Phase 1: Get basic instance information (serial)
 	instance, err := ddsService.DescribeMongoDBInstance(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
@@ -534,13 +534,13 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 	d.Set("zone_id", instance.ZoneId)
 	d.Set("vswitch_id", instance.VSwitchId)
 
-	// 第二阶段：并发获取其他数据
+	// Phase 2: Concurrently fetch other data
 	var wg sync.WaitGroup
-	errChan := make(chan error, 6) // 根据实际任务数调整缓冲区大小
+	errChan := make(chan error, 6) // Adjust buffer size according to actual task count
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 并发任务1：节点信息
+	// Concurrent Task 1: Node Information
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -564,7 +564,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		}
 	}()
 
-	// 并发任务2：TDE状态
+	// Concurrent Task 2: TDE Status
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -584,7 +584,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		}
 	}()
 
-	// 并发任务3：安全IP列表
+	// Concurrent Task 3: Security IP List
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -602,7 +602,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		}
 	}()
 
-	// 并发任务4：备份策略
+	// Concurrent Task 4: Backup Policy
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -630,7 +630,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		}
 	}()
 
-	// 并发任务5：获取数据库用户
+	// Concurrent Task 5: Get Database User
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -655,7 +655,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		}
 	}()
 
-	// 并发任务4：审计策略
+	// Concurrent Task 6: Audit Policy
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -673,13 +673,13 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		}
 	}()
 
-	// 等待所有协程完成
+	// Wait for all goroutines to complete
 	go func() {
 		wg.Wait()
 		close(errChan)
 	}()
 
-	// 错误处理
+	// Error handling
 	for e := range errChan {
 		if e != nil {
 			return errmsgs.WrapError(e)

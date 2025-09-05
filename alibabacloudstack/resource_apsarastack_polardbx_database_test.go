@@ -67,7 +67,7 @@ func TestAccAlibabacloudStackPolardbxDatabase_basic0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// mode 无法回读
+				// mode cannot be read back
 				ImportStateVerifyIgnore: []string{"mode"},
 			},
 		},

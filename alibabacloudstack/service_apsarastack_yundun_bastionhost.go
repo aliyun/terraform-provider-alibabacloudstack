@@ -1350,13 +1350,13 @@ func (s *YundunBastionhostService) DescribeBastionhostLdapAuthServer(id string) 
 }
 
 func compareMapWithIgnoreEquivalent(m1, m2 map[string]interface{}, ignoreKeys []string) bool {
-	// 创建一个集合来存储需要忽略的键
+	// Create a set to store keys that need to be ignored
 	ignoreSet := make(map[string]struct{})
 	for _, key := range ignoreKeys {
 		ignoreSet[key] = struct{}{}
 	}
 
-	// 检查 m1 中的所有键
+	// Check all keys in m1
 	for k, v := range m1 {
 		if _, ignore := ignoreSet[k]; ignore {
 			continue
@@ -1366,7 +1366,7 @@ func compareMapWithIgnoreEquivalent(m1, m2 map[string]interface{}, ignoreKeys []
 		}
 	}
 
-	// 检查 m2 中的所有键
+	// Check all keys in m2
 	for k, v := range m2 {
 		if _, ignore := ignoreSet[k]; ignore {
 			continue

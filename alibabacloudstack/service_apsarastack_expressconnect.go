@@ -231,7 +231,7 @@ func (s *ExpressconnectService) DoVpcDescribebgpnetworksRequest(id string) (*Vpc
 	request := s.client.NewCommonRequest("GET", "Vpc", "2016-04-28", "DescribeBgpNetworks", "")
 	VpcDescribebgpnetworksResponseObj := &VpcDescribebgpnetworksResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["RouterId"] = id
 
@@ -331,7 +331,7 @@ func (s *ExpressconnectService) DoVpcDescribevirtualborderroutersRequest(id stri
 	request := s.client.NewCommonRequest("GET", "Vpc", "2016-04-28", "DescribeVirtualBorderRouters", "")
 	VpcDescribevirtualborderroutersResponseObj := &VpcDescribevirtualborderroutersResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["PageNumber"] = "1"
 	request.QueryParams["PageSize"] = "10"

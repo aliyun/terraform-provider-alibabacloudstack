@@ -85,7 +85,7 @@ func dataSourceAlibabacloudStackMongodbAccountsRead(d *schema.ResourceData, meta
 	request := client.NewCommonRequest("POST", "Dds", "2022-11-21", "DescribeAccounts", "")
 	DdsDescribeaccountsResponseObj := DdsDescribeaccountsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok {

@@ -155,7 +155,7 @@ func dataSourceAlibabacloudStackCenCenInstancesRead(d *schema.ResourceData, meta
 	request := client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DescribeCens", "")
 	CbnDescribecensResponseObj := CbnDescribecensResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("page_number"); ok {
 		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))

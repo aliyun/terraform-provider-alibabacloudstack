@@ -161,7 +161,7 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						// 不支持
+						// Not supported
 						// "encrypt_algorithm": {
 						// 	Type:         schema.TypeString,
 						// 	Optional:     true,
@@ -794,7 +794,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 				"performance_level":       disk["performance_level"].(string),
 				"kms_key_id":              disk["kms_key_id"].(string),
 			})
-			// v3.18.3 Sp01 后不支持该参数加密worker节点
+			// v3.18.3 Sp01 does not support this parameter to encrypt worker nodes
 			// worker_data_disks = append(worker_data_disks, map[string]interface{}{
 			// 	"size":                    fmt.Sprintf("%d", disk["size"].(int)),
 			// 	"category":                disk["category"].(string),
@@ -805,7 +805,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 			// })
 		}
 		scaling_group["data_disks"] = data_disks
-		// v3.18.3 Sp01 后不支持该参数加密worker节点
+		// v3.18.3 Sp01 does not support this parameter to encrypt worker nodes
 		// body["worker_data_disks"] = worker_data_disks
 	}
 	defnodepool["scaling_group"] = scaling_group
@@ -859,7 +859,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		}
 	}
 
-	// v3.18.3 Sp01 后不支持该参数加密worker节点
+	// v3.18.3 Sp01 does not support this parameter to encrypt worker nodes
 	// if v, ok := d.GetOk("worker_disk_encrypted"); ok && v.(bool) {
 	// 	body["worker_system_disk_encrypted"] = fmt.Sprintf("%t", v.(bool))
 	// 	if v, ok := d.GetOk("worker_disk_encrypt_algorithm"); ok && v.(string) != "" {
@@ -876,7 +876,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		body["instances"] = expandStringList(v.(*schema.Set).List())
 	} else {
 		body["nodepools"] = []interface{}{defnodepool}
-		// v3.18.3 Sp01 后不支持该参数加密worker节点
+		// v3.18.3 Sp01 does not support this parameter to encrypt worker nodes
 		// body["worker_instance_types"] = d.Get("worker_instance_types").([]interface{})
 		// body["worker_vswitch_ids"] = d.Get("worker_vswitch_ids").([]interface{})
 		// body["worker_system_disk_category"] = d.Get("worker_disk_category").(string)

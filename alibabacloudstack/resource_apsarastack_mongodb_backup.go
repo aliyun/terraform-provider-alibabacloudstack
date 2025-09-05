@@ -94,7 +94,7 @@ func resourceAlibabacloudStackMongodbBackupCreate(d *schema.ResourceData, meta i
 	request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "CreateBackup", "")
 	DdsCreatebackupResponseObj := DdsCreatebackupResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["BackupMethod"] = d.Get("backup_method").(string)
 

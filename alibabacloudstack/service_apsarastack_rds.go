@@ -31,9 +31,9 @@ type RdsService struct {
 //	                    |B. {nil, error}                     |b. {200, nil}
 //	               					  |c. {4xx, nil}
 //
-// The API return 200 for resource not found.
+// The API returns 200 when the resource is not found.
 // When getInstance is empty, then throw InstanceNotfound error.
-// That the business layer only need to check error.
+// That the business layer only needs to check the error.
 var DBInstanceStatusCatcher = Catcher{"OperationDenied.DBInstanceStatus", 60, 5}
 
 func (s *RdsService) DescribeDBInstance(id string) (*rds.DBInstanceAttribute, error) {
@@ -1513,7 +1513,7 @@ func (s *RdsService) ignoreTag(t Tag) bool {
 		log.Printf("[DEBUG] Matching prefix %v with %v\n", v, t.Key)
 		ok, _ := regexp.MatchString(v, t.Key)
 		if ok {
-			log.Printf("[DEBUG] Found Alibaba Cloud specific t %s (val: %s), ignoring.\n", t.Key, t.Value)
+			log.Printf("[DEBUG] Found Alibaba Cloud specific tag %s (val: %s), ignoring.\n", t.Key, t.Value)
 			return true
 		}
 	}
@@ -1541,7 +1541,7 @@ func (s *RdsService) DoDescribebackupsRequest(id string) (*RdsDescribebackupsRes
 	request := s.client.NewCommonRequest("GET", "rds", "2014-08-15", "DescribeBackups", "")
 	RkvstoreDescribebackupsResponseObj := &RdsDescribebackupsResponse{}
 
-	//调用request_params_handler
+	//call request_params_handler
 
 	parts := strings.Split(id, ":")
 	request.QueryParams["DBInstanceId"] = parts[0]

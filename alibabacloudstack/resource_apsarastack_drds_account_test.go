@@ -76,7 +76,7 @@ func TestAccAlibabacloudStackDrdsAccount_basic0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// password无法回读
+				// password cannot be read back
 				ImportStateVerifyIgnore: []string{"password"},
 			},
 			{

@@ -184,7 +184,7 @@ func TestAccAlibabacloudStackPolardbxInstance_basic0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// "topology_type" 不支持回读， "compute_parameters", "storage_parameters" 只支持回读本地更新的参数。
+				// "topology_type" does not support readback, "compute_parameters", "storage_parameters" only support reading back locally updated parameters.
 				ImportStateVerifyIgnore: []string{"topology_type", "compute_parameters", "storage_parameters"},
 			},
 		},

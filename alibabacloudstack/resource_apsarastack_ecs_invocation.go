@@ -66,7 +66,7 @@ func resourceAlibabacloudStackEcsInvocationCreate(d *schema.ResourceData, meta i
 	// api: Ecs - 2014-05-26 - InvokeCommand
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", "InvokeCommand", "")
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("command_id"); ok {
 		request.QueryParams["CommandId"] = v.(string)

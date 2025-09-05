@@ -459,7 +459,7 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 			request["InstanceId"] = d.Id()
 			request["Config"] = configKey
 			request["Value"] = v
-			// 如存在变更任务则等待任务完成
+			// Wait for the task to complete if there is a change task
 			if err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
 				response, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", action, "", nil, request, nil)
 				if err != nil {
@@ -475,7 +475,7 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 			}); err != nil {
 				return err
 			}
-			// 等待任务允许查询
+			// Wait for the task to be queryable
 			if err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
 				_, err := alikafkaService.DescribeAlikafkaInstanceConfigMap(d.Id())
 				if err != nil {
@@ -493,7 +493,7 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 	}
 
 	if last_updated_key != "" {
-		// 等待变更终态
+		// Wait for the final state of the change
 		if err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
 			err := resourceAlibabacloudStackAlikafkaInstanceRead(d, meta)
 			if err != nil {

@@ -99,7 +99,7 @@ func resourceAlibabacloudStackRdsBackupCreate(d *schema.ResourceData, meta inter
 	request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "CreateBackup", "")
 	rdsCreatebackupResponse := RdsCreatebackupResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	instanceId := d.Get("instance_id").(string)
 	request.QueryParams["BackupMethod"] = d.Get("backup_method").(string)

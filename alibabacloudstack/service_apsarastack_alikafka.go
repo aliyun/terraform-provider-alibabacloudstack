@@ -818,7 +818,7 @@ func (s *AlikafkaService) AliKafkaInstanceStateRefreshFunc(id, attribute string,
 		}
 
 		rv := reflect.ValueOf(object).Elem()
-		// 查找字段
+		// Find field
 		field := rv.FieldByName(attribute)
 		if !field.IsValid() || !field.CanInterface() {
 			return nil, "", nil
@@ -904,7 +904,7 @@ type GetInstanceListResponse struct {
 	Message      string       `json:"Message"`
 	RequestId    string       `json:"RequestId"`
 	Success      bool         `json:"Success"`
-	InstanceList []InstanceVO `json:"InstanceList"` // 修改为直接使用 []InstanceVO
+	InstanceList []InstanceVO `json:"InstanceList"` // Changed to directly use []InstanceVO
 }
 
 type InstanceVO struct {

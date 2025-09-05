@@ -400,7 +400,7 @@ func getNextpageNumber(number requests.Integer) (requests.Integer, error) {
 }
 
 func incrementalWait(firstDuration time.Duration, increaseDuration time.Duration) func() {
-	//	迁移动作太大，使用重定向
+	//	Migration action is too large, use redirection
 	return connectivity.IncrementalWait(firstDuration, increaseDuration)
 }
 
@@ -556,7 +556,7 @@ func GetUserHomeDir() (string, error) {
 	return usr.HomeDir, nil
 }
 
-// writeToFile 函数
+// writeToFile function
 func writeToFile(filePath string, data interface{}) error {
 	var out string
 	switch v := data.(type) {
@@ -572,7 +572,7 @@ func writeToFile(filePath string, data interface{}) error {
 		out = string(bs)
 	}
 
-	// 替换 ~ 为用户主目录
+	// Replace ~ with user home directory
 	if strings.HasPrefix(filePath, "~") {
 		home, err := GetUserHomeDir()
 		if err != nil {
@@ -583,30 +583,30 @@ func writeToFile(filePath string, data interface{}) error {
 		}
 	}
 
-	// 获取当前工作目录
+	// Get current working directory
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("failed to get current working directory: %v", err)
 	}
 
-	// 获取用户主目录
+	// Get user home directory
 	home, err := GetUserHomeDir()
 	if err != nil {
 		return fmt.Errorf("failed to get user home directory: %v", err)
 	}
 
-	// 获取文件路径的绝对路径
+	// Get absolute path of the file
 	absFilePath, err := filepath.Abs(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path for %s: %v", filePath, err)
 	}
 
-	// 确保文件路径是相对于当前工作目录或用户主目录
+	// Ensure file path is relative to current working directory or user home directory
 	if !strings.HasPrefix(absFilePath, currentDir+string(filepath.Separator)) && !strings.HasPrefix(absFilePath, home+string(filepath.Separator)) {
 		return fmt.Errorf("file path %s is not within the allowed directories: current directory %s or home directory %s", absFilePath, currentDir, home)
 	}
 
-	// 写入文件
+	// Write to file
 	return ioutil.WriteFile(absFilePath, []byte(out), 0644)
 }
 
@@ -869,10 +869,10 @@ func convertMapFloat64ToJsonString(m map[string]interface{}) (string, error) {
 	}
 }
 
-// 合并两个 map，并在遇到相同键时覆盖第一个 map 的值
+// Merge two maps and overwrite the value of the first map when encountering the same key
 func mergeMaps(map1, map2 map[string]string) {
 
-	// 将第二个 map 的所有键值对复制到 mergedMap，覆盖已存在的键
+	// Copy all key-value pairs from the second map to mergedMap, overwriting existing keys
 	for key, value := range map2 {
 		map1[key] = value
 	}
@@ -971,7 +971,7 @@ func newInstanceDiff(resourceName string, attributes, attributesDiff map[string]
 				}
 			}
 		}
-		// 使用 SetNew 和 SetOld 方法来设置属性差异
+		// Use SetNew and SetOld methods to set attribute differences
 		if diff.Attributes == nil {
 			diff.Attributes = make(map[string]*terraform.ResourceAttrDiff)
 		}
@@ -1018,7 +1018,7 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 
 		if err != nil {
 			waitSecondsIfWithTest(3)
-			// 如果创建成功但读取加载失败，tf不会终态，为方式残留资源，触发删除
+			// If creation succeeds but reading fails, tf will not reach final state. To avoid residual resources, trigger deletion
 			resource.DeleteContext(ctx, d, meta)
 			return diag.FromErr(err)
 		}
@@ -1026,7 +1026,7 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 		waitSecondsIfWithTest(1)
 		retry := 5
 		for retry > 0 {
-			// 大批量触发时asapi侧的资源同步会有一定的延迟，如果失败则重试
+			// When triggered in large batches, there will be a certain delay in resource synchronization on the asapi side. Retry if it fails
 			err = readFunc(d, meta)
 			if err != nil {
 				time.Sleep(time.Second * 5)
@@ -1036,7 +1036,7 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 			break
 		}
 		if err != nil {
-			// 如果创建成功但读取加载失败，tf不会终态，为方式残留资源，触发删除
+			// If creation succeeds but reading fails, tf will not reach final state. To avoid residual resources, trigger deletion
 			waitSecondsIfWithTest(3)
 			resource.DeleteContext(ctx, d, meta)
 			return diag.FromErr(err)
@@ -1108,13 +1108,13 @@ func GenerateRandomString(length int) string {
 	return string(result)
 }
 
-// 全局锁管理器：存储lockname的互斥锁
+// Global lock manager: store mutex locks for lockname
 var (
 	Locks   = make(map[string]*sync.Mutex)
-	LockRWM sync.RWMutex // 保护 Locks 的读写
+	LockRWM sync.RWMutex // Protect read and write of Locks
 )
 
-// 获取lockname级锁（线程安全）
+// Get lockname level lock (thread-safe)
 func getLock(lockname string) *sync.Mutex {
 	LockRWM.Lock()
 	defer LockRWM.Unlock()

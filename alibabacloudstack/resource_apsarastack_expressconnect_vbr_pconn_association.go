@@ -94,7 +94,7 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationCreate(d *schema.
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "AssociatePhysicalConnectionToVirtualBorderRouter", "")
 	VpcAssociatephysicalconnectiontovirtualborderrouterResponseObj := VpcAssociatephysicalconnectiontovirtualborderrouterResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("enable_ipv6"); ok && v.(bool) {
 		request.QueryParams["EnableIpv6"] = "true"
@@ -153,7 +153,7 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationCreate(d *schema.
 }
 
 func resourceAlibabacloudStackExpressconnectVbrpconnassociationUpdate(d *schema.ResourceData, meta interface{}) error {
-	//	 当前无法编辑
+	//	 Currently not editable
 	//		client := meta.(*connectivity.AlibabacloudStackClient)
 	//		if d.IsNewResource() {
 	//			return nil
@@ -247,7 +247,7 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationDelete(d *schema.
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "UnassociatePhysicalConnectionFromVirtualBorderRouter", "")
 	VpcUnassociatephysicalconnectionfromvirtualborderrouterResponseObj := VpcUnassociatephysicalconnectionfromvirtualborderrouterResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["PhysicalConnectionId"] = d.Get("physical_connection_id").(string)
 	request.QueryParams["VbrId"] = d.Get("vbr_id").(string)

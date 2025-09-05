@@ -90,7 +90,7 @@ func resourceAlibabacloudStackVpngatewaySslvpnclientcertCreate(d *schema.Resourc
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "CreateSslVpnClientCert", "")
 	VpcCreatesslvpnclientcertResponseObj := VpcCreatesslvpnclientcertResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("ssl_vpn_client_cert_name"); ok {
 		request.QueryParams["Name"] = v.(string)
@@ -204,7 +204,7 @@ func resourceAlibabacloudStackVpngatewaySslvpnclientcertDelete(d *schema.Resourc
 	// api: Vpc - 2016-04-28 - DeleteSslVpnClientCert
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteSslVpnClientCert", "")
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["SslVpnClientCertId"] = d.Id()
 

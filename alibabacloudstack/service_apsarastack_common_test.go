@@ -176,7 +176,7 @@ func (rc *resourceCheck) checkResourceDestroy() resource.TestCheckFunc {
 					return errmsgs.WrapError(err)
 				}
 			} else if outValue[0].IsNil() {
-				// 返回为空，且没有报错时也视为未找到数据，删除成功
+				// Return empty, and no error is also considered as data not found, deletion successful
 				continue
 			} else {
 				return errmsgs.WrapError(errmsgs.Error("the resource %s %s was not destroyed ! ", rc.resourceId, rs.Primary.ID))
@@ -757,7 +757,7 @@ data "alibabacloudstack_instance_types" "all" {
 }
 
 data "alibabacloudstack_instance_types" "default" {
-  count = 8  # 遍历 1-8 核CPU配置
+  count = 8  # Traverse 1-8 core CPU configurations
 
   availability_zone    = data.alibabacloudstack_zones.default.zones[0].id
   cpu_core_count       = count.index + 1  # 1-8
@@ -1584,3 +1584,4 @@ DrlNdiysTI4Dd1dLeErVpjsckAaOW/JDG5PCSwkaMxk=
 EOF
 `
 }
+

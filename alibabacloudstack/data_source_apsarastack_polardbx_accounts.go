@@ -98,7 +98,7 @@ func dataSourceAlibabacloudStackPolardbxAccountsRead(d *schema.ResourceData, met
 	polardbxService := PolardbXService{client}
 
 	if _, err := polardbxService.DoPolardbxDescribedbinstanceattributeRequest(d.Get("instance_id").(string)); err != nil {
-		// 需要先判断instance_id，不存在时直接返回空
+		// Need to check instance_id first, return empty if not exist
 		ids := []string{}
 		datas := []interface{}{}
 		d.SetId(dataResourceIdHash(ids))
@@ -117,7 +117,7 @@ func dataSourceAlibabacloudStackPolardbxAccountsRead(d *schema.ResourceData, met
 	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeAccountList", "")
 	DoPolardbxDescribeAccountListResponseObj := DoPolardbxDescribeAccountListResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["DBInstanceName"] = d.Get("instance_id").(string)
 
@@ -177,7 +177,7 @@ func dataSourceAlibabacloudStackPolardbxAccountsRead(d *schema.ResourceData, met
 		i := map[string]interface{}{
 			"id":                id,
 			"description":       data.AccountDescription,
-			"account_name": data.AccountName,
+			"account_name":      data.AccountName,
 			"instance_id":       d.Get("instance_id").(string),
 			"db_privileges":     db_privileges,
 		}

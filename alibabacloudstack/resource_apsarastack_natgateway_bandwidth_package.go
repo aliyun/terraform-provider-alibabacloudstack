@@ -102,7 +102,7 @@ func resourceAlibabacloudStackNatgatewayBandwidthpackageCreate(d *schema.Resourc
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "CreateBandwidthPackage", "")
 	VpcCreatebandwidthpackageResponseObj := VpcCreatebandwidthpackageResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("bandwidth"); ok {
 		request.QueryParams["Bandwidth"] = v.(string)
@@ -329,7 +329,7 @@ func resourceAlibabacloudStackNatgatewayBandwidthpackageDelete(d *schema.Resourc
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteBandwidthPackage", "")
 	// VpcDeletebandwidthpackageResponseObj := VpcDeletebandwidthpackageResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["BandwidthPackageId"] = d.Id()
 

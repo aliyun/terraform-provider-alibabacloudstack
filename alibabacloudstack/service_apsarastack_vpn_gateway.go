@@ -528,7 +528,7 @@ func (s *VpnGatewayService) DoVpcDescribesslvpnserversRequest(id string) (*VpcDe
 	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeSslVpnServers", "")
 	VpcDescribesslvpnserversResponseObj := &VpcDescribesslvpnserversResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 	request.QueryParams["SslVpnServerId"] = id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -566,7 +566,7 @@ func (s *VpnGatewayService) DoVpcDescribevpnsslserverlogsRequest(d *schema.Resou
 	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeVpnSslServerLogs", "")
 	VpcDescribevpnsslserverlogsResponseObj := &VpcDescribevpnsslserverlogsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("region_id"); ok {
 		request.QueryParams["RegionId"] = v.(string)
@@ -618,7 +618,7 @@ func (s *VpnGatewayService) DoVpcDescribesslvpnclientcertRequest(id string) (*Vp
 	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeSslVpnClientCert", "")
 	VpcDescribesslvpnclientcertResponseObj := &VpcDescribesslvpnclientcertResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["SslVpnClientCertId"] = id
 
@@ -664,7 +664,7 @@ func (s *VpnGatewayService) DoVpcDescribesslvpnclientcertsRequest(d *schema.Reso
 	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeSslVpnClientCerts", "")
 	VpcDescribesslvpnclientcertsResponseObj := &VpcDescribesslvpnclientcertsResponse{}
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if v, ok := d.GetOk("page_number"); ok {
 		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))

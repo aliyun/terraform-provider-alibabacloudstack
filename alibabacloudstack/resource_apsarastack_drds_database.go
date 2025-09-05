@@ -397,7 +397,7 @@ func resourceAlibabacloudStackDrdsDatabaseRead(d *schema.ResourceData, meta inte
 
 	sec := data.CreateTime / 1000
 	nsec := (data.CreateTime % 1000) * int64(time.Millisecond)
-	createTime := time.Unix(sec, nsec).UTC() // 关键改动：直接转UTC
+	createTime := time.Unix(sec, nsec).UTC() // Key change: directly convert to UTC
 	d.Set("create_time", createTime.Format("2006-01-02T15:04:05-07:00"))
 
 	d.Set("drds_database_name", data.DbName)
@@ -414,7 +414,7 @@ func resourceAlibabacloudStackDrdsDatabaseRead(d *schema.ResourceData, meta inte
 	} else {
 		drdsInstanceId = parts[0]
 		databaseName = parts[1]
-		d.Set("instance_id",drdsInstanceId)
+		d.Set("instance_id", drdsInstanceId)
 	}
 	reqQuery := map[string]interface{}{
 		"DbName":         databaseName,
@@ -452,7 +452,7 @@ func resourceAlibabacloudStackDrdsDatabaseDelete(d *schema.ResourceData, meta in
 	// api: Drds - 2019-01-23 - RemoveDrdsDb
 	request := client.NewCommonRequest("POST", "Drds", "2019-01-23", "RemoveDrdsDb", "")
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
 		return err

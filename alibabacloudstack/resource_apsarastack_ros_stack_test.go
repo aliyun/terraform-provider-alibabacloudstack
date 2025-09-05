@@ -257,13 +257,13 @@ var AlibabacloudStackRosStackMap = map[string]string{
 }
 
 func AlibabacloudStackRosStackBasicDependence(name string) string {
-	return 	fmt.Sprintf(`
+	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
 }
 
 resource "alibabacloudstack_ros_template" "default" {
-	description = "模板的描述"
+	description = "Description of the template"
 	template_name = "${var.name}"
 	template_body = "{\"ROSTemplateFormatVersion\":\"2015-09-01\", \"Parameters\": {\"VpcName\": {\"Type\": \"String\"},\"InstanceType\": {\"Type\": \"String\"}}}"
 }

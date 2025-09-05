@@ -97,7 +97,7 @@ func resourceAlibabacloudStackExpressconnectVbrHaDelete(d *schema.ResourceData, 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteVbrHa", "")
 
-	//调用request_params_handler
+	// Call request_params_handler
 
 	request.QueryParams["InstanceId"] = d.Id()
 

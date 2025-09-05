@@ -44,7 +44,7 @@ const (
 	DDSCode              = ServiceCode("DDS")
 	GPDBCode             = ServiceCode("GPDB")
 	CENCode              = ServiceCode("CEN")
-	KVSTORECode          = ServiceCode("R_KVSTORE") // 不允许出现-，schema不接受，以_代替
+	KVSTORECode          = ServiceCode("R_KVSTORE") // Do not allow "-", schema does not accept it, use "_" instead
 	POLARDBCode          = ServiceCode("POLARDB")
 	MNSCode              = ServiceCode("MNS")
 	CLOUDAPICode         = ServiceCode("CLOUDAPI")
@@ -71,7 +71,7 @@ const (
 	YaochiOpsCode        = ServiceCode("YAOCHIOPS")
 	ACMCode              = ServiceCode("ACM")
 	POLARDBXCode         = ServiceCode("POLARDBX")
-	//undefined code 先添加
+	// undefined code, add first
 	GDBCode                   = ServiceCode("GDB")
 	ARMSCode                  = ServiceCode("ARMS")
 	CSBCode                   = ServiceCode("CSB")
@@ -87,7 +87,7 @@ const (
 	WAFONECSCode              = ServiceCode("WAF_ONECS")
 	ALIKAFKACode              = ServiceCode("ALIKAFKA")
 	DataworksPrivateCloudCode = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
-	//自建网关虚假Code
+	// Self-built gateway fake Code
 	OssDataCode = ServiceCode("OSSDATA")
 	SlSDataCode = ServiceCode("SLSDATA")
 	BssDataCode = ServiceCode("BSSDATA")
@@ -155,7 +155,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"adb.{{.region}}.{{.domain}}",
 	},
 	//apigateway endpoint
-	//中心化部署
+	//centralized deployment
 	CLOUDAPICode: PopEndpoint{
 		"apigateway.{{.region}}.{{.domain}}",
 		"apigateway.{{.region}}.{{.domain}}",
@@ -365,7 +365,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"cbn.{{.domain}}",
 		"cbn.{{.region}}.{{.domain}}",
 	},
-	// 3.18.3新局点将不会开放
+	// 3.18.3 new sites will not be opened
 	OneRouterCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
