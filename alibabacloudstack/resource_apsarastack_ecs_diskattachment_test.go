@@ -197,6 +197,7 @@ func testAccMultiDiskAttachmentConfig(common string) string {
 		name = "${var.name}-${count.index}"
 		count = "${var.number}"
 		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+		category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 		size = "20"
 
 		tags = {

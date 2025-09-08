@@ -49,7 +49,7 @@ func Provider() *schema.Provider {
 			"region_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", nil),
+				//DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", nil),
 				Description: descriptions["region_id"],
 				Deprecated:  "Field region_id is Deprecated, Please use parameter region replace it.",
 			},

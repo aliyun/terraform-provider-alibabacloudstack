@@ -15,11 +15,9 @@ func TestAccAlibabacloudStackSlbBackendServersDataSource_basic(t *testing.T) {
 			{
 				Config: testAccCheckAlibabacloudStackSlbBackendServersDataSource,
 				Check: resource.ComposeTestCheckFunc(
-
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_slb_backend_servers.default"),
 					resource.TestCheckResourceAttr("data.alibabacloudstack_slb_backend_servers.default", "load_balancer_id.#", "0"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
