@@ -274,7 +274,7 @@ func dataSourceAlibabacloudStackPolardbDbClusterInstancesRead(d *schema.Resource
 			}
 		}
 
-		// 构建DB节点信息
+		// Build DB node information
 		dbNodes := make([]interface{}, 0)
 		for _, node := range data.DBNodes.DBNode {
 			nodeInfo := map[string]interface{}{
@@ -287,11 +287,11 @@ func dataSourceAlibabacloudStackPolardbDbClusterInstancesRead(d *schema.Resource
 			dbNodes = append(dbNodes, nodeInfo)
 		}
 
-		// 构建标签信息
+		// Build tag information
 		tags := make([]interface{}, 0)
 		for _, tag := range data.Tags.Tag {
-			// 注意：由于Tag是interface{}类型，需要根据实际情况处理
-			// 这里假设Tag有Key和Value字段
+			//Note: As Tag is of interface {} type, it needs to be handled according to the actual situation
+			//Assuming that Tag has Key and Value fields here
 			if tagMap, ok := tag.(map[string]interface{}); ok {
 				tagInfo := map[string]interface{}{
 					"tag_key":   tagMap["Key"],

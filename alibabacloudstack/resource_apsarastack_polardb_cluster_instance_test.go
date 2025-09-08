@@ -44,8 +44,8 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 					"db_type":                "${var.db_type}",
 					"db_version":             "${var.db_version}",
 					"storage_space":          "20",
-					"vpc_id":                 "vpc-c3d79nt47rh1mghkysi00",
-					"vswitch_id":             "vsw-c3dijzuatzymqi5ah3pcz",
+					"vpc_id":                 "${alibabacloudstack_vpc_vpc.default.id}",
+					"vswitch_id":             "${alibabacloudstack_vpc_vswitch.default.id}",
 					"db_node_class":          "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
 					"db_node_num":            "2",
 					"sub_category":           "General",
@@ -153,16 +153,16 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 						"parameters.#": "2",
 					}),
 					resource.TestCheckTypeSetElemNestedAttrs(
-						resourceId,     // 资源地址
-						"parameters.*", // TypeSet 属性路径（通配符 `*` 表示集合中的任意元素）
+						resourceId,
+						"parameters.*",
 						map[string]string{
 							"name":  "auto_explain.log_analyze",
 							"value": "on",
 						},
 					),
 					resource.TestCheckTypeSetElemNestedAttrs(
-						resourceId,     // 资源地址
-						"parameters.*", // TypeSet 属性路径（通配符 `*` 表示集合中的任意元素）
+						resourceId,
+						"parameters.*",
 						map[string]string{
 							"name":  "auto_explain.sample_rate",
 							"value": "0",
@@ -207,10 +207,7 @@ variable "db_version" {
   default = "8.0"
 }
 
-data "alibabacloudstack_zones" default {
-  available_resource_creation = "VSwitch"
-  enable_details = true
-}
+%s
 
 data "alibabacloudstack_polardb_cluster_instance_types" "default" {
   db_type = "${var.db_type}"
@@ -220,5 +217,5 @@ data "alibabacloudstack_polardb_cluster_instance_types" "default" {
   sub_category = "General"
 }
 
- `, name)
+ `, name, VSwitchCommonTestCase)
 }

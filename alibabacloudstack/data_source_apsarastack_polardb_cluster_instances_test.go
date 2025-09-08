@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackPolardbDbClusterInstancesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackPolardbClusterInstancesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_polardb_cluster_instances.default"
 
