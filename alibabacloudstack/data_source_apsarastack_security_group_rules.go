@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -135,6 +136,11 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 	response, ok := raw.(*ecs.DescribeSecurityGroupAttributeResponse)
 	addDebug(req.GetActionName(), raw, req.RpcRequest, req)
 	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			d.SetId(dataResourceIdHash([]string{""}))
+			d.Set("rules", make([]map[string]interface{}, 0))
+			return nil
+		}
 		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
@@ -142,6 +148,7 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "security_group_rules", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	var rules []map[string]interface{}
+	var ids []string
 
 	if response != nil {
 		for _, item := range response.Permissions.Permission {
@@ -150,6 +157,10 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 			}
 
 			if v, ok := d.GetOk("policy"); ok && strings.ToLower(string(item.Policy)) != v.(string) {
+				continue
+			}
+			
+			if v, ok := d.GetOk("nic_type"); ok && strings.ToLower(string(item.NicType)) != v.(string) {
 				continue
 			}
 
@@ -168,6 +179,10 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 				//"description":                item.Description,//has been removed for Alibabacloudstack
 			}
 
+			ids = append(ids, fmt.Sprintf("%s:%s:%s:%s:%s:%s:%s",
+				item.SourceGroupId, item.Direction, item.IpProtocol, item.PortRange,
+				item.NicType, item.DestCidrIp, item.Policy))
+
 			pri, err := strconv.Atoi(item.Priority)
 			if err != nil {
 				return errmsgs.WrapError(err)
@@ -185,7 +200,7 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 		}
 	}
 
-	d.SetId(d.Get("group_id").(string))
+	d.SetId(dataResourceIdHash(ids))
 
 	if err := d.Set("rules", rules); err != nil {
 		return errmsgs.WrapError(err)
