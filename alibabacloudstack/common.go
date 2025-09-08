@@ -1003,6 +1003,16 @@ func newInstanceDiff(resourceName string, attributes, attributesDiff map[string]
 }
 
 func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, readFunc schema.ReadFunc, updateFunc schema.UpdateFunc, deleteFunc schema.DeleteFunc) {
+	if resource.Importer == nil && readFunc != nil {
+		resource.Importer = &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		}
+	}
+
+	if readFunc == nil {
+		readFunc = schema.Noop
+	}
+
 	resource.CreateContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		var err error
 		err = createFunc(d, meta)
@@ -1065,12 +1075,6 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 	resource.DeleteContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		err := deleteFunc(d, meta)
 		return diag.FromErr(err)
-	}
-
-	if resource.Importer == nil {
-		resource.Importer = &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		}
 	}
 }
 

@@ -20,11 +20,11 @@ func TestAccAlibabacloudStackKmsCiphertext_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceId, "ciphertext_blob"),
 				),
 			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
+//			{
+//				ResourceName:      resourceId,
+//				ImportState:       true,
+//				ImportStateVerify: true,
+//			},
 		},
 	})
 }

@@ -38,7 +38,7 @@ func resourceAlibabacloudStackKmsCiphertext() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackKmsCiphertextCreate, schema.Noop, nil, resourceAlibabacloudStackKmsCiphertextDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackKmsCiphertextCreate, nil, nil, resourceAlibabacloudStackKmsCiphertextDelete)
 	return resource
 }
 
