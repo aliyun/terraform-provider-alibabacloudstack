@@ -26,8 +26,8 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/panjf2000/ants/v2 v2.10.0
 	github.com/stretchr/testify v1.8.2
+	github.com/zclconf/go-cty v1.14.1
 	gopkg.in/yaml.v2 v2.3.0
 )
 
@@ -94,11 +94,9 @@ require (
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	github.com/zclconf/go-cty v1.14.1 // indirect
 	golang.org/x/crypto v0.15.0 // indirect
 	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.4.0 // indirect
