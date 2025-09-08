@@ -508,6 +508,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardb_backups":                                  dataSourceAlibabacloudStackPolardbBackups(),
 		"alibabacloudstack_polardb_proxies":                                  dataSourceAlibabacloudStackPolardbProxies(),
 		"alibabacloudstack_polardb_cluster_instance_types":                   dataSourceAlibabacloudStackPolardbClusterInstanceTypes(),
+		"alibabacloudstack_polardb_cluster_instances":                        dataSourceAlibabacloudStackPolardbDbClusterInstances(),
 		"alibabacloudstack_acm_configurations":                               dataSourceAlibabacloudStackAcmConfigurations(),
 		"alibabacloudstack_bastionhost_instances":                            dataSourceAlibabacloudStackBastionhostInstances(),
 		"alibabacloudstack_waf_instances":                                    dataSourceAlibabacloudStackWafInstances(),

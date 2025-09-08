@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tfacc-polardb-shared-%d", rand)
-	// name := "tfacc-polardb-shared-18373"
+	// name := "tfacc-polardb-shared-18641"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceoPolardbClusterInstanceDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -40,17 +40,17 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"db_cluster_description": "${var.name}",
-					"zone_id":                "cn-ece-entity46-amtest11001-a",
+					"zone_id":                "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"db_type":                "${var.db_type}",
 					"db_version":             "${var.db_version}",
 					"storage_space":          "20",
-					"vpc_id":                 "vpc-wz9i8dcp5yiq2me6f6ndc",
-					"vswitch_id":             "vsw-wz9bb8mem4qmwqnmqjcs2",
+					"vpc_id":                 "vpc-c3d79nt47rh1mghkysi00",
+					"vswitch_id":             "vsw-c3dijzuatzymqi5ah3pcz",
 					"db_node_class":          "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
 					"db_node_num":            "2",
-					"cpu_type":               "intel",
 					"sub_category":           "General",
 					"storage_type":           "ESSDPL1",
+					"tde_enabled":            "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -63,7 +63,40 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 						"db_node_class":          CHECKSET,
 						"db_node_num":            "2",
 						"storage_type":           "ESSDPL1",
-						"cpu_type":               "intel",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"db_node_class":      "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
+					"db_read_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.2.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"db_node_class":      CHECKSET,
+						"db_read_node_class": CHECKSET,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"ssl_enabled": "true",
+					"tde_enabled": "true",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"ssl_enabled": "true",
+						"tde_enabled": "true",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"ssl_enabled": "false",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"ssl_enabled": "false",
 					}),
 				),
 			},
@@ -84,16 +117,6 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"db_node_num": "2",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"db_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"db_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
 					}),
 				),
 			},
@@ -160,28 +183,6 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccConfig(map[string]interface{}{
-					"ssl_enabled": "true",
-					"tde_enabled": "true",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"ssl_enabled": "true",
-						"tde_enabled": "true",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"ssl_enabled": "false",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"ssl_enabled": "false",
-					}),
-				),
-			},
-			{
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -199,18 +200,23 @@ variable "name" {
 }
 
 variable "db_type" {
-  default = "PostgreSQL"
+  default = "MySQL"
 }
 
 variable "db_version" {
-  default = "14"
+  default = "8.0"
 }
 
+data "alibabacloudstack_zones" default {
+  available_resource_creation = "VSwitch"
+  enable_details = true
+}
 
 data "alibabacloudstack_polardb_cluster_instance_types" "default" {
   db_type = "${var.db_type}"
+  db_version = "${var.db_version}"
   sorted_by = "CPU"
-  cpu_type = "intel"
+  cpu_type = "hygon"
   sub_category = "General"
 }
 

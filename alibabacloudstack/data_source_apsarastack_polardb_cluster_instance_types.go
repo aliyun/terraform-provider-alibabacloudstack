@@ -36,7 +36,7 @@ func dataSourceAlibabacloudStackPolardbClusterInstanceTypes() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"intel", "arm64", "Hygon"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"intel", "arm64", "hygon"}, false),
 			},
 			"memory": {
 				Type:     schema.TypeInt,
