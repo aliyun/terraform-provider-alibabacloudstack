@@ -54,7 +54,7 @@ func TestAccAlibabacloudStackPolardbDbClusterInstancesDataSource(t *testing.T) {
 			"db_cluster_instances.0.engine":                 CHECKSET,
 			"db_cluster_instances.0.architecture":           CHECKSET,
 			"db_cluster_instances.0.db_cluster_status":      CHECKSET,
-			"db_cluster_instances.0.ascm_create_user":       CHECKSET,
+			"db_cluster_instances.0.db_node_number":         CHECKSET,
 		}
 	}
 
