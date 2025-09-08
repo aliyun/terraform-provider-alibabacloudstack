@@ -106,6 +106,9 @@ func resourceAlibabacloudStackSlbCreate(d *schema.ResourceData, meta interface{}
 	if v, ok := d.GetOk("address"); ok && v.(string) != "" {
 		request.QueryParams["Address"] = v.(string)
 	}
+	if v, ok := d.GetOk("address_type"); ok && v.(string) != "" {
+		request.QueryParams["AddressType"] = v.(string)
+	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
