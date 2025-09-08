@@ -101,6 +101,10 @@ func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoRes
 	}
 
 	buckets, err := getBucketListResponseBuckets(bresponse)
+	if err != nil && errmsgs.NotFoundError(err){
+		response.BucketInfo.Name = ""
+		err = nil
+	}
 
 	var found = false
 	for _, j := range buckets {
@@ -154,7 +158,7 @@ func getBucketListResponseBuckets(response *responses.CommonResponse) ([]BucketL
 	}
 
 	if _, ok := bucketList.Data.ListAllMyBucketsResult.Buckets.(string); ok {
-		return buckets, errmsgs.WrapErrorf(err, "Not Found: Oss Bucket")
+		return buckets, errmsgs.GetNotFoundErrorFromString("Not Found: Oss Bucket")
 	}
 
 	var bucketInterface interface{}
