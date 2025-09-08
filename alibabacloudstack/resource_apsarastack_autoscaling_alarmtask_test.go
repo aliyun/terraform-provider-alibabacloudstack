@@ -615,23 +615,6 @@ func resourceEssAlarmConfigDependence(name string) string {
 
 	%s
 
-	%s
-
-	resource "alibabacloudstack_vpc_vswitch" "default" {
-		name = "${var.name}_vsw"
-		vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-		cidr_block = "192.168.0.0/16"
-		zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	  }
-
-// 	resource "alibabacloudstack_vpc_vswitch" "default2" {
-// 		vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-// 		cidr_block = "192.168.0.0/16"
-// 		availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-// 		name = "${var.name}"
-//   }
-
-
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 1
@@ -639,14 +622,6 @@ func resourceEssAlarmConfigDependence(name string) string {
 		removal_policies = ["OldestInstance", "NewestInstance"]
 		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}",]
 	}
-
-	// resource "alibabacloudstack_ess_scaling_group" "new" {
-	// 	min_size = 1
-	// 	max_size = 1
-	// 	scaling_group_name = "${var.name}-new"
-	// 	removal_policies = ["OldestInstance", "NewestInstance"]
-	// 	vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default2.id}"]
-	// }
 
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		count = 2
@@ -657,5 +632,5 @@ func resourceEssAlarmConfigDependence(name string) string {
 		cooldown = 60
 	}
 
-`, name, DataZoneCommonTestCase, VpcCommonTestCase)
+`, name, VSwitchCommonTestCase)
 }
