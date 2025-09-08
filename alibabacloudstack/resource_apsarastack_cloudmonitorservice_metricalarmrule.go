@@ -72,6 +72,7 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 				Type:          schema.TypeMap,
 				Optional:      true,
 				ForceNew:      true,
+				Computed:      true,
 				Elem:          schema.TypeString,
 				Deprecated:    "Field 'dimensions' is deprecated and will be removed in a future release. Please use new field 'resources' instead.",
 				ConflictsWith: []string{"resources"},
@@ -80,6 +81,7 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
+				Computed:      true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					Elem: &schema.Schema{
