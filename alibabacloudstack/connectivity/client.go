@@ -1324,7 +1324,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			wait()
 			return resource.RetryableError(err)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "ServiceUnavailable", "RequestTimeout", "asapi.server.timeout.socket", "InvalidAction.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "ServiceUnavailable", "RequestTimeout", "asapi.server.timeout.socket"}) {
 			return resource.RetryableError(err)
 		}
 		return resource.NonRetryableError(err)
