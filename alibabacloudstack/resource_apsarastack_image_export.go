@@ -34,6 +34,7 @@ func resourceAlibabacloudStackImageExport() *schema.Resource {
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackImageExportCreate, resourceAlibabacloudStackImageExportRead, nil, resourceAlibabacloudStackImageExportDelete)
+	resource.Importer = nil
 	return resource
 }
 
