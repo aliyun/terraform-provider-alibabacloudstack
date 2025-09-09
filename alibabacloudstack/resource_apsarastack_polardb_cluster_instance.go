@@ -785,9 +785,6 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 		o, n := d.GetChange("db_node_num")
 		add := n.(int) - o.(int)
 		action := "CreateDBNodes"
-		reqQuery := map[string]interface{}{
-			"DBClusterId": d.Id(),
-		}
 		log.Printf("[DEBUG] alibabacloudstack_polardb_cluster_instance: add db node num: %d", add)
 		log.Printf("[DEBUG] alibabacloudstack_polardb_cluster_instance: db_node_num: %d", d.Get("db_node_num"))
 		if add < 0 {
@@ -802,52 +799,64 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 			if len(standbyNodes) < add*-1 {
 				return errmsgs.WrapError(errmsgs.Error("The number of standby nodes cannot be less than the number of nodes to be deleted."))
 			}
-			reqQuery["DBNodeId"] = standbyNodes[:add*-1]
+			for _, standbyNode := range standbyNodes[:add*-1] {
+				reqQuery := map[string]interface{}{
+					"DBClusterId": d.Id(),
+					"DBNodeId":    []string{standbyNode},
+				}
+				if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
+				}
+				stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, "Change the Node num: waiting for PolarDB cluster instance %s to be Running failed!", d.Id())
+				}
+			}
 		} else {
 			count := d.Get("db_node_num").(int)
-			dbNodeZones := make([]map[string]interface{}, 0)
 			for count > 0 {
-				dbNodeZones = append(dbNodeZones, map[string]interface{}{
-					"ZoneId": d.Get("zone_id").(string),
-				})
+				reqQuery := map[string]interface{}{
+					"DBClusterId": d.Id(),
+					"DBNode": map[string]interface{}{
+						"ZoneId": d.Get("zone_id").(string),
+					},
+				}
+				if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
+				}
+				stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, "Change the Node num: waiting for PolarDB cluster instance %s to be Running failed!", d.Id())
+				}
 				count--
 			}
 			reqQuery["DBNode"] = dbNodeZones
-		}
-
-		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, "Change the Node num: waiting for PolarDB cluster instance %s to be Running failed!", d.Id())
 		}
 	}
 	return nil
 }
 
 func resourceAlibabacloudStackPolardbClusterInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	return nil
-	// client := meta.(*connectivity.AlibabacloudStackClient)
-	// polardbService := PolardbService{client}
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	polardbService := PolardbService{client}
 
-	// reqQuery := map[string]interface{}{
-	// 	"DBClusterId": d.Id(),
-	// }
+	reqQuery := map[string]interface{}{
+		"DBClusterId": d.Id(),
+	}
 
-	// // Call DeleteDBCluster API
-	// _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
-	// if err != nil {
-	// 	if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
-	// 		return nil
-	// 	}
-	// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteDBCluster", errmsgs.AlibabacloudStackSdkGoERROR, "")
-	// }
+	// Call DeleteDBCluster API
+	_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
+			return nil
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteDBCluster", errmsgs.AlibabacloudStackSdkGoERROR, "")
+	}
 
-	// // Wait for the cluster to be fully deleted
-	// stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{}))
-	// _, err = stateConf.WaitForState()
-	// return errmsgs.WrapError(err)
+	// Wait for the cluster to be fully deleted
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{}))
+	_, err = stateConf.WaitForState()
+	return errmsgs.WrapError(err)
 }
 
 func GetPolardbClusterInstanceModifyType(oldClass, newClass map[string]interface{}) string {
