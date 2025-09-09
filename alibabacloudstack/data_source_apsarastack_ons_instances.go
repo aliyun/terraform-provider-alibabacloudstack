@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"regexp"
 
@@ -127,7 +128,17 @@ func dataSourceAlibabacloudStackOnsInstancesRead(d *schema.ResourceData, meta in
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		if response.Code == "200" || len(response.Data) < 1 {
+
+		var responseCode string
+		if intVal, ok := response.Code.(int); ok {
+			responseCode = fmt.Sprintf("%d", intVal)
+		} else if intVal, ok := response.Code.(float64); ok {
+			responseCode = fmt.Sprintf("%v", intVal)
+		} else if strVal, ok := response.Code.(string); ok {
+			responseCode = strVal
+		}
+
+		if responseCode == "200" || len(response.Data) < 1 {
 			break
 		}
 	}

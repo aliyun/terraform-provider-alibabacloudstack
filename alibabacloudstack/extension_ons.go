@@ -85,7 +85,7 @@ type OInstance struct {
 	PageNumber   int    `json:"PageNumber"`
 	PageSize     int    `json:"PageSize"`
 	Total        int    `json:"Total"`
-	Code         string `json:"code"`
+	Code         any    `json:"code"`
 	Cost         int    `json:"cost"`
 	Message      string `json:"message"`
 	PureListData bool   `json:"pureListData"`
