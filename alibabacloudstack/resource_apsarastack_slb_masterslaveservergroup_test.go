@@ -59,7 +59,6 @@ func TestAccAlibabacloudStackSlbMasterSlaveServerGroup_vpc(t *testing.T) {
 						"servers.#": "2",
 					}),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 			{
 				ResourceName:            resourceId,
@@ -124,7 +123,6 @@ func TestAccAlibabacloudStackSlbMasterSlaveServerGroup_multi_vpc(t *testing.T) {
 						"servers.#": "2",
 					}),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -137,42 +135,24 @@ func resourceMasterSlaveServerGroupConfigDependence(name string) string {
 		default = "%s"
 	}
 
-	data "alibabacloudstack_instance_types" "new" {
-		availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		eni_amount = 2
-	}
-
 	%s
 
 	resource "alibabacloudstack_ecs_instance" "new" {
-		image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type        = "${data.alibabacloudstack_instance_types.new.instance_types[0].id}"
-		system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-		system_disk_size     = 40
-		system_disk_name     = "test_sys_diskv2"
-		security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
-		instance_name        = "${var.name}_ecs"
-		vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
-		zone_id    = data.alibabacloudstack_zones.default.zones.0.id
-		is_outdated          = false
-		lifecycle {
-		ignore_changes = [
-			instance_type
-		]
-		}
-	}
-
-	resource "alibabacloudstack_network_interface" "default" {
-		count = 1
-		name = "${var.name}"
-		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-		security_groups = [ "${alibabacloudstack_ecs_securitygroup.default.id}" ]
-	}
-
-	resource "alibabacloudstack_network_interface_attachment" "default" {
-		count = 1
-		instance_id = "${alibabacloudstack_ecs_instance.new.id}"
-		network_interface_id = "${element(alibabacloudstack_network_interface.default.*.id, count.index)}"
+	  image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
+	  instance_type        = "${local.default_instance_type_id}"
+	  system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	  system_disk_size     = 20
+	  system_disk_name     = "test_sys_disk"
+	  security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
+	  instance_name        = "${var.name}_ecs"
+	  vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
+	  zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
+	  is_outdated          = false
+	  lifecycle {
+	    ignore_changes = [
+	      instance_type
+	    ]
+	  }
 	}
 
 	resource "alibabacloudstack_slb" "default" {

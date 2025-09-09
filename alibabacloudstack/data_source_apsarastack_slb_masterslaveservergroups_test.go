@@ -21,7 +21,6 @@ func TestAccAlibabacloudStackSlbMasterSlaveServerGroupsDataSource_basic(t *testi
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_slb_master_slave_server_groups.default"),
 					resource.TestCheckResourceAttr("data.alibabacloudstack_slb_master_slave_server_groups.default", "load_balancer_id.#", "0"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
