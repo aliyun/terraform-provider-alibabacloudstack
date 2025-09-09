@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
@@ -588,21 +589,21 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 
 	if d.HasChange("ssl_enabled") && !(d.IsNewResource() && !d.Get("ssl_enabled").(bool)) {
 
-		// endpointId := ""
-		// if endpointsResponse, err := polardbService.DescribeDBClusterEndpoints(d.Id()); err == nil {
-		// 	endpoint, err := jsonpath.Get("$.Items.0.DBEndpointId", endpointsResponse)
-		// 	if err != nil {
-		// 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterEndpoints", errmsgs.AlibabacloudStackSdkGoERROR)
-		// 	}
-		// 	endpointId = endpoint.(string)
-		// } else {
-		// 	return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterAttribute", "Endpoint not found")
-		// }
+		endpointId := ""
+		if endpointsResponse, err := polardbService.DescribeDBClusterEndpoints(d.Id()); err == nil {
+			endpoint, err := jsonpath.Get("$.Items.0.DBEndpointId", endpointsResponse)
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterEndpoints", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+			endpointId = endpoint.(string)
+		} else {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterAttribute", "Endpoint not found")
+		}
 		enabled := d.Get("ssl_enabled").(bool)
 		reqQuery := map[string]interface{}{
-			"DBClusterId": d.Id(),
-			// "DBEndpointId": endpointId,
-			"NetType": "Private",
+			"DBClusterId":  d.Id(),
+			"DBEndpointId": endpointId,
+			"NetType":      "Private",
 		}
 		if enabled {
 			reqQuery["SSLEnabled"] = "Enable"
