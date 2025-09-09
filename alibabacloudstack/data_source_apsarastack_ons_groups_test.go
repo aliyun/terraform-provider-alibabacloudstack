@@ -66,7 +66,6 @@ resource "alibabacloudstack_ons_group" "default" {
   instance_id = "${alibabacloudstack_ons_instance.default.id}"
   group_id = "${var.group_id}"
   remark = "alibabacloudstack_ons_group_remark"
-  read_enable = "true"
 }
 `, name)
 }

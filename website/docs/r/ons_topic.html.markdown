@@ -51,7 +51,6 @@ The following arguments are supported:
 * `topic` - (Required) Name of the topic. Two topics on a single instance cannot have the same name and the name cannot start with 'GID' or 'CID'. The length cannot exceed 64 characters.
 * `message_type` - (Required) The type of the message.
 * `remark` - (Required) This attribute is a concise description of topic. The length cannot exceed 128.
-* `perm` - (Optional) This attribute is used to set the read-write mode for the topic.
 
 ## Attributes Reference
 

@@ -50,7 +50,6 @@ resource "alibabacloudstack_ons_group" "default" {
 * `instance_id` - (必填) 拥有该组的ONS实例的ID。
 * `group_id` - (必填) 组的名称。单个实例上的两个组不能具有相同的名称。`group_id`以"GID_"或"GID-"开头，并包含字母、数字、连字符(-)和下划线(_)。
 * `remark` - (可选) 此属性是对组的简要描述。长度不得超过256。
-* `read_enable` - (可选) 此属性用于设置消息读取是否启用或禁用。只有在组被客户端使用后才能设置。默认值为`true`，表示启用消息读取功能。如果设置为`false`，则禁用消息读取功能。
 
 ## 属性说明
 

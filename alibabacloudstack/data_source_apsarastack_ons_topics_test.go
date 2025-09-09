@@ -69,7 +69,6 @@ resource "alibabacloudstack_ons_topic" "default" {
   topic = "${var.topic}"
   message_type = "0"
   remark = "alibabacloudstack_ons_topic_remark"
-  perm = "6"
 }
 `, name)
 }
