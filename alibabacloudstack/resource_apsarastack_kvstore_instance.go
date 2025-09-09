@@ -232,7 +232,6 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	action := "CreateInstance"
 	request := make(map[string]interface{})
 
-	request["ClientToken"] = buildClientToken("CreateInstance")
 	if v, ok := connectivity.GetResourceDataOk(d, "tair_instance_name", "instance_name"); ok {
 		request["InstanceName"] = v.(string)
 	}

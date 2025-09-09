@@ -1303,7 +1303,7 @@ resource "alibabacloudstack_slb_master_slave_server_group" "default" {
 `
 
 const DataZoneCommonTestCase = `
-data "alibabacloudstack_zones" default {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
   enable_details = true
 }
