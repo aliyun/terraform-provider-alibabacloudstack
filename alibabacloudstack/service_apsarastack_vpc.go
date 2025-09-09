@@ -1425,7 +1425,6 @@ func (s *VpcService) DeleteAclResources(id string) (object map[string]interface{
 		"NetworkAclId": id,
 		"Resource":     deleteResources,
 	}
-	request["ClientToken"] = buildClientToken("UnassociateNetworkAcl")
 	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "UnassociateNetworkAcl", "", nil, nil, request)
 	if err != nil {
 		return response, err
