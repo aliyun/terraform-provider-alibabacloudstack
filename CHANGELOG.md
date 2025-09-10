@@ -1,3 +1,16 @@
+# 3.16.18
+
+## New
+
+1. Added dynamic retrieval support for the `tls_cipher_policy` type in SLB listeners.
+
+## Fixes
+
+1. Fixed PolarDB for MySQL TDE encryption configuration failure to retrieve KMS encryption keys
+2. Added enable/disable control for MongoDB SQL audit capability
+
+---
+
 # 3.16.17
 
 ## Fixes
@@ -6,7 +19,7 @@
 2. polardb database cannot be queried or used normally after binding user
 3. mongodb_instance ssl status check fix
 
-## Additions
+## New
 
 1. polardb adds support for ACL function configuration
 2. added authorization resources for service roles
@@ -29,7 +42,7 @@
 1. slb loadbalancer adds network_type attribute to bring incompatibility
 2. Fixed the issue that alibabacloudstack_log_alert did not automatically create charts
 
-## Additions
+## New
 
 1. alibabacloudstack_log_alert supports configuring webhook
 2. Implemented alibabacloudstack_acm_configuration
@@ -42,7 +55,7 @@
 
 1. Fixed polardb's ability to modify kernel parameters
 
-## Additions
+## New
 
 1. Added polardb instance configuration tag capability
 2. Allow edas k8sapp to bind existing slb instances
@@ -59,7 +72,7 @@
 
 # 3.16.12
 
-## Additions
+## New
 
 1. edas_k8s_application slb binding update, delete function, batch binding function
 2. edas_k8s_application supports setting host_aliases
@@ -73,7 +86,7 @@
 
 # 3.16.11
 
-## Additions
+## New
 
 1. redis implements ssl enable and disable functions
 2. slb supports specifying address for classic network
@@ -90,7 +103,7 @@
 
 # 3.16.10
 
-## Additions
+## New
 
 1. Pull up the import capability of all resources through id, and fix and verify the import function of 73 key resources
 
@@ -109,7 +122,7 @@
 
 # 3.16.9
 
-## Additions
+## New
 1. cs_kubernetes allows setting storage_set when creating
 ## Fixes
 1. Fixed the issue of tde startup failure when polardb uses pgsql engine
@@ -150,7 +163,7 @@
 
 # 3.16.5
 
-## Additions
+## New
 
 1. Organization resource set filtering modification exact match.
 2. Fixed vpngateway resource creation.
@@ -166,7 +179,7 @@
 
 # 3.16.4
 
-## Additions
+## New
 
 1. When creating Edas_k8s_app, support setting PVC mounting, local mounting, and configuration settings
 2. Added new resource Edas_k8s_service
@@ -199,7 +212,7 @@
 
 # 3.16.1
 
-## Additions
+## New
 
 1. Support for apsarastack user smooth migration
 2. Support for sls log_alert resource CRUD operations
@@ -225,7 +238,7 @@
 
 # 3.16.0
 
-## Additions
+## New
 
 1. Support ASAPI and POPAPI scheduling, support separate designation of cloud product endpoints
 2. Support ASAPI permission processing mechanism, all requests will be authenticated and message error encapsulated through ASAPI

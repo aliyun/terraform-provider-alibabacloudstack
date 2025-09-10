@@ -1,3 +1,16 @@
+# 3.16.18
+
+## 新增
+
+1. slb_listener 的1tls_cipher_policy1类型支持动态获取。 
+
+## 修复
+
+1. polardb MySql版本设置TDE加密后，无法获取到加密的KmsKey
+2. mongodb 支持开启和关闭Sql审计
+
+---
+
 # 3.16.17
 
 ## 修复
