@@ -63,9 +63,9 @@ func TestAccAlibabacloudStackSlbListener0(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// delete_protection_validation is a local attribute and cannot be loaded from remote
 				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
 			},
@@ -299,10 +299,12 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 }
 
 func AlibabacloudTestAccSlbListenerLogStoredependence(name string) string {
-	return AlibabacloudTestAccSlbListenerBasicdependence(name) + fmt.Sprintf(`
+	return fmt.Sprintf(`
+
+	%s
+
 	resource "alibabacloudstack_log_project" "default" {
-		name = "${var.name}_"
-		description = "test"
+		name = "${var.name}"
 	}
 	resource "alibabacloudstack_log_store" "default" {
 		name = "${var.name}_store"
@@ -313,5 +315,5 @@ func AlibabacloudTestAccSlbListenerLogStoredependence(name string) string {
 		auto_split            = true
 		max_split_shard_count = "64"
 		append_meta           = true
-	}`)
+	}`, AlibabacloudTestAccSlbListenerBasicdependence(name))
 }

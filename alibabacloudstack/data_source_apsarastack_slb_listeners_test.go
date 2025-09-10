@@ -20,7 +20,6 @@ func TestAccAlibabacloudStackSlbListenersDataSource_http(t *testing.T) {
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_slb_listeners.default"),
 					resource.TestCheckResourceAttr("data.alibabacloudstack_slb_listeners.default", "load_balancer_id.#", "0"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -40,7 +39,6 @@ func TestAccAlibabacloudStackSlbListenersDataSource_https(t *testing.T) {
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_slb_listeners.default"),
 					resource.TestCheckResourceAttr("data.alibabacloudstack_slb_listeners.default", "load_balancer_id.#", "0"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -60,7 +58,6 @@ func TestAccAlibabacloudStackSlbListenersDataSource_tcp(t *testing.T) {
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_slb_listeners.default"),
 					resource.TestCheckResourceAttr("data.alibabacloudstack_slb_listeners.default", "load_balancer_id.#", "0"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -80,7 +77,6 @@ func TestAccAlibabacloudStackSlbListenersDataSource_udp(t *testing.T) {
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_slb_listeners.default"),
 					resource.TestCheckResourceAttr("data.alibabacloudstack_slb_listeners.default", "load_balancer_id.#", "0"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
