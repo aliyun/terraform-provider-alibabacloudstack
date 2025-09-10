@@ -58,7 +58,6 @@ func resourceAlibabacloudStackVpcIpv6InternetBandwidthCreate(d *schema.ResourceD
 	request["Ipv6AddressId"] = d.Get("ipv6_address_id")
 	request["Ipv6GatewayId"] = d.Get("ipv6_gateway_id")
 
-	request["ClientToken"] = buildClientToken("AllocateIpv6InternetBandwidth")
 	response, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return err
@@ -105,7 +104,6 @@ func resourceAlibabacloudStackVpcIpv6InternetBandwidthUpdate(d *schema.ResourceD
 
 	action := "ModifyIpv6InternetBandwidth"
 
-	request["ClientToken"] = buildClientToken("ModifyIpv6InternetBandwidth")
 	_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return err

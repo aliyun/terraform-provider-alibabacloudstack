@@ -66,7 +66,6 @@ func resourceAlibabacloudStackVpcIpv6GatewayCreate(d *schema.ResourceData, meta 
 		request["Spec"] = v
 	}
 	request["VpcId"] = d.Get("vpc_id")
-	request["ClientToken"] = buildClientToken("CreateIpv6Gateway")
 	response, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return err
@@ -121,7 +120,6 @@ func resourceAlibabacloudStackVpcIpv6GatewayUpdate(d *schema.ResourceData, meta 
 
 	if update {
 		action := "ModifyIpv6GatewaySpec"
-		request["ClientToken"] = buildClientToken("ModifyIpv6GatewaySpec")
 		response, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 		addDebug(action, response, request)
 		if err != nil {
