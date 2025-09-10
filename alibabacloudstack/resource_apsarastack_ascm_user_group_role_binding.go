@@ -1,16 +1,12 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
-	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -29,7 +25,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBinding() *schema.Resource {
 		},
 		DeprecationMessage: "ascm_user_group already includes corresponding functions",
 	}
-	setResourceFunc(resource, 
+	setResourceFunc(resource,
 		resourceAlibabacloudStackAscmUserGroupRoleBindingCreate,
 		resourceAlibabacloudStackAscmUserGroupRoleBindingRead,
 		resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate,
@@ -100,12 +96,20 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingRead(d *schema.ResourceDat
 	}
 	atoi, err := strconv.Atoi(d.Id())
 	d.Set("user_group_id", atoi)
+	role_ids := []int{}
+	for _, role := range object.Data[0].Roles {
+		role_ids = append(role_ids, role.Id)
+	}
+	d.Set("role_ids", role_ids)
 
 	return nil
 }
 
 func resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d *schema.ResourceData, meta interface{}) error {
 	var roleIdList []string
+	user_group_id := d.Get("user_group_id").(int)
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	ascmService := AscmService{client}
 
 	if v, ok := d.GetOk("role_ids"); ok {
 		roleids := expandIntList(v.(*schema.Set).List())
@@ -114,94 +118,50 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d *schema.ResourceD
 			roleIdList = append(roleIdList, strconv.Itoa(roleid))
 		}
 	}
-	user_group_id := d.Get("user_group_id").(int)
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ResetRolesForUserGroup", "/ascm/auth/user/resetRolesForUserGroup")
-
-	request.Headers["x-ascm-product-version"] = "2019-05-10"
-
-	QueryParams := map[string]interface{}{
-		"userGroupId":      strconv.Itoa(user_group_id),
-		"roleIdList":       roleIdList,
-		"SecurityToken":    client.Config.SecurityToken,
-		"SignatureVersion": "1.0",
-		"SignatureMethod":  "HMAC-SHA1",
-	}
-
-	requeststring, _ := json.Marshal(QueryParams)
-	request.SetContent(requeststring)
-	request.Headers["Content-Type"] = requests.Json
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	log.Printf("response of raw ResetRolesForUserGroup is : %s", bresponse)
-
-	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	if d.HasChange("role_ids") {
+		o, n := d.GetChange("role_ids")
+		oldValue := make(map[int]struct{})
+		newValue := make(map[int]struct{})
+		for _, v := range o.(*schema.Set).List() {
+			oldValue[v.(int)] = struct{}{}
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ResetRolesForUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
+		if len(oldValue) == 0 {
+			if object, err := ascmService.DescribeAscmUserGroupRoleBinding(d.Id()); err == nil && len(object.Data) > 0 {
+				for _, role := range object.Data[0].Roles {
+					oldValue[role.Id] = struct{}{}
+				}
+			}
+		}
+		for _, v := range n.(*schema.Set).List() {
+			newValue[v.(int)] = struct{}{}
+		}
 
-	addDebug("ResetRolesForUserGroup", bresponse, request)
+		for key, _ := range oldValue {
+			if _, exist := newValue[key]; !exist {
+				requestBody := map[string]interface{}{
+					"userGroupId": user_group_id,
+					"roleId":      key,
+				}
+				if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUserGroup", "/ascm/auth/user/removeRoleFromUserGroup", nil, nil, requestBody); err != nil {
+					return err
+				}
+			}
+		}
+		for key, _ := range newValue {
+			if _, exist := oldValue[key]; !exist {
+				requestBody := map[string]interface{}{
+					"userGroupId": user_group_id,
+					"roleId":      key,
+				}
+				if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "AddRoleToUserGroup", "/ascm/auth/user/addRoleToUserGroup", nil, nil, requestBody); err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return nil
 }
 
 func resourceAlibabacloudStackAscmUserGroupRoleBindingDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	ascmService := AscmService{client}
-	var roleid int
-	flag := false
-	var roleids []int
-
-	if v, ok := d.GetOk("role_ids"); ok {
-		roleids = expandIntList(v.(*schema.Set).List())
-		for i := range roleids {
-			if len(roleids) > 1 {
-				roleid = roleids[i]
-				flag = true
-			} else {
-				roleid = roleids[0]
-				flag = true
-			}
-		}
-	}
-	log.Printf("roleid is %v", roleid)
-	log.Printf("roleids is %v", roleids)
-	_, err := ascmService.DescribeAscmUserGroupRoleBinding(d.Id())
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBindingExist", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		if flag {
-			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUserGroup", "/ascm/auth/user/removeRoleFromUserGroup")
-			mergeMaps(request.QueryParams, map[string]string{
-				"ProductName": "ascm",
-				"userGroupId": d.Id(),
-				"roleId":      fmt.Sprint(roleid),
-			})
-
-			bresponse, err := client.ProcessCommonRequest(request)
-			if err != nil {
-				errmsg := ""
-				if bresponse != nil {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
-				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "RemoveRoleFromUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-			}
-			_, err = ascmService.DescribeAscmUserGroupRoleBinding(d.Id())
-
-			if err != nil {
-				return resource.NonRetryableError(err)
-			}
-			addDebug("RemoveRoleFromUserGroup", bresponse, request)
-
-		}
-		return nil
-	})
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "RemoveRoleFromUserGroup", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
 	return nil
 }

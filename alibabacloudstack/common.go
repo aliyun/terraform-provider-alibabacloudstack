@@ -1072,6 +1072,9 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 		}
 	}
 
+	if deleteFunc == nil {
+		deleteFunc = schema.Noop
+	}
 	resource.DeleteContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		err := deleteFunc(d, meta)
 		return diag.FromErr(err)
