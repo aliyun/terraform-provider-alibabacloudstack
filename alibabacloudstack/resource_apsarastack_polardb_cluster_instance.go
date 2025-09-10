@@ -817,9 +817,9 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 			for count > 0 {
 				reqQuery := map[string]interface{}{
 					"DBClusterId": d.Id(),
-					"DBNode": map[string]interface{}{
+					"DBNode": []map[string]interface{}{{
 						"ZoneId": d.Get("zone_id").(string),
-					},
+					}},
 				}
 				if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -830,7 +830,6 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 				}
 				count--
 			}
-			reqQuery["DBNode"] = dbNodeZones
 		}
 	}
 	return nil
