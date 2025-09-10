@@ -462,7 +462,9 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 
 	d.Set("vswitch_id", object["networkConfig"].(map[string]interface{})["vswitchId"])
 
-	d.Set("slb_address", object["slbAddress"].(string))
+	if v, exist := object["slbAddress"]; exist {
+		d.Set("slb_address", v.(string))
+	}
 	d.Set("domain", object["domain"])
 	d.Set("port", object["port"])
 	d.Set("status", object["status"])
@@ -760,8 +762,7 @@ func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta i
 	}
 
 	request := map[string]interface{}{
-		"RegionId":    client.RegionId,
-		"clientToken": StringPointer(buildClientToken(action)),
+		"RegionId": client.RegionId,
 	}
 	_, err := client.DoTeaRequest("DELETE", "elasticsearch-k8s", "2017-06-13", action, fmt.Sprintf("/openapi/instances/%s", d.Id()), nil, nil, request)
 	if err != nil {
@@ -786,7 +787,6 @@ func buildElasticsearchCreateRequestBody(d *schema.ResourceData, meta interface{
 	vpcService := VpcService{client}
 
 	content := make(map[string]interface{})
-	content["ClientToken"] = buildClientToken("createInstance")
 
 	content["nodeAmount"] = connectivity.GetResourceData(d, "data_node_amount", "data_node.amount")
 	content["esVersion"] = d.Get("version")

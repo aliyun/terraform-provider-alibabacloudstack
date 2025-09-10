@@ -309,7 +309,6 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 		"Value": client.RegionId,
 	})
 	request["Parameter"] = parameterMapList
-	request["ClientToken"] = buildClientToken("CreateInstance")
 	// response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
 
 	response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
