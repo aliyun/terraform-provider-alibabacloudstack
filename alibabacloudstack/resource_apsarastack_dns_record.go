@@ -51,6 +51,7 @@ func resourceAlibabacloudStackDnsRecord() *schema.Resource {
 			"line_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"remark": {
