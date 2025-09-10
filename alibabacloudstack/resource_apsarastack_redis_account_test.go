@@ -30,8 +30,9 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 
 		CheckDestroy: nil,
 
@@ -39,23 +40,15 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"description": "rdk_test_description",
-
 					"instance_id": "${alibabacloudstack_kvstore_instance.default.id}",
-
 					"account_name": "rdk_test_name_01",
-
-					"account_password": "1qaz@WSX",
+					"account_password": "${random_password.password.0.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"description": "rdk_test_description",
-
 						"account_name": "rdk_test_name_01",
-
-						"account_password": "1qaz@WSX",
 					}),
 				),
 			},
@@ -66,15 +59,21 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 				// Sensitive information is not read back
 				ImportStateVerifyIgnore: []string{"account_password"},
 			},
-
 			{
 				Config: testAccConfig(map[string]interface{}{
-
+					"account_password": "${random_password.password.1.result}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"account_privilege": "RoleReadWrite",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"account_privilege": "RoleReadWrite",
 					}),
 				),
@@ -82,12 +81,10 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"description": "testescription",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"description": "testescription",
 					}),
 				),
@@ -125,6 +122,8 @@ variable "kv_engine" {
 
 %s
 
+%s
+
 data "alibabacloudstack_zones" "default" {
 	available_resource_creation = "VSwitch"
   }
@@ -135,11 +134,11 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_type  = var.kv_engine
 	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
-	node_type = "double"
-	password       = "%s"
+	node_type      = "double"
+	password       = random_password.password.0.result
 }
 
 
 
-`, name, string(KVStoreRedis), KVRInstanceClassCommonTestCase, string(KVStore4Dot0), getAccTestPassword(12))
+`, name, string(KVStoreRedis), KVRInstanceClassCommonTestCase, RandomPasswordTestCase(12, 2), string(KVStore4Dot0))
 }
