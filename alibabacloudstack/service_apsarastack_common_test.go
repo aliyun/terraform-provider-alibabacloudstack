@@ -1310,7 +1310,7 @@ data "alibabacloudstack_zones" "default" {
 
 `
 
-const NasCommonTestCase = DataZoneCommonTestCase + `
+const NasCommonTestCase = `
 data "alibabacloudstack_nas_zones" "default" {
 }
 

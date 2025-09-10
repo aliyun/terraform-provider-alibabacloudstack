@@ -60,23 +60,15 @@ func testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand int, attrMap m
 	}
 
 	config := fmt.Sprintf(`
-variable "description" {
-  default = "tf-testAccCheckAlibabacloudStackFileSystemsDataSource"
+variable "name" {
+  default = "tf-testAcc-nas_fs_DataSource%d"
 }
-variable "storage_type" {
-  default = "Capacity"
-}
-data "alibabacloudstack_nas_protocols" "default" {
-        type = "${var.storage_type}"
-}
-resource "alibabacloudstack_nas_file_system" "default" {
-  description = "${var.description}"
-  storage_type = "${var.storage_type}"
-  protocol_type = "${data.alibabacloudstack_nas_protocols.default.protocols.0}"
-}
+
+%s
+
 data "alibabacloudstack_nas_file_systems" "default" {
 	%s
-}`, strings.Join(pairs, "\n  "))
+}`, rand, NasCommonTestCase,strings.Join(pairs, "\n  "))
 	return config
 }
 

@@ -67,7 +67,7 @@ func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackNasFileSystemCreate, 
+	setResourceFunc(resource, resourceAlibabacloudStackNasFileSystemCreate,
 		resourceAlibabacloudStackNasFileSystemRead, resourceAlibabacloudStackNasFileSystemUpdate, resourceAlibabacloudStackNasFileSystemDelete)
 	return resource
 }
@@ -94,7 +94,7 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 	}
 
 	response, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
-	
+
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,9 @@ func resourceAlibabacloudStackNasFileSystemRead(d *schema.ResourceData, meta int
 	d.Set("capacity", object["Capacity"])
 	d.Set("zone_id", object["ZoneId"])
 	d.Set("kms_key_id", object["KMSKeyId"])
-	d.Set("cluster_id", object["Location"])
+	if d.Get("cluster_id").(string) == "" {
+		d.Set("cluster_id", object["Location"])
+	}
 	return nil
 }
 

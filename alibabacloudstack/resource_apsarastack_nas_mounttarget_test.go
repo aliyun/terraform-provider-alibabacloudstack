@@ -39,7 +39,7 @@ func TestAccAlibabacloudStackNasMounttarget0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"vswitch_id":        "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id":        "${alibabacloudstack_vpc_vswitch.default.id}",
 					"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
 					"file_system_id":    "${alibabacloudstack_nas_file_system.default.id}",
 				}),
@@ -88,42 +88,20 @@ var AlibabacloudTestAccNasMounttargetCheckmap = map[string]string{
 }
 
 func AlibabacloudTestAccNasMounttargetBasicdependence(name string) string {
-	rand := getAccTestRandInt(10000, 99999)
 	return fmt.Sprintf(`
 variable "name" {
     default = "%s"
 }
 
-resource "alibabacloudstack_vpc" "default" {
-	cidr_block = "172.16.0.0/16"
-	name = "${var.name}"
-  }
-  data "alibabacloudstack_zones" "default" {
-	  available_resource_creation = "VSwitch"
-  }
-  
-resource "alibabacloudstack_vswitch" "default" {
-vpc_id = "${alibabacloudstack_vpc.default.id}"
-cidr_block = "172.16.0.0/21"
-availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-name = "${var.name}"
-}
-variable "storage_type" {
-default = "Capacity"
-}
-data "alibabacloudstack_nas_protocols" "default" {
-		type = "${var.storage_type}"
-}
-resource "alibabacloudstack_nas_file_system" "default" {
-description = "${var.name}"
-storage_type = "${var.storage_type}"
-protocol_type = "${data.alibabacloudstack_nas_protocols.default.protocols.0}"
-}
+%s
+
+%s
+
 resource "alibabacloudstack_nas_access_group" "default" {
-			access_group_name = "tf-testAccNasConfig-resource-test%d"
+			access_group_name = var.name
 			access_group_type = "Vpc"
 			description = "tf-testAccNasConfig"
 }
 
-`, name, rand)
+`, name, VSwitchCommonTestCase, NasCommonTestCase)
 }

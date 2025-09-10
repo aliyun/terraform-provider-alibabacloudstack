@@ -156,6 +156,8 @@ func TestAccAlibabacloudStackNasFileSystem_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				//When the instance state changes to running, the cluster_id may change during queries.
+				ImportStateVerifyIgnore: []string{"cluster_id"},
 			},
 			// {
 			// 	Config: testAccConfig(map[string]interface{}{
@@ -225,6 +227,8 @@ func TestAccAlibabacloudStackNasFileSystemEncrypt(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				//When the instance state changes to running, the cluster_id may change during queries.
+				ImportStateVerifyIgnore: []string{"cluster_id"},
 			},
 			 {
 			 	Config: testAccConfig(map[string]interface{}{

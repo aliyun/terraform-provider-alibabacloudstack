@@ -128,20 +128,12 @@ variable "name" {
 			default = "tf-testAccCheck-nasmount%d"
 }
 
-variable "storage_type" {
-  default = "Capacity"
-}
+
 
 %s
 
-data "alibabacloudstack_nas_protocols" "default" {
-        type = "${var.storage_type}"
-}
-resource "alibabacloudstack_nas_file_system" "default" {
-  description = "${var.name}"
-  storage_type = "${var.storage_type}"
-  protocol_type = "${data.alibabacloudstack_nas_protocols.default.protocols.0}"
-}
+%s
+
 resource "alibabacloudstack_nas_access_group" "default" {
 			access_group_name = "${var.name}"
 			access_group_type = "Vpc"
@@ -154,7 +146,7 @@ resource "alibabacloudstack_nas_mount_target" "default" {
 }
 data "alibabacloudstack_nas_mount_targets" "default" {
 		%s
-}`, rand, VSwitchCommonTestCase, strings.Join(pairs, "\n  "))
+}`, rand, VSwitchCommonTestCase, NasCommonTestCase, strings.Join(pairs, "\n  "))
 	return config
 }
 
