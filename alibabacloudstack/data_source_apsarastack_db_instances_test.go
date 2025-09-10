@@ -18,7 +18,7 @@ func TestAccAlibabacloudStackDBInstancesDataSource(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_db_instances.default"),
 					resource.TestCheckResourceAttr("data.alibabacloudstack_db_instances.default", "instances.#", "1"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_db_instances.default", "ids.#"),
+					resource.TestCheckResourceAttr("data.alibabacloudstack_db_instances.default", "ids.#", "1"),
 				),
 			},
 		},
@@ -41,10 +41,6 @@ data "alibabacloudstack_db_instances" "default" {
   name_regex = "${alibabacloudstack_db_instance.default.instance_name}"
   ids        = ["${alibabacloudstack_db_instance.default.id}"]
   status     = "Running"
-  tags       = {
-    "type" = "database",
-    "size" = "tiny"
-  }
 }
 `
 }

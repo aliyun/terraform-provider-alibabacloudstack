@@ -178,12 +178,24 @@ func dataSourceAlibabacloudStackDBInstancesRead(d *schema.ResourceData, meta int
 
 	request := rds.CreateDescribeDBInstancesRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	request.Engine = d.Get("engine").(string)
-	request.DBInstanceStatus = d.Get("status").(string)
-	request.DBInstanceType = d.Get("db_type").(string)
-	request.VpcId = d.Get("vpc_id").(string)
-	request.VSwitchId = d.Get("vswitch_id").(string)
-	request.ConnectionMode = d.Get("connection_mode").(string)
+	if v, ok := d.GetOk("engine"); ok && v.(string) != "" {
+		request.Engine = v.(string)
+	}
+	if v, ok := d.GetOk("status"); ok && v.(string) != "" {
+		request.DBInstanceStatus = v.(string)
+	}
+	if v, ok := d.GetOk("db_type"); ok && v.(string) != "" {
+		request.DBInstanceType = v.(string)
+	}
+	if v, ok := d.GetOk("vpc_id"); ok && v.(string) != "" {
+		request.VpcId = v.(string)
+	}
+	if v, ok := d.GetOk("vswitch_id"); ok && v.(string) != "" {
+		request.VSwitchId = v.(string)
+	}
+	if v, ok := d.GetOk("connection_mode"); ok && v.(string) != "" {
+		request.ConnectionMode = v.(string)
+	}
 	if v, ok := d.GetOk("tags"); ok {
 		tagsMap := v.(map[string]interface{})
 		bs, err := json.Marshal(tagsMap)
