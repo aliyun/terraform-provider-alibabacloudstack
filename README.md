@@ -1,79 +1,79 @@
-# Terraform Provider For AlibabaCloud ApsaraStack
+# Alibaba Cloud ApsaraStack Terraform Provider
 
 <img src="https://www.datocms-assets.com/2885/1506527326-color.svg" width="400px">
 
-## Documentation Language
+## Document languages
 
 ---
 
-[简体中文](./README_zh-Hans.md) | English
+[简体中文](./README_zh-Hans.md)|English
 
-## Official Sites
+## Websites
 
 ---
 
-
-- [GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack)
 - [Alibaba Cloud Help Center](https://help.aliyun.com/apsara/index.html)
 - [Terraform Public Registry](https://registry.terraform.io/providers/aliyun/alibabacloudstack)
+- [GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack)
 
-## Environment Configuration
+## Environment configuration
 
 ---
 
-### Install Dependencies
+### Install dependencies
 
-Download TF Core from [Terraform](https://www.terraform.io/downloads.html) or [OpenTofu](https://opentofu.org/docs/intro/install/) official websites, then install or extract it locally. It is recommended to add the installation path to the system `PATH` variable.
+Download TF Core from the [Terraform](https://www.terraform.io/downloads.html) or [OpenTofu](https://opentofu.org/docs/intro/install/) website and install TF Core on your on-premises computer. We recommend that you add the installation path to the PATH system variable. 
 
-> **Note**: Terraform requires version 0.13.x or higher. OpenTofu has no minimum version requirement.
+> **Note** : The version of Terraform must be 0.13.x or later. OpenTofu does not require a minimum version. 
 
-### Install Terraform Provider
+### Install the Terraform provider
 
-> Select the appropriate AlibabacloudStack version based on your proprietary cloud version.
+> Select an appropriate AlibabacloudStack version based on your Apsara Stack version.
+>
+> + If you use Alibaba Cloud ApsaraStack V3.16.2, the compatible version of AlibabaCloudStack should correspondingly be V3.16.x. You can use `< 3.18.0` to declare the version number if you want to obtain the latest version.
+>
+> + If you use Alibaba Cloud ApsaraStack V3.18.x (such as V3.18.0, V3.18.1, V3.18.2, and V3.18.6), the compatible version of AlibabaCloudStack should correspondingly be 3.18.x. You can use `< 3.19.0` to declare the version number if you want to obtain the latest version. **Note**: Multiple Alibaba Cloud ApsaraStack versions are released. Refer to the documentation version corresponding to the Alibaba Cloud ApsaraStack version. 
+>
+> + To obtain the Terraform provider versions for other Alibaba Cloud ApsaraStack versions, contact Apsara Stack customer service.
 
-> If the proprietary cloud version is 3.16.2, the AlibabacloudStack version should be 3.16.x. Use `< 3.18.0` to declare the version number when obtaining the latest version.
-
-> If the proprietary cloud version is 3.18.x (including 3.18.0, 3.18.1, 3.18.2, 3.18.6), the AlibabacloudStack version should be 3.18.x. Use `>= 3.18.0` to declare the version number when obtaining the latest version. **Note**: Please use the corresponding version documentation due to version differences.
-
-| AlibabaCloud ApsaraStack Version | AlibabacloudStack Version |
+| Alibaba Cloud ApsaraStack version | AlibabacloudStack version |
 | ---  | ---  |
 | v3.16.2 | < 3.18.0 |
-| v3.18.x | >= 3.18.0 |
+| v3.18.x | < 3.19.0 |
 
-**Option 1: Automatic Installation**
+**Solution 1: Automatic installation**
 
-> **Note**: Automatic installation requires your execution environment to have access to GitHub. This method requires no additional configuration, and TF Core will automatically install the Provider later.
+> **Note**: Automatic installation is supported only when your environment can access GitHub. This solution does not require additional configurations. You can skip the following content of this section and proceed with the [Getting Started](#getting-started) section to get started with the Terraform provider. TF Core will automatically install AlibabacloudStack. 
 
-**Option 2: Mirror Site Installation**
+**Solution 2: Installation from the mirror site**
 
-> **Description**: Mirror site installation effectively resolves installation failures caused by network isolation or instability.
+> **Note**: The mirror site provides local download sources to prevent installation errors caused by network isolation or instability.
 
-1. Create a `.terraformrc` or `terraform.rc` configuration file. The file location depends on the host operating system:
+1. Create a Terraform configuration file (The file location varies based on the operating system on your host)
    
    > **Note**:
-   > 
-   > - On Windows: The file must be named `terraform.rc` and placed in the `%APPDATA%` directory of the relevant user. Use `$env:APPDATA` in PowerShell to locate this directory.
-   > 
-   > - On other systems: The file must be named `.terraformrc` and placed directly in the user's home directory.
-   > 
-   > - Alternatively, use the `TF_CLI_CONFIG_FILE` environment variable to specify the Terraform CLI configuration file location. Any such file should follow the naming pattern `*.tfrc`.
+   > On a Windows operating system, the file must be named `terraform.rc` and stored in the `%APPDATA%` directory of the user. This directory varies based on the Windows version and system configurations. You can run the `$env:APPDATA` command in PowerShell to find the file directory on your operating system. 
+   >
+   > On all other operating systems, the file must be named `.terraformrc` and stored in the home directory of the user. 
+   >
+   > In addition, you can specify the path of the Terraform configuration file in the `TF_CLI_CONFIG_FILE` environment variable. The configuration file specified in this way must be named with the `.tfrc` suffix. 
 
-2. Configure Mirror Site Information
+2. Configure the information about the image site
 
-> **Note**: The following example uses [Alibaba Cloud Open Source Mirror Site](https://developer.aliyun.com/mirror/terraform)
+   > **Note**: In the following example, the [Alibaba Cloud open source image site](https://developer.aliyun.com/mirror/terraform) is used.
 
-```hcl
+``` hcl
 provider_installation {
   network_mirror {
     url = "https://mirrors.aliyun.com/terraform/"
-    // Restrict only AlibabacloudStack downloads from mirror
+    // Allows AlibabacloudStack to download only from the specified image source
     include = [
       "registry.terraform.io/aliyun/alibabacloudstack",
       "registry.terraform.io/hashicorp/alibabacloudstack",
     ]
   }
   direct {
-    // Other providers maintain original download paths
+    // All providers except AlibabacloudStack must maintain the original download URLs
     exclude = [
       "registry.terraform.io/aliyun/alibabacloudstack",
       "registry.terraform.io/hashicorp/alibabacloudstack",
@@ -82,34 +82,32 @@ provider_installation {
 }
 ```
 
-**Option 3: Manual Installation**
+**Solution 3: Manual installation**
 
-Download the appropriate version of AlibabacloudStack from [GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack/releases/), create the directory structure according to the specified format under the selected installation path, and extract the Provider.
+Download the required AlibabacloudStack version from [GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack/releases/). Create a directory structure in the desired installation path based on the specified format, and decompress the provider.
 
-> **Warning**: Incorrect directory structure will cause Provider loading failure.
+> **Note**: The download of the provider fails if you use an invalid directory structure.
 
-Standard Provider directory format:
+Standard directory structure of the provider：
 
 ```
-XX(Plugin root path, e.g., ./terraform.d/providers/)
-└── <hostname>(Use registry.terraform.io for Terraform, registry.opentofu.org for Opentofu)
-    └── <Namespace>(e.g., hashicorp or aliyun)
-        └── <Provider Name>(alibabacloudstack)
-            └── <Provider Version>(e.g., 3.16.2)
-                └── <OS Arch>(e.g., windows_amd64)
-                    └── <Provider Bin>(terraform-provider-alibabacloudstack)
+XX(The provider repository path, such as./terraform.d/providers/)
+└── <hostname>(Terraform uses registry.terraform.io and OpenTofu uses registry.opentofu.org.)
+    └── <namespace>(aliyun)
+        └── <provider name>(alibabacloudstack)
+            └── <provider version>(such as  3.18.0)
+                └── <system architecture>(such as windows_amd64)
+                    └── <provider file>(terraform-provider-alibabacloudstack)
 ```
+> **Note**: We recommend that you use the aliyun namespace. In the [Initialize a project](#initialize-a-project) step, we recommend that you declare the `source` of AlibabacloudStack as aliyun/alibabacloudstack when you write the `provider.tf` file. 
 
-> **Note**: 
->
-> - For the `namespace` layer, `hashicorp` is recommended. If using `aliyun`, ensure to explicitly declare it in subsequent Provider configurations.
->
-> - Common system architectures: `windows_amd64`, `linux_amd64`, `linux_arm64`, `darwin_amd64`, `darwin_arm64`
->
-> - The plugin root path can use the official default locations (auto-loaded during execution) or a custom path (requires manual specification during execution).
->
-> Terraform scans and loads Providers from the following OS-specific paths:
->
+> **Note**: Common system architectures include `windows_amd64`, `linux_amd64`, `linux_arm64`, `darwin_amd64`, and `darwin_arm64`.
+
+
+> **Note**: You can specify the default path as the provider repository so that the provider can be automatically loaded each time you run Terraform. You can also install the provider repository to a custom path. In this case, you need to manually specify the path each time you run Terraform. 
+> 
+> Terraform scans and loads the AlibabacloudStack provider from multiple directories in sequence based on the operating system that you use.
+> 
 >    *Windows*:
 >
 >        %APPDATA%/terraform.d/plugins
@@ -124,7 +122,7 @@ XX(Plugin root path, e.g., ./terraform.d/providers/)
 >
 >        /Library/Application Support/io.terraform/plugins
 >    
->    *Linux或其他类Unix系统*:
+>    *Linux or other Unix-like operating systems*:
 >
 >        $HOME/.terraform.d/plugins
 >
@@ -134,80 +132,78 @@ XX(Plugin root path, e.g., ./terraform.d/providers/)
 >
 >        /usr/share/terraform/plugins
 
-
-## Quick Start
+## Getting Started
 
 ---
 
-### Initialize Project
+### Initialize a project
 
-1. **Create working directory**  
-   Create a new working directory and create a `provider.tf` file with the following content:
+1. Create a working directory and a `provider.tf` file
 
 ```hcl
- terraform {
+terraform {
   required_providers {
     alibabacloudstack = {
       source = "aliyun/alibabacloudstack"
-      #version = "< 3.18.0"
+      #version = "< 3.19.0"
     }
   }
 }
 ```
 
-> **Note**: You can specify the version of the Provider according to your requirements. If not declared, the latest version will be used by default.
+> **Note**: You can specify a provider version based on your business requirements. If you do not specify a provider version, the latest version is used by default. 
 
 2. Initialize the directory
 
-```bash
+``` bash
 terraform init
 ```
 
-> **Note**: If you customized the plugin root path in the [Install Terraform Provider](#install-terraform-provider) section, you need to specify the path during initialization:
+> **Note**: If you specify a third-party provider repository path in the [Install the Terraform provider](#install-the-terraform-provider) section, you must specify the path during directory initialization.
 >	```bash
->	terraform init -plugin-dir=<YOUR PLUGIN ROOT PATH>
+>	terraform init -plugin-dir=<provider repository path>
 >	```
 
-### Configure Cluster Connection Information
+### Configure the Alibaba Cloud ApsaraStack Cluster Info
 
-**Option 1: Configuration File**
+**Solution 1: Use a configuration file**
 
-Create a `provider.tf` file in your working directory and configure according to your environment:
+Create a `provider.tf` file in the working directory and configure the parameters based on the environment that you use. 
 
-> AlibabacloudStack supports both AK/SK authentication and STS authentication. It is recommended to use STS authentication.
-> + [STS authentication] When configuring `access_key`, `secret_key`, and `role_arn`, AlibabacloudStack will perform role assumption and use the generated STS Token for authentication;
-> + [STS authentication] When configuring `access_key`, `secret_key`, and `security_token`, AlibabacloudStack will use the specified STS Token for authentication;
-> + [AK/SK authentication] When configuring `access_key` and `secret_key`, AK/SK authentication will be used;
+> AlibabacloudStack supports authentication based on AccessKey pairs and Security Token Service (STS) tokens. We recommend that you use STS for authentication.
+> + [STS authentication method 1]: When `access_key`, `secret_key`, and `role_arn` are configured, AlibabacloudStack assumes the role and uses the STS token generated by the role for authentication. 
+> + [STS authentication method 2]: When `access_key`, `secret_key`, and `security_token` are configured, AlibabacloudStack uses the specified STS token for authentication. 
+> + [Authentication based on AccessKey pairs]: When `access_key` and `secret_key` are configured, the AccessKey pair is used for authentication. 
 
 ```hcl
 
 provider "alibabacloudstack" {
-  popgw_domain = "xxx.xxx.com" # AlibabaCloud ApsaraStack platform Service Endpoint
-  domain = "xxx.xxx.com" # AlibabaCloud ApsaraStack platform ASAPI Service Endpoint  
-  suffix
-  access_key   = "xxxx" # Account Access Key
-  secret_key   = "xxxx" # Account Secret Key
-  # role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx" # RAM Role to be assumed
+  popgw_domain = "xxx.xxx.com" # The standard suffix in the service address of Alibaba Cloud ApsaraStack.
+  # domain = "xxx.xxx.com"       # Deprecated, Asapi endpoint for Alibaba Cloud ApsaraStack.
+  access_key   = "xxxx" # The AccessKey ID of the account.
+  secret_key   = "xxxx" # The AccessKey secret of the account.
+  role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx" # The Resource Access Management (RAM) role to be assumed.
   # security_token = "xxxxxxxx"
-  region       = "xxxx" # Platform Region information
-  proxy        = "HTTP://x.x.x.x:xxx" # Proxy server address
-  protocol                = "HTTPS" # Network protocol (`HTTP` or `HTTPS`)
-  insecure                = "true" # Skip HTTPS certificate verification
-  resource_group_set_name = "ResourceSet(xxxx)" # Resource group set name
+  region       = "xxxx" # The region of Apsara Stack.
+  proxy        = "HTTP://x.x.x.x:xxx" # The address of the proxy server. 
+  protocol                = "HTTPS" # The network protocol. Valid values: HTTP and HTTPS.
+  insecure                = "true" # Specify whether to skip HTTPS certificate verification. Valid values: true and false.
+  resource_group_set_name = "ResourceSet(xxxx)" # The name of the resource set.
 }
 
 ```
 
-> For detailed parameter descriptions, refer to [AlibabacloudStack Provider Parameters Documentation](website/docs/index.html.markdown)
+> For more information about the parameters, see [AlibabacloudStack provider parameters](website/docs/index.html.markdown)
 
-**Option 2: Environment Variables** 
+**Solution 2: Use environment variables**
 
-Configure environment variables in the command execution terminal:
+Configure environment variables for the terminal on which you run the commands. 
 
-> AlibabacloudStack supports both AK/SK authentication and STS authentication. It is recommended to use STS authentication.
-> + [STS authentication] When configuring `ALIBABACLOUDSTACK_ACCESS_KEY`, `ALIBABACLOUDSTACK_SECRET_KEY`, and `ALIBABACLOUDSTACK_ASSUME_ROLE_ARN`, AlibabacloudStack will perform role assumption and use the generated STS Token for authentication;
-> + [STS authentication] When configuring `ALIBABACLOUDSTACK_ACCESS_KEY`, `ALIBABACLOUDSTACK_SECRET_KEY`, and `ALIBABACLOUDSTACK_SECURITY_TOKEN`, AlibabacloudStack will use the specified STS Token for authentication;
-> + [AK/SK authentication] When configuring `ALIBABACLOUDSTACK_ACCESS_KEY` and `ALIBABACLOUDSTACK_SECRET_KEY`, AK/SK authentication will be used;
+
+> AlibabacloudStack supports authentication based on AccessKey pairs and STS tokens. We recommend that you use STS for authentication.
+> + [STS authentication method 1]: When `ALIBABACLOUDSTACK_ACCESS_KEY`, `ALIBABACLOUDSTACK_SECRET_KEY`, and `ALIBABACLOUDSTACK_ASSUME_ROLE_ARN` are configured, AlibabacloudStack assumes the role and uses the STS token generated by the role for authentication. 
+> + [STS authentication method 2]: When `ALIBABACLOUDSTACK_ACCESS_KEY`, `ALIBABACLOUDSTACK_SECRET_KEY`, and `ALIBABACLOUDSTACK_SECURITY_TOKEN` are configured, AlibabacloudStack uses the specified STS token for authentication. 
+> + [Authentication based on AccessKey pairs]: When `ALIBABACLOUDSTACK_ACCESS_KEY` and `ALIBABACLOUDSTACK_SECRET_KEY` are configured, the AccessKey pair is used for authentication. 
 
 + *Windows PowerShell*
 
@@ -219,9 +215,10 @@ $env:ALIBABACLOUDSTACK_PROTOCOL = "HTTPS"
 $env:ALIBABACLOUDSTACK_INSECURE = "true"
 $env:ALIBABACLOUDSTACK_ACCESS_KEY = "xxxx"
 $env:ALIBABACLOUDSTACK_SECRET_KEY = "xxxx"
+$env:ALIBABACLOUDSTACK_ASSUME_ROLE_ARN = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
 ```
 
-+ *Unix-like Systems*
++ *Unix-like operating systems*
 
 ```bash
 export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxx.xxx.com"
@@ -231,15 +228,15 @@ export ALIBABACLOUDSTACK_PROTOCOL="HTTPS"
 export ALIBABACLOUDSTACK_INSECURE="true"
 export ALIBABACLOUDSTACK_ACCESS_KEY="xxxx"
 export ALIBABACLOUDSTACK_SECRET_KEY="xxxx"
+export ALIBABACLOUDSTACK_ASSUME_ROLE_ARN="acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
 ```
 
-> For detailed parameter descriptions, refer to [AlibabacloudStack Provider Parameters Documentation](website/docs/index.html.markdown)
+> For more information about the parameters, see [AlibabacloudStack provider parameters](website/docs/index.html.markdown)
 
-### Orchestrate Resources
+### Orchestrate resources
 
-1. Create a `main.tf` file in your working directory.
+1. Create a `main.tf` file in the working directory.
 
-> For more examples, please refer to the [official documentation](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
 
 ```hcl
 resource "alibabacloudstack_vpc_vpc" "default_vpc" {
@@ -247,69 +244,84 @@ resource "alibabacloudstack_vpc_vpc" "default_vpc" {
   cidr_block = "172.16.0.0/12"
 }
 ```
+> This example demonstrates the basic configuration and operational workflows of Terraform with a simple VPC resource.
+> For more examples, see alibabacloudstack on the [Terraform website](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
 
-2. Execute Orchestration
+2. Perform resource orchestration
 
-```bash
-terraform plan  # View execution plan
-terraform apply # Execute orchestration tasks
-terraform show  # View orchestration results
-terraform destroy # Destroy resources
+``` bash
+terraform plan # View the resource plan.
+
+terraform apply # Execute the orchestration task.
+
+terraform show # View the orchestration result.
+
+terraform destroy # Destroy resources.
 ```
 
-## Changelog
+## Change history
 
 ---
 
-Please refer to [ReleaseNote](./CHANGELOG.md)
+For more information, see [Change history.](./CHANGELOG.md)
 
-## Development Guide
+## Developer guide
 
 ---
 
-### Set Up Development Environment
+### Install a compilation environment
 
-+ Install [Golang](https://golang.org/doc/install)  
-  > **Note**: Recommended version 1.21 for current project development.
++ Install [Golang](https://golang.org/doc/install) 
 
-+ Install [dlv](https://github.com/go-delve/delve/tree/master/Documentation/installation)  
-  > **Note**: dlv is a Golang debugger (optional)
+> **Note**: We recommend that you use Golang 1.21 during project development. 
 
-### Download Source Code and Compile
++ Install [dlv](https://github.com/go-delve/delve/tree/master/Documentation/installation)
+
+> **Note**: Delve is a debugger for Golang. Delve is an optional tool.
+
+### Download and compile the source code
 
 ```bash
 cd <YOUR WORKSPACE>
 git clone https://github.com/aliyun/terraform-provider-alibabacloudstack.git
 cd terraform-provider-alibabacloudstack
-git checkout <appropriate TAG and branch>  # e.g. v3.16.16
+git checkout <An appropriate tag and branch>
 go mod tidy
 go mod vendor
 go build
 ```
 
-### Cross-compilation
+### Perform cross-compilation
 
-> **Note**: When you need to compile AlibabacloudStack for target execution environments, perform cross-compilation after completing local compilation.
+> **Note**: If you need to compile AlibabacloudStack in your environment, you can perform cross-compile after on-premises compilation is completed. 
 
 ```bash
 GOOS=<OS> GOARCH=<ARCH> go build
 ```
 
-  > **Note**: GOOS options has `windows`, `linux`, `darwin`, `freebsd`, `openbsd`, `solaris`
-  
-  > **Note**：GOARCH options has `amd64`, `'386'`, `arm`, `arm64`
-  
-### Source Code Testing
+> **Note**: You can select  `windows`, `linux`, `darwin`, `freebsd`, `openbsd`, `solaris` for GOOS.
 
-1. Configure environment variables by following the *Environment Variables* method described in the [Configure Cluster Connection Information](#configure-cluster-connection-information) section
-2. Execute tests:
-```bash
-   TF_ACC=1 TF_LOG=INFO go test ./alibabacloudstack -v -run=TestAccAlibabacloudStack -timeout=0
-```
+> **Note**: You can select `amd64`, `'386'`, `arm`, `arm64` for GOARCH.
 
-### Log Tracing
+### Test the source code
 
-> **Note**: Enable logging to trace API requests initiated by AlibabacloudStack.
+1. For more information, see the environment variable configuration methods in the [Configure the Alibaba Cloud ApsaraStack Cluster Info](#configure-the-alibaba-cloud-apsarastack-cluster-info) section.
+2. Run the testcase.
+   ```bash
+   TF_ACC=1 TF_LOG=INFO go test ./alibabacloudstack -v -run="TestAccAlibabacloudStackxxxxx" -timeout=0
+   ```
+
+### Debug the source code
+
+1. For more information, see the environment variable configuration methods in the [Configure the Alibaba Cloud ApsaraStack Cluster Info](#configure-the-alibaba-cloud-apsarastack-cluster-info) section.
+2. Debug the testcase.
+   ```bash
+   TF_ACC=1 dlv test ./alibabacloudstack -- -test.v -test.run="TestAccAlibabacloudStackxxxxx"
+   ```
+
+### Enable logging
+
+> **Note**: If you need to trace API requests initiated by AlibabacloudStack, you can enable the logging feature. 
 
 ```bash
 export DEBUG="terraform"
@@ -317,13 +329,13 @@ export TF_LOG="TRACE"
 terraform apply
 ```
 
-### Compatibility Statement
+### Compatibility
 
-:white_check_mark: All features of Terraform Core are supported by the Provider
+:white_check_mark:：All capabilities of Terraform Core are supported by the provider.
 
-:warning: Partial features of Terraform Core are **not** supported by the Provider
+:warning:：Some capabilities of Terraform Core are not supported by the provider.
 
-| Rpc Name  | terraform-v1.0.11  | terraform-v1.1.9  | terraform-v1.2.9  | terraform-v1.3.10  | terraform-v1.4.7  | terraform-v1.5.7  | terraform-v1.6.6  | terraform-v1.7.5  | terraform-v1.8.5  | terraform-v1.9.3  | opentofu-v1.6.3  | opentofu-v1.7.3  | opentofu-v1.8.0 |
+| RPC Name  | terraform-v1.0.11  | terraform-v1.1.9  | terraform-v1.2.9  | terraform-v1.3.10  | terraform-v1.4.7  | terraform-v1.5.7  | terraform-v1.6.6  | terraform-v1.7.5  | terraform-v1.8.5  | terraform-v1.9.3  | opentofu-v1.6.3  | opentofu-v1.7.3  | opentofu-v1.8.0 |
 | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | --- |
 | GetSchema  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :warning:  | :warning:  | :white_check_mark:  | :warning:  | :warning: |
 | PrepareProviderConfig  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
