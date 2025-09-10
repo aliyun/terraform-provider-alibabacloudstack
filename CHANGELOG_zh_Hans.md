@@ -1,3 +1,26 @@
+# 3.18.15
+
+## 变更
+
+1. alibabacloudstack_slb_listener的`tls_cipher_policy`支持在环境中动态获取可用范围
+
+## 修复
+
+1. 修复多个单元测试用例
+2. 修复资源集下oss bucket为空时创建失败的问题
+3. 修复alibabacloudstack_security_group_rules无法根据`nic_type`进行过滤的问题
+4. 修复alibabacloudstack_slb_loadbalancer为生效`AddressType`的问题
+5. 修复alibabacloudstack_ons_instances因为接口返回数据类型的变化导致的查询失败的问题
+6. 修复kvstore instance 应为clientToken导致签名验证失败的问题
+7. 修复alibabacloudstack_dns_record不能终态的问题
+8. 修复alibabacloudstack_cr_repos查询数据失败的问题
+9. 修复alibabacloudstack_nas_file_system创建成功了`cluster_id`会发生变化导致无法终态的问题
+10. 修复alibabacloudstack_ascm_user_group_role_binding因为asapi不可能导致的问题
+11. **（不兼容）** 修复alibabacloudstack_ascm_user_role_binding因为asapi不可能导致的问题。注意`role_ids`类型修改为Set[INT]
+12. 修复polardb MySql版本设置TDE加密后，无法获取到加密的KmsKey的问题
+
+---
+
 # 3.18.14
 
 ## 新增
@@ -72,7 +95,7 @@
 
 ## 变更
 
-1. 不兼容 新增加Mongodb分片实例各node支持设置描述，该字段在TF下为必填，且同一实例下需要唯一
+1. **（不兼容）** 新增加Mongodb分片实例各node支持设置描述，该字段在TF下为必填，且同一实例下需要唯一
 
 ---
 

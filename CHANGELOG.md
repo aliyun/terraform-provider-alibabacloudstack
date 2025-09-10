@@ -1,6 +1,29 @@
+# 3.18.15
+
+
+## Changes
+1. Added support for dynamically retrieving available TLS cipher policy options in the environment for `alibabacloudstack_slb_listener`
+
+## Fixes
+1. Fixed multiple unit test cases
+2. Fixed creation failure when OSS bucket under resource group is empty
+3. Fixed inability to filter `alibabacloudstack_security_group_rules` by `nic_type`
+4. Fixed ineffective AddressType configuration for `alibabacloudstack_slb_loadbalancer`
+5. Fixed query failures for `alibabacloudstack_ons_instances` caused by API response data type changes
+6. Fixed signature verification failures in KVStore instances caused by `clientToken` parameter issues
+7. Fixed non-terminal state handling for `alibabacloudstack_dns_record` resources
+8. Fixed data retrieval failures in `alibabacloudstack_cr_repos`
+9. Fixed unstable `cluster_id` values causing state mismatches when creating `alibabacloudstack_nas_file_system`
+10. Fixed `alibabacloudstack_ascm_user_group_role_binding` issues caused by ASAPI unavailability
+11. **(Incompatible)** Fixed `alibabacloudstack_ascm_user_role_binding` issues caused by ASAPI unavailability.  
+   **Note:** Modified `role_ids` type to `Set[INT]`
+12. Fixed PolarDB for MySQL TDE encryption configuration failure to retrieve KMS keys
+
+---
+
 # 3.18.14
 
-## Additions
+## New
 
 1. Added support for ACL functionality configuration in PolarDB  
 2. Added authorization resources for service roles  
@@ -19,7 +42,7 @@
 
 # 3.18.13
 
-## Additions
+## New
 
 1. Added support for managing instances of Enterprise Cloud Network CEN (cen_instance)
 2. Added support for CEN transit router route tables (cen_transit_router_route_table)
@@ -48,7 +71,7 @@
 
 # 3.18.12
 
-## Additions
+## New
 
 1. Added MongoDB account management capability (`mongodb_account`)
 2. Added MongoDB backup management capability (`mongodb_backup`)
@@ -73,24 +96,27 @@
 
 ## Changes
 
-1. **Breaking Change**: Added support for setting descriptions on nodes in MongoDB sharded instances. This field is now **mandatory in Terraform (TF)** and must be **unique within the same instance**.
+1. **(Incompatible)**: Added support for setting descriptions on nodes in MongoDB sharded instances. This field is now **mandatory in Terraform (TF)** and must be **unique within the same instance**.
 
 ---
 
 # 3.18.11
 
 ## Fixes
+
 1. Fixed the issue where `alibabacloudstack_log_alert` did not automatically create charts
 
-## Additions
+## New
+
 1. `alibabacloudstack_log_alert` now supports webhook configuration
-2. Implemented `alibabacloudstack_acm_configuration`
+2. **(Incompatible)** `alibabacloudstack_acm_configuration`
 
 ---
 
 # 3.18.10
 
-## Additions
+## New
+
 1. Added VPN resources:
    - `vpn_pbr_route_entry` (Policy-Based Routing Table)
    - `ssl_vpnserver` (SSL Server)
@@ -104,16 +130,19 @@
 3. Added NAS resource `nas_lifecycle_policy` (Lifecycle Policy)
 
 ## Fixes
+
 1. **(Incompatible)** Major structural changes in NAS resource availability zone query responses
 
 ## Deprecations
+
 1. **(Incompatible)** Deprecated `protocols` query in NAS resources. Use the new `Zone` query instead
 
 ---
 
 # 3.18.9
 
-## Additions
+## New
+
 1. Added `BandwidthPackage` resource for NatGateway
 2. Added `AccessLog` resource for SLB
 3. Added `vpc_ipv6_isps` resource (IPv6 CIDR block support) with multi-resource binding via `ipv6_cidr_blocks`
@@ -121,13 +150,15 @@
 5. Added `HaVip` resource (High-Availability Virtual IP) for VPC
 
 ## Deprecations
+
 1. Marked SLB Listener's `logs_download_attributes` as deprecated. Use `AccessLog` resource instead
 
 ---
 
 # 3.18.8
 
-## Additions
+## New
+
 1. Added EBS resources:
    - `DiskReplicaPair` (Disk Async Replication)
    - `DiskReplicaGroup` (Consistency Replication Group)
@@ -139,19 +170,22 @@
 3. Added `scaling_group_id` support for ESS `ScheduledTask`
 
 ## Removals
+
 1. Removed `LaunchTemplate` functionality (unavailable in ASCM console)
 
 ---
 
 # 3.18.7
 
-## Additions
+## New
+
 1. Added `flink_namespace` creation/query capabilities
 2. Added `tag` configuration support for PolarDB instances
 3. Added disk encryption support for CS Kubernetes clusters
 4. Enabled EDAS K8sApp to bind existing SLB instances
 
 ## Fixes
+
 1. Fixed PolarDB kernel parameter modification capability
 
 ## Deprecations
@@ -161,7 +195,8 @@
 
 # 3.18.6
 
-## Additions
+## New
+
 1. Added SLB binding update/delete and batch binding for `edas_k8s_application`
 2. Added `host_aliases` support for `edas_k8s_application`
 
@@ -174,18 +209,21 @@
 
 # 3.18.5
 
-## Additions
+## New
+
 1. Added `alikafka_instance` creation/query capabilities
 2. Implemented SSL enable/disable for Redis
 3. Added classic network `address` specification for SLB
 4. Added `tags` support for `oss_bucket`
 
 ## Changes
+
 1. Changed primary key of `alibabacloudstack_ascm_user_group_resource_set_binding` from `resourceSetId` to `resourceSetId:userGroupId:ascmRoleId` (recreation required on apply)
 2. Deprecated `alibabacloudstack_ascm_user_group_role_binding` (functionality merged into `alibabacloudstack_ascm_user_group.role_ids`)
 3. Deprecated `alibabacloudstack_ascm_user_role_binding` (functionality merged into `alibabacloudstack_ascm_user.role_ids`)
 
 ## Fixes
+
 1. Fixed TDE activation failure for PolarDB PostgreSQL engines
 2. Fixed OSS bucket configuration via environment variables
 3. Fixed TDE activation errors for non-MySQL PolarDB engines
@@ -197,7 +235,8 @@
 
 # 3.18.4
 
-## Additions
+## New
+
 1. Implemented exact matching for organizational resource set filtering
 2. Added PolarDB resources:
    - `polardb_instance`
@@ -208,6 +247,7 @@
    - `polardb_zone`
 
 ## Fixes
+
 1. Enhanced `edas_k8s_service` with new read API and documentation
 2. Adjusted `cr_repo` name length to 64 characters (UI alignment)
 3. Fixed CR-EE resource queries in popgw mode
@@ -220,7 +260,8 @@
 
 # 3.18.3
 
-## Additions
+## New
+
 1. Added PVC/local mount and configuration support for `edas_k8s_app`
 2. New resources:
    - `edas_k8s_service`
@@ -230,20 +271,23 @@
 
 # 3.18.2
 
-## Additions
+## New
+
 1. Added management support for:
    - `alibabacloudstack_bastionhost_instance` (Bastion Host)
    - `alibabacloudstack_waf_instance` (Web Application Firewall)
    - `alibabacloudstack_vpn_gateway` (VPN Gateway)
 
 ## Fixes
+
 1. Fixed `vpn_gateway` creation failure
 
 ---
 
 # 3.18.1
 
-## Additions
+## New
+
 1. Added disk encryption methods
 
 ## Fixes
@@ -260,7 +304,9 @@
 > Branch: 3.16.2
 
 ## Fixes
+
 1. Modified alikafka popgw domain format for 318x compatibility **(apsarastack 3.16.2 incompatible)**
 
 ## Removals
+
 1. Removed `domain` and `force_use_asapi` ASAPI configurations
