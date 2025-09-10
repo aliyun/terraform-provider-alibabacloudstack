@@ -91,6 +91,8 @@ func dataSourceAlibabacloudStackCRRepos() *schema.Resource {
 									},
 								},
 							},
+							MaxItems: 0,
+							MinItems: 0,
 						},
 					},
 				},
@@ -139,10 +141,11 @@ func dataSourceAlibabacloudStackCRReposRead(d *schema.ResourceData, meta interfa
 				continue
 			}
 		}
-		domainList := make(map[string]string)
-		domainList["public"] = repo.RepoDomainList.Public
-		domainList["internal"] = repo.RepoDomainList.Internal
-		domainList["vpc"] = repo.RepoDomainList.Vpc
+		domainList := []map[string]string{{
+			"public":   repo.RepoDomainList.Public,
+			"internal": repo.RepoDomainList.Internal,
+			"vpc":      repo.RepoDomainList.Vpc,
+		}}
 		mapping := map[string]interface{}{
 			"namespace":   repo.RepoNamespace,
 			"name":        repo.RepoName,
