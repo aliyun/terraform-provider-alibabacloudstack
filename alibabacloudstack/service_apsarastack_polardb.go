@@ -1044,7 +1044,7 @@ func (s *PolardbService) PolardbDBInstanceStateRefreshFunc(d *schema.ResourceDat
 	return func() (interface{}, string, error) {
 		object, err := s.DoPolardbDescribedbinstancesRequest(d.Id())
 		if err != nil {
-			if errmsgs.NotFoundError(err) {
+			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"ServiceUnavailable"}) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
@@ -1673,4 +1673,55 @@ func (s *PolardbService) DoDescribeDBProxyEndpointRequest(instanceId string) (*P
 	}
 
 	return dBProxyEndpoint, nil
+}
+
+
+func (s *PolardbService) CheckCloudResourceAuthorized() (string, error) {
+	req := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "CheckCloudResourceAuthorized", "")
+	req.QueryParams["TargetRegionId"] = s.client.RegionId
+	var arnresp RoleARN
+	bresponse, err := s.client.ProcessCommonRequest(req)
+	addDebug(req.GetActionName(), bresponse, req, req.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return "", errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+			"alibabacloudstack_polardb_db_instance", "CheckCloudResourceAuthorized", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &arnresp)
+	if err != nil {
+		return "", errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+			"alibabacloudstack_polardb_db_instance", "CheckCloudResourceAuthorized", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	arnrole := arnresp.RoleArn
+	return arnrole, errmsgs.WrapError(err)
+}
+
+func (s *PolardbService) DescribeDBInstanceEncryptionKey(id string) string {
+	var err error
+	req := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceEncryptionKey", "")
+	req.QueryParams["DBInstanceId"] = id
+	bresponse, err := s.client.ProcessCommonRequest(req)
+	addDebug(req.GetActionName(), bresponse, req, req.QueryParams)
+	response := make(map[string]interface{})
+	if err != nil {
+		if bresponse == nil {
+			return ""
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		log.Printf("[DEBUG] Polardb %s : DescribeDBInstanceEncryptionKey %s", id, errmsg)
+		return ""
+	}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		log.Printf("[DEBUG] Polardb %s : DescribeDBInstanceEncryptionKey json.Unmarshal Error! \n %s", id, bresponse.GetHttpContentString())
+		return ""
+	}
+	encryptionKey, err := jsonpath.Get("$.EncryptionKey", response)
+	if err != nil {
+		return ""
+	}
+	return encryptionKey.(string)
 }
