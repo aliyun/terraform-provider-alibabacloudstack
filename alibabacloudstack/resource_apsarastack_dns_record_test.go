@@ -91,6 +91,14 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"ttl":          "10",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(nil),
+				),
+			},
 		},
 	})
 

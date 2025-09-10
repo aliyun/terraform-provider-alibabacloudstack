@@ -187,34 +187,43 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 	var Type string
 	var Ttl int
 	if d.HasChange("type") {
-		if v, ok := d.GetOk("type"); ok {
-			Type = v.(string)
-		}
-		check.Data[0].Type = Type
 		attributeUpdate = true
-	} else {
-		if v, ok := d.GetOk("type"); ok {
-			Type = v.(string)
-		}
-		check.Data[0].Type = Type
 	}
+	if v, ok := d.GetOk("type"); ok {
+		Type = v.(string)
+	}
+	check.Data[0].Type = Type
 	if d.HasChange("ttl") {
-		if v, ok := d.GetOk("ttl"); ok {
-			Ttl = v.(int)
-		}
-		check.Data[0].TTL = Ttl
 		attributeUpdate = true
-	} else {
-		if v, ok := d.GetOk("ttl"); ok {
-			Ttl = v.(int)
-		}
-		check.Data[0].TTL = Ttl
 	}
+	if v, ok := d.GetOk("ttl"); ok {
+		Ttl = v.(int)
+	}
+	check.Data[0].TTL = Ttl
 	if d.HasChange("rr_set") {
 		attributeUpdate = true
 	}
+	if d.HasChange("line_ids") {
+		attributeUpdate = true
+	}
+	line_ids := expandStringList(d.Get("line_ids").(*schema.Set).List())
+	if len(line_ids) <= 0 {
+		line_ids = []string{"default"}
+	}
+	line_ids_json, _ := json.Marshal(line_ids)
+	line_ids_str := string(line_ids_json)
 	if !d.IsNewResource() && attributeUpdate {
-		request := make(map[string]interface{})
+
+		request := map[string]interface{}{
+			"Type":        Type,
+			"Ttl":         Ttl,
+			"Id":          ID,
+			"ZoneId":      ZoneId,
+			"LbaStrategy": LbaStrategy,
+			"Name":        Name,
+			"LineIds":     line_ids_str,
+			"Remark":      check.Data[0].Remark,
+		}
 		var rrsets []string
 		if v, ok := d.GetOk("rr_set"); ok {
 			rrsets = expandStringList(v.(*schema.Set).List())
@@ -223,14 +232,7 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 			}
 		}
 		action := "UpdateGlobalZoneRecord"
-		request["Type"] = Type
-		request["Ttl"] = Ttl
-		request["Id"] = ID
-		request["ZoneId"] = ZoneId
-		request["LbaStrategy"] = LbaStrategy
-		request["Name"] = Name
-		request["Remark"] = check.Data[0].Remark
-		request["ClientToken"] = buildClientToken(action)
+
 		_, err := client.DoTeaRequest("POST", "CloudDns", "2021-06-24", action, "", nil, nil, request)
 		if err != nil {
 			return err
