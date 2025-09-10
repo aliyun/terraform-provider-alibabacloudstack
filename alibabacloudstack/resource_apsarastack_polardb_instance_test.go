@@ -219,7 +219,7 @@ func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 					"db_instance_class":        "rds.mysql.t1.small",
 					"db_instance_storage":      "10",
 					"encryption":               "true",
-					"encryption_key":           "e8afb5e8-2e70-4643-b3e6-b1cf0441f949",
+					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            "${var.name}",
 					"db_instance_storage_type": "local_ssd",
@@ -321,10 +321,10 @@ variable "name" {
 	default = "%s"
 }
 %s
-// resource "alibabacloudstack_kms_key" "key" {
-//   description             = "Hello KMS"
-//   pending_window_in_days  = "7"
-// }
+resource "alibabacloudstack_kms_key" "key" {
+  description             = "Hello KMS"
+  pending_window_in_days  = "7"
+}
 
 `, name, DataZoneCommonTestCase)
 }
