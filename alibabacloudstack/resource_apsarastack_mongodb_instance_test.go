@@ -308,6 +308,14 @@ func TestAccAlibabacloudStackMongoDBInstance_Version4(t *testing.T) {
 				),
 			},
 			{
+				Config: testMongoDBInstance_audit_status,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"audit_status": "enabled",
+					}),
+				),
+			},
+			{
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -765,6 +773,20 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
   tde_status    = "enabled"
+}`
+
+const testMongoDBInstance_audit_status = `
+data "alibabacloudstack_zones" "default" {
+  
+}
+
+resource "alibabacloudstack_mongodb_instance" "default" {
+  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
+  engine_version      = "4.0"
+  db_instance_storage = 10
+  db_instance_class   = "dds.mongo.mid"
+  tde_status    = "enabled"
+  audit_status = "enabled"
 }`
 
 func testMongoDBInstance_classic_security_ip_list(password string) string {

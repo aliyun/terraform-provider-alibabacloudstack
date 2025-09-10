@@ -182,6 +182,12 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"audit_status": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"enabled", "disabled"}, false),
+			},
 			"tags": tagsSchema(),
 		},
 	}
@@ -363,6 +369,11 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	}
 
 	d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
+	auditStatus, err := ddsService.DescribeAuditPolicy(d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.Set("audit_status", auditStatus)
 	return nil
 }
 
@@ -397,6 +408,26 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		}
 		//d.SetPartial("instance_charge_type")
 		//d.SetPartial("period")
+	}
+
+	if d.HasChange("audit_status") {
+		request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyAuditPolicy", "")
+		request.QueryParams["DBInstanceId"] = d.Id()
+		auditStatus := d.Get("audit_status").(string)
+		if auditStatus == "enabled" {
+			request.QueryParams["AuditStatus"] = "Enable"
+		} else {
+			request.QueryParams["AuditStatus"] = "Disabled"
+
+		}
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_mongodb_instance", "ModifyAuditPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
 	}
 
 	if d.HasChanges("preferred_backup_time", "preferred_backup_period", "backup_time", "backup_period") {

@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
@@ -592,4 +593,29 @@ func (s *MongoDBService) tagsFromMap(m map[string]interface{}) []dds.TagResource
 	}
 
 	return result
+}
+
+func (s *MongoDBService) DescribeAuditPolicy(instanceId string) (string, error) {
+
+	request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeAuditPolicy", "")
+	request.QueryParams["DBInstanceId"] = instanceId
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return "", errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_mongodb_instance", "DescribeAuditPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	result := make(map[string]interface{})
+	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &result)
+	status := result["LogAuditStatus"]
+	var auditStatus string
+	if status != nil && status.(string) == "Disabled" {
+		auditStatus = "disabled"
+	} else if status != nil && status.(string) == "Enable" {
+		auditStatus = "enabled"
+	}
+	return auditStatus, nil
 }

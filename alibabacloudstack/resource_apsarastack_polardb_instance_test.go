@@ -187,7 +187,7 @@ resource "alibabacloudstack_security_group" "default" {
 `, VSwitchCommonTestCase, name)
 }
 
-func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
+func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 	var instance *PolardbDescribedbinstancesResponse
 
 	resourceId := "alibabacloudstack_polardb_dbinstance.default"
@@ -218,6 +218,8 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 					"engine_version":           "8.0",
 					"db_instance_class":        "rds.mysql.t1.small",
 					"db_instance_storage":      "10",
+					"encryption":               "true",
+					"encryption_key":           "e8afb5e8-2e70-4643-b3e6-b1cf0441f949",
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            "${var.name}",
 					"db_instance_storage_type": "local_ssd",
@@ -225,24 +227,20 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"instance_name": name,
+						"encryption":    "true",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"enable_ssl":               "true",
-					"tde_status":               "true",
-					"encryption":               "true",
-					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
-					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
-					"instance_name":            "${var.name}",
-					"db_instance_storage_type": "local_ssd",
+					"enable_ssl": "true",
+					"tde_status": "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"encryption": "true",
-						"tde_status": "true",
-						"enable_ssl": "true",
+						"tde_status":     "true",
+						"enable_ssl":     "true",
+						"encryption_key": CHECKSET,
 					}),
 				),
 			},
@@ -323,11 +321,10 @@ variable "name" {
 	default = "%s"
 }
 %s
-resource "alibabacloudstack_kms_key" "key" {
-  description             = "Hello KMS"
-  pending_window_in_days  = "7"
-  key_state               = "Enabled"
-}
+// resource "alibabacloudstack_kms_key" "key" {
+//   description             = "Hello KMS"
+//   pending_window_in_days  = "7"
+// }
 
 `, name, DataZoneCommonTestCase)
 }
