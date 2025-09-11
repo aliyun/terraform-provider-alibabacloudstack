@@ -1206,6 +1206,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 
 	var response map[string]interface{}
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
+	retryTimes := 3
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 
 		var err error
@@ -1253,6 +1254,13 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 				wait()
 				return resource.RetryableError(err)
 			}
+
+			if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound"}) && retryTimes > 0 {
+				retryTimes -= 1
+				wait()
+				return resource.RetryableError(err)
+			}
+
 			errmsg := errmsgs.GetAsapiErrorMessage(response)
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, popcode, apiname, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
@@ -1314,6 +1322,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 
 	var response *responses.CommonResponse
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
+	retryTimes :=3 
 	resource.Retry(5*time.Minute, func() *resource.RetryError {
 		// Retry only when the request does not return normally
 		response, err = conn.ProcessCommonRequest(request)
@@ -1325,6 +1334,11 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			return resource.RetryableError(err)
 		}
 		if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "ServiceUnavailable", "RequestTimeout", "asapi.server.timeout.socket"}) {
+			return resource.RetryableError(err)
+		}
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound"}) && retryTimes > 0 {
+			retryTimes -= 1
+			wait()
 			return resource.RetryableError(err)
 		}
 		return resource.NonRetryableError(err)

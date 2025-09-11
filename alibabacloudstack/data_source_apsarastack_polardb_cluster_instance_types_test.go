@@ -18,7 +18,7 @@ func TestAccAlibabacloudStackPolardbClusterInstanceTypesDataSource(t *testing.T)
 			"db_type":      "MySQL",
 			"db_version":   "5.7",
 			"cpu_type":     "intel",
-			"sub_category": "Exclusive",
+			"sub_category": "normal_exclusive",
 		}),
 	}
 

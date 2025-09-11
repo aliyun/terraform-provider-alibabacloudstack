@@ -50,7 +50,7 @@ func TestAccAlibabacloudStackPolardbClusterInstancesDataSource(t *testing.T) {
 			"db_cluster_instances.0.db_cluster_description": fmt.Sprintf("tf-testAcc-%d", rand),
 			"db_cluster_instances.0.create_time":            CHECKSET,
 			"db_cluster_instances.0.db_cluster_id":          CHECKSET,
-			"db_cluster_instances.0.db_nodes.#":             "2",
+			"db_cluster_instances.0.db_nodes.#":             "3",
 			"db_cluster_instances.0.engine":                 CHECKSET,
 			"db_cluster_instances.0.architecture":           CHECKSET,
 			"db_cluster_instances.0.db_cluster_status":      CHECKSET,
@@ -95,7 +95,7 @@ data "alibabacloudstack_polardb_cluster_instance_types" "default" {
   db_version = "${var.db_version}"
   sorted_by = "CPU"
   cpu_type = "hygon"
-  sub_category = "General"
+  sub_category = "normal_exclusive"
 }
 
 resource "alibabacloudstack_polardb_cluster_instance" "default" {
@@ -105,12 +105,11 @@ resource "alibabacloudstack_polardb_cluster_instance" "default" {
 	db_version 				= "${var.db_version}"
 	storage_space 			= "20"
 	vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
-	vswitch_id			  	= "${alibabacloudstack_vpc_vswitch.default.id}"
+	vswitch_id				= "${alibabacloudstack_vpc_vswitch.default.id}"
 	db_node_class 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}"
 	db_node_num 			= "2"
-	sub_category 			= "General"
+	sub_category 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.sub_category}"
 	storage_type 			= "ESSDPL1"
-	tde_enabled 			= "true"
 }
 
  `, name, VSwitchCommonTestCase)

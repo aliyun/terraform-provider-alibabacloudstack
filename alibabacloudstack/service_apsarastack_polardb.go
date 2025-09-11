@@ -29,7 +29,7 @@ type PolardbCheckaccountnameavailableResponse struct {
 
 func (s *PolardbService) DoPolardbCheckaccountnameavailableRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbCheckaccountnameavailableResponse, error) {
 	// api: polardb - 2024-01-30 - CheckAccountNameAvailable
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "CheckAccountNameAvailable", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "CheckAccountNameAvailable", "")
 	PolardbCheckaccountnameavailableResponse := &PolardbCheckaccountnameavailableResponse{}
 
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -1676,7 +1676,7 @@ func (s *PolardbService) DoDescribeDBProxyEndpointRequest(instanceId string) (*P
 }
 
 func (s *PolardbService) CheckCloudResourceAuthorized() (string, error) {
-	req := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "CheckCloudResourceAuthorized", "")
+	req := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "CheckCloudResourceAuthorized", "")
 	req.QueryParams["TargetRegionId"] = s.client.RegionId
 	var arnresp RoleARN
 	bresponse, err := s.client.ProcessCommonRequest(req)
@@ -1700,7 +1700,7 @@ func (s *PolardbService) CheckCloudResourceAuthorized() (string, error) {
 
 func (s *PolardbService) DescribeDBInstanceEncryptionKey(id string) string {
 	var err error
-	req := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceEncryptionKey", "")
+	req := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceEncryptionKey", "")
 	req.QueryParams["DBInstanceId"] = id
 	bresponse, err := s.client.ProcessCommonRequest(req)
 	addDebug(req.GetActionName(), bresponse, req, req.QueryParams)
@@ -1729,36 +1729,23 @@ func (s *PolardbService) DescribePolardbClusterInstance(id string) (map[string]i
 	reqQuery := map[string]interface{}{"DBClusterId": id}
 	response, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterAttribute", "", nil, reqQuery, nil)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
-
 	if response["DBClusterId"] == nil || response["DBClusterId"].(string) == "" {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB shared instance %s was not found", id))
 	}
-
 	return response, nil
 }
 
 func (s *PolardbService) PolardbClusterInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		var object map[string]interface{}
-		var err error
-		retry := 0
-		for retry < 5 {
-			object, err = s.DescribePolardbClusterInstance(id)
-			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM"}) {
-					retry++
-					time.Sleep(time.Duration(retry) * time.Second)
-					continue
-				}
-				if errmsgs.NotFoundError(err) {
-					// Set this to nil as if we didn't find anything.
-					return nil, "", nil
-				}
-				return nil, "", errmsgs.WrapError(err)
+		object, err := s.DescribePolardbClusterInstance(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
 			}
-			break
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
@@ -1768,6 +1755,27 @@ func (s *PolardbService) PolardbClusterInstanceStateRefreshFunc(id string, failS
 		}
 		return object, object["DBClusterStatus"].(string), nil
 	}
+}
+
+func (s *PolardbService) WaitPolardbClusterInstanceAllDbNodesRunning(d *schema.ResourceData) error {
+	return resource.Retry(20*time.Minute, func() *resource.RetryError {
+		object, err := s.DescribePolardbClusterInstance(d.Id())
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+
+		if len(object["DBNodes"].([]interface{}))-1 != d.Get("db_node_num").(int) {
+			return resource.RetryableError(fmt.Errorf("The Number for Node in Instance %s is not enough", d.Id()))
+		}
+
+		for _, dbNode := range object["DBNodes"].([]interface{}) {
+			nodeInfo := dbNode.(map[string]interface{})
+			if nodeInfo["DBNodeStatus"].(string) != "Running" {
+				return resource.RetryableError(fmt.Errorf("The Status for Node %s in Instance %s is %s", nodeInfo["DBNodeId"].(string), d.Id(), nodeInfo["DBNodeStatus"].(string)))
+			}
+		}
+		return nil
+	})
 }
 
 func (s *PolardbService) DescribeDBClusterEndpoints(id string) (map[string]interface{}, error) {
@@ -1970,7 +1978,7 @@ func (s *PolardbService) ModifyClusterParameters(d *schema.ResourceData) error {
 		for _, i := range add {
 			key := i.(map[string]interface{})["name"].(string)
 			value := i.(map[string]interface{})["value"].(string)
-			if parameters[key].(string) == value {
+			if v, exist := parameters[key]; exist && v.(string) == value {
 				continue
 			}
 			config[key] = value
@@ -1996,7 +2004,7 @@ func (s *PolardbService) ModifyClusterParameters(d *schema.ResourceData) error {
 }
 
 func (s *PolardbService) DescribeDBClusterTDE(id string) (string, string, error) {
-	req := s.client.NewCommonRequest("POST", "polardb", "2017-08-01", "DescribeDBClusterTDE", "")
+	req := s.client.NewCommonRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterTDE", "")
 	req.QueryParams["DBClusterId"] = id
 	bresponse, err := s.client.ProcessCommonRequest(req)
 	addDebug(req.GetActionName(), bresponse, req, req.QueryParams)
@@ -2020,7 +2028,7 @@ func (s *PolardbService) DescribeDBClusterTDE(id string) (string, string, error)
 }
 
 func (s *PolardbService) DescribeDBClusterSSL(id string) (bool, error) {
-	req := s.client.NewCommonRequest("POST", "polardb", "2017-08-01", "DescribeDBClusterSSL", "")
+	req := s.client.NewCommonRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterSSL", "")
 	req.QueryParams["DBClusterId"] = id
 	bresponse, err := s.client.ProcessCommonRequest(req)
 	addDebug(req.GetActionName(), bresponse, req, req.QueryParams)

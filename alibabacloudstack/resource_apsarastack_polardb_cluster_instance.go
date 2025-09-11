@@ -53,7 +53,7 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 			"sub_category": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"General", "Exclusive"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"normal_general", "normal_exclusive"}, false),
 			},
 			"db_node_class": {
 				Type:     schema.TypeString,
@@ -62,6 +62,7 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 			"db_read_node_class": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"db_node_num": {
 				Type:         schema.TypeInt,
@@ -407,7 +408,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceCreate(d *schema.ResourceDat
 		request["StorageSpace"] = v.(int)
 	}
 	if v, ok := d.GetOk("sub_category"); ok {
-		request["SubCategory"] = GetSubCategory(v)
+		request["SubCategory"] = v.(string)
 	}
 	if v, ok := d.GetOk("cpu_type"); ok {
 		request["CpuType"] = v.(string)
@@ -445,6 +446,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceCreate(d *schema.ResourceDat
 	if _, err := stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("waiting for PolarDB cluster instance %s to be Running failed: %v", dbClusterId, err)
 	}
+	polardbService.WaitPolardbClusterInstanceAllDbNodesRunning(d)
 	return nil
 }
 
@@ -514,6 +516,13 @@ func resourceAlibabacloudStackPolardbClusterInstanceRead(d *schema.ResourceData,
 	d.Set("storage_type", strings.ToUpper(object["StorageType"].(string)))
 	d.Set("architecture", object["Architecture"])
 	d.Set("db_cluster_status", object["DBClusterStatus"])
+	d.Set("vpc_id", object["VPCId"])
+	d.Set("db_node_num", len(object["DBNodes"].([]interface{}))-1)
+	d.Set("db_node_class", object["DBNodes"].([]interface{})[0].(map[string]interface{})["DBNodeClass"])
+	d.Set("zone_id",object["DBNodes"].([]interface{})[0].(map[string]interface{})["ZoneId"])
+	if len(object["DBNodes"].([]interface{})) > 2 {
+		d.Set("db_read_node_class", object["DBNodes"].([]interface{})[2].(map[string]interface{})["DBNodeClass"])
+	}
 	d.Set("vswitch_id", object["VSwitchId"])
 	d.Set("db_cluster_description", object["DBClusterDescription"])
 	d.Set("proxy_cpu_cores", object["ProxyCpuCores"])
@@ -586,41 +595,6 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 			return err
 		}
 	}
-
-	if d.HasChange("ssl_enabled") && !(d.IsNewResource() && !d.Get("ssl_enabled").(bool)) {
-
-		endpointId := ""
-		if endpointsResponse, err := polardbService.DescribeDBClusterEndpoints(d.Id()); err == nil {
-			endpoint, err := jsonpath.Get("$.Items.0.DBEndpointId", endpointsResponse)
-			if err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterEndpoints", errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			endpointId = endpoint.(string)
-		} else {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterAttribute", "Endpoint not found")
-		}
-		enabled := d.Get("ssl_enabled").(bool)
-		reqQuery := map[string]interface{}{
-			"DBClusterId":  d.Id(),
-			"DBEndpointId": endpointId,
-			"NetType":      "Private",
-		}
-		if enabled {
-			reqQuery["SSLEnabled"] = "Enable"
-		} else {
-			reqQuery["SSLEnabled"] = "Disable"
-		}
-
-		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterSSL", "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBClusterSSL", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
-		stateConf := BuildStateConf([]string{"SSLModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-	}
-
 	if d.HasChange("tde_enabled") {
 		if o, n := d.GetChange("tde_enabled"); o.(bool) && !n.(bool) {
 			return errmsgs.Error("TDE cannot be disabled after enabled, please disable TDE in console.")
@@ -648,7 +622,42 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
+		polardbService.WaitPolardbClusterInstanceAllDbNodesRunning(d)
 	}
+	if d.HasChange("ssl_enabled") && !(d.IsNewResource() && !d.Get("ssl_enabled").(bool)) {
+
+			endpointId := ""
+			if endpointsResponse, err := polardbService.DescribeDBClusterEndpoints(d.Id()); err == nil {
+				endpoint, err := jsonpath.Get("$.Items[0].DBEndpointId", endpointsResponse)
+				if err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterEndpoints", errmsgs.AlibabacloudStackSdkGoERROR)
+				}
+				endpointId = endpoint.(string)
+			} else {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "DescribeDBClusterAttribute", "Endpoint not found")
+			}
+			enabled := d.Get("ssl_enabled").(bool)
+			reqQuery := map[string]interface{}{
+				"DBClusterId":  d.Id(),
+				"DBEndpointId": endpointId,
+				"NetType":      "Private",
+			}
+			if enabled {
+				reqQuery["SSLEnabled"] = "Enable"
+			} else {
+				reqQuery["SSLEnabled"] = "Disable"
+			}
+
+			if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBClusterSSL", "", nil, reqQuery, nil); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_instance", "ModifyDBClusterSSL", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+
+			stateConf := BuildStateConf([]string{"SSLModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+			if _, err := stateConf.WaitForState(); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+			}
+			polardbService.WaitPolardbClusterInstanceAllDbNodesRunning(d)
+		}
 	if d.HasChange("parameters") {
 		if err := polardbService.ModifyClusterParameters(d); err != nil {
 			return err
@@ -693,7 +702,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 			reqBody := map[string]interface{}{
 				"DBClusterId": d.Id(),
 				"ZoneId":      d.Get("zone_id"),
-				"SubCategory": GetSubCategory(d.Get("sub_category")),
+				"SubCategory": d.Get("sub_category"),
 				"ModifyType":  modifyType,
 			}
 			for _, n := range nodes {
@@ -714,6 +723,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
+			polardbService.WaitPolardbClusterInstanceAllDbNodesRunning(d)
 		}
 	}
 
@@ -748,7 +758,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 		reqBody := map[string]interface{}{
 			"DBClusterId": d.Id(),
 			"ZoneId":      d.Get("zone_id"),
-			"SubCategory": GetSubCategory(d.Get("sub_category")),
+			"SubCategory": d.Get("sub_category"),
 			"ModifyType":  modifyType,
 		}
 		for _, n := range nodes {
@@ -770,6 +780,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
+		polardbService.WaitPolardbClusterInstanceAllDbNodesRunning(d)
 	}
 	if d.HasChange("db_cluster_description") {
 		reqQuery := map[string]interface{}{
@@ -784,11 +795,10 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 	if d.HasChange("db_node_num") {
 		o, n := d.GetChange("db_node_num")
 		add := n.(int) - o.(int)
-		action := "CreateDBNodes"
 		log.Printf("[DEBUG] alibabacloudstack_polardb_cluster_instance: add db node num: %d", add)
 		log.Printf("[DEBUG] alibabacloudstack_polardb_cluster_instance: db_node_num: %d", d.Get("db_node_num"))
 		if add < 0 {
-			action = "DeleteDBNodes"
+			action := "DeleteDBNodes"
 			standbyNodes := make([]string, 0)
 			for _, v := range d.Get("db_nodes").([]interface{}) {
 				node := v.(map[string]interface{})
@@ -807,28 +817,31 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 				if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
 				}
-				stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+				stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 				if _, err := stateConf.WaitForState(); err != nil {
 					return errmsgs.WrapErrorf(err, "Change the Node num: waiting for PolarDB cluster instance %s to be Running failed!", d.Id())
 				}
+				polardbService.WaitPolardbClusterInstanceAllDbNodesRunning(d)
 			}
 		} else {
-			count := d.Get("db_node_num").(int)
-			for count > 0 {
+			for add > 0 {
+				action := "CreateDBNodes"
 				reqQuery := map[string]interface{}{
 					"DBClusterId": d.Id(),
 					"DBNode": []map[string]interface{}{{
-						"ZoneId": d.Get("zone_id").(string),
+						"ZoneId":      d.Get("zone_id").(string),
+						"TargetClass": d.Get("db_read_node_class").(string),
 					}},
 				}
 				if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
 				}
-				stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+				stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 				if _, err := stateConf.WaitForState(); err != nil {
 					return errmsgs.WrapErrorf(err, "Change the Node num: waiting for PolarDB cluster instance %s to be Running failed!", d.Id())
 				}
-				count--
+				polardbService.WaitPolardbClusterInstanceAllDbNodesRunning(d)
+				add--
 			}
 		}
 	}
@@ -868,15 +881,4 @@ func GetPolardbClusterInstanceModifyType(oldClass, newClass map[string]interface
 		modifyType = "Downgrade"
 	}
 	return modifyType
-}
-
-func GetSubCategory(subCategory interface{}) string {
-	switch subCategory.(string) {
-	case "General":
-		return "normal_general"
-	case "Exclusive":
-		return "normal_exclusive"
-	default:
-		return ""
-	}
 }

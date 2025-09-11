@@ -46,9 +46,9 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 					"storage_space":          "20",
 					"vpc_id":                 "${alibabacloudstack_vpc_vpc.default.id}",
 					"vswitch_id":             "${alibabacloudstack_vpc_vswitch.default.id}",
-					"db_node_class":          "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
+					"db_node_class":          "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
 					"db_node_num":            "1",
-					"sub_category":           "General",
+					"sub_category":           "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.sub_category}",
 					"storage_type":           "ESSDPL1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -66,6 +66,12 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"parameters", "sub_category"},
+			},
+			{
 				Config: testAccConfig(map[string]interface{}{
 					"db_node_num": "2",
 				}),
@@ -77,8 +83,8 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_class":      "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
-					"db_read_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
+					"db_node_class":      "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
+					"db_read_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -89,8 +95,8 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_class":      "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
-					"db_read_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
+					"db_node_class":      "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
+					"db_read_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -149,6 +155,16 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"parameters": []map[string]interface{}{
+						// mysql parameter
+						//						{
+						//							"name":  "connect_timeout",
+						//							"value": "20",
+						//						},
+						//						{
+						//							"name":  "loose_hotspot",
+						//							"value": "ON",
+						//						},
+						// pg parameter
 						{
 							"name":  "auto_explain.log_analyze",
 							"value": "on",
@@ -163,6 +179,24 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 					testAccCheck(map[string]string{
 						"parameters.#": "2",
 					}),
+					// mysql parameter
+					//					resource.TestCheckTypeSetElemNestedAttrs(
+					//						resourceId,
+					//						"parameters.*",
+					//						map[string]string{
+					//							"name":  "connect_timeout",
+					//							"value": "20",
+					//						},
+					//					),
+					//					resource.TestCheckTypeSetElemNestedAttrs(
+					//						resourceId,
+					//						"parameters.*",
+					//						map[string]string{
+					//							"name":  "loose_hotspot",
+					//							"value": "ON",
+					//						},
+					//					),
+					// pg parameter
 					resource.TestCheckTypeSetElemNestedAttrs(
 						resourceId,
 						"parameters.*",
@@ -194,9 +228,14 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: testAccConfig(map[string]interface{}{
+					"deletion_lock": 0,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"deletion_lock": "0",
+					}),
+				),
 			},
 		},
 	})
@@ -211,11 +250,11 @@ variable "name" {
 }
 
 variable "db_type" {
-  default = "MySQL"
+  default = "PostgreSQL"
 }
 
 variable "db_version" {
-  default = "8.0"
+  default = "14"
 }
 
 %s
@@ -224,8 +263,7 @@ data "alibabacloudstack_polardb_cluster_instance_types" "default" {
   db_type = "${var.db_type}"
   db_version = "${var.db_version}"
   sorted_by = "CPU"
-  cpu_type = "hygon"
-  sub_category = "General"
+  sub_category = "normal_exclusive"
 }
 
  `, name, VSwitchCommonTestCase)

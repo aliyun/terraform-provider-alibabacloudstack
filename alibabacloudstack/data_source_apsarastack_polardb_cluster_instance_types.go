@@ -1,10 +1,8 @@
 package alibabacloudstack
 
 import (
-	"fmt"
 	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -52,7 +50,7 @@ func dataSourceAlibabacloudStackPolardbClusterInstanceTypes() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"General", "Exclusive"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"normal_general", "normal_exclusive"}, false),
 			},
 			"db_type": {
 				Type:         schema.TypeString,
@@ -189,8 +187,7 @@ func dataSourceAlibabacloudStackPolardbClusterInstanceTypesRead(d *schema.Resour
 		reqQuery["dbType"] = v
 	}
 	if v, ok := d.GetOk("sub_category"); ok {
-		sub_category := fmt.Sprintf("normal_%s", strings.ToLower(v.(string)))
-		reqQuery["subCategory"] = sub_category
+		reqQuery["subCategory"] = v
 	}
 
 	reqHeader := map[string]string{

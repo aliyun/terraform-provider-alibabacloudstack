@@ -1,7 +1,10 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -364,6 +367,16 @@ func resourceAlibabacloudStackVpcDelete(d *schema.ResourceData, meta interface{}
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		}
+		content:=map[string]interface{}{}
+		bresponse, _ := raw.(*vpc.DeleteVpcResponse)
+		json.Unmarshal(bresponse.GetHttpContentBytes(), &content)
+		if v, exist := content["Code"]; exist && v.(string) == "InnerError" {
+			if v, exist := content["Message"]; exist && strings.Contains(v.(string), "Specified object has dependent resources") {
+				return resource.RetryableError(fmt.Errorf("Specified object has dependent resources"))
+			} else {
+				return resource.NonRetryableError(fmt.Errorf("InnerError"))
+			}
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
