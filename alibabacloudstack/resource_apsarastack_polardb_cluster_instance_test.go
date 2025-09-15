@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tfacc-polardb-shared-%d", rand)
-	// name := "tfacc-polardb-shared-18641"
+	// name := "tfacc-polardb-shared-14498"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceoPolardbClusterInstanceDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -47,7 +47,6 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 					"vpc_id":                 "${alibabacloudstack_vpc_vpc.default.id}",
 					"vswitch_id":             "${alibabacloudstack_vpc_vswitch.default.id}",
 					"db_node_class":          "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
-					"db_node_num":            "1",
 					"sub_category":           "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.sub_category}",
 					"storage_type":           "ESSDPL1",
 				}),
@@ -60,58 +59,57 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 						"vpc_id":                 CHECKSET,
 						"vswitch_id":             CHECKSET,
 						"db_node_class":          CHECKSET,
-						"db_node_num":            "1",
 						"storage_type":           "ESSDPL1",
 					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parameters", "sub_category"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_num": "2",
+					"readonly_node_num": "1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_node_num": "2",
+						"readonly_node_num": "1",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_class":      "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
-					"db_read_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
+					"db_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
+					// "db_read_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.3.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_node_class":      CHECKSET,
-						"db_read_node_class": CHECKSET,
+						"db_node_class": CHECKSET,
+						// "db_read_node_class": CHECKSET,
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_class":      "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
-					"db_read_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
+					"db_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.3.id}",
+					// "db_read_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_node_class":      CHECKSET,
-						"db_read_node_class": CHECKSET,
+						"db_node_class": CHECKSET,
+						// "db_read_node_class": CHECKSET,
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_num": "1",
+					"readonly_node_num": REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_node_num": "1",
+						"readonly_node_num": "0",
 					}),
 				),
 			},

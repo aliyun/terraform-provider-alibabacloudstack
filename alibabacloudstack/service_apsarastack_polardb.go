@@ -1727,10 +1727,21 @@ func (s *PolardbService) DescribeDBInstanceEncryptionKey(id string) string {
 
 func (s *PolardbService) DescribePolardbClusterInstance(id string) (map[string]interface{}, error) {
 	reqQuery := map[string]interface{}{"DBClusterId": id}
-	response, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterAttribute", "", nil, reqQuery, nil)
-	if err != nil {
-		return response, err
+	response := make(map[string]interface{})
+	var err error
+	retry := 0
+	for retry < 5 {
+		response, err = s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterAttribute", "", nil, reqQuery, nil)
+		if err == nil {
+			break
+		} else if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM"}) {
+			time.Sleep(time.Duration(5) * time.Second)
+			retry++
+		} else {
+			return response, err
+		}
 	}
+
 	if response["DBClusterId"] == nil || response["DBClusterId"].(string) == "" {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB shared instance %s was not found", id))
 	}
@@ -1764,9 +1775,9 @@ func (s *PolardbService) WaitPolardbClusterInstanceAllDbNodesRunning(d *schema.R
 			return resource.NonRetryableError(err)
 		}
 
-		if len(object["DBNodes"].([]interface{}))-1 != d.Get("db_node_num").(int) {
-			return resource.RetryableError(fmt.Errorf("The Number for Node in Instance %s is not enough", d.Id()))
-		}
+		// if len(object["DBNodes"].([]interface{})) != d.Get("db_node_num").(int) {
+		// 	return resource.RetryableError(fmt.Errorf("The Number for Node in Instance %s is not enough", d.Id()))
+		// }
 
 		for _, dbNode := range object["DBNodes"].([]interface{}) {
 			nodeInfo := dbNode.(map[string]interface{})
@@ -2053,14 +2064,15 @@ func (s *PolardbService) DescribeDBClusterSSL(id string) (bool, error) {
 	return true, nil
 }
 
-func (s *PolardbService) GetPolardbClusterClassData(dbClass string) (classData map[string]interface{}, err error) {
+func (s *PolardbService) GetPolardbClusterClassData(dbType, dbVersion, dbClass string) (classData map[string]interface{}, err error) {
 	reqQuery := map[string]interface{}{
-		"pageStart":       1,
-		"pageSize":        500,
-		"label":           "true",
-		"resourceType":    "POLARDB",
-		"status":          "Available",
-		"dbInstanceClass": dbClass,
+		"pageStart":    1,
+		"pageSize":     500,
+		"label":        "true",
+		"resourceType": "POLARDB",
+		"status":       "Available",
+		"dbVersion":    dbVersion,
+		"dbType":       dbType,
 	}
 	reqHeader := map[string]string{
 		"x-acs-territory": "US",
