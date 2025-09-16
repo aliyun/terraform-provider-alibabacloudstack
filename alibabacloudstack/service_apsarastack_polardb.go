@@ -2097,3 +2097,52 @@ func (s *PolardbService) GetPolardbClusterClassData(dbType, dbVersion, dbClass s
 	}
 	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("polardb_cluster_instance_type", dbClass))
 }
+
+func (s *PolarDBService) DescribePolardbClusterAccount(id string) (map[string]interface{}, error) {
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid id format, expected DBClusterId:AccountName")
+	}
+	dbClusterId := parts[0]
+	accountName := parts[1]
+
+	reqQuery := map[string]interface{}{
+		"DBClusterId": dbClusterId,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "polardb", "2024-01-30", "DescribeAccounts", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if accounts, ok := response["Accounts"].(map[string]interface{})["Account"].([]interface{}); ok {
+		for _, acc := range accounts {
+			account := acc.(map[string]interface{})
+			if account["AccountName"].(string) == accountName {
+				return account, nil
+			}
+		}
+	}
+
+	return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+}
+
+func (s *PolarDBService) PolardbClusterAccountStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribePolardbClusterAccount(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object["AccountStatus"].(string) == failState {
+				return object, status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["AccountStatus"].(string)))
+			}
+		}
+		return object, object["AccountStatus"].(string), nil
+	}
+}
