@@ -32,11 +32,6 @@ func resourceAlibabacloudStackPolardbClusterDatabase() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"account_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"collate": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -67,7 +62,6 @@ func resourceAlibabacloudStackPolardbClusterDatabaseCreate(d *schema.ResourceDat
 	request := make(map[string]interface{})
 	request["DBClusterId"] = d.Get("db_cluster_id")
 	request["DBName"] = d.Get("db_name")
-	request["AccountName"] = d.Get("account_name")
 	request["CharacterSetName"] = d.Get("character_set_name")
 
 	if v, ok := d.GetOk("db_description"); ok {
@@ -114,7 +108,6 @@ func resourceAlibabacloudStackPolardbClusterDatabaseRead(d *schema.ResourceData,
 
 	d.Set("db_cluster_id", strings.Split(d.Id(), ":")[0])
 	d.Set("db_name", object["DBName"])
-	d.Set("account_name", object["AccountName"])
 	d.Set("character_set_name", object["CharacterSetName"])
 	d.Set("db_description", object["DBDescription"])
 	d.Set("engine", object["Engine"])
