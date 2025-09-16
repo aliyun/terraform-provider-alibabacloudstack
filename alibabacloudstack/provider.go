@@ -47,8 +47,8 @@ func Provider() *schema.Provider {
 				Description: descriptions["region"],
 			},
 			"region_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
+				Type:     schema.TypeString,
+				Optional: true,
 				//DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", nil),
 				Description: descriptions["region_id"],
 				Deprecated:  "Field region_id is Deprecated, Please use parameter region replace it.",
@@ -935,6 +935,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_multicast_domain_association": resourceAlibabacloudStackCenTransitMulticastDomainAssociation(),
 		"alibabacloudstack_cen_transit_router_multicast_domain_source":      resourceAlibabacloudStackCenTransitMulticastDomainSource(),
 		"alibabacloudstack_polardb_cluster_instance":                        resourceAlibabacloudStackPolardbClusterInstance(),
+		"alibabacloudstack_polardb_cluster_account":                         resourceAlibabacloudStackPolardbClusterAccount(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

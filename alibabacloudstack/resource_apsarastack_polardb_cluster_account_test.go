@@ -10,13 +10,12 @@ import (
 
 func TestAccAlibabacloudStackPolardbClusterAccount_basic(t *testing.T) {
 	var account map[string]interface{}
-	rand := getAccTestRandInt(10000, 999999)
-	name := fmt.Sprintf("tf-testAccdbaccount-%d", rand)
+	rand := getAccTestRandInt(1000, 9999)
+	name := fmt.Sprintf("tfaccount%d", rand)
 	var basicMap = map[string]string{
-		"data_base_instance_id": CHECKSET,
-		"account_name":          "tftestnormal",
-		"account_password":      "${random_password.password.0.result}",
-		"account_type":          "Normal",
+		"db_cluster_id": CHECKSET,
+		"account_name":  name,
+		"account_type":  "Normal",
 	}
 	resourceId := "alibabacloudstack_polardb_cluster_account.default"
 	ra := resourceAttrInit(resourceId, basicMap)
@@ -41,7 +40,7 @@ func TestAccAlibabacloudStackPolardbClusterAccount_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"db_cluster_id":    "${alibabacloudstack_polardb_cluster_instance.instance.id}",
-					"account_name":     "tftestnormal",
+					"account_name":     "${var.name}",
 					"account_password": "${random_password.password.0.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -57,33 +56,14 @@ func TestAccAlibabacloudStackPolardbClusterAccount_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"account_description": "from terraform",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"account_description": "from terraform",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"account_password": "${random_password.password.1.result}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"account_password": "${random_password.password.1.result}",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
+					"account_password":    "${random_password.password.1.result}",
+					"account_lock_state":  "Lock",
 					"account_description": "tf test",
-					"account_password":    "${random_password.password.2.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"account_lock_state":  "Lock",
 						"account_description": "tf test",
-						"account_password":    "${random_password.password.2.result}",
 					}),
 				),
 			},
@@ -115,5 +95,5 @@ func resourcePolardbClusterAccountConfigDependence(name string) string {
 		vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"
 		sub_category 			= "General"
 	}
-	`, name, RandomPasswordTestCase(12, 3), VSwitchCommonTestCase)
+	`, name, RandomPasswordTestCase(12, 2), VSwitchCommonTestCase)
 }

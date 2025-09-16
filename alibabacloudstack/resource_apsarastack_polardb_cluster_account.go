@@ -9,6 +9,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackPolardbClusterAccount() *schema.Resource {
@@ -25,9 +26,10 @@ func resourceAlibabacloudStackPolardbClusterAccount() *schema.Resource {
 				ForceNew: true,
 			},
 			"account_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "Normal",
+				ValidateFunc: validation.StringInSlice([]string{"Normal", "Lock"}, false),
 			},
 			"account_description": {
 				Type:     schema.TypeString,
@@ -43,8 +45,10 @@ func resourceAlibabacloudStackPolardbClusterAccount() *schema.Resource {
 				Computed: true,
 			},
 			"account_lock_state": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"UnLock", "Lock"}, false),
 			},
 			"account_password_valid_time": {
 				Type:     schema.TypeString,
@@ -58,7 +62,7 @@ func resourceAlibabacloudStackPolardbClusterAccount() *schema.Resource {
 
 func resourceAlibabacloudStackPolardbClusterAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolarDBService{client}
+	polardbService := PolardbService{client}
 
 	// Prepare the request parameters for CreateAccount API
 	reqBody := map[string]interface{}{
@@ -70,7 +74,7 @@ func resourceAlibabacloudStackPolardbClusterAccountCreate(d *schema.ResourceData
 	}
 
 	// Call the CreateAccount API
-	if _, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "CreateAccount", "", nil, nil, reqBody); err != nil {
+	if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "CreateAccount", "", nil, nil, reqBody); err != nil {
 		return err
 	}
 
@@ -90,7 +94,7 @@ func resourceAlibabacloudStackPolardbClusterAccountCreate(d *schema.ResourceData
 
 func resourceAlibabacloudStackPolardbClusterAccountRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polarDBService := PolarDBService{client}
+	polarDBService := PolardbService{client}
 
 	// The resource ID is in the format {DBClusterId}:{AccountName}
 	object, err := polarDBService.DescribePolardbClusterAccount(d.Id())
@@ -116,7 +120,6 @@ func resourceAlibabacloudStackPolardbClusterAccountRead(d *schema.ResourceData, 
 
 func resourceAlibabacloudStackPolardbClusterAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolarDBService{client}
 
 	// Parse resource ID to get DBClusterId and AccountName
 	parts, err := ParseResourceId(d.Id(), 2)
@@ -134,7 +137,7 @@ func resourceAlibabacloudStackPolardbClusterAccountUpdate(d *schema.ResourceData
 			"AccountLockState": d.Get("account_lock_state").(string),
 		}
 
-		if _, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "ModifyAccountLockState", "", nil, reqQuery, nil); err != nil {
+		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyAccountLockState", "", nil, reqQuery, nil); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_polardb_cluster_account", "ModifyAccountLockState", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
@@ -144,7 +147,6 @@ func resourceAlibabacloudStackPolardbClusterAccountUpdate(d *schema.ResourceData
 	if d.IsNewResource() {
 		return nil
 	}
-
 	// Update account description if changed
 	if d.HasChange("account_description") {
 		reqQuery := map[string]interface{}{
@@ -153,11 +155,12 @@ func resourceAlibabacloudStackPolardbClusterAccountUpdate(d *schema.ResourceData
 			"AccountDescription": d.Get("account_description").(string),
 		}
 
-		if _, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "ModifyAccountDescription", "", nil, reqQuery, nil); err != nil {
+		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyAccountDescription", "", nil, reqQuery, nil); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_polardb_cluster_account", "ModifyAccountDescription", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
+
 	// Update account password if changed
 	if d.HasChange("account_password") {
 		reqQuery := map[string]interface{}{
@@ -166,7 +169,7 @@ func resourceAlibabacloudStackPolardbClusterAccountUpdate(d *schema.ResourceData
 			"NewAccountPassword": d.Get("account_password").(string),
 		}
 
-		if _, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "ModifyAccountPassword", "", nil, reqQuery, nil); err != nil {
+		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyAccountPassword", "", nil, reqQuery, nil); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_polardb_cluster_account", "ModifyAccountPassword", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
@@ -177,7 +180,6 @@ func resourceAlibabacloudStackPolardbClusterAccountUpdate(d *schema.ResourceData
 
 func resourceAlibabacloudStackPolardbClusterAccountDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polarDBService := PolarDBService{client}
 
 	dbClusterId := d.Get("db_cluster_id").(string)
 	accountName := d.Get("account_name").(string)
@@ -188,7 +190,7 @@ func resourceAlibabacloudStackPolardbClusterAccountDelete(d *schema.ResourceData
 	}
 
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
-		_, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "DeleteAccount", "", nil, reqQuery, nil)
+		_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteAccount", "", nil, reqQuery, nil)
 		if err != nil {
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, accountName, "DeleteAccount", errmsgs.AlibabacloudStackSdkGoERROR, "")
 			return resource.RetryableError(err)

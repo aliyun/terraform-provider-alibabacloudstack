@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
+func dataSourceAlibabacloudStackPolardbAccounts() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackPolardbClusterAccountsRead,
+		Read: dataSourceAlibabacloudStackPolardbAccountsRead,
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeList,
@@ -32,7 +32,7 @@ func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
 				Optional: true,
 			},
 
-			"db_cluster_id": {
+			"db_instance_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -76,11 +76,6 @@ func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
 							Computed: true,
 						},
 
-						"db_cluster_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
 						"database_privileges": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -106,7 +101,7 @@ func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
 							},
 						},
 
-						"priv_exceeded": {
+						"account_lock_state": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -122,15 +117,12 @@ func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackPolardbClusterAccountsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackPolardbAccountsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeAccounts", "")
-	PolardbDescribeaccountsResponse := PolardbDescribeaccountsResponse{}
-	request.QueryParams["DBInstanceId"] = d.Get("db_cluster_id").(string)
-	if v, ok := d.GetOk("account_name"); ok {
-		request.QueryParams["AccountName"] = v.(string)
-	}
+	db_cluster_id := d.Get("db_cluster_id").(string)
+	request := client.NewCommonRequest("GET", "polardb", "2017-08-01", "DescribeAccounts", "")
+	response := make(map[string]interface{})
+	request.QueryParams["DBClusterId"] = db_cluster_id
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -142,8 +134,13 @@ func dataSourceAlibabacloudStackPolardbClusterAccountsRead(d *schema.ResourceDat
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_account", "DescribeAccounts", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbDescribeaccountsResponse)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+			"alibabacloudstack_polardb_account", "DescribeAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	accounts, ok := response["Accounts"].([]interface{})
+	if !ok {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_polardb_account", "DescribeAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -156,18 +153,21 @@ func dataSourceAlibabacloudStackPolardbClusterAccountsRead(d *schema.ResourceDat
 	}
 	var ids []string
 	datas := make([]interface{}, 0)
-	for _, data := range PolardbDescribeaccountsResponse.Accounts.DBInstanceAccount {
+	for _, data := range accounts {
+		account := data.(map[string]interface{})
+
+		account_name := account["AccountName"].(string)
+
+		if v, ok := d.GetOk("account_name"); ok && v.(string) != account_name {
+			continue
+		}
 
 		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
 			r := regexp.MustCompile(description_regex.(string))
-			if !r.MatchString(data.AccountName) {
+			if !r.MatchString(account_name) {
 				continue
 			}
 		}
-
-		account_name := data.AccountName
-
-		db_cluster_id := data.DBInstanceId
 
 		dbid := fmt.Sprintf("%s:%s", db_cluster_id, account_name)
 
@@ -178,28 +178,27 @@ func dataSourceAlibabacloudStackPolardbClusterAccountsRead(d *schema.ResourceDat
 		}
 
 		database_privileges := make([]map[string]interface{}, 0)
-		for _, data1 := range data.DatabasePrivileges.DatabasePrivilege {
+		for _, v := range account["DatabasePrivileges"].([]interface{}) {
+			privilege := v.(map[string]interface{})
 			database_privileges = append(database_privileges, map[string]interface{}{
-				"account_privilege":        data1.AccountPrivilege,
-				"account_privilege_detail": data1.AccountPrivilegeDetail,
-				"data_base_name":           data1.DBName,
+				"account_privilege":        privilege["AccountPrivilege"].(string),
+				"account_privilege_detail": privilege["AccountPrivilegeDetail"].(string),
+				"data_base_name":           privilege["DBName"].(string),
 			})
 		}
 		i := map[string]interface{}{
 
 			"id": dbid,
 
-			"account_description": data.AccountDescription,
+			"account_description": account["AccountDescription"],
 
-			"account_name": data.AccountName,
+			"account_name": account["AccountName"],
 
-			"account_type": data.AccountType,
+			"account_type": account["AccountType"],
 
-			"db_cluster_id": data.DBInstanceId,
+			"status": account["AccountStatus"],
 
-			"priv_exceeded": data.PrivExceeded,
-
-			"status": data.AccountStatus,
+			"account_lock_state": account["AccountLockState"],
 
 			"database_privileges": database_privileges,
 		}
