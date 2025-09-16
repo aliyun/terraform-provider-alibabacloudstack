@@ -51,7 +51,6 @@ var existAlibabacloudstackPolardbClusterDatabasesDataMapFunc = func(rand int) ma
 	return map[string]string{
 		"databases.#":                    "1",
 		"databases.0.id":                 CHECKSET,
-		"databases.0.db_description":     CHECKSET,
 		"databases.0.db_name":            fmt.Sprintf("tfaccount%d", rand),
 		"databases.0.character_set_name": CHECKSET,
 	}

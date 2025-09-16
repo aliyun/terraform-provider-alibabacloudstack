@@ -157,9 +157,7 @@ func dataSourceAlibabacloudStackPolardbClusterDatabasesRead(d *schema.ResourceDa
 
 			"id": dbid,
 
-			"account_description": database["AccountDescription"],
-
-			"db_name": database["AccountName"],
+			"db_name": database["DBName"],
 
 			"character_set_name": database["CharacterSetName"],
 
@@ -167,7 +165,7 @@ func dataSourceAlibabacloudStackPolardbClusterDatabasesRead(d *schema.ResourceDa
 
 			"engine": database["Engine"],
 
-			"db_status": database["Engine"],
+			"db_status": database["DBStatus"],
 		}
 		datas = append(datas, i)
 
@@ -175,7 +173,7 @@ func dataSourceAlibabacloudStackPolardbClusterDatabasesRead(d *schema.ResourceDa
 	}
 
 	d.SetId(dataResourceIdHash(ids))
-	if err := d.Set("accounts", datas); err != nil {
+	if err := d.Set("databases", datas); err != nil {
 		return err
 	}
 	if err := d.Set("ids", ids); err != nil {
