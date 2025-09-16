@@ -2205,3 +2205,22 @@ func (s *PolardbService) DescribePolardbClusterDatabase(id string) (map[string]i
 
 	return databases[0].(map[string]interface{}), nil
 }
+
+
+
+func (s *PolardbService) DescribePolardbClusterProxy(id string) (map[string]interface{}, error) {
+	query := map[string]interface{}{
+		"DBClusterId": id,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterAttribute", "", nil, query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if response["DBClusterId"] == nil || response["DBClusterId"].(string) != id {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Polardb cluster proxy %s not found", id))
+	}
+
+	return response, nil
+}
