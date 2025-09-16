@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackPolardbAccounts() *schema.Resource {
+func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackPolardbAccountsRead,
+		Read: dataSourceAlibabacloudStackPolardbClusterAccountsRead,
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeList,
@@ -32,7 +32,7 @@ func dataSourceAlibabacloudStackPolardbAccounts() *schema.Resource {
 				Optional: true,
 			},
 
-			"db_instance_id": {
+			"db_cluster_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -117,7 +117,7 @@ func dataSourceAlibabacloudStackPolardbAccounts() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackPolardbAccountsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackPolardbClusterAccountsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	db_cluster_id := d.Get("db_cluster_id").(string)
 	request := client.NewCommonRequest("GET", "polardb", "2017-08-01", "DescribeAccounts", "")
@@ -131,18 +131,18 @@ func dataSourceAlibabacloudStackPolardbAccountsRead(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_account", "DescribeAccounts", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_accounts", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_polardb_account", "DescribeAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
+			"alibabacloudstack_polardb_cluster_accounts", "DescribeAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	accounts, ok := response["Accounts"].([]interface{})
 	if !ok {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_polardb_account", "DescribeAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
+			"alibabacloudstack_polardb_cluster_accounts", "DescribeAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	idsMap := make(map[string]string)

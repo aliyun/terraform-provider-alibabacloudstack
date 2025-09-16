@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
+func dataSourceAlibabacloudStackPolardbAccounts() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackPolardbClusterAccountsRead,
+		Read: dataSourceAlibabacloudStackPolardbAccountsRead,
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeList,
@@ -32,7 +32,7 @@ func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
 				Optional: true,
 			},
 
-			"db_cluster_id": {
+			"db_instance_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -76,7 +76,7 @@ func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
 							Computed: true,
 						},
 
-						"db_cluster_id": {
+						"db_instance_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -122,12 +122,12 @@ func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackPolardbClusterAccountsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackPolardbAccountsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeAccounts", "")
 	PolardbDescribeaccountsResponse := PolardbDescribeaccountsResponse{}
-	request.QueryParams["DBInstanceId"] = d.Get("db_cluster_id").(string)
+	request.QueryParams["DBInstanceId"] = d.Get("db_instance_id").(string)
 	if v, ok := d.GetOk("account_name"); ok {
 		request.QueryParams["AccountName"] = v.(string)
 	}
@@ -167,9 +167,9 @@ func dataSourceAlibabacloudStackPolardbClusterAccountsRead(d *schema.ResourceDat
 
 		account_name := data.AccountName
 
-		db_cluster_id := data.DBInstanceId
+		db_instance_id := data.DBInstanceId
 
-		dbid := fmt.Sprintf("%s:%s", db_cluster_id, account_name)
+		dbid := fmt.Sprintf("%s:%s", db_instance_id, account_name)
 
 		if len(idsMap) > 0 {
 			if _, exist := idsMap[dbid]; !exist {
@@ -195,7 +195,7 @@ func dataSourceAlibabacloudStackPolardbClusterAccountsRead(d *schema.ResourceDat
 
 			"account_type": data.AccountType,
 
-			"db_cluster_id": data.DBInstanceId,
+			"db_instance_id": data.DBInstanceId,
 
 			"priv_exceeded": data.PrivExceeded,
 

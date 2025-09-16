@@ -98,8 +98,8 @@ func datasourcePolardbClusterAccountsConfigDependence(name string) string {
 		sub_category 			= "General"
 	}
 	resource "alibabacloudstack_polardb_cluster_account" "default" {
-		dbcluster_id = "${alibabacloudstack_polardb_cluster.default.id}"
-		account_name = "test"
+		db_cluster_id = "${alibabacloudstack_polardb_cluster.default.id}"
+		account_name = "${var.name}"
 		account_description = "from terraform"
 		account_password = "${random_password.password.0.result}"
 	}
