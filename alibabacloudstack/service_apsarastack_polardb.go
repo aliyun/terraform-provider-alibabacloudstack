@@ -2146,3 +2146,62 @@ func (s *PolardbService) PolardbClusterAccountStateRefreshFunc(id string, failSt
 		return object, object["AccountStatus"].(string), nil
 	}
 }
+
+func (s *PolardbService) CreatePolardbClusterAccount(clusterId, accountName, accountPassword string) (err error) {
+
+	reqQuery := map[string]interface{}{
+		"DBClusterId":     clusterId,
+		"AccountName":     accountName,
+		"AccountType":     "Normal",
+		"AccountPassword": accountPassword,
+	}
+	_, err = s.client.DoTeaRequest("POST", "polardb", "2017-08-01", "CreateAccount", "", nil, reqQuery, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *PolardbService) DeletePolardClusterAccount(clusterId, accountName string) (err error) {
+
+	reqQuery := map[string]interface{}{
+		"AccountName": accountName,
+		"DBClusterId": clusterId,
+	}
+
+	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+		_, err := s.client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteAccount", "", nil, reqQuery, nil)
+		if err != nil {
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, accountName, "DeleteAccount", errmsgs.AlibabacloudStackSdkGoERROR, "")
+			return resource.RetryableError(err)
+		}
+		return nil
+	})
+	return nil
+}
+
+func (s *PolardbService) DescribePolardbClusterDatabase(id string) (map[string]interface{}, error) {
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid id format, expected DBClusterId:DBName")
+	}
+	dbClusterId := parts[0]
+	dbName := parts[1]
+
+	reqQuery := map[string]interface{}{
+		"DBClusterId": dbClusterId,
+		"DBName":      dbName,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDatabases", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	databases := response["Databases"].(map[string]interface{})["Database"].([]interface{})
+	if len(databases) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("database %s not found in cluster %s", dbName, dbClusterId))
+	}
+
+	return databases[0].(map[string]interface{}), nil
+}
