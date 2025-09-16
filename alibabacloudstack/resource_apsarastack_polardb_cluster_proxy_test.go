@@ -13,8 +13,8 @@ func TestAccAlibabacloudStackPolardbClusterProxy_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tfaccount%d", rand)
 	var basicMap = map[string]string{
-		"db_cluster_id":   CHECKSET,
-		"proxy_instances": CHECKSET,
+		"db_cluster_id":     CHECKSET,
+		"proxy_instances.#": CHECKSET,
 	}
 	resourceId := "alibabacloudstack_polardb_cluster_proxy.default"
 	ra := resourceAttrInit(resourceId, basicMap)
@@ -97,7 +97,6 @@ func resourcePolardbClusterProxyConfigDependence(name string) string {
 		storage_type			= "ESSDPL1"
 		storage_space 			= 20
 		db_node_class 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}"
-		db_node_num 			= "1"
 		zone_id					= "${data.alibabacloudstack_zones.default.zones.0.id}"
 		vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
 		vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"

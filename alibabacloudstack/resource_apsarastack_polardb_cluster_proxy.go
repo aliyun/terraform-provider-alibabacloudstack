@@ -20,6 +20,15 @@ func resourceAlibabacloudStackPolardbClusterProxy() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"db_proxy_cluster_num": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"db_proxy_cluster_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"proxy_instances": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -91,6 +100,8 @@ func resourceAlibabacloudStackPolardbClusterProxyRead(d *schema.ResourceData, me
 	}
 
 	d.Set("db_cluster_id", d.Id())
+	d.Set("db_proxy_cluster_num", object["DBProxyClusterNum"])
+	d.Set("db_proxy_cluster_id", object["DBProxyClusterId"])
 
 	var childInstances []map[string]interface{}
 	if v, ok := object["ChildInstances"].([]interface{}); ok && len(v) > 0 {
