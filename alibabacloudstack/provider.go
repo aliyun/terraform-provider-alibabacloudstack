@@ -941,6 +941,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardb_cluster_account":                         resourceAlibabacloudStackPolardbClusterAccount(),
 		"alibabacloudstack_polardb_cluster_database":                        resourceAlibabacloudStackPolardbClusterDatabase(),
 		"alibabacloudstack_polardb_cluster_account_database_binding":        resourceAlibabacloudStackPolardbClusterAccountDatabaseBinding(),
+		"alibabacloudstack_polardb_cluster_proxy":                           resourceAlibabacloudStackPolardbClusterProxy(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

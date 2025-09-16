@@ -9,18 +9,19 @@ import (
 )
 
 func TestAccAlibabacloudStackPolardbClusterProxy_basic(t *testing.T) {
-	var account map[string]interface{}
+	var proxy map[string]interface{}
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tfaccount%d", rand)
 	var basicMap = map[string]string{
-		"db_cluster_id": CHECKSET,
+		"db_cluster_id":   CHECKSET,
+		"proxy_instances": CHECKSET,
 	}
 	resourceId := "alibabacloudstack_polardb_cluster_proxy.default"
 	ra := resourceAttrInit(resourceId, basicMap)
 	serviceFunc := func() interface{} {
 		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &account, serviceFunc, "DescribePolardbClusterProxy")
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &proxy, serviceFunc, "DescribePolardbClusterProxy")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbClusterProxyConfigDependence)
@@ -78,8 +79,8 @@ func resourcePolardbClusterProxyConfigDependence(name string) string {
 	}
 
 	data "alibabacloudstack_polardb_cluster_proxy_types" "types" {
-		dbtype = "${var.db_type}"
-		dbversion = "${var.db_version}"
+		db_type = "${var.db_type}"
+		db_version = "${var.db_version}"
 	}
 	data "alibabacloudstack_polardb_cluster_instance_types" "default" {
 		db_type = "${var.db_type}"
@@ -93,7 +94,6 @@ func resourcePolardbClusterProxyConfigDependence(name string) string {
 		db_cluster_description 	= "${var.name}"
 		db_type            		= "${var.db_type}"
 		db_version    			= "${var.db_version}"
-		instance_name 			= "${var.name}"
 		storage_type			= "ESSDPL1"
 		storage_space 			= 20
 		db_node_class 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}"
