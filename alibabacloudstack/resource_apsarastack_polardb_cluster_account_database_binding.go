@@ -170,7 +170,7 @@ func resourceAlibabacloudStackPolardbClusterAccountDatabaseBindingDelete(d *sche
 	for _, dbPrivilege := range databasePrivileges {
 		removeDbnames = append(removeDbnames, dbPrivilege.(map[string]interface{})["db_name"].(string))
 	}
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "RevokeAccountPrivilege", "")
+	request := client.NewCommonRequest("POST", "polardb", "2017-08-01", "RevokeAccountPrivilege", "")
 	request.QueryParams["AccountName"] = accountName
 	request.QueryParams["DBClusterId"] = dbInstanceId
 	request.QueryParams["DBName"] = strings.Join(removeDbnames, ",")
