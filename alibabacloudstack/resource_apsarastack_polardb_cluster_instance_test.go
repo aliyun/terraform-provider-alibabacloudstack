@@ -43,7 +43,7 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 					"zone_id":                "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"db_type":                "${var.db_type}",
 					"db_version":             "${var.db_version}",
-					"hot_standby_cluster":    "standby",
+					"hot_standby_cluster":    "off",
 					"storage_space":          "20",
 					"vpc_id":                 "${alibabacloudstack_vpc_vpc.default.id}",
 					"vswitch_id":             "${alibabacloudstack_vpc_vswitch.default.id}",
@@ -56,7 +56,7 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 						"db_cluster_description": name,
 						"db_type":                CHECKSET,
 						"db_version":             CHECKSET,
-						"hot_standby_cluster":    "standby",
+						"hot_standby_cluster":    "off",
 						"storage_space":          "20",
 						"vpc_id":                 CHECKSET,
 						"vswitch_id":             CHECKSET,
@@ -95,7 +95,7 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.3.id}",
+					"db_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.1.id}",
 					// "db_read_node_class": "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -112,6 +112,26 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"readonly_node_num": "0",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"hot_standby_cluster": "standby",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"hot_standby_cluster": "standby",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"hot_standby_cluster": "off",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"hot_standby_cluster": "off",
 					}),
 				),
 			},
@@ -156,14 +176,14 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"parameters": []map[string]interface{}{
 						// mysql parameter
-						//						{
-						//							"name":  "connect_timeout",
-						//							"value": "20",
-						//						},
-						//						{
-						//							"name":  "loose_hotspot",
-						//							"value": "ON",
-						//						},
+						// {
+						// 	"name":  "connect_timeout",
+						// 	"value": "20",
+						// },
+						// {
+						// 	"name":  "loose_hotspot",
+						// 	"value": "ON",
+						// },
 						// pg parameter
 						{
 							"name":  "auto_explain.log_analyze",
@@ -180,22 +200,22 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 						"parameters.#": "2",
 					}),
 					// mysql parameter
-					//					resource.TestCheckTypeSetElemNestedAttrs(
-					//						resourceId,
-					//						"parameters.*",
-					//						map[string]string{
-					//							"name":  "connect_timeout",
-					//							"value": "20",
-					//						},
-					//					),
-					//					resource.TestCheckTypeSetElemNestedAttrs(
-					//						resourceId,
-					//						"parameters.*",
-					//						map[string]string{
-					//							"name":  "loose_hotspot",
-					//							"value": "ON",
-					//						},
-					//					),
+					// resource.TestCheckTypeSetElemNestedAttrs(
+					// 	resourceId,
+					// 	"parameters.*",
+					// 	map[string]string{
+					// 		"name":  "connect_timeout",
+					// 		"value": "20",
+					// 	},
+					// ),
+					// resource.TestCheckTypeSetElemNestedAttrs(
+					// 	resourceId,
+					// 	"parameters.*",
+					// 	map[string]string{
+					// 		"name":  "loose_hotspot",
+					// 		"value": "ON",
+					// 	},
+					// ),
 					// pg parameter
 					resource.TestCheckTypeSetElemNestedAttrs(
 						resourceId,
@@ -250,10 +270,12 @@ variable "name" {
 }
 
 variable "db_type" {
+  //default = "MySQL"
   default = "PostgreSQL"
 }
 
 variable "db_version" {
+  //default = "8.0"
   default = "14"
 }
 
