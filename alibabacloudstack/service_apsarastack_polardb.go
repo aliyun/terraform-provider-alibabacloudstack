@@ -1774,10 +1774,14 @@ func (s *PolardbService) WaitPolardbClusterInstanceAllDbNodesRunning(d *schema.R
 		if err != nil {
 			return resource.NonRetryableError(err)
 		}
-
-		// if len(object["DBNodes"].([]interface{})) != d.Get("db_node_num").(int) {
-		// 	return resource.RetryableError(fmt.Errorf("The Number for Node in Instance %s is not enough", d.Id()))
-		// }
+		readonlyNodeNum := d.Get("readonly_node_num").(int)
+		dbNodeNum := readonlyNodeNum + 1 // sum a rw node
+		if d.Get("hot_standby_cluster") == "standby" {
+			dbNodeNum += 1
+		}
+		if len(object["DBNodes"].([]interface{})) != dbNodeNum {
+			return resource.RetryableError(fmt.Errorf("The Number for Node in Instance %s is not enough", d.Id()))
+		}
 
 		for _, dbNode := range object["DBNodes"].([]interface{}) {
 			nodeInfo := dbNode.(map[string]interface{})
