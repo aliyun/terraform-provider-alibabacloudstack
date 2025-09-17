@@ -100,7 +100,6 @@ func datasourcePolardbClusterDatabasesConfigDependence(name string) string {
 		storage_space 			= 20
 		db_node_class 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}"
 		zone_id					= "${data.alibabacloudstack_zones.default.zones.0.id}"
-		vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
 		vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"
 		sub_category 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.sub_category}"
 	}
