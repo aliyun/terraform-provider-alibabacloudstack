@@ -19,11 +19,6 @@ import (
 func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"pay_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"tde_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -526,7 +521,6 @@ func resourceAlibabacloudStackPolardbClusterInstanceRead(d *schema.ResourceData,
 	d.Set("vswitch_id", object["VSwitchId"])
 	d.Set("db_cluster_description", object["DBClusterDescription"])
 	d.Set("proxy_cpu_cores", object["ProxyCpuCores"])
-	d.Set("pay_type", object["PayType"])
 	d.Set("lock_mode", object["LockMode"])
 	//	d.Set("inode_total", object["InodeTotal"])
 	storageSpace := object["StorageSpace"].(json.Number)

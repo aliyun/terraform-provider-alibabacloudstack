@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -106,9 +107,14 @@ func resourceAlibabacloudStackPolardbClusterAccountRead(d *schema.ResourceData, 
 		}
 		return errmsgs.WrapError(err)
 	}
-
+	parts := strings.SplitN(d.Id(), ":", 2)
+		if len(parts) != 2 {
+			return fmt.Errorf("invalid id format, expected DBClusterId:AccountName")
+		}
+	d.Set("db_cluster_id",  parts[0])
+	d.Set("account_name",  parts[1])
+		
 	// Set the resource data from the returned object
-	d.Set("account_name", object["AccountName"])
 	d.Set("account_type", object["AccountType"])
 	d.Set("account_description", object["AccountDescription"])
 	d.Set("account_status", object["AccountStatus"])

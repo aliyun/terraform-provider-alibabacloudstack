@@ -14,11 +14,11 @@ func TestAccAlibabacloudStackPolardbClusterAccountsDataSource(t *testing.T) {
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids":           []string{"${alibabacloudstack_polardb_cluster_account.default.id}"},
-			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.instance.id}",
+			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":           []string{"${alibabacloudstack_polardb_cluster_account.default.id}_fake"},
-			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.instance.id}",
+			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.default.id}",
 		}),
 	}
 
@@ -26,12 +26,12 @@ func TestAccAlibabacloudStackPolardbClusterAccountsDataSource(t *testing.T) {
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids":           []string{"${alibabacloudstack_polardb_cluster_account.default.id}"},
 			"account_name":  "${alibabacloudstack_polardb_cluster_account.default.account_name}",
-			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.instance.id}",
+			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":           []string{"${alibabacloudstack_polardb_cluster_account.default.id}_fake"},
 			"account_name":  "${alibabacloudstack_polardb_cluster_account.default.account_name}_fake",
-			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.instance.id}",
+			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.default.id}",
 		}),
 	}
 
@@ -39,12 +39,12 @@ func TestAccAlibabacloudStackPolardbClusterAccountsDataSource(t *testing.T) {
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids":           []string{"${alibabacloudstack_polardb_cluster_account.default.id}"},
 			"account_name":  "${alibabacloudstack_polardb_cluster_account.default.account_name}",
-			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.instance.id}",
+			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":           []string{"${alibabacloudstack_polardb_cluster_account.default.id}_fake"},
 			"account_name":  "${alibabacloudstack_polardb_cluster_account.default.account_name}_fake",
-			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.instance.id}",
+			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.default.id}",
 		}),
 	}
 
@@ -78,27 +78,34 @@ func datasourcePolardbClusterAccountsConfigDependence(name string) string {
 	variable "name" {
 		default = "%v"
 	}
-	variable "creation" {
-		default = "PolarDB"
+	variable "db_type" {
+	  default = "PostgreSQL"
+	}
+
+	variable "db_version" {
+	  default = "14"
 	}
 	%s
 	%s
-	resource "alibabacloudstack_polardb_cluster_instance" "instance" {
+	data "alibabacloudstack_polardb_cluster_instance_types" "default" {
+	  db_type = "${var.db_type}"
+	  db_version = "${var.db_version}"
+	  sorted_by = "CPU"
+	  sub_category = "normal_exclusive"
+	}
+	resource "alibabacloudstack_polardb_cluster_instance" "default" {
 		db_cluster_description 	= "${var.name}"
-		db_type            		= "MySQL"
-		db_version    			= "5.7"
-		instance_name 			= "${var.name}"
+		db_type            		= "${var.db_type}"
+		db_version    			= "${var.db_version}"
 		storage_type			= "ESSDPL1"
 		storage_space 			= 20
 		db_node_class 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}"
-		db_node_num 			= "1"
 		zone_id					= "${data.alibabacloudstack_zones.default.zones.0.id}"
-		vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
 		vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"
-		sub_category 			= "General"
+		sub_category 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.sub_category}"
 	}
 	resource "alibabacloudstack_polardb_cluster_account" "default" {
-		db_cluster_id = "${alibabacloudstack_polardb_cluster.default.id}"
+		db_cluster_id = "${alibabacloudstack_polardb_cluster_instance.default.id}"
 		account_name = "${var.name}"
 		account_description = "from terraform"
 		account_password = "${random_password.password.0.result}"

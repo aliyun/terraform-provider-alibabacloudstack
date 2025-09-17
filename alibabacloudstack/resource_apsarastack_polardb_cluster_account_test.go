@@ -35,6 +35,7 @@ func TestAccAlibabacloudStackPolardbClusterAccount_basic(t *testing.T) {
 		IDRefreshName: resourceId,
 
 		Providers: testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 		// CheckDestroy: rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
@@ -74,26 +75,38 @@ func TestAccAlibabacloudStackPolardbClusterAccount_basic(t *testing.T) {
 func resourcePolardbClusterAccountConfigDependence(name string) string {
 	return fmt.Sprintf(`
 	variable "name" {
-		default = "%v"
+	  default = "%s"
 	}
-	variable "creation" {
-		default = "PolarDB"
+
+	variable "db_type" {
+	  default = "PostgreSQL"
 	}
+
+	variable "db_version" {
+	  default = "14"
+	}
+
 	%s
+
+	data "alibabacloudstack_polardb_cluster_instance_types" "default" {
+	  db_type = "${var.db_type}"
+	  db_version = "${var.db_version}"
+	  sorted_by = "CPU"
+	  sub_category = "normal_exclusive"
+	}
+
 	%s
+	
 	resource "alibabacloudstack_polardb_cluster_instance" "instance" {
 		db_cluster_description 	= "${var.name}"
-		db_type            		= "MySQL"
-		db_version    			= "5.7"
-		instance_name 			= "${var.name}"
+		db_type            		= "${var.db_type}"
+		db_version    			= "${var.db_version}"
 		storage_type			= "ESSDPL1"
 		storage_space 			= 20
 		db_node_class 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}"
-		db_node_num 			= "1"
 		zone_id					= "${data.alibabacloudstack_zones.default.zones.0.id}"
-		vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
 		vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"
-		sub_category 			= "General"
+		sub_category 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.sub_category}"
 	}
 	`, name, RandomPasswordTestCase(12, 2), VSwitchCommonTestCase)
 }
