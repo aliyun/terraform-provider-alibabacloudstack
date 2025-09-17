@@ -83,17 +83,11 @@ func dataSourceAlibabacloudStackPolardbClusterAccounts() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 
-									"account_privilege": {
+									"privilege": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-
-									"account_privilege_detail": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-
-									"data_base_name": {
+									"db_name": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -176,15 +170,16 @@ func dataSourceAlibabacloudStackPolardbClusterAccountsRead(d *schema.ResourceDat
 				continue
 			}
 		}
+		dbPrivileges := account["DatabasePrivileges"].([]interface{})
 
-		database_privileges := make([]map[string]interface{}, 0)
-		for _, v := range account["DatabasePrivileges"].([]interface{}) {
-			privilege := v.(map[string]interface{})
-			database_privileges = append(database_privileges, map[string]interface{}{
-				"account_privilege":        privilege["AccountPrivilege"].(string),
-				"account_privilege_detail": privilege["AccountPrivilegeDetail"].(string),
-				"data_base_name":           privilege["DBName"].(string),
-			})
+		var databasePrivileges []map[string]interface{}
+		for _, dbPrivilege := range dbPrivileges {
+			privilege := dbPrivilege.(map[string]interface{})
+			p := map[string]interface{}{
+				"privilege": privilege["AccountPrivilege"],
+				"db_name":   privilege["DBName"],
+			}
+			databasePrivileges = append(databasePrivileges, p)
 		}
 		i := map[string]interface{}{
 
@@ -200,7 +195,7 @@ func dataSourceAlibabacloudStackPolardbClusterAccountsRead(d *schema.ResourceDat
 
 			"account_lock_state": account["AccountLockState"],
 
-			"database_privileges": database_privileges,
+			"database_privileges": databasePrivileges,
 		}
 		datas = append(datas, i)
 
