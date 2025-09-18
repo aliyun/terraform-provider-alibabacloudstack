@@ -35,20 +35,31 @@ func TestAccAlibabacloudStackPolarDBClusterDatabase_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"db_cluster_id":      "${alibabacloudstack_polardb_cluster_instance.instance.id}",
 					"db_name":            "${var.name}",
+					"db_description":     "${var.name}",
 					"character_set_name": "utf8",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"db_name":            name,
+						"db_description":     name,
 						"character_set_name": "utf8",
 					}),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collate", "ctype"},
+				Config: testAccConfig(map[string]interface{}{
+					"db_description": "${var.name}_update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"db_description": fmt.Sprintf("%v_update", name),
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

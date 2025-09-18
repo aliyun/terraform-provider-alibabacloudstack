@@ -32,16 +32,6 @@ func resourceAlibabacloudStackPolardbClusterDatabase() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"collate": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"ctype": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"engine": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -67,15 +57,6 @@ func resourceAlibabacloudStackPolardbClusterDatabaseCreate(d *schema.ResourceDat
 	if v, ok := d.GetOk("db_description"); ok {
 		request["DBDescription"] = v
 	}
-
-	if v, ok := d.GetOk("collate"); ok {
-		request["Collate"] = v
-	}
-
-	if v, ok := d.GetOk("ctype"); ok {
-		request["Ctype"] = v
-	}
-
 	_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "CreateDatabase", "", nil, request, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
