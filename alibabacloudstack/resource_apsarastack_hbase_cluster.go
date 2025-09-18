@@ -619,7 +619,7 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		// Cumbersome operation，async call, wait for state change
+		// Cumbersome operation, async call, wait for state change
 		// wait instance status is running after modifying
 		stateConf := BuildStateConf([]string{Hb_NODE_RESIZING}, []string{Hb_ACTIVATION}, d.Timeout(schema.TimeoutUpdate),
 			5*time.Minute, hBaseService.HBaseClusterStateRefreshFunc(d.Id(), []string{Hb_NODE_RESIZING_FAILED}))
@@ -658,7 +658,7 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 				}
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			// Cumbersome operation，async call, wait for state change
+			// Cumbersome operation, async call, wait for state change
 			// wait instance status is running after modifying
 			stateConf := BuildStateConf([]string{Hb_LEVEL_MODIFY}, []string{Hb_ACTIVATION}, d.Timeout(schema.TimeoutUpdate),
 				5*time.Minute, hBaseService.HBaseClusterStateRefreshFunc(d.Id(), []string{Hb_LEVEL_MODIFY_FAILED}))
@@ -688,7 +688,7 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		// Cumbersome operation，async call, wait for state change
+		// Cumbersome operation, async call, wait for state change
 		// wait instance status is running after modifying
 		stateConf := BuildStateConf([]string{Hb_DISK_RESIZING}, []string{Hb_ACTIVATION}, d.Timeout(schema.TimeoutUpdate),
 			2*time.Minute, hBaseService.HBaseClusterStateRefreshFunc(d.Id(), []string{Hb_DISK_RESIZE_FAILED}))
@@ -716,7 +716,7 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		// Cumbersome operation，async call, wait for state change
+		// Cumbersome operation, async call, wait for state change
 		// wait instance status is running after modifying
 		stateConf := BuildStateConf([]string{Hb_HBASE_COLD_EXPANDING}, []string{Hb_ACTIVATION}, d.Timeout(schema.TimeoutUpdate),
 			10*time.Second, hBaseService.HBaseClusterStateRefreshFunc(d.Id(), []string{Hb_DISK_RESIZE_FAILED}))

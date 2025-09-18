@@ -507,7 +507,7 @@ func addIndentation(indentation int) string {
 	return strings.Repeat(INDENTATIONSYMBOL, indentation)
 }
 
-// in most cases, the TestCheckFunc list of dataSource test case is repeated，so we make an abstract in
+// in most cases, the TestCheckFunc list of dataSource test case is repeated, so we make an abstract in
 // order to reduce redundant code.
 // dataSourceAttr has 3 field ,incloud resourceId  existMapFunc fakeMapFunc, every dataSource test can use only one
 type dataSourceAttr struct {
