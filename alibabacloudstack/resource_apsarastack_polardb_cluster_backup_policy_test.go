@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackPolardbClusterBackupPolicy_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_cluster_id":                       "pc-x5wp1k3511323696d",
+					"db_cluster_id":                       "pc-x5w8oyax716lxr4x1",
 					"data_level1_backup_period":           "Monday,Tuesday,Wednesday,Thursday,Friday",
 					"data_level1_backup_time":             "10:00Z-11:00Z",
 					"data_level1_backup_retention_period": "7",
@@ -45,9 +45,8 @@ func TestAccAlibabacloudStackPolardbClusterBackupPolicy_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"data_level1_backup_period":           "Monday,Tuesday,Wednesday,Thursday,Friday",
-						"data_level1_backup_time":             "12:00Z-13:00Z",
+						"data_level1_backup_time":             "10:00Z-11:00Z",
 						"data_level1_backup_retention_period": "7",
-						"data_level2_backup_retention_period": "0",
 						"log_backup_retention_period":         "7",
 					}),
 				),
@@ -59,7 +58,6 @@ func TestAccAlibabacloudStackPolardbClusterBackupPolicy_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_cluster_id":                       "${alibabacloudstack_polardb_dbinstance.instance.id}",
 					"data_level1_backup_period":           "Monday,Tuesday,Wednesday,Thursday,Friday",
 					"data_level1_backup_time":             "12:00Z-13:00Z",
 					"data_level1_backup_retention_period": "3",
@@ -70,7 +68,6 @@ func TestAccAlibabacloudStackPolardbClusterBackupPolicy_basic(t *testing.T) {
 						"data_level1_backup_period":           "Monday,Tuesday,Wednesday,Thursday,Friday",
 						"data_level1_backup_time":             "12:00Z-13:00Z",
 						"data_level1_backup_retention_period": "3",
-						"data_level2_backup_retention_period": "0",
 						"log_backup_retention_period":         "5",
 					}),
 				),

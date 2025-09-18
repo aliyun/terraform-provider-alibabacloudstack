@@ -13,9 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackPolardbDbClusterInstances() *schema.Resource {
+func dataSourceAlibabacloudStackPolardbClusterInstances() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackPolardbDbClusterInstancesRead,
+		Read: dataSourceAlibabacloudStackPolardbClusterInstancesRead,
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeList,
@@ -231,7 +231,7 @@ func dataSourceAlibabacloudStackPolardbDbClusterInstances() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackPolardbDbClusterInstancesRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackPolardbClusterInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := client.NewCommonRequest("GET", "polardb", "2017-08-01", "DescribeDBClusters", "")
