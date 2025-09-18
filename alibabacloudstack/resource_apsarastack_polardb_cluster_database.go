@@ -30,7 +30,6 @@ func resourceAlibabacloudStackPolardbClusterDatabase() *schema.Resource {
 			"db_description": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"engine": {
 				Type:     schema.TypeString,
@@ -43,7 +42,7 @@ func resourceAlibabacloudStackPolardbClusterDatabase() *schema.Resource {
 		},
 	}
 
-	setResourceFunc(resource, resourceAlibabacloudStackPolardbClusterDatabaseCreate, resourceAlibabacloudStackPolardbClusterDatabaseRead, nil, resourceAlibabacloudStackPolardbClusterDatabaseDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackPolardbClusterDatabaseCreate, resourceAlibabacloudStackPolardbClusterDatabaseRead, resourceAlibabacloudStackPolardbClusterDatabaseUpdate, resourceAlibabacloudStackPolardbClusterDatabaseDelete)
 	return resource
 }
 
@@ -71,6 +70,27 @@ func resourceAlibabacloudStackPolardbClusterDatabaseCreate(d *schema.ResourceDat
 	// Set the temporary ID
 	d.SetId(resourceId)
 
+	return nil
+}
+
+func resourceAlibabacloudStackPolardbClusterDatabaseUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	if d.IsNewResource() {
+		return nil
+	}
+	if d.HasChange("db_description") {
+		param := strings.Split(d.Id(), ":")
+		request := make(map[string]interface{})
+		request["DBClusterId"] = param[0]
+		request["DBName"] = param[1]
+		request["DBDescription"] = d.Get("db_description")
+
+		_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyDBDescription", "", nil, request, nil)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_polardb_cluster_database", "ModifyDBDescription", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+	}
 	return nil
 }
 
