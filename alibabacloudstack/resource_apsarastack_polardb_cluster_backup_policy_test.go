@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackPolardbClusterBackupPolicy_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_cluster_id":                       "pc-x5w8oyax716lxr4x1",
+					"db_cluster_id":                       "${alibabacloudstack_polardb_cluster_instance.default.id}",
 					"data_level1_backup_period":           "Monday,Tuesday,Wednesday,Thursday,Friday",
 					"data_level1_backup_time":             "10:00Z-11:00Z",
 					"data_level1_backup_retention_period": "7",
@@ -77,43 +77,41 @@ func TestAccAlibabacloudStackPolardbClusterBackupPolicy_basic(t *testing.T) {
 }
 
 func resourcePolardbClusterBackupPolicyDependence(name string) string {
-	return ""
-	// 	return fmt.Sprintf(`
-	// variable "name" {
-	//   default = "%s"
-	// }
-	// variable "creation" {
-	// 	default = "PolarDB"
-	// }
+	return fmt.Sprintf(`
+	 variable "name" {
+	   default = "%s"
+	 }
+	 variable "creation" {
+	 	default = "PolarDB"
+	 }
 
-	// variable "db_type" {
-	// 	default = "MySQL"
-	// }
+	 variable "db_type" {
+	 	default = "MySQL"
+	 }
 
-	// variable "db_version" {
-	// 	default = "5.7"
-	// }
+	 variable "db_version" {
+	 	default = "5.7"
+	 }
 
-	// data "alibabacloudstack_polardb_cluster_instance_types" "default" {
-	// 	db_type = "${var.db_type}"
-	// 	db_version = "${var.db_version}"
-	// 	sorted_by = "CPU"
-	// 	sub_category = "normal_exclusive"
-	// }
+	 data "alibabacloudstack_polardb_cluster_instance_types" "default" {
+	 	db_type = "${var.db_type}"
+	 	db_version = "${var.db_version}"
+	 	sorted_by = "CPU"
+	 	sub_category = "normal_exclusive"
+	 }
 
-	// %s
+	 %s
 
-	// resource "alibabacloudstack_polardb_cluster_instance" "instance" {
-	// 	db_cluster_description 	= "${var.name}"
-	// 	db_type            		= "${var.db_type}"
-	// 	db_version    			= "${var.db_version}"
-	// 	storage_type			= "ESSDPL1"
-	// 	storage_space 			= 20
-	// 	db_node_class 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}"
-	// 	zone_id					= "${data.alibabacloudstack_zones.default.zones.0.id}"
-	// 	vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
-	// 	vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"
-	// 	sub_category 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.sub_category}"
-	// }
-	//  `, name, VSwitchCommonTestCase)
+	 resource "alibabacloudstack_polardb_cluster_instance" "default" {
+	 	db_cluster_description 	= "${var.name}"
+	 	db_type            		= "${var.db_type}"
+	 	db_version    			= "${var.db_version}"
+	 	storage_type			= "ESSDPL1"
+	 	storage_space 			= 20
+	 	db_node_class 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}"
+	 	zone_id					= "${data.alibabacloudstack_zones.default.zones.0.id}"
+	 	vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"
+	 	sub_category 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.sub_category}"
+	 }
+	  `, name, VSwitchCommonTestCase)
 }
