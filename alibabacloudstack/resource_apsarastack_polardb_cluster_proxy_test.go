@@ -11,7 +11,7 @@ import (
 func TestAccAlibabacloudStackPolardbClusterProxy_basic(t *testing.T) {
 	var proxy map[string]interface{}
 	rand := getAccTestRandInt(1000, 9999)
-	name := fmt.Sprintf("tfaccount%d", rand)
+	name := fmt.Sprintf("tf-proxy%d", rand)
 	var basicMap = map[string]string{
 		"db_cluster_id":     CHECKSET,
 		"proxy_instances.#": CHECKSET,
@@ -66,9 +66,6 @@ func resourcePolardbClusterProxyConfigDependence(name string) string {
 	return fmt.Sprintf(`
 	variable "name" {
 		default = "%v"
-	}
-	variable "creation" {
-		default = "PolarDB"
 	}
 	variable "db_type" {
 		default = "PostgreSQL"

@@ -1,10 +1,13 @@
 package alibabacloudstack
 
 import (
+	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -19,11 +22,6 @@ func resourceAlibabacloudStackPolardbClusterProxy() *schema.Resource {
 			"db_proxy_cluster_class": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-			"db_proxy_cluster_num": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
 			},
 			"db_proxy_cluster_id": {
 				Type:     schema.TypeString,
@@ -100,7 +98,6 @@ func resourceAlibabacloudStackPolardbClusterProxyRead(d *schema.ResourceData, me
 	}
 
 	d.Set("db_cluster_id", d.Id())
-	d.Set("db_proxy_cluster_num", object["DBProxyClusterNum"])
 	d.Set("db_proxy_cluster_id", object["DBProxyClusterId"])
 
 	var childInstances []map[string]interface{}
@@ -115,6 +112,15 @@ func resourceAlibabacloudStackPolardbClusterProxyRead(d *schema.ResourceData, me
 			}
 			if val, ok := item.(map[string]interface{})["DBNodeClass"]; ok {
 				childInstance["db_node_class"] = val
+				pattern := `^polar\.(o\.)?maxscale\.server\.(.+)$`
+				re := regexp.MustCompile(pattern)
+
+				if !re.MatchString(val.(string)) {
+					return fmt.Errorf("invalid db node class")
+				}
+
+				result := regexp.MustCompile(`\.server`).ReplaceAllString(val.(string), "")
+				d.Set("db_proxy_cluster_class", result)
 			}
 			childInstances = append(childInstances, childInstance)
 		}
@@ -158,11 +164,18 @@ func resourceAlibabacloudStackPolardbClusterProxyDelete(d *schema.ResourceData, 
 	reqQuery := map[string]interface{}{
 		"DBClusterId": d.Id(),
 	}
+	err := resource.Retry(20*time.Minute, func() *resource.RetryError {
+		// Call the DeleteDBClusterProxy API
+		_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBClusterProxy", "", nil, reqQuery, nil)
+		if err != nil {
+			if  errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBClusterStatus"})  {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteDBClusterProxy", errmsgs.AlibabacloudStackSdkGoERROR))
+		} else {
+			return nil
+		}
+	})
 
-	// Call the DeleteDBClusterProxy API
-	_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBClusterProxy", "", nil, reqQuery, nil)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteDBClusterProxy", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	return nil
+	return err
 }
