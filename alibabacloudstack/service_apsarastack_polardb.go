@@ -2242,3 +2242,29 @@ func (s *PolardbService) PolardbClusterProxyStateRefreshFunc(id string, failStat
 		return object, object["DBProxyClusterStatus"].(string), nil
 	}
 }
+
+
+func (s *PolardbService) DescribePolardbClusterBackupPolicy(id string) (map[string]interface{}, error) {
+	// DescribeBackupPolicy
+	backupQuery := map[string]interface{}{
+		"DBClusterId": id,
+	}
+	backupResp, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeBackupPolicy", "", nil, backupQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return backupResp, nil
+}
+
+func (s *PolardbService) DescribePolardbClusterLogBackupPolicy(id string) (map[string]interface{}, error) {
+	// DescribeLogBackupPolicy
+	logQuery := map[string]interface{}{
+		"DBClusterId": id,
+	}
+	logResp, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeLogBackupPolicy", "", nil, logQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+	return logResp, nil
+}

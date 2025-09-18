@@ -943,6 +943,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardb_cluster_database":                        resourceAlibabacloudStackPolardbClusterDatabase(),
 		"alibabacloudstack_polardb_cluster_account_database_binding":        resourceAlibabacloudStackPolardbClusterAccountDatabaseBinding(),
 		"alibabacloudstack_polardb_cluster_proxy":                           resourceAlibabacloudStackPolardbClusterProxy(),
+		"alibabacloudstack_polardb_cluster_backup_policy":                   resourceAlibabacloudStackPolardbClusterBackupPolicy(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -1439,7 +1440,7 @@ func getResourceCredentials(config *connectivity.Config) (string, string, int, e
 	if matched == 0 {
 		return "", "", 0, fmt.Errorf("resource group ID and organization not found for resource set %s", config.ResourceSetName)
 	} else if matched > 1 {
-		return "", "", 0, fmt.Errorf("There exists a resource group set name with the same name, Please Provider department or resource_group")
+		return "", "", 0, errmsgs.Error("There exists a resource group set name with the same name, Please Provider department or resource_group")
 	} else {
 		for _, j := range response.Data {
 			if j.ResourceGroupName == config.ResourceSetName {
