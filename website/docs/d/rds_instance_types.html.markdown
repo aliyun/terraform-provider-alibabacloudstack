@@ -27,7 +27,7 @@ data "alibabacloudstack_rds_instance_types" "default" {
 The following arguments are supported:
 
 * `ids` - (Optional, ForceNew) Specifies the ID range of instance specifications. If not specified, returns instance specifications across all availability zones.
-* `engine` - (Optional, ForceNew) Filter the results to a specific rds engine. valid values: `PostgreSQL`, `MySQL`，`POLARDB`.
+* `engine` - (Optional, ForceNew) Filter the results to a specific rds engine. valid values: `PostgreSQL`, `MySQL`,`POLARDB`.
 * `engine_version` - (Optional, ForceNew) Filter the results to a specific rds engine version.
 * `series` - (Optional) Filter the results to a specific rds series.
 * `cpu` - (Optional) Filter the results to a specific number of cpu cores.

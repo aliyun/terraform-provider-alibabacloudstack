@@ -360,7 +360,7 @@ The following arguments are supported:
 
 #### tags
 
-The tags example：
+The tags example:
 ```
 tags {
   "key-a" = "value-a"

@@ -75,7 +75,7 @@ The following arguments are supported:
 * `group_rules` - (Required) Sets the event group. See [`group_rules`](#group_rules) below. It will be ignored  when `dispatch_type = "DISCARD_ALERT"`.
   * `group_wait_time` - (Required) The duration for which the system waits after the first alert is sent. After the duration, all alerts are sent in a single notification to the handler.
   * `group_interval` - (Required) The duration for which the system waits after the first alert is sent. After the duration, all alerts are sent in a single notification to the handler.
-  * `grouping_fields` - (Required， List<String>) The fields that are used to group events. Events with the same field content are assigned to a group. Alerts with the same specified grouping field are sent to the handler in separate notifications. 
+  * `grouping_fields` - (Required, List<String>) The fields that are used to group events. Events with the same field content are assigned to a group. Alerts with the same specified grouping field are sent to the handler in separate notifications. 
   * `repeat_interval` - (Optional) The silence period of repeated alerts. All alerts are repeatedly sent at specified intervals until the alerts are cleared. The minimum value is 61. Default to 600.
   * `group_id` - (Optional) The ID of the group rule.
 * `label_match_expression_grid` - (Required) Sets the dispatch rule. See [`label_match_expression_grid`](#label_match_expression_grid) below. 

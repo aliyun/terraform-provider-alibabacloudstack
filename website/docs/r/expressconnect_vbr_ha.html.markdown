@@ -48,10 +48,10 @@ resource "alibabacloudstack_expressconnect_vbr_ha" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `name` - (Required, ForceNew) - The name of the Ha Failover Groups。 It must be 2 to 128 characters in length and can contain letters, digits, periods (.), underscores (_), and hyphens (-). It must start with a letter.
+  * `name` - (Required, ForceNew) - The name of the Ha Failover Groups. It must be 2 to 128 characters in length and can contain letters, digits, periods (.), underscores (_), and hyphens (-). It must start with a letter.
   * `description` - (Optional, ForceNew) - It must be 2 to 256 characters in length and start with a letter. It cannot start with http:// or https://. 
-  * `vbr_id` - (Required, ForceNew) - VBR ID。
-  * `peer_vbr_id` - (Required, ForceNew) - Failover Group VBR ID。
+  * `vbr_id` - (Required, ForceNew) - VBR ID.
+  * `peer_vbr_id` - (Required, ForceNew) - Failover Group VBR ID.
 
 ## Attributes Reference
 

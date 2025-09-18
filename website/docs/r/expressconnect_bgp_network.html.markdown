@@ -38,10 +38,10 @@ resource "alibabacloudstack_expressconnect_bgp_network" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `dst_cidr_block` - (Require) - expressconnect Bgpnetwork cidr block。
-  * `router_id` - (Require, ForceNew) - vbr router id。
+  * `dst_cidr_block` - (Require) - expressconnect Bgpnetwork cidr block.
+  * `router_id` - (Require, ForceNew) - vbr router id.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `status` - expressconnect Bgpnetwork resource status。
+  * `status` - expressconnect Bgpnetwork resource status.

@@ -88,7 +88,7 @@ Download the required AlibabacloudStack version from [GitHub](https://github.com
 
 > **Note**: The download of the provider fails if you use an invalid directory structure.
 
-Standard directory structure of the provider：
+Standard directory structure of the provider:
 
 ```
 XX(The provider repository path, such as./terraform.d/providers/)
@@ -330,9 +330,9 @@ terraform apply
 
 ### Compatibility
 
-:white_check_mark:：All capabilities of Terraform Core are supported by the provider.
+:white_check_mark::All capabilities of Terraform Core are supported by the provider.
 
-:warning:：Some capabilities of Terraform Core are not supported by the provider.
+:warning::Some capabilities of Terraform Core are not supported by the provider.
 
 | RPC Name  | terraform-v1.0.11  | terraform-v1.1.9  | terraform-v1.2.9  | terraform-v1.3.10  | terraform-v1.4.7  | terraform-v1.5.7  | terraform-v1.6.6  | terraform-v1.7.5  | terraform-v1.8.5  | terraform-v1.9.3  | opentofu-v1.6.3  | opentofu-v1.7.3  | opentofu-v1.8.0 |
 | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | --- |

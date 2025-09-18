@@ -91,7 +91,7 @@ The following arguments are supported:
   * `db_proxy_read_write_mode` - (Optional) - The proxy endpoint read write mode.
   * `effective_specific_time` - (Optional) - The specified time takes effect. Format: <I> yyyy-MM-dd</I> T <I> HH:mm:ss</I> Z(UTC time).> When **EffectiveTime** is set to **SpecificTime**, this parameter must be set.
   * `effective_time` - (Optional) - Effective time, value:* **Immediate**: Effective immediately.* **MaintainTime**: takes effect during the O & M period. For details, see ModifyDBInstanceMaintainTime.* **SpecificTime**: The specified time takes effect.Default value: **MaintainTime * *.
-  * `connection_persist` - (Optional) - (Optional) - Connection Pool.  Value: - **0**: Disable - **1**: Enable Session Connection Pool - **2**：Enable Transaction Connection Pool.
+  * `connection_persist` - (Optional) - (Optional) - Connection Pool.  Value: - **0**: Disable - **1**: Enable Session Connection Pool - **2**:Enable Transaction Connection Pool.
   * `causal_consist_read` - (Optional) - Consistency Parameters.  Value: - **0**: Enable Transaction Connection Pool - **1**: Session Consistency - **2**: Global Consistency.
 ## Attributes Reference
 
