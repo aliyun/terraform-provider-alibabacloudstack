@@ -20,7 +20,7 @@ func TestAccAlibabacloudStackPolardbClusterBackupPoliciesDataSource(t *testing.T
 				Config: datasourcePolardbClusterBackupPoliciesDataSourceDependence(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_polardb_cluster_backup_policies.policy"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "id"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "db_cluster_id"),
 					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "data_level1_backup_time"),
 					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "data_level1_backup_retention_period"),
 					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "data_level2_backup_retention_period"),
@@ -35,7 +35,7 @@ func TestAccAlibabacloudStackPolardbClusterBackupPoliciesDataSource(t *testing.T
 func datasourcePolardbClusterBackupPoliciesDataSourceDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tfaccpolicy-datasource-test"
+  default = "%v"
 }
 
 variable "db_type" {
@@ -73,5 +73,5 @@ data "alibabacloudstack_polardb_cluster_backup_policies" "policy" {
 	db_cluster_id = "${alibabacloudstack_polardb_cluster_instance.default.id}"
 }
 
- `, VSwitchCommonTestCase)
+ `, name, VSwitchCommonTestCase)
 }
