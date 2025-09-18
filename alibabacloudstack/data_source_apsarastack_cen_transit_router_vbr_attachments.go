@@ -117,7 +117,7 @@ func dataSourceAlibabacloudStackCenTransitRouterVbrAttachmentsRead(d *schema.Res
 	cencen_instanceservice := CenService{client}
 	cen_id := d.Get("cen_id").(string)
 	transit_router_id := d.Get("transit_router_id").(string)
-	vpc_id := d.Get("vpc_id").(string)
+	vbr_id := d.Get("vbr_id").(string)
 	response, err := cencen_instanceservice.DoCbnDescribeTransitRouterAttachmentsRequest(cen_id + ":" + transit_router_id)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_transit_router_vbr_attachments", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -139,7 +139,7 @@ func dataSourceAlibabacloudStackCenTransitRouterVbrAttachmentsRead(d *schema.Res
 	datas := make([]interface{}, 0)
 	for _, data := range response.TransitRouterAttachments {
 		if len(idsMap) > 0 {
-			key := fmt.Sprintf("%s:%s:%s:%s", cen_id, transit_router_id, data.TransitRouterAttachmentId, vpc_id)
+			key := fmt.Sprintf("%s:%s:%s:%s", cen_id, transit_router_id, data.TransitRouterAttachmentId, vbr_id)
 			if _, ok := idsMap[key]; !ok {
 				continue
 			}

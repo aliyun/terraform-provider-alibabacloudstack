@@ -114,9 +114,11 @@ func resourceAlibabacloudStackCenTransitRouterVbrAttachmentCreate(d *schema.Reso
 		request.QueryParams["RouteTableAssociationEnabled"] = fmt.Sprintf("%v", v)
 	}
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		for i := 1; i <= 5; i++ {
 			bresponse, err = client.ProcessCommonRequest(request)
+			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 			if err != nil {
 				time.Sleep(3 * time.Second)
 				continue
