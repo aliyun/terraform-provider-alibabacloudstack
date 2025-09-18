@@ -37,7 +37,6 @@ func resourceAlibabacloudStackPolardbClusterBackupPolicy() *schema.Resource {
 			},
 			"data_level2_backup_retention_period": {
 				Type:     schema.TypeInt,
-				Optional: true,
 				Computed: true,
 			},
 			"backup_retention_policy_on_cluster_deletion": {
@@ -153,36 +152,26 @@ func resourceAlibabacloudStackPolardbClusterBackupPolicyRead(d *schema.ResourceD
 func resourceAlibabacloudStackPolardbClusterBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	if d.IsNewResource() {
-		return nil
-	}
+	// if d.IsNewResource() {
+	// 	return nil
+	// }
 
 	if d.HasChanges(
 		"data_level1_backup_period",
 		"data_level1_backup_time",
 		"data_level1_backup_retention_period",
-		"data_level2_backup_retention_period",
 	) {
 		reqQuery := map[string]interface{}{
-			"DBClusterId":                            d.Get("db_cluster_id"),
+			"DBClusterId":                            d.Id(),
 			"DataLevel1BackupFrequency":              "Normal",
 			"BackupRetentionPolicyOnClusterDeletion": "NONE",
+			"DataLevel1BackupPeriod":                 d.Get("data_level1_backup_period"),
+			"DataLevel1BackupTime":                   d.Get("data_level1_backup_time"),
+			"DataLevel1BackupRetentionPeriod":        d.Get("data_level1_backup_retention_period"),
+			"DataLevel2BackupRetentionPeriod":        0,
 		}
 
-		if v, ok := d.GetOk("data_level1_backup_period"); ok {
-			reqQuery["DataLevel1BackupPeriod"] = v
-		}
-		if v, ok := d.GetOk("data_level1_backup_time"); ok {
-			reqQuery["DataLevel1BackupTime"] = v
-		}
-		if v, ok := d.GetOk("data_level1_backup_retention_period"); ok {
-			reqQuery["DataLevel1BackupRetentionPeriod"] = v
-		}
-		if v, ok := d.GetOk("data_level2_backup_retention_period"); ok {
-			reqQuery["DataLevel2BackupRetentionPeriod"] = v
-		}
-
-		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyBackupPolicy", "", nil, reqQuery, nil); err != nil {
+		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyBackupPolicy", "", nil, nil, reqQuery); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "ModifyBackupPolicy", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
@@ -193,7 +182,7 @@ func resourceAlibabacloudStackPolardbClusterBackupPolicyUpdate(d *schema.Resourc
 			"LogBackupRetentionPeriod": d.Get("log_backup_retention_period"),
 		}
 
-		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyLogBackupPolicy", "", nil, reqQuery, nil); err != nil {
+		if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "ModifyLogBackupPolicy", "", nil, nil, reqQuery); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "ModifyLogBackupPolicy", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
