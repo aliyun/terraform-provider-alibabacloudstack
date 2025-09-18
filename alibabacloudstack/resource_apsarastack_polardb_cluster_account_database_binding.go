@@ -98,7 +98,7 @@ func resourceAlibabacloudStackPolardbClusterAccountDatabaseBindingUpdate(d *sche
 				}
 				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-					"alibabacloudstack_polardb_account_database_binding", "RevokeAccountPrivilege", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+					"alibabacloudstack_polardb_cluster_account_database_binding", "RevokeAccountPrivilege", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 		}
 		if len(addPrivileges) > 0 {
@@ -121,7 +121,7 @@ func resourceAlibabacloudStackPolardbClusterAccountDatabaseBindingUpdate(d *sche
 				}
 				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-					"alibabacloudstack_polardb_account_database_binding", "GrantAccountPrivilege", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+					"alibabacloudstack_polardb_cluster_account_database_binding", "GrantAccountPrivilege", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 		}
 	}

@@ -24,14 +24,28 @@ data  "alibabacloudstack_zones" "default" {
 	available_resource_creation = "PolarDB"
 }
 
-resource "alibabacloudstack_polardb_cluster" "cluster" {
-	engine            = "MySQL"
-	engine_version    = "5.7"
-	cluster_name      = "tfcluster"
-	db_node_class     = "polar.mysql.x4.large"
-	db_node_count     = 2
-	db_node_storage   = 20
-	zone_id           = "${data.alibabacloudstack_zones.default.zones.0.id}"
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name       = "${var.name}_vpc"
+  cidr_block = "172.16.0.0/16"
+}
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block        = "172.16.0.0/24"
+  zone_id           = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  vswitch_name      = "${var.name}_vsw"
+}
+
+resource "alibabacloudstack_polardb_cluster_instance" "default" {
+  db_cluster_description 	=  "${var.name}"
+  zone_id 				= "${data.alibabacloudstack_zones.default.zones.0.id}"
+  db_type 				= "${var.db_type}"
+  db_version 			= "${var.db_version}"
+  storage_space 		= "20"
+  vpc_id 				= "${alibabacloudstack_vpc_vpc.default.id}"
+  vswitch_id			= "${alibabacloudstack_vpc_vswitch.default.id}"
+  db_node_class 		= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}"
+  sub_category 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.sub_category}"
+  storage_type 			= "ESSDPL1"
 }
 
 resource "alibabacloudstack_polardb_cluster_account" "default" {
@@ -54,7 +68,7 @@ data "alibabacloudstack_polardb_cluster_accounts" "default" {
 
 The following arguments are supported:
   * `ids` - (Optional) - A list of account IDs to filter results.
-  * `account_name` - (Optional) - The account name must meet the following requirements:* Start with a lowercase letter and end with a letter or number.* Consists of lowercase letters, numbers, or underscores.* The length is 2 to 16 characters.* You cannot use some reserved usernames, such as root and admin.
+  * `account_name` - (Optional) - The account name
   * `db_cluster_id` - (Required) - db cluster id.
   * `name_regex` - (Optional, Deprecated) - A regex string to filter results by account name. Field 'name_regex' is deprecated and will be removed in a future release. Please use new field 'description_regex' instead.
   * `description_regex` - (Optional) - A regex string to filter results by account description.
@@ -65,8 +79,8 @@ The following attributes are exported in addition to the arguments listed above:
   * `accounts` - A list of accounts. Each element contains the following attributes:
     * `id` - The ID of the account.
     * `account_description` - The account number Notes shall meet the following requirements:-Cannot start with' http:// 'or' https.-2 to 256 characters in length.
-    * `account_name` - The account name must meet the following requirements:* Start with a lowercase letter and end with a letter or number.* Consists of lowercase letters, numbers, or underscores.* The length is 2 to 16 characters.* You cannot use some reserved usernames, such as root and admin.
-    * `account_type` - Account type. The value range is as follows:-**Normal**: Normal account.-**Super**: a highly privileged account.> * If this parameter is left blank, the **Super** account is created by default.* When the cluster is PolarDB O engine or PolarDB PostgreSQL engine, each cluster can create multiple high-permission accounts. High-permission accounts have more permissions than normal accounts. For more information about creating database accounts, see [create database accounts](~~ 68508 ~~).* When the cluster is the PolarDB MySQL engine, each cluster can only create one high-permission account at most. High-permission accounts have more permissions than normal accounts. For more information about creating database accounts, see [create database accounts](~~ 68508 ~~).
+    * `account_name` - The account name
+    * `account_type` - Account type.
     * `account_lock_state` - The lock state of the account.
     * `status` - The status of the resource.
     * `database_privileges` - The Database permissions of the target account.
