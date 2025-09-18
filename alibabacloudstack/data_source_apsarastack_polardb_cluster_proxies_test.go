@@ -48,9 +48,7 @@ func dataSourcePolardbClusterProxiesDependence(name string) string {
 	variable "name" {
 		default = "%v"
 	}
-	variable "creation" {
-		default = "PolarDB"
-	}
+
 	variable "db_type" {
 		default = "PostgreSQL"
 	}

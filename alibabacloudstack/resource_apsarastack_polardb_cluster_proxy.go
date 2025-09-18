@@ -7,7 +7,6 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -76,7 +75,7 @@ func resourceAlibabacloudStackPolardbClusterProxyCreate(d *schema.ResourceData, 
 	d.SetId(dbClusterId)
 
 	// Wait for the proxy to be in Running state
-	stateConf := BuildStateConf([]string{"ProxyCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(dbClusterId, []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbService.PolardbClusterProxyStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -150,7 +149,7 @@ func resourceAlibabacloudStackPolardbClusterProxyUpdate(d *schema.ResourceData, 
 		}
 
 		// Wait for the proxy cluster to become Running after modification
-		stateConf := BuildStateConf([]string{"ProxyModifyingClass"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Get("db_cluster_id").(string), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"ClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterProxyStateRefreshFunc(d.Id(), []string{"Failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -161,21 +160,19 @@ func resourceAlibabacloudStackPolardbClusterProxyUpdate(d *schema.ResourceData, 
 
 func resourceAlibabacloudStackPolardbClusterProxyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	polardbService := PolardbService{client}
 	reqQuery := map[string]interface{}{
 		"DBClusterId": d.Id(),
 	}
-	err := resource.Retry(20*time.Minute, func() *resource.RetryError {
-		// Call the DeleteDBClusterProxy API
-		_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBClusterProxy", "", nil, reqQuery, nil)
-		if err != nil {
-			if  errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBClusterStatus"})  {
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteDBClusterProxy", errmsgs.AlibabacloudStackSdkGoERROR))
-		} else {
-			return nil
-		}
-	})
 
-	return err
+	// Call the DeleteDBClusterProxy API
+	_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBClusterProxy", "", nil, reqQuery, nil)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteDBClusterProxy", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbClusterProxyStateRefreshFunc(d.Id(), []string{"Failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+	return nil
 }

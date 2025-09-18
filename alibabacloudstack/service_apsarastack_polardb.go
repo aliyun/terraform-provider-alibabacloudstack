@@ -2206,8 +2206,6 @@ func (s *PolardbService) DescribePolardbClusterDatabase(id string) (map[string]i
 	return databases[0].(map[string]interface{}), nil
 }
 
-
-
 func (s *PolardbService) DescribePolardbClusterProxy(id string) (map[string]interface{}, error) {
 	query := map[string]interface{}{
 		"DBClusterId": id,
@@ -2219,4 +2217,28 @@ func (s *PolardbService) DescribePolardbClusterProxy(id string) (map[string]inte
 	}
 
 	return response, nil
+}
+
+func (s *PolardbService) PolardbClusterProxyStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribePolardbClusterProxy(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		if _, exist := object["DBProxyClusterId"]; !exist {
+			return nil, "", nil
+		}
+
+		for _, failState := range failStates {
+			if object["DBProxyClusterStatus"] == failState {
+				return object, object["DBProxyClusterStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["DBClusterStatus"]))
+			}
+		}
+		return object, object["DBProxyClusterStatus"].(string), nil
+	}
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -848,18 +849,27 @@ func resourceAlibabacloudStackPolardbClusterInstanceDelete(d *schema.ResourceDat
 		"DBClusterId": d.Id(),
 	}
 
-	// Call DeleteDBCluster API
-	_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
+	if err := resource.Retry(20*time.Minute, func() *resource.RetryError {
+		// Call the DeleteDBClusterProxy API
+		_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
+		if err != nil {
+			if  errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBClusterStatus"})  {
+				return resource.RetryableError(err)
+			}
+			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
+				return nil
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteDBClusterProxy", errmsgs.AlibabacloudStackSdkGoERROR))
+		} else {
 			return nil
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteDBCluster", errmsgs.AlibabacloudStackSdkGoERROR, "")
+	}); err != nil {
+		return err
 	}
 
 	// Wait for the cluster to be fully deleted
 	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{}))
-	_, err = stateConf.WaitForState()
+	_, err := stateConf.WaitForState()
 	return errmsgs.WrapError(err)
 }
 
