@@ -853,10 +853,10 @@ func resourceAlibabacloudStackPolardbClusterInstanceDelete(d *schema.ResourceDat
 		// Call the DeleteDBClusterProxy API
 		_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteDBCluster", "", nil, reqQuery, nil)
 		if err != nil {
-			if  errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBClusterStatus"})  {
+			if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBClusterStatus"}) {
 				return resource.RetryableError(err)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound", "InvalidDBClusterId.NotFound"}) {
 				return nil
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteDBClusterProxy", errmsgs.AlibabacloudStackSdkGoERROR))
