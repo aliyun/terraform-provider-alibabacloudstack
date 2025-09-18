@@ -159,6 +159,24 @@ type CbnDescribeTransitRouterVpcAttachmentsResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
+type CbnDescribeTransitRouterVbrAttachmentsResponse struct {
+	TransitRouterAttachments []struct {
+		Status                             string        `json:"Status"`
+		TransitRouterAttachmentId          string        `json:"TransitRouterAttachmentId"`
+		AutoPublishRouteEnabled            bool          `json:"AutoPublishRouteEnabled"`
+		VbrOwnerId                         int64         `json:"VbrOwnerId"`
+		CreationTime                       string        `json:"CreationTime"`
+		ResourceType                       string        `json:"ResourceType"`
+		TransitRouterAttachmentName        string        `json:"TransitRouterAttachmentName"`
+		TransitRouterAttachmentDescription string        `json:"TransitRouterAttachmentDescription"`
+		VbrRegionId                        string        `json:"VbrRegionId"`
+		VbrId                              string        `json:"VbrId"`
+		Tags                               []interface{} `json:"Tags"`
+		TransitRouterId                    string        `json:"TransitRouterId"`
+	} `json:"TransitRouterAttachments"`
+	RequestId string `json:"RequestId"`
+}
+
 type TransitRouterRouteTableAssociationsResponse struct {
 	TransitRouterAssociations []struct {
 		TransitRouterAttachmentId string `json:"TransitRouterAttachmentId"`
@@ -678,7 +696,7 @@ func (s *CenService) DoCbnDescribeTransitRouterAttachmentsRequest(id string) (*T
 	request.QueryParams["TransitRouterId"] = transit_router_id
 	request.QueryParams["CenId"] = cen_id
 	request.QueryParams["ResourceTypes.1"] = "VPC"
-	request.QueryParams["ResourceTypes.2"] = "VPR"
+	request.QueryParams["ResourceTypes.2"] = "VBR"
 	request.QueryParams["ResourceTypes.3"] = "Connect"
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -698,6 +716,38 @@ func (s *CenService) DoCbnDescribeTransitRouterAttachmentsRequest(id string) (*T
 	}
 
 	return DescribeRouterattachmentsResponseObj, nil
+}
+
+func (s *CenService) DoCbnDescribeTransitRouterVbrAttachmentsRequest(id string) (*CbnDescribeTransitRouterVbrAttachmentsResponse, error) {
+
+	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterVbrAttachments", "")
+	CbnDescribeRouterVbrattachmentsResponseObj := &CbnDescribeTransitRouterVbrAttachmentsResponse{}
+
+	parts := strings.Split(id, ":")
+	cen_id := parts[0]
+	transit_router_id := parts[1]
+	attachment_id := parts[2]
+	request.QueryParams["TransitRouterId"] = transit_router_id
+	request.QueryParams["CenId"] = cen_id
+	request.QueryParams["TransitRouterAttachmentId"] = attachment_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterVbrAttachments", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnDescribeRouterVbrattachmentsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterVbrAttachments", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return CbnDescribeRouterVbrattachmentsResponseObj, nil
 }
 
 func (s *CenService) DoCbnDescribeTransitRouterVpcAttachmentsRequest(id string) (*CbnDescribeTransitRouterVpcAttachmentsResponse, error) {
