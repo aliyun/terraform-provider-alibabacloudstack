@@ -982,12 +982,12 @@ func (s *CenService) DescribeCenTransitRouterConnectAttachment(id string) (map[s
 		"TransitRouterAttachmentId": transitRouterAttachmentId,
 	}
 
-	response, err := s.client.DoTeaRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterAttachments", "", nil, reqQuery, nil)
+	response, err := s.client.DoTeaRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterConnectAttachments", "", nil, reqQuery, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if _, ok := response["TransitRouterAttachments"]; !ok || response["TotalCount"].(int) == 0 {
+	if _, ok := response["TransitRouterAttachments"]; !ok || fmt.Sprint(response["TotalCount"]) == "0" {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Cen TransitRouterConnectAttachment %s not found", id))
 	}
 

@@ -49,6 +49,18 @@ func resourceAlibabacloudStackCenTransitRouterConnectAttachment() *schema.Resour
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"protocol": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"transport_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource,
@@ -87,7 +99,7 @@ func resourceAlibabacloudStackCenTransitRouterConnectAttachmentCreate(d *schema.
 	d.SetId(fmt.Sprintf("%s:%s:%s", cenId, transitRouterId, attachmentId))
 
 	// Wait for the attachment to be in the "Attached" state
-	stateConf := BuildStateConf([]string{"Creating", "Attaching"}, []string{"Attached"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, cbnService.CenTransitRouterConnectAttachmentStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"Attaching"}, []string{"Attached"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, cbnService.CenTransitRouterConnectAttachmentStateRefreshFunc(d.Id(), []string{}))
 	if _, err = stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("waiting for CEN transit router connect attachment to be attached failed: %v", err)
 	}
@@ -115,13 +127,16 @@ func resourceAlibabacloudStackCenTransitRouterConnectAttachmentRead(d *schema.Re
 	}
 
 	d.Set("cen_id", parts[0])
-	d.Set("transit_router_id", parts[1])
+	d.Set("transit_router_id", object["TransitRouterId"])
+	d.Set("transport_type", object["TransportType"])
 	d.Set("transit_router_attachment_id", object["TransitRouterAttachmentId"])
 	d.Set("resource_id", object["ResourceId"])
 	d.Set("creation_time", object["CreationTime"])
 	d.Set("resource_type", object["ResourceType"])
 	d.Set("resource_owner_id", object["ResourceOwnerId"])
 	d.Set("transit_router_attachment_name", object["TransitRouterAttachmentName"])
+	d.Set("status", object["Status"])
+	d.Set("protocol", object["Protocol"])
 
 	return nil
 }
@@ -155,7 +170,7 @@ func resourceAlibabacloudStackCenTransitRouterConnectAttachmentDelete(d *schema.
 	}
 
 	// Wait for the resource to be deleted
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 3*time.Second, cbnService.CenTransitRouterConnectAttachmentStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"Detaching"}, []string{}, d.Timeout(schema.TimeoutDelete), 3*time.Second, cbnService.CenTransitRouterConnectAttachmentStateRefreshFunc(d.Id(), []string{"Attached", "Modifying"}))
 	_, err = stateConf.WaitForState()
 	return errmsgs.WrapError(err)
 }

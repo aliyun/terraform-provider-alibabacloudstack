@@ -542,6 +542,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_route_entries":                 dataSourceAlibabacloudStackCenTransitRouterRouteEntries(),
 		"alibabacloudstack_cen_transit_router_vpc_attachments":               dataSourceAlibabacloudStackCenTransitRouterVpcAttachments(),
 		"alibabacloudstack_cen_transit_router_vbr_attachments":               dataSourceAlibabacloudStackCenTransitRouterVbrAttachments(),
+		"alibabacloudstack_cen_transit_router_connect_attachments":           dataSourceAlibabacloudStackCenTransitRouterConnectAttachments(),
 		"alibabacloudstack_cen_transit_router_route_table_associations":      dataSourceAlibabacloudStackCenTransitRouterRouterTableAssociations(),
 		"alibabacloudstack_cen_transit_router_route_table_propagations":      dataSourceAlibabacloudStackCenTransitRouterRouterTablePropagations(),
 		"alibabacloudstack_cen_route_maps":                                   dataSourceAlibabacloudStackCenTransitRouterRouteMaps(),

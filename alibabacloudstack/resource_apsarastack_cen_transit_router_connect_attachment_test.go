@@ -22,7 +22,6 @@ func TestAccAlibabacloudStackCenTransitRouterConnectAttachment0(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%srouter_connect_attachment%d", defaultRegionToTest, rand)
-	modify_name := fmt.Sprintf("tf-testacc%srouter_connect_attachment%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCenTransitRouterConnectAttachmentBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -39,9 +38,10 @@ func TestAccAlibabacloudStackCenTransitRouterConnectAttachment0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cen_id":            "cen-y5hsaev9m0fyefocz5",
-					"transit_router_id": "tr-xxxvhy5cbe7oniom3o1nm",
-					"transit_router_attachment_name": "${var.name}"
+					"cen_id":                         "${alibabacloudstack_cen_instance.default.id}",
+					"transit_router_id":              "${alibabacloudstack_cen_instance.default.transit_router_id}",
+					"transit_router_attachment_name": "${var.name}",
+					"depends_on":                     []string{`alibabacloudstack_cen_transit_router_vbr_attachment.default`},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -52,10 +52,9 @@ func TestAccAlibabacloudStackCenTransitRouterConnectAttachment0(t *testing.T) {
 			},
 
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cen_id"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -67,11 +66,31 @@ var AlibabacloudTestAccCenTransitRouterConnectAttachmentCheckmap = map[string]st
 }
 
 func AlibabacloudTestAccCenTransitRouterConnectAttachmentBasicdependence(name string) string {
-	vlan_id := getAccTestRandInt(1000, 2000)
 	return fmt.Sprintf(
 		`
 variable "name" {
-	default = "%s"
+  default = "%v"
 }
-`, name)
+
+resource "alibabacloudstack_cen_instance" "default" {
+  description = "tf-testaccceninstance48958"
+  cen_instance_name = "tf-testaccceninstance48958"
+}
+
+resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
+	physical_connection_id = "%s"
+	vlan_id =                    1
+	local_gateway_ip =           "10.0.0.1"
+	peer_gateway_ip =            "10.0.0.2"
+	peering_subnet_mask =        "255.255.255.252"
+	virtual_border_router_name = "${var.name}"
+}
+
+resource "alibabacloudstack_cen_transit_router_vbr_attachment" "default" {
+    vbr_id = "${alibabacloudstack_express_connect_virtual_border_router.default.id}"
+	cen_id = "${alibabacloudstack_cen_instance.default.id}"
+	transit_router_id = "${alibabacloudstack_cen_instance.default.transit_router_id}"
+}
+
+`, name, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"))
 }
