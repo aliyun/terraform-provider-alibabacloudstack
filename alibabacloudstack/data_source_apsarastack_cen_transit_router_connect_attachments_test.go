@@ -27,14 +27,12 @@ func TestAccAlibabacloudStackCenTransitRouterConnectAttachmentsDataSourceBasic(t
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStacRouterConnectAttachmentsDataSourceConfig(rand, map[string]string{
-			"name_regex":        `"${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}"`,
-			"description_regex": `"${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_description}"`,
-			"ids":               `["${alibabacloudstack_cen_transit_router_connect_attachment.default.id}" ]`,
+			"name_regex": `"${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}"`,
+			"ids":        `["${alibabacloudstack_cen_transit_router_connect_attachment.default.id}" ]`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudStacRouterConnectAttachmentsDataSourceConfig(rand, map[string]string{
-			"name_regex":        `"${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}"`,
-			"ids":               `["${alibabacloudstack_cen_transit_router_connect_attachment.default.id}"]`,
-			"description_regex": `"${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_description}_fake"`,
+			"name_regex": `"${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}_fake"`,
+			"ids":        `["${alibabacloudstack_cen_transit_router_connect_attachment.default.id}_fake"]`,
 		}),
 	}
 
@@ -75,7 +73,6 @@ func testAccCheckAlibabacloudStacRouterConnectAttachmentsDataSourceConfig(rand i
 	for k, v := range attrMap {
 		pairs = append(pairs, k+" = "+v)
 	}
-
 	config := fmt.Sprintf(`
 variable "name" {
   default = "tf-testacc_router_connect_attachment%v"
