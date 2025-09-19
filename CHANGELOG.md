@@ -1,3 +1,18 @@
+# 3.18.16
+
+## New
+
+1. Polardb cluster instance orchestration capability (`alibabacloudstack_polardb_cluster_instance`)
+2. Polardb cluster account orchestration capability (`alibabacloudstack_polardb_cluster_account`)
+3. Polardb cluster database orchestration capability (`alibabacloudstack_polardb_cluster_database`)
+4. Polardb cluster account permission configuration capability (`alibabacloudstack_polardb_cluster_account_database_binding`)
+5. Polardb cluster proxy configuration capability (`alibabacloudstack_polardb_cluster_proxy`)
+6. Polardb cluster backup policy configuration capability (`alibabacloudstack_polardb_cluster_backup_policy`)
+7. Polardb cluster instance type query capability (`alibabacloudstack_polardb_cluster_instance_types`)
+8. Polardb cluster proxy specification query capability (`alibabacloudstack_polardb_cluster_proxy_types`)
+
+---
+
 # 3.18.15
 
 
@@ -15,8 +30,7 @@
 8. Fixed data retrieval failures in `alibabacloudstack_cr_repos`
 9. Fixed unstable `cluster_id` values causing state mismatches when creating `alibabacloudstack_nas_file_system`
 10. Fixed `alibabacloudstack_ascm_user_group_role_binding` issues caused by ASAPI unavailability
-11. **(Incompatible)** Fixed `alibabacloudstack_ascm_user_role_binding` issues caused by ASAPI unavailability.  
-   **Note:** Modified `role_ids` type to `Set[INT]`
+11. **(Incompatible)** Fixed `alibabacloudstack_ascm_user_role_binding` issues caused by ASAPI unavailability.  Modified `role_ids` type to `Set[INT]`
 12. Fixed PolarDB for MySQL TDE encryption configuration failure to retrieve KMS keys
 
 ---

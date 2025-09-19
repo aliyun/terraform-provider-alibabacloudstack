@@ -1,3 +1,18 @@
+# 3.18.16
+
+## 新增
+
+1. Polardb 共享盘实例的编排能力（`alibabacloudstack_polardb_cluster_instance`）
+2. Polardb 共享盘帐号编排能力（`alibabacloudstack_polardb_cluster_account`）
+3. Polardb 共享盘数据库编排能力（`alibabacloudstack_polardb_cluster_database`）
+4. Polardb 共享盘帐号权限配置能力（`alibabacloudstack_polardb_cluster_account_database_binding`）
+5. Polardb 共享盘数据库代理配置能力（`alibabacloudstack_polardb_cluster_proxy`）
+6. Polardb 共享盘备份策略配置能力（`alibabacloudstack_polardb_cluster_backup_policy`）
+7. Polardb 共享盘实例规格查询能力（`alibabacloudstack_polardb_cluster_instance_types`）
+8. Polardb 共享盘代理规格查询能力（`alibabacloudstack_polardb_cluster_proxy_types`）
+
+---
+
 # 3.18.15
 
 ## 变更
