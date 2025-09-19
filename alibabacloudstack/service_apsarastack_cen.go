@@ -2,11 +2,13 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 const ChildInstanceTypeVpc = "VPC"
@@ -963,4 +965,60 @@ func (s *CenService) DoCbnDescribeCenRouteMapsRequest(id string) (*CbnDescribeCe
 	}
 
 	return CbnDescribeRouteMapsResponseObj, nil
+}
+
+func (s *CenService) DescribeCenTransitRouterConnectAttachment(id string) (map[string]interface{}, error) {
+	parts := strings.Split(id, ":")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("invalid id format, expected {CenId}:{TransitRouterId}:{TransitRouterAttachmentId}")
+	}
+	cenId := parts[0]
+	transitRouterId := parts[1]
+	transitRouterAttachmentId := parts[2]
+
+	reqQuery := map[string]interface{}{
+		"CenId":                     cenId,
+		"TransitRouterId":           transitRouterId,
+		"TransitRouterAttachmentId": transitRouterAttachmentId,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterAttachments", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := response["TransitRouterAttachments"]; !ok || response["TotalCount"].(int) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Cen TransitRouterConnectAttachment %s not found", id))
+	}
+
+	attachments := response["TransitRouterAttachments"].([]interface{})
+	for _, v := range attachments {
+		attachment := v.(map[string]interface{})
+		if attachment["TransitRouterAttachmentId"].(string) == transitRouterAttachmentId {
+			return attachment, nil
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Cen TransitRouterConnectAttachment %s not found", id))
+}
+
+func (s *CenService) CenTransitRouterConnectAttachmentStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeCenTransitRouterConnectAttachment(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		status := object["Status"].(string)
+		for _, failState := range failStates {
+			if status == failState {
+				return object, status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, status))
+			}
+		}
+		return object, status, nil
+	}
 }
