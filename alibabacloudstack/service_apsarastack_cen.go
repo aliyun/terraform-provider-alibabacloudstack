@@ -1022,3 +1022,35 @@ func (s *CenService) CenTransitRouterConnectAttachmentStateRefreshFunc(id string
 		return object, status, nil
 	}
 }
+
+func (s *CenService) DescribeCenVbrHealthCheck(id string) (map[string]interface{}, error) {
+	parts := strings.Split(id, ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid id format, expected CenId:VbrInstanceId, got %s", id)
+	}
+	cenId := parts[0]
+	vbrInstanceId := parts[1]
+
+	reqQuery := map[string]interface{}{
+		"CenId":               cenId,
+		"VbrInstanceId":       vbrInstanceId,
+		"VbrInstanceRegionId": s.client.RegionId,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "Cbn", "2017-09-12", "DescribeCenVbrHealthCheck", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := response["VbrHealthChecks"]; !ok || response["VbrHealthChecks"] == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("CenVbrHealthCheck not found for CenId: %s, VbrInstanceId: %s", cenId, vbrInstanceId))
+	}
+
+	vbrHealthChecks := response["VbrHealthChecks"].(map[string]interface{})
+	if vbrHealthCheckList, ok := vbrHealthChecks["VbrHealthCheck"].([]interface{}); ok && len(vbrHealthCheckList) > 0 {
+		// Return the first matched health check item
+		return vbrHealthCheckList[0].(map[string]interface{}), nil
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("CenVbrHealthCheck not found for CenId: %s, VbrInstanceId: %s", cenId, vbrInstanceId))
+}

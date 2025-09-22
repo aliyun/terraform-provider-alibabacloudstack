@@ -549,6 +549,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_multicast_domains":             dataSourceAlibabacloudStackCenTransitRouterMulticastDomains(),
 		"alibabacloudstack_cen_transit_router_multicast_domain_associations": dataSourceAlibabacloudStackCenTransitRouterMulticastDomainAssociations(),
 		"alibabacloudstack_cen_transit_router_multicast_domain_sources":      dataSourceAlibabacloudStackCenTransitRouterMulticastDomainSources(),
+		"alibabacloudstack_cen_vbr_health_checks":                            dataSourceAlibabacloudStackCenVbrHealthChecks(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -949,6 +950,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardb_cluster_proxy":                           resourceAlibabacloudStackPolardbClusterProxy(),
 		"alibabacloudstack_polardb_cluster_backup_policy":                   resourceAlibabacloudStackPolardbClusterBackupPolicy(),
 		"alibabacloudstack_cen_transit_router_connect_attachment":           resourceAlibabacloudStackCenTransitRouterConnectAttachment(),
+		"alibabacloudstack_cen_vbr_health_check":                            resourceAlibabacloudStackCenVbrHealthCheck(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -983,10 +985,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	ecsRoleName := getProviderConfig(d.Get("ecs_role_name").(string), "ram_role_name")
 
 	var eagleeye connectivity.EagleEye
-	if os.Getenv("TF_EAGLEEYE_TRACEID") != "" && os.Getenv("TF_EAGLEEYE_TRACEID") != "" {
+	if os.Getenv("TF_EAGLEEYE_TRACEID") != "" && os.Getenv("TF_EAGLEEYE_RPCID") != "" {
 		eagleeye = connectivity.EagleEye{
 			TraceId: os.Getenv("TF_EAGLEEYE_TRACEID"),
-			RpcId:   os.Getenv("TF_EAGLEEYE_TRACEID"),
+			RpcId:   os.Getenv("TF_EAGLEEYE_RPCID"),
 		}
 	} else {
 		eagleeye = connectivity.EagleEye{
