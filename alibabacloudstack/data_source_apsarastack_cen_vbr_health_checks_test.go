@@ -60,8 +60,8 @@ resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
 
 resource "alibabacloudstack_cen_transit_router_vbr_attachment" "default" {
     vbr_id = "${alibabacloudstack_express_connect_virtual_border_router.default.id}"
-        cen_id = "${alibabacloudstack_cen_instance.default.id}"
-        transit_router_id = "${alibabacloudstack_cen_instance.default.transit_router_id}"
+	cen_id = "${alibabacloudstack_cen_instance.default.id}"
+	transit_router_id = "${alibabacloudstack_cen_instance.default.transit_router_id}"
 }
 
 resource "alibabacloudstack_cen_vbr_health_check" "default" {
