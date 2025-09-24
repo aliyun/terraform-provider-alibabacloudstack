@@ -104,22 +104,25 @@ type CbnDescribeTransitRouterMulticastDomainsResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
+type CbnTransitRouterMulticastGroupData struct {
+	TransitRouterAttachmentId      string `json:"TransitRouterAttachmentId"`
+	Status                         string `json:"Status"`
+	GroupMember                    bool   `json:"GroupMember"`
+	ResourceId                     string `json:"ResourceId"`
+	VSwitchId                      string `json:"VSwitchId"`
+	SourceType                     string `json:"SourceType"`
+	MemberType                     string `json:"MemberType"`
+	TransitRouterMulticastDomainId string `json:"TransitRouterMulticastDomainId"`
+	ResourceType                   string `json:"ResourceType"`
+	NetworkInterfaceId             string `json:"NetworkInterfaceId"`
+	GroupSource                    bool   `json:"GroupSource"`
+	ResourceOwnerId                int64  `json:"ResourceOwnerId"`
+	GroupIpAddress                 string `json:"GroupIpAddress"`
+}
+
 type CbnDescribeTransitRouterMulticastDomainSourceResponse struct {
-	TransitRouterMulticastGroups []struct {
-		TransitRouterAttachmentId      string `json:"TransitRouterAttachmentId"`
-		Status                         string `json:"Status"`
-		GroupMember                    bool   `json:"GroupMember"`
-		ResourceId                     string `json:"ResourceId"`
-		VSwitchId                      string `json:"VSwitchId"`
-		SourceType                     string `json:"SourceType"`
-		TransitRouterMulticastDomainId string `json:"TransitRouterMulticastDomainId"`
-		ResourceType                   string `json:"ResourceType"`
-		NetworkInterfaceId             string `json:"NetworkInterfaceId"`
-		GroupSource                    bool   `json:"GroupSource"`
-		ResourceOwnerId                int64  `json:"ResourceOwnerId"`
-		GroupIpAddress                 string `json:"GroupIpAddress"`
-	} `json:"TransitRouterMulticastGroups"`
-	RequestId string `json:"RequestId"`
+	TransitRouterMulticastGroups []CbnTransitRouterMulticastGroupData `json:"TransitRouterMulticastGroups"`
+	RequestId                    string                               `json:"RequestId"`
 }
 
 type CbnDescribeTransitRouterMulticastDomainAssociationsResponse struct {
@@ -468,7 +471,7 @@ func (s *CenService) WaitForTransitRouterMulticastDomainSource(id string, status
 
 			}
 		}
-		if delete == true && status == Deleted {
+		if delete && status == Deleted {
 			return nil
 		}
 		if time.Now().After(deadline) {
@@ -589,6 +592,59 @@ func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainSourceRequest(id 
 	}
 
 	return CbnDescribeRouterMulticastDomainSourceResponseObj, nil
+}
+
+func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainMemberRequest(id string) (*CbnTransitRouterMulticastGroupData, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterMulticastGroups", "")
+	CbnDescribeRouterMulticastDomainMemberResponseObj := &CbnDescribeTransitRouterMulticastDomainSourceResponse{}
+	// Call request_params_handler
+	parts := strings.Split(id, ":")
+	request.QueryParams["IsGroupMember"] = "true"
+	request.QueryParams["GroupIpAddress"] = parts[0]
+	request.QueryParams["VSwitchIds.1"] = parts[1]
+	request.QueryParams["TransitRouterMulticastDomainId"] = parts[2]
+	request.QueryParams["NetworkInterfaceIds.1"] = parts[3]
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterMulticastGroups", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnDescribeRouterMulticastDomainMemberResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterMulticastDomains", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if len(CbnDescribeRouterMulticastDomainMemberResponseObj.TransitRouterMulticastGroups) < 1 {
+		return nil, errmsgs.GetNotFoundErrorFromString("Not Found CentTransitRouterMuliticastDomainMember " + id)
+	}
+	return &CbnDescribeRouterMulticastDomainMemberResponseObj.TransitRouterMulticastGroups[0], nil
+}
+
+func (s *CenService) CbnTransitRouterMuliticastDomainMemberStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DoCbnDescribeTransitRouterMuliticastDomainMemberRequest(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object.Status == failState {
+				return object, object.Status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Status))
+			}
+		}
+		return object, object.Status, nil
+	}
 }
 
 func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainAssociationsRequest(id string) (*CbnDescribeTransitRouterMulticastDomainAssociationsResponse, error) {

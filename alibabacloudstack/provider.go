@@ -549,6 +549,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_multicast_domains":             dataSourceAlibabacloudStackCenTransitRouterMulticastDomains(),
 		"alibabacloudstack_cen_transit_router_multicast_domain_associations": dataSourceAlibabacloudStackCenTransitRouterMulticastDomainAssociations(),
 		"alibabacloudstack_cen_transit_router_multicast_domain_sources":      dataSourceAlibabacloudStackCenTransitRouterMulticastDomainSources(),
+		"alibabacloudstack_cen_transit_router_multicast_domain_members":      dataSourceAlibabacloudStackCenTransitRouterMulticastDomainMembers(),
 		"alibabacloudstack_cen_vbr_health_checks":                            dataSourceAlibabacloudStackCenVbrHealthChecks(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
@@ -943,6 +944,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_multicast_domain":             resourceAlibabacloudStackCenTransitMulticastDomain(),
 		"alibabacloudstack_cen_transit_router_multicast_domain_association": resourceAlibabacloudStackCenTransitMulticastDomainAssociation(),
 		"alibabacloudstack_cen_transit_router_multicast_domain_source":      resourceAlibabacloudStackCenTransitMulticastDomainSource(),
+		"alibabacloudstack_cen_transit_router_multicast_domain_member":      resourceAlibabacloudStackCenTransitMulticastDomainMember(),
 		"alibabacloudstack_polardb_cluster_instance":                        resourceAlibabacloudStackPolardbClusterInstance(),
 		"alibabacloudstack_polardb_cluster_account":                         resourceAlibabacloudStackPolardbClusterAccount(),
 		"alibabacloudstack_polardb_cluster_database":                        resourceAlibabacloudStackPolardbClusterDatabase(),
