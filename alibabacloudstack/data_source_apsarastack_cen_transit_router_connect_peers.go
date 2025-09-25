@@ -88,10 +88,6 @@ func dataSourceAlibabacloudStackCenTransitRouterConnectPeers() *schema.Resource 
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"transit_router_id": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
 					},
 				},
 			},
@@ -106,9 +102,6 @@ func dataSourceAlibabacloudStackCenTransitRouterConnectPeersRead(d *schema.Resou
 	reqQuery := make(map[string]interface{})
 	reqQuery["CenId"] = d.Get("cen_id")
 	reqQuery["TransitRouterAttachmentId"] = d.Get("connect_attachment_id")
-	if v, ok := d.GetOk("peer_name"); ok {
-		reqQuery["TransitRouterConnectPeerName"] = v
-	}
 
 	// Call the API to list transit router connect peers
 	resp, err := client.DoTeaRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterConnectPeers", "", nil, reqQuery, nil)
@@ -118,7 +111,7 @@ func dataSourceAlibabacloudStackCenTransitRouterConnectPeersRead(d *schema.Resou
 
 	// Parse response
 	peersRaw, ok := resp["TransitRouterConnectPeers"]
-	if !ok || peersRaw == nil {
+	if !ok || peersRaw == nil || len(peersRaw.([]interface{})) == 0 {
 		// Return empty list if no peers found
 		d.SetId(dataResourceIdHash([]string{}))
 		if err := d.Set("peers", []interface{}{}); err != nil {
@@ -126,17 +119,6 @@ func dataSourceAlibabacloudStackCenTransitRouterConnectPeersRead(d *schema.Resou
 		}
 		return nil
 	}
-
-	peersList := peersRaw.([]interface{})
-	if len(peersList) == 0 {
-		// Return empty list if no peers found
-		d.SetId(dataResourceIdHash([]string{}))
-		if err := d.Set("peers", []interface{}{}); err != nil {
-			return fmt.Errorf("error setting 'peers': %v", err)
-		}
-		return nil
-	}
-
 	// Process filtering
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok {
@@ -150,23 +132,23 @@ func dataSourceAlibabacloudStackCenTransitRouterConnectPeersRead(d *schema.Resou
 	// Prepare result
 	var ids []string
 	var result []map[string]interface{}
-	for _, peerRaw := range peersList {
+	for _, peerRaw := range peersRaw.([]interface{}) {
 		peer := peerRaw.(map[string]interface{})
 		peerId := fmt.Sprintf("%s:%s:%s", peer["CenId"], peer["TransitRouterAttachmentId"], peer["TransitRouterConnectPeerId"])
+		if v, ok := d.GetOk("peer_name"); ok && v.(string) != peer["TransitRouterConnectPeerName"].(string) {
+			continue
+		}
 		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
 			r := regexp.MustCompile(description_regex.(string))
 			if !r.MatchString(peer["TransitRouterConnectPeerName"].(string)) {
 				continue
 			}
 		}
-
 		if len(idsMap) > 0 {
 			if _, exist := idsMap[peerId]; !exist {
 				continue
 			}
 		}
-		ids = append(ids, peerId)
-
 		mapping := map[string]interface{}{
 			"id":                    peerId,
 			"cen_id":                peer["CenId"],
@@ -178,9 +160,8 @@ func dataSourceAlibabacloudStackCenTransitRouterConnectPeersRead(d *schema.Resou
 			"region_id":             peer["TransitRouterRegionId"],
 			"status":                peer["Status"],
 			"creation_time":         peer["CreationTime"],
-			"transit_router_id":     int(peer["TransitRouterId"].(float64)),
 		}
-
+		ids = append(ids, peerId)
 		result = append(result, mapping)
 	}
 

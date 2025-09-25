@@ -89,7 +89,7 @@ resource "alibabacloudstack_cen_instance" "default" {
   cen_instance_name = "tf-testaccceninstance48958"
   transit_router_cidrs {
     cidr = "172.16.0.0/16"
-  }
+}
 }
 
 resource "alibabacloudstack_express_connect_virtual_border_router" "default" {

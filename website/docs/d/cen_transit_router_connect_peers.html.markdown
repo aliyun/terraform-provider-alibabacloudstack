@@ -85,10 +85,9 @@ The following attributes are exported:
   * `cen_id` - The ID of the CEN instance.
   * `connect_attachment_id` - The ID of the Transit Router Connect attachment.
   * `peer_id` - The ID of the Transit Router Connect Peer.
-  * [name](file://d:\terraform\terraform-provider-apsarastack\scripts\inspectSet\inspectSet.go#L15-L15) - The name of the Transit Router Connect Peer.
+  * `name` - The name of the Transit Router Connect Peer.
   * `local_ip` - The local IP address of the Transit Router Connect Peer.
   * `peer_ip` - The peer IP address of the Transit Router Connect Peer.
   * `region_id` - The region ID of the Transit Router Connect Peer.
   * `status` - The status of the Transit Router Connect Peer.
   * `creation_time` - The creation time of the Transit Router Connect Peer.
-  * `transit_router_id` - The ID of the transit router.

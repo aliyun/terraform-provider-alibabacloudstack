@@ -91,4 +91,3 @@ output "first_connect_peer_id" {
   * `region_id` - 转发路由器连接对等点的区域ID。
   * `status` - 转发路由器连接对等点的状态。
   * `creation_time` - 转发路由器连接对等点的创建时间。
-  * `transit_router_id` - 转发路由器的ID。
