@@ -2,7 +2,7 @@
 
 ## 新增
 
-1. slb_listener 的1tls_cipher_policy1类型支持动态获取。 
+1. slb_listener 的`tls_cipher_policy`类型支持动态获取。 
 
 ## 修复
 

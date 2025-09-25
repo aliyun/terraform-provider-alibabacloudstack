@@ -50,3 +50,4 @@ website/vendor
 alibabacloudstack/cover.out
 alibabacloudstack/debug.test*
 alibabacloudstack/dryrun_*/**/*.tf
+/.dbeaver/

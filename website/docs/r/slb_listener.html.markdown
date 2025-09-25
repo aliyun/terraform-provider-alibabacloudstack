@@ -100,7 +100,7 @@ The following arguments are supported:
 * `listener_forward` - (Optional, ForceNew) Whether to enable http redirect to https. Valid values are `on` and `off`. Default to `off`.
 * `enable_http2` - (Optional) Specifies whether to enable HTTP/2. Default value: on. Valid values: "on", "off".
 * `forward_port` - (Optional, ForceNew) The port that HTTP redirects to HTTPS.
-* `tls_cipher_policy` - (Optional) The Transport Layer Security (TLS) security policy. Default value: tls_cipher_policy_1_0. Valid values: tls_cipher_policy_1_0, tls_cipher_policy_1_1, tls_cipher_policy_1_2, tls_cipher_policy_1_2_strict.
+* `tls_cipher_policy` - (Optional) The Transport Layer Security (TLS) security policy. Default value: tls_cipher_policy_1_0.
 * `delete_protection_validation` - (Optional) Checking DeleteProtection of SLB instance before deleting. If true, this resource will not be deleted when its SLB instance enabled DeleteProtection. Default to false.
 * `logs_download_attributes` - (Optional) A map for defining sls logs.
   * `log_project`: (Required) sls-log Server project name.
