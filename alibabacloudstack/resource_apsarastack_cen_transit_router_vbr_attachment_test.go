@@ -40,9 +40,11 @@ func TestAccAlibabacloudStackCenTransitRouterVbrAttachment0(t *testing.T) {
 			{
 				// d.SetId(fmt.Sprintf("%s:%s:%s:%s", "cen-xga10z1cg13l3vizpj", "tr-xxxvhy5cbe7oniom3o1nm", "tr-attach-qfikjqwq6fb0ld5ygi", "vbr-i2qmch4xlydzx670c739p"))
 				Config: testAccConfig(map[string]interface{}{
-					"vbr_id":            "${alibabacloudstack_express_connect_virtual_border_router.default.id}",
-					"cen_id":            "${alibabacloudstack_cen_instance.default.id}",
-					"transit_router_id": "${alibabacloudstack_cen_instance.default.transit_router_id}",
+					"vbr_id":                          "${alibabacloudstack_express_connect_virtual_border_router.default.id}",
+					"cen_id":                          "${alibabacloudstack_cen_instance.default.id}",
+					"transit_router_id":               "${alibabacloudstack_cen_instance.default.transit_router_id}",
+					"route_table_propagation_enabled": true,
+					"route_table_association_enabled": true,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -71,7 +73,7 @@ func TestAccAlibabacloudStackCenTransitRouterVbrAttachment0(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cen_id"},
+				ImportStateVerifyIgnore: []string{"cen_id", "route_table_association_enabled", "route_table_propagation_enabled"},
 			},
 		},
 	})
