@@ -76,10 +76,12 @@ func resourceAlibabacloudStackCenTransitRouterVbrAttachment() *schema.Resource {
 			"route_table_propagation_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 			"route_table_association_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 			"vbr_id": {
 				Type:     schema.TypeString,
