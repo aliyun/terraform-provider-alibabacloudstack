@@ -10,6 +10,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackCenTransitMulticastDomainMember() *schema.Resource {
@@ -19,11 +20,6 @@ func resourceAlibabacloudStackCenTransitMulticastDomainMember() *schema.Resource
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Multicast IP address.",
-			},
-			"network_interface_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -35,9 +31,32 @@ func resourceAlibabacloudStackCenTransitMulticastDomainMember() *schema.Resource
 				ForceNew:    true,
 				Description: "Forwarding router multicast domain ID.",
 			},
+			"resource_type": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"VPC", "Connect"}, false),
+				ForceNew:     true,
+			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"network_interface_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"connect_peer_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"connect_attachment_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 		},
@@ -51,27 +70,43 @@ func resourceAlibabacloudStackCenTransitMulticastDomainMember() *schema.Resource
 
 func resourceAlibabacloudStackCenTransitRouterMulticastDomainMemberCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	vswitch_service := VpcService{client}
-	vswitch_id := d.Get("vswitch_id").(string)
-	object, err := vswitch_service.DescribeVSwitch(vswitch_id)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, "get vpc_id error")
-
-	}
-	vpc_id := object.VpcId
-	// api: Cbn - 2017-09-12 - RegisterTransitRouterMulticastGroupSources
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "RegisterTransitRouterMulticastGroupMembers", "")
 	request.QueryParams["GroupIpAddress"] = d.Get("group_ip_address").(string)
-	request.QueryParams["VpcId"] = vpc_id
 	request.QueryParams["TransitRouterMulticastDomainId"] = d.Get("transit_router_multicast_domain_id").(string)
-	request.QueryParams["NetworkInterfaceIds.1"] = d.Get("network_interface_id").(string)
+	resourceType := d.Get("resource_type").(string)
+	key := ""
+	if resourceType == "VPC" {
+		vswitch_id := d.Get("vswitch_id").(string)
+		network_interface_id := d.Get("network_interface_id").(string)
+		key = network_interface_id
+		if vswitch_id == "" || network_interface_id == "" {
+			return errmsgs.Error("[ERROR] argument error: resource_type is VPC, vswitch_id or network_interface_id must be set")
+		}
+		vswitch_service := VpcService{client}
+		object, err := vswitch_service.DescribeVSwitch(vswitch_id)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, "get vpc_id error")
+		}
+		request.QueryParams["VpcId"] = object.VpcId
+		request.QueryParams["NetworkInterfaceIds.1"] = network_interface_id
+	} else {
+		connect_peer_id := d.Get("connect_peer_id").(string)
+		connect_attachment_id := d.Get("connect_attachment_id").(string)
+		key = connect_peer_id
+		if connect_peer_id == "" || connect_attachment_id == "" {
+			return errmsgs.Error("[ERROR] argument error: resource_type is `Connect`, `connect_peer_id` or `connect_attachment_id` must be set")
+		}
+		request.QueryParams["TransitRouterAttachmentId"] = connect_attachment_id
+		request.QueryParams["ConnectPeerIds.1"] = connect_peer_id
+	}
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_multicast_domain_member", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 
 	}
-	d.SetId(fmt.Sprintf("%s:%s:%s:%s", d.Get("group_ip_address").(string), vswitch_id, d.Get("transit_router_multicast_domain_id").(string), d.Get("network_interface_id").(string)))
+	d.SetId(fmt.Sprintf("%s:%s:%s:%s", d.Get("group_ip_address").(string), d.Get("transit_router_multicast_domain_id").(string), resourceType, key))
 	cenService := CenService{client}
 	stateConf := BuildStateConf([]string{"Registering"}, []string{"Registered"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, cenService.CbnTransitRouterMuliticastDomainMemberStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
@@ -87,16 +122,18 @@ func resourceAlibabacloudStackCenTransitRouterMulticastDomainMemberUpdate(d *sch
 func resourceAlibabacloudStackCenTransitRouterMulticastDomainMemberRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cencen_instanceservice := CenService{client}
-	member, err := cencen_instanceservice.DoCbnDescribeTransitRouterMuliticastDomainMemberRequest(d.Id())
+	data, err := cencen_instanceservice.DoCbnDescribeTransitRouterMuliticastDomainMemberRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_transit_router_multicast_domain_member", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	d.Set("status", member.Status)
-	d.Set("group_ip_address", member.GroupIpAddress)
-	d.Set("vswitch_id", member.VSwitchId)
-	d.Set("network_interface_id", member.NetworkInterfaceId)
-	d.Set("transit_router_multicast_domain_id", member.TransitRouterMulticastDomainId)
-
+	d.Set("status", data.Status)
+	d.Set("group_ip_address", data.GroupIpAddress)
+	d.Set("vswitch_id", data.VSwitchId)
+	d.Set("network_interface_id", data.NetworkInterfaceId)
+	d.Set("transit_router_multicast_domain_id", data.TransitRouterMulticastDomainId)
+	d.Set("resource_type", data.ResourceType)
+	d.Set("connect_peer_id", data.ConnectPeerId)
+	d.Set("connect_attachment_id", data.TransitRouterAttachmentId)
 	return nil
 }
 
@@ -106,11 +143,16 @@ func resourceAlibabacloudStackCenTransitRouterMulticastDomainMemberDelete(d *sch
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "DeregisterTransitRouterMulticastGroupMembers", "")
 	parts := strings.Split(d.Id(), ":")
 	group_ip_address := parts[0]
-	domain_id := parts[2]
-	network_interface_id := parts[3]
+	transit_router_multicast_domain_id := parts[1]
+	resource_type := parts[2]
+	key := parts[3]
 	request.QueryParams["GroupIpAddress"] = group_ip_address
-	request.QueryParams["TransitRouterMulticastDomainId"] = domain_id
-	request.QueryParams["NetworkInterfaceIds.1"] = network_interface_id
+	request.QueryParams["TransitRouterMulticastDomainId"] = transit_router_multicast_domain_id
+	if resource_type == "VPC" {
+		request.QueryParams["NetworkInterfaceIds.1"] = key
+	} else {
+		request.QueryParams["ConnectPeerIds.1"] = key
+	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)

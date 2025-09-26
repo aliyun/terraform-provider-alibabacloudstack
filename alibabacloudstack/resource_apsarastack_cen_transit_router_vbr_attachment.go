@@ -294,7 +294,7 @@ func resourceAlibabacloudStackCenTransitRouterVbrAttachmentDelete(d *schema.Reso
 		if len(response.TransitRouterAttachments) == 0 {
 			break
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
 	return nil
 }

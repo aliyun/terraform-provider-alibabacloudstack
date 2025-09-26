@@ -118,6 +118,9 @@ func dataSourceAlibabacloudStackCenTransitRouterMulticastDomainMembersRead(d *sc
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnDescribeRouterMulticastDomainMemberResponseObj)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterMulticastDomains", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok {
 		for _, vv := range v.([]interface{}) {
@@ -130,9 +133,13 @@ func dataSourceAlibabacloudStackCenTransitRouterMulticastDomainMembersRead(d *sc
 	var ids []string
 	datas := make([]interface{}, 0)
 	for _, data := range CbnDescribeRouterMulticastDomainMemberResponseObj.TransitRouterMulticastGroups {
+		resourceData := data.NetworkInterfaceId
+		if data.ResourceType != "VPC" {
+			resourceData = data.ConnectPeerId
+		}
+		resourceId := fmt.Sprintf("%s:%s:%s:%s", data.GroupIpAddress, data.TransitRouterMulticastDomainId, data.ResourceType, resourceData)
 		if len(idsMap) > 0 {
-			key := fmt.Sprintf("%s:%s:%s:%s", data.GroupIpAddress, data.VSwitchId, data.TransitRouterMulticastDomainId, data.NetworkInterfaceId)
-			if _, ok := idsMap[key]; !ok {
+			if _, ok := idsMap[resourceId]; !ok {
 				continue
 			}
 		}
@@ -148,7 +155,7 @@ func dataSourceAlibabacloudStackCenTransitRouterMulticastDomainMembersRead(d *sc
 		}
 
 		i := map[string]interface{}{
-			"id":                                 fmt.Sprintf("%s:%s:%s:%s", data.GroupIpAddress, data.VSwitchId, data.TransitRouterMulticastDomainId, data.NetworkInterfaceId),
+			"id":                                 resourceId,
 			"group_ip_address":                   data.GroupIpAddress,
 			"network_interface_id":               data.NetworkInterfaceId,
 			"transit_router_multicast_domain_id": data.TransitRouterMulticastDomainId,

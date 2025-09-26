@@ -138,6 +138,7 @@ func testAccCheckAlibabacloudStacMulticastDomainMembersDataSourceConfig(rand int
 
 	resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "default" {
 		group_ip_address = "239.192.0.2"
+		resource_type = "VPC"
 		transit_router_multicast_domain_id = "${alibabacloudstack_cen_transit_router_multicast_domain.default.transit_router_multicast_domain_id}"
 		network_interface_id = "${alibabacloudstack_network_interface.interface.id}"
 		vswitch_id = "${alibabacloudstack_cen_transit_router_multicast_domain_association.default.vswitch_id}"

@@ -40,6 +40,7 @@ func resourceAlibabacloudStackCenTransitMulticastDomainSource() *schema.Resource
 			"vswitch_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"network_interface_id": {
@@ -56,6 +57,7 @@ func resourceAlibabacloudStackCenTransitMulticastDomainSource() *schema.Resource
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 		},
 	}
@@ -78,7 +80,7 @@ func resourceAlibabacloudStackCenTransitRouterMulticastDomainSourceCreate(d *sch
 		vswitch_id := d.Get("vswitch_id").(string)
 		network_interface_id := d.Get("network_interface_id").(string)
 		key = network_interface_id
-		if vswitch_id != "" || network_interface_id != "" {
+		if vswitch_id == "" || network_interface_id == "" {
 			return errmsgs.Error("[ERROR] argument error: resource_type is VPC, vswitch_id or network_interface_id must be set")
 		}
 		vswitch_service := VpcService{client}
@@ -91,8 +93,8 @@ func resourceAlibabacloudStackCenTransitRouterMulticastDomainSourceCreate(d *sch
 	} else {
 		connect_peer_id := d.Get("connect_peer_id").(string)
 		connect_attachment_id := d.Get("connect_attachment_id").(string)
-		key = connect_attachment_id
-		if connect_peer_id != "" || connect_attachment_id != "" {
+		key = connect_peer_id
+		if connect_peer_id == "" || connect_attachment_id == "" {
 			return errmsgs.Error("[ERROR] argument error: resource_type is `Connect`, `connect_peer_id` or `connect_attachment_id` must be set")
 		}
 		request.QueryParams["TransitRouterAttachmentId"] = connect_attachment_id

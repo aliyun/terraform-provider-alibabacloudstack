@@ -576,11 +576,18 @@ func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainMemberRequest(id 
 	CbnDescribeRouterMulticastDomainMemberResponseObj := &CbnDescribeTransitRouterMulticastDomainSourceResponse{}
 	// Call request_params_handler
 	parts := strings.Split(id, ":")
+	group_ip_address := parts[0]
+	transit_router_multicast_domain_id := parts[1]
+	resource_type := parts[2]
+	key := parts[3]
 	request.QueryParams["IsGroupMember"] = "true"
-	request.QueryParams["GroupIpAddress"] = parts[0]
-	request.QueryParams["VSwitchIds.1"] = parts[1]
-	request.QueryParams["TransitRouterMulticastDomainId"] = parts[2]
-	request.QueryParams["NetworkInterfaceIds.1"] = parts[3]
+	request.QueryParams["GroupIpAddress"] = group_ip_address
+	request.QueryParams["TransitRouterMulticastDomainId"] = transit_router_multicast_domain_id
+	if resource_type == "VPC" {
+		request.QueryParams["NetworkInterfaceIds.1"] = key
+	} else {
+		request.QueryParams["ConnectPeerIds.1"] = key
+	}
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
