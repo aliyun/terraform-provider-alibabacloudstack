@@ -140,7 +140,7 @@ XX(Provider仓库路径 如：./terraform.d/providers/)
 
 ### 初始化项目
 
-1. 新建工作目录，并创建`provider.tf`文件
+1. 新建工作目录，并创建`terraform.tf`文件
 
 ```hcl
 terraform {

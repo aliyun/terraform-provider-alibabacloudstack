@@ -138,7 +138,7 @@ XX(The provider repository path, such as./terraform.d/providers/)
 
 ### Initialize a project
 
-1. Create a working directory and a `provider.tf` file
+1. Create a working directory and a `terraform.tf` file
 
 ```hcl
 terraform {
