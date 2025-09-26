@@ -1,68 +1,70 @@
 ---
 subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_multicast_domain_members"
-sidebar_current: "docs-alibabacloudstack-datasource-cen-transit-router-multicast-domain-members"
+page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_multicast_domain_member"
+sidebar_current: "docs-alibabacloudstack-resource-cen-transit-router-multicast-domain-member"
 description: |-
-  Provides a list of CEN transit router multicast domain members to be used by an Alibaba Cloud Stack account.
+  Provides a AlibabacloudStack CEN transit router multicast domain member resource.
 ---
 
-# alibabacloudstack\_cen\_transit\_router\_multicast\_domain\_members
+# alibabacloudstack_cen_transit_router_multicast_domain_member
 
-This data source provides a list of CEN transit router multicast domain members in an Alibaba Cloud Stack account according to the specified filters.
+Provides a CEN transit router multicast domain member resource.
+
+For information about CEN transit router multicast domain member and how to use it, see [What is Transit Router Multicast Domain Member](https://www.alibabacloud.com/help/doc-detail/).
 
 ## Example Usage
 
+Basic Usage
+
 ```hcl
 variable "name" {
-  default = "tf-testAccMulticastDomainMember"
+  default = "tf-testAccRouteTable"
 }
 
-data "alibabacloudstack_zones" "default" {
+data "alibabacloudstack_zones" default {
   available_resource_creation = "VSwitch"
   enable_details = true
 }
 
-resource "alibabacloudstack_vpc" "default" {
-  vpc_name = "${var.name}_vpc"
-  cidr_block = "172.16.0.0/16"
+
+resource "alibabacloudstack_vpc" "example" {
+  vpc_name       = var.name
+  cidr_block     = "10.0.0.0/8"
 }
 
-resource "alibabacloudstack_vswitch" "default" {
-  name = "${var.name}_vsw"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "172.16.1.0/24"
-  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+resource "alibabacloudstack_vswitch" "example" {
+  vpc_id       = alibabacloudstack_vpc.example.id
+  cidr_block   = "10.1.0.0/16"
+  zone_id      = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  vswitch_name = var.name
 }
 
-resource "alibabacloudstack_cen_instance" "default" {
-  cen_instance_name = "${var.name}"
-  description = "${var.name}"
+resource "alibabacloudstack_cen_instance" "example" {
+  cen_instance_name = var.name
+  description       = var.name
 }
 
-resource "alibabacloudstack_cen_transit_router" "default" {
-  cen_id = "${alibabacloudstack_cen_instance.default.id}"
+resource "alibabacloudstack_cen_transit_router" "example" {
+  cen_id = alibabacloudstack_cen_instance.example.id
 }
 
-resource "alibabacloudstack_cen_transit_router_multicast_domain" "default" {
-  transit_router_multicast_domain_name = "${var.name}"
-  transit_router_id = "${alibabacloudstack_cen_transit_router.default.transit_router_id}"
-  cen_id = "${alibabacloudstack_cen_instance.default.id}"
+resource "alibabacloudstack_cen_transit_router_multicast_domain" "example" {
+  cen_id                                = alibabacloudstack_cen_instance.example.id
+  transit_router_id                     = alibabacloudstack_cen_transit_router.example.transit_router_id
+  transit_router_multicast_domain_name  = var.name
 }
 
-resource "alibabacloudstack_network_interface" "default" {
-  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+resource "alibabacloudstack_network_interface" "example" {
+  vswitch_id = alibabacloudstack_vswitch.example.id
 }
 
-resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "default" {
-  group_ip_address = "224.0.0.1"
-  network_interface_id = "${alibabacloudstack_network_interface.default.id}"
-  transit_router_multicast_domain_id = "${alibabacloudstack_cen_transit_router_multicast_domain.default.id}"
-  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-}
-
-data "alibabacloudstack_cen_transit_router_multicast_domain_members" "default" {
-  transit_router_multicast_domain_id = "${alibabacloudstack_cen_transit_router_multicast_domain.default.id}"
+resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "example" {
+  group_ip_address                      = "224.0.0.1"
+  network_interface_id                  = alibabacloudstack_network_interface.example.id
+  transit_router_multicast_domain_id    = alibabacloudstack_cen_transit_router_multicast_domain.example.id
+  vswitch_id                            = alibabacloudstack_vswitch.example.id
+  resource_type                         = "VPC"
 }
 ```
 
@@ -70,25 +72,29 @@ data "alibabacloudstack_cen_transit_router_multicast_domain_members" "default" {
 
 The following arguments are supported:
 
-* `ids` - (Optional) A list of multicast domain member IDs.
-* `transit_router_multicast_domain_id` - (Required) The ID of the multicast domain to which the multicast member belongs.
-* `transit_router_attachment_id` - (Optional) The ID of the transit router attachment.
-* `vswitch_id` - (Optional) The ID of the VSwitch.
+* `group_ip_address` - (Required, ForceNew) The multicast IP address. 
+* `transit_router_multicast_domain_id` - (Required, ForceNew) Forwarding router multicast domain ID.
+* `resource_type` - (Required, ForceNew) Resource type. Valid values: `VPC`, `Connect`.
+* `vswitch_id` - (Optional, ForceNew) The ID of the switch to which the multicast member belongs. Required when `resource_type` is `VPC`.
+* `network_interface_id` - (Optional, ForceNew) The ID of the network interface. Required when `resource_type` is `VPC`.
+* `connect_peer_id` - (Optional, ForceNew) Connection peer ID. Required when `resource_type` is `Connect`.
+* `connect_attachment_id` - (Optional, ForceNew, Computed) Connection attachment ID. Required when `resource_type` is `Connect`.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `transit_router_multicast_groups` - A list of multicast domain members. Each element contains the following attributes:
-  * `id` - The ID of the multicast member.
-  * `group_ip_address` - The multicast IP address.
-  * `network_interface_id` - The ID of the network interface.
-  * `status` - The status of the multicast member.
-  * `transit_router_multicast_domain_id` - The ID of the multicast domain to which the multicast member belongs.
-  * `transit_router_attachment_id` - The ID of the transit router attachment.
-  * `vswitch_id` - The ID of the VSwitch.
-  * `resource_type` - The type of the resource.
-  * `member_type` - The type of the member.
-  * `resource_id` - The ID of the resource.
-  * `group_source` - Whether the group is a source group.
-  * `group_member` - Whether the group is a member group.
+* `id` - The ID of the resource, formatted as `<group_ip_address>:<transit_router_multicast_domain_id>:<resource_type>:<key>`.
+* `status` - The status of the multicast member.
+* `vswitch_id` - The ID of the switch to which the multicast member belongs.
+* `network_interface_id` - The ID of the network interface.
+* `connect_peer_id` - Connection peer ID.
+* `connect_attachment_id` - Connection attachment ID.
+
+## Import
+
+CEN transit router multicast domain member can be imported using the id, e.g.
+
+```bash
+$ terraform import alibabacloudstack_cen_transit_router_multicast_domain_member.default 224.0.0.1:tr-mcast-domain-1234567890abcdef0:VPC:eni-1234567890abcdef0
+```
