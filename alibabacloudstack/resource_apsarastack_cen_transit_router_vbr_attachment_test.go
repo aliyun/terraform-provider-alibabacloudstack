@@ -20,7 +20,7 @@ func TestAccAlibabacloudStackCenTransitRouterVbrAttachment0(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	rand := getAccTestRandInt(10000, 99999)
+	rand := getAccTestRandInt(1000, 2000)
 	name := fmt.Sprintf("tf-testacc%srouter_vbr_attachment%d", defaultRegionToTest, rand)
 	modify_name := fmt.Sprintf("tf-testacc%srouter_vbr_attachment%d", defaultRegionToTest, rand)
 

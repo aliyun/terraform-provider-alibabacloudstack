@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccAlibabacloudStackCenTransitRouterConnectPeersDataSource(t *testing.T) {
-	rand := getAccTestRandInt(10000, 20000)
+	rand := getAccTestRandInt(1000, 2000)
 	resourceId := "data.alibabacloudstack_cen_transit_router_connect_peers.default"
 
 	attr := dataSourceAttr{
@@ -94,7 +94,7 @@ resource "alibabacloudstack_cen_instance" "default" {
 
 resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
   physical_connection_id = "%s"
-  vlan_id =                    99
+  vlan_id =                    %d
   local_gateway_ip =           "10.0.0.1"
   peer_gateway_ip =            "10.0.0.2"
   peering_subnet_mask =        "255.255.255.252"
@@ -127,5 +127,5 @@ data "alibabacloudstack_cen_transit_router_connect_peers" "default" {
   connect_attachment_id = "${alibabacloudstack_cen_transit_router_connect_peer.default.connect_attachment_id}"
   %s
 }
-`, rand, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"), strings.Join(pairs, "\n   "))
+`, rand, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"), rand, strings.Join(pairs, "\n   "))
 }

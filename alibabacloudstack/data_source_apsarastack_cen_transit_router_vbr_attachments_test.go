@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccAlibabacloudStackCenTransitRouterVbrAttachmentsDataSourceBasic(t *testing.T) {
-	rand := getAccTestRandInt(10000, 20000)
+	rand := getAccTestRandInt(1000, 2000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStacRouterVbrAttachmentsDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_cen_transit_router_vbr_attachment.default.transit_router_attachment_name}"`,

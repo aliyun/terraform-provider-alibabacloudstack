@@ -18,7 +18,8 @@ func TestAccAlibabacloudStackCenTransitRouterConnectPeer_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := "tf-testAccTransitRouterConnectPeer19955"
+	rand := getAccTestRandInt(1000, 2000)
+	name := fmt.Sprintf("tf-testAccTransitRouterConnectPeer%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, TransitRouterConnectPeerCommonTestCase)
 
 	resource.Test(t, resource.TestCase{
@@ -57,10 +58,11 @@ func TestAccAlibabacloudStackCenTransitRouterConnectPeer_basic(t *testing.T) {
 	})
 }
 
-func TransitRouterConnectPeerCommonTestCase(name string) string {
+func TransitRouterConnectPeerCommonTestCase(randInt string) string {
+	vlanId := getAccTestRandInt(1000, 2000)
 	return fmt.Sprintf(`
 variable "name" {
-  default = "%v"
+  default = "tf-testAccTransitRouterConnectPeer%s"
 }
 
 resource "alibabacloudstack_cen_instance" "default" {
@@ -73,7 +75,7 @@ resource "alibabacloudstack_cen_instance" "default" {
 
 resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
 	physical_connection_id = "%s"
-	vlan_id =                    99
+	vlan_id =                    %d
 	local_gateway_ip =           "10.0.0.1"
 	peer_gateway_ip =            "10.0.0.2"
 	peering_subnet_mask =        "255.255.255.252"
@@ -93,5 +95,5 @@ resource "alibabacloudstack_cen_transit_router_connect_attachment" "default" {
 	depends_on = ["alibabacloudstack_cen_transit_router_vbr_attachment.default"]
 }
 
-`, name, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"))
+`, randInt, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"), vlanId)
 }
