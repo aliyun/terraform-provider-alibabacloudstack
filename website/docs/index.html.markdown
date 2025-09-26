@@ -26,7 +26,7 @@ For configurable parameters, please refer to the **[Parameter Specifications](#p
 
 ### Static Configuration
 
-+ Create `provider.tf` file
++ Create `terraform.tf` file
 
 ```hcl
 # Declare AlibabacloudStack Provider source and version
@@ -39,6 +39,8 @@ terraform {
     }
   }
 }
+
++ Create `provider.tf` file
 
 # Configure AlibabacloudStack Provider
 provider "alibabacloudstack" {

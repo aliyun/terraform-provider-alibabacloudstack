@@ -100,7 +100,7 @@ resource "alibabacloudstack_slb_listener" "default" {
 * `listener_forward` - (选填, 变更时重建) 是否启用HTTP重定向到HTTPS。有效值为 `on` 和 `off`。默认值为 `off`。
 * `enable_http2` - (选填) 是否启用HTTP/2。默认值：on。有效值："on", "off"。
 * `forward_port` - (选填, 变更时重建) HTTP重定向到HTTPS的端口。
-* `tls_cipher_policy` - (选填) 传输层安全(TLS)加密策略。默认值：tls_cipher_policy_1_0。有效值：tls_cipher_policy_1_0, tls_cipher_policy_1_1, tls_cipher_policy_1_2, tls_cipher_policy_1_2_strict。
+* `tls_cipher_policy` - (选填) 传输层安全(TLS)加密策略。默认值：tls_cipher_policy_1_0。
 * `delete_protection_validation` - (选填) 删除前检查SLB实例的DeleteProtection。如果为true，当SLB实例启用了DeleteProtection时，此资源不会被删除。默认值为 false。
 * `logs_download_attributes` - (选填) 日志下载配置相关的属性。
   * `log_project` - (必填) 日志项目的名称。

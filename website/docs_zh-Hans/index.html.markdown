@@ -23,7 +23,7 @@ AlibabacloudStack Privder支持静态配置和环境变量配置两种方式，�
 
 ### 静态配置
 
-+ 创建`provider.tf`配置文件
++ 创建`terraform.tf`配置文件
 
 ```hcl
 # 声明 AlibabacloudStack Provider 来源与版本
@@ -36,6 +36,8 @@ terraform {
     }
   }
 }
+
++ 创建`provider.tf`配置文件
 
 # 配置 AlibabacloudStack Provider
 provider "alibabacloudstack" {

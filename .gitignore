@@ -32,7 +32,6 @@ develop*
 /vendor/*
 /.settings
 !vendor/github.com/valyala/**/*.pem
-.dbeaver
 
 website/vendor
 
@@ -51,3 +50,4 @@ website/vendor
 alibabacloudstack/cover.out
 alibabacloudstack/debug.test*
 alibabacloudstack/dryrun_*
+/.dbeaver/
