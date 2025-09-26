@@ -10,6 +10,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackCenTransitMulticastDomainSource() *schema.Resource {
@@ -19,11 +20,6 @@ func resourceAlibabacloudStackCenTransitMulticastDomainSource() *schema.Resource
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Multicast IP address.",
-			},
-			"network_interface_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -35,9 +31,30 @@ func resourceAlibabacloudStackCenTransitMulticastDomainSource() *schema.Resource
 				ForceNew:    true,
 				Description: "Forwarding router multicast domain ID.",
 			},
+			"resource_type": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"VPC", "Connect"}, false),
+				ForceNew:     true,
+			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				ForceNew: true,
+			},
+			"network_interface_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"connect_peer_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"connect_attachment_id": {
+				Type:     schema.TypeString,
+				Optional: true,
 				ForceNew: true,
 			},
 		},
@@ -51,48 +68,51 @@ func resourceAlibabacloudStackCenTransitMulticastDomainSource() *schema.Resource
 
 func resourceAlibabacloudStackCenTransitRouterMulticastDomainSourceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	cencen_instanceservice := CenService{client}
-	vswitch_service := VpcService{client}
-	vswitch_id := d.Get("vswitch_id").(string)
-	object, err := vswitch_service.DescribeVSwitch(vswitch_id)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, "get vpc_id error")
-
-	}
-	vpc_id := object.VpcId
-	// api: Cbn - 2017-09-12 - RegisterTransitRouterMulticastGroupSources
+	cenService := CenService{client}
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "RegisterTransitRouterMulticastGroupSources", "")
 	request.QueryParams["GroupIpAddress"] = d.Get("group_ip_address").(string)
-	request.QueryParams["VpcId"] = vpc_id
 	request.QueryParams["TransitRouterMulticastDomainId"] = d.Get("transit_router_multicast_domain_id").(string)
-	request.QueryParams["NetworkInterfaceIds.1"] = d.Get("network_interface_id").(string)
-	cencen_instanceservice.DoCbnDescribeTransitRouterMuliticastDomainAssociationsRequest(":" + d.Get("transit_router_multicast_domain_id").(string))
+	resourceType := d.Get("resource_type").(string)
+	key := ""
+	if resourceType == "VPC" {
+		vswitch_id := d.Get("vswitch_id").(string)
+		network_interface_id := d.Get("network_interface_id").(string)
+		key = network_interface_id
+		if vswitch_id != "" || network_interface_id != "" {
+			return errmsgs.Error("[ERROR] argument error: resource_type is VPC, vswitch_id or network_interface_id must be set")
+		}
+		vswitch_service := VpcService{client}
+		object, err := vswitch_service.DescribeVSwitch(vswitch_id)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, "get vpc_id error")
+		}
+		request.QueryParams["VpcId"] = object.VpcId
+		request.QueryParams["NetworkInterfaceIds.1"] = network_interface_id
+	} else {
+		connect_peer_id := d.Get("connect_peer_id").(string)
+		connect_attachment_id := d.Get("connect_attachment_id").(string)
+		key = connect_attachment_id
+		if connect_peer_id != "" || connect_attachment_id != "" {
+			return errmsgs.Error("[ERROR] argument error: resource_type is `Connect`, `connect_peer_id` or `connect_attachment_id` must be set")
+		}
+		request.QueryParams["TransitRouterAttachmentId"] = connect_attachment_id
+		request.QueryParams["ConnectPeerIds.1"] = connect_peer_id
+	}
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		for i := 0; i < 3; i++ {
-			cencen_instanceservice.DoCbnDescribeTransitRouterMuliticastDomainAssociationsRequest(":" + d.Get("transit_router_multicast_domain_id").(string))
-			bresponse, err = client.ProcessCommonRequest(request)
-			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-			if err == nil {
-				break
-			}
-			time.Sleep(5 * time.Second)
 
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		// if bresponse == nil {
-		// 	return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		// }
-		// errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		// return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_multicast_domain_source", "RegisterTransitRouterMulticastGroupSources", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_multicast_domain_source", "RegisterTransitRouterMulticastGroupSources", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	d.SetId(fmt.Sprintf("%s:%s:%s:%s", d.Get("group_ip_address").(string), vswitch_id, d.Get("transit_router_multicast_domain_id").(string), d.Get("network_interface_id").(string)))
-	err = cencen_instanceservice.WaitForTransitRouterMulticastDomainSource(d.Id(), Registered, 120)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-			"alibabacloudstack_cen_transit_router_multicast_domain_source", "CreateTransitRouterMulticastDomainSource", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, err)
-
+	d.SetId(fmt.Sprintf("%s:%s:%s:%s", d.Get("group_ip_address").(string), d.Get("transit_router_multicast_domain_id").(string), resourceType, key))
+	stateConf := BuildStateConf([]string{"Registering"}, []string{"Registered"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, cenService.CbnTransitRouterMuliticastDomainSourceStateRefreshFunc(d.Id(), []string{"Failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return nil
 }
@@ -104,40 +124,37 @@ func resourceAlibabacloudStackCenTransitRouterMulticastDomainSourceUpdate(d *sch
 func resourceAlibabacloudStackCenTransitRouterMulticastDomainSourceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cencen_instanceservice := CenService{client}
-	response, err := cencen_instanceservice.DoCbnDescribeTransitRouterMuliticastDomainSourceRequest(d.Id())
+	data, err := cencen_instanceservice.DoCbnDescribeTransitRouterMuliticastDomainSourceRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_transit_router_multicast_domain_source", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	parts := strings.Split(d.Id(), ":")
-	group_id_address := parts[0]
-	vswitch_id := parts[1]
-	network_interface_id := parts[3]
-	for _, v := range response.TransitRouterMulticastGroups {
-		if v.GroupIpAddress == group_id_address && v.NetworkInterfaceId == network_interface_id && v.VSwitchId == vswitch_id {
-			d.Set("status", v.Status)
-			d.Set("group_ip_address", v.GroupIpAddress)
-			d.Set("vswitch_id", v.VSwitchId)
-			d.Set("network_interface_id", v.NetworkInterfaceId)
-			d.Set("transit_router_multicast_domain_id", v.TransitRouterMulticastDomainId)
-			break
-		}
-	}
-
+	d.Set("status", data.Status)
+	d.Set("group_ip_address", data.GroupIpAddress)
+	d.Set("vswitch_id", data.VSwitchId)
+	d.Set("network_interface_id", data.NetworkInterfaceId)
+	d.Set("transit_router_multicast_domain_id", data.TransitRouterMulticastDomainId)
+	d.Set("resource_type", data.ResourceType)
+	d.Set("connect_peer_id", data.ConnectPeerId)
+	d.Set("connect_attachment_id", data.TransitRouterAttachmentId)
 	return nil
 }
 
 func resourceAlibabacloudStackCenTransitRouterMulticastDomainSourceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	// api: Cbn - 2017-09-12 - DeleteCen
-	cencen_instanceservice := CenService{client}
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "DeregisterTransitRouterMulticastGroupSources", "")
 	parts := strings.Split(d.Id(), ":")
 	group_ip_address := parts[0]
-	domain_id := parts[2]
-	network_interface_id := parts[3]
+	transit_router_multicast_domain_id := parts[1]
+	resource_type := parts[2]
+	key := parts[3]
 	request.QueryParams["GroupIpAddress"] = group_ip_address
-	request.QueryParams["TransitRouterMulticastDomainId"] = domain_id
-	request.QueryParams["NetworkInterfaceIds.1"] = network_interface_id
+	request.QueryParams["TransitRouterMulticastDomainId"] = transit_router_multicast_domain_id
+	if resource_type == "VPC" {
+		request.QueryParams["NetworkInterfaceIds.1"] = key
+	} else {
+		request.QueryParams["ConnectPeerIds.1"] = key
+	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -148,12 +165,10 @@ func resourceAlibabacloudStackCenTransitRouterMulticastDomainSourceDelete(d *sch
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_multicast_domain_source", "DeregisterTransitRouterMulticastGroupSources", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	err = cencen_instanceservice.WaitForTransitRouterMulticastDomainSource(d.Id(), Deleted, 120)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-			"alibabacloudstack_cen_transit_router_multicast_domain_source", "DeregisterTransitRouterMulticastGroupSources", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, err)
-
+	cenService := CenService{client}
+	stateConf := BuildStateConf([]string{"Deregistering"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, cenService.CbnTransitRouterMuliticastDomainSourceStateRefreshFunc(d.Id(), []string{"Failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-
 	return nil
 }

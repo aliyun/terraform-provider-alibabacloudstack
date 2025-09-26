@@ -118,6 +118,7 @@ type CbnTransitRouterMulticastGroupData struct {
 	GroupSource                    bool   `json:"GroupSource"`
 	ResourceOwnerId                int64  `json:"ResourceOwnerId"`
 	GroupIpAddress                 string `json:"GroupIpAddress"`
+	ConnectPeerId                  string `json:"ConnectPeerId"`
 }
 
 type CbnDescribeTransitRouterMulticastDomainSourceResponse struct {
@@ -444,43 +445,6 @@ func (s *CenService) WaitForTransitRouterMulticastDomain(instanceId string, stat
 	}
 }
 
-func (s *CenService) WaitForTransitRouterMulticastDomainSource(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	parts := strings.Split(id, COLON_SEPARATED)
-	group_id_address := parts[0]
-	vswitch_id := parts[1]
-	network_interface_id := parts[3]
-	for {
-		instance, err := s.DoCbnDescribeTransitRouterMuliticastDomainSourceRequest(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		delete := true
-		for _, data := range instance.TransitRouterMulticastGroups {
-			if data.GroupIpAddress == group_id_address && data.NetworkInterfaceId == network_interface_id && data.VSwitchId == vswitch_id {
-				delete = false
-				if data.Status == string(status) {
-					return nil
-				}
-
-			}
-		}
-		if delete && status == Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
-	}
-}
-
 func (s *CenService) DoCbnDescribeTransitRouterRouteEntriesRequest(id string) (*CbnDescribeTransitRouterRouteEntriesResponse, error) {
 	// api: Dds - 2022-11-21 - DescribeAccounts
 
@@ -566,14 +530,24 @@ func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainsRequest(id strin
 	return CbnDescribeRouterMulticastDomainResponseObj, nil
 }
 
-func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainSourceRequest(id string) (*CbnDescribeTransitRouterMulticastDomainSourceResponse, error) {
+func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainSourceRequest(id string) (*CbnTransitRouterMulticastGroupData, error) {
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterMulticastGroups", "")
 	CbnDescribeRouterMulticastDomainSourceResponseObj := &CbnDescribeTransitRouterMulticastDomainSourceResponse{}
 	// Call request_params_handler
 	parts := strings.Split(id, ":")
-	transit_router_multicast_domain_id := parts[2]
+	group_ip_address := parts[0]
+	transit_router_multicast_domain_id := parts[1]
+	resource_type := parts[2]
+	key := parts[3]
+	request.QueryParams["IsGroupSource"] = "true"
+	request.QueryParams["GroupIpAddress"] = group_ip_address
 	request.QueryParams["TransitRouterMulticastDomainId"] = transit_router_multicast_domain_id
+	if resource_type == "VPC" {
+		request.QueryParams["NetworkInterfaceIds.1"] = key
+	} else {
+		request.QueryParams["ConnectPeerIds.1"] = key
+	}
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -590,8 +564,10 @@ func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainSourceRequest(id 
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterMulticastDomains", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-
-	return CbnDescribeRouterMulticastDomainSourceResponseObj, nil
+	if len(CbnDescribeRouterMulticastDomainSourceResponseObj.TransitRouterMulticastGroups) < 1 {
+		return nil, errmsgs.GetNotFoundErrorFromString("Not Found CentTransitRouterMuliticastDomainMember " + id)
+	}
+	return &CbnDescribeRouterMulticastDomainSourceResponseObj.TransitRouterMulticastGroups[0], nil
 }
 
 func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainMemberRequest(id string) (*CbnTransitRouterMulticastGroupData, error) {
@@ -630,6 +606,26 @@ func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainMemberRequest(id 
 func (s *CenService) CbnTransitRouterMuliticastDomainMemberStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		object, err := s.DoCbnDescribeTransitRouterMuliticastDomainMemberRequest(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object.Status == failState {
+				return object, object.Status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Status))
+			}
+		}
+		return object, object.Status, nil
+	}
+}
+
+func (s *CenService) CbnTransitRouterMuliticastDomainSourceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DoCbnDescribeTransitRouterMuliticastDomainSourceRequest(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
