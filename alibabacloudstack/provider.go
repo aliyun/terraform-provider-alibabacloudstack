@@ -836,6 +836,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_acm_configuration":                      resourceAlibabacloudStackAcmConfiguration(),
 		"alibabacloudstack_polardb_account_database_binding":       resourceAlibabacloudStackPolardbAccountDatabaseBinding(),
 		"alibabacloudstack_ascm_service_ram_role":                  resourceAlibabacloudStackAscmServiceRamRole(),
+		"alibabacloudstack_edas_k8s_application_scaling_rule":      resourceAlibabacloudStackEdasK8sApplicationScalingRule(),
 		//"alibabacloudstack_polardb_readonly_instance":              resourceAlibabacloudStackPolardbReadonlyInstance(),
 		//"alibabacloudstack_polardb_readwrite_splitting_connection": resourceAlibabacloudStackPolardbReadWriteSplittingConnection(),
 	}
