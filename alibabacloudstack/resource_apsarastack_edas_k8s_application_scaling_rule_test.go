@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"app_id":            "26cf2af4-e4f6-4989-8974-e029dee26bca",
+					"app_id":            "${alibabacloudstack_edas_k8s_application.default.id}",
 					"scaling_rule_name": "testtf",
 					"scaling_rule_type": "metric",
 					"max_replicas":      "10",
@@ -133,7 +133,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"app_id":            "26cf2af4-e4f6-4989-8974-e029dee26bca",
+					"app_id":            "${alibabacloudstack_edas_k8s_application.default.id}",
 					"scaling_rule_name": "testtf",
 					"scaling_rule_type": "metric",
 					"max_replicas":      "10",
@@ -225,8 +225,27 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 
 func resourceEdasK8sApplicationScalingRuleDependence(name string) string {
 	return fmt.Sprintf(`
-		variable "name" {
-		  default = "%v"
-		}
+variable "name" {
+	default = "%v"
+}
+
+variable "package_version" {	
+	default = "2025-05-20 17:17:18"
+} 
+
+resource "alibabacloudstack_edas_k8s_application" "default" {
+  application_name        	= "${var.name}"
+  application_description 	= "This is description of application"
+  cluster_id              	= var.cluster_id
+  replicas                	= 2
+  package_type 				= "FatJar"
+  package_url     			= "http://fileserver.edas.intra.env212.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
+  package_version 			= var.package_version
+  jdk             			= "Open JDK 8"
+  limit_mem             	= 1024
+  requests_mem          	= 1024
+  requests_m_cpu        	= 300
+  limit_m_cpu           	= 300
+}
 		`, name)
 }

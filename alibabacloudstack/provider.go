@@ -508,6 +508,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardb_instances":   dataSourceAlibabacloudStackPolardbDbInstances(),
 		"alibabacloudstack_acm_configurations":  dataSourceAlibabacloudStackAcmConfigurations(),
 		//	"alibabacloudstack_polardb_accounts":                       dataSourceAlibabacloudStackPolardbAccounts(),
+		"alibabacloudstack_edas_k8s_application_scaling_rules": dataSourceAlibabacloudStackEdasScalingRules(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

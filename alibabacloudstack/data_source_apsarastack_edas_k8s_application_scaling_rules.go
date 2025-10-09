@@ -1,14 +1,13 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -50,6 +49,15 @@ func dataSourceAlibabacloudStackEdasScalingRules() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"app_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
 						"scaling_rule_name": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -133,17 +141,17 @@ func dataSourceAlibabacloudStackEdasScalingRules() *schema.Resource {
 
 func dataSourceAlibabacloudStackEdasScalingRulesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	request := map[string]interface{}{
+		"AppId": d.Get("app_id"),
+	}
+	resp, err := client.DoTeaRequest("GET", "Edas", "2017-08-01", "DescribeApplicationScalingRules", "/pop/v1/eam/scale/application_scaling_rules", nil, request, nil)
+	if err != nil {
+		return errmsgs.WrapError(err)
 
-	action := "ListUserDefineRegion"
-	request := make(map[string]interface{})
-	var objects []map[string]interface{}
-	var namespaceNameRegex *regexp.Regexp
-	if v, ok := d.GetOk("name_regex"); ok {
-		r, err := regexp.Compile(v.(string))
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		namespaceNameRegex = r
+	}
+	result, err := jsonpath.Get("$.Data.result", resp)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "alibabacloudstack_edas_k8s_application_scaling_rules", "$.Data.result", resp)
 	}
 
 	idsMap := make(map[string]string)
@@ -155,58 +163,84 @@ func dataSourceAlibabacloudStackEdasScalingRulesRead(d *schema.ResourceData, met
 			idsMap[vv.(string)] = vv.(string)
 		}
 	}
-	var response map[string]interface{}
-	var err error
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = client.DoTeaRequest("POST", "Edas", "2017-08-01", action, "/pop/v5/user_region_defs", nil, request, nil)
-		if err != nil {
-			if errmsgs.NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_edas_namespaces", action, errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	resp, err := jsonpath.Get("$.UserDefineRegionList.UserDefineRegionEntity", response)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.UserDefineRegionList.UserDefineRegionEntity", response)
-	}
-	result, _ := resp.([]interface{})
-	for _, v := range result {
-		item := v.(map[string]interface{})
-		if namespaceNameRegex != nil && !namespaceNameRegex.MatchString(fmt.Sprint(item["RegionName"])) {
-			continue
-		}
+	ids := make([]string, 0)
+	scaling_rules := make([]map[string]interface{}, 0)
+	for _, data := range result.([]interface{}) {
+		object := data.(map[string]interface{})
+		key := fmt.Sprintf("%s:%s", object["appId"].(string), object["scaleRuleName"].(string))
 		if len(idsMap) > 0 {
-			if _, ok := idsMap[fmt.Sprint(item["Id"])]; !ok {
+			if _, ok := idsMap[key]; !ok {
 				continue
 			}
 		}
-		objects = append(objects, item)
-	}
-	ids := make([]string, 0)
-	names := make([]interface{}, 0)
-	s := make([]map[string]interface{}, 0)
-	for _, object := range objects {
+
+		if nameRegex, ok := d.GetOk("name_regex"); ok {
+			r := regexp.MustCompile(nameRegex.(string))
+			if !r.MatchString(object["scaleRuleName"].(string)) {
+				continue
+			}
+		}
+
+		if scaleRuleType, ok := d.GetOk("scaling_rule_type"); ok && scaleRuleType.(string) != "" && scaleRuleType.(string) != object["scaleRuleType"].(string) {
+			continue
+		}
+		scalingRuleMetrics, ok := object["metric"].(map[string]interface{})
+		metrics := make([]map[string]interface{}, 0)
+		if ok {
+			for _, metric := range scalingRuleMetrics["metrics"].([]interface{}) {
+				metrics = append(metrics, map[string]interface{}{
+					"type":        metric.(map[string]interface{})["metricType"],
+					"utilization": metric.(map[string]interface{})["metricTargetAverageUtilization"],
+				})
+			}
+		}
+		scalingRuleTrigger, ok := object["trigger"]
+		timers := make([]map[string]interface{}, 0)
+		var triggerType, triggerName, triggerPeriod string
+		var dryRun bool
+		timerInWeek := make([]interface{}, 0)
+		if ok {
+			triggers := scalingRuleTrigger.(map[string]interface{})["triggers"].([]interface{})
+			trigger := triggers[0].(map[string]interface{})
+			triggerType = trigger["type"].(string)
+			triggerName = trigger["name"].(string)
+			triggerPeriod = trigger["period"].(string)
+			dryRun = trigger["dryRun"] == "true"
+			matedata := make(map[string]interface{})
+			_ = json.Unmarshal([]byte(trigger["metadata"].(string)), &matedata)
+			v, ok := trigger["timerInWeek"]
+			if ok {
+				timerInWeek = v.([]interface{})
+			}
+			timerInDay, ok := trigger["timerInDay"]
+			if ok {
+				for _, v := range timerInDay.([]interface{}) {
+					timer := v.(map[string]interface{})
+					timers = append(timers, map[string]interface{}{
+						"at_time":  timer["atTime"],
+						"replicas": timer["targetReplicas"],
+					})
+				}
+			}
+		}
 		mapping := map[string]interface{}{
-			// 			"debug_enable":         object["DebugEnable"],
-			"description":          object["Description"],
-			"id":                   fmt.Sprint(object["Id"]),
-			"namespace_id":         fmt.Sprint(object["Id"]),
-			"namespace_logical_id": object["RegionId"],
-			"namespace_name":       object["RegionName"],
-			"user_id":              object["UserId"],
-			"belong_region":        object["BelongRegion"],
+			"id":                    key,
+			"app_id":                object["appId"],
+			"scaling_rule_name":     object["scaleRuleName"],
+			"scaling_rule_type":     object["scaleRuleType"],
+			"max_replicas":          object["maxReplicas"],
+			"min_replicas":          object["minReplicas"],
+			"metrics":               metrics,
+			"trigger_timer_in_day":  timers,
+			"trigger_type":          triggerType,
+			"trigger_name":          triggerName,
+			"trigger_period":        triggerPeriod,
+			"trigger_dryrun":        dryRun,
+			"trigger_timer_in_week": timerInWeek,
+			"enabled":               object["scaleRuleEnabled"],
 		}
 		ids = append(ids, fmt.Sprint(mapping["id"]))
-		names = append(names, object["RegionName"])
-		s = append(s, mapping)
+		scaling_rules = append(scaling_rules, mapping)
 	}
 
 	d.SetId(dataResourceIdHash(ids))
@@ -214,16 +248,8 @@ func dataSourceAlibabacloudStackEdasScalingRulesRead(d *schema.ResourceData, met
 		return errmsgs.WrapError(err)
 	}
 
-	if err := d.Set("names", names); err != nil {
+	if err := d.Set("scaling_rules", scaling_rules); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	if err := d.Set("namespaces", s); err != nil {
-		return errmsgs.WrapError(err)
-	}
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), s)
-	}
-
 	return nil
 }
