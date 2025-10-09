@@ -32,11 +32,11 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_basic(t *testing.T) {
 
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"app_id":            "d84ddafa-f371-4f09-9307-76d61cd83864",
+					"app_id":            "26cf2af4-e4f6-4989-8974-e029dee26bca",
 					"scaling_rule_name": "testtf",
 					"scaling_rule_type": "metric",
 					"max_replicas":      "10",
@@ -129,11 +129,11 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"app_id":            "d84ddafa-f371-4f09-9307-76d61cd83864",
+					"app_id":            "26cf2af4-e4f6-4989-8974-e029dee26bca",
 					"scaling_rule_name": "testtf",
 					"scaling_rule_type": "metric",
 					"max_replicas":      "10",

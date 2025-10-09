@@ -63,7 +63,7 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRule() *schema.Resource {
 			"trigger_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "cron",
+				Computed: true,
 			},
 			"trigger_name": {
 				Type:     schema.TypeString,
@@ -138,8 +138,12 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRuleCreate(d *schema.Reso
 	} else {
 		scalingRuleTrigger["maxReplicas"] = d.Get("max_replicas")
 		scalingRuleTrigger["minReplicas"] = d.Get("min_replicas")
+		trigger_type, ok := d.GetOk("trigger_type")
+		if !ok {
+			trigger_type = "cron"
+		}
 		triggers := map[string]interface{}{
-			"type": d.Get("trigger_type"),
+			"type": trigger_type,
 			"name": d.Get("trigger_name"),
 		}
 		metadata := map[string]interface{}{
@@ -208,7 +212,7 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRuleUpdate(d *schema.Reso
 			}
 		}
 	}
-	if d.HasChanges("metrics", "max_replicas", "min_replicas",
+	if !d.IsNewResource() && d.HasChanges("metrics", "max_replicas", "min_replicas",
 		"trigger_type", "trigger_name", "trigger_period", "trigger_dryrun",
 		"trigger_timer_in_day", "trigger_timer_in_week") {
 
@@ -298,6 +302,7 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRuleRead(d *schema.Resour
 				"utilization": metric.(map[string]interface{})["metricTargetAverageUtilization"],
 			})
 		}
+		d.Set("metrics", metrics)
 	}
 	scalingRuleTrigger, ok := object["trigger"]
 	if ok {
@@ -323,7 +328,7 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRuleRead(d *schema.Resour
 					"replicas": timer["targetReplicas"],
 				})
 			}
-			d.Set("trigger_timer_in_day", timerInWeek)
+			d.Set("trigger_timer_in_day", timers)
 		}
 	}
 	d.Set("enabled", object["scaleRuleEnabled"])
