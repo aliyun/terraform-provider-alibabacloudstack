@@ -34,6 +34,7 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"private", "public-read", "public-read-write"}, false),
 			},
+
 			"logging": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -75,6 +76,7 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 			},
 			"location": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"owner": {
@@ -98,9 +100,10 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				Default:  true,
 			},
 			"storage_capacity": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  -1,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      1024,
+				ValidateFunc: validation.IntBetween(1, 2048000000),
 			},
 			"sse_algorithm": {
 				Type:         schema.TypeString,
@@ -144,34 +147,43 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	if storageClass == "" {
 		storageClass = "Standard"
 	}
-
+	storage_capacity := d.Get("storage_capacity").(int)
 	// If not present, Create Bucket
 	if det.BucketInfo.Name == "" {
-		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["OpenApiAction"] = "PutBucket"
-		request.QueryParams["ProductName"] = "oss"
-		queryParams := map[string]interface{}{
-			"Department":          client.Department,
-			"ResourceGroup":       client.ResourceGroup,
-			"RegionId":            client.RegionId,
-			"asVersion":           "enterprise",
-			"asArchitechture":     "x86",
-			"haAlibabacloudStack": "true",
-			"Language":            "en",
-			"BucketName":          bucketName,
-			"StorageClass":        storageClass,
-			"x-oss-acl":           acl,
-			"SSEAlgorithm":        storageClass,
+		ossEndpointData, err := ossService.GetOssEndpointList()
+		if err != nil {
+			return errmsgs.WrapError(err)
 		}
-		if querybytes, err := json.Marshal(queryParams); err != nil {
+		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
+		request.QueryParams["AppAction"] = "BucketCreate"
+		request.QueryParams["AppName"] = "one-console-app-oss"
+		params := map[string]interface{}{
+			"region":        client.RegionId,
+			"BucketName":    bucketName,
+			"Department":    client.Department,
+			"ResourceGroup": client.ResourceGroup,
+			"BucketQuota":   storage_capacity,
+			"Size":          1,
+			"params": map[string]interface{}{
+				"bucketName":   bucketName,
+				"department":   client.Department,
+				"storageClass": storageClass,
+				"bucketQuota":  storage_capacity,
+				"size":         1,
+				"xOssAcl":      acl,
+				"ossEndpoint":  ossEndpointData["oss-endpoint"],
+				"location":     ossEndpointData["location"],
+			},
+		}
+
+		if querybytes, err := json.Marshal(params); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "json Marshal", "CreateBucket", errmsgs.AlibabacloudStackOssGoSdk)
 		} else {
 			request.QueryParams["Params"] = string(querybytes)
 		}
 
 		bresponse, err := client.ProcessCommonRequest(request)
-		log.Printf("Response of Create Bucket: %s", bresponse)
-		log.Printf("Bresponse ossbucket before error")
+		addDebug("CreateBucketInfo", bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -182,18 +194,10 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 		}
-		log.Printf("Bresponse ossbucket after error")
-		addDebug("CreateBucketInfo", bresponse, request)
-		log.Printf("Bresponse ossbucket check")
-		log.Printf("Bresponse ossbucket %s", bresponse)
 
 		if bresponse.GetHttpStatus() != 200 {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", "CreateBucket", errmsgs.AlibabacloudStackOssGoSdk)
 		}
-		//logging:= make(map[string]interface{})
-		log.Printf("Enter for logging")
-
-		//addDebug("CreateBucket", raw, requestInfo, bresponse.GetHttpContentString())
 
 		err = resource.Retry(3*time.Minute, func() *resource.RetryError {
 			det, err := ossService.DescribeOssBucket(bucketName)

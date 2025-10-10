@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -118,7 +119,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 
 	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-app-scalingrule%v", rand)
+	name := fmt.Sprintf("tfappscalingrule%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sApplicationScalingRuleDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -134,11 +135,11 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"app_id":            "${alibabacloudstack_edas_k8s_application.default.id}",
-					"scaling_rule_name": "testtf",
-					"scaling_rule_type": "metric",
+					"scaling_rule_name": "${var.name}",
+					"scaling_rule_type": "trigger",
 					"max_replicas":      "10",
 					"min_replicas":      "1",
-					"trigger_name":      "testtf",
+					"trigger_name":      "${var.name}",
 					"trigger_period":    "weekly",
 					"trigger_dryrun":    "true",
 					"trigger_timer_in_day": []map[string]interface{}{
@@ -156,11 +157,11 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"scaling_rule_name":               "testtf",
-						"scaling_rule_type":               "metric",
+						"scaling_rule_name":               name,
+						"scaling_rule_type":               "trigger",
 						"max_replicas":                    "10",
 						"min_replicas":                    "1",
-						"trigger_name":                    "testtf",
+						"trigger_name":                    name,
 						"trigger_period":                  "weekly",
 						"trigger_dryrun":                  "true",
 						"trigger_timer_in_day.#":          "2",
@@ -184,8 +185,6 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 				Config: testAccConfig(map[string]interface{}{
 					"max_replicas":   "8",
 					"min_replicas":   "4",
-					"trigger_name":   "testtf",
-					"trigger_period": "weekly",
 					"trigger_dryrun": "true",
 					"trigger_timer_in_day": []map[string]interface{}{
 						{
@@ -202,12 +201,8 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"scaling_rule_name":               "testtf",
-						"scaling_rule_type":               "metric",
 						"max_replicas":                    "8",
 						"min_replicas":                    "4",
-						"trigger_name":                    "testtf",
-						"trigger_period":                  "weekly",
 						"trigger_dryrun":                  "true",
 						"trigger_timer_in_day.#":          "2",
 						"trigger_timer_in_day.0.at_time":  "09:00",
@@ -224,13 +219,19 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 }
 
 func resourceEdasK8sApplicationScalingRuleDependence(name string) string {
+	edasClusterId := os.Getenv("ALIBABACLOUDSTACK_EDAS_CLUSTER_ID")
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%v"
 }
 
+variable "cluster_id" {	
+	default = "%s"
+}
+
+
 variable "package_version" {	
-	default = "2025-05-20 17:17:18"
+	default = "2025-10-09 17:17:18"
 } 
 
 resource "alibabacloudstack_edas_k8s_application" "default" {
@@ -239,7 +240,7 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   cluster_id              	= var.cluster_id
   replicas                	= 2
   package_type 				= "FatJar"
-  package_url     			= "http://fileserver.edas.intra.env212.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
+  package_url     			= "http://fileserver.edas.intra.env212.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar"
   package_version 			= var.package_version
   jdk             			= "Open JDK 8"
   limit_mem             	= 1024
@@ -247,5 +248,5 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   requests_m_cpu        	= 300
   limit_m_cpu           	= 300
 }
-		`, name)
+`, name, edasClusterId)
 }

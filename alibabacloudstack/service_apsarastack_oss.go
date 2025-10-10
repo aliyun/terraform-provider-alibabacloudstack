@@ -406,3 +406,26 @@ func (s *OssService) DeleteBucketTags(bucketName string) error {
 	}
 	return nil
 }
+
+func (s *OssService) GetOssEndpointList() (map[string]interface{}, error) {
+	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
+	request.QueryParams["AppAction"] = "GetOssEndpointList"
+	request.QueryParams["AppName"] = "one-console-app-oss"
+	request.QueryParams["Params"] = fmt.Sprintf("{\"params\":{\"region\":\"%s\"}}", s.client.RegionId)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("GetOssEndpointList", bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetOssEndpointList", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+	}
+	result := make(map[string]interface{})
+	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &result)
+	data, ok := result["Data"]
+	if !ok || len(data.([]interface{})) == 0 {
+		return nil, errmsgs.Error(fmt.Sprintf("GetOssEndpointList Failed! region: %s \n %#v", s.client.RegionId, bresponse.GetHttpContentString()))
+	}
+	return data.([]interface{})[0].(map[string]interface{}), nil
+}

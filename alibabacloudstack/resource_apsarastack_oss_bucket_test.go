@@ -132,7 +132,7 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bucket":           name,
-						"storage_capacity": "-1",
+						"storage_capacity": "1024",
 						"tags.%":           "2",
 						"tags.Created":     "TF",
 						"tags.For":         "Test",
@@ -188,11 +188,11 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"storage_capacity": "10",
+					"storage_capacity": "2048",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"storage_capacity": "10",
+						"storage_capacity": "2048",
 					}),
 				),
 			},

@@ -100,6 +100,7 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRule() *schema.Resource {
 			"trigger_timer_in_week": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"enabled": {
@@ -151,7 +152,7 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRuleCreate(d *schema.Reso
 			"dryRun": fmt.Sprint(d.Get("trigger_dryrun")),
 		}
 		timerInDay := make([]map[string]interface{}, 0)
-		for _, v := range d.Get("trigger_timer_in_day").([]interface{}) {
+		for _, v := range d.Get("trigger_timer_in_day").(*schema.Set).List() {
 			timer := v.(map[string]interface{})
 			timerInDay = append(timerInDay, map[string]interface{}{
 				"atTime":         timer["at_time"],
@@ -160,21 +161,24 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRuleCreate(d *schema.Reso
 		}
 		metadata["timerInDay"] = timerInDay
 		if d.Get("trigger_period").(string) == "weekly" {
-			metadata["timeInWeek"] = d.Get("trigger_timer_in_week")
+			metadata["timeInWeek"] = d.Get("trigger_timer_in_week").(*schema.Set).List()
 		}
 		triggers["metadata"] = metadata
 		scalingRuleTrigger["triggers"] = triggers
 	}
 	metric, _ := json.Marshal(scalingRuleMetric)
-	trigger, _ := json.Marshal(scalingRuleMetric)
+	trigger, err := json.Marshal(scalingRuleTrigger)
+	if err != nil {
+		return fmt.Errorf("scalingRuleTrigger data to marshal JSON failed: %w \n%v", err, scalingRuleTrigger)
+	}
 	request := map[string]interface{}{
 		"AppId":              d.Get("app_id"),
 		"ScalingRuleName":    d.Get("scaling_rule_name"),
 		"ScalingRuleType":    scaling_rule_type,
 		"ScalingRuleMetric":  string(metric),
-		"scalingRuleTrigger": string(trigger),
+		"ScalingRuleTrigger": string(trigger),
 	}
-	_, err := client.DoTeaRequest("POST", "Edas", "2017-08-01", "CreateApplicationScalingRule", "/pop/v1/eam/scale/application_scaling_rule", nil, request, nil)
+	_, err = client.DoTeaRequest("POST", "Edas", "2017-08-01", "CreateApplicationScalingRule", "/pop/v1/eam/scale/application_scaling_rule", nil, request, nil)
 	if err != nil {
 		return err
 	}
@@ -244,7 +248,7 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRuleUpdate(d *schema.Reso
 				"dryRun": fmt.Sprint(d.Get("trigger_dryrun")),
 			}
 			timerInDay := make([]map[string]interface{}, 0)
-			for _, v := range d.Get("trigger_timer_in_day").([]interface{}) {
+			for _, v := range d.Get("trigger_timer_in_day").(*schema.Set).List() {
 				timer := v.(map[string]interface{})
 				timerInDay = append(timerInDay, map[string]interface{}{
 					"atTime":         timer["at_time"],
@@ -253,13 +257,13 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRuleUpdate(d *schema.Reso
 			}
 			metadata["timerInDay"] = timerInDay
 			if d.Get("trigger_period").(string) == "weekly" {
-				metadata["timeInWeek"] = d.Get("trigger_timer_in_week")
+				metadata["timeInWeek"] = d.Get("trigger_timer_in_week").(*schema.Set).List()
 			}
 			triggers["metadata"] = metadata
 			scalingRuleTrigger["triggers"] = triggers
 		}
 		metric, _ := json.Marshal(scalingRuleMetric)
-		trigger, _ := json.Marshal(scalingRuleMetric)
+		trigger, _ := json.Marshal(scalingRuleTrigger)
 		request := map[string]interface{}{
 			"AppId":              d.Get("app_id"),
 			"ScalingRuleName":    d.Get("scaling_rule_name"),
@@ -312,13 +316,13 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRuleRead(d *schema.Resour
 		d.Set("trigger_name", trigger["name"])
 		matedata := make(map[string]interface{})
 		_ = json.Unmarshal([]byte(trigger["metadata"].(string)), &matedata)
-		d.Set("trigger_period", trigger["period"])
-		d.Set("trigger_dryrun", trigger["dryRun"] == "true")
-		timerInWeek, ok := trigger["timerInWeek"]
+		d.Set("trigger_period", matedata["period"])
+		d.Set("trigger_dryrun", matedata["dryRun"] == "true")
+		timerInWeek, ok := matedata["timeInWeek"]
 		if ok {
 			d.Set("trigger_timer_in_week", timerInWeek)
 		}
-		timerInDay, ok := trigger["timerInDay"]
+		timerInDay, ok := matedata["timerInDay"]
 		timers := make([]map[string]interface{}, 0)
 		if ok {
 			for _, v := range timerInDay.([]interface{}) {
