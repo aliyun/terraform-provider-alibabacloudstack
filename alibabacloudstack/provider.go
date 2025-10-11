@@ -430,6 +430,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_networkinterfaces":                   dataSourceAlibabacloudStackNetworkInterfaces(),
 		"alibabacloudstack_oss_buckets":                             dataSourceAlibabacloudStackOssBuckets(),
 		"alibabacloudstack_oss_bucket_objects":                      dataSourceAlibabacloudStackOssBucketObjects(),
+		"alibabacloudstack_oss_endpoints":                           dataSourceAlibabacloudStackOssEndpoints(),
 		"alibabacloudstack_ons_instances":                           dataSourceAlibabacloudStackOnsInstances(),
 		"alibabacloudstack_ons_topics":                              dataSourceAlibabacloudStackOnsTopics(),
 		"alibabacloudstack_ons_groups":                              dataSourceAlibabacloudStackOnsGroups(),
