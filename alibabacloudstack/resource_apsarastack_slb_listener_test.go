@@ -273,24 +273,27 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 					"description":      "testcreate",
 					"scheduler":        "wrr",
 					"acl_id":           "${alibabacloudstack_slb_acl.default.id}",
-					// "logs_download_attributes": map[string]string{
-					// 	"log_store_name": "${alibabacloudstack_log_store.default.name}",
-					// 	"project_name": "${alibabacloudstack_log_project.default.name}"
-					// },
+					"logs_download_attributes": []map[string]string{
+						{
+							"log_store":   "${alibabacloudstack_log_store.default.name}",
+							"log_project": "${alibabacloudstack_log_project.default.name}",
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"load_balancer_id": CHECKSET,
-						"protocol":         "http",
-						"bandwidth":        "10",
-						"frontend_port":    "80",
-						"backend_port":     "80",
-						"acl_status":       "on",
-						"acl_type":         "white",
-						"description":      "testcreate",
-						"scheduler":        "wrr",
-						"acl_id":           CHECKSET,
+						"load_balancer_id":                     CHECKSET,
+						"protocol":                             "http",
+						"bandwidth":                            "10",
+						"frontend_port":                        "80",
+						"backend_port":                         "80",
+						"acl_status":                           "on",
+						"acl_type":                             "white",
+						"description":                          "testcreate",
+						"scheduler":                            "wrr",
+						"acl_id":                               CHECKSET,
+						"logs_download_attributes.#":           "1",
+						"logs_download_attributes.0.log_store": fmt.Sprintf("%s_store", name),
 					}),
 				),
 			},
@@ -315,5 +318,7 @@ func AlibabacloudTestAccSlbListenerLogStoredependence(name string) string {
 		auto_split            = true
 		max_split_shard_count = "64"
 		append_meta           = true
-	}`, AlibabacloudTestAccSlbListenerBasicdependence(name))
+	}
+
+	`, AlibabacloudTestAccSlbListenerBasicdependence(name))
 }

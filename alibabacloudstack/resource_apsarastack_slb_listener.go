@@ -1,12 +1,12 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -294,6 +294,7 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 			"logs_download_attributes": {
 				Type:     schema.TypeList,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"log_project": {
@@ -310,12 +311,12 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 		},
 		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 			client := meta.(*connectivity.AlibabacloudStackClient)
-			
+
 			if v, ok := d.GetOk("tls_cipher_policy"); ok {
 				policyMatched := false
 				value := v.(string)
 				availableValue := []string{}
-				if request, err := client.DoTeaRequest("GET","Slb","2014-05-15" ,"DescribeTLSCipherPolicies","", nil, nil, nil); err != nil {
+				if request, err := client.DoTeaRequest("GET", "Slb", "2014-05-15", "DescribeTLSCipherPolicies", "", nil, nil, nil); err != nil {
 					return err
 				} else {
 					for _, v := range request["TLSCipherPolicies"].(map[string]interface{})["TLSCipherPolicy"].([]interface{}) {
@@ -328,11 +329,11 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 						}
 					}
 				}
-				if ! policyMatched {
-					return fmt.Errorf(" expected tls_cipher_policy to be one of %v, got %s", availableValue, value )
+				if !policyMatched {
+					return fmt.Errorf(" expected tls_cipher_policy to be one of %v, got %s", availableValue, value)
 				}
 			}
-			
+
 			return nil
 		},
 	}
@@ -456,6 +457,17 @@ func resourceAlibabacloudStackSlbListenerRead(d *schema.ResourceData, meta inter
 	d.Set("protocol", protocol)
 	d.Set("load_balancer_id", lb_id)
 	d.Set("frontend_port", port)
+	logAttr, err := slbService.DescribeAccessLogsDownloadAttribute(lb_id)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if logAttr != nil {
+		logattr := map[string]interface{}{
+			"log_store":   logAttr["logStore"],
+			"log_project": logAttr["logProject"],
+		}
+		d.Set("logs_download_attributes", []interface{}{logattr})
+	}
 	d.SetId(lb_id + ":" + protocol + ":" + strconv.Itoa(port))
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		object, err := slbService.DescribeSlbListener(d.Id())
@@ -737,14 +749,15 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 	if protocol == Https && d.HasChange("logs_download_attributes") {
 		slbService := SlbService{client}
 		old, new := d.GetChange("logs_download_attributes")
-		if len(old.(map[string]interface{})) > 0 {
+		if len(old.([]interface{})) > 0 {
 			err = slbService.DeleteAccessLogsDownloadAttribute(d.Get("load_balancer_id").(string))
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}
 		}
-		if new != "" {
-			err = slbService.SetAccessLogsDownloadAttribute(new.(map[string]interface{}), d.Get("load_balancer_id").(string))
+		if len(new.([]interface{})) > 0 {
+			logAttr := new.([]interface{})[0].(map[string]interface{})
+			err = slbService.SetAccessLogsDownloadAttribute(logAttr, d.Get("load_balancer_id").(string))
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}
