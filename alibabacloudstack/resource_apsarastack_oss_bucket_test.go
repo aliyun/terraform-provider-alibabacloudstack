@@ -258,7 +258,7 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketDualDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -285,11 +285,15 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket_sync": "false",
+					"bucket_sync":    "true",
+					"dual_kms_key":   "${alibabacloudstack_kms_key.defaylt.id}",
+					"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"bucket_sync": "false",
+						"bucket_sync":    "true",
+						"dual_kms_key":   CHECKSET,
+						"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
 					}),
 				),
 			},
@@ -393,6 +397,12 @@ resource "alibabacloudstack_vpc" "vpc2" {
 }
 %s
 `, name, name, KeyCommonTestCase)
+}
+
+func resourceOssBucketDualDependence(name string) string {
+	return fmt.Sprintf(`
+%s
+`, KeyCommonTestCase)
 }
 
 var ossBucketBasicMap = map[string]string{

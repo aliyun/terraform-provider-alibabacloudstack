@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackOssEndpoints() *schema.Resource {
+func dataSourceAlibabacloudStackOssClusters() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackOssEndpointsRead,
+		Read: dataSourceAlibabacloudStackOssClustersRead,
 
 		Schema: map[string]*schema.Schema{
 			"ids": {
@@ -107,9 +107,9 @@ func dataSourceAlibabacloudStackOssEndpoints() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackOssEndpointsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackOssClustersRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
+	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
 	request.QueryParams["AppAction"] = "GetOssEndpointList"
 	request.QueryParams["AppName"] = "one-console-app-oss"
 	region := client.RegionId

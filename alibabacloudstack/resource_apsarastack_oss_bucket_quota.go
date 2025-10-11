@@ -45,7 +45,7 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 	quota := d.Get("quota").(int)
 
 	if det.BucketInfo.Name == bucketName {
-		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
 		request.QueryParams["ProductName"] = "oss"
 		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":%d}", "BucketName", bucketName, "StorageCapacity", quota)
@@ -150,7 +150,7 @@ func resourceAlibabacloudStackOssBucketQuotaDelete(d *schema.ResourceData, meta 
 	}
 
 	if det.BucketInfo.Name == bucketName {
-		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
 		request.QueryParams["ProductName"] = "oss"
 		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":%d}", "BucketName", bucketName, "StorageCapacity", -1)
