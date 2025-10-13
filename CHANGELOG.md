@@ -1,3 +1,18 @@
+# 3.16.19
+
+## New
+
+1. Query capability for OSS clusters
+2. Configuration management capability for auto-scaling rules of EDAS K8s applications
+
+## Fixes
+
+1. Fixed the issue where the order of service IDs in SLB VServerGroup caused failure to reach the final state
+2. Fixed the issue where KMS encryption could not be enabled for OSS buckets in disaster recovery mode
+3. Fixed the issue of incorrect variable types when configuring log monitoring for SLB listeners
+
+---
+
 # 3.16.18
 
 ## New
