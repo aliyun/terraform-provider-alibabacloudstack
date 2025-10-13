@@ -1,3 +1,16 @@
+# 3.18.17
+
+## New Features
+
+1. Orchestration capability for CEN border router network instance connections (`alibabacloudstack_cen_transit_router_vbr_attachment`)
+2. Orchestration capability for CEN Connect network instance connections (`alibabacloudstack_cen_transit_router_connect_attachment`)
+3. CEN VBR health check capability (`alibabacloudstack_cen_vbr_health_check`)
+4. CEN Connect network instance connections now support peer configuration (`alibabacloudstack_cen_connect_peer`)
+5. Orchestration capability for CEN multicast domain members (`alibabacloudstack_cen_transit_router_multicast_domain_member`)
+6. Added Connect support for CEN multicast domain sources (`alibabacloudstack_cen_transit_router_multicast_domain_source`)
+
+---
+
 # 3.18.16
 
 ## New

@@ -1,3 +1,16 @@
+# 3.18.17
+
+# 新增
+
+1. Cen边界路由的网络实例连接的编排能力（alibabacloudstack_cen_transit_router_vbr_attachment）
+2. Cen Connect的网络实例连接的编排能力（alibabacloudstack_cen_transit_router_connect_attachment）
+3. Cen健康检查能力（alibabacloudstack_cen_vbr_health_check）
+4. Cen Connect的网络实例连接支持配置对端（alibabacloudstack_cen_connect_peer）
+5. Cen 组播成员的编排能力（alibabacloudstack_cen_transit_router_multicast_domain_member）
+6. Cen 组播源的增加Connect的支持（alibabacloudstack_cen_transit_router_multicast_domain_source）
+
+---
+
 # 3.18.16
 
 ## 新增
