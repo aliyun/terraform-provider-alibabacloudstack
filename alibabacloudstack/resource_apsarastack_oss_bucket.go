@@ -34,7 +34,11 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"private", "public-read", "public-read-write"}, false),
 			},
-
+			"oss_cluster": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"logging": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -97,7 +101,7 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 			"bucket_sync": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 			"storage_capacity": {
 				Type:         schema.TypeInt,
@@ -158,7 +162,8 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	storage_capacity := d.Get("storage_capacity").(int)
 	// If not present, Create Bucket
 	if det.BucketInfo.Name == "" {
-		ossEndpointData, err := ossService.GetOssEndpointList()
+		ossCluster := d.Get("oss_cluster").(string)
+		ossEndpointData, err := ossService.GetOssEndpointList(ossCluster)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
