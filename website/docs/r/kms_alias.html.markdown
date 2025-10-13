@@ -30,7 +30,7 @@ resource "alibabacloudstack_kms_alias" "alias" {
 
 The following arguments are supported:
 
-* `alias_name` - (Required, ForceNew) The alias of CMK. `Encrypt`、`GenerateDataKey`、`DescribeKey` can be called using aliases. Length of characters other than prefixes: minimum length of 1 character and maximum length of 255 characters. Must contain prefix `alias/`.
+* `alias_name` - (Required, ForceNew) The alias of CMK. `Encrypt`, `GenerateDataKey`,`DescribeKey` can be called using aliases. Length of characters other than prefixes: minimum length of 1 character and maximum length of 255 characters. Must contain prefix `alias/`.
 * `key_id` - (Required) The id of the key.
 
 

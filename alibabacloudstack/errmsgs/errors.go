@@ -391,7 +391,7 @@ func CheckEmpty(value interface{}, schemaType schema.ValueType, keys ...string) 
 }
 
 // A default message of ComplexError's Err. It is format to Resource <resource-id> <operation> Failed!!! <error source>
-const IdMsg = "Resource id：%s "
+const IdMsg = "Resource id: %s "
 const DefaultErrorMsg = "Resource %s %s Failed!!! %s"
 const RequestV1ErrorMsg = "Resource %s %s Failed!!! %s%s"
 const UpdateFailedErrorMsg = "Resource %s fields: %s not update allowed!!! %s"

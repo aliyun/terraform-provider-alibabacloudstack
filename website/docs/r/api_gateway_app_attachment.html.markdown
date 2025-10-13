@@ -81,10 +81,10 @@ resource "alibabacloudstack_api_gateway_app_attachment" "default" {
 
 The following arguments are supported:
 
-* `app_id` - (Required，ForceNew) The app that apply to the authorization.
-* `api_id` - (Required，ForceNew) The api_id that app apply to access.
-* `group_id` - (Required，ForceNew) The group that the api belongs to.
-* `stage_name` - (Required，ForceNew) Stage that the app apply to access.
+* `app_id` - (Required, ForceNew) The app that apply to the authorization.
+* `api_id` - (Required, ForceNew) The api_id that app apply to access.
+* `group_id` - (Required, ForceNew) The group that the api belongs to.
+* `stage_name` - (Required, ForceNew) Stage that the app apply to access.
 
 ## Attributes Reference
 
