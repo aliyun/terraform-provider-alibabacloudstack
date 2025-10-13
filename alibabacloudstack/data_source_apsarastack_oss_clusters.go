@@ -35,7 +35,7 @@ func dataSourceAlibabacloudStackOssClusters() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"endpoints": {
+			"clusters": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -142,7 +142,7 @@ func dataSourceAlibabacloudStackOssClustersRead(d *schema.ResourceData, meta int
 		}
 	}
 	ids := make([]string, 0)
-	endpoints := make([]map[string]interface{}, 0)
+	clusters := make([]map[string]interface{}, 0)
 	for _, v := range data.([]interface{}) {
 		object := v.(map[string]interface{})
 		if len(idsMap) > 0 {
@@ -176,7 +176,7 @@ func dataSourceAlibabacloudStackOssClustersRead(d *schema.ResourceData, meta int
 			"oss_suffix":                          object["oss-suffix"],
 		}
 		ids = append(ids, fmt.Sprint(mapping["id"]))
-		endpoints = append(endpoints, mapping)
+		clusters = append(clusters, mapping)
 	}
 
 	d.SetId(dataResourceIdHash(ids))
@@ -184,7 +184,7 @@ func dataSourceAlibabacloudStackOssClustersRead(d *schema.ResourceData, meta int
 		return errmsgs.WrapError(err)
 	}
 
-	if err := d.Set("endpoints", endpoints); err != nil {
+	if err := d.Set("clusters", clusters); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	return nil

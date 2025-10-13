@@ -163,9 +163,24 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	// If not present, Create Bucket
 	if det.BucketInfo.Name == "" {
 		ossCluster := d.Get("oss_cluster").(string)
-		ossEndpointData, err := ossService.GetOssEndpointList(ossCluster)
+		var ossEndpoint map[string]interface{}
+		ossEndpointData, err := ossService.GetOssEndpointList()
 		if err != nil {
 			return errmsgs.WrapError(err)
+		}
+		if len(ossEndpointData) > 1 && ossCluster == "" {
+			return errmsgs.Error("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
+		}
+		for _, v := range ossEndpointData {
+			endpoint := v.(map[string]interface{})
+			if endpoint["cluster"].(string) == ossCluster {
+				ossEndpoint = endpoint
+				break
+			}
+		}
+		if ossEndpoint == nil {
+			return errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OssEndpoint", ossCluster)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+
 		}
 		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
 		request.QueryParams["AppAction"] = "BucketCreate"
@@ -184,8 +199,8 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 				"bucketQuota":        storage_capacity,
 				"size":               1,
 				"xOssAcl":            acl,
-				"ossEndpoint":        ossEndpointData["oss-endpoint"],
-				"location":           ossEndpointData["location"],
+				"ossEndpoint":        ossEndpoint["oss-endpoint"],
+				"location":           ossEndpoint["location"],
 				"dualClusterEnabled": false,
 			},
 		}
@@ -257,6 +272,13 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 		return errmsgs.WrapError(err)
 	}
 	logging, err := resourceAlibabacloudStackOssBucketLoggingDescribe(client, d)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	ossEndpointData, err := ossService.GetOssEndpointList()
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
 	log.Printf("read describe logging %v", logging)
 	d.Set("bucket", d.Id())
 	if object.BucketInfo.Name == "" {
@@ -268,6 +290,13 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	d.Set("location", object.BucketInfo.Location)
 	d.Set("owner", object.BucketInfo.Owner.ID)
 	d.Set("storage_class", object.BucketInfo.StorageClass)
+	for _, v := range ossEndpointData {
+		endpoint := v.(map[string]interface{})
+		if endpoint["oss-endpoint"].(string) == object.BucketInfo.IntranetEndpoint {
+			d.Set("oss_cluster", endpoint["cluster"])
+			break
+		}
+	}
 	var list []map[string]interface{}
 	desclog := logging.Data.BucketLoggingStatus.LoggingEnabled
 	list = append(list, map[string]interface{}{"target_bucket": desclog.TargetBucket, "target_prefix": desclog.TargetPrefix})

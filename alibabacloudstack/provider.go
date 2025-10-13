@@ -1047,6 +1047,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	ascmOpenAPIEndpoint := d.Get("ascm_openapi_endpoint").(string)
 	if ascmOpenAPIEndpoint != "" {
 		config.Endpoints[connectivity.ASCMCode] = ascmOpenAPIEndpoint
+		config.Endpoints[connectivity.ASAPICode] = ascmOpenAPIEndpoint
 	}
 	if strings.ToLower(config.Protocol) == "https" {
 		config.Protocol = "HTTPS"

@@ -270,11 +270,13 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket": name,
+					"bucket":      name,
+					"oss_cluster": "${data.alibabacloudstack_oss_clusters.default.clusters[0].id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"bucket": name,
+						"bucket":      name,
+						"oss_cluster": "CdsOssHybridCluster-A-20250724-00b4",
 					}),
 				),
 			},
@@ -402,6 +404,11 @@ resource "alibabacloudstack_vpc" "vpc2" {
 func resourceOssBucketDualDependence(name string) string {
 	return fmt.Sprintf(`
 %s
+
+data "alibabacloudstack_oss_clusters" "default" {
+	name_regex = "CdsOssHybridCluster-A-20250724-00b4"
+}
+	
 `, KeyCommonTestCase)
 }
 

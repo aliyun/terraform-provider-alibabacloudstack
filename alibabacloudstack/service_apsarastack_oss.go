@@ -414,7 +414,7 @@ func (s *OssService) DeleteBucketTags(bucketName string) error {
 	return nil
 }
 
-func (s *OssService) GetOssEndpointList(ossCluster string) (map[string]interface{}, error) {
+func (s *OssService) GetOssEndpointList() ([]interface{}, error) {
 	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
 	request.QueryParams["AppAction"] = "GetOssEndpointList"
 	request.QueryParams["AppName"] = "one-console-app-oss"
@@ -432,18 +432,9 @@ func (s *OssService) GetOssEndpointList(ossCluster string) (map[string]interface
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &result)
 	data, ok := result["Data"]
 	if !ok || len(data.([]interface{})) == 0 {
-		return nil, errmsgs.Error(fmt.Sprintf("GetOssEndpointList Failed! region: %s | cluster: %s \n %#v", s.client.RegionId, ossCluster bresponse.GetHttpContentString()))
+		return nil, errmsgs.Error(fmt.Sprintf("GetOssEndpointList Failed! region: %s \n %#v", s.client.RegionId, bresponse.GetHttpContentString()))
 	}
-	if len(data.([]interface{})) > 1 && ossCluster == "" {
-		return nil, errmsgs.Error("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
-	}
-	for _, v := range data.([]interface{}) {
-		endpoint := v.(map[string]interface{})
-		if endpoint["Cluster"].(string) == ossCluster {
-			return endpoint, nil
-		}
-	}
-	return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OssEndpoint", ossCluster)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+	return data.([]interface{}), nil
 }
 
 func (s *OssService) ossTagIgnored(t map[string]interface{}) bool {
