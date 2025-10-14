@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackEdasScalingRulesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackEdasK8sApplicationScalingRulesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(100, 999)
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackEdasScalingRulesDataSourceName(rand, map[string]string{
@@ -68,17 +68,13 @@ func testAccCheckAlibabacloudStackEdasScalingRulesDataSourceName(rand int, attrM
 	for k, v := range attrMap {
 		pairs = append(pairs, k+" = "+v)
 	}
-	edasClusterId := os.Getenv("ALIBABACLOUDSTACK_EDAS_CLUSTER_ID")
 	config := fmt.Sprintf(`
 
 variable "name" {	
 	default = "testtf%d"
 }
 
-
-variable "cluster_id" {	
-	default = "%s"
-}
+%s
 
 
 variable "package_version" {	
@@ -88,10 +84,10 @@ variable "package_version" {
 resource "alibabacloudstack_edas_k8s_application" "default" {
   application_name        	= "${var.name}"
   application_description 	= "This is description of application"
-  cluster_id              	= var.cluster_id
+  cluster_id              	= local.edas_cluster_id
   replicas                	= 2
   package_type 				= "FatJar"
-  package_url     			= "http://fileserver.edas.intra.env212.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar"
+  package_url     			= "http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar"
   package_version 			= var.package_version
   jdk             			= "Open JDK 8"
   limit_mem             	= 1024
@@ -120,6 +116,6 @@ data "alibabacloudstack_edas_k8s_application_scaling_rules" "default" {
 	app_id = "${alibabacloudstack_edas_k8s_application_scaling_rule.default.app_id}"
 	%s
 }
-`, rand, edasClusterId, strings.Join(pairs, " \n "))
+`, rand, EdasClusterCommonTestCase(), os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"), strings.Join(pairs, " \n "))
 	return config
 }

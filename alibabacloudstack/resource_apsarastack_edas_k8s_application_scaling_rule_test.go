@@ -31,9 +31,10 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_basic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  nil,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -128,9 +129,10 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 			testAccPreCheck(t)
 		},
 
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  nil,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -219,16 +221,12 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_trigger(t *testing.T)
 }
 
 func resourceEdasK8sApplicationScalingRuleDependence(name string) string {
-	edasClusterId := os.Getenv("ALIBABACLOUDSTACK_EDAS_CLUSTER_ID")
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%v"
 }
 
-variable "cluster_id" {	
-	default = "%s"
-}
-
+%s
 
 variable "package_version" {	
 	default = "2025-10-09 17:17:18"
@@ -237,10 +235,10 @@ variable "package_version" {
 resource "alibabacloudstack_edas_k8s_application" "default" {
   application_name        	= "${var.name}"
   application_description 	= "This is description of application"
-  cluster_id              	= var.cluster_id
+  cluster_id              	= local.edas_cluster_id
   replicas                	= 2
   package_type 				= "FatJar"
-  package_url     			= "http://fileserver.edas.intra.env212.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar"
+  package_url     			= "http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar"
   package_version 			= var.package_version
   jdk             			= "Open JDK 8"
   limit_mem             	= 1024
@@ -248,5 +246,5 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   requests_m_cpu        	= 300
   limit_m_cpu           	= 300
 }
-`, name, edasClusterId)
+`, name, EdasClusterCommonTestCase(), os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"))
 }

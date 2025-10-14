@@ -143,19 +143,20 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckEdasK8sApplicationDestroy,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      testAccCheckEdasK8sApplicationDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"application_name": "${var.name}",
-					"cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
-					"package_type":    "FatJar",
-					"package_url":     fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
-					"package_version": "2025-07-09 13:00:18",
-					"jdk":             "Open JDK 8",
-					"replicas":        "2",
+					"cluster_id":       "${local.edas_cluster_id}",
+					"package_type":     "FatJar",
+					"package_url":      fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
+					"package_version":  "2025-07-09 13:00:18",
+					"jdk":              "Open JDK 8",
+					"replicas":         "2",
 					"internet_service_port_infos": []map[string]interface{}{
 						{
 							"target_port": "18082",
@@ -470,20 +471,21 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 			testAccPreCheck(t)
 		},
 
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckEdasK8sApplicationDestroy,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      testAccCheckEdasK8sApplicationDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"application_name": "${var.name}",
-					"cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
+					"cluster_id":       "${local.edas_cluster_id}",
 					"package_type":     "FatJar",
-					"package_url":      "http://fileserver.edas.intra.env205.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
+					"package_url":      fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
 					"package_version":  "2025-05-20 17:17:18",
 					"jdk":              "Open JDK 8",
 					"replicas":         "1",
-					"internet_slb_id":  "${alibabacloudstack_slb.default.id}",
+					"internet_slb_id":  "${alibabacloudstack_slb_loadbalancer.default.id}",
 					"internet_service_port_infos": []map[string]interface{}{
 						{
 							"target_port": "18082",
@@ -491,7 +493,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 							"protocol":    "HTTP",
 						},
 					},
-					"intranet_slb_id": "${alibabacloudstack_slb.default1.id}",
+					"intranet_slb_id": "${alibabacloudstack_slb_loadbalancer.default1.id}",
 					"intranet_service_port_infos": []map[string]interface{}{
 						{
 							"target_port": "8080",
@@ -585,7 +587,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 					Config: testAccConfig(map[string]interface{}{
 						"count":            "2",
 						"application_name": "${var.name}-${count.index}",
-						"cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
+						"cluster_id":       "${local.edas_cluster_id}",
 						"replicas":         "1",
 						"package_type":     "Image",
 						"image_url":        image,
@@ -609,53 +611,18 @@ func testAccCheckEdasK8sApplicationDestroy(s *terraform.State) error {
 
 func resourceEdasK8sApplicationConfigDependence(name string) string {
 	return fmt.Sprintf(`
-		variable "name" {
-			default = "%v"
-		}
+	variable "name" {
+		default = "%v"
+	}
 		
-		variable "cs_k8s_id" {
-			default = "%s"
-		}
+	%s
 		
-		%s
+	resource "alibabacloudstack_slb_loadbalancer" "default" {
+		name          = "${var.name}_slb"
+		vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
+		address_type  = "internet"
+		specification = "slb.s2.small"
+	}
 
-		%s
-		
-		resource "alibabacloudstack_slb" "default1" {
-			name = "${var.name}2"
-			vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
-			address_type       = "intranet"
-			specification        = "slb.s2.small"
-		}
-
-		locals {
-			create_k8s_count = var.cs_k8s_id == "" ? 1 : 0
-		} 
-		
-		resource "alibabacloudstack_cs_kubernetes" "default" {
-			count = local.create_k8s_count
-			name = var.name
-			version 					= "1.20.11-aliyun.1"
-			os_type 					= "linux"
-			platform 					= "AliyunLinux"
-			num_of_nodes 				= "1"
-			master_count				= "3"
-			master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
-			master_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
-			master_disk_category 		= "cloud_ssd"
-			vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
-			worker_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
-			worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
-			worker_disk_category 		= "cloud_ssd"
-			password 					= " "
-			pod_cidr 					= "172.20.0.0/16"
-			service_cidr 				= "172.21.0.0/20"
-			worker_disk_size 			= "40"
-			master_disk_size 			= "40"
-			slb_internet_enabled 		= "true"
-		}
-		resource "alibabacloudstack_edas_k8s_cluster" "default" {
-			cs_cluster_id = var.cs_k8s_id == "" ? "${alibabacloudstack_cs_kubernetes.default.0.id}" : var.cs_k8s_id
-		}
-		`, name, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SlbCommonTestCase, DataAlibabacloudstackInstanceTypes) // GeneratePassword(12))
+		`, name, EdasClusterCommonTestCase()) // GeneratePassword(12))
 }

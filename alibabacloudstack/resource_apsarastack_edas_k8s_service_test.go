@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -28,14 +29,15 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckEdasK8sServicDestroy,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      testAccCheckEdasK8sServicDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"app_id":       "${alibabacloudstack_edas_k8s_application.default.id}",
-					"service_name": "${var.service_name}",
+					"service_name": "${var.name}",
 					"type":         "ClusterIP",
 					"port_mappings": []map[string]interface{}{
 						{
@@ -97,14 +99,15 @@ func TestAccAlibabacloudStackEdasK8sSerice_NodePort(t *testing.T) {
 			testAccPreCheck(t)
 		},
 
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckEdasK8sServicDestroy,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      testAccCheckEdasK8sServicDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"app_id":       "${alibabacloudstack_edas_k8s_application.default.id}",
-					"service_name": "${var.service_name}",
+					"service_name": "${var.name}",
 					"type":         "NodePort",
 					"port_mappings": []map[string]interface{}{
 						{
@@ -144,62 +147,33 @@ func testAccCheckEdasK8sServicDestroy(s *terraform.State) error {
 func resourceEdasK8sSericeDependence(name string) string {
 
 	return fmt.Sprintf(`
-		variable "service_name" {
-		  default = "%v"
-		}
-
-		variable "package_url" {
-		  default = "http://fileserver.edas.intra.env212.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar"
-		}
-
-		resource "alibabacloudstack_cs_kubernetes" "default" {
-			name = var.name
-			version 					= "1.20.11-aliyun.1"
-			os_type 					= "linux"
-			platform 					= "AliyunLinux"
-			num_of_nodes 				= "1"
-			master_count				= "3"
-			master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
-			master_instance_types 		= ["ecs.n4v2.large","ecs.n4v2.large","ecs.n4v2.large"]
-			master_disk_category 		= "cloud_ssd"
-			vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
-			worker_instance_types 		= ["ecs.n4v2.large"]
-			worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
-			worker_disk_category 		= "cloud_ssd"
-			password 					= "%s"
-			pod_cidr 					= "172.20.0.0/16"
-			service_cidr 				= "172.21.0.0/20"
-			worker_disk_size 			= "40"
-			master_disk_size 			= "40"
-			slb_internet_enabled 		= "true"
+		variable "name" {
+			default = "%v"
 		}
 		
-				
-		resource "alibabacloudstack_edas_k8s_cluster" "default" {
-		  cs_cluster_id = "${alibabacloudstack_cs_kubernetes.default.id}"
-		}
+		%s
 
 		resource "alibabacloudstack_edas_k8s_application" "default" {
-			package_type            = "FatJar"
-			application_name        = "terraform-test-fatjar"
-			application_description = "This is description of application"
-			cluster_id              = "${alibabacloudstack_edas_k8s_cluster.default.id}"
-			replicas                = 1
-			package_url    		 	= "http://fileserver.edas.intra.env212.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar"
-			package_version 		= "2025-02-21 18:46:19"
-			jdk             		= "Open JDK 8"
-			internet_target_port  	= 18082
-			internet_slb_port     	= 8080
-			internet_slb_protocol 	= "TCP"
-			limit_mem             	= 1024
-			limit_m_cpu           	= 1000
-			requests_mem          	= 1024
-			requests_m_cpu        	= 1000
-			command               	= "/bin/sh"
-			command_args          	= ["-c", "sleep 1001", ]
-			pre_stop              	= "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
-			post_start            	= "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
-			namespace             	= "default"
+			package_type			= "FatJar"
+			application_name		= "terraform-test-fatjar"
+			application_description	= "This is description of application"
+			cluster_id				= local.edas_cluster_id
+			replicas				= 1
+			package_url				= "http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar"
+			package_version			= "2025-02-21 18:46:19"
+			jdk						= "Open JDK 8"
+			internet_target_port	= 18082
+			internet_slb_port		= 8080
+			internet_slb_protocol	= "TCP"
+			limit_mem				= 1024
+			limit_m_cpu				= 1000
+			requests_mem			= 1024
+			requests_m_cpu			= 1000
+			command					= "/bin/sh"
+			command_args			= ["-c", "sleep 1001", ]
+			pre_stop				= "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
+			post_start				= "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
+			namespace				= "default"
 		}
-		`, name, getAccTestPassword(12))
+		`, name, EdasClusterCommonTestCase(), os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"))
 }

@@ -1447,6 +1447,59 @@ resource "alibabacloudstack_common_bandwidth_package" "foo" {
 
 `
 
+func EdasClusterCommonTestCase() string {
+	return fmt.Sprintf(`
+variable "existed_cluster_id" {
+	default = "%s"
+}
+
+%s
+
+%s
+
+locals {
+	create_count = var.existed_cluster_id == "" ? 1 : 0
+}
+
+resource "alibabacloudstack_cs_kubernetes" "default" {
+	count						= local.create_count
+	name						= var.name
+	version						= "1.30.7-aliyun.1"
+	os_type						= "linux"
+	platform					= "AliyunLinux"
+	num_of_nodes				= "3"
+	master_count				= "3"
+	master_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+	master_instance_types		= ["ecs.n4v2.large","ecs.n4v2.large","ecs.n4v2.large"]
+	master_disk_category		= "cloud_ssd"
+	vpc_id						= "${alibabacloudstack_vpc_vpc.default.id}"
+	worker_instance_types		= ["ecs.n4v2.large"]
+	worker_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}"]
+	worker_disk_category		= "cloud_ssd"
+	password					= random_password.password.0.result
+	pod_cidr					= "172.20.0.0/16"
+	service_cidr				= "172.21.0.0/20"
+	worker_disk_size			= "40"
+	master_disk_size			= "40"
+	slb_internet_enabled		= "true"
+	security_group_id			= alibabacloudstack_ecs_securitygroup.default.id
+	runtime	 {
+		name	= "containerd"
+		version	= "1.6.28"
+	}
+}
+
+resource "alibabacloudstack_edas_k8s_cluster" "default" {
+	count			= local.create_count
+	cs_cluster_id	= "${alibabacloudstack_cs_kubernetes.default.0.id}"
+}
+
+locals {
+	edas_cluster_id = var.existed_cluster_id == "" ? alibabacloudstack_edas_k8s_cluster.default.0.id : var.existed_cluster_id
+}
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1))
+}
+
 const VrtCommonTestCase = `
 
 data "alibabacloudstack_express_connect_physical_connections" "nameRegex" {
