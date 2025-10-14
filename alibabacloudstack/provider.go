@@ -249,6 +249,20 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_RESOURCE_GROUP_SET", nil),
 				Description: descriptions["resource_group_set_name"],
 			},
+			"kms_endpoint": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_KMS_ENDPOINT", nil),
+				Description: descriptions["kms_endpoint"],
+				Deprecated:  "Use schema endpoints replace kms_endpoint.",
+			},
+			"asapi_endpoint": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ASAPI_ENDPOINT", nil),
+				Description: descriptions["asapi_endpoint"],
+				Deprecated:  "Use schema endpoints replace asapi_endpoint.",
+			},
 			"dataworkspublic": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -1047,7 +1061,12 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	ascmOpenAPIEndpoint := d.Get("ascm_openapi_endpoint").(string)
 	if ascmOpenAPIEndpoint != "" {
 		config.Endpoints[connectivity.ASCMCode] = ascmOpenAPIEndpoint
-		config.Endpoints[connectivity.ASAPICode] = ascmOpenAPIEndpoint
+	}
+	if kmsEndpoint, ok := d.GetOk("kms_endpoint"); ok && kmsEndpoint.(string) != "" {
+		config.Endpoints[connectivity.KmsCode] = kmsEndpoint.(string)
+	}
+	if asapiEndpoint, ok := d.GetOk("asapi_endpoint"); ok && asapiEndpoint.(string) != "" {
+		config.Endpoints[connectivity.ASAPICode] = asapiEndpoint.(string)
 	}
 	if strings.ToLower(config.Protocol) == "https" {
 		config.Protocol = "HTTPS"

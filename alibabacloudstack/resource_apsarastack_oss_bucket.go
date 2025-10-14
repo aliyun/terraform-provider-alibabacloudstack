@@ -37,6 +37,7 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 			"oss_cluster": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"logging": {
@@ -80,7 +81,6 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 			},
 			"location": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"owner": {
@@ -168,14 +168,19 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		if len(ossEndpointData) > 1 && ossCluster == "" {
-			return errmsgs.Error("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
-		}
-		for _, v := range ossEndpointData {
-			endpoint := v.(map[string]interface{})
-			if endpoint["cluster"].(string) == ossCluster {
-				ossEndpoint = endpoint
-				break
+		if ossCluster == "" {
+			if len(ossEndpointData) > 1 {
+				return errmsgs.Error("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
+			} else {
+				ossEndpoint = ossEndpointData[0].(map[string]interface{})
+			}
+		} else {
+			for _, v := range ossEndpointData {
+				endpoint := v.(map[string]interface{})
+				if endpoint["cluster"].(string) == ossCluster {
+					ossEndpoint = endpoint
+					break
+				}
 			}
 		}
 		if ossEndpoint == nil {

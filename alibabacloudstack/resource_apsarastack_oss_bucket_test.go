@@ -271,12 +271,11 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"bucket":      name,
-					"oss_cluster": "${data.alibabacloudstack_oss_clusters.default.clusters[0].id}",
+					"oss_cluster": "${data.alibabacloudstack_oss_clusters.default.clusters.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bucket":      name,
-						"oss_cluster": "CdsOssHybridCluster-A-20250724-00b4",
 					}),
 				),
 			},
@@ -288,7 +287,7 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"bucket_sync":    "true",
-					"dual_kms_key":   "${alibabacloudstack_kms_key.defaylt.id}",
+					"dual_kms_key":   "${alibabacloudstack_kms_key.key.id}",
 					"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -406,7 +405,6 @@ func resourceOssBucketDualDependence(name string) string {
 %s
 
 data "alibabacloudstack_oss_clusters" "default" {
-	name_regex = "CdsOssHybridCluster-A-20250724-00b4"
 }
 	
 `, KeyCommonTestCase)
