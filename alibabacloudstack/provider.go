@@ -1145,9 +1145,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if slsOpenAPIEndpoint != "" {
 		config.Endpoints[connectivity.SlSDataCode] = slsOpenAPIEndpoint
 	}
-	kmsEndpoint := d.Get("kms_endpoint").(string)
-	if kmsEndpoint != "" {
-		config.Endpoints[connectivity.KmsCode] = kmsEndpoint
+	if kmsEndpoint, ok := d.GetOk("kms_endpoint"); ok && kmsEndpoint.(string) != "" {
+		config.Endpoints[connectivity.KmsCode] = kmsEndpoint.(string)
 	}
 
 	if asapiEndpoint, ok := d.GetOk("asapi_endpoint"); ok && asapiEndpoint.(string) != "" {
