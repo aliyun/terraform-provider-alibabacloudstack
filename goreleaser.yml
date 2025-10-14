@@ -20,7 +20,7 @@ builds:
   
   hooks:
     post: 
-      - cmd: 'zip -j {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.zip {{ .Path }} ./LICENSE ./README.md ./CHANGELOG.md'
+      - cmd: 'zip -9 -j {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.zip {{ .Path }} ./LICENSE ./README.md ./CHANGELOG.md'
       - cmd: 'rm -f {{ .Path }}'
   
   goos:
