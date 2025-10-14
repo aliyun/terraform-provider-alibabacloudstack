@@ -85,7 +85,7 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 					}
 					return
 				},
-				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool{
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					re := regexp.MustCompile(`\r?\n|\r`)
 					oldValue = re.ReplaceAllString(oldValue, "")
 					newValue = re.ReplaceAllString(newValue, "")

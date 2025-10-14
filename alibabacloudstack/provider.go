@@ -422,6 +422,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_networkinterfaces":                            dataSourceAlibabacloudStackNetworkInterfaces(),
 		"alibabacloudstack_oss_buckets":                                      dataSourceAlibabacloudStackOssBuckets(),
 		"alibabacloudstack_oss_bucket_objects":                               dataSourceAlibabacloudStackOssBucketObjects(),
+		"alibabacloudstack_oss_clusters":                                     dataSourceAlibabacloudStackOssClusters(),
 		"alibabacloudstack_ons_instances":                                    dataSourceAlibabacloudStackOnsInstances(),
 		"alibabacloudstack_ons_topics":                                       dataSourceAlibabacloudStackOnsTopics(),
 		"alibabacloudstack_ons_groups":                                       dataSourceAlibabacloudStackOnsGroups(),
@@ -552,6 +553,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_multicast_domain_members":      dataSourceAlibabacloudStackCenTransitRouterMulticastDomainMembers(),
 		"alibabacloudstack_cen_vbr_health_checks":                            dataSourceAlibabacloudStackCenVbrHealthChecks(),
 		"alibabacloudstack_cen_transit_router_connect_peers":                 dataSourceAlibabacloudStackCenTransitRouterConnectPeers(),
+		"alibabacloudstack_edas_k8s_application_scaling_rules": dataSourceAlibabacloudStackEdasScalingRules(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -955,7 +957,8 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_connect_attachment":           resourceAlibabacloudStackCenTransitRouterConnectAttachment(),
 		"alibabacloudstack_cen_vbr_health_check":                            resourceAlibabacloudStackCenVbrHealthCheck(),
 		"alibabacloudstack_cen_transit_router_connect_peer":                 resourceAlibabacloudStackCenTransitRouterConnectPeer(),
-	}
+		"alibabacloudstack_edas_k8s_application_scaling_rule":               resourceAlibabacloudStackEdasK8sApplicationScalingRule(),
+		}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
 	}
@@ -1149,7 +1152,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	if asapiEndpoint, ok := d.GetOk("asapi_endpoint"); ok && asapiEndpoint.(string) != "" {
 		config.Endpoints[connectivity.ASAPICode] = asapiEndpoint.(string)
-		config.Endpoints[connectivity.OneRouterCode] = asapiEndpoint.(string)
 	}
 
 	slsEndpoint := d.Get("sls_endpoint").(string)

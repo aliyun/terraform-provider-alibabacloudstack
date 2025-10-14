@@ -41,15 +41,24 @@ func TestAccAlibabacloudStackSlbVservergroup0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
+					"load_balancer_id":   "${alibabacloudstack_slb.default.id}",
+					"vserver_group_name": "vserver_group_name",
+					"servers": []map[string]interface{}{
+						{
+							"server_ids": []string{"${alibabacloudstack_ecs_instance.default.id}", "${alibabacloudstack_ecs_instance.default1.id}"},
+							"port":       "80",
+							"weight":     "100",
+							"type":       "ecs",
+						},
+					},
 				}),
-				// Check: resource.ComposeTestCheckFunc(
-				// 	testAccCheck(map[string]string{
-
-				// 		"vserver_group_name": CHECKSET,
-
-				// 	}),
-				// ),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vserver_group_name":     "vserver_group_name",
+						"servers.#":              "1",
+						"servers.0.server_ids.#": "2",
+					}),
+				),
 			},
 
 			{
@@ -97,13 +106,30 @@ func AlibabacloudTestAccSlbVservergroupBasicdependence(name string) string {
 
 	resource "alibabacloudstack_slb" "default" {
 		name = "${var.name}"
-		address_type       = "internet"
 		specification        = "slb.s2.small"
 	}
+	
+	%s
 
+	resource "alibabacloudstack_ecs_instance" "default1" {
+		image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type        = "${local.default_instance_type_id}"
+		system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+		system_disk_size     = 20
+		system_disk_name     = "test_sys_disk"
+		security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
+		instance_name        = "${var.name}_ecs"
+		vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
+		zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
+		is_outdated          = false
+		lifecycle {
+			ignore_changes = [
+			instance_type
+			]
+		}
+	}
 
-
-	`, name)
+	`, name, ECSInstanceCommonTestCase)
 }
 
 // func TestAccAlibabacloudStackSlbVservergroup1(t *testing.T) {

@@ -100,7 +100,7 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 			options = append(options, oss.Marker(nextMarker))
 		}
 
-		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		request.QueryParams["OpenApiAction"] = "GetService"
 		request.QueryParams["ProductName"] = "oss"
 		bresponse, err := client.ProcessCommonRequest(request)

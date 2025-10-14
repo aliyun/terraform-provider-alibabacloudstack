@@ -44,7 +44,7 @@ func resourceAlibabacloudStackSlbServerGroup() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"server_ids": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Required: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							MinItems: 1,
@@ -183,7 +183,7 @@ func resourceAlibabacloudStackSlbServerGroupUpdate(d *schema.ResourceData, meta 
 			for _, rmserver := range remove {
 				rms := rmserver.(map[string]interface{})
 				if v, ok := rms["server_ids"]; ok {
-					server_ids := v.([]interface{})
+					server_ids := v.(*schema.Set).List()
 					for _, id := range server_ids {
 						idPort := fmt.Sprintf("%s:%d", id, rms["port"])
 						if removeserverSet.Contains(idPort) {
@@ -227,7 +227,7 @@ func resourceAlibabacloudStackSlbServerGroupUpdate(d *schema.ResourceData, meta 
 			for _, addserver := range add {
 				adds := addserver.(map[string]interface{})
 				if v, ok := adds["server_ids"]; ok {
-					server_ids := v.([]interface{})
+					server_ids := v.(*schema.Set).List()
 					for _, id := range server_ids {
 						idPort := fmt.Sprintf("%s:%d", id, adds["port"])
 						if addServerSet.Contains(idPort) {
@@ -279,15 +279,13 @@ func resourceAlibabacloudStackSlbServerGroupUpdate(d *schema.ResourceData, meta 
 		request := slb.CreateSetVServerGroupAttributeRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.VServerGroupId = d.Id()
-		if nameUpdate {
-			request.VServerGroupName = name
-		}
+		request.VServerGroupName = name
 		if serverUpdate {
 			servers := make([]interface{}, 0)
 			for _, server := range d.Get("servers").(*schema.Set).List() {
 				s := server.(map[string]interface{})
 				if v, ok := s["server_ids"]; ok {
-					server_ids := v.([]interface{})
+					server_ids := v.(*schema.Set).List()
 					for _, id := range server_ids {
 						idPort := fmt.Sprintf("%s:%d", id, s["port"])
 						if updateServerSet.Contains(idPort) {
@@ -313,6 +311,7 @@ func resourceAlibabacloudStackSlbServerGroupUpdate(d *schema.ResourceData, meta 
 				raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 					return slbClient.SetVServerGroupAttribute(request)
 				})
+				addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 				if err != nil {
 					errmsg := ""
 					if response, ok := raw.(*slb.SetVServerGroupAttributeResponse); ok {
@@ -320,12 +319,12 @@ func resourceAlibabacloudStackSlbServerGroupUpdate(d *schema.ResourceData, meta 
 					}
 					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 				}
-				addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			}
 		} else {
 			raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 				return slbClient.SetVServerGroupAttribute(request)
 			})
+			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			if err != nil {
 				errmsg := ""
 				if response, ok := raw.(*slb.SetVServerGroupAttributeResponse); ok {
@@ -333,7 +332,6 @@ func resourceAlibabacloudStackSlbServerGroupUpdate(d *schema.ResourceData, meta 
 				}
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		}
 	}
 	d.Partial(false)

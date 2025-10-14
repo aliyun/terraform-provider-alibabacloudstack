@@ -78,7 +78,7 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 	}
 
 	if det.BucketInfo.Name == bucketName {
-		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		mergeMaps(request.QueryParams, map[string]string{
 			"OpenApiAction": "PutBucketEncryption",
 			"ProductName":   "oss",

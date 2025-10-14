@@ -1055,3 +1055,25 @@ type EdasK8sAppAffinity struct {
 		} `json:"preferredDuringSchedulingIgnoredDuringExecution"`
 	} `json:"podAntiAffinity"`
 }
+
+func (s *EdasService) DescribeEdasK8sApplicationScalingRule(id string) (map[string]interface{}, error) {
+	param := strings.Split(id, ":")
+	request := map[string]interface{}{
+		"AppId": param[0],
+	}
+	resp, err := s.client.DoTeaRequest("GET", "Edas", "2017-08-01", "DescribeApplicationScalingRules", "/pop/v1/eam/scale/application_scaling_rules", nil, request, nil)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+
+	}
+	result, err := jsonpath.Get("$.Data.result", resp)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Data.result", resp)
+	}
+
+	if len(result.([]interface{})) > 0 {
+		data := result.([]interface{})
+		return data[0].(map[string]interface{}), nil
+	}
+	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("edas_k8s_application_scaling_rule", id))
+}

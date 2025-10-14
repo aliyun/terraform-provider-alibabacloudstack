@@ -132,7 +132,7 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bucket":           name,
-						"storage_capacity": "-1",
+						"storage_capacity": "1024",
 						"tags.%":           "2",
 						"tags.Created":     "TF",
 						"tags.For":         "Test",
@@ -188,11 +188,11 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"storage_capacity": "10",
+					"storage_capacity": "2048",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"storage_capacity": "10",
+						"storage_capacity": "2048",
 					}),
 				),
 			},
@@ -258,7 +258,7 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketDualDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -270,11 +270,12 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket": name,
+					"bucket":      name,
+					"oss_cluster": "${data.alibabacloudstack_oss_clusters.default.clusters.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"bucket": name,
+						"bucket":      name,
 					}),
 				),
 			},
@@ -285,11 +286,15 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket_sync": "false",
+					"bucket_sync":    "true",
+					"dual_kms_key":   "${alibabacloudstack_kms_key.key.id}",
+					"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"bucket_sync": "false",
+						"bucket_sync":    "true",
+						"dual_kms_key":   CHECKSET,
+						"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
 					}),
 				),
 			},
@@ -393,6 +398,16 @@ resource "alibabacloudstack_vpc" "vpc2" {
 }
 %s
 `, name, name, KeyCommonTestCase)
+}
+
+func resourceOssBucketDualDependence(name string) string {
+	return fmt.Sprintf(`
+%s
+
+data "alibabacloudstack_oss_clusters" "default" {
+}
+	
+`, KeyCommonTestCase)
 }
 
 var ossBucketBasicMap = map[string]string{

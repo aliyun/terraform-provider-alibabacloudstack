@@ -3,12 +3,14 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -19,18 +21,23 @@ type OssService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+type BucketSyncRule struct {
+	Status                      string            `json:"Status"`
+	Destination                 map[string]string `json:"Destination"`
+	Action                      string            `json:"Action"`
+	ID                          string            `json:"ID"`
+	SyncRole                    string            `json:"SyncRole"`
+	SrcLocation                 string            `json:"SrcLocation"`
+	EncryptionConfiguration     map[string]string `json:"EncryptionConfiguration"`
+	HistoricalObjectReplication string            `json:"HistoricalObjectReplication"`
+}
+
 type BucketSyncResponse struct {
 	RequestID string `json:"requestId"`
 	Code      string `json:"code"`
 	Data      struct {
 		ReplicationConfiguration struct {
-			Rule []struct {
-				Status                      string            `json:"Status"`
-				Destination                 map[string]string `json:"Destination"`
-				Action                      string            `json:"Action"`
-				ID                          string            `json:"ID"`
-				HistoricalObjectReplication string            `json:"HistoricalObjectReplication"`
-			} `json:"Rule"`
+			Rule []BucketSyncRule `json:"Rule"`
 		} `json:"ReplicationConfiguration"`
 	} `json:"data"`
 	Cost            int    `json:"cost"`
@@ -84,7 +91,7 @@ type BucketEncryptionResponse struct {
 }
 
 func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoResult, err error) {
-	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetService"
 	request.QueryParams["ProductName"] = "oss"
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -125,7 +132,7 @@ func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoRes
 }
 
 func (s *OssService) ListOssBucket() (response []BucketListBucket, err error) {
-	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetService"
 	request.QueryParams["ProductName"] = "oss"
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -258,7 +265,7 @@ func (s *OssService) WaitForOssBucket(id string, status Status, timeout int) err
 }
 
 func (s *OssService) HeadOssBucketObject(bucketName string, objectName string) error {
-	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
+	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
 	mergeMaps(request.QueryParams, map[string]string{
 		"AppAction": "HeadObject",
 		"AppName":   "one-console-app-oss",
@@ -320,7 +327,7 @@ func (s *OssService) PutOssBucketTags(bucketName string, tags []OssTags) error {
 	}
 
 	content := fmt.Sprintf(`<Tagging><TagSet>%s</TagSet></Tagging>`, osstags)
-	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	mergeMaps(request.QueryParams, map[string]string{
 		"OpenApiAction": "PutBucketTags",
 		"ProductName":   "oss",
@@ -353,7 +360,7 @@ func (s *OssService) PutOssBucketTags(bucketName string, tags []OssTags) error {
 
 func (s *OssService) GetBucketTags(bucketName string) (tags []interface{}, err error) {
 	tags = make([]interface{}, 0)
-	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	mergeMaps(request.QueryParams, map[string]string{
 		"OpenApiAction": "GetBucketTags",
 		"ProductName":   "oss",
@@ -391,7 +398,7 @@ func (s *OssService) GetBucketTags(bucketName string) (tags []interface{}, err e
 }
 
 func (s *OssService) DeleteBucketTags(bucketName string) error {
-	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	mergeMaps(request.QueryParams, map[string]string{
 		"OpenApiAction": "DeleteBucketTags",
 		"ProductName":   "oss",
@@ -409,4 +416,87 @@ func (s *OssService) DeleteBucketTags(bucketName string) error {
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetBucketTags", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 	}
 	return nil
+}
+
+func (s *OssService) GetOssEndpointList() ([]interface{}, error) {
+	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
+	request.QueryParams["AppAction"] = "GetOssEndpointList"
+	request.QueryParams["AppName"] = "one-console-app-oss"
+	request.QueryParams["Params"] = fmt.Sprintf("{\"params\":{\"region\":\"%s\"}}", s.client.RegionId)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("GetOssEndpointList", bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetOssEndpointList", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+	}
+	result := make(map[string]interface{})
+	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &result)
+	data, ok := result["Data"]
+	if !ok || len(data.([]interface{})) == 0 {
+		return nil, errmsgs.Error(fmt.Sprintf("GetOssEndpointList Failed! region: %s \n %#v", s.client.RegionId, bresponse.GetHttpContentString()))
+	}
+	return data.([]interface{}), nil
+}
+
+func (s *OssService) ossTagIgnored(t map[string]interface{}) bool {
+	filter := []string{"^aliyun", "^acs:", "^ascm:", "^http://", "^https://"}
+	for _, v := range filter {
+		ok, _ := regexp.MatchString(v, t["Key"].(string))
+		if ok {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *OssService) GetBucketSync(bucketName string) (object *BucketSyncResponse, err error) {
+	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	request.QueryParams["OpenApiAction"] = "GetBucketSync"
+	request.QueryParams["ProductName"] = "oss"
+	request.QueryParams["Params"] = fmt.Sprintf("{\"BucketName\":\"%s\"}", bucketName)
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "GetBucketSync", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+	}
+	bucketSync := BucketSyncResponse{}
+	err = json.Unmarshal([]byte(bresponse.GetHttpContentString()), &bucketSync)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	}
+	return &bucketSync, nil
+}
+
+func (s *OssService) OssBucketSyncStateRefreshFunc(bucketName string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		result, err := s.GetBucketSync(bucketName)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		var object BucketSyncRule
+		for _, rule := range result.Data.ReplicationConfiguration.Rule {
+			if rule.SrcLocation == "" {
+				object = rule
+				break
+			}
+		}
+		for _, failState := range failStates {
+			if object.Status == failState {
+				return object, object.Status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Status))
+			}
+		}
+		return object, object.Status, nil
+	}
 }
