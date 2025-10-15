@@ -23,9 +23,41 @@ func TestAccAlibabacloudStackAckTemplate0(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testaccAckTemplate%d", rand)
+
+	ackTemplateContentTemplate = fmt.Sprintf(`<<EOF
+		apiVersion: apps/v1
+		kind: Deployment
+		metadata:
+		labels:
+			vsw: test
+		name: nginx-deployment-basic
+		namespace: default
+		spec:
+		replicas: 1
+		selector:
+			matchLabels:
+			vsw: test
+		template:
+			metadata:
+			labels:
+				vsw: test
+			spec:
+			containers:
+				- command:
+					- sleep
+					- '%%s'
+				image: >-
+					registry.acs.%s/acs/busybox:1.33.1
+				imagePullPolicy: IfNotPresent
+				name: vsw
+		EOF`, os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"))
+
+	ackTemplateContent1 := fmt.Sprintf(ackTemplateContentTemplate, 100)
+	ackTemplateContent2 := fmt.Sprintf(ackTemplateContentTemplate, 200)
+
 	modify_name := fmt.Sprintf("tf-testaccAckTemplatemodify%d", rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccAckTemplateBasicdependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccAckTemplateBasicdependence(ackTemplateContent1, ackTemplateContent2))
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -39,14 +71,14 @@ func TestAccAlibabacloudStackAckTemplate0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"template": "${var.template_content}",
+					"template":      "${var.template_content}",
 					"description":   name,
 					"name":          name,
 					"template_type": "kubernetes",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"template": CHECKSET,
+						"template":      ackTemplateContent1,
 						"description":   name,
 						"name":          name,
 						"template_type": "kubernetes",
@@ -72,7 +104,7 @@ func TestAccAlibabacloudStackAckTemplate0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"template": CHECEKSET,
+						"template": ackTemplateContent2,
 					}),
 				),
 			},
@@ -104,71 +136,21 @@ var AlibabacloudTestAccAckTemplateCheckmap = map[string]string{
 	"updated": CHECKSET,
 }
 
-func AlibabacloudTestAccAckTemplateBasicdependence(name string) string {
-	return fmt.Sprintf(
-		`
+func AlibabacloudTestAccAckTemplateBasicdependence(ackTemplateContent1, ackTemplateContent2 string) func(string) string {
+	return func(name string) string {
+		return fmt.Sprintf(
+			`
 variable "name" {
 	default = "%s"
 }
 
 variable "template_content" {
-	default = <<EOF
-	apiVersion: apps/v1
-	kind: Deployment
-	metadata:
-	labels:
-		vsw: test
-	name: nginx-deployment-basic
-	namespace: default
-	spec:
-	replicas: 1
-	selector:
-		matchLabels:
-		vsw: test
-	template:
-		metadata:
-		labels:
-			vsw: test
-		spec:
-		containers:
-			- command:
-				- sleep
-				- '10000001'
-			image: >-
-				registry.acs.%s/acs/busybox:1.33.1
-			imagePullPolicy: IfNotPresent
-			name: vsw
-	EOF
+	default = %s
 }
 
 variable "template_content_update" {
-	default = <<EOF
-	apiVersion: apps/v1
-	kind: Deployment
-	metadata:
-	labels:
-		vsw: test
-	name: nginx-deployment-basic
-	namespace: default
-	spec:
-	replicas: 1
-	selector:
-		matchLabels:
-		vsw: test
-	template:
-		metadata:
-		labels:
-			vsw: test
-		spec:
-		containers:
-			- command:
-				- sleep
-				- '10000002'
-			image: >-
-				registry.acs.%s/acs/busybox:1.33.1
-			imagePullPolicy: IfNotPresent
-			name: vsw
-	EOF
+	default = %s
 }
-`, name, os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"), os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"))
+`, name, ackTemplateContent1, ackTemplateContent2)
+	}
 }
