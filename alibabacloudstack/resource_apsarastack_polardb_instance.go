@@ -309,7 +309,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	vpcService := VpcService{client}
 
 	var VSwitchId, InstanceNetworkType, ZoneIdSlave1, ZoneIdSlave2, ZoneId, VPCId, arnrole string
-
+	var err error
 	var encryption bool
 	EncryptionKey := d.Get("encryption_key").(string)
 	encryption = d.Get("encryption").(bool)
@@ -317,12 +317,11 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	log.Print("Encryption key input")
 	if EncryptionKey != "" && encryption {
 		log.Print("Encryption key condition passed")
-		arnrole, err := PolardbService.CheckCloudResourceAuthorized()
+		arnrole, err = PolardbService.CheckCloudResourceAuthorized()
 		if err != nil {
 			return errmsgs.WrapErrorf(err, "CheckCloudResourceAuthorized", "CheckCloudResourceAuthorized", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		d.Set("role_arn", arnrole)
-		log.Printf("check arnrole %v", arnrole)
 	} else if EncryptionKey == "" && encryption {
 		return errmsgs.WrapErrorf(nil, "Add EncryptionKey or Set encryption to false", "CheckCloudResourceAuthorized", errmsgs.AlibabacloudStackSdkGoERROR)
 	} else if EncryptionKey != "" && !encryption {
@@ -332,7 +331,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	}
 	d.Set("encryption", encryption)
 	log.Printf("encryptionbool %v", d.Get("encryption").(bool))
-
+	log.Printf("check arnrole %v", arnrole)
 	enginever := Trim(d.Get("engine_version").(string))
 	engine := Trim(d.Get("engine").(string))
 	DBInstanceStorage := connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int)
@@ -424,6 +423,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	}
 	log.Printf("request245 %v", request.QueryParams)
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug("CreateDBInstance", bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -431,7 +431,6 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "CreateDBInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("CreateDBInstance", bresponse, request, request.QueryParams)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbCreatedbinstanceResponse)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
