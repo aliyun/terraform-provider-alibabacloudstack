@@ -101,17 +101,17 @@ func dataSourceAlibabacloudStackAckTemplatesRead(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// Build request query params
-	queryParams := make(map[string]string)
-	queryParams["TemplateType"] = "kubernetes"
+	reqQuery := map[string]interface{}{
+		"template_type": "kubernetes",
+	}
 
-	// Call API to get templates list
-	resp, err := client.DoTeaRequest("GET", "cs", "2015-12-15", "DescribeTemplates", "/templates", queryParams, nil, nil)
+	response, err := client.DoTeaRequest("GET", "cs", "2015-12-15", "DescribeTemplates", "/templates", nil, reqQuery, nil)
 	if err != nil {
 		return err
 	}
 
 	// Parse response
-	templatesRaw, ok := resp["templates"]
+	templatesRaw, ok := response["templates"]
 	if !ok || templatesRaw == nil {
 		templatesRaw = []interface{}{}
 	}

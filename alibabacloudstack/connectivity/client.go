@@ -1229,7 +1229,18 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 				if e != nil {
 					return r, e
 				} else {
-					return r["body"].(map[string]interface{}), e
+					// Handle both map and slice responses
+					bodyData, ok := r["body"].(map[string]interface{})
+					if !ok {
+						// If it's not a map, check if it's a slice
+						if sliceData, ok := r["body"].([]interface{}); ok {
+							// Convert slice to map with a "data" key
+							return map[string]interface{}{"data": sliceData}, e
+						}
+						// If neither, return empty map
+						return map[string]interface{}{}, e
+					}
+					return bodyData, e
 				}
 			}()
 		} else {

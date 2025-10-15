@@ -941,6 +941,20 @@ locals {
 `, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_POLARDBX_ID"))
 }
 
+func removeEOFMarkers(input string) string {
+	startMarker := "<<EOF\n"
+	if strings.HasPrefix(input, startMarker) {
+		input = input[len(startMarker):]
+	}
+
+	endMarker := "EOF"
+	if idx := strings.LastIndex(input, endMarker); idx != -1 {
+		input = input[:idx] + input[idx+len(endMarker):]
+	}
+
+	return input
+}
+
 const AdbCommonTestCase = `
 resource "alibabacloudstack_vpc" "default" {
  name = "${var.name}"
@@ -1648,4 +1662,3 @@ DrlNdiysTI4Dd1dLeErVpjsckAaOW/JDG5PCSwkaMxk=
 EOF
 `
 }
-

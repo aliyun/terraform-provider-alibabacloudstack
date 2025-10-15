@@ -346,9 +346,9 @@ func (s *CsService) WaitForUpgradeCluster(clusterId string, action string) (stri
 	return Task_Status_Failed, errmsgs.WrapError(err)
 }
 
-func (s *CsService) DescribeAckTemplate(id string) (map[string]interface{}, error) {
+func (s *CsService) DescribeAckTemplates(id string) (map[string]interface{}, error) {
 	reqQuery := map[string]interface{}{
-		"TemplateType": "kubernetes",
+		"template_type": "kubernetes",
 	}
 
 	response, err := s.client.DoTeaRequest("GET", "cs", "2015-12-15", "DescribeTemplates", "/templates", nil, reqQuery, nil)
@@ -364,6 +364,72 @@ func (s *CsService) DescribeAckTemplate(id string) (map[string]interface{}, erro
 	for _, v := range templates {
 		template := v.(map[string]interface{})
 		if template["id"].(string) == id {
+			return template, nil
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ack template %s not found", id))
+}
+
+func (s *CsService) DescribeAckTemplate(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{
+		// "template_type": "kubernetes",
+	}
+	pathPattern := fmt.Sprintf("/templates/%s", id)
+	response, err := s.client.DoTeaRequest("GET", "cs", "2015-12-15", "DescribeTemplateAttribute", pathPattern, nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+	addDebug("DescribeTemplateAttribute", response, reqQuery)
+
+	// Check if response["data"] is an array of templates
+	templates, ok := response["data"].([]interface{})
+	if !ok {
+		// If not an array, check if it's a single template object
+		if template, ok := response["data"].(map[string]interface{}); ok {
+			return template, nil
+		}
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ack template %s not found", id))
+	}
+	// sort.Slice(templates, func(i, j int) bool {
+	// 	templateI, okI := templates[i].(map[string]interface{})
+	// 	templateJ, okJ := templates[j].(map[string]interface{})
+
+	// 	if !okI || !okJ {
+	// 		return false
+	// 	}
+
+	// 	createdI, okI := templateI["created"].(string)
+	// 	createdJ, okJ := templateJ["created"].(string)
+
+	// 	if !okI || !okJ {
+	// 		return false
+	// 	}
+
+	// 	// Parse time strings to compare
+	// 	timeI, errI := time.Parse(time.RFC3339, createdI)
+	// 	timeJ, errJ := time.Parse(time.RFC3339, createdJ)
+
+	// 	if errI != nil || errJ != nil {
+	// 		return false
+	// 	}
+
+	// 	return timeI.After(timeJ)
+	// })
+
+	// Return the first (newest) template that matches the ID
+	for _, item := range templates {
+		template, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		templateId, ok := template["template_with_hist_id"].(string)
+		if !ok {
+			continue
+		}
+
+		if templateId == id {
 			return template, nil
 		}
 	}

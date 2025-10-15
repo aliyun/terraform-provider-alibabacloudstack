@@ -16,7 +16,7 @@ func TestAccAlibabacloudStackAckTemplate0(t *testing.T) {
 	resourceId := "alibabacloudstack_ack_template.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccAckTemplateCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &CenService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &CsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeAckTemplate")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -24,36 +24,36 @@ func TestAccAlibabacloudStackAckTemplate0(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testaccAckTemplate%d", rand)
 
-	ackTemplateContentTemplate = fmt.Sprintf(`<<EOF
-		apiVersion: apps/v1
-		kind: Deployment
+	ackTemplateContentTemplate := fmt.Sprintf(`<<EOF
+	apiVersion: apps/v1
+	kind: Deployment
+	metadata:
+	labels:
+		vsw: test
+	name: nginx-deployment-basic
+	namespace: default
+	spec:
+	replicas: 1
+	selector:
+		matchLabels:
+		vsw: test
+	template:
 		metadata:
 		labels:
 			vsw: test
-		name: nginx-deployment-basic
-		namespace: default
 		spec:
-		replicas: 1
-		selector:
-			matchLabels:
-			vsw: test
-		template:
-			metadata:
-			labels:
-				vsw: test
-			spec:
-			containers:
-				- command:
-					- sleep
-					- '%%s'
-				image: >-
-					registry.acs.%s/acs/busybox:1.33.1
-				imagePullPolicy: IfNotPresent
-				name: vsw
-		EOF`, os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"))
+		containers:
+			- command:
+				- sleep
+				- '%%s'
+			image: >-
+				registry.acs.%s/acs/busybox:1.33.1
+			imagePullPolicy: IfNotPresent
+			name: vsw
+EOF`, os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"))
 
-	ackTemplateContent1 := fmt.Sprintf(ackTemplateContentTemplate, 100)
-	ackTemplateContent2 := fmt.Sprintf(ackTemplateContentTemplate, 200)
+	ackTemplateContent1 := fmt.Sprintf(ackTemplateContentTemplate, "100")
+	ackTemplateContent2 := fmt.Sprintf(ackTemplateContentTemplate, "200")
 
 	modify_name := fmt.Sprintf("tf-testaccAckTemplatemodify%d", rand)
 
@@ -78,7 +78,7 @@ func TestAccAlibabacloudStackAckTemplate0(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"template":      ackTemplateContent1,
+						"template":      removeEOFMarkers(ackTemplateContent1),
 						"description":   name,
 						"name":          name,
 						"template_type": "kubernetes",
@@ -104,7 +104,7 @@ func TestAccAlibabacloudStackAckTemplate0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"template": ackTemplateContent2,
+						"template": removeEOFMarkers(ackTemplateContent2),
 					}),
 				),
 			},

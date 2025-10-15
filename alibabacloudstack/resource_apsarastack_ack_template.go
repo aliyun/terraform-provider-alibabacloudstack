@@ -141,9 +141,18 @@ func resourceAlibabacloudStackAckTemplateRead(d *schema.ResourceData, meta inter
 
 func resourceAlibabacloudStackAckTemplateUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
+	ackTemplateService := CsService{client}
 	if d.IsNewResource() {
 		return nil
+	}
+	object, err := ackTemplateService.DescribeAckTemplate(d.Id())
+	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			log.Printf("[DEBUG] Resource alibabacloudstack_ack_template ackTemplateService.DescribeAckTemplate Failed!!! %s", err)
+			d.SetId("")
+			return nil
+		}
+		return errmsgs.WrapError(err)
 	}
 
 	if d.HasChanges("template", "description") {
@@ -151,7 +160,14 @@ func resourceAlibabacloudStackAckTemplateUpdate(d *schema.ResourceData, meta int
 		pathPattern := fmt.Sprintf("/templates/%s", templateId)
 
 		body := make(map[string]interface{})
+		body["template"] = object["template"]
+		body["template_with_hist_id"] = object["template_with_hist_id"]
+		body["template_hash_code_version"] = object["template_hash_code_version"]
+		body["acl"] = object["acl"]
+		body["name"] = object["name"]
+		body["template_type"] = object["template_type"]
 		body["id"] = templateId
+		body["description"] = object["description"]
 		if d.HasChange("template") {
 			body["template"] = d.Get("template")
 		}

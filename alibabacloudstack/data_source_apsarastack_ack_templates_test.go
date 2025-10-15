@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 )
@@ -62,7 +63,33 @@ variable "name" {
 }
 
 resource "alibabacloudstack_ack_template" "default" {
-    template = "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  labels:\n    vsw: test\n  name: nginx-deployment-basic\n  namespace: default\nspec:\n  replicas: 1\n  selector:\n    matchLabels:\n      vsw: test\n  template:\n    metadata:\n      labels:\n        vsw: test\n    spec:\n      containers:\n        - command:\n            - sleep\n            - '1000000'\n          image: >-\n            registry.acs.intra.env35.shuguang.com/acs/busybox:1.33.1\n          imagePullPolicy: IfNotPresent\n          name: vsw"
+    template = <<EOF
+	apiVersion: apps/v1
+	kind: Deployment
+	metadata:
+	labels:
+		vsw: test
+	name: nginx-deployment-basic
+	namespace: default
+	spec:
+	replicas: 1
+	selector:
+		matchLabels:
+		vsw: test
+	template:
+		metadata:
+		labels:
+			vsw: test
+		spec:
+		containers:
+			- command:
+				- sleep
+				- '1000'
+			image: >-
+				registry.acs.%s/acs/busybox:1.33.1
+			imagePullPolicy: IfNotPresent
+			name: vsw
+	EOF
 	name = "${var.name}"
 	description="${var.name}"
 	template_type="kubernetes"
@@ -70,7 +97,7 @@ resource "alibabacloudstack_ack_template" "default" {
 
 data "alibabacloudstack_ack_templates" "default" {
 	%s
-}`, rand, strings.Join(pairs, "\n  "))
+}`, rand, os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"), strings.Join(pairs, "\n  "))
 	return config
 }
 
