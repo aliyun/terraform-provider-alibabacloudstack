@@ -346,6 +346,51 @@ func (s *CsService) WaitForUpgradeCluster(clusterId string, action string) (stri
 	return Task_Status_Failed, errmsgs.WrapError(err)
 }
 
+func (s *CsService) DescribeAckTemplate(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{
+		"TemplateType": "kubernetes",
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "cs", "2015-12-15", "DescribeTemplates", "/templates", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	templates, ok := response["templates"].([]interface{})
+	if !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ack template %s not found", id))
+	}
+
+	for _, v := range templates {
+		template := v.(map[string]interface{})
+		if template["id"].(string) == id {
+			return template, nil
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ack template %s not found", id))
+}
+
+func (s *CsService) AckTemplateStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeAckTemplate(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object["status"] == failState {
+				return object, object["status"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["status"]))
+			}
+		}
+		return object, object["status"].(string), nil
+	}
+}
+
 type UpgradeClusterArgs struct {
 	Version string `json:"version"`
 }
