@@ -229,9 +229,8 @@ variable "cluster_id" {
 	default = "%s"
 }
 
-
 variable "package_version" {	
-	default = "2025-10-09 17:17:18"
+	default = "2025-10-16 16:17:18"
 } 
 
 resource "alibabacloudstack_edas_k8s_application" "default" {
@@ -240,7 +239,7 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   cluster_id              	= var.cluster_id
   replicas                	= 2
   package_type 				= "FatJar"
-  package_url     			= "http://fileserver.edas.intra.env212.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar"
+  package_url     			= "http://fileserver.edas.intra.env205.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar"
   package_version 			= var.package_version
   jdk             			= "Open JDK 8"
   limit_mem             	= 1024

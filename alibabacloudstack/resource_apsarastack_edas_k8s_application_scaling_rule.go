@@ -182,8 +182,13 @@ func resourceAlibabacloudStackEdasK8sApplicationScalingRuleCreate(d *schema.Reso
 	if err != nil {
 		return err
 	}
+	edasService := EdasService{client}
 	resourceId := fmt.Sprintf("%s:%s", d.Get("app_id").(string), d.Get("scaling_rule_name").(string))
-	d.SetId(resourceId)
+	object, err := edasService.DescribeEdasK8sApplicationScalingRule(resourceId)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.SetId(fmt.Sprintf("%s:%s", object["appId"].(string), object["scaleRuleName"].(string)))
 	return nil
 }
 
