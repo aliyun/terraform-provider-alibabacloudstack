@@ -179,7 +179,7 @@ resource "alibabacloudstack_security_group" "default" {
 resource "alibabacloudstack_security_group_rule" "default" {
   type = "ingress"
   ip_protocol = "tcp"
-  nic_type = "intranet"
+  
   policy = "drop"
   port_range = "22/22"
   priority = 100
@@ -208,7 +208,7 @@ resource "alibabacloudstack_security_group" "default" {
 resource "alibabacloudstack_security_group_rule" "default" {
   type = "ingress"
   ip_protocol = "tcp"
-  nic_type = "intranet"
+  
   policy = "drop"
   port_range = "22/22"
   priority = 100
@@ -238,7 +238,7 @@ resource "alibabacloudstack_security_group" "default" {
 resource "alibabacloudstack_security_group_rule" "default" {
   type = "ingress"
   ip_protocol = "tcp"
-  nic_type = "intranet"
+  
   policy = "drop"
   port_range = "22/22"
   priority = 100
@@ -268,7 +268,7 @@ resource "alibabacloudstack_security_group" "default" {
 resource "alibabacloudstack_security_group_rule" "default" {
   type = "ingress"
   ip_protocol = "tcp"
-  nic_type = "intranet"
+  
   policy = "drop"
   port_range = "22/22"
   priority = 100
@@ -305,7 +305,7 @@ resource "alibabacloudstack_security_group_rule" "default" {
   policy = "drop"
   port_range = "22/22"
   ip_protocol = "tcp"
-  nic_type = "intranet"
+  
   priority = 100
   cidr_ip = "${element(var.cidr_ip_list, count.index)}"
 }
@@ -360,7 +360,7 @@ resource "alibabacloudstack_security_group" "default" {
 resource "alibabacloudstack_security_group_rule" "default" {
   type = "egress"
   ip_protocol = "tcp"
-  nic_type = "intranet"
+  
   policy = "accept"
   port_range = "443/443"
   priority = "1"
@@ -388,7 +388,7 @@ resource "alibabacloudstack_security_group" "default" {
 resource "alibabacloudstack_security_group_rule" "default" {
   type = "egress"
   ip_protocol = "tcp"
-  nic_type = "intranet"
+  
   policy = "accept"
   port_range = "443/443"
   priority = "1"

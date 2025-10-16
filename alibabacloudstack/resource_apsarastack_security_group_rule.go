@@ -39,7 +39,7 @@ func resourceAlibabacloudStackSecurityGroupRule() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Computed:     true,
+				Default:      "intranet",
 				ValidateFunc: validation.StringInSlice([]string{"internet", "intranet"}, false),
 			},
 
