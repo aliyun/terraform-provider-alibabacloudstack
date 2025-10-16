@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_basic(t *testing.T) {
 					"app_id":            "${alibabacloudstack_edas_k8s_application.default.id}",
 					"scaling_rule_name": "testtf",
 					"scaling_rule_type": "metric",
-					"max_replicas":      "10",
+					"max_replicas":      "4",
 					"min_replicas":      "1",
 					"metrics": []map[string]interface{}{
 						{
@@ -57,7 +57,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_basic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"scaling_rule_name":     "testtf",
 						"scaling_rule_type":     "metric",
-						"max_replicas":          "10",
+						"max_replicas":          "4",
 						"min_replicas":          "1",
 						"metrics.#":             "2",
 						"metrics.0.type":        "CPU",
@@ -76,8 +76,8 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_basic(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"max_replicas": "8",
-					"min_replicas": "4",
+					"max_replicas": "5",
+					"min_replicas": "3",
 					"metrics": []map[string]interface{}{
 						{
 							"type":        "CPU",
@@ -93,8 +93,8 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_basic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"scaling_rule_name":     "testtf",
 						"scaling_rule_type":     "metric",
-						"max_replicas":          "8",
-						"min_replicas":          "4",
+						"max_replicas":          "5",
+						"min_replicas":          "3",
 						"metrics.#":             "2",
 						"metrics.0.type":        "CPU",
 						"metrics.0.utilization": "70",
