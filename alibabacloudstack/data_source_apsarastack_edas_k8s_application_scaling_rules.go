@@ -90,43 +90,112 @@ func dataSourceAlibabacloudStackEdasScalingRules() *schema.Resource {
 								},
 							},
 						},
-						"trigger_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"trigger_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"trigger_period": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"trigger_dryrun": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-
-						"trigger_timer_in_day": {
+						"triggers": {
 							Type:     schema.TypeSet,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"at_time": {
+									"type": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"replicas": {
+									"name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"period": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"timer_in_day": {
+										Type:     schema.TypeSet,
+										Computed: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"at_time": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"replicas": {
+													Type:     schema.TypeInt,
+													Computed: true,
+												},
+												"horizon_mode": {
+													Type:     schema.TypeBool,
+													Computed: true,
+												},
+											},
+										},
+									},
+									"timer_in_week": {
+										Type:     schema.TypeSet,
+										Computed: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+									"timer_in_month": {
+										Type:     schema.TypeSet,
+										Computed: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+								},
+							},
+						},
+						"scale_up_stabilization_window_seconds": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"scale_up_select_policy": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"scale_up_policies": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"type": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"value": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"period_seconds": {
 										Type:     schema.TypeInt,
 										Computed: true,
 									},
 								},
 							},
 						},
-						"trigger_timer_in_week": {
-							Type:     schema.TypeSet,
+						"scale_down_stabilization_window_seconds": {
+							Type:     schema.TypeInt,
 							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"scale_down_select_policy": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"scale_down_policies": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"type": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"value": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"period_seconds": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+								},
+							},
 						},
 						"enabled": {
 							Type:     schema.TypeBool,
@@ -195,49 +264,92 @@ func dataSourceAlibabacloudStackEdasScalingRulesRead(d *schema.ResourceData, met
 			}
 		}
 		scalingRuleTrigger, ok := object["trigger"]
-		timers := make([]map[string]interface{}, 0)
-		var triggerType, triggerName, triggerPeriod string
-		var dryRun bool
-		timerInWeek := make([]interface{}, 0)
+		triggers := make([]map[string]interface{}, 0)
 		if ok {
-			triggers := scalingRuleTrigger.(map[string]interface{})["triggers"].([]interface{})
-			trigger := triggers[0].(map[string]interface{})
-			triggerType = trigger["type"].(string)
-			triggerName = trigger["name"].(string)
-			triggerPeriod = trigger["period"].(string)
-			dryRun = trigger["dryRun"] == "true"
-			matedata := make(map[string]interface{})
-			_ = json.Unmarshal([]byte(trigger["metadata"].(string)), &matedata)
-			v, ok := trigger["timerInWeek"]
-			if ok {
-				timerInWeek = v.([]interface{})
-			}
-			timerInDay, ok := trigger["timerInDay"]
-			if ok {
-				for _, v := range timerInDay.([]interface{}) {
-					timer := v.(map[string]interface{})
-					timers = append(timers, map[string]interface{}{
-						"at_time":  timer["atTime"],
-						"replicas": timer["targetReplicas"],
-					})
+			triggerDatas := scalingRuleTrigger.(map[string]interface{})["triggers"].([]interface{})
+			for _, v := range triggerDatas {
+				trigger := make(map[string]interface{})
+				data := v.(map[string]interface{})
+				metadata := make(map[string]interface{})
+				mdate := data["metadata"].(string)
+				err := json.Unmarshal([]byte(mdate), &metadata)
+				if err != nil {
+					return errmsgs.WrapErrorf(err, "Failed to unmarshal trigger metadata: %s", mdate)
 				}
+				trigger["name"] = data["name"]
+				trigger["type"] = data["type"]
+				trigger["period"] = metadata["period"]
+				if v, ok := metadata["timerInWeek"]; ok {
+					trigger["timer_in_week"] = v
+				}
+				if v, ok := metadata["timerInMonth"]; ok {
+					trigger["timer_in_month"] = v
+				}
+				if v, ok := metadata["timerInDay"]; ok {
+					timer_in_day := make([]map[string]interface{}, 0)
+					days := v.([]interface{})
+					for _, d := range days {
+						day := d.(map[string]interface{})
+						timer_in_day = append(timer_in_day, map[string]interface{}{
+							"at_time":      day["atTime"],
+							"horizon_mode": day["horizonMode"] == "true",
+							"replicas":     day["targetReplicas"],
+						})
+					}
+					trigger["timer_in_day"] = timer_in_day
+				}
+				triggers = append(triggers, trigger)
+
 			}
 		}
 		mapping := map[string]interface{}{
-			"id":                    key,
-			"app_id":                object["appId"],
-			"scaling_rule_name":     object["scaleRuleName"],
-			"scaling_rule_type":     object["scaleRuleType"],
-			"max_replicas":          object["maxReplicas"],
-			"min_replicas":          object["minReplicas"],
-			"metrics":               metrics,
-			"trigger_timer_in_day":  timers,
-			"trigger_type":          triggerType,
-			"trigger_name":          triggerName,
-			"trigger_period":        triggerPeriod,
-			"trigger_dryrun":        dryRun,
-			"trigger_timer_in_week": timerInWeek,
-			"enabled":               object["scaleRuleEnabled"],
+			"id":                key,
+			"app_id":            object["appId"],
+			"scaling_rule_name": object["scaleRuleName"],
+			"scaling_rule_type": object["scaleRuleType"],
+			"max_replicas":      object["maxReplicas"],
+			"min_replicas":      object["minReplicas"],
+			"metrics":           metrics,
+			"triggers":          triggers,
+			"enabled":           object["scaleRuleEnabled"],
+		}
+		behaviour, ok := object["behaviour"]
+		if ok {
+			behaviourData := behaviour.(map[string]interface{})
+			scale_up, ok := behaviourData["scaleUp"]
+			if ok {
+				scaleUpData := scale_up.(map[string]interface{})
+				mapping["scale_up_stabilization_window_seconds"] = scaleUpData["stabilizationWindowSeconds"]
+				mapping["scale_up_select_policy"] = scaleUpData["selectPolicy"]
+				policies := make([]map[string]interface{}, 0)
+				for _, v := range scaleUpData["policies"].([]interface{}) {
+					policy := v.(map[string]interface{})
+					policies = append(policies, map[string]interface{}{
+						"period_seconds": policy["periodSeconds"],
+						"value":          policy["value"],
+						"type":           policy["type"],
+					})
+				}
+				mapping["scale_up_policies"] = policies
+			}
+			scale_down, ok := behaviourData["scaleDown"]
+			if ok {
+				scaleDownData := scale_down.(map[string]interface{})
+				d.Set("scale_down_stabilization_window_seconds", scaleDownData["stabilizationWindowSeconds"])
+				d.Set("scale_down_select_policy", scaleDownData["selectPolicy"])
+				mapping["scale_down_stabilization_window_seconds"] = scaleDownData["stabilizationWindowSeconds"]
+				mapping["scale_down_select_policy"] = scaleDownData["selectPolicy"]
+				policies := make([]map[string]interface{}, 0)
+				for _, v := range scaleDownData["policies"].([]interface{}) {
+					policy := v.(map[string]interface{})
+					policies = append(policies, map[string]interface{}{
+						"period_seconds": policy["periodSeconds"],
+						"value":          policy["value"],
+						"type":           policy["type"],
+					})
+				}
+				mapping["scale_down_policies"] = policies
+			}
 		}
 		ids = append(ids, fmt.Sprint(mapping["id"]))
 		scaling_rules = append(scaling_rules, mapping)
