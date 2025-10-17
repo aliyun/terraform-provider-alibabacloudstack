@@ -91,8 +91,10 @@ func NotFoundError(err error) bool {
 		return false
 	}
 	if e, ok := err.(*ComplexError); ok {
-		if e.Err != nil && strings.HasPrefix(e.Err.Error(), ResourceNotfound) {
-			return true
+		if e.Err != nil {
+			if strings.HasPrefix(e.Err.Error(), ResourceNotfound) || strings.HasSuffix(e.Err.Error(), "is not found.") {
+				return true
+			}
 		}
 		return NotFoundError(e.Cause)
 	}
@@ -313,6 +315,11 @@ func (e ComplexError) Error() string {
 
 func Error(msg string, args ...interface{}) error {
 	return fmt.Errorf(msg, args...)
+}
+
+func ResourceNotFoundError(resourceName, id string) error {
+	err := Error(GetNotFoundMessage(resourceName, id))
+	return WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
 }
 
 // Return a ComplexError which including error occurred file and path
