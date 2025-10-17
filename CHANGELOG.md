@@ -1,3 +1,11 @@
+# 3.16.20
+
+## Fixes
+
+1. Fixed the issue where creating TDE-enabled PolarDB for PostgreSQL versions caused errors.
+2. Added default value handling for NIC type in security group rules (`security_group_rule`) to prevent potential failures.
+3. Resolved improper exception handling in EDAS Kubernetes application scaling rules (`edas_k8s_application_scaling_rule`) with invalid parameter configurations.
+
 # 3.16.19
 
 ## New

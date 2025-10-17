@@ -1,3 +1,13 @@
+# 3.16.20
+
+## 修复
+
+1. 修复polardb在创建Tde版本得PGSQL时报错得问题。
+2. 修复security_group_rule的网卡类型缺少默认值可能会导致失败的问题。
+3. 修复edas_k8s_application_scaling_rule在错误参数配置下异常且没有正确报错的问题。
+
+---
+
 # 3.16.19
 
 ## 新增
