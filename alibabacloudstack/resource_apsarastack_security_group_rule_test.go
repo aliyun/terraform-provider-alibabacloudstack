@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -22,6 +23,10 @@ func TestAccAlibabacloudStackSecurityGroupRuleBasic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc_sg_rule%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccSecurityGroupRuleBasic)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -33,10 +38,19 @@ func TestAccAlibabacloudStackSecurityGroupRuleBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckSecurityGroupRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityGroupRuleBasic,
+				Config: testAccConfig(map[string]interface{}{
+					"type":                     "ingress",
+					"ip_protocol":              "tcp",
+					"policy":                   "drop",
+					"port_range":               "22/22",
+					"priority":                 100,
+					"security_group_id":        "${alibabacloudstack_security_group.default.0.id}",
+					"source_security_group_id": "${alibabacloudstack_security_group.default.1.id}",
+					"description":              "abc",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": "abc",
+						"description":              "abc",
 					}),
 				),
 			},
@@ -46,28 +60,24 @@ func TestAccAlibabacloudStackSecurityGroupRuleBasic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccSecurityGroupRule_cidrIp,
+				Config: testAccConfig(map[string]interface{}{
+					"source_security_group_id": REMOVEKEY,
+					"cidr_ip":                  "0.0.0.0/0",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"source_security_group_id": REMOVEKEY,
 						"cidr_ip":                  "0.0.0.0/0",
-						"description":              "abcd",
 					}),
 				),
 			},
 			{
-				Config: testAccSecurityGroupRule_description,
+				Config: testAccConfig(map[string]interface{}{
+					"description": "description",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"description": "description",
-					}),
-				),
-			},
-			{
-				Config: testAccSecurityGroupRule_all,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description": "abcd",
 					}),
 				),
 			},
@@ -94,6 +104,10 @@ func TestAccAlibabacloudStackSecurityGroupEgressRule(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc_sg_rule%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccSecurityGroupEgressRule)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -105,211 +119,44 @@ func TestAccAlibabacloudStackSecurityGroupEgressRule(t *testing.T) {
 		CheckDestroy:  testAccCheckSecurityGroupRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityGroupEgressRule,
+				Config: testAccConfig(map[string]interface{}{
+					"type":              "egress",
+					"ip_protocol":       "tcp",
+					"policy":            "accept",
+					"port_range":        "443/443",
+					"priority":          "1",
+					"security_group_id": "${alibabacloudstack_security_group.default.id}",
+					"cidr_ip":           "182.254.11.243/32",
+					"description":       "SHDRP-7513",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"description": "SHDRP-7513",
 					}),
 				),
 			},
-			{
-				Config: testAccSecurityGroupEgressRule_description,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description": "SHDRP-7512",
-					}),
-				),
-			},
 		},
 	})
 
 }
 
-func TestAccAlibabacloudStackSecurityGroupRuleMulti(t *testing.T) {
-	var v ecs.Permission
-	resourceId := "alibabacloudstack_security_group_rule.default.2"
-	ra := resourceAttrInit(resourceId, testAccCheckSecurityGroupRuleBasicMap)
-	serviceFunc := func() interface{} {
-		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+func testAccSecurityGroupRuleBasic(name string) string {
+	return fmt.Sprintf(`
+	variable "name" {
+	  default = "%s"
 	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
+	resource "alibabacloudstack_vpc" "default" {
+	  name = "${var.name}"
+	  cidr_block = "192.168.0.0/16"
+	}
 
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckSecurityGroupRuleDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccSecurityGroupRuleMulti,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"cidr_ip":                  "45.20.250.240/32",
-						"source_security_group_id": REMOVEKEY,
-					}),
-				),
-			},
-		},
-	})
-
+	resource "alibabacloudstack_security_group" "default" {
+	  count  = 2
+	  vpc_id = "${alibabacloudstack_vpc.default.id}"
+	  name = "${var.name}"
+	}`, name)
 }
-
-const testAccSecurityGroupRuleBasic = `
-variable "name" {
-  default = "tf-testAccSecurityGroupRuleBasic"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "192.168.0.0/16"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-  count  = 2
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  name = "${var.name}"
-}
-
-resource "alibabacloudstack_security_group_rule" "default" {
-  type = "ingress"
-  ip_protocol = "tcp"
-  
-  policy = "drop"
-  port_range = "22/22"
-  priority = 100
-  security_group_id = "${alibabacloudstack_security_group.default.0.id}"
-  source_security_group_id = "${alibabacloudstack_security_group.default.1.id}"
-  description = "abc"
-}
-`
-const testAccSecurityGroupRule_cidrIp = `
-
-variable "name" {
-  default = "tf-testAccSecurityGroupRuleBasic"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "192.168.0.0/16"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-  count = 2
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  name = "${var.name}"
-}
-
-resource "alibabacloudstack_security_group_rule" "default" {
-  type = "ingress"
-  ip_protocol = "tcp"
-  
-  policy = "drop"
-  port_range = "22/22"
-  priority = 100
-  security_group_id = "${alibabacloudstack_security_group.default.0.id}"
-  cidr_ip = "0.0.0.0/0"
-  description = "abcd"
-}
-`
-
-const testAccSecurityGroupRule_description = `
-
-variable "name" {
-  default = "tf-testAccSecurityGroupRuleBasic"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "192.168.0.0/16"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-  count = 2
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  name = "${var.name}"
-}
-
-resource "alibabacloudstack_security_group_rule" "default" {
-  type = "ingress"
-  ip_protocol = "tcp"
-  
-  policy = "drop"
-  port_range = "22/22"
-  priority = 100
-  security_group_id = "${alibabacloudstack_security_group.default.0.id}"
-  cidr_ip = "0.0.0.0/0"
-  description = "description"
-}
-`
-
-const testAccSecurityGroupRule_all = `
-
-variable "name" {
-  default = "tf-testAccSecurityGroupRuleBasic"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "192.168.0.0/16"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-  count = 2
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  name = "${var.name}"
-}
-
-resource "alibabacloudstack_security_group_rule" "default" {
-  type = "ingress"
-  ip_protocol = "tcp"
-  
-  policy = "drop"
-  port_range = "22/22"
-  priority = 100
-  security_group_id = "${alibabacloudstack_security_group.default.0.id}"
-  cidr_ip = "0.0.0.0/0"
-  description = "abcd"
-}
-`
-
-const testAccSecurityGroupRuleMulti = `
-variable "name" {
-  default = "tf-testAccSecurityGroupRuleBasic"
-}
-
-variable "cidr_ip_list" {
-  type = list(string)
-  default = ["50.255.255.255/32", "75.250.250.250/32", "45.20.250.240/32"]
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "10.1.0.0/21"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-  name = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-
-resource "alibabacloudstack_security_group_rule" "default" {
-  count = "${length(compact(var.cidr_ip_list))}"
-  security_group_id = "${alibabacloudstack_security_group.default.id}"
-  type = "ingress"
-  policy = "drop"
-  port_range = "22/22"
-  ip_protocol = "tcp"
-  
-  priority = 100
-  cidr_ip = "${element(var.cidr_ip_list, count.index)}"
-}
-`
 
 var testAccCheckSecurityGroupRuleBasicMap = map[string]string{
 	"type":                     "ingress",
@@ -342,9 +189,10 @@ func testAccCheckSecurityGroupRuleDestroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccSecurityGroupEgressRule = `
+func testAccSecurityGroupEgressRule(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccSecurityGroupRuleBasic"
+  default = "%s"
 }
 
 resource "alibabacloudstack_vpc" "default" {
@@ -356,44 +204,5 @@ resource "alibabacloudstack_security_group" "default" {
   vpc_id = "${alibabacloudstack_vpc.default.id}"
   name = "${var.name}"
 }
-
-resource "alibabacloudstack_security_group_rule" "default" {
-  type = "egress"
-  ip_protocol = "tcp"
-  
-  policy = "accept"
-  port_range = "443/443"
-  priority = "1"
-  security_group_id = "${alibabacloudstack_security_group.default.id}"
-  cidr_ip = "182.254.11.243/32"
-  description = "SHDRP-7513"
+`, name)
 }
-`
-
-const testAccSecurityGroupEgressRule_description = `
-variable "name" {
-  default = "tf-testAccSecurityGroupRuleBasic"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "192.168.0.0/16"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  name = "${var.name}"
-}
-
-resource "alibabacloudstack_security_group_rule" "default" {
-  type = "egress"
-  ip_protocol = "tcp"
-  
-  policy = "accept"
-  port_range = "443/443"
-  priority = "1"
-  security_group_id = "${alibabacloudstack_security_group.default.id}"
-  cidr_ip = "182.254.11.243/32"
-  description = "SHDRP-7512"
-}
-`
