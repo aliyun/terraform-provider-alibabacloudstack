@@ -81,11 +81,11 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_basic(t *testing.T) {
 					"metrics": []map[string]interface{}{
 						{
 							"type":        "CPU",
-							"utilization": "70",
+							"utilization": "75",
 						},
 						{
 							"type":        "MEMORY",
-							"utilization": "70",
+							"utilization": "75",
 						},
 					},
 				}),
@@ -97,9 +97,9 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_basic(t *testing.T) {
 						"min_replicas":          "3",
 						"metrics.#":             "2",
 						"metrics.0.type":        "CPU",
-						"metrics.0.utilization": "70",
+						"metrics.0.utilization": "75",
 						"metrics.1.type":        "MEMORY",
-						"metrics.1.utilization": "70",
+						"metrics.1.utilization": "75",
 					}),
 				),
 			},
