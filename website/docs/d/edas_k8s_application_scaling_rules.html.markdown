@@ -48,12 +48,27 @@ The following attributes are exported:
   * `metrics` - The metrics configuration.
     * `type` - The type of metric.
     * `utilization` - The target average utilization of the metric.
-  * `trigger_type` - The type of trigger.
-  * `trigger_name` - The name of the trigger.
-  * `trigger_period` - The period of the trigger.
-  * `trigger_dryrun` - Whether to perform a dry run.
-  * `trigger_timer_in_day` - The timer configuration in a day.
-    * `at_time` - The scheduled time in the day.
-    * `replicas` - The number of replicas.
-  * `trigger_timer_in_week` - The timer configuration in a week.
   * `enabled` - Whether the scaling rule is enabled.
+  * `triggers` - (Optional) The triggers configuration.
+  * `type` - (Optional) The type of trigger. Default: `cron`.
+  * `name` - (Optional) The name of the trigger.
+  * `period` - (Optional) The period of the trigger. Valid values: `daily`, `weekly` and `monthly`.
+  * `timer_in_day` - (Optional) The timer configuration in a day.
+    * `at_time` - (Required) The scheduled time in the day, e.g. "08:00".
+    * `replicas` - (Required) The number of replicas. Valid values: 1 to 100.
+    * `horizon_mode` - (Optional) Whether to enable horizon mode. Default: `false`.
+  * `timer_in_week` - (Optional) The timer configuration in a week. 
+  * `timer_in_month` - (Optional) The timer configuration in a month. 
+  * `scale_up_stabilization_window_seconds` - (Optional) The stabilization window for scale up in seconds. Valid values: 0 to 3600.
+  * `scale_up_select_policy` - (Optional) The select policy for scale up. Valid values: `Min`, `Max`, `Disabled`. 
+  * `scale_up_policies` - (Optional) The policies for scale up.
+    * `type` - (Required) The type of policy. Valid values: `Percent`, `Pods`.
+    * `value` - (Required) The value of policy. Valid values: 1 to 100.
+    * `period_seconds` - (Required) The period in seconds. Valid values: 0 to 3600.
+
+  * `scale_down_stabilization_window_seconds` - (Optional) The stabilization window for scale down in seconds. Valid values: 0 to 3600. 
+  * `scale_down_select_policy` - (Optional) The select policy for scale down. Valid values: `Min`, `Max`, `Disabled`. 
+  * `scale_down_policies` - (Optional) The policies for scale down.
+    * `type` - (Required) The type of policy. Valid values: `Percent`, `Pods`.
+    * `value` - (Required) The value of policy. Valid values: 1 to 100.
+    * `period_seconds` - (Required) The period in seconds. Valid values: 0 to 3600.

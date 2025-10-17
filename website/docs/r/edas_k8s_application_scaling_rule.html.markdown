@@ -45,20 +45,66 @@ resource "alibabacloudstack_edas_k8s_application_scaling_rule" "example_cron" {
   scaling_rule_type  = "trigger"
   max_replicas       = 20
   min_replicas       = 5
-  trigger_type       = "cron"
-  trigger_name       = "example-trigger"
-  trigger_period     = "daily"
-  trigger_dryrun     = false
+  triggers {
+    type   = "cron"
+    name   = "example-trigger"
+    period = "daily"
+    
+    timer_in_day {
+      at_time  = "09:00"
+      replicas = 10
+    }
+
+    timer_in_day {
+      at_time  = "18:00"
+      replicas = 5
+    }
+  }
+  
+  enabled = true
+}
+```
+
+### Scaling Behavior Configuration
+
+```terraform
+resource "alibabacloudstack_edas_k8s_application_scaling_rule" "example_behavior" {
+  app_id             = "your-app-id"
+  scaling_rule_name  = "example-behavior-scaling-rule"
+  scaling_rule_type  = "metric"
+  max_replicas       = 10
+  min_replicas       = 2
   enabled            = true
 
-  trigger_timer_in_day {
-    at_time  = "09:00"
-    replicas = 10
+  metrics {
+    type        = "CPU"
+    utilization = 80
   }
 
-  trigger_timer_in_day {
-    at_time  = "18:00"
-    replicas = 5
+  # Scale up behavior
+  scale_up_stabilization_window_seconds = 300
+  scale_up_select_policy                = "Max"
+  
+  scale_up_policies {
+    type           = "Pods"
+    value          = 2
+    period_seconds = 60
+  }
+
+  scale_up_policies {
+    type           = "Percent"
+    value          = 10
+    period_seconds = 60
+  }
+
+  # Scale down behavior
+  scale_down_stabilization_window_seconds = 300
+  scale_down_select_policy                = "Max"
+  
+  scale_down_policies {
+    type           = "Pods"
+    value          = 1
+    period_seconds = 120
   }
 }
 ```
@@ -86,14 +132,36 @@ When `scaling_rule_type` is set to `metric`, the following arguments are support
 
 When `scaling_rule_type` is set to `trigger`, the following arguments are supported:
 
-* `trigger_type` - (Optional) The type of trigger. Default: `cron`.
-* `trigger_name` - (Optional) The name of the trigger.
-* `trigger_period` - (Optional) The period of the trigger. Valid values: `daily` and `weekly`.
-* `trigger_dryrun` - (Optional) Whether to perform a dry run.
-* `trigger_timer_in_day` - (Optional) The timer configuration in a day.
-  * `at_time` - (Required) The scheduled time in the day, e.g. "08:00".
-  * `replicas` - (Required) The number of replicas. Valid values: 1 to 100.
-* `trigger_timer_in_week` - (Optional) The timer configuration in a week.
+* `triggers` - (Optional) The triggers configuration.
+  * `type` - (Optional) The type of trigger. Default: `cron`.
+  * `name` - (Optional) The name of the trigger.
+  * `period` - (Optional) The period of the trigger. Valid values: `daily`, `weekly` and `monthly`.
+  * `timer_in_day` - (Optional) The timer configuration in a day.
+    * `at_time` - (Required) The scheduled time in the day, e.g. "08:00".
+    * `replicas` - (Required) The number of replicas. Valid values: 1 to 100.
+    * `horizon_mode` - (Optional) Whether to enable horizon mode. Default: `false`.
+  * `timer_in_week` - (Optional) The timer configuration in a week. Computed when not set.
+  * `timer_in_month` - (Optional) The timer configuration in a month. Computed when not set.
+
+### Scaling Behavior Arguments
+
+The following arguments configure scaling behaviors:
+
+* `scale_up_stabilization_window_seconds` - (Optional) The stabilization window for scale up in seconds. Valid values: 0 to 3600. Computed when not set.
+* `scale_up_select_policy` - (Optional) The select policy for scale up. Valid values: `Min`, `Max`, `Disabled`. Computed when not set.
+* `scale_up_policies` - (Optional) The policies for scale up.
+  * `type` - (Required) The type of policy. Valid values: `Percent`, `Pods`.
+  * `value` - (Required) The value of policy. Valid values: 1 to 100.
+  * `period_seconds` - (Required) The period in seconds. Valid values: 0 to 3600.
+
+* `scale_down_stabilization_window_seconds` - (Optional) The stabilization window for scale down in seconds. Valid values: 0 to 3600. Computed when not set.
+* `scale_down_select_policy` - (Optional) The select policy for scale down. Valid values: `Min`, `Max`, `Disabled`. Computed when not set.
+* `scale_down_policies` - (Optional) The policies for scale down.
+  * `type` - (Required) The type of policy. Valid values: `Percent`, `Pods`.
+  * `value` - (Required) The value of policy. Valid values: 1 to 100.
+  * `period_seconds` - (Required) The period in seconds. Valid values: 0 to 3600.
+
+-> **NOTE:** When setting scaling behavior arguments (`scale_up_*` or `scale_down_*`), all arguments in the respective group must be set together. For example, if you specify `scale_up_stabilization_window_seconds`, you must also specify `scale_up_select_policy` and `scale_up_policies`.
 
 ## Attributes Reference
 
