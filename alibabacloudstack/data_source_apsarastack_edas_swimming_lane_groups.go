@@ -79,6 +79,8 @@ func dataSourceAlibabacloudStackEdasSwimmingLaneGroupsRead(d *schema.ResourceDat
 	request := make(map[string]interface{})
 	if v, ok := d.GetOk("logical_region_id"); ok {
 		request["logicalRegionId"] = v.(string)
+	} else {
+		request["logicalRegionId"] = client.RegionId
 	}
 	response, err := client.DoTeaRequest("GET", "Edas", "2017-08-01", "ListSwimmingLaneGroup", "/pop/v5/trafficmgnt/swimming_lane_groups", nil, request, nil)
 	if err != nil {
@@ -121,6 +123,7 @@ func dataSourceAlibabacloudStackEdasSwimmingLaneGroupsRead(d *schema.ResourceDat
 			app := v.(map[string]interface{})
 			apps = append(apps, app["AppId"].(string))
 		}
+		entryApplication := laneGroup["EntryApplication"].(map[string]interface{})
 		i := map[string]interface{}{
 			"id": id,
 
@@ -130,7 +133,7 @@ func dataSourceAlibabacloudStackEdasSwimmingLaneGroupsRead(d *schema.ResourceDat
 
 			"group_id": fmt.Sprint(laneGroup["Id"]),
 
-			"entry_app_id": laneGroup["AppId"],
+			"entry_app_id": entryApplication["AppId"],
 
 			"apps": apps,
 		}
