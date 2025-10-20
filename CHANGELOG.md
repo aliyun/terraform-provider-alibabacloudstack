@@ -1,3 +1,22 @@
+# 3.18.18
+
+## New
+
+1. Query capability for OSS clusters
+2. Configuration management capability for auto-scaling rules of EDAS K8s applications
+
+
+## Fixes
+
+1. Fixed the issue where creating TDE-enabled PolarDB for PostgreSQL versions caused errors.
+2. Added default value handling for NIC type in security group rules (`security_group_rule`) to prevent potential failures.
+3. Resolved improper exception handling in EDAS Kubernetes application scaling rules (`edas_k8s_application_scaling_rule`) with invalid parameter configurations.
+4. Fixed the issue where the order of service IDs in SLB VServerGroup caused failure to reach the final state
+5. Fixed the issue where KMS encryption could not be enabled for OSS buckets in disaster recovery mode
+6. Fixed the issue of incorrect variable types when configuring log monitoring for SLB listeners
+
+---
+
 # 3.18.17
 
 ## New Features

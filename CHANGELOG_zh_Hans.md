@@ -1,3 +1,21 @@
+# 3.18.18
+
+## 新增
+
+1. oss集群的查询能力
+2. edas k8s应用的伸缩规则配置管理能力
+
+## 修复
+
+1. 修复polardb在创建Tde版本得PGSQL时报错得问题。
+2. 修复security_group_rule的网卡类型缺少默认值可能会导致失败的问题。
+3. 修复edas_k8s_application_scaling_rule在错误参数配置下异常且没有正确报错的问题。
+4. 修复slb_vservergroup的services的ids顺序导致无法终态问题
+5. 修复oss_bucket容灾模式无法开启kms加密问题
+6. 修复slb_listener 配置日志监听时变量的类型不正确问题
+
+---
+
 # 3.18.17
 
 ## 新增

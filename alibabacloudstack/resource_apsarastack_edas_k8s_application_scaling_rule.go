@@ -463,7 +463,7 @@ func BuildScalingBehaviour(d *schema.ResourceData) (string, error) {
 	scale_down_select_policy := d.Get("scale_down_select_policy").(string)
 	scale_down_policies := d.Get("scale_down_policies").(*schema.Set).List()
 
-	// 验证scale_up属性：如果设置了任何一个，则三个必须都设置
+	// Verify the scale_up attribute: if any one is set, all three must be set
 	scaleUpSet := scale_up_stabilization_window_seconds > 0 || scale_up_select_policy != "" || len(scale_up_policies) > 0
 	scaleDownSet := scale_down_stabilization_window_seconds > 0 || scale_down_select_policy != "" || len(scale_down_policies) > 0
 	if scaleUpSet || scaleDownSet {
