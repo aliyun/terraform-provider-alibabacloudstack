@@ -1077,3 +1077,28 @@ func (s *EdasService) DescribeEdasK8sApplicationScalingRule(id string) (map[stri
 	}
 	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("edas_k8s_application_scaling_rule", id))
 }
+
+func (s *EdasService) DescribeEdasSwimmingLaneGroup(id string) (map[string]interface{}, error) {
+	param := strings.Split(id, ":")
+	request := map[string]interface{}{
+		"logicalRegionId": param[0],
+	}
+	response, err := s.client.DoTeaRequest("GET", "Edas", "2017-08-01", "ListSwimmingLaneGroup", "/pop/v5/trafficmgnt/swimming_lane_groups", nil, request, nil)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_swimming_lane_group", "ListSwimmingLaneGroup", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if fmt.Sprint(response["Code"]) != "200" {
+		return nil, errmsgs.Error("describe k8s application failed for: " + response["Message"].(string))
+	}
+	data, err := jsonpath.Get("$.Data", response)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_swimming_lane_group", "ListSwimmingLaneGroup", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	for _, v := range data.([]interface{}) {
+		laneGroup := v.(map[string]interface{})
+		if fmt.Sprint(laneGroup["Id"]) == param[1] {
+			return laneGroup, nil
+		}
+	}
+	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("edas_swimming_lane_group", id))
+}
