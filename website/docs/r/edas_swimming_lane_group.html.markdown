@@ -11,7 +11,6 @@ description: |-
 
 Provides an EDAS swimming lane group resource.
 
-For information about EDAS swimming lane group and how to use it, see [What is Swimming Lane Group](https://www.alibabacloud.com/help/doc-detail/175726.html).
 
 ## Example Usage
 
