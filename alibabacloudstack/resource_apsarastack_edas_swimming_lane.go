@@ -50,7 +50,7 @@ func resourceAlibabacloudStackEdasSwimmingLane() *schema.Resource {
 			},
 			"rest_items": {
 				Type:     schema.TypeSet,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
