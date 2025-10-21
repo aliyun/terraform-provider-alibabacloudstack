@@ -113,7 +113,7 @@ func TestAccAlibabacloudStackEdasSwimmingLane_basic(t *testing.T) {
 						"enabled":               "true",
 						"rest_items.#":          "1",
 						"rest_items.0.name":     "test1",
-						"rest_items.0.value":    "",
+						"rest_items.0.value":    "90",
 						"rest_items.0.type":     "cookie",
 						"rest_items.0.cond":     ">=",
 						"rest_items.0.operator": "rawvalue",

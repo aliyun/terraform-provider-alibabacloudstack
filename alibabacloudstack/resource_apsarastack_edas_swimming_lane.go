@@ -36,7 +36,7 @@ func resourceAlibabacloudStackEdasSwimmingLane() *schema.Resource {
 				MinItems: 1,
 			},
 			"priority": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Required: true,
 			},
 			"path": {
@@ -127,6 +127,7 @@ func resourceAlibabacloudStackEdasSwimmingLaneCreate(d *schema.ResourceData, met
 		"restItems": restItems,
 	}
 	request := map[string]interface{}{
+		// "Tag":             "tag",
 		"LogicalRegionId": logicalRegionId,
 		"Name":            d.Get("name"),
 		"GroupId":         groupId,
@@ -134,7 +135,7 @@ func resourceAlibabacloudStackEdasSwimmingLaneCreate(d *schema.ResourceData, met
 		"EntryRules":      []interface{}{entryRule},
 		"EnableRules":     d.Get("enabled"),
 	}
-	response, err := client.DoTeaRequest("POST", "Edas", "2017-08-01", "InsertSwimmingLane", "/pop/v5/trafficmgnt/swimming_lanes", nil, request, nil)
+	response, err := client.DoTeaRequest("POST", "Edas", "2017-08-01", "InsertSwimmingLane", "/pop/v5/trafficmgnt/swimming_lanes", nil, request, request)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_swimming_lane", "InsertSwimmingLane", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -173,7 +174,7 @@ func resourceAlibabacloudStackEdasSwimmingLaneRead(d *schema.ResourceData, meta 
 		return errmsgs.WrapError(err)
 	}
 	restItems := make([]map[string]interface{}, 0)
-	if entryRules != nil && len(entryRules) > 0 {
+	if len(entryRules) > 0 {
 		entryRule := entryRules[0]
 		d.Set("condition", entryRule["condition"])
 		d.Set("enabled", entryRule["enable"])
@@ -242,7 +243,7 @@ func resourceAlibabacloudStackEdasSwimmingLaneUpdate(d *schema.ResourceData, met
 			"EntryRules":      []interface{}{entryRule},
 			"EnableRules":     d.Get("enabled"),
 		}
-		response, err := client.DoTeaRequest("PUT", "Edas", "2017-08-01", "UpdateSwimmingLane", "/pop/v5/trafficmgnt/swimming_lanes", nil, request, nil)
+		response, err := client.DoTeaRequest("PUT", "Edas", "2017-08-01", "UpdateSwimmingLane", "/pop/v5/trafficmgnt/swimming_lanes", nil, request, request)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_swimming_lane", "UpdateSwimmingLane", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
