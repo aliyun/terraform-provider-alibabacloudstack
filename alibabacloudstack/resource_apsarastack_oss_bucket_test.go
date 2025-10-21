@@ -29,6 +29,7 @@ func testSweepOSSBuckets(region string) error {
 		return fmt.Errorf("error getting Alibabacloudstack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	ossService := OssService{client}
 
 	prefixes := []string{
 		"tf-testacc",
@@ -39,17 +40,20 @@ func testSweepOSSBuckets(region string) error {
 		"test-acc-alibabacloudstack-",
 	}
 
-	raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
-		return ossClient.ListBuckets()
-	})
+	buckets ,err := ossService.ListOssBucket()
 	if err != nil {
-		return fmt.Errorf("Error retrieving OSS buckets: %s", err)
+		return err
 	}
-	resp, _ := raw.(oss.ListBucketsResult)
+
 	sweeped := false
 
-	for _, v := range resp.Buckets {
+	for _, v := range buckets {
 		name := v.Name
+		
+		bucket, err := ossService.GetBucketClient(name)
+		if err != nil {
+			return fmt.Errorf("Error getting bucket (%s): %#v", name, err)
+		}
 		skip := true
 		for _, prefix := range prefixes {
 			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
@@ -62,13 +66,6 @@ func testSweepOSSBuckets(region string) error {
 			continue
 		}
 		sweeped = true
-		raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
-			return ossClient.Bucket(name)
-		})
-		if err != nil {
-			return fmt.Errorf("Error getting bucket (%s): %#v", name, err)
-		}
-		bucket, _ := raw.(*oss.Bucket)
 		if objects, err := bucket.ListObjects(); err != nil {
 			log.Printf("[ERROR] Failed to list objects: %s", err)
 		} else if len(objects.Objects) > 0 {
@@ -82,9 +79,7 @@ func testSweepOSSBuckets(region string) error {
 
 		log.Printf("[INFO] Deleting OSS bucket: %s", name)
 
-		_, err = client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
-			return nil, ossClient.DeleteBucket(name)
-		})
+		err =ossService.DeleteBucket(name)
 		if err != nil {
 			log.Printf("[ERROR] Failed to delete OSS bucket (%s): %s", name, err)
 		}

@@ -79,7 +79,6 @@ const (
 	DataworkspublicCode = ServiceCode("DATAWORKSPUBLIC")
 	OneRouterCode       = ServiceCode("ONEROUTER")
 	// Self-built gateway fake Code
-	OssDataCode  = ServiceCode("OSSDATA")
 	SlSDataCode  = ServiceCode("SLSDATA")
 	ALIKAFKACode = ServiceCode("ALIKAFKADATA")
 	BssDataCode  = ServiceCode("BSSDATA")
@@ -244,10 +243,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 
 	DmsEnterpriseCode: PopEndpoint{"", ""},
-	OSSCode: PopEndpoint{
-		"occ.{{.domain}}",
-		"occ.{{.region}}.{{.domain}}",
-	},
+	OSSCode: PopEndpoint{"", ""},
 	DataworkspublicCode: PopEndpoint{
 		"dataworks-public.{{.domain}}",
 		"dataworks-public.{{.region}}.{{.domain}}",
@@ -306,10 +302,6 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	CDNCode:     PopEndpoint{"", ""},
 	QuickbiCode: PopEndpoint{"", ""},
-	OssDataCode: PopEndpoint{
-		"oss-{{.region}}-a.{{.domain}}",
-		"oss-{{.region}}-a.{{.domain}}",
-	},
 	BssDataCode: PopEndpoint{"", ""},
 	OtsCode: PopEndpoint{
 		"ots.{{.domain}}",

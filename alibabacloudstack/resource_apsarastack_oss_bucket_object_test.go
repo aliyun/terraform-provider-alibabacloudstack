@@ -1,8 +1,5 @@
 package alibabacloudstack
 
-/*
-ALIBABACLOUDSTACK_OSSSERVICE_DOMAIN=oss-cn-qingdao-env66-d01-a.intra.env66.shuguang.com;
-*/
 import (
 	"fmt"
 	"io/ioutil"
@@ -165,7 +162,7 @@ func testAccCheckAlicloudOssBucketObjectExists(n string, bucket string, obj http
 	providers := []*schema.Provider{testAccProvider}
 	return testAccCheckOssBucketObjectExistsWithProviders(n, bucket, obj, &providers)
 }
-func testAccCheckOssBucketObjectExistsWithProviders(n string, bucket string, obj http.Header, providers *[]*schema.Provider) resource.TestCheckFunc {
+func testAccCheckOssBucketObjectExistsWithProviders(n string, bucketName string, obj http.Header, providers *[]*schema.Provider) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -181,24 +178,22 @@ func testAccCheckOssBucketObjectExistsWithProviders(n string, bucket string, obj
 				continue
 			}
 			client := provider.Meta().(*connectivity.AlibabacloudStackClient)
-			raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
-				return ossClient.Bucket(bucket)
-			})
-			buck, _ := raw.(*oss.Bucket)
+			ossService := OssService{client}
+			buck, err := ossService.GetBucketClient(bucketName)
 			if err != nil {
 				return fmt.Errorf("Error getting bucket: %#v", err)
 			}
 			id_info := strings.SplitN(rs.Primary.ID, ":", 2)
 			key := id_info[1]
 			object, err := buck.GetObjectMeta(key)
-			log.Printf("[WARN]get oss bucket object %#v", bucket)
+			log.Printf("[WARN]get oss bucket object %#v", bucketName)
 			if err == nil {
 				if object != nil {
 					obj = object
 					return nil
 				}
 				continue
-			} else if err != nil {
+			} else {
 				return err
 
 			}
@@ -218,13 +213,15 @@ func testAccCheckOssBucketObjectDestroyWithProvider(s *terraform.State, provider
 		if rs.Type != "alibabacloudstack_oss_bucket" {
 			continue
 		}
-		raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
-			return ossClient.Bucket(rs.Primary.ID)
-		})
+		ossService := OssService{client}
+		var err error
+		bucket, err = ossService.GetBucketClient(rs.Primary.ID)
 		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				return nil
+			}
 			return fmt.Errorf("Error getting bucket: %#v", err)
 		}
-		bucket, _ = raw.(*oss.Bucket)
 	}
 	if bucket == nil {
 		return nil

@@ -643,34 +643,9 @@ func resourceAlibabacloudStackOssBucketDelete(d *schema.ResourceData, meta inter
 		return nil
 	}
 
-	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["OpenApiAction"] = "DeleteBucket"
-		request.QueryParams["ProductName"] = "oss"
-		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":%s,\"%s\":%s,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}", "Department", client.Department, "ResourceGroup", client.ResourceGroup, "RegionId", client.RegionId, "asVersion", "enterprise", "asArchitechture", "x86", "haAlibabacloudStack", "true", "Language", "en", "BucketName", d.Id(), "StorageClass", "Standard")
-
-		bresponse, err := client.ProcessCommonRequest(request)
-
-		if err != nil {
-			if bresponse == nil {
-				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
-			}
-			if ossNotFoundError(err) {
-				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk))
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteBucket", errmsgs.AlibabacloudStackOssGoSdk, errmsg))
-		}
-		det, err := ossService.DescribeOssBucket(d.Id())
-		if err != nil {
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk))
-		}
-		if det.BucketInfo.Name != "" {
-			return resource.RetryableError(errmsgs.Error("Trying to delete OSS bucket %#v successfully.", d.Id()))
-		}
-		return nil
-	})
-	log.Print(err)
+	if err := ossService.DeleteBucket(d.Id()); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	return errmsgs.WrapError(ossService.WaitForOssBucket(d.Id(), Deleted, DefaultTimeoutMedium))
 }
 

@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -90,17 +89,10 @@ func resourceAlibabacloudStackImageExportRead(d *schema.ResourceData, meta inter
 func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client: client}
-	var requestInfo *oss.Client
-	raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
-		requestInfo = ossClient
-		return ossClient.Bucket(d.Get("oss_bucket").(string))
-	})
+	bucket, err:=ossService.GetBucketClient(d.Get("oss_bucket").(string))
 	if err != nil {
-		errmsg := ""
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Get("oss_bucket").(string), "OSS Bucket", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+		return err
 	}
-	addDebug("OSS Bucket", raw, requestInfo, map[string]string{"bucketName": d.Get("oss_bucket").(string)})
-	bucket, _ := raw.(*oss.Bucket)
 	objectName := d.Id() + "_system.raw.tar.gz"
 	if d.Get("oss_prefix").(string) != "" {
 		objectName = d.Get("oss_prefix").(string) + "_" + objectName

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/PaesslerAG/jsonpath"
@@ -90,43 +91,6 @@ type BucketEncryptionResponse struct {
 	} `json:"data"`
 }
 
-func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoResult, err error) {
-	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	request.QueryParams["OpenApiAction"] = "GetService"
-	request.QueryParams["ProductName"] = "oss"
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("GetBucketInfo", bresponse, request)
-	if err != nil {
-		if bresponse == nil {
-			return response, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		if ossNotFoundError(err) {
-			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
-	}
-
-	buckets, err := getBucketListResponseBuckets(bresponse)
-
-	var found = false
-	for _, j := range buckets {
-		if j.Name == id {
-			response.BucketInfo.Name = j.Name
-			response.BucketInfo.StorageClass = j.StorageClass
-			response.BucketInfo.ExtranetEndpoint = j.ExtranetEndpoint
-			response.BucketInfo.IntranetEndpoint = j.IntranetEndpoint
-			response.BucketInfo.Location = j.Location
-			found = true
-			break
-		}
-	}
-	if !found {
-		response.BucketInfo.Name = ""
-	}
-	return
-}
-
 func (s *OssService) ListOssBucket() (response []BucketListBucket, err error) {
 	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetService"
@@ -150,6 +114,7 @@ func (s *OssService) ListOssBucket() (response []BucketListBucket, err error) {
 	}
 	return buckets, nil
 }
+
 func getBucketListResponseBuckets(response *responses.CommonResponse) ([]BucketListBucket, error) {
 	var buckets []BucketListBucket
 
@@ -207,6 +172,25 @@ func getBucketListResponseBuckets(response *responses.CommonResponse) ([]BucketL
 		return buckets, errmsgs.WrapErrorf(err, "Error Response Format")
 	}
 	return buckets, nil
+}
+
+func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoResult, err error) {
+	
+	response.BucketInfo.Name = ""
+	if buckets, err := s.ListOssBucket(); err == nil {
+		for _, j := range buckets {
+				if j.Name == id {
+					response.BucketInfo.Name = j.Name
+					response.BucketInfo.StorageClass = j.StorageClass
+					response.BucketInfo.ExtranetEndpoint = j.ExtranetEndpoint
+					response.BucketInfo.IntranetEndpoint = j.IntranetEndpoint
+					response.BucketInfo.Location = j.Location
+					break
+				}
+			}
+	}
+	
+	return response, err
 }
 
 type BucketListBucket struct {
@@ -414,6 +398,53 @@ func (s *OssService) DeleteBucketTags(bucketName string) error {
 	return nil
 }
 
+func (s *OssService) DeleteBucket(bucketName string) error {
+	return resource.Retry(1*time.Minute, func() *resource.RetryError {
+		request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
+		request.QueryParams["OpenApiAction"] = "DeleteBucket"
+		request.QueryParams["ProductName"] = "oss"
+
+		params := map[string]string{
+			"Department":          s.client.Department,
+			"ResourceGroup":       s.client.ResourceGroup,
+			"RegionId":            s.client.RegionId,
+			"asVersion":           "enterprise",
+			"asArchitechture":     "x86",
+			"haAlibabacloudStack": "true",
+			"Language":            "en",
+			"BucketName":          bucketName,
+			"StorageClass":        "Standard",
+		}
+
+		if content, err := json.Marshal(params); err != nil {
+			return resource.NonRetryableError(err)
+		} else {
+			request.QueryParams["Params"] = string(content)
+		}
+
+		bresponse, err := s.client.ProcessCommonRequest(request)
+
+		if err != nil {
+			if bresponse == nil {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
+			}
+			if ossNotFoundError(err) {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk))
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "DeleteBucket", errmsgs.AlibabacloudStackOssGoSdk, errmsg))
+		}
+		det, err := s.DescribeOssBucket(bucketName)
+		if err != nil {
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk))
+		}
+		if det.BucketInfo.Name != "" {
+			return resource.RetryableError(errmsgs.Error("Trying to delete OSS bucket %#v successfully.", bucketName))
+		}
+		return nil
+	})
+}
+
 func (s *OssService) GetOssEndpointList() ([]interface{}, error) {
 	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
 	request.QueryParams["AppAction"] = "GetOssEndpointList"
@@ -495,4 +526,39 @@ func (s *OssService) OssBucketSyncStateRefreshFunc(bucketName string, failStates
 		}
 		return object, object.Status, nil
 	}
+}
+
+func (s OssService) GetBucketClient(bucketName string) (*oss.Bucket, error) {
+	bucketInfo, err := s.DescribeOssBucket(bucketName)
+	if bucketInfo.BucketInfo.Name == "" {
+		return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName+" Not Found")
+	}
+	var ossconn *oss.Client
+
+	bucketEndpoint := bucketInfo.BucketInfo.ExtranetEndpoint
+	schma := strings.ToLower(s.client.Config.Protocol)
+	if !strings.HasPrefix(bucketEndpoint, "http") {
+		bucketEndpoint = fmt.Sprintf("%s://%s", schma, bucketEndpoint)
+	}
+
+	clientOptions := []oss.ClientOption{oss.UserAgent(s.client.GetUserAgent()),
+		oss.SecurityToken(s.client.Config.SecurityToken)}
+	if s.client.Config.Proxy != "" {
+		clientOptions = append(clientOptions, oss.Proxy(s.client.Config.Proxy))
+	}
+
+	clientOptions = append(clientOptions, oss.UseCname(false))
+
+	if ossconn, err = oss.New(bucketEndpoint, s.client.Config.AccessKey, s.client.Config.SecretKey, clientOptions...); err != nil {
+		return nil, fmt.Errorf("unable to initialize the OSS client: %#v", err)
+	}
+
+	bucket, err := ossconn.Bucket(bucketName)
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to get the bucket %s: %#v", bucketName, err)
+	} else {
+		return bucket, nil
+	}
+
 }

@@ -178,9 +178,8 @@ func Provider() *schema.Provider {
 			"ossservice_domain": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_OSSSERVICE_DOMAIN", nil),
 				Description: descriptions["ossservice_domain"],
-				Deprecated:  "Use schema endpoints replace ossservice_domain.",
+				Deprecated:  "This parameter will no longer be valid and will be removed in 3.19.0.",
 			},
 			"kafkaopenapi_domain": {
 				Type:        schema.TypeString,
@@ -889,10 +888,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	ecsRoleName := getProviderConfig(d.Get("ecs_role_name").(string), "ram_role_name")
 
 	var eagleeye connectivity.EagleEye
-	if os.Getenv("TF_EAGLEEYE_TRACEID") != "" && os.Getenv("TF_EAGLEEYE_TRACEID") != "" {
+	if os.Getenv("TF_EAGLEEYE_TRACEID") != "" && os.Getenv("TF_EAGLEEYE_RPCID") != "" {
 		eagleeye = connectivity.EagleEye{
 			TraceId: os.Getenv("TF_EAGLEEYE_TRACEID"),
-			RpcId:   os.Getenv("TF_EAGLEEYE_TRACEID"),
+			RpcId:   os.Getenv("TF_EAGLEEYE_RPCID"),
 		}
 	} else {
 		eagleeye = connectivity.EagleEye{
@@ -986,10 +985,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 			return endpoint
 		}
 		for popcode := range connectivity.PopEndpoints {
-			if popcode == connectivity.OssDataCode {
-				// oss data gateway is not configured
-				continue
-			}
 			if popcode == connectivity.SlSDataCode {
 				// SLS data gateway is not configured
 				continue
@@ -1022,11 +1017,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 				}
 			}
 		}
-	}
-	ossServicedomain := d.Get("ossservice_domain").(string)
-	if ossServicedomain != "" {
-		config.Endpoints[connectivity.OssDataCode] = ossServicedomain
-		config.Endpoints[connectivity.OSSCode] = ossServicedomain
 	}
 	DbsEndpoint := d.Get("dbs_endpoint").(string)
 	if DbsEndpoint != "" {

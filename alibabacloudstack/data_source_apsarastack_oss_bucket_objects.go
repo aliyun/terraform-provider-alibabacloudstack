@@ -5,9 +5,6 @@ import (
 	"regexp"
 	"time"
 
-	"net/http"
-
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -106,6 +103,11 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	bucketName := d.Get("bucket_name").(string)
+	ossService := OssService{client}
+	bucket, err := ossService.GetBucketClient(bucketName)
+	if err != nil {
+		return err
+	}
 
 	// List bucket objects
 	var initialOptions []oss.Option
@@ -113,7 +115,6 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 		keyPrefix := v.(string)
 		initialOptions = append(initialOptions, oss.Prefix(keyPrefix))
 	}
-	var requestInfo *oss.Client
 	var allObjects []oss.ObjectProperties
 	nextMarker := ""
 	for {
@@ -123,13 +124,11 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 			options = append(options, oss.Marker(nextMarker))
 		}
 
-		raw, err := client.WithOssBucketClient(bucketName, func(bucket *oss.Bucket) (interface{}, error) {
-			requestInfo = &bucket.Client
-			return bucket.ListObjects(options...)
-		})
-		response, ok := raw.(oss.ListObjectsResult)
+		response, err := bucket.ListObjects(options...)
+		if err != nil{
+			return err
+		}
 		log.Printf("err is %s", err)
-		log.Printf("ok is %t", ok)
 		// if err != nil {
 		// 	errmsg := ""
 		// 	if ok {
@@ -139,9 +138,6 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 		// }
 		// var response *oss.ListObjectsResult
 		// err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if debugOn() {
-			addDebug("ListObjects", raw, requestInfo, map[string]interface{}{"options": options})
-		}
 		if response.Objects == nil || len(response.Objects) < 1 {
 			break
 		}
@@ -178,7 +174,11 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var ids []string
 	var s []map[string]interface{}
-	var requestInfo *oss.Client
+	ossService:=OssService{client}
+	bucket, err := ossService.GetBucketClient(bucketName)
+	if err != nil {
+		return err
+	}
 	for _, object := range objects {
 		mapping := map[string]interface{}{
 			"key":                    object.Key,
@@ -187,19 +187,11 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 		}
 
 		// Add metadata information
-		raw, err := client.WithOssBucketClient(bucketName, func(bucket *oss.Bucket) (interface{}, error) {
-			requestInfo = &bucket.Client
-			return bucket.GetObjectDetailedMeta(object.Key)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
+		objectHeader, err := bucket.GetObjectDetailedMeta(object.Key)
 		if err != nil {
 			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
 			log.Printf("[ERROR] Unable to get metadata for the object %s: %v: %s", object.Key, err, errmsg)
 		} else {
-			objectHeader, _ := raw.(http.Header)
 			mapping["content_type"] = objectHeader.Get("Content-Type")
 			mapping["cache_control"] = objectHeader.Get("Cache-Control")
 			mapping["content_disposition"] = objectHeader.Get("Content-Disposition")
@@ -209,26 +201,13 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 			mapping["server_side_encryption"] = objectHeader.Get(oss.HTTPHeaderOssServerSideEncryption)
 			mapping["sse_kms_key_id"] = objectHeader.Get(oss.HTTPHeaderOssServerSideEncryptionKeyID)
 		}
-		if debugOn() {
-			addDebug("GetObjectDetailedMeta", raw, requestInfo, map[string]string{"objectKey": object.Key})
-		}
 		// Add ACL information
-		raw, err = client.WithOssBucketClient(bucketName, func(bucket *oss.Bucket) (interface{}, error) {
-			requestInfo = &bucket.Client
-			return bucket.GetObjectACL(object.Key)
-		})
+		objectACL, err := bucket.GetObjectACL(object.Key)
 		if err != nil {
 			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
 			log.Printf("[ERROR] Unable to get ACL for the object %s: %v: %s", object.Key, err, errmsg)
 		} else {
-			objectACL, _ := raw.(oss.GetObjectACLResult)
 			mapping["acl"] = objectACL.ACL
-		}
-		if debugOn() {
-			addDebug("GetObjectACL", raw, requestInfo, map[string]string{"objectKey": object.Key})
 		}
 
 		ids = append(ids, object.Key)
