@@ -17,7 +17,7 @@ func resourceAlibabacloudStackEdasSwimmingLaneGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"entry_app_id": {
 				Type:     schema.TypeString,
@@ -37,6 +37,7 @@ func resourceAlibabacloudStackEdasSwimmingLaneGroup() *schema.Resource {
 			"strategy_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Default:      "CONTENT",
 				ValidateFunc: validation.StringInSlice([]string{"CONTENT", "PERCENT"}, false),
 			},
 			"group_id": {
@@ -108,6 +109,9 @@ func resourceAlibabacloudStackEdasSwimmingLaneGroupRead(d *schema.ResourceData, 
 	d.Set("group_id", fmt.Sprint(object["Id"]))
 	d.Set("entry_app_id", entryApplication["AppId"])
 	d.Set("apps", apps)
+	if v, ok := object["StrategyType"]; ok && v.(string) != "" {
+		d.Set("strategy_type", v)
+	}
 
 	return nil
 }
