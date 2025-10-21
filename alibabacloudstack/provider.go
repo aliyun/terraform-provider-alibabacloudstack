@@ -962,6 +962,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_connect_peer":                 resourceAlibabacloudStackCenTransitRouterConnectPeer(),
 		"alibabacloudstack_edas_k8s_application_scaling_rule":               resourceAlibabacloudStackEdasK8sApplicationScalingRule(),
 		"alibabacloudstack_edas_swimming_lane_group":                        resourceAlibabacloudStackEdasSwimmingLaneGroup(),
+		"alibabacloudstack_edas_swimming_lane":                              resourceAlibabacloudStackEdasSwimmingLane(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

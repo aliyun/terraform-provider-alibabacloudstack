@@ -1088,7 +1088,7 @@ func (s *EdasService) DescribeEdasSwimmingLaneGroup(id string) (map[string]inter
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_swimming_lane_group", "ListSwimmingLaneGroup", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if fmt.Sprint(response["Code"]) != "200" {
-		return nil, errmsgs.Error("describe k8s application failed for: " + response["Message"].(string))
+		return nil, errmsgs.Error("describe edas swimming_lane_group failed for: " + response["Message"].(string))
 	}
 	data, err := jsonpath.Get("$.Data", response)
 	if err != nil {
@@ -1101,4 +1101,29 @@ func (s *EdasService) DescribeEdasSwimmingLaneGroup(id string) (map[string]inter
 		}
 	}
 	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("edas_swimming_lane_group", id))
+}
+
+func (s *EdasService) DescribeEdasSwimmingLane(id string) (map[string]interface{}, error) {
+	param := strings.Split(id, ":")
+	request := map[string]interface{}{
+		"GroupId": param[1],
+	}
+	response, err := s.client.DoTeaRequest("GET", "Edas", "2017-08-01", "ListSwimmingLane", "/pop/v5/trafficmgnt/swimming_lanes", nil, request, nil)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_swimming_lane", "ListSwimmingLane", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if fmt.Sprint(response["Code"]) != "200" {
+		return nil, errmsgs.Error("describe edas swimming_lane failed for: " + response["Message"].(string))
+	}
+	data, err := jsonpath.Get("$.Data", response)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_swimming_lane", "ListSwimmingLane", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	for _, v := range data.([]interface{}) {
+		lane := v.(map[string]interface{})
+		if fmt.Sprint(lane["Id"]) == param[2] {
+			return lane, nil
+		}
+	}
+	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("edas_swimming_lane", id))
 }
