@@ -148,8 +148,8 @@ func dataSourceAlibabacloudStackEdasSwimmingLanesRead(d *schema.ResourceData, me
 
 	var ids []string
 	datas := make([]interface{}, 0)
-	for _, data := range data.([]interface{}) {
-		lane := data.(map[string]interface{})
+	for _, v := range data.([]interface{}) {
+		lane := v.(map[string]interface{})
 		id := fmt.Sprintf("%s:%s:%s", lane["NamespaceId"], fmt.Sprint(lane["GroupId"]), fmt.Sprint(lane["Id"]))
 		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
 			r := regexp.MustCompile(description_regex.(string))

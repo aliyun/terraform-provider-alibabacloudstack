@@ -20,32 +20,32 @@ func TestAccAlibabacloudStackEdasSwimmingLanesDataSource(t *testing.T) {
 			"group_id":   "${alibabacloudstack_edas_swimming_lane.default.group_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_edas_swimming_lane_group.default.name}-fakeTestAcccc",
+			"name_regex": "${alibabacloudstack_edas_swimming_lane.default.name}-fakeTestAcccc",
 			"group_id":   "${alibabacloudstack_edas_swimming_lane.default.group_id}",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":      []string{"${alibabacloudstack_edas_swimming_lane_group.default.id}"},
+			"ids":      []string{"${alibabacloudstack_edas_swimming_lane.default.id}"},
 			"group_id": "${alibabacloudstack_edas_swimming_lane.default.group_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":      []string{"${alibabacloudstack_edas_swimming_lane_group.default.id}-fakeTestAcccc"},
+			"ids":      []string{"${alibabacloudstack_edas_swimming_lane.default.id}-fakeTestAcccc"},
 			"group_id": "${alibabacloudstack_edas_swimming_lane.default.group_id}",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_edas_swimming_lane_group.default.name}",
+			"name_regex": "${alibabacloudstack_edas_swimming_lane.default.name}",
 			"group_id":   "${alibabacloudstack_edas_swimming_lane.default.group_id}",
-			"ids":        []string{"${alibabacloudstack_edas_swimming_lane_group.default.id}"},
+			"ids":        []string{"${alibabacloudstack_edas_swimming_lane.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_edas_swimming_lane_group.default.name}-fakeTestAcccc",
+			"name_regex": "${alibabacloudstack_edas_swimming_lane.default.name}-fakeTestAcccc",
 			"group_id":   "${alibabacloudstack_edas_swimming_lane.default.group_id}",
-			"ids":        []string{"${alibabacloudstack_edas_swimming_lane_group.default.id}-fakeTestAcccc"},
+			"ids":        []string{"${alibabacloudstack_edas_swimming_lane.default.id}-fakeTestAcccc"},
 		}),
 	}
 
@@ -55,7 +55,7 @@ func TestAccAlibabacloudStackEdasSwimmingLanesDataSource(t *testing.T) {
 			"ids.0":                              CHECKSET,
 			"swimming_lanes.#":                   "1",
 			"swimming_lanes.0.name":              fmt.Sprintf("tf-testAcc%s-%d", defaultRegionToTest, rand),
-			"swimming_lanes.0.entry_app_id":      CHECKSET,
+			"swimming_lanes.0.condition":         CHECKSET,
 			"swimming_lanes.0.apps.#":            "2",
 			"swimming_lanes.0.logical_region_id": CHECKSET,
 			"swimming_lanes.0.group_id":          CHECKSET,
