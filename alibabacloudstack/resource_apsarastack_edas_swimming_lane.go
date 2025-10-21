@@ -248,7 +248,7 @@ func resourceAlibabacloudStackEdasSwimmingLaneUpdate(d *schema.ResourceData, met
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_swimming_lane", "UpdateSwimmingLane", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if fmt.Sprint(response["Code"]) != "200" {
-			return errmsgs.Error("update k8s application failed for: " + response["Message"].(string))
+			return errmsgs.Error("update edas swimming_lane failed for: " + response["Message"].(string))
 		}
 	}
 	return nil
@@ -265,7 +265,7 @@ func resourceAlibabacloudStackEdasSwimmingLaneDelete(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_swimming_lane", "DeleteSwimmingLane", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if fmt.Sprint(response["Code"]) != "200" {
-		return errmsgs.Error("delete k8s application failed for: " + response["Message"].(string))
+		return errmsgs.Error("delete edas swimming_lane failed for: " + response["Message"].(string))
 	}
 	return nil
 }
