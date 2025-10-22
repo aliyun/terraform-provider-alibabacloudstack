@@ -175,21 +175,21 @@ func getBucketListResponseBuckets(response *responses.CommonResponse) ([]BucketL
 }
 
 func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoResult, err error) {
-	
+
 	response.BucketInfo.Name = ""
 	if buckets, err := s.ListOssBucket(); err == nil {
 		for _, j := range buckets {
-				if j.Name == id {
-					response.BucketInfo.Name = j.Name
-					response.BucketInfo.StorageClass = j.StorageClass
-					response.BucketInfo.ExtranetEndpoint = j.ExtranetEndpoint
-					response.BucketInfo.IntranetEndpoint = j.IntranetEndpoint
-					response.BucketInfo.Location = j.Location
-					break
-				}
+			if j.Name == id {
+				response.BucketInfo.Name = j.Name
+				response.BucketInfo.StorageClass = j.StorageClass
+				response.BucketInfo.ExtranetEndpoint = j.ExtranetEndpoint
+				response.BucketInfo.IntranetEndpoint = j.IntranetEndpoint
+				response.BucketInfo.Location = j.Location
+				break
 			}
+		}
 	}
-	
+
 	return response, err
 }
 
@@ -331,7 +331,7 @@ func (s *OssService) PutOssBucketTags(bucketName string, tags []OssTags) error {
 		return errmsgs.WrapError(err)
 	}
 
-	if resp["asapiSuccess"].(bool) == false {
+	if v, ok := resp["asapiSuccess"]; ok && !v.(bool) {
 		return errmsgs.WrapError(errmsgs.Error(fmt.Sprintf("put bucket tags error %#v", resp)))
 	}
 
@@ -531,7 +531,7 @@ func (s *OssService) OssBucketSyncStateRefreshFunc(bucketName string, failStates
 func (s OssService) GetBucketClient(bucketName string) (*oss.Bucket, error) {
 	bucketInfo, err := s.DescribeOssBucket(bucketName)
 	if bucketInfo.BucketInfo.Name == "" {
-		return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName+" Not Found")
+		return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
 	}
 	var ossconn *oss.Client
 
