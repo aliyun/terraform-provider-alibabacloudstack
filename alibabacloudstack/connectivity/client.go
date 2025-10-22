@@ -1258,6 +1258,12 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 	if domain == "" {
 		domain = conn.Domain
 	}
+	
+	if popcode == OneRouterCode {
+		// special logic, 3.16.2 mandatory, no longer required after 3.18.1
+		request.QueryParams["AccountInfo"] = client.GetAccountInfo()
+	}
+	
 	if strings.HasPrefix(domain, "internal.asapi.") || strings.HasPrefix(domain, "public.asapi.") {
 		// asapi compatibility logic
 		// # asapi When using common SDK, pathpattern cannot be concatenated, otherwise an error will be reported
@@ -1268,9 +1274,6 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		}
 		if len(request.Content) > 0 {
 			request.QueryParams["x-acs-body"] = string(request.Content)
-		}
-		if popcode == OneRouterCode {
-			request.QueryParams["AccountInfo"] = client.GetAccountInfo()
 		}
 		request.Method = "POST"
 		if strings.HasPrefix(domain, "public.asapi.") {
