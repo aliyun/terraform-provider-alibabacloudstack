@@ -1,6 +1,7 @@
 package connectivity
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"log"
 
@@ -1220,6 +1221,30 @@ func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*s
 	return conn, nil
 }
 
+func (client *AlibabacloudStackClient) GetAccountInfo() string {
+	accountMap := make(map[string]interface{})
+
+	// User information
+	// accountMap["aliyunPk"] = nil
+	// accountMap["accountStructure"] = nil
+	// accountMap["parentPk"] = nil
+	accountMap["accessKeyId"] = client.Config.AccessKey
+	accountMap["accessKeySecret"] = client.Config.SecretKey
+	// accountMap["partnerPk"] = nil
+
+	// // Local machine IP
+	// accountMap["sourceIp"] = nil
+
+	// STS required
+	if client.Config.SecurityToken != "" {
+		accountMap["securityToken"] = client.Config.SecurityToken
+	}
+
+	jsonData, _ := json.Marshal(accountMap)
+	accountInfo := base64.StdEncoding.EncodeToString([]byte(jsonData))
+	return accountInfo
+}
+
 func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {
 	popcode := ServiceCode(strings.ReplaceAll(strings.ToUpper(request.Product), "-", "_"))
 
@@ -1245,7 +1270,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			request.QueryParams["x-acs-body"] = string(request.Content)
 		}
 		if popcode == OneRouterCode {
-			request.QueryParams["AccountInfo"] = "terraform-provider" //TODO: 3162 ~ 3180 onerouter is required, will be removed in subsequent versions
+			request.QueryParams["AccountInfo"] = client.GetAccountInfo()
 		}
 		request.Method = "POST"
 		if strings.HasPrefix(domain, "public.asapi.") {
