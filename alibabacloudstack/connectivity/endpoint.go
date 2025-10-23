@@ -71,6 +71,7 @@ const (
 	YaochiOpsCode        = ServiceCode("YAOCHIOPS")
 	ACMCode              = ServiceCode("ACM")
 	POLARDBXCode         = ServiceCode("POLARDBX")
+	HOLOGRAMCode         = ServiceCode("HOLOGRAM")
 	// undefined code, add first
 	GDBCode                   = ServiceCode("GDB")
 	ARMSCode                  = ServiceCode("ARMS")
@@ -364,6 +365,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	CbnCode: PopEndpoint{
 		"cbn.{{.domain}}",
 		"cbn.{{.region}}.{{.domain}}",
+	},
+	HOLOGRAMCode: PopEndpoint{
+		"hologram.{{.domain}}",
+		"hologram.{{.region}}.{{.domain}}",
 	},
 	// 3.18.3 new sites will not be opened
 	OneRouterCode: PopEndpoint{
