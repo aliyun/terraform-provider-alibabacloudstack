@@ -9,16 +9,17 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackHologramInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"compute_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "Standard",
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Standard", "Follower"}, false),
 			},
 			"zone_id": {
 				Type:     schema.TypeString,
@@ -30,12 +31,6 @@ func resourceAlibabacloudStackHologramInstance() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Default:  "intel",
-			},
-			"is_new_feature": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-				Default:  true,
 			},
 			"node": {
 				Type:     schema.TypeInt,
@@ -49,6 +44,11 @@ func resourceAlibabacloudStackHologramInstance() *schema.Resource {
 			"vswitch_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
+			},
+			"leader_instance_id": {
+				Type:     schema.TypeString,
+				Optional: true,
 				ForceNew: true,
 			},
 			"instance_name": {
@@ -128,18 +128,39 @@ func resourceAlibabacloudStackHologramInstanceCreate(d *schema.ResourceData, met
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
+	compute_type := d.Get("compute_type").(string)
 	body := map[string]interface{}{
-		"zoneId":       d.Get("zone_id"),
-		"vpcId":        d.Get("vpc_id"),
-		"vpcSwitchId":  d.Get("vswitch_id"),
-		"instanceName": d.Get("instance_name"),
-		"computeType":  d.Get("compute_type"),
-		"cpu":          d.Get("cpu"),
-		"node":         node,
-		"cluster":      cluster,
-		"cu":           quota["Cu"],
-		"memory":       quota["Memory"],
-		"isNewFeature": true,
+		"zoneId":         d.Get("zone_id"),
+		"vpcId":          d.Get("vpc_id"),
+		"vpcSwitchId":    d.Get("vswitch_id"),
+		"instanceName":   d.Get("instance_name"),
+		"computeType":    compute_type,
+		"cpu":            d.Get("cpu"),
+		"node":           node,
+		"cluster":        cluster,
+		"cu":             quota["Cu"],
+		"memory":         quota["Memory"],
+		"isNewFeature":   true,
+		"ClusterEnvType": 0,
+		"Department":     client.Department,
+		"ResourceGroup":  client.ResourceGroup,
+		"region":         client.Region,
+	}
+	if compute_type == "Follower" {
+		body["ClusterEnvType"] = 2
+		if v, ok := d.GetOk("leader_instance_id"); ok {
+			stateConf := BuildStateConf([]string{"Allocating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, hologramService.HologramInstanceStateRefreshFunc(v.(string), []string{"Failed"}))
+			if _, err := stateConf.WaitForState(); err != nil {
+				return fmt.Errorf("waiting for hologram leader instance %s to be Running failed: %v", v.(string), err)
+			}
+			body["leaderInstanceId"] = v
+		} else {
+			return errmsgs.Error("leader_instance_id is required when compute_type is Follower")
+		}
+	} else {
+		if _, ok := d.GetOk("leader_instance_id"); ok {
+			return errmsgs.Error("leader_instance_id can not be set when compute_type is not Follower")
+		}
 	}
 	request := map[string]interface{}{
 		"x-acs-body": body,
@@ -209,6 +230,40 @@ func resourceAlibabacloudStackHologramInstanceUpdate(d *schema.ResourceData, met
 			return fmt.Errorf("waiting for hologram instance %s to be Running failed: %v", d.Id(), err)
 		}
 	}
+	if d.HasChange("leader_instance_id") {
+		if d.Get("compute_type") != "Follower" {
+			return errmsgs.Error("leader_instance_id can not be set when compute_type is not Follower")
+		}
+		// old, new := d.GetChange("leader_instance_id")
+		hologramService := HologramService{client}
+		var err error
+		unBindPattern := fmt.Sprintf("/api/v1/instances/%s/unBindReadOnly", d.Id())
+		_, err = client.DoTeaRequest("POST", "Hologram", "2022-06-01", "UnBindLeaderInstance", unBindPattern, nil, nil, nil)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "UnBindLeaderInstance", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		stateConf := BuildStateConf([]string{"Allocating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		if _, err = stateConf.WaitForState(); err != nil {
+			return fmt.Errorf("waiting for hologram instance %s to be Running failed: %v", d.Id(), err)
+		}
+		if v, ok := d.GetOk("leader_instance_id"); ok {
+			request := map[string]interface{}{
+				"x-acs-body": map[string]interface{}{
+					"leaderInstanceId": v.(string),
+					"RegionId":         client.RegionId,
+				},
+			}
+			pattern := fmt.Sprintf("//api/v1/instances/%s/bindReadOnly", d.Id())
+			_, err = client.DoTeaRequest("POST", "Hologram", "2022-06-01", "BindLeaderInstance", pattern, nil, nil, request)
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "BindLeaderInstance", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+			stateConf := BuildStateConf([]string{"Allocating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+			if _, err := stateConf.WaitForState(); err != nil {
+				return fmt.Errorf("waiting for hologram instance %s to be Running failed: %v", d.Id(), err)
+			}
+		}
+	}
 
 	return nil
 }
@@ -235,6 +290,11 @@ func resourceAlibabacloudStackHologramInstanceRead(d *schema.ResourceData, meta 
 	d.Set("cpu", instance["CpuBrand"])
 	d.Set("version", instance["Version"])
 	d.Set("enable_hive_access", instance["EnableHiveAccess"])
+	if v, ok := instance["LeaderInstanceId"]; ok {
+		d.Set("leader_instance_id", v)
+	} else {
+		d.Set("leader_instance_id", "")
+	}
 
 	if endpoints, ok := instance["Endpoints"].([]interface{}); ok {
 		endpointList := make([]map[string]interface{}, 0)
@@ -272,11 +332,24 @@ func resourceAlibabacloudStackHologramInstanceRead(d *schema.ResourceData, meta 
 
 func resourceAlibabacloudStackHologramInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	pattern := fmt.Sprintf("/inner/v1/instances/%s/delete", d.Id())
-	response, err := client.DoTeaRequest("POST", "Hologram", "2022-06-01", "DeleteInstance", pattern, nil, nil, nil)
+	hologramService := HologramService{client}
+	var err error
+	request := map[string]interface{}{
+		"instanceId": d.Id(),
+	}
+	stop_pattern := fmt.Sprintf("/api/v1/instances/%s/stop", d.Id())
+	_, err = client.DoTeaRequest("POST", "Hologram", "2022-06-01", "StopInstance", stop_pattern, nil, request, nil)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "StopInstance", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	stateConf := BuildStateConf([]string{"Allocating"}, []string{"Suspended"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+	if _, err = stateConf.WaitForState(); err != nil {
+		return fmt.Errorf("waiting for hologram instance %s to be Suspended failed: %v", d.Id(), err)
+	}
+	pattern := fmt.Sprintf("/api/v1/instances/%s/delete", d.Id())
+	_, err = client.DoTeaRequest("POST", "Hologram", "2022-06-01", "DeleteInstance", pattern, nil, request, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "DeleteInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	log.Printf("[DEBUG] Hologres instance deleted: %s", response)
 	return nil
 }

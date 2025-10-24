@@ -557,6 +557,8 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_edas_k8s_application_scaling_rules":               dataSourceAlibabacloudStackEdasScalingRules(),
 		"alibabacloudstack_edas_swimming_lane_groups":                        dataSourceAlibabacloudStackEdasSwimmingLaneGroups(),
 		"alibabacloudstack_edas_swimming_lanes":                              dataSourceAlibabacloudStackEdasSwimmingLanes(),
+		"alibabacloudstack_hologram_clusters":                                dataSourceAlibabacloudStackHologramClusters(),
+		"alibabacloudstack_hologram_instances":                               dataSourceAlibabacloudStackHologramInstances(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
