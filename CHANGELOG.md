@@ -1,3 +1,16 @@
+# 3.18.19
+
+## New
+
+1. ACK template orchestration capability (`alibabacloudstack_ack_template`)
+2. EDAS swimming lane orchestration capability (`alibabacloudstack_edas_swimming_lane`)
+3. EDAS swimming lane group orchestration capability (`alibabacloudstack_edas_swimming_lane_group`)
+4. Hologram cluster data source (`alibabacloudstack_hologram_clusters`)
+5. Hologram instance orchestration capability (`alibabacloudstack_hologram_instance`)
+6. Hologram instance backup policy orchestration capability (`alibabacloudstack_hologram_instance_backup_policy`)
+
+---
+
 # 3.18.18
 
 ## New

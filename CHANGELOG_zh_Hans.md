@@ -1,3 +1,16 @@
+# 3.18.19
+
+## 新增
+
+1. ack 模板的编排能力（`alibabacloudstack_ack_template`）
+2. Edas游道的编排能力（`alibabacloudstack_edas_swimming_lane`）
+3. Edas游道组的编排能力（`alibabacloudstack_edas_swimming_lane_group`）
+4. Hologram集群的查询能力（`alibabacloudstack_hologram_clusters`）
+5. Hologram实例的编排能力（`alibabacloudstack_hologram_instance`）
+6. Hologram实例备份规则的编排能力（`alibabacloudstack_hologram_instance_backup_policy`）
+
+---
+
 # 3.18.18
 
 ## 新增
