@@ -132,17 +132,13 @@ func (s *HologramService) DescribeHologramInstanceBackupPolicy(id string) (map[s
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance_backup_policy", "GetScheduledBackupConfig", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	backupConfig := make(map[string]interface{})
-	backupConfig["Enabled"] = data.(map[string]interface{})["Enabled"]
 	taskParameter := data.(map[string]interface{})["TaskParameter"]
-	params := make(map[string]interface{})
 	err = json.Unmarshal([]byte(taskParameter.(string)), &backupConfig)
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance_backup_policy", "GetScheduledBackupConfig", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	for k, v := range params {
-		backupConfig[k] = v
-	}
 	if backupConfig != nil {
+		backupConfig["Enabled"] = data.(map[string]interface{})["Enabled"]
 		return backupConfig, nil
 	} else {
 		return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("hologram_instance_backup_policy", id))
