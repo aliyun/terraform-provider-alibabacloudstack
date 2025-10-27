@@ -4,20 +4,17 @@ layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hologram_instance"
 sidebar_current: "docs-alibabacloudstack-resource-hologram-instance"
 description: |-
-  Provides a AlibabacloudStack Hologram Instance resource.
+  Provides a Alibaba Cloud Hologram Instance resource.
 ---
 
-# alibabacloudstack\_hologram\_instance
+# alibabacloudstack_hologram_instance
 
-Provides a Hologram instance resource.
+Provides a Hologram Instance resource.
 
-For information about Hologram instance and how to use, see [What is Instance](https://www.alibabacloud.com/help/en/hologres/latest/create-an-instance).
-
--> **NOTE:** Available in v1.134.0+.
 
 ## Example Usage
 
-Basic Usage
+### Basic Usage
 
 ```hcl
 
@@ -73,12 +70,13 @@ resource "alibabacloudstack_hologram_instance" "example" {
 
 The following arguments are supported:
 
-* `compute_type` - (Optional, ForceNew) The type of computation. Valid values: `Standard`, `Follower`. Default value: `Standard`.
+* `compute_type` - (Required, ForceNew) The type of the instance. Valid values: `Standard`, `Follower`.
 * `zone_id` - (Required, ForceNew) The zone ID of the instance.
-* `cpu` - (Optional, ForceNew) The CPU count. Default value: `intel`.
-* `node` - (Required) The node count.
-* `vpc_id` - (Required, ForceNew) The VPC ID.
-* `vswitch_id` - (Required, ForceNew) The VSwitch ID.
+* `cpu` - (Optional, ForceNew) The CPU brand. defaults to `intel`.
+* `node` - (Required) The number of nodes.
+* `vpc_id` - (Required, ForceNew) The ID of the VPC.
+* `vswitch_id` - (Required, ForceNew) The ID of the vSwitch.
+* `leader_instance_id` - (Optional) The ID of the leader instance. It is required when the `compute_type` is `Follower`.
 * `instance_name` - (Required) The name of the instance.
 * `cluster` - (Required, ForceNew) The cluster name.
 
@@ -107,9 +105,8 @@ The endpoints mapping supports the following:
 
 ## Import
 
-Hologram instance can be imported using the id, e.g.
+Hologram Instance can be imported using the id, e.g.
 
 ```shell
 $ terraform import alibabacloudstack_hologram_instance.example <id>
-```
 ```
