@@ -36,6 +36,7 @@ data "alibabacloudstack_zones" "default" {
 }
 data "alibabacloudstack_hologram_clusters" "default" {
   zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  name_regex = "Hologres.*"
 }
 
 

@@ -37,7 +37,7 @@ func TestAccAlibabacloudStackHologramInstance_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"compute_type":  "Standard",
-					"zone_id":       "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"zone_id":       "${data.alibabacloudstack_hologram_clusters.default.zone_id}",
 					"cpu":           "intel",
 					"node":          "2",
 					"vpc_id":        "${alibabacloudstack_vpc_vpc.default.id}",
@@ -103,14 +103,14 @@ func TestAccAlibabacloudStackHologramInstance_readOnly(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"compute_type":       "Follower",
-					"zone_id":            "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"zone_id":            "${alibabacloudstack_hologram_instance.standard.0.zone_id}",
 					"cpu":                "intel",
 					"node":               "2",
 					"vpc_id":             "${alibabacloudstack_vpc_vpc.default.id}",
 					"vswitch_id":         "${alibabacloudstack_vpc_vswitch.default.id}",
 					"instance_name":      "${var.name}",
 					"cluster":            "${data.alibabacloudstack_hologram_clusters.default.clusters.0.id}",
-					"leader_instance_id": "${alibabacloudstack_hologram_instance.standard[0].id}",
+					"leader_instance_id": "${alibabacloudstack_hologram_instance.standard.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -123,7 +123,7 @@ func TestAccAlibabacloudStackHologramInstance_readOnly(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"leader_instance_id": "${alibabacloudstack_hologram_instance.standard[1].id}",
+					"leader_instance_id": "${alibabacloudstack_hologram_instance.standard.1.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -149,7 +149,7 @@ variable "name" {
 %s
 
 data "alibabacloudstack_hologram_clusters" "default" {
-  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  zone_id = sort(data.alibabacloudstack_zones.default.ids)[0]
 }
 
 `, name, VSwitchCommonTestCase)
@@ -164,13 +164,13 @@ variable "name" {
 %s
 
 data "alibabacloudstack_hologram_clusters" "default" {
-  zone_id = "cn-wulan-env82-amtest82001-a"
+  zone_id = sort(data.alibabacloudstack_zones.default.ids)[0]
 }
 
 resource "alibabacloudstack_hologram_instance" "standard" {
 	count = 2
   	compute_type = "Standard"
-	zone_id = "cn-wulan-env82-amtest82001-a"
+	zone_id = "${data.alibabacloudstack_hologram_clusters.default.zone_id}"
 	cpu = "intel"
 	node = "2"
 	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
