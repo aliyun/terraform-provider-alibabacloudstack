@@ -92,11 +92,11 @@ func dataSourceAlibabacloudStackHologramClustersRead(d *schema.ResourceData, met
 	}
 	response, err := client.DoTeaRequest("POST", "Hologram", "2022-06-01", "ListClusters", "/api/v1/regions/listClusters", nil, nil, request)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologress_instances", "ListClusters", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_clusters", "ListClusters", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	clusters, err := jsonpath.Get("$.ClusterList", response)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologress_instances", "ListClusters", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_clusters", "ListClusters", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok {

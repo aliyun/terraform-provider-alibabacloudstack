@@ -196,7 +196,7 @@ func resourceAlibabacloudStackHologramInstanceUpdate(d *schema.ResourceData, met
 		pattern := fmt.Sprintf("/api/v1/instances/%s/instanceName", d.Id())
 		response, err := client.DoTeaRequest("POST", "Hologram", "2022-06-01", "UpdateInstanceName", pattern, nil, nil, request)
 		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "ScaleInstance", errmsgs.AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "UpdateInstanceName", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		log.Printf("[DEBUG] Hologres instance updated: %s", response)
 	}
@@ -257,7 +257,7 @@ func resourceAlibabacloudStackHologramInstanceUpdate(d *schema.ResourceData, met
 			if err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "BindLeaderInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			stateConf := BuildStateConf([]string{"Allocating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+			stateConf := BuildStateConf([]string{"Allocating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return fmt.Errorf("waiting for hologram instance %s to be Running failed: %v", d.Id(), err)
 			}
@@ -341,7 +341,7 @@ func resourceAlibabacloudStackHologramInstanceDelete(d *schema.ResourceData, met
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "StopInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	stateConf := BuildStateConf([]string{"Allocating"}, []string{"Suspended"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"Allocating"}, []string{"Suspended"}, d.Timeout(schema.TimeoutDelete), 10*time.Second, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err = stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("waiting for hologram instance %s to be Suspended failed: %v", d.Id(), err)
 	}

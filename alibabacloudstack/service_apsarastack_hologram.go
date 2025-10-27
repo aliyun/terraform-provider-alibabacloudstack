@@ -18,16 +18,16 @@ func (s *HologramService) DescribeHologramInstance(id string) (map[string]interf
 	pattern := fmt.Sprintf("/api/v1/instances/%s", id)
 	response, err := s.client.DoTeaRequest("GET", "Hologram", "2022-06-01", "GetInstance", pattern, nil, nil, nil)
 	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologress_instance", "ListInstances", errmsgs.AlibabacloudStackSdkGoERROR)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "ListInstances", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	instance, err := jsonpath.Get("$.Instance", response)
 	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologress_instance", "ListInstances", errmsgs.AlibabacloudStackSdkGoERROR)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "ListInstances", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if instance != nil {
 		return instance.(map[string]interface{}), nil
 	}
-	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("hologress_instance", id))
+	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("hologram_instance", id))
 }
 
 func (s *HologramService) HologramInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
@@ -61,11 +61,11 @@ func (s *HologramService) CalculateQuota(node int, cluster string) (map[string]i
 	}
 	response, err := s.client.DoTeaRequest("POST", "Hologram", "2022-06-01", "CalculateQuota", "/api/v1/instances/calculateQuota", nil, nil, request)
 	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologress_instance", "CalculateQuota", errmsgs.AlibabacloudStackSdkGoERROR)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "CalculateQuota", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	quota, err := jsonpath.Get("$.Quota", response)
 	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologress_instance", "CalculateQuota", errmsgs.AlibabacloudStackSdkGoERROR)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "CalculateQuota", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return quota.(map[string]interface{}), nil
 }
