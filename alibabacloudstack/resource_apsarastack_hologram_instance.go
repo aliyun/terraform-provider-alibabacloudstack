@@ -49,7 +49,6 @@ func resourceAlibabacloudStackHologramInstance() *schema.Resource {
 			"leader_instance_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"instance_name": {
 				Type:     schema.TypeString,
@@ -225,7 +224,7 @@ func resourceAlibabacloudStackHologramInstanceUpdate(d *schema.ResourceData, met
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "ScaleInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		log.Printf("[DEBUG] Hologres instance updated: %s", response)
-		stateConf := BuildStateConf([]string{"Allocating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"Allocating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return fmt.Errorf("waiting for hologram instance %s to be Running failed: %v", d.Id(), err)
 		}
@@ -242,7 +241,7 @@ func resourceAlibabacloudStackHologramInstanceUpdate(d *schema.ResourceData, met
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "UnBindLeaderInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		stateConf := BuildStateConf([]string{"Allocating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"Allocating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, hologramService.HologramInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 		if _, err = stateConf.WaitForState(); err != nil {
 			return fmt.Errorf("waiting for hologram instance %s to be Running failed: %v", d.Id(), err)
 		}
@@ -253,7 +252,7 @@ func resourceAlibabacloudStackHologramInstanceUpdate(d *schema.ResourceData, met
 					"RegionId":         client.RegionId,
 				},
 			}
-			pattern := fmt.Sprintf("//api/v1/instances/%s/bindReadOnly", d.Id())
+			pattern := fmt.Sprintf("/api/v1/instances/%s/bindReadOnly", d.Id())
 			_, err = client.DoTeaRequest("POST", "Hologram", "2022-06-01", "BindLeaderInstance", pattern, nil, nil, request)
 			if err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "BindLeaderInstance", errmsgs.AlibabacloudStackSdkGoERROR)

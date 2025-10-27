@@ -127,7 +127,7 @@ func TestAccAlibabacloudStackHologramInstance_readOnly(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"leader_instance_id": "${alibabacloudstack_hologram_instance.standard[1].id}",
+						"leader_instance_id": CHECKSET,
 					}),
 				),
 			},
