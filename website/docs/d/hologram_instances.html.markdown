@@ -63,7 +63,7 @@ resource "alibabacloudstack_hologram_instance" "example" {
 }
 
 data "alibabacloudstack_hologram_instances" "example" {
-  ids = ["${alibabacloudstack_hologram_instance.default.id}"]
+  ids = ["${alibabacloudstack_hologram_instance.example.id}"]
 }
 
 output "first_instance_id" {
