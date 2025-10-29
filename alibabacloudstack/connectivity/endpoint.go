@@ -313,8 +313,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	// New sites after 3.18.3 will no longer be open
 	OneRouterCode: PopEndpoint{
-		"occ.{{.domain}}",
-		"occ.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
 	},
 	ASAPICode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
