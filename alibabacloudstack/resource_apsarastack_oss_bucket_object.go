@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -103,9 +103,9 @@ func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackOssBucketObjectCreate, 
-		resourceAlibabacloudStackOssBucketObjectRead, 
-		resourceAlibabacloudStackOssBucketObjectUpdate, 
+	setResourceFunc(resource, resourceAlibabacloudStackOssBucketObjectCreate,
+		resourceAlibabacloudStackOssBucketObjectRead,
+		resourceAlibabacloudStackOssBucketObjectUpdate,
 		resourceAlibabacloudStackOssBucketObjectDelete)
 	return resource
 }
@@ -120,18 +120,12 @@ func resourceAlibabacloudStackOssBucketObjectUpdate(d *schema.ResourceData, meta
 
 func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *oss.Client
 	bucketName := d.Get("bucket").(string)
-	raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
-		requestInfo = ossClient
-		return ossClient.Bucket(bucketName)
-	})
+	ossService := OssService{client}
+	bucket, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
-		errmsg := ""
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket_object", "Bucket", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+		return err
 	}
-	addDebug("Bucket", raw, requestInfo, map[string]string{"bucketName": bucketName})
-	bucket, _ := raw.(*oss.Bucket)
 	var filePath string
 	var body io.Reader
 
@@ -184,25 +178,20 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *oss.Client
 	var bucketName, key string
-	if id_info := strings.SplitN(d.Id(), ":", 2) ; len(id_info) == 1 {
+	if id_info := strings.SplitN(d.Id(), ":", 2); len(id_info) == 1 {
 		// Compatible with old ID d.SetId(key)
 		bucketName = d.Get("bucket").(string)
 		key = d.Get("key").(string)
 		d.SetId(fmt.Sprintf("%s:%s", bucketName, key))
-	}else {
+	} else {
 		bucketName = id_info[0]
 		key = id_info[1]
 	}
-	raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
-		requestInfo = ossClient
-		return ossClient.Bucket(bucketName)
-	})
+	ossService := OssService{client}
+	bucket, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
-		errmsg := ""
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "Bucket", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+		return err
 	}
-	addDebug("Bucket", raw, requestInfo, map[string]string{"bucketName": bucketName})
-	bucket, _ := raw.(*oss.Bucket)
 	options, err := buildObjectHeaderOptions(d)
 	if err != nil {
 		return errmsgs.WrapError(err)
@@ -220,12 +209,11 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 		"objectKey": key,
 		"options":   options,
 	})
-	
+
 	if acl, err := bucket.GetObjectACL(key, options...); err == nil {
 		// Requires special permissions, may fail. Do not overwrite the attribute when it fails.
 		d.Set("acl", acl.ACL)
 	}
-	
 
 	d.Set("bucket", bucketName)
 	d.Set("key", key)
@@ -243,17 +231,12 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackOssBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
-	var requestInfo *oss.Client
-	raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
-		requestInfo = ossClient
-		return ossClient.Bucket(d.Get("bucket").(string))
-	})
+
+	bucketName := d.Get("bucket").(string)
+	bucket, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
-		errmsg := ""
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "Bucket", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+		return err
 	}
-	addDebug("Bucket", raw, requestInfo, map[string]string{"bucketName": d.Get("bucket").(string)})
-	bucket, _ := raw.(*oss.Bucket)
 
 	err = bucket.DeleteObject(d.Get("key").(string))
 	if err != nil {

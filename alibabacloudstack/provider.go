@@ -165,9 +165,8 @@ func Provider() *schema.Provider {
 			"ossservice_domain": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_OSSSERVICE_DOMAIN", nil),
 				Description: descriptions["ossservice_domain"],
-				Deprecated:  "Use schema endpoints replace ossservice_domain.",
+				Deprecated:  "This parameter will no longer be valid and will be removed in 3.19.0.",
 			},
 			"organization_accesskey": {
 				Type:        schema.TypeString,
@@ -1136,10 +1135,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 				}
 			}
 		}
-	}
-	ossServicedomain := d.Get("ossservice_domain").(string)
-	if ossServicedomain != "" {
-		config.Endpoints[connectivity.OssDataCode] = ossServicedomain
 	}
 	StsEndpoint := d.Get("sts_endpoint").(string)
 	if StsEndpoint != "" {

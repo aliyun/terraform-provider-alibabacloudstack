@@ -1,6 +1,7 @@
 package connectivity
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"log"
 
@@ -39,7 +40,6 @@ import (
 	slsPop "github.com/aliyun/alibaba-cloud-sdk-go/services/sls"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	sls "github.com/aliyun/aliyun-log-go-sdk"
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
 	"github.com/aliyun/fc-go-sdk"
 
@@ -103,7 +103,6 @@ type AlibabacloudStackClient struct {
 	elasticsearchconn            *elasticsearch.Client
 	hbaseconn                    *hbase.Client
 	adbconn                      *adb.Client
-	ossconn                      *oss.Client
 	rkvconn                      *r_kvstore.Client
 	fcconn                       *fc.Client
 	ddsconn                      *dds.Client
@@ -616,40 +615,6 @@ func (client *AlibabacloudStackClient) NewNasClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("nas", client.Config.Endpoints[NasCode])
 }
 
-func (client *AlibabacloudStackClient) WithOssDataClient(do func(*oss.Client) (interface{}, error)) (interface{}, error) {
-	goSdkMutex.Lock()
-	defer goSdkMutex.Unlock()
-
-	// Initialize the OSS client if necessary
-	if client.ossconn == nil {
-		schma := strings.ToLower(client.Config.Protocol)
-		endpoint := client.Config.Endpoints[OssDataCode]
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the oss client: endpoint or domain is not provided for OSS service")
-		}
-		if !strings.HasPrefix(endpoint, "http") {
-			endpoint = fmt.Sprintf("%s://%s", schma, endpoint)
-		}
-
-		clientOptions := []oss.ClientOption{oss.UserAgent(client.getUserAgent()),
-			oss.SecurityToken(client.Config.SecurityToken)}
-		if client.Config.Proxy != "" {
-			clientOptions = append(clientOptions, oss.Proxy(client.Config.Proxy))
-		}
-
-		clientOptions = append(clientOptions, oss.UseCname(false))
-
-		ossconn, err := oss.New(endpoint, client.Config.AccessKey, client.Config.SecretKey, clientOptions...)
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the OSS client: %#v", err)
-		}
-
-		client.ossconn = ossconn
-	}
-
-	return do(client.ossconn)
-}
-
 func (client *AlibabacloudStackClient) WithRamClient(do func(*ram.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the RAM client if necessary
 	if client.ramconn == nil {
@@ -706,7 +671,7 @@ func (client *AlibabacloudStackClient) WithCdnClient(do func(*cdn.Client) (inter
 
 	return do(client.cdnconn)
 }
-func (client *AlibabacloudStackClient) getUserAgent() string {
+func (client *AlibabacloudStackClient) GetUserAgent() string {
 	return fmt.Sprintf("%s/%s %s/%s %s/%s", Terraform, TerraformVersion, Provider, ProviderVersion, Module, client.Config.ConfigurationSource)
 }
 
@@ -725,17 +690,6 @@ func (client *AlibabacloudStackClient) getHttpProxyUrl() *url.URL {
 		}
 	}
 	return nil
-}
-
-func (client *AlibabacloudStackClient) WithOssBucketClient(bucketName string, do func(*oss.Bucket) (interface{}, error)) (interface{}, error) {
-	return client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
-		bucket, err := client.ossconn.Bucket(bucketName)
-
-		if err != nil {
-			return nil, fmt.Errorf("unable to get the bucket %s: %#v", bucketName, err)
-		}
-		return do(bucket)
-	})
 }
 
 func (client *AlibabacloudStackClient) WithSlsClient(do func(*slsPop.Client) (interface{}, error)) (interface{}, error) {
@@ -774,7 +728,7 @@ func (client *AlibabacloudStackClient) WithSlsDataClient(do func(*sls.Client) (i
 			AccessKeySecret: client.Config.SecretKey,
 			Endpoint:        client.Config.Endpoints[SlSDataCode],
 			SecurityToken:   client.Config.SecurityToken,
-			UserAgent:       client.getUserAgent(),
+			UserAgent:       client.GetUserAgent(),
 		}
 	}
 
@@ -944,7 +898,7 @@ func (client *AlibabacloudStackClient) WithDataHubClient(do func(api datahub.Dat
 
 		account := datahub.NewStsCredential(client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
 		config := &datahub.Config{
-			UserAgent: client.getUserAgent(),
+			UserAgent: client.GetUserAgent(),
 		}
 
 		client.dhconn = datahub.NewClientWithConfig(endpoint, config, account)
@@ -983,7 +937,7 @@ func (client *AlibabacloudStackClient) NewRoaCsClient() (*roaCS.Client, error) {
 		AccessKeySecret: tea.String(client.Config.SecretKey),
 		SecurityToken:   tea.String(client.Config.SecurityToken),
 		RegionId:        tea.String(client.Config.RegionId),
-		UserAgent:       tea.String(client.getUserAgent()),
+		UserAgent:       tea.String(client.GetUserAgent()),
 		Endpoint:        tea.String(endpoint),
 		ReadTimeout:     tea.Int(client.Config.ClientReadTimeout),
 		ConnectTimeout:  tea.Int(client.Config.ClientConnectTimeout),
@@ -1297,6 +1251,30 @@ func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*s
 	return conn, nil
 }
 
+func (client *AlibabacloudStackClient) GetAccountInfo() string {
+	accountMap := make(map[string]interface{})
+
+	// User information
+	// accountMap["aliyunPk"] = nil
+	// accountMap["accountStructure"] = nil
+	// accountMap["parentPk"] = nil
+	accountMap["accessKeyId"] = client.Config.AccessKey
+	accountMap["accessKeySecret"] = client.Config.SecretKey
+	// accountMap["partnerPk"] = nil
+
+	// // Local machine IP
+	// accountMap["sourceIp"] = nil
+
+	// STS required
+	if client.Config.SecurityToken != "" {
+		accountMap["securityToken"] = client.Config.SecurityToken
+	}
+
+	jsonData, _ := json.Marshal(accountMap)
+	accountInfo := base64.StdEncoding.EncodeToString([]byte(jsonData))
+	return accountInfo
+}
+
 func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {
 	popcode := ServiceCode(strings.ReplaceAll(strings.ToUpper(request.Product), "-", "_"))
 
@@ -1310,6 +1288,12 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 	if domain == "" {
 		domain = conn.Domain
 	}
+	
+	if popcode == OneRouterCode {
+		// special logic, 3.16.2 mandatory, no longer required after 3.18.1
+		request.QueryParams["AccountInfo"] = client.GetAccountInfo()
+	}
+	
 	if strings.HasPrefix(domain, "internal.asapi.") || strings.HasPrefix(domain, "public.asapi.") {
 		// asapi compatibility logic
 		// # asapi When using common SDK, pathpattern cannot be concatenated, otherwise an error will be reported
@@ -1320,9 +1304,6 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		}
 		if len(request.Content) > 0 {
 			request.QueryParams["x-acs-body"] = string(request.Content)
-		}
-		if popcode == OneRouterCode {
-			request.QueryParams["AccountInfo"] = "terraform-provider" //TODO: 3162 ~ 3180 onerouter is required, will be removed in subsequent versions
 		}
 		request.Method = "POST"
 		if strings.HasPrefix(domain, "public.asapi.") {

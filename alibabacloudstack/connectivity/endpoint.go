@@ -89,7 +89,6 @@ const (
 	ALIKAFKACode              = ServiceCode("ALIKAFKA")
 	DataworksPrivateCloudCode = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
 	// Self-built gateway fake Code
-	OssDataCode = ServiceCode("OSSDATA")
 	SlSDataCode = ServiceCode("SLSDATA")
 	BssDataCode = ServiceCode("BSSDATA")
 
@@ -270,10 +269,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 
 	DmsEnterpriseCode: PopEndpoint{"", ""},
-	OSSCode: PopEndpoint{
-		"occ.{{.domain}}",
-		"occ.{{.region}}.{{.domain}}",
-	},
+	OSSCode: PopEndpoint{"", ""},
 	DataworkspublicCode: PopEndpoint{
 		"dataworks-public.{{.domain}}",
 		"dataworks-public.{{.region}}.{{.domain}}",
@@ -332,10 +328,6 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	CDNCode:     PopEndpoint{"", ""},
 	QuickbiCode: PopEndpoint{"", ""},
-	OssDataCode: PopEndpoint{
-		"oss-{{.region}}-a.{{.domain}}",
-		"oss-{{.region}}-a.{{.domain}}",
-	},
 	BssDataCode: PopEndpoint{"", ""},
 	BastionHostCode: PopEndpoint{
 		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
@@ -372,8 +364,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	// 3.18.3 new sites will not be opened
 	OneRouterCode: PopEndpoint{
-		"occ.{{.domain}}",
-		"occ.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
 	},
 	ASAPICode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
