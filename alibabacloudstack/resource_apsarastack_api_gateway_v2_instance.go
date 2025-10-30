@@ -1,6 +1,8 @@
 package alibabacloudstack
 
 import (
+	"time"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -22,9 +24,8 @@ func resourceAlibabacloudStackAPIGateWayV2Instance() *schema.Resource {
 			"instance_name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
-			"k8s_service_name": {
+			"ingress_class_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -49,10 +50,6 @@ func resourceAlibabacloudStackAPIGateWayV2Instance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"HIGRESS", "SCG"}, false),
 			},
 			"deploy_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"deploy_cluster_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -139,11 +136,12 @@ func resourceAlibabacloudStackAPIGateWayV2Instance() *schema.Resource {
 
 func resourceAlibabacloudStackAPIGateWayV2InstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	apigatewayv2Service := ApiGateWayV2Service{client}
 	broker_engine_type := d.Get("broker_engine_type").(string)
 	request := map[string]interface{}{
-		"regionId":         client.RegionId,
-		"department":       client.Department,
-		"resourceGroup":    client.ResourceGroup,
+		"RegionId":         client.RegionId,
+		"Department":       client.Department,
+		"ResourceGroup":    client.ResourceGroup,
 		"gwInstanceName":   d.Get("instance_name"),
 		"instanceNumber":   d.Get("node_number"),
 		"instanceClass":    d.Get("instance_class"),
@@ -165,8 +163,8 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceCreate(d *schema.ResourceData,
 		}
 	} else {
 		request["clusterCode"] = d.Get("deploy_cluster_code")
-		request["ingressClassName"] = d.Get("deploy_cluster_namespace")
-		request["namespace"] = d.Get("k8s_service_name")
+		request["namespace"] = d.Get("deploy_cluster_namespace")
+		request["ingressClassName"] = d.Get("ingress_class_name")
 		request["slsEnabled"] = d.Get("sls_enabled")
 		request["prometheusEnabled"] = d.Get("prometheus_enabled")
 		request["o11y"] = map[string]interface{}{
@@ -174,13 +172,17 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceCreate(d *schema.ResourceData,
 			"prometheusEnabled": d.Get("prometheus_enabled"),
 		}
 	}
-	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "AscmCreateInstance", "/gatewayInstance/ascmCreateInstance", nil, nil, request)
+	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "AscmCreateInstance", "/gatewayInstance/ascmCreateInstance", nil, request, request)
 	if err != nil {
 		return err
 	}
 	id, ok := response["data"]
 	if !ok {
 		return errmsgs.Error("CreateInstance Failed! %v", response)
+	}
+	stateConf := BuildStateConf([]string{"1", "0"}, []string{"2"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, apigatewayv2Service.ApiGateWayV2InstanceStateRefreshFunc(id.(string), []string{"3"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, id)
 	}
 	d.SetId(id.(string))
 	return nil
@@ -193,16 +195,15 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceRead(d *schema.ResourceData, m
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	d.Set("instance_name", instance["gwInstanceName"])
+	d.Set("instance_name", instance["instanceName"])
 	d.Set("deploy_cluster_namespace", instance["deployClusterNamespace"])
 	d.Set("broker_engine_version", instance["brokerEngineVersion"])
-	d.Set("k8s_service_name", instance["k8sServiceName"])
+	d.Set("ingress_class_name", instance["ingressClassName"])
 	d.Set("access_mode", instance["accessMode"])
 	d.Set("tid", instance["tid"])
 	d.Set("k8s_cluster_id", instance["k8sClusterId"])
 	d.Set("broker_engine_type", instance["brokerEngineType"])
 	d.Set("deploy_mode", instance["deployMode"])
-	d.Set("deploy_cluster_name", instance["deployClusterName"])
 	d.Set("node_number", instance["nodeNumber"])
 	d.Set("instance_class", instance["instanceClass"])
 	d.Set("broker_latest_engine_version", instance["brokerLatestEngineVersion"])
@@ -211,7 +212,6 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceRead(d *schema.ResourceData, m
 	d.Set("create_time", instance["createTime"])
 	d.Set("edas_namespace_id", instance["edasNamespaceId"])
 	d.Set("edas_app_id", instance["edasAppId"])
-	d.Set("gw_instance_id", instance["gwInstanceId"])
 	d.Set("status", instance["status"])
 
 	// Handle edas_app_infos
@@ -260,7 +260,7 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceDelete(d *schema.ResourceData,
 		"gwInstanceId": d.Id(),
 		"forcedDelete": true,
 	}
-	_, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "DeleteInstance", "/gatewayInstance/deleteInstance", nil, request, nil)
+	_, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "DeleteInstance", "/gatewayInstance/deleteInstance", nil, request, request)
 	if err != nil {
 		return err
 	}

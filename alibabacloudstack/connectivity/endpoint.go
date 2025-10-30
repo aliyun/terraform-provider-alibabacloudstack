@@ -364,8 +364,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"hologram.{{.region}}.{{.domain}}",
 	},
 	CSB2Code: PopEndpoint{
-		"csb-cop-api-biz.{{.domain}}",
-		"csb-cop-api-biz.{{.region}}.{{.domain}}",
+		"csb-cop-api-mgmt.{{.domain}}",
+		"csb-cop-api-mgmt.{{.region}}.{{.domain}}",
 	},
 	// 3.18.3 new sites will not be opened
 	OneRouterCode: PopEndpoint{

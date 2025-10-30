@@ -13,7 +13,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_api_gateway_v2_instance.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &CenService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeApiGatewayV2Instace")
 	rac := resourceAttrCheckInit(rc, ra)
 
@@ -70,7 +70,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_HIGRESS(t *testing.T) {
 	resourceId := "alibabacloudstack_api_gateway_v2_instance.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &CenService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeApiGatewayV2Instace")
 	rac := resourceAttrCheckInit(rc, ra)
 
@@ -90,34 +90,37 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_HIGRESS(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_name":            "${var.name}",
-					"node_number":              "2",
+					"node_number":              "1",
 					"instance_class":           "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}",
 					"broker_engine_type":       "HIGRESS",
 					"deploy_mode":              "k8s",
 					"deploy_cluster_code":      "fb63cd07-1272-40e9-a013-787a801eaad4",
-					"deploy_cluster_namespace": "tftest-namespace",
-					"k8s_service_name":         "tftest-namespace",
+					"deploy_cluster_namespace": "tftest-namespace1",
+					"ingress_class_name":       "tftest-namespace2",
 					"sls_enabled":              "true",
 					"prometheus_enabled":       "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"node_number":              "2",
+						"instance_name":            name,
+						"node_number":              "1",
 						"instance_class":           "mini",
 						"broker_engine_type":       "HIGRESS",
 						"deploy_mode":              "k8s",
 						"deploy_cluster_code":      "fb63cd07-1272-40e9-a013-787a801eaad4",
-						"deploy_cluster_namespace": "tftest-namespace",
-						"k8s_service_name":         "tftest-namespace",
+						"deploy_cluster_namespace": "tftest-namespace1",
+						"ingress_class_name":       "tftest-namespace2",
 						"sls_enabled":              "true",
 						"prometheus_enabled":       "true",
 					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				// sls_enabled, prometheus_enabled  not read
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"sls_enabled", "prometheus_enabled"},
 			},
 		},
 	})
