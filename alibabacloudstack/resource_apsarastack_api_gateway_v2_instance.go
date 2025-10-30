@@ -141,6 +141,9 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceCreate(d *schema.ResourceData,
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	broker_engine_type := d.Get("broker_engine_type").(string)
 	request := map[string]interface{}{
+		"regionId":         client.RegionId,
+		"department":       client.Department,
+		"resourceGroup":    client.ResourceGroup,
 		"gwInstanceName":   d.Get("instance_name"),
 		"instanceNumber":   d.Get("node_number"),
 		"instanceClass":    d.Get("instance_class"),
