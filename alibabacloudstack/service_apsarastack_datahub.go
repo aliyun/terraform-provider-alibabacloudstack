@@ -16,7 +16,7 @@ type DatahubService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
-func (s *DatahubService) DoDatahubGetkafkagroupRequest(id string) (*datahub.GetProjectResult, error) { 
+func (s *DatahubService) DoDatahubGetkafkagroupRequest(id string) (*datahub.GetProjectResult, error) {
 	return s.DescribeDatahubProject(id)
 }
 
@@ -73,24 +73,37 @@ func (s *DatahubService) WaitForDatahubProject(id string, status Status, timeout
 	}
 }
 
-func (s *DatahubService) DoDatahubGetsubscriptionoffsetRequest(id string) (*datahub.GetSubscriptionResult, error) {
-    return s.DescribeDatahubSubscription(id)
+type SubscriptionEntry struct {
+	SubId       string `json:"SubscriptionId"`
+	Application string `json:"Application"`
+	Creator     string `json:"Creator"`
+	Type        string `json:"Type"`
+	State       int    `json:"State,omitempty"`
+	Comment     string `json:"Comment,omitempty"`
 }
-func (s *DatahubService) DescribeDatahubSubscription(id string) (*datahub.GetSubscriptionResult, error) {
-	subscription := &datahub.GetSubscriptionResult{}
+
+type ListSubscriptionResult struct {
+	TotalCount int `json:"TotalCount"`
+	List       struct {
+		Subscriptions []SubscriptionEntry `json:"Subscription"`
+	} `json:"List"`
+}
+
+func (s *DatahubService) DescribeDatahubSubscription(id string) (*SubscriptionEntry, error) {
+	subscriptions := &ListSubscriptionResult{}
+	subscription := &SubscriptionEntry{}
 	parts, err := ParseResourceId(id, 3)
 	if err != nil {
 		return subscription, errmsgs.WrapError(err)
 	}
 	projectName, topicName, subId := parts[0], parts[1], parts[2]
 
-	request := s.client.NewCommonRequest("GET", "datahub", "2019-11-20", "GetSubscriptionOffset", "")
+	request := s.client.NewCommonRequest("GET", "datahub", "2019-11-20", "ListSubscriptions", "")
 	request.QueryParams["ProjectName"] = projectName
 	request.QueryParams["TopicName"] = topicName
-	request.QueryParams["SubscriptionId"] = subId
-	request.QueryParams["SignatureMethod"] = "HMAC-SHA256"
-	request.QueryParams["Format"] = "JSON"
-	request.QueryParams["SignatureVersion"] = "2.1"
+	request.QueryParams["Keyword"] = subId
+	request.QueryParams["PageNumber"] = "1"
+	request.QueryParams["PageSize"] = "100"
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
@@ -98,7 +111,7 @@ func (s *DatahubService) DescribeDatahubSubscription(id string) (*datahub.GetSub
 			return subscription, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackDatahubSdkGo)
 		}
 		if bresponse == nil {
-			return subscription,errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			return subscription, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return subscription, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetSubscription", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
@@ -110,43 +123,20 @@ func (s *DatahubService) DescribeDatahubSubscription(id string) (*datahub.GetSub
 		requestMap["SubId"] = subId
 		addDebug("GetProject", bresponse, nil, requestMap)
 	}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), subscription)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), subscriptions)
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DatahubProject", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
-	return subscription, nil
-}
-
-func (s *DatahubService) WaitForDatahubSubscription(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	parts, err := ParseResourceId(id, 3)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	topicName, subId := parts[1], parts[2]
-	//for {
-	object, err := s.DescribeDatahubSubscription(id)
-	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			if status == Deleted {
-				return nil
-			}
-		} else {
-			return errmsgs.WrapError(err)
+	for _, sub := range subscriptions.List.Subscriptions {
+		if sub.SubId == subId {
+			return &sub, nil
 		}
 	}
-	if object.TopicName == topicName && object.SubId == subId && status != Deleted {
-		return nil
-	}
-	if time.Now().After(deadline) {
-		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.TopicName+":"+object.SubId, parts[1]+":"+parts[2], errmsgs.ProviderERROR)
-	}
-
-	return nil
+	return subscription, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackDatahubSdkGo)
 }
 
 func (s *DatahubService) DoDatahubGettopicRequest(id string) (*GetTopicResult, error) {
-    return s.DescribeDatahubTopic(id)
+	return s.DescribeDatahubTopic(id)
 }
 func (s *DatahubService) DescribeDatahubTopic(id string) (*GetTopicResult, error) {
 	topic := &GetTopicResult{}

@@ -6,18 +6,17 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
-	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackDatahubSubscription0(t *testing.T) {
-	var v *datahub.GetSubscriptionResult
+	var v *SubscriptionEntry
 
 	resourceId := "alibabacloudstack_datahub_subscription.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccDatahubSubscriptionCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &DatahubService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoDatahubGetsubscriptionoffsetRequest")
+	}, "DescribeDatahubSubscription")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
@@ -41,6 +40,8 @@ func TestAccAlibabacloudStackDatahubSubscription0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 
 					"comment": name,
+					
+					"application_name":name,
 
 					"project_name": "${alibabacloudstack_datahub_project.default.name}",
 
@@ -50,10 +51,12 @@ func TestAccAlibabacloudStackDatahubSubscription0(t *testing.T) {
 					testAccCheck(map[string]string{
 
 						"comment": name,
+						
+						"application_name": name,
 
 						"project_name": name,
 
-						"topic_name": name,
+						"topic_name": name+"_topic",
 					}),
 				),
 			},
@@ -89,7 +92,7 @@ resource "alibabacloudstack_datahub_project" "default" {
 }
 
 resource "alibabacloudstack_datahub_topic" "default" {
-  name = var.name
+  name = "${var.name}_topic"
   comment = "test"
   record_type = "BLOB"
   project_name = "${alibabacloudstack_datahub_project.default.name}"

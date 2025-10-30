@@ -3,7 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
+	"regexp"
 	"strings"
 
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
@@ -34,6 +34,12 @@ func resourceAlibabacloudStackDatahubSubscription() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return strings.ToLower(new) == strings.ToLower(old)
 				},
+			},
+			"application_name":{
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[a-z][a-z0-9_]{0,31}$`), "application_name must be '^[a-z][a-z0-9_]{0,31}$'"),
 			},
 			"comment": {
 				Type:         schema.TypeString,
@@ -72,7 +78,7 @@ func resourceAlibabacloudStackDatahubSubscriptionCreate(d *schema.ResourceData, 
 	request := client.NewCommonRequest("GET", "datahub", "2019-11-20", "CreateSubscription", "")
 	request.QueryParams["ProjectName"] = projectName
 	request.QueryParams["TopicName"] = topicName
-	request.QueryParams["Application"] = "CreateSubscription"
+	request.QueryParams["Application"] = d.Get("application_name").(string)
 	request.QueryParams["Comment"] = subComment
 
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -93,7 +99,7 @@ func resourceAlibabacloudStackDatahubSubscriptionCreate(d *schema.ResourceData, 
 	}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &subscription)
 
-	d.SetId(fmt.Sprintf("%s%s%s%s%s", strings.ToLower(projectName), COLON_SEPARATED, strings.ToLower(topicName), COLON_SEPARATED, subscription.SubId))
+	d.SetId(fmt.Sprintf("%s:%s:%s", strings.ToLower(projectName), strings.ToLower(topicName), subscription.SubId))
 	return nil
 }
 
@@ -116,52 +122,17 @@ func resourceAlibabacloudStackDatahubSubscriptionRead(d *schema.ResourceData, me
 		}
 		return errmsgs.WrapError(err)
 	}
-	d.SetId(fmt.Sprintf("%s%s%s%s%s", strings.ToLower(projectName), COLON_SEPARATED, strings.ToLower(TopicName), COLON_SEPARATED, SubId))
 
 	d.Set("project_name", projectName)
 	d.Set("topic_name", TopicName)
 	d.Set("sub_id", SubId)
-	//d.Set("comment", object.Comment) // Cannot get comment in private cloud
-	d.Set("create_time", strconv.FormatInt(object.CreateTime, 10))
-	d.Set("last_modify_time", strconv.FormatInt(object.LastModifyTime, 10))
-	return nil
-}
-
-func resourceAlibabacloudStackDatahubSubscriptionUpdate(d *schema.ResourceData, meta interface{}) error {
-	//parts, err := ParseResourceId(d.Id(), 3)
-	//if err != nil {
-	//	return errmsgs.WrapError(err)
-	//}
-	//projectName, topicName, subId := parts[0], parts[1], parts[2]
-	//client := meta.(*connectivity.AlibabacloudStackClient)
-	//
-	//if d.HasChange("comment") {
-	//	subComment := d.Get("comment").(string)
-	//
-	//	var requestInfo *datahub.DataHub
-	//
-	//	raw, err := client.WithDataHubClient(func(dataHubClient datahub.DataHubApi) (interface{}, error) {
-	//		requestInfo = dataHubClient.(*datahub.DataHub)
-	//		return dataHubClient.UpdateSubscription(projectName, topicName, subId, subComment)
-	//	})
-	//	if err != nil {
-	//		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateSubscription", errmsgs.AlibabacloudStackDatahubSdkGo)
-	//	}
-	//	if debugOn() {
-	//		requestMap := make(map[string]string)
-	//		requestMap["ProjectName"] = projectName
-	//		requestMap["TopicName"] = topicName
-	//		requestMap["SubId"] = subId
-	//		requestMap["SubComment"] = subComment
-	//		addDebug("UpdateSubscription", raw, requestInfo, requestMap)
-	//	}
-	//}
+	d.Set("comment", object.Comment)
+	d.Set("application_name", object.Application)
 	return nil
 }
 
 func resourceAlibabacloudStackDatahubSubscriptionDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	datahubService := DatahubService{client}
 
 	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
@@ -194,5 +165,5 @@ func resourceAlibabacloudStackDatahubSubscriptionDelete(d *schema.ResourceData, 
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteSubscription", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
-	return errmsgs.WrapError(datahubService.WaitForDatahubSubscription(d.Id(), Deleted, DefaultTimeout))
+	return nil
 }
