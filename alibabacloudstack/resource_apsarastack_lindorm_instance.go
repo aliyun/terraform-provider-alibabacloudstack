@@ -12,11 +12,6 @@ import (
 func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"topology_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"zone_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -56,13 +51,13 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"node_num": {
+			"lindorm_num": {
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true,
 			},
-			"core_disk_size": {
-				Type:     schema.TypeInt,
+			"local_disk_size": {
+				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
@@ -165,14 +160,14 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	request["InstanceAlias"] = d.Get("instance_alias")
 	request["CpuBrand"] = d.Get("cpu_brand")
 	request["DiskCategory"] = d.Get("disk_category")
-	request["CoreSpec"] = "lindorm.g1.2c2g"
 	request["EngineType"] = d.Get("engine_type")
 	request["Engine"] = d.Get("engine")
 	request["VPCId"] = d.Get("vpc_id")
 	request["VSwitchId"] = d.Get("vswitch_id")
-	request["LindormNum"] = d.Get("node_num")
-	// request["ZoneLength"] = d.Get("zone_length")
-	request["CoreDiskSize"] = d.Get("core_disk_size")
+	request["LindormNum"] = d.Get("lindorm_num")
+	request["LocalDiskSize"] = d.Get("local_disk_size")
+	request["LocalDiskNum"] = 1
+	request["CoreSpec"] = "lindorm.g1.2c2g"
 
 	resp, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "CreateLindormInstance", "", nil, request, nil)
 	if err != nil {
