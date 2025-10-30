@@ -10,7 +10,7 @@ func TestAccAlibabacloudStackLindormInstanceDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_lindorm_instances.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf-testAcc%sLindormInstanceDataSource-%d", defaultRegionToTest, rand),
+		fmt.Sprintf("tf-lindorm-%d", rand),
 		dataSourceLindormInstanceDependence)
 
 	descriptionRegexConf := dataSourceTestAccConfig{

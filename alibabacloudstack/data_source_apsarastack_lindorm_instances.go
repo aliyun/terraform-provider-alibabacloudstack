@@ -36,7 +36,7 @@ func dataSourceAlibabacloudStackLindormInstances() *schema.Resource {
 				ConflictsWith: []string{"name_regex"},
 			},
 			"instances": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -81,11 +81,11 @@ func dataSourceAlibabacloudStackLindormInstances() *schema.Resource {
 							Computed: true,
 						},
 						"engine_type": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"ali_uid": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 					},
@@ -98,7 +98,7 @@ func dataSourceAlibabacloudStackLindormInstances() *schema.Resource {
 func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := client.NewCommonRequest("POST", "hitsdb", "2020-06-15", "GetLindormInstance", "")
+	request := client.NewCommonRequest("POST", "hitsdb", "2020-06-15", "GetLindormInstanceList", "")
 	response := make(map[string]interface{})
 
 	// Call request_params_handler
@@ -118,7 +118,7 @@ func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, met
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_lindorm_instances", "GetLindormInstance", errmsgs.AlibabacloudStackSdkGoERROR)
+			"alibabacloudstack_lindorm_instances", "GetLindormInstanceList", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	idsMap := make(map[string]string)
