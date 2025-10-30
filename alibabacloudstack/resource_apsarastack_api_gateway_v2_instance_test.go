@@ -34,13 +34,13 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"instance_name":      "${var.name}",
 					"node_number":        "1",
-					"instance_class":     "mini",
+					"instance_class":     "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}",
 					"broker_engine_type": "SCG",
 					"deploy_mode":        "edas",
 					"edas_app_infos": []map[string]interface{}{
 						{
-							"edas_namespace": "cn-wulan-env17e-d01",
-							"k8s_cluster_id": "a0f1b51f-ca84-4131-8e17-f1439e8e7c36",
+							"edas_namespace": defaultRegionToTest,
+							"k8s_cluster_id": "${local.edas_cluster_id}",
 							"k8s_namespace":  "default",
 						},
 					},
@@ -101,7 +101,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_custom(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"instance_name":      "${var.name}",
 					"node_number":        "1",
-					"instance_class":     "mini",
+					"instance_class":     "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}",
 					"broker_engine_type": "SCG",
 					"deploy_mode":        "custom",
 				}),
@@ -158,9 +158,9 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_HIGRESS(t *testing.T) {
 					"instance_class":           "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}",
 					"broker_engine_type":       "HIGRESS",
 					"deploy_mode":              "k8s",
-					"deploy_cluster_code":      "fb63cd07-1272-40e9-a013-787a801eaad4",
-					"deploy_cluster_namespace": "tftest-namespace1",
-					"ingress_class_name":       "tftest-namespace2",
+					"deploy_cluster_code":      "${local.cluster_id}",
+					"deploy_cluster_namespace": "${var.name}_namespace",
+					"ingress_class_name":       "${var.name}_class",
 					"sls_enabled":              "true",
 					"prometheus_enabled":       "true",
 				}),
@@ -171,9 +171,9 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_HIGRESS(t *testing.T) {
 						"instance_class":           "mini",
 						"broker_engine_type":       "HIGRESS",
 						"deploy_mode":              "k8s",
-						"deploy_cluster_code":      "fb63cd07-1272-40e9-a013-787a801eaad4",
-						"deploy_cluster_namespace": "tftest-namespace1",
-						"ingress_class_name":       "tftest-namespace2",
+						"deploy_cluster_code":      "${local.cluster_id}",
+						"deploy_cluster_namespace": fmt.Sprintf("%s_namespace", name),
+						"ingress_class_name":       fmt.Sprintf("%s_class", name),
 						"sls_enabled":              "true",
 						"prometheus_enabled":       "true",
 					}),
@@ -199,5 +199,8 @@ variable "name" {
 data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
 	sorted_by = "CPU"
 }
-`, name)
+
+%s
+
+`, name, EdasClusterCommonTestCase())
 }

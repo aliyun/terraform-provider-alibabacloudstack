@@ -1467,16 +1467,23 @@ variable "existed_cluster_id" {
 	default = "%s"
 }
 
+variable "existed_edas_cluster_id" {
+	default = "%s"
+}
+
+
 %s
 
 %s
 
 locals {
-	create_count = var.existed_cluster_id == "" ? 1 : 0
+	k8s_create_count = var.existed_cluster_id == "" ? 1 : 0	
+	edask8s_create_count = var.existed_edas_cluster_id == "" ? 1 : 0
+
 }
 
 resource "alibabacloudstack_cs_kubernetes" "default" {
-	count						= local.create_count
+	count						= local.k8s_create_count
 	name						= var.name
 	version						= "1.30.7-aliyun.1"
 	os_type						= "linux"
@@ -1503,15 +1510,21 @@ resource "alibabacloudstack_cs_kubernetes" "default" {
 	}
 }
 
+
+locals {
+	cluster_id = var.existed_cluster_id == "" ? alibabacloudstack_cs_kubernetes.default.0.id : var.existed_cluster_id
+}
+
 resource "alibabacloudstack_edas_k8s_cluster" "default" {
-	count			= local.create_count
-	cs_cluster_id	= "${alibabacloudstack_cs_kubernetes.default.0.id}"
+	count			= local.edask8s_create_count
+	cs_cluster_id	= local.cluster_id
 }
 
 locals {
-	edas_cluster_id = var.existed_cluster_id == "" ? alibabacloudstack_edas_k8s_cluster.default.0.id : var.existed_cluster_id
+	edas_cluster_id = var.existed_edas_cluster_id == "" ? alibabacloudstack_edas_k8s_cluster.default.0.id : var.existed_edas_cluster_id
 }
-`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1))
+
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_EDAS_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1))
 }
 
 const VrtCommonTestCase = `
