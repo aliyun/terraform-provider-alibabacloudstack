@@ -37,19 +37,17 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 					"disk_category":   "HDD",
 					"local_disk_size": "6T",
 					"engine_type":     "lindorm",
-					"instance_type":   "lindorm.g1.8c32g",
+					"instance_type":   "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[0].name}",
 					"vpc_id":          "vpc-ud5v703k1q97fck6d3aqq",
 					"vswitch_id":      "vsw-ud5mcgtcrpssn5d9xi5pm",
 					"lindorm_num":     3,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"instance_alias": name,
-						"cpu_brand":      "Intel",
-						"disk_category":  "HDD",
-						// "core_spec":       "lindorm.g1.2c2g",
+						"instance_alias":  name,
+						"cpu_brand":       "Intel",
+						"disk_category":   "HDD",
 						"engine_type":     "lindorm",
-						"instance_type":   "lindorm.g1.8c32g",
 						"lindorm_num":     "3",
 						"instance_status": "ACTIVATION",
 					}),
@@ -62,11 +60,25 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_alias": "${var.name}_update",
+					"instance_alias":      "${var.name}_update",
+					"deletion_protection": "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"instance_alias": "${var.name}_update",
+						"instance_alias":      "${var.name}_update",
+						"deletion_protection": "true",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"lindorm_num":   "2",
+					"instance_type": "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[1].name}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"lindorm_num":   "2",
+						"instance_type": "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[1].name}",
 					}),
 				),
 			},
@@ -79,5 +91,11 @@ func LindormInstanceCommonTestCase(name string) string {
 variable "name" {
   default = "%s"
 }
+
+data "alibabacloudstack_lindorm_instance_types" "sortbycpu" {
+	sorted_by = "CPU"
+	engine_type = "lindorm"
+}
+
 `, name)
 }
