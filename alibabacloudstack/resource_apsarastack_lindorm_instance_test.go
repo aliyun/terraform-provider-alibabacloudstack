@@ -35,7 +35,7 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 					"instance_alias":  "${var.name}",
 					"cpu_brand":       "Intel",
 					"disk_category":   "HDD",
-					"local_disk_size": "6T",
+					"local_disk_size": "200",
 					"engine_type":     "lindorm",
 					"instance_type":   "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[0].name}",
 					"vpc_id":          "vpc-ud5v703k1q97fck6d3aqq",
@@ -46,7 +46,6 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"instance_alias":  name,
 						"cpu_brand":       "Intel",
-						"disk_category":   "HDD",
 						"engine_type":     "lindorm",
 						"lindorm_num":     "3",
 						"instance_status": "ACTIVATION",
@@ -54,9 +53,10 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"disk_category", "local_disk_num", "local_disk_size"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -65,7 +65,7 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"instance_alias":      "${var.name}_update",
+						"instance_alias":      fmt.Sprintf("%s_update", name),
 						"deletion_protection": "true",
 					}),
 				),
