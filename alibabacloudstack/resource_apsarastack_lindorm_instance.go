@@ -223,14 +223,22 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 	if d.IsNewResource() {
 		return nil
 	}
-	if d.HasChange("lindorm_num") {
+
+	if d.HasChanges("instance_type", "lindorm_num") {
+		old_type, new_type := d.GetChange("instance_type")
+		old_num, new_num := d.GetChange("lindorm_num")
 		reqQuery := map[string]interface{}{
-			"InstanceId": d.Id(),
-			"LindormNum": d.Get("lindorm_num"),
-			"ZoneId":     d.Get("zone_id"),
+			"InstanceId":          d.Id(),
+			"upgradeType":         "upgrade-lindorm-core-spec",
+			"ZoneId":              d.Get("zone_id"),
+			"Engine":              "lindorm",
+			"EngineCoreNum":       new_num,
+			"EngineSpec":          new_type,
+			"SourceEngineCoreNum": old_num,
+			"SourceEngineSpec":    old_type,
 		}
 
-		if _, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpgradeLindormInstance", "", nil, reqQuery, nil); err != nil {
+		if _, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpgradeLindormInstanceEngine", "", nil, reqQuery, nil); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_lindorm_instance", "UpdateLindormInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
@@ -243,24 +251,29 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 		}
 	}
 
-	if d.HasChange("instance_type") {
-		reqQuery := map[string]interface{}{
-			"InstanceId":  d.Id(),
-			"LindormSpec": d.Get("instance_type"),
-		}
+	// if d.HasChange("lindorm_num") {
+	// 	reqQuery := map[string]interface{}{
+	// 		"InstanceId":   d.Id(),
+	// 		"LindormNum":   d.Get("lindorm_num"),
+	// 		"ZoneId":       d.Get("zone_id"),
+	// 		"PayType":      "Postpaid",
+	// 		"DiskCategory": d.Get("disk_category"),
+	// 		"VSwitchId":    d.Get("vswitch_id"),
+	// 		"VPCId":        d.Get("vpc_id"),
+	// 	}
 
-		if _, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpgradeLindormInstance", "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_lindorm_instance", "UpdateLindormInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
+	// 	if _, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpgradeLindormInstance", "", nil, reqQuery, nil); err != nil {
+	// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+	// 			"alibabacloudstack_lindorm_instance", "UpdateLindormInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
+	// 	}
 
-		// Wait for the instance to be updated
-		stateConf := BuildStateConf([]string{"UPDATING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutUpdate), 3*time.Second,
-			lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"FAILED"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-	}
+	// 	// Wait for the instance to be updated
+	// 	stateConf := BuildStateConf([]string{"UPDATING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutUpdate), 3*time.Second,
+	// 		lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"FAILED"}))
+	// 	if _, err := stateConf.WaitForState(); err != nil {
+	// 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	// 	}
+	// }
 
 	return nil
 }

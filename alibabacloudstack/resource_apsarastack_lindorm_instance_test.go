@@ -31,24 +31,26 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"zone_id":         "cn-wulan-env2g1-amtest2001-a",
-					"instance_alias":  "${var.name}",
-					"cpu_brand":       "Intel",
-					"disk_category":   "HDD",
-					"local_disk_size": "200",
-					"engine_type":     "lindorm",
-					"instance_type":   "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[0].name}",
-					"vpc_id":          "vpc-ud5v703k1q97fck6d3aqq",
-					"vswitch_id":      "vsw-ud5mcgtcrpssn5d9xi5pm",
-					"lindorm_num":     3,
+					"zone_id":             "cn-wulan-env2g1-amtest2001-a",
+					"instance_alias":      "${var.name}",
+					"cpu_brand":           "Intel",
+					"disk_category":       "HDD",
+					"local_disk_size":     "200",
+					"engine_type":         "lindorm",
+					"instance_type":       "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[0].name}",
+					"vpc_id":              "vpc-ud5v703k1q97fck6d3aqq",
+					"vswitch_id":          "vsw-ud5mcgtcrpssn5d9xi5pm",
+					"lindorm_num":         2,
+					"deletion_protection": "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"instance_alias":  name,
-						"cpu_brand":       "Intel",
-						"engine_type":     "lindorm",
-						"lindorm_num":     "3",
-						"instance_status": "ACTIVATION",
+						"instance_alias":      name,
+						"cpu_brand":           "Intel",
+						"engine_type":         "lindorm",
+						"lindorm_num":         "2",
+						"instance_status":     "ACTIVATION",
+						"deletion_protection": "true",
 					}),
 				),
 			},
@@ -61,23 +63,23 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_alias":      "${var.name}_update",
-					"deletion_protection": "true",
+					"deletion_protection": "false",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"instance_alias":      fmt.Sprintf("%s_update", name),
-						"deletion_protection": "true",
+						"deletion_protection": "false",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"lindorm_num":   "2",
+					"lindorm_num":   "3",
 					"instance_type": "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[1].name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"lindorm_num":   "2",
+						"lindorm_num":   "3",
 						"instance_type": "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[1].name}",
 					}),
 				),
