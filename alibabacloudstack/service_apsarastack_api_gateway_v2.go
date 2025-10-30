@@ -22,7 +22,7 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Instace(id string) (map[string
 	}
 	data, ok := response["data"]
 	if !ok {
-		return nil, errmsgs.Error("CreateInstance Failed! %v", response)
+		return nil, errmsgs.Error("GetInstanceInfo Failed! %v", response)
 	}
 	return data.(map[string]interface{}), nil
 }
@@ -45,4 +45,19 @@ func (s *ApiGateWayV2Service) ApiGateWayV2InstanceStateRefreshFunc(id string, fa
 		}
 		return object, fmt.Sprint(object["status"]), nil
 	}
+}
+
+func (s *ApiGateWayV2Service) GetCustomDeployConfig(id string) (map[string]interface{}, error) {
+	request := map[string]interface{}{
+		"gwInstanceId": id,
+	}
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetCustomDeployConfig", "/gatewayInstance/getCustomDeployConfig", nil, request, request)
+	if err != nil {
+		return nil, err
+	}
+	data, ok := response["data"]
+	if !ok {
+		return nil, errmsgs.Error("CreateInstance Failed! %v", response)
+	}
+	return data.(map[string]interface{}), nil
 }

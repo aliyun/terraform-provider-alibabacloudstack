@@ -33,26 +33,90 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_name":      "${var.name}",
-					"node_number":        "2",
+					"node_number":        "1",
 					"instance_class":     "mini",
 					"broker_engine_type": "SCG",
 					"deploy_mode":        "edas",
 					"edas_app_infos": []map[string]interface{}{
 						{
-							"edas_namespace_id": "cn-wulan-env17e-d01",
-							"edas_k8s_id":       "a0f1b51f-ca84-4131-8e17-f1439e8e7c36",
-							"k8s_namespace":     "default",
+							"edas_namespace": "cn-wulan-env17e-d01",
+							"k8s_cluster_id": "a0f1b51f-ca84-4131-8e17-f1439e8e7c36",
+							"k8s_namespace":  "default",
 						},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"instance_name":      name,
-						"node_number":        "2",
+						"node_number":        "1",
 						"instance_class":     "mini",
 						"broker_engine_type": "SCG",
 						"deploy_mode":        "edas",
 						"edas_app_infos.#":   "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"instance_name": "${var.name}_update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_name": fmt.Sprintf("%s_update", name),
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackAPIGateWayV2Instance_custom(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alibabacloudstack_api_gateway_v2_instance.default"
+	ra := resourceAttrInit(resourceId, map[string]string{})
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeApiGatewayV2Instace")
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000, 2000)
+	name := fmt.Sprintf("testtf-apigw-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGateWayV2InstanceDependence)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"instance_name":      "${var.name}",
+					"node_number":        "1",
+					"instance_class":     "mini",
+					"broker_engine_type": "SCG",
+					"deploy_mode":        "custom",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_name":                          name,
+						"node_number":                            "1",
+						"instance_class":                         "mini",
+						"broker_engine_type":                     "SCG",
+						"deploy_mode":                            "custom",
+						"custom_deploy_config.%":                 "4",
+						"custom_deploy_config.jarStr":            CHECKSET,
+						"custom_deploy_config.serviceYamlStr":    CHECKSET,
+						"custom_deploy_config.deploymentYamlStr": CHECKSET,
+						"custom_deploy_config.wgetStr":           CHECKSET,
 					}),
 				),
 			},

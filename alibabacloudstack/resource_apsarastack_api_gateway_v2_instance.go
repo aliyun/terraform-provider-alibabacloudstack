@@ -15,10 +15,11 @@ func resourceAlibabacloudStackAPIGateWayV2Instance() *schema.Resource {
 			"deploy_cluster_namespace": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 			"broker_engine_version": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"instance_name": {
@@ -29,37 +30,43 @@ func resourceAlibabacloudStackAPIGateWayV2Instance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"access_mode": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"tid": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"k8s_cluster_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"broker_engine_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"HIGRESS", "SCG"}, false),
 			},
 			"deploy_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"k8s", "edas", "custom"}, false),
 			},
 			"node_number": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				ForceNew: true,
 			},
 			"instance_class": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"edas_app_infos": {
 				Type:     schema.TypeSet,
@@ -95,7 +102,7 @@ func resourceAlibabacloudStackAPIGateWayV2Instance() *schema.Resource {
 			},
 			"shared_instance": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"deploy_cluster_code": {
 				Type:     schema.TypeString,
@@ -109,24 +116,32 @@ func resourceAlibabacloudStackAPIGateWayV2Instance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"prometheus_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"sls_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 			"edas_app_id": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"status": {
 				Type:     schema.TypeInt,
 				Computed: true,
+			},
+			"custom_deploy_config": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem:     schema.TypeString,
 			},
 		},
 	}
@@ -153,9 +168,12 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceCreate(d *schema.ResourceData,
 		for _, v := range d.Get("edas_app_infos").(*schema.Set).List() {
 			edasAppInfo := v.(map[string]interface{})
 			edasAppInfos = append(edasAppInfos, map[string]interface{}{
-				"edasNamespaceId": edasAppInfo["edas_namespace_id"],
-				"k8sClusterId":    edasAppInfo["edas_k8s_id"],
+				"edasNamespaceId": edasAppInfo["edas_namespace"],
+				"k8sClusterId":    edasAppInfo["k8s_cluster_id"],
 				"k8sNamespace":    edasAppInfo["k8s_namespace"],
+				"organizationId":  client.Department,
+				"resourceGroupId": client.ResourceGroup,
+				"regionId":        client.RegionId,
 			})
 		}
 		if len(edasAppInfos) > 0 {
@@ -172,7 +190,7 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceCreate(d *schema.ResourceData,
 			"prometheusEnabled": d.Get("prometheus_enabled"),
 		}
 	}
-	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "AscmCreateInstance", "/gatewayInstance/ascmCreateInstance", nil, request, request)
+	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "AscmCreateInstance", "/gatewayInstance/ascmCreateInstance", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -180,7 +198,11 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceCreate(d *schema.ResourceData,
 	if !ok {
 		return errmsgs.Error("CreateInstance Failed! %v", response)
 	}
-	stateConf := BuildStateConf([]string{"1", "0"}, []string{"2"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, apigatewayv2Service.ApiGateWayV2InstanceStateRefreshFunc(id.(string), []string{"3"}))
+	target := "2"
+	if d.Get("deploy_mode").(string) == "custom" {
+		target = "5"
+	}
+	stateConf := BuildStateConf([]string{"1", "0"}, []string{target}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, apigatewayv2Service.ApiGateWayV2InstanceStateRefreshFunc(id.(string), []string{"3"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, id)
 	}
@@ -246,11 +268,29 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceRead(d *schema.ResourceData, m
 			d.Set("sls_enabled", v)
 		}
 	}
+	customDeployConfig, err := apigatewayv2Service.GetCustomDeployConfig(d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.Set("custom_deploy_config", customDeployConfig)
 	return nil
 }
 
 func resourceAlibabacloudStackAPIGateWayV2InstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*connectivity.AlibabacloudStackClient)
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	if d.IsNewResource() {
+		return nil
+	}
+	if d.HasChange("instance_name") {
+		request := map[string]interface{}{
+			"gwInstanceId": d.Id(),
+			"instanceName": d.Get("instance_name"),
+		}
+		_, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ModifyInstance", "/gatewayInstance/modifyInstance", nil, request, request)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
