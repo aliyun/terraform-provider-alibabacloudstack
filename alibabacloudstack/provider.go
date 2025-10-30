@@ -560,6 +560,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_hologram_instances":                               dataSourceAlibabacloudStackHologramInstances(),
 		"alibabacloudstack_lindorm_instances":                                dataSourceAlibabacloudStackLindormInstances(),
 		"alibabacloudstack_lindorm_instance_types":                           dataSourceAlibabacloudStackLindormInstanceTypes(),
+		"alibabacloudstack_api_gateway_v2_instance_types":                    dataSourceAlibabacloudStackAPIGateWayV2InstanceTypes(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
