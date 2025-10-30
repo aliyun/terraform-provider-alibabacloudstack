@@ -967,6 +967,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_edas_swimming_lane":                              resourceAlibabacloudStackEdasSwimmingLane(),
 		"alibabacloudstack_hologram_instance":                               resourceAlibabacloudStackHologramInstance(),
 		"alibabacloudstack_hologram_instance_backup_policy":                 resourceAlibabacloudStackHologramInstanceBackupPolicy(),
+		"alibabacloudstack_lindorm_instance":                                resourceAlibabacloudStackLindormInstance(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

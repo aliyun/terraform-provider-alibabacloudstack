@@ -72,6 +72,7 @@ const (
 	ACMCode              = ServiceCode("ACM")
 	POLARDBXCode         = ServiceCode("POLARDBX")
 	HOLOGRAMCode         = ServiceCode("HOLOGRAM")
+	HitsdbCode           = ServiceCode("HITSDB")
 	// undefined code, add first
 	GDBCode                   = ServiceCode("GDB")
 	ARMSCode                  = ServiceCode("ARMS")
@@ -79,7 +80,6 @@ const (
 	DBSCode                   = ServiceCode("DBS")
 	DTSCode                   = ServiceCode("DTS")
 	SLSCode                   = ServiceCode("SLS")
-	HitsdbCode                = ServiceCode("HITSDB")
 	RosCode                   = ServiceCode("ROS")
 	QuickbiCode               = ServiceCode("QUICKBI")
 	DataworkspublicCode       = ServiceCode("DATAWORKSPUBLIC")
