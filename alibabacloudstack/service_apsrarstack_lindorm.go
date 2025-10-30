@@ -1,8 +1,6 @@
 package alibabacloudstack
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -22,11 +20,6 @@ func (s *LindormService) DescribeLindormInstance(id string) (map[string]interfac
 	if err != nil {
 		return nil, err
 	}
-
-	if response["data"] == nil {
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Lindorm instance %s not found", id))
-	}
-
 	return response, nil
 }
 
@@ -40,9 +33,7 @@ func (s *LindormService) LindormInstanceStateRefreshFunc(id string, failStates [
 			}
 			return nil, "", errmsgs.WrapError(err)
 		}
-
-		data := object["data"].(map[string]interface{})
-		instanceStatus := data["instanceStatus"].(string)
+		instanceStatus := object["InstanceStatus"].(string)
 
 		for _, failState := range failStates {
 			if instanceStatus == failState {
