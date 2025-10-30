@@ -73,6 +73,7 @@ const (
 	POLARDBXCode         = ServiceCode("POLARDBX")
 	HOLOGRAMCode         = ServiceCode("HOLOGRAM")
 	HitsdbCode           = ServiceCode("HITSDB")
+	CSB2Code             = ServiceCode("CSB2")
 	// undefined code, add first
 	GDBCode                   = ServiceCode("GDB")
 	ARMSCode                  = ServiceCode("ARMS")
@@ -361,6 +362,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	HOLOGRAMCode: PopEndpoint{
 		"hologram.{{.domain}}",
 		"hologram.{{.region}}.{{.domain}}",
+	},
+	CSB2Code: PopEndpoint{
+		"csb-cop-api-biz.{{.domain}}",
+		"csb-cop-api-biz.{{.region}}.{{.domain}}",
 	},
 	// 3.18.3 new sites will not be opened
 	OneRouterCode: PopEndpoint{
