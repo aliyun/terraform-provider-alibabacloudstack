@@ -146,7 +146,6 @@ resource "apsarastack_api_gateway_v2_instance" "custom_example" {
 * `broker_engine_type` - (可选，强制新建) broker 引擎类型。有效值：`HIGRESS`(AI网关)、`SCG`(API网关)。
 * `instance_class` - (可选，强制新建) 实例类别/规格。
 * `node_number` - (可选，强制新建) 实例的节点数量。
-* `k8s_cluster_id` - (可选，强制新建) Kubernetes 集群的 ID。
 * `edas_namespace_id` - (可选，强制新建) EDAS 命名空间 ID。
 * `deploy_cluster_code` - (可选) 部署集群代码。
 * `deploy_cluster_namespace` - (可选，强制新建) 部署集群命名空间。
@@ -167,6 +166,7 @@ resource "apsarastack_api_gateway_v2_instance" "custom_example" {
 * `access_mode` - 实例的访问模式。
 * `tid` - 租户 ID。
 * `create_time` - 实例的创建时间。
+* `k8s_cluster_id` - Kubernetes 集群的 ID。
 * `edas_app_id` - EDAS 应用程序 ID。
 * `status` - 实例的状态。
 * `broker_latest_engine_version` - 最新的 broker 引擎版本。

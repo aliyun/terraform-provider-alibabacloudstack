@@ -146,7 +146,6 @@ The following arguments are supported:
 * `broker_engine_type` - (Optional, ForceNew) The broker engine type. Valid values: `HIGRESS`(AIGateWay), `SCG`(APIGateWay).
 * `instance_class` - (Optional, ForceNew) The instance class/specification.
 * `node_number` - (Optional, ForceNew) The number of nodes for the instance.
-* `k8s_cluster_id` - (Optional, ForceNew) The ID of the Kubernetes cluster.
 * `edas_namespace_id` - (Optional, ForceNew) The EDAS namespace ID.
 * `deploy_cluster_code` - (Optional) The deployment cluster code.
 * `deploy_cluster_namespace` - (Optional, ForceNew) The deployment cluster namespace.
@@ -167,6 +166,7 @@ The following attributes are exported:
 * `access_mode` - The access mode of the instance.
 * `tid` - The tenant ID.
 * `create_time` - The creation time of the instance.
+* `k8s_cluster_id` - The ID of the Kubernetes cluster.
 * `edas_app_id` - The EDAS application ID.
 * `status` - The status of the instance.
 * `broker_latest_engine_version` - The latest broker engine version.

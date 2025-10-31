@@ -20,7 +20,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 2000)
 	name := fmt.Sprintf("testtf-apigw-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGateWayV2InstanceDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGateWayV2InstanceEdasDepDependence)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_basic(t *testing.T) {
 					"edas_app_infos": []map[string]interface{}{
 						{
 							"edas_namespace": defaultRegionToTest,
-							"k8s_cluster_id": "a0f1b51f-ca84-4131-8e17-f1439e8e7c36",
+							"k8s_cluster_id": "${local.edas_cluster_id}",
 							"k8s_namespace":  "default",
 						},
 					},

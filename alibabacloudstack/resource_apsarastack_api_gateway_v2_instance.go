@@ -43,8 +43,7 @@ func resourceAlibabacloudStackAPIGateWayV2Instance() *schema.Resource {
 			},
 			"k8s_cluster_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"broker_engine_type": {
 				Type:         schema.TypeString,
@@ -268,11 +267,15 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceRead(d *schema.ResourceData, m
 			d.Set("sls_enabled", v)
 		}
 	}
-	customDeployConfig, err := apigatewayv2Service.GetCustomDeployConfig(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
+	if instance["deployMode"].(string) == "custom" {
+		customDeployConfig, err := apigatewayv2Service.GetCustomDeployConfig(d.Id())
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		d.Set("custom_deploy_config", customDeployConfig)
+	} else {
+		d.Set("custom_deploy_config", nil)
 	}
-	d.Set("custom_deploy_config", customDeployConfig)
 	return nil
 }
 
