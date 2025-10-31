@@ -83,15 +83,19 @@ variable "name" {
 }
 
 %s
+data "alibabacloudstack_lindorm_instance_types" "sortbycpu" {
+	sorted_by = "CPU"
+	engine_type = "lindorm"
+}
 
 resource "alibabacloudstack_lindorm_instance" "default" {
 	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 	instance_alias = "${var.name}"
 	cpu_brand = "Intel"
 	disk_category = "HDD"
-	local_disk_size = "6T"
+	local_disk_size = "200"
 	engine_type = "lindorm"
-	instance_type = "lindorm.g1.8c32g"
+	instance_type = "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[0].name}"
 	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
 	vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	lindorm_num = 2
