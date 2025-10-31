@@ -145,7 +145,6 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 		return errmsgs.Error(fmt.Sprintf("Create lindorm instance failed %#v", resp))
 	}
 	d.SetId(instanceId.(string))
-	// d.SetId("ld-xuypbvcg6zj5hjced")
 	// Wait for instance to be active
 	stateConf := BuildStateConf([]string{"CREATING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutCreate), 60*time.Second, lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"CREATE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
@@ -196,11 +195,6 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
-
-	if d.IsNewResource() {
-		return nil
-	}
-
 	if d.HasChanges("instance_alias", "deletion_protection") {
 		reqQuery := map[string]interface{}{
 			"InstanceId":         d.Id(),
@@ -227,76 +221,69 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 	if d.HasChanges("instance_type", "lindorm_num") {
 		old_type, new_type := d.GetChange("instance_type")
 		old_num, new_num := d.GetChange("lindorm_num")
-		reqQuery := map[string]interface{}{
-			"InstanceId":          d.Id(),
-			"upgradeType":         "upgrade-lindorm-core-spec",
-			"ZoneId":              d.Get("zone_id"),
-			"Engine":              "lindorm",
-			"EngineCoreNum":       new_num,
-			"EngineSpec":          new_type,
-			"SourceEngineCoreNum": old_num,
-			"SourceEngineSpec":    old_type,
-		}
+		if old_type != new_type {
+			reqQuery := map[string]interface{}{
+				"InstanceId":          d.Id(),
+				"ZoneId":              d.Get("zone_id"),
+				"EngineType":          "lindorm",
+				"EngineCoreNum":       old_num,
+				"EngineSpec":          new_type,
+				"SourceEngineCoreNum": old_num,
+				"SourceEngineSpec":    old_type,
+			}
 
-		if _, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpgradeLindormInstanceEngine", "", nil, reqQuery, nil); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_lindorm_instance", "UpdateLindormInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
+			if _, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpgradeLindormInstanceEngine", "", nil, reqQuery, nil); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+					"alibabacloudstack_lindorm_instance", "UpgradeLindormInstanceEngine", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
 
-		// Wait for the instance to be updated
-		stateConf := BuildStateConf([]string{"UPDATING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutUpdate), 3*time.Second,
-			lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"FAILED"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+			// Wait for the instance to be updated
+			stateConf := BuildStateConf([]string{"RESIZING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second,
+				lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"FAILED"}))
+			if _, err := stateConf.WaitForState(); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+			}
+
+		}
+		if old_num != new_num {
+			reqQuery := map[string]interface{}{
+				"InstanceId":          d.Id(),
+				"ZoneId":              d.Get("zone_id"),
+				"EngineType":          "lindorm",
+				"EngineCoreNum":       new_num,
+				"EngineSpec":          new_type,
+				"SourceEngineCoreNum": old_num,
+				"SourceEngineSpec":    new_type,
+			}
+
+			if _, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpgradeLindormInstanceEngine", "", nil, reqQuery, nil); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+					"alibabacloudstack_lindorm_instance", "UpdateLindormInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+
+			// Wait for the instance to be updated
+			stateConf := BuildStateConf([]string{"RESIZING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second,
+				lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"FAILED"}))
+			if _, err := stateConf.WaitForState(); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+			}
 		}
 	}
-
-	// if d.HasChange("lindorm_num") {
-	// 	reqQuery := map[string]interface{}{
-	// 		"InstanceId":   d.Id(),
-	// 		"LindormNum":   d.Get("lindorm_num"),
-	// 		"ZoneId":       d.Get("zone_id"),
-	// 		"PayType":      "Postpaid",
-	// 		"DiskCategory": d.Get("disk_category"),
-	// 		"VSwitchId":    d.Get("vswitch_id"),
-	// 		"VPCId":        d.Get("vpc_id"),
-	// 	}
-
-	// 	if _, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpgradeLindormInstance", "", nil, reqQuery, nil); err != nil {
-	// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-	// 			"alibabacloudstack_lindorm_instance", "UpdateLindormInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
-	// 	}
-
-	// 	// Wait for the instance to be updated
-	// 	stateConf := BuildStateConf([]string{"UPDATING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutUpdate), 3*time.Second,
-	// 		lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"FAILED"}))
-	// 	if _, err := stateConf.WaitForState(); err != nil {
-	// 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	// 	}
-	// }
 
 	return nil
 }
 
 func resourceAlibabacloudStackLindormInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	lindormService := LindormService{client}
 
+	client := meta.(*connectivity.AlibabacloudStackClient)
 	reqQuery := map[string]interface{}{
 		"InstanceId": d.Id(),
 	}
-
 	// Call the release API to delete the instance
 	_, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "ReleaseLindormInstance", "", nil, reqQuery, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "ReleaseLindormInstance", errmsgs.AlibabacloudStackSdkGoERROR, "")
 	}
 
-	// Wait for the instance to be fully deleted
-	stateConf := BuildStateConf([]string{"ACTIVATION", "DELETING"}, []string{""}, d.Timeout(schema.TimeoutDelete), 3*time.Second, lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"DELETED"}))
-	_, err = stateConf.WaitForState()
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
 	return nil
 }

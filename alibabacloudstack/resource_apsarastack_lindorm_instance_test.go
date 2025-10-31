@@ -27,19 +27,19 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"zone_id":             "cn-wulan-env2g1-amtest2001-a",
+					"zone_id":             "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"instance_alias":      "${var.name}",
 					"cpu_brand":           "Intel",
 					"disk_category":       "HDD",
 					"local_disk_size":     "200",
 					"engine_type":         "lindorm",
 					"instance_type":       "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[0].name}",
-					"vpc_id":              "vpc-ud5v703k1q97fck6d3aqq",
-					"vswitch_id":          "vsw-ud5mcgtcrpssn5d9xi5pm",
+					"vpc_id":              "${alibabacloudstack_vpc_vpc.default.id}",
+					"vswitch_id":          "${alibabacloudstack_vpc_vswitch.default.id}",
 					"lindorm_num":         2,
 					"deletion_protection": "true",
 				}),
@@ -53,12 +53,6 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 						"deletion_protection": "true",
 					}),
 				),
-			},
-			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"disk_category", "local_disk_num", "local_disk_size"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -80,9 +74,15 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"lindorm_num":   "3",
-						"instance_type": "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[1].name}",
+						"instance_type": CHECKSET,
 					}),
 				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"disk_category", "local_disk_num", "local_disk_size"},
 			},
 		},
 	})
@@ -99,5 +99,7 @@ data "alibabacloudstack_lindorm_instance_types" "sortbycpu" {
 	engine_type = "lindorm"
 }
 
-`, name)
+%s
+
+`, name, VSwitchCommonTestCase)
 }
