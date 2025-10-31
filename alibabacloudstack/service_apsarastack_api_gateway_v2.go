@@ -2,7 +2,9 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -83,4 +85,27 @@ func (s *ApiGateWayV2Service) GetCustomDeployConfig(id string) (map[string]inter
     }
 
     return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Apigatewayv2 K8s Cluster %s was not found", id))
+}
+
+
+func (s *ApiGateWayV2Service) DescribeApiGatewayV2Certificate(id string) (map[string]interface{}, error) {
+	params := strings.Split(id, ":")
+	request := map[string]interface{}{
+		"gwInstanceId": params[0],
+	}
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListCertificates", "/certificate/listCertificates", nil, request, request)
+	if err != nil {
+		return nil, err
+	}
+	data, err := jsonpath.Get("$.data.records", response)
+	if err != nil {
+		return nil, errmsgs.Error("GetInstanceInfo Failed! %v", response)
+	}
+	for _, v := range data.([]interface{}) {
+		certificate := v.(map[string]interface{})
+		if certificate["certificateId"].(string) == params[1] {
+			return certificate, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString("Not Found ApiGateway V2 Certificate " + id)
 }
