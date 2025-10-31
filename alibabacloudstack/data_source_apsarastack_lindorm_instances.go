@@ -106,6 +106,8 @@ func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, met
 	if v, ok := d.GetOk("instance_id"); ok {
 		request.QueryParams["InstanceId"] = v.(string)
 	}
+	request.QueryParams["PageNumber"] ="10000"
+	request.QueryParams["PageSize"] ="1"
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
 		if bresponse == nil {
