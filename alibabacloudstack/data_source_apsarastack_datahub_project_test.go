@@ -10,31 +10,22 @@ func TestAccAlibabacloudStackDatahubProjectsDataSource(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
 
-	idsConf := dataSourceTestAccConfig{
+	nameConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackDatahubProjectsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_projects.default.id}"]`,
+			"name_regex":`"^${alibabacloudstack_datahub_project.default.name}$"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackDatahubProjectsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_projects.default.id}_fake"]`,
+			"name_regex": `"^${alibabacloudstack_datahub_project.default.name}_fake$"`,
 		}),
 	}
 
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackDatahubProjectsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_projects.default.id}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackDatahubProjectsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_projects.default.id}_fake"]`,
-		}),
-	}
-
-	AlibabacloudstackDatahubProjectsCheckInfo.dataSourceTestCheck(t, rand, idsConf, allConf)
+	AlibabacloudstackDatahubProjectsCheckInfo.dataSourceTestCheck(t, rand, nameConf)
 }
 
 var existAlibabacloudstackDatahubProjectsMapFunc = func(rand int) map[string]string {
 	return map[string]string{
 		"projects.#":    "1",
-		"projects.0.id": CHECKSET,
+		"projects.0.name": CHECKSET,
 	}
 }
 
@@ -57,13 +48,13 @@ func testAccCheckAlibabacloudstackDatahubProjectsSourceConfig(rand int, attrMap 
 	}
 	config := fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackDatahubProjects%d"
+	default = "tf_testdatahubrojects%d"
 }
 
-
-
-
-
+resource "alibabacloudstack_datahub_project" "default" {
+    comment = "test"
+    name = var.name
+}
 
 data "alibabacloudstack_datahub_projects" "default" {
 %s

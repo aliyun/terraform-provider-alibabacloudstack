@@ -20,6 +20,21 @@ func (s *DatahubService) DoDatahubGetkafkagroupRequest(id string) (*datahub.GetP
 	return s.DescribeDatahubProject(id)
 }
 
+type DatahubProject struct {
+	Comment     string `json:"Comment"`
+	ProjectName string `json:"ProjectName"`
+	CreateTime  int64  `json:"CreateTime"`
+	UpdateTime  int64  `json:"UpdateTime"`
+	Creator     string `json:"Creator"`
+}
+
+type ListProjectResult struct {
+	TotalCount int `json:"TotalCount"`
+	List       struct {
+		Project []DatahubProject `json:"Project"`
+	} `json:"List"`
+}
+
 func (s *DatahubService) DescribeDatahubProject(id string) (*datahub.GetProjectResult, error) {
 	resp := &datahub.GetProjectResult{}
 
