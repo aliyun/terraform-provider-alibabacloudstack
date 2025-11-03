@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"regexp"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -98,31 +97,27 @@ func dataSourceAlibabacloudStackLindormInstances() *schema.Resource {
 func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := client.NewCommonRequest("POST", "hitsdb", "2020-06-15", "GetLindormInstanceList", "")
+	request := map[string]interface{}{
+		"PageSize":   10000,
+		"PageNumber": 1,
+		"Department": client.Department,
+		"RegionId":   client.RegionId,
+	}
 	response := make(map[string]interface{})
-
 	// Call request_params_handler
 
 	if v, ok := d.GetOk("instance_id"); ok {
-		request.QueryParams["InstanceId"] = v.(string)
+		request["InstanceId"] = v.(string)
 	}
-	request.QueryParams["PageNumber"] ="10000"
-	request.QueryParams["PageSize"] ="1"
-	bresponse, err := client.ProcessCommonRequest(request)
+	// request["PageNumber"] = "10000"
+	// request["PageSize"] = "1"
+	response, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "GetLindormInstanceList", "", nil, request, nil)
 	if err != nil {
-		if bresponse == nil {
+		if response == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_lindorm_instances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapError(err)
 	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_lindorm_instances", "GetLindormInstanceList", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok {
 		for _, vv := range v.([]interface{}) {

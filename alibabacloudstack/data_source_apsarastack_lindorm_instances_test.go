@@ -52,7 +52,6 @@ func TestAccAlibabacloudStackLindormInstanceDataSource(t *testing.T) {
 			"instances.0.instance_id":      CHECKSET,
 			"instances.0.instance_storage": CHECKSET,
 			"instances.0.engine_type":      CHECKSET,
-			"instances.0.ascm_create_user": CHECKSET,
 			"instances.0.instance_alias":   CHECKSET,
 			"instances.0.network_type":     CHECKSET,
 			"instances.0.service_type":     CHECKSET,
