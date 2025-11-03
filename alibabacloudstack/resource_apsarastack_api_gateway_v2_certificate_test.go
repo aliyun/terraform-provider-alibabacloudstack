@@ -16,25 +16,29 @@ func TestAccAlibabacloudStackAPIGateWayV2Certificate_basic(t *testing.T) {
 		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeApiGatewayV2Certificate")
 	rac := resourceAttrCheckInit(rc, ra)
-
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000, 2000)
-	name := fmt.Sprintf("testtf-apigw-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AIGateWayV2InstanceK8sDepDependence)
 
-	resource.Test(t, resource.TestCase{
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%d", rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGateWayV2CertificateDependence)
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
+
 			testAccPreCheck(t)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  nil,
+
+		CheckDestroy: rac.checkResourceDestroy(),
+
 		Steps: []resource.TestStep{
+
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"certificate_name": "${var.name}",
-					"instance_id":      "i-iv5kgenx2ddlygr8mpao",
-					"cert_type":        0,
+					"instance_id":      "${alibabacloudstack_api_gateway_v2_instance.default.id}",
+					"cert_type":        "0",
 					"certificates":     "${var.certificates}",
 					"private_key":      "${var.private_key}",
 				}),
@@ -57,10 +61,10 @@ func TestAccAlibabacloudStackAPIGateWayV2Certificate_basic(t *testing.T) {
 				),
 			},
 			{
-				// sls_enabled, prometheus_enabled  not read
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"certificates", "private_key"},
 			},
 		},
 	})
@@ -72,24 +76,33 @@ variable "name" {
   default = "%s"
 }
 
+data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
+	sorted_by = "CPU"
+}
+
+resource "alibabacloudstack_api_gateway_v2_instance" "default" {
+  	instance_name = "${var.name}"
+	node_number = "1"
+	instance_class = "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}"
+	broker_engine_type = "SCG"
+	deploy_mode = "custom"
+}
+
 variable "certificates" {
-  default = "%s"
+  default = %s
 }
 
 variable "private_key" {
-  default = "%s"
+  default = %s
 }
 
 variable "certificates2" {
-  default = "%s"
+  default = %s
 }
 
 variable "private_key2" {
-  default = "%s"
+  default = %s
 }
 
-// data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
-// 	sorted_by = "CPU"
-// }
 `, name, ServerCertificateTestCase(), RsaPrivateKeyTestCase(), UpdateCertificateTestCase(), UpdateRsaPrivateKeyTestCase())
 }

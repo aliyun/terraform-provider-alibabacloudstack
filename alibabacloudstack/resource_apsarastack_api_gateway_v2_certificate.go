@@ -7,15 +7,17 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackAPIGateWayV2Certificate() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"cert_type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"0", "1"}, false),
 			},
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -33,6 +35,10 @@ func resourceAlibabacloudStackAPIGateWayV2Certificate() *schema.Resource {
 			"certificate_name": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"certificate_id": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"expire_time": {
 				Type:     schema.TypeString,
@@ -93,6 +99,9 @@ func resourceAlibabacloudStackAPIGateWayV2CertificateRead(d *schema.ResourceData
 		}
 		return errmsgs.WrapError(err)
 	}
+	params := strings.Split(d.Id(), ":")
+	d.Set("certificate_id", certificate["certificateId"])
+	d.Set("instance_id", params[0])
 	d.Set("certificate_name", certificate["certificateName"])
 	d.Set("cert_type", certificate["certType"])
 	d.Set("expire_time", certificate["expireTime"])

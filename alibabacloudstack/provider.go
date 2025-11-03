@@ -563,6 +563,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_api_gateway_v2_k8s_clusters":                      dataSourceAlibabacloudStackAPIGatewayV2K8sClusters(),
 		"alibabacloudstack_api_gateway_v2_instance_types":                    dataSourceAlibabacloudStackAPIGateWayV2InstanceTypes(),
 		"alibabacloudstack_api_gateway_v2_instances":                         dataSourceAlibabacloudStackAPIGateWayV2Instances(),
+		"alibabacloudstack_api_gateway_v2_certificates":                      dataSourceAlibabacloudStackAPIGateWayV2Certificates(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
