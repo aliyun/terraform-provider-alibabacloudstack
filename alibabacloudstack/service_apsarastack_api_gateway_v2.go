@@ -61,3 +61,26 @@ func (s *ApiGateWayV2Service) GetCustomDeployConfig(id string) (map[string]inter
 	}
 	return data.(map[string]interface{}), nil
 }
+
+ func (s *ApiGateWayV2Service) DescribeApigatewayv2K8sCluster(id string) (map[string]interface{}, error) {
+    reqBody := map[string]interface{}{
+        "current": 1,
+        "size":    100,
+    }
+
+    response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListClusters", "/k8s/listClusters", nil, nil, reqBody)
+    if err != nil {
+        return nil, err
+    }
+
+    if records, ok := response["data"].(map[string]interface{})["records"].([]interface{}); ok {
+        for _, record := range records {
+            item := record.(map[string]interface{})
+            if k8sClusterCode, ok := item["k8sClusterCode"].(string); ok && k8sClusterCode == id {
+                return item, nil
+            }
+        }
+    }
+
+    return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Apigatewayv2 K8s Cluster %s was not found", id))
+}
