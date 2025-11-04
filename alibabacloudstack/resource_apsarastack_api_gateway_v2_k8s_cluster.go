@@ -25,11 +25,16 @@ func resourceAlibabacloudStackApigatewayv2K8sCluster() *schema.Resource {
 			"k8s_cluster_name": {
 				Type:     schema.TypeString,
 				ForceNew: true,
+				Required: true,
 			},
-			"config_contents": {
+			"config_content": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+			},
+			"cluster_type": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -48,19 +53,27 @@ func resourceAlibabacloudStackApigatewayv2K8sClusterCreate(d *schema.ResourceDat
 	if v, ok := d.GetOk("cs_cluster_id"); ok {
 		reqBody["k8sClusterType"] = "container-service"
 		reqBody["csClusterId"] = v.(string)
+		k8sClusterAttribute := map[string]interface{}{
+			"csClusterId": v.(string),
+		}
 		if object, err := csService.DescribeCsKubernetes(v.(string)); err != nil {
 			return err
 		} else {
 			reqBody["csClusterName"] = object.Name
+			k8sClusterAttribute["csClusterName"] = object.Name
 		}
 		if v, ok := d.GetOk("vpc_id"); ok {
 			reqBody["vpcId"] = v.(string)
+			k8sClusterAttribute["vpcId"] = v.(string)
 			reqBody["slbType"] = "intranet"
+			k8sClusterAttribute["slbType"] = "intranet"
 		} else {
 			reqBody["slbType"] = "internet"
+			k8sClusterAttribute["slbType"] = "internet"
 		}
-		if v, ok := d.GetOk("config_contents"); ok && v.(string) != "" {
-			reqBody["configContents"] = v.(string)
+		reqBody["k8sClusterAttribute"] = k8sClusterAttribute
+		if v, ok := d.GetOk("config_content"); ok && v.(string) != "" {
+			reqBody["configContent"] = v.(string)
 		} else {
 			var privateAddress bool
 			if reqBody["slbType"] == "intranet" {
@@ -68,18 +81,18 @@ func resourceAlibabacloudStackApigatewayv2K8sClusterCreate(d *schema.ResourceDat
 			} else {
 				privateAddress = false
 			}
-			if configContents, err := csService.GetK8sCluterKubeConfig(reqBody["csClusterId"].(string), privateAddress); err != nil {
+			if configContent, err := csService.GetK8sCluterKubeConfig(reqBody["csClusterId"].(string), privateAddress); err != nil {
 				return err
 			} else {
-				reqBody["configContents"] = configContents
+				reqBody["configContent"] = configContent
 			}
 		}
 	} else {
 		reqBody["k8sClusterType"] = "self-built"
-		if v, ok := d.GetOk("config_contents"); ok && v.(string) != "" {
-			reqBody["configContents"] = v.(string)
+		if v, ok := d.GetOk("config_content"); ok && v.(string) != "" {
+			reqBody["configContent"] = v.(string)
 		} else {
-			return fmt.Errorf("configContents is necessory while cs_cluster_id not set")
+			return fmt.Errorf("configContent is necessory while cs_cluster_id not set")
 		}
 	}
 	reqBody["k8sClusterName"] = d.Get("k8s_cluster_name").(string)
@@ -95,7 +108,7 @@ func resourceAlibabacloudStackApigatewayv2K8sClusterCreate(d *schema.ResourceDat
 	if !ok {
 		return fmt.Errorf("failed to get data from ImportCluster response")
 	}
-	k8sClusterCode, ok := data.(map[string]interface{})["data"].(string)
+	k8sClusterCode, ok := data.(string)
 	if !ok || k8sClusterCode == "" {
 		return fmt.Errorf("failed to extract k8sClusterCode from ImportCluster response")
 	}
@@ -121,10 +134,13 @@ func resourceAlibabacloudStackApigatewayv2K8sClusterRead(d *schema.ResourceData,
 	}
 
 	d.Set("k8s_cluster_name", object["k8sClusterName"])
-	if attr, ok := object["k8sClusterAttribute"].(map[string]interface{}); ok {
-		d.Set("cs_cluster_id", attr["csClusterId"])
-		if v, exist := attr["vpcId"]; exist {
-		d.Set("vpc_id",v)
+	d.Set("cluster_type", object["k8sClusterType"])
+	if object["k8sClusterType"].(string) == "container-service" {
+		if attr, ok := object["k8sClusterAttribute"].(map[string]interface{}); ok {
+			d.Set("cs_cluster_id", attr["csClusterId"])
+			if v, exist := attr["vpcId"]; exist {
+				d.Set("vpc_id", v)
+			}
 		}
 	}
 
