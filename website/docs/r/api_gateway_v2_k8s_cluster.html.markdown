@@ -1,0 +1,157 @@
+---
+subcategory: "API Gateway"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_k8s_cluster"
+sidebar_current: "docs-Alibabacloudstack-api-gateway-v2-k8s-cluster"
+description: |-
+  Import K8s cluster to API Gateway V2
+---
+
+# alibabacloudstack_api_gateway_v2_k8s_cluster
+
+Import K8s cluster to API Gateway V2, supporting both Container Service clusters and self-built clusters.
+
+## Example Usage
+
+### Basic Usage
+
+```hcl
+
+variable "name" {
+  default = "tf_testAccApiGatewayv2cluster_2641257"
+}
+
+
+variable "existed_k8s_cluster_id" {
+  default = ""
+}
+
+
+data "alibabacloudstack_zones" "default" {
+  available_resource_creation = "VSwitch"
+  enable_details              = true
+}
+
+
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name   = "${var.name}_vpc"
+  cidr_block = "172.16.0.0/16"
+  lifecycle {
+    ignore_changes = [
+      secondary_cidr_blocks,
+      tags
+    ]
+  }
+}
+
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  vswitch_name = "${var.name}_vsw"
+  vpc_id       = alibabacloudstack_vpc_vpc.default.id
+  cidr_block   = "172.16.1.0/24"
+  zone_id      = data.alibabacloudstack_zones.default.zones.0.id
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+
+resource "alibabacloudstack_ecs_securitygroup" "default" {
+  name   = "${var.name}_sg"
+  vpc_id = alibabacloudstack_vpc_vpc.default.id
+}
+
+resource "alibabacloudstack_security_group_rule" "default" {
+  type              = "ingress"
+  ip_protocol       = "tcp"
+  nic_type          = "intranet"
+  policy            = "accept"
+  port_range        = "22/22"
+  priority          = 1
+  security_group_id = alibabacloudstack_ecs_securitygroup.default.id
+  cidr_ip           = "192.168.0.0/16"
+}
+
+
+
+
+resource "random_password" "password" {
+  count            = 1
+  length           = 12
+  special          = true
+  override_special = "!@#$^&*()_"
+  min_lower        = 1
+  min_upper        = 1
+  min_numeric      = 1
+}
+
+data "alibabacloudstack_cs_kubernetes_clusters" "default" {
+  ids = var.existed_k8s_cluster_id == "" ? [] : [var.existed_k8s_cluster_id]
+}
+
+locals {
+  create_count = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? 0 : 1
+}
+
+resource "alibabacloudstack_cs_kubernetes" "default" {
+  count                 = local.create_count
+  name                  = var.name
+  version               = "1.30.7-aliyun.1"
+  os_type               = "linux"
+  platform              = "AliyunLinux"
+  num_of_nodes          = "3"
+  master_count          = "3"
+  master_vswitch_ids    = ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+  master_instance_types = ["ecs.n4v2.large", "ecs.n4v2.large", "ecs.n4v2.large"]
+  master_disk_category  = "cloud_ssd"
+  vpc_id                = alibabacloudstack_vpc_vpc.default.id
+  worker_instance_types = ["ecs.n4v2.large"]
+  worker_vswitch_ids    = ["${alibabacloudstack_vpc_vswitch.default.id}"]
+  worker_disk_category  = "cloud_ssd"
+  password              = random_password.password.0.result
+  pod_cidr              = "172.20.0.0/16"
+  service_cidr          = "172.21.0.0/20"
+  worker_disk_size      = "40"
+  master_disk_size      = "40"
+  slb_internet_enabled  = "true"
+  security_group_id     = alibabacloudstack_ecs_securitygroup.default.id
+  runtime {
+    name    = "containerd"
+    version = "1.6.28"
+  }
+}
+
+locals {
+  k8s_cluster_id   = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.ids.0 : alibabacloudstack_cs_kubernetes.default.0.id
+  k8s_cluster_name = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.names.0 : alibabacloudstack_cs_kubernetes.default.0.name
+}
+
+
+data "alibabacloudstack_cs_kubernetes_clusters_kubeconfig" "k8s_clusters_kubeconfig" {
+  cluster_id = local.k8s_cluster_id
+}
+
+
+
+resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
+  cs_cluster_id    = local.k8s_cluster_id
+  k8s_cluster_name = var.name
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `k8s_cluster_name` - (Required, Forces new resource) The name of the K8s cluster. It can be 1 to 128 characters in length and can contain letters, digits, hyphens (-), and underscores (_).
+* `cs_cluster_id` - (Optional, Forces new resource) The ID of the Container Service cluster. If provided, the cluster name and configuration content will be automatically queried.
+* `vpc_id` - (Optional, Forces new resource) The ID of the VPC network. If provided, the internal network SLB type will be used; otherwise, the public network SLB type will be used.
+* `config_content` - (Optional, Forces new resource) The configuration content of the K8s cluster. This parameter is required when `cs_cluster_id` is not provided, used for importing self-built clusters.
+
+## Attributes Reference
+
+The following attributes are exported:
+
+* `id` - The ID of the K8s cluster, a unique identifier generated by the API Gateway service.
+* `cluster_type` - The type of the K8s cluster, possible values include "container-service" (Container Service cluster) or "self-built" (self-built cluster).
