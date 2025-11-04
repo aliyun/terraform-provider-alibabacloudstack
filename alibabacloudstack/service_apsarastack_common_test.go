@@ -1461,9 +1461,9 @@ resource "alibabacloudstack_common_bandwidth_package" "foo" {
 
 `
 
-func EdasClusterCommonTestCase() string {
+func AckK8sCommonTestCase() string {
 	return fmt.Sprintf(`
-variable "existed_cluster_id" {
+variable "existed_k8s_cluster_id" {
 	default = "%s"
 }
 
@@ -1471,8 +1471,12 @@ variable "existed_cluster_id" {
 
 %s
 
+data "alibabacloudstack_cs_kubernetes_clusters" "default" {
+	ids = [var.existed_k8s_cluster_id]
+}
+
 locals {
-	create_count = var.existed_cluster_id == "" ? 1 : 0
+	create_count = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? 0 : 1
 }
 
 resource "alibabacloudstack_cs_kubernetes" "default" {
@@ -1503,15 +1507,29 @@ resource "alibabacloudstack_cs_kubernetes" "default" {
 	}
 }
 
+locals {
+	k8s_cluster_id = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.ids.0 : alibabacloudstack_cs_kubernetes.default.0.id
+	k8s_cluster_name = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.names.0 : alibabacloudstack_cs_kubernetes.default.0.name
+}
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1))
+}
+
+func EdasClusterCommonTestCase() string {
+	return AckK8sCommonTestCase() + `
+	
+data "alibabacloudstack_edas_clusters" "default" {
+	name_regex = "^${local.k8s_cluster_name}$"
+}
+
 resource "alibabacloudstack_edas_k8s_cluster" "default" {
-	count			= local.create_count
-	cs_cluster_id	= "${alibabacloudstack_cs_kubernetes.default.0.id}"
+	count			= length(data.alibabacloudstack_edas_clusters.default.ids) > 0 ? 0 : 1
+	cs_cluster_id	= local.k8s_cluster_id
 }
 
 locals {
-	edas_cluster_id = var.existed_cluster_id == "" ? alibabacloudstack_edas_k8s_cluster.default.0.id : var.existed_cluster_id
+	edas_cluster_id = length(data.alibabacloudstack_edas_clusters.default.ids) > 0 ? data.alibabacloudstack_edas_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
 }
-`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1))
+`
 }
 
 const VrtCommonTestCase = `
