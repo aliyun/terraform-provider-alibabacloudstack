@@ -1,11 +1,8 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
-	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -19,6 +16,11 @@ func dataSourceAlibabacloudStackCSKubernetesClustersKubeConfig() *schema.Resourc
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"private_address": {
+				Type:     schema.TypeBool,
+				Default:  false,
+				Optional: true,
+			},
 			"kubeconfig": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -29,18 +31,13 @@ func dataSourceAlibabacloudStackCSKubernetesClustersKubeConfig() *schema.Resourc
 
 func dataSourceAlibabacloudStackCSKubernetesClustersKubeConfigRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	csService := CsService{client}
 	clusterId := d.Get("cluster_id").(string)
-	request := client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterUserKubeconfig", fmt.Sprintf("/k8s/%s/user_config", clusterId))
-	resp, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_cs_kubernetes_clusters_kubeconfig", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	if config, err := csService.GetK8sCluterKubeConfig(clusterId, d.Get("private_address").(bool)); err != nil {
+		return err
+	} else {
+		d.Set("kubeconfig", config)
+		d.SetId(clusterId)
+		return nil
 	}
-	addDebug(request.GetActionName(), resp, request, request.QueryParams)
-	response := make(map[string]interface{})
-	err = json.Unmarshal(resp.GetHttpContentBytes(), &response)
-	d.SetId(clusterId)
-	if err := d.Set("kubeconfig", response["config"]); err != nil {
-		return errmsgs.WrapError(err)
-	}
-	return nil
 }

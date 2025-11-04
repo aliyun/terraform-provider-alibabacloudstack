@@ -909,3 +909,18 @@ type Event struct {
 	Message   string
 	Source    string
 }
+
+
+func (s *CsService) GetK8sCluterKubeConfig(clusterId string, private_address bool) (string,error) {
+	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterUserKubeconfig", fmt.Sprintf("/k8s/%s/user_config", clusterId))
+	if private_address{
+	request.QueryParams["PrivateIpAddress"] = "true" 
+	}
+	resp, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		return "", errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_cs_kubernetes_clusters_kubeconfig", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(resp.GetHttpContentBytes(), &response)
+	return response["config"].(string), nil
+}
