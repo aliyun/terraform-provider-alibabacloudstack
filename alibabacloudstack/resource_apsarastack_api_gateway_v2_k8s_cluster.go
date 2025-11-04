@@ -81,7 +81,7 @@ func resourceAlibabacloudStackApigatewayv2K8sClusterCreate(d *schema.ResourceDat
 			} else {
 				privateAddress = false
 			}
-			if configContent, err := csService.GetK8sCluterKubeConfig(reqBody["csClusterId"].(string), privateAddress); err != nil {
+			if configContent, err := csService.GetK8sClusterKubeConfig(reqBody["csClusterId"].(string), privateAddress); err != nil {
 				return err
 			} else {
 				reqBody["configContent"] = configContent

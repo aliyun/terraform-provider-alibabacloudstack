@@ -104,7 +104,7 @@ resource "apsarastack_api_gateway_v2_instance" "example" {
   node_number    = 1
     
   edas_app_infos {
-    edas_namespace = "${alibabacloudstack_edas_namespace.default.id`}"
+    edas_namespace = "${alibabacloudstack_edas_namespace.default.id}"
     k8s_cluster_id = "${alibabacloudstack_edas_k8s_cluster.default.id}"
   }
 }

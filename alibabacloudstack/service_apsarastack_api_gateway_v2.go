@@ -12,7 +12,7 @@ type ApiGateWayV2Service struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
-func (s *ApiGateWayV2Service) DescribeApiGatewayV2Instace(id string) (map[string]interface{}, error) {
+func (s *ApiGateWayV2Service) DescribeApiGatewayV2Instance(id string) (map[string]interface{}, error) {
 	request := map[string]interface{}{
 		"gwInstanceId": id,
 	}
@@ -29,7 +29,7 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Instace(id string) (map[string
 
 func (s *ApiGateWayV2Service) ApiGateWayV2InstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		object, err := s.DescribeApiGatewayV2Instace(id)
+		object, err := s.DescribeApiGatewayV2Instance(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.

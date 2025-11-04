@@ -212,7 +212,7 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceCreate(d *schema.ResourceData,
 func resourceAlibabacloudStackAPIGateWayV2InstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	apigatewayv2Service := ApiGateWayV2Service{client}
-	instance, err := apigatewayv2Service.DescribeApiGatewayV2Instace(d.Id())
+	instance, err := apigatewayv2Service.DescribeApiGatewayV2Instance(d.Id())
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}

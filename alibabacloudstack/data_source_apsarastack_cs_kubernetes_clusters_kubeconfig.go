@@ -33,7 +33,7 @@ func dataSourceAlibabacloudStackCSKubernetesClustersKubeConfigRead(d *schema.Res
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	clusterId := d.Get("cluster_id").(string)
-	if config, err := csService.GetK8sCluterKubeConfig(clusterId, d.Get("private_address").(bool)); err != nil {
+	if config, err := csService.GetK8sClusterKubeConfig(clusterId, d.Get("private_address").(bool)); err != nil {
 		return err
 	} else {
 		d.Set("kubeconfig", config)

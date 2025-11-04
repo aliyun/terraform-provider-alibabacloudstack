@@ -911,7 +911,7 @@ type Event struct {
 }
 
 
-func (s *CsService) GetK8sCluterKubeConfig(clusterId string, private_address bool) (string,error) {
+func (s *CsService) GetK8sClusterKubeConfig(clusterId string, private_address bool) (string,error) {
 	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterUserKubeconfig", fmt.Sprintf("/k8s/%s/user_config", clusterId))
 	if private_address{
 	request.QueryParams["PrivateIpAddress"] = "true" 
