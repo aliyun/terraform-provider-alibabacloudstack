@@ -980,7 +980,8 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_api_gateway_v2_k8s_cluster":                      resourceAlibabacloudStackApigatewayv2K8sCluster(),
 		"alibabacloudstack_api_gateway_v2_instance":                         resourceAlibabacloudStackAPIGateWayV2Instance(),
 		"alibabacloudstack_api_gateway_v2_certificate":                      resourceAlibabacloudStackAPIGateWayV2Certificate(),
-		}
+		"alibabacloudstack_api_gateway_v2_domian":                           resourceAlibabacloudStackAPIGateWayV2Domain(),
+	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
 	}

@@ -109,3 +109,20 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Certificate(id string) (map[st
 	}
 	return nil, errmsgs.GetNotFoundErrorFromString("Not Found ApiGateway V2 Certificate " + id)
 }
+
+func (s *ApiGateWayV2Service) DescribeApiGatewayV2Domain(id string) (map[string]interface{}, error) {
+	params := strings.Split(id, ":")
+	request := map[string]interface{}{
+		"gwInstanceId": params[0],
+		"domainId":     params[1],
+	}
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetDomain", "/domain/getDomain", nil, nil, request)
+	if err != nil {
+		return nil, err
+	}
+	data, ok := response["data"]
+	if !ok {
+		return nil, errmsgs.Error("GetDomain Failed! %v", response)
+	}
+	return data.(map[string]interface{}), nil
+}
