@@ -1472,7 +1472,7 @@ variable "existed_k8s_cluster_id" {
 %s
 
 data "alibabacloudstack_cs_kubernetes_clusters" "default" {
-	ids = [var.existed_k8s_cluster_id]
+	ids = var.existed_k8s_cluster_id == "" ? [] : [var.existed_k8s_cluster_id]
 }
 
 locals {

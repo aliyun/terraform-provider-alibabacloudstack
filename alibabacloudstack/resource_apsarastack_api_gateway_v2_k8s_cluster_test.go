@@ -32,7 +32,7 @@ func TestAccAlibabacloudStackApigatewayv2K8sCluster_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cs_cluster_id":    "${data.alibabacloudstack_cs_kubernetes_clusters.default.clusters.0.id}",
+					"cs_cluster_id":    "${local.k8s_cluster_id}",
 					"k8s_cluster_name": "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
