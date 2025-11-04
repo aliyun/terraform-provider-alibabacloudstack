@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackCenVbrHealthCheck_basic(t *testing.T) {
 	randInt := fmt.Sprintf("%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, randInt, CenVbrHealthCheckCommonTestCase)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

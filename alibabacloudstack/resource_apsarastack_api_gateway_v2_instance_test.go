@@ -22,7 +22,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_basic(t *testing.T) {
 	name := fmt.Sprintf("testtf-apigw-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGateWayV2InstanceEdasDepDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -91,7 +91,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_custom(t *testing.T) {
 	name := fmt.Sprintf("testtf-apigw-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGateWayV2InstanceDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -146,7 +146,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_HIGRESS(t *testing.T) {
 	name := fmt.Sprintf("testtf-apigw-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AIGateWayV2InstanceK8sDepDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

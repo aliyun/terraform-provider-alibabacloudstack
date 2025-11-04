@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackPolardbClusterBackupPolicy_basic(t *testing.T) {
 	name := fmt.Sprintf("tfacc-polardb-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbClusterBackupPolicyDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
