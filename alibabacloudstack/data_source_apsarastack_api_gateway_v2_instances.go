@@ -155,6 +155,8 @@ func dataSourceAlibabacloudStackAPIGateWayV2InstancesRead(d *schema.ResourceData
 	if v, ok := d.GetOk("broker_engine_type"); ok {
 		request["brokerEngineType"] = v.(string)
 	}
+	request["current"]=1
+	request["size"]=1000
 	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListInstances", "/gatewayInstance/listInstances", nil, request, request)
 	if err != nil {
 		return errmsgs.WrapError(err)

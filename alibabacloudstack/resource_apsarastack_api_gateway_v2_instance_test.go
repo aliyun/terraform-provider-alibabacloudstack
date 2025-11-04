@@ -162,7 +162,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_HIGRESS(t *testing.T) {
 					"instance_class":           "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}",
 					"broker_engine_type":       "HIGRESS",
 					"deploy_mode":              "k8s",
-					"deploy_cluster_code":      "${local.k8s_cluster_id}",
+					"deploy_cluster_code":      "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.id}",
 					"deploy_cluster_namespace": "${var.name}-namespace",
 					"ingress_class_name":       "${var.name}-class",
 					"sls_enabled":              "true",
@@ -229,6 +229,11 @@ variable "name" {
 
 data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
 	sorted_by = "CPU"
+}
+
+resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
+	cs_cluster_id =   "${local.k8s_cluster_id}"
+	k8s_cluster_name = "${var.name}"
 }
 
 %s
