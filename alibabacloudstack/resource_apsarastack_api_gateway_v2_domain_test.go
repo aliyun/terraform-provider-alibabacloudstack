@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAPIGateWayV2Domain_basic(t *testing.T) {
+func TestAccAlibabacloudStackAPIGatewayV2Domain_basic(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_api_gateway_v2_domain.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Domain_basic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%d", rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGateWayV2DomainDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGatewayV2DomainDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -84,7 +84,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Domain_basic(t *testing.T) {
 	})
 }
 
-func APIGateWayV2DomainDependence(name string) string {
+func APIGatewayV2DomainDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"

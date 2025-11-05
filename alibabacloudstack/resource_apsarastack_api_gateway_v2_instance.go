@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudStackAPIGateWayV2Instance() *schema.Resource {
+func resourceAlibabacloudStackAPIGatewayV2Instance() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"deploy_cluster_namespace": {
@@ -144,11 +144,11 @@ func resourceAlibabacloudStackAPIGateWayV2Instance() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackAPIGateWayV2InstanceCreate, resourceAlibabacloudStackAPIGateWayV2InstanceRead, resourceAlibabacloudStackAPIGateWayV2InstanceUpdate, resourceAlibabacloudStackAPIGateWayV2InstanceDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackAPIGatewayV2InstanceCreate, resourceAlibabacloudStackAPIGatewayV2InstanceRead, resourceAlibabacloudStackAPIGatewayV2InstanceUpdate, resourceAlibabacloudStackAPIGatewayV2InstanceDelete)
 	return resource
 }
 
-func resourceAlibabacloudStackAPIGateWayV2InstanceCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2InstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	apigatewayv2Service := ApiGateWayV2Service{client}
 	broker_engine_type := d.Get("broker_engine_type").(string)
@@ -209,7 +209,7 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceCreate(d *schema.ResourceData,
 	return nil
 }
 
-func resourceAlibabacloudStackAPIGateWayV2InstanceRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2InstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	apigatewayv2Service := ApiGateWayV2Service{client}
 	instance, err := apigatewayv2Service.DescribeApiGatewayV2Instance(d.Id())
@@ -279,7 +279,7 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceRead(d *schema.ResourceData, m
 	return nil
 }
 
-func resourceAlibabacloudStackAPIGateWayV2InstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2InstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	if d.IsNewResource() {
 		return nil
@@ -297,7 +297,7 @@ func resourceAlibabacloudStackAPIGateWayV2InstanceUpdate(d *schema.ResourceData,
 	return nil
 }
 
-func resourceAlibabacloudStackAPIGateWayV2InstanceDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2InstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := map[string]interface{}{
 		"gwInstanceId": d.Id(),

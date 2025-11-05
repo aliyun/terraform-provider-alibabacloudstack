@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackAPIGateWayV2InstancesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackAPIGatewayV2InstancesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_api_gateway_v2_instances.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		fmt.Sprintf("testtf-apigw-%d", rand),
-		dataSourceAPIGateWayV2InstancesDependence)
+		dataSourceAPIGatewayV2InstancesDependence)
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -60,7 +60,7 @@ func TestAccAlibabacloudStackAPIGateWayV2InstancesDataSource(t *testing.T) {
 		}),
 	}
 
-	var existAPIGateWayV2InstancesMapFunc = func(rand int) map[string]string {
+	var existAPIGatewayV2InstancesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                              "1",
 			"ids.0":                              CHECKSET,
@@ -73,23 +73,23 @@ func TestAccAlibabacloudStackAPIGateWayV2InstancesDataSource(t *testing.T) {
 		}
 	}
 
-	var fakeAPIGateWayV2InstancesMapFunc = func(rand int) map[string]string {
+	var fakeAPIGatewayV2InstancesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":       "0",
 			"instances.#": "0",
 		}
 	}
 
-	var APIGateWayV2InstancesCheckInfo = dataSourceAttr{
+	var APIGatewayV2InstancesCheckInfo = dataSourceAttr{
 		resourceId:   resourceId,
-		existMapFunc: existAPIGateWayV2InstancesMapFunc,
-		fakeMapFunc:  fakeAPIGateWayV2InstancesMapFunc,
+		existMapFunc: existAPIGatewayV2InstancesMapFunc,
+		fakeMapFunc:  fakeAPIGatewayV2InstancesMapFunc,
 	}
 
-	APIGateWayV2InstancesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, deployModeConf, brokerEngineTypeConf, idsConf, allConf)
+	APIGatewayV2InstancesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, deployModeConf, brokerEngineTypeConf, idsConf, allConf)
 }
 
-func dataSourceAPIGateWayV2InstancesDependence(name string) string {
+func dataSourceAPIGatewayV2InstancesDependence(name string) string {
 	return fmt.Sprintf(`
 
 variable "name" {

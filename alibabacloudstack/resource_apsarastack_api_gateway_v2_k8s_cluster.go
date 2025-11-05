@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceAlibabacloudStackApigatewayv2K8sCluster() *schema.Resource {
+func resourceAlibabacloudStackAPIGatewayV2K8sCluster() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"cs_cluster_id": {
@@ -38,13 +38,13 @@ func resourceAlibabacloudStackApigatewayv2K8sCluster() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackApigatewayv2K8sClusterCreate,
-		resourceAlibabacloudStackApigatewayv2K8sClusterRead, nil,
-		resourceAlibabacloudStackApigatewayv2K8sClusterDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackAPIGatewayV2K8sClusterCreate,
+		resourceAlibabacloudStackAPIGatewayV2K8sClusterRead, nil,
+		resourceAlibabacloudStackAPIGatewayV2K8sClusterDelete)
 	return resource
 }
 
-func resourceAlibabacloudStackApigatewayv2K8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2K8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 
@@ -119,7 +119,7 @@ func resourceAlibabacloudStackApigatewayv2K8sClusterCreate(d *schema.ResourceDat
 	return nil
 }
 
-func resourceAlibabacloudStackApigatewayv2K8sClusterRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2K8sClusterRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	apigatewayv2Service := ApiGateWayV2Service{client}
 
@@ -147,7 +147,7 @@ func resourceAlibabacloudStackApigatewayv2K8sClusterRead(d *schema.ResourceData,
 	return nil
 }
 
-func resourceAlibabacloudStackApigatewayv2K8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2K8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// Prepare the request body for CancelImportCluster API

@@ -563,10 +563,10 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_lindorm_instances":                                dataSourceAlibabacloudStackLindormInstances(),
 		"alibabacloudstack_lindorm_instance_types":                           dataSourceAlibabacloudStackLindormInstanceTypes(),
 		"alibabacloudstack_api_gateway_v2_k8s_clusters":                      dataSourceAlibabacloudStackAPIGatewayV2K8sClusters(),
-		"alibabacloudstack_api_gateway_v2_instance_types":                    dataSourceAlibabacloudStackAPIGateWayV2InstanceTypes(),
-		"alibabacloudstack_api_gateway_v2_instances":                         dataSourceAlibabacloudStackAPIGateWayV2Instances(),
-		"alibabacloudstack_api_gateway_v2_certificates":                      dataSourceAlibabacloudStackAPIGateWayV2Certificates(),
-		"alibabacloudstack_api_gateway_v2_domains":                           dataSourceAlibabacloudStackAPIGateWayV2Domains(),
+		"alibabacloudstack_api_gateway_v2_instance_types":                    dataSourceAlibabacloudStackAPIGatewayV2InstanceTypes(),
+		"alibabacloudstack_api_gateway_v2_instances":                         dataSourceAlibabacloudStackAPIGatewayV2Instances(),
+		"alibabacloudstack_api_gateway_v2_certificates":                      dataSourceAlibabacloudStackAPIGatewayV2Certificates(),
+		"alibabacloudstack_api_gateway_v2_domains":                           dataSourceAlibabacloudStackAPIGatewayV2Domains(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -978,10 +978,10 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_hologram_instance_backup_policy":                 resourceAlibabacloudStackHologramInstanceBackupPolicy(),
 		"alibabacloudstack_lindorm_instance":                                resourceAlibabacloudStackLindormInstance(),
 		"alibabacloudstack_lindorm_lts_instance":                            resourceAlibabacloudStackLindormLtsInstance(),
-		"alibabacloudstack_api_gateway_v2_k8s_cluster":                      resourceAlibabacloudStackApigatewayv2K8sCluster(),
-		"alibabacloudstack_api_gateway_v2_instance":                         resourceAlibabacloudStackAPIGateWayV2Instance(),
-		"alibabacloudstack_api_gateway_v2_certificate":                      resourceAlibabacloudStackAPIGateWayV2Certificate(),
-		"alibabacloudstack_api_gateway_v2_domain":                           resourceAlibabacloudStackAPIGateWayV2Domain(),
+		"alibabacloudstack_api_gateway_v2_k8s_cluster":                      resourceAlibabacloudStackAPIGatewayV2K8sCluster(),
+		"alibabacloudstack_api_gateway_v2_instance":                         resourceAlibabacloudStackAPIGatewayV2Instance(),
+		"alibabacloudstack_api_gateway_v2_certificate":                      resourceAlibabacloudStackAPIGatewayV2Certificate(),
+		"alibabacloudstack_api_gateway_v2_domain":                           resourceAlibabacloudStackAPIGatewayV2Domain(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudStackAPIGateWayV2Certificate() *schema.Resource {
+func resourceAlibabacloudStackAPIGatewayV2Certificate() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"cert_type": {
@@ -54,11 +54,11 @@ func resourceAlibabacloudStackAPIGateWayV2Certificate() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackAPIGateWayV2CertificateCreate, resourceAlibabacloudStackAPIGateWayV2CertificateRead, resourceAlibabacloudStackAPIGateWayV2CertificateUpdate, resourceAlibabacloudStackAPIGateWayV2CertificateDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackAPIGatewayV2CertificateCreate, resourceAlibabacloudStackAPIGatewayV2CertificateRead, resourceAlibabacloudStackAPIGatewayV2CertificateUpdate, resourceAlibabacloudStackAPIGatewayV2CertificateDelete)
 	return resource
 }
 
-func resourceAlibabacloudStackAPIGateWayV2CertificateCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2CertificateCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := map[string]interface{}{
 		"certType":        d.Get("cert_type"),
@@ -88,7 +88,7 @@ func resourceAlibabacloudStackAPIGateWayV2CertificateCreate(d *schema.ResourceDa
 	return nil
 }
 
-func resourceAlibabacloudStackAPIGateWayV2CertificateRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2CertificateRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	apigatewayv2Service := ApiGateWayV2Service{client}
 	certificate, err := apigatewayv2Service.DescribeApiGatewayV2Certificate(d.Id())
@@ -110,7 +110,7 @@ func resourceAlibabacloudStackAPIGateWayV2CertificateRead(d *schema.ResourceData
 	return nil
 }
 
-func resourceAlibabacloudStackAPIGateWayV2CertificateUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2CertificateUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	if d.IsNewResource() {
 		return nil
@@ -135,7 +135,7 @@ func resourceAlibabacloudStackAPIGateWayV2CertificateUpdate(d *schema.ResourceDa
 	return nil
 }
 
-func resourceAlibabacloudStackAPIGateWayV2CertificateDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2CertificateDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	params := strings.Split(d.Id(), ":")
 	request := map[string]interface{}{

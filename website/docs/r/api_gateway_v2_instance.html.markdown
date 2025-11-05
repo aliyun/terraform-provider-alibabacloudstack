@@ -1,7 +1,7 @@
 ---
 subcategory: "API GatewayV2"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: apsarastack_api_gateway_v2_instance"
+page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_instance"
 sidebar_current: "docs-alibabacloudstack-resource-api-gateway-v2-instance"
 description: |-
     Provides a Alibabacloudstack Api Gateway V2 Instance Resource.
@@ -96,7 +96,7 @@ resource "alibabacloudstack_edas_namespace" "default" {
   namespace_name       = var.name
 }
 
-resource "apsarastack_api_gateway_v2_instance" "example" {
+resource "alibabacloudstack_api_gateway_v2_instance" "example" {
   instance_name = "example-instance"
   deploy_mode   = "edas"
   broker_engine_type = "SCG"
@@ -113,7 +113,7 @@ resource "apsarastack_api_gateway_v2_instance" "example" {
 ### Custom Deployment Mode
 
 ```hcl
-resource "apsarastack_api_gateway_v2_instance" "edas_example" {
+resource "alibabacloudstack_api_gateway_v2_instance" "edas_example" {
   instance_name      = "example-instance"
   deploy_mode        = "custom"
   broker_engine_type = "SCG"
@@ -125,7 +125,7 @@ resource "apsarastack_api_gateway_v2_instance" "edas_example" {
 ### AiGateway Mode
 
 ```hcl
-resource "apsarastack_api_gateway_v2_instance" "custom_example" {
+resource "alibabacloudstack_api_gateway_v2_instance" "custom_example" {
   instance_name         = "custom-instance"
   deploy_mode           = "custom"
   broker_engine_type    = "HIGRESS"
@@ -178,5 +178,5 @@ The following attributes are exported:
 API Gateway V2 instances can be imported using the instance ID:
 
 ```shell
-terraform import apsarastack_api_gateway_v2_instance.example <instance_id>
+terraform import alibabacloudstack_api_gateway_v2_instance.example <instance_id>
 ```

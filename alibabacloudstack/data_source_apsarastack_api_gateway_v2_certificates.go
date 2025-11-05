@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackAPIGateWayV2Certificates() *schema.Resource {
+func dataSourceAlibabacloudStackAPIGatewayV2Certificates() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackAPIGateWayV2CertificatesRead,
+		Read: dataSourceAlibabacloudStackAPIGatewayV2CertificatesRead,
 
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
@@ -90,8 +90,8 @@ func dataSourceAlibabacloudStackAPIGateWayV2Certificates() *schema.Resource {
 	}
 }
 
-// dataSourceAlibabacloudStackAPIGateWayV2CertificateDescriptionRead performs the AlibabacloudStack Image lookup.
-func dataSourceAlibabacloudStackAPIGateWayV2CertificatesRead(d *schema.ResourceData, meta interface{}) error {
+// dataSourceAlibabacloudStackAPIGatewayV2CertificateDescriptionRead performs the AlibabacloudStack Image lookup.
+func dataSourceAlibabacloudStackAPIGatewayV2CertificatesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := map[string]interface{}{
 		"gwInstanceId": d.Get("instance_id").(string),

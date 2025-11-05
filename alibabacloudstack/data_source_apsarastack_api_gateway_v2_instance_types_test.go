@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackAPIGateWayV2InstanceTypesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackAPIGatewayV2InstanceTypesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_api_gateway_v2_instance_types.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf_testAccAPIGateWayV2InstanceTypesDataSource_%d", rand),
-		dataSourceAPIGateWayV2InstanceTypesConfigDependence)
+		fmt.Sprintf("tf_testAccAPIGatewayV2InstanceTypesDataSource_%d", rand),
+		dataSourceAPIGatewayV2InstanceTypesConfigDependence)
 
 	cpuConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -30,7 +30,7 @@ func TestAccAlibabacloudStackAPIGateWayV2InstanceTypesDataSource(t *testing.T) {
 		}),
 	}
 
-	var existAPIGateWayV2InstanceTypesMapFunc = func(rand int) map[string]string {
+	var existAPIGatewayV2InstanceTypesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                           CHECKSET,
 			"ids.0":                           CHECKSET,
@@ -42,22 +42,22 @@ func TestAccAlibabacloudStackAPIGateWayV2InstanceTypesDataSource(t *testing.T) {
 		}
 	}
 
-	var fakeAPIGateWayV2InstanceTypesMapFunc = func(rand int) map[string]string {
+	var fakeAPIGatewayV2InstanceTypesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":            "0",
 			"instance_types.#": "0",
 		}
 	}
 
-	var APIGateWayV2InstanceTypesCheckInfo = dataSourceAttr{
+	var APIGatewayV2InstanceTypesCheckInfo = dataSourceAttr{
 		resourceId:   resourceId,
-		existMapFunc: existAPIGateWayV2InstanceTypesMapFunc,
-		fakeMapFunc:  fakeAPIGateWayV2InstanceTypesMapFunc,
+		existMapFunc: existAPIGatewayV2InstanceTypesMapFunc,
+		fakeMapFunc:  fakeAPIGatewayV2InstanceTypesMapFunc,
 	}
 
-	APIGateWayV2InstanceTypesCheckInfo.dataSourceTestCheck(t, rand, cpuConf, memoryConf)
+	APIGatewayV2InstanceTypesCheckInfo.dataSourceTestCheck(t, rand, cpuConf, memoryConf)
 }
 
-func dataSourceAPIGateWayV2InstanceTypesConfigDependence(name string) string {
+func dataSourceAPIGatewayV2InstanceTypesConfigDependence(name string) string {
 	return ""
 }

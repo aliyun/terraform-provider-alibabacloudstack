@@ -8,19 +8,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAPIGateWayV2Instance_basic(t *testing.T) {
+func TestAccAlibabacloudStackAPIGatewayV2Instance_basic(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_api_gateway_v2_instance.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DescribeApiGatewayV2Instace")
+	}, "DescribeApiGatewayV2Instance")
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 2000)
 	name := fmt.Sprintf("testtf-apigw-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGateWayV2InstanceEdasDepDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGatewayV2InstanceEdasDepDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -77,19 +77,19 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_basic(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackAPIGateWayV2Instance_custom(t *testing.T) {
+func TestAccAlibabacloudStackAPIGatewayV2Instance_custom(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_api_gateway_v2_instance.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DescribeApiGatewayV2Instace")
+	}, "DescribeApiGatewayV2Instance")
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 2000)
 	name := fmt.Sprintf("testtf-apigw-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGateWayV2InstanceDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGatewayV2InstanceDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -132,13 +132,13 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_custom(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackAPIGateWayV2Instance_HIGRESS(t *testing.T) {
+func TestAccAlibabacloudStackAPIGatewayV2Instance_HIGRESS(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_api_gateway_v2_instance.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DescribeApiGatewayV2Instace")
+	}, "DescribeApiGatewayV2Instance")
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -194,7 +194,7 @@ func TestAccAlibabacloudStackAPIGateWayV2Instance_HIGRESS(t *testing.T) {
 	})
 }
 
-func APIGateWayV2InstanceDependence(name string) string {
+func APIGatewayV2InstanceDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"
@@ -206,7 +206,7 @@ data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
 `, name)
 }
 
-func APIGateWayV2InstanceEdasDepDependence(name string) string {
+func APIGatewayV2InstanceEdasDepDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"

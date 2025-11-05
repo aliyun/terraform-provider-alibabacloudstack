@@ -59,7 +59,7 @@ func (s *ApiGateWayV2Service) GetCustomDeployConfig(id string) (map[string]inter
 	}
 	data, ok := response["data"]
 	if !ok {
-		return nil, errmsgs.Error("CreateInstance Failed! %v", response)
+		return nil, errmsgs.Error("GetCustomDeployConfig Failed! %v", response)
 	}
 	return data.(map[string]interface{}), nil
 }

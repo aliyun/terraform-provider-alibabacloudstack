@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudStackAPIGateWayV2Domain() *schema.Resource {
+func resourceAlibabacloudStackAPIGatewayV2Domain() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
@@ -60,11 +60,11 @@ func resourceAlibabacloudStackAPIGateWayV2Domain() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackAPIGateWayV2DomainCreate, resourceAlibabacloudStackAPIGateWayV2DomainRead, resourceAlibabacloudStackAPIGateWayV2DomainUpdate, resourceAlibabacloudStackAPIGateWayV2DomainDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackAPIGatewayV2DomainCreate, resourceAlibabacloudStackAPIGatewayV2DomainRead, resourceAlibabacloudStackAPIGatewayV2DomainUpdate, resourceAlibabacloudStackAPIGatewayV2DomainDelete)
 	return resource
 }
 
-func resourceAlibabacloudStackAPIGateWayV2DomainCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2DomainCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	protocol := d.Get("protocol").(string)
 	client_auth := d.Get("client_auth").(string)
@@ -72,10 +72,10 @@ func resourceAlibabacloudStackAPIGateWayV2DomainCreate(d *schema.ResourceData, m
 	issuer_dn := d.Get("issuer_dn").(string)
 	certificate_id := d.Get("certificate_id").(string)
 	ca_certificate_id := d.Get("ca_certificate_id").(string)
-	if protocol == "https" && certificate_id == "" {
+	if strings.ToUpper(protocol) == "HTTPS" && certificate_id == "" {
 		return errmsgs.WrapError(fmt.Errorf("[ERROR] The certificate_id is required when the protocol is https"))
 	}
-	if protocol == "https" && client_auth == "1" && ca_certificate_id == "" {
+	if strings.ToUpper(protocol) == "HTTPS" && client_auth == "1" && ca_certificate_id == "" {
 		return errmsgs.WrapError(fmt.Errorf("[ERROR] The ca_certificate_id is required when the protocol is https and client_auth is 1"))
 	}
 
@@ -107,7 +107,7 @@ func resourceAlibabacloudStackAPIGateWayV2DomainCreate(d *schema.ResourceData, m
 	return nil
 }
 
-func resourceAlibabacloudStackAPIGateWayV2DomainRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2DomainRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	apigatewayv2Service := ApiGateWayV2Service{client}
 	domain, err := apigatewayv2Service.DescribeApiGatewayV2Domain(d.Id())
@@ -129,7 +129,7 @@ func resourceAlibabacloudStackAPIGateWayV2DomainRead(d *schema.ResourceData, met
 	return nil
 }
 
-func resourceAlibabacloudStackAPIGateWayV2DomainUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2DomainUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.IsNewResource() {
 		return nil
 	}
@@ -173,7 +173,7 @@ func resourceAlibabacloudStackAPIGateWayV2DomainUpdate(d *schema.ResourceData, m
 	return nil
 }
 
-func resourceAlibabacloudStackAPIGateWayV2DomainDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackAPIGatewayV2DomainDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	params := strings.Split(d.Id(), ":")
 	request := map[string]interface{}{

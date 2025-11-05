@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackAPIGateWayV2InstanceTypes() *schema.Resource {
+func dataSourceAlibabacloudStackAPIGatewayV2InstanceTypes() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackAPIGateWayV2InstanceTypesRead,
+		Read: dataSourceAlibabacloudStackAPIGatewayV2InstanceTypesRead,
 
 		Schema: map[string]*schema.Schema{
 			"ids": {
@@ -79,7 +79,7 @@ func dataSourceAlibabacloudStackAPIGateWayV2InstanceTypes() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackAPIGateWayV2InstanceTypesRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackAPIGatewayV2InstanceTypesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	filterIds := map[string]string{}

@@ -1,13 +1,13 @@
 ---
 subcategory: "API 网关 V2"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: apsarastack_api_gateway_v2_instances"
+page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_instances"
 sidebar_current: "docs-alibabacloudstack-datasource-api-gateway-v2-instances"
 description: |-
     提供一个数据源来查询 API 网关 V2 实例。
 ---
 
-# apsarastack_api_gateway_v2_instances
+# alibabacloudstack_api_gateway_v2_instances
 
 API 网关 V2 实例数据源提供与请求参数匹配的 API 网关 V2 实例列表。
 
@@ -16,31 +16,31 @@ API 网关 V2 实例数据源提供与请求参数匹配的 API 网关 V2 实例
 ### 基本用法
 
 ```hcl
-data "apsarastack_api_gateway_v2_instances" "example" {
+data "alibabacloudstack_api_gateway_v2_instances" "example" {
   instance_id = "i-example123"
 }
 
 output "instance_ids" {
-  value = data.apsarastack_api_gateway_v2_instances.example.ids
+  value = data.alibabacloudstack_api_gateway_v2_instances.example.ids
 }
 ```
 
 ### 按部署模式过滤
 
 ```hcl
-data "apsarastack_api_gateway_v2_instances" "edas_instances" {
+data "alibabacloudstack_api_gateway_v2_instances" "edas_instances" {
   deploy_mode = "edas"
 }
 
 output "edas_instance_details" {
-  value = data.apsarastack_api_gateway_v2_instances.edas_instances.instances
+  value = data.alibabacloudstack_api_gateway_v2_instances.edas_instances.instances
 }
 ```
 
 ### 按 Broker 引擎类型过滤
 
 ```hcl
-data "apsarastack_api_gateway_v2_instances" "scg_instances" {
+data "alibabacloudstack_api_gateway_v2_instances" "scg_instances" {
   broker_engine_type = "SCG"
 }
 ```
@@ -48,7 +48,7 @@ data "apsarastack_api_gateway_v2_instances" "scg_instances" {
 ### 使用正则表达式过滤
 
 ```hcl
-data "apsarastack_api_gateway_v2_instances" "name_filtered" {
+data "alibabacloudstack_api_gateway_v2_instances" "name_filtered" {
   description_regex = "^test-.*"
 }
 ```

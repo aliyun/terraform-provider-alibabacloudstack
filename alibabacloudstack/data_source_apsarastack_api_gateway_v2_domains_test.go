@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackAPIGateWayV2DomainsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackAPIGatewayV2DomainsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_api_gateway_v2_domains.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		fmt.Sprintf("tf.apigwv2.domain%d", rand),
-		dataSourceAPIGateWayV2DomainsDependence)
+		dataSourceAPIGatewayV2DomainsDependence)
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -61,7 +61,7 @@ func TestAccAlibabacloudStackAPIGateWayV2DomainsDataSource(t *testing.T) {
 		}),
 	}
 
-	var existAPIGateWayV2DomainsMapFunc = func(rand int) map[string]string {
+	var existAPIGatewayV2DomainsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                    "1",
 			"ids.0":                    CHECKSET,
@@ -73,23 +73,23 @@ func TestAccAlibabacloudStackAPIGateWayV2DomainsDataSource(t *testing.T) {
 		}
 	}
 
-	var fakeAPIGateWayV2DomainsMapFunc = func(rand int) map[string]string {
+	var fakeAPIGatewayV2DomainsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":     "0",
 			"domains.#": "0",
 		}
 	}
 
-	var APIGateWayV2DomainsCheckInfo = dataSourceAttr{
+	var APIGatewayV2DomainsCheckInfo = dataSourceAttr{
 		resourceId:   resourceId,
-		existMapFunc: existAPIGateWayV2DomainsMapFunc,
-		fakeMapFunc:  fakeAPIGateWayV2DomainsMapFunc,
+		existMapFunc: existAPIGatewayV2DomainsMapFunc,
+		fakeMapFunc:  fakeAPIGatewayV2DomainsMapFunc,
 	}
 
-	APIGateWayV2DomainsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, protocolConf, allConf)
+	APIGatewayV2DomainsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, protocolConf, allConf)
 }
 
-func dataSourceAPIGateWayV2DomainsDependence(name string) string {
+func dataSourceAPIGatewayV2DomainsDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"

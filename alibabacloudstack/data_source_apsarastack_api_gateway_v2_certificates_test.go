@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackAPIGateWayV2CertificateDataSource(t *testing.T) {
+func TestAccAlibabacloudStackAPIGatewayV2CertificateDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_api_gateway_v2_certificates.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf-testAccAPIGateWayV2Certificate-%d", rand),
-		dataSourceAPIGateWayV2CertificateDependence)
+		fmt.Sprintf("tf-testAccAPIGatewayV2Certificate-%d", rand),
+		dataSourceAPIGatewayV2CertificateDependence)
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -48,12 +48,12 @@ func TestAccAlibabacloudStackAPIGateWayV2CertificateDataSource(t *testing.T) {
 		}),
 	}
 
-	var existAPIGateWayV2CertificateMapFunc = func(rand int) map[string]string {
+	var existAPIGatewayV2CertificateMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                           "1",
 			"ids.0":                           CHECKSET,
 			"certificates.#":                  "1",
-			"certificates.0.certificate_name": fmt.Sprintf("tf-testAccAPIGateWayV2Certificate-%d", rand),
+			"certificates.0.certificate_name": fmt.Sprintf("tf-testAccAPIGatewayV2Certificate-%d", rand),
 			"certificates.0.certificate_id":   CHECKSET,
 			"certificates.0.cert_type":        CHECKSET,
 			"certificates.0.expire_time":      CHECKSET,
@@ -61,23 +61,23 @@ func TestAccAlibabacloudStackAPIGateWayV2CertificateDataSource(t *testing.T) {
 		}
 	}
 
-	var fakeAPIGateWayV2CertificateMapFunc = func(rand int) map[string]string {
+	var fakeAPIGatewayV2CertificateMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":          "0",
 			"certificates.#": "0",
 		}
 	}
 
-	var APIGateWayV2CertificateCheckInfo = dataSourceAttr{
+	var APIGatewayV2CertificateCheckInfo = dataSourceAttr{
 		resourceId:   resourceId,
-		existMapFunc: existAPIGateWayV2CertificateMapFunc,
-		fakeMapFunc:  fakeAPIGateWayV2CertificateMapFunc,
+		existMapFunc: existAPIGatewayV2CertificateMapFunc,
+		fakeMapFunc:  fakeAPIGatewayV2CertificateMapFunc,
 	}
 
-	APIGateWayV2CertificateCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
+	APIGatewayV2CertificateCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func dataSourceAPIGateWayV2CertificateDependence(name string) string {
+func dataSourceAPIGatewayV2CertificateDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"

@@ -1,7 +1,7 @@
 ---
 subcategory: "API GatewayV2"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: apsarastack_api_gateway_v2_instances"
+page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_instances"
 sidebar_current: "docs-alibabacloudstack-datasource-api-gateway-v2-instances"
 description: |-
     Provides a datasource to query the API Gateway V2 instances.
@@ -14,31 +14,31 @@ The API Gateway V2 Instances data source provides a list of API Gateway V2 insta
 
 ```hcl
 
-data "apsarastack_api_gateway_v2_instances" "example" {
+data "alibabacloudstack_api_gateway_v2_instances" "example" {
   instance_id = "i-example123"
 }
 
 output "instance_ids" {
-  value = data.apsarastack_api_gateway_v2_instances.example.ids
+  value = data.alibabacloudstack_api_gateway_v2_instances.example.ids
 }
 ```
 
 ### Filter by Deploy Mode
 
 ```hcl
-data "apsarastack_api_gateway_v2_instances" "edas_instances" {
+data "alibabacloudstack_api_gateway_v2_instances" "edas_instances" {
   deploy_mode = "edas"
 }
 
 output "edas_instance_details" {
-  value = data.apsarastack_api_gateway_v2_instances.edas_instances.instances
+  value = data.alibabacloudstack_api_gateway_v2_instances.edas_instances.instances
 }
 ```
 
 ### Filter by Broker Engine Type
 
 ```hcl
-data "apsarastack_api_gateway_v2_instances" "scg_instances" {
+data "alibabacloudstack_api_gateway_v2_instances" "scg_instances" {
   broker_engine_type = "SCG"
 }
 ```
@@ -46,7 +46,7 @@ data "apsarastack_api_gateway_v2_instances" "scg_instances" {
 ### Using Regular Expression Filter
 
 ```hcl
-data "apsarastack_api_gateway_v2_instances" "name_filtered" {
+data "alibabacloudstack_api_gateway_v2_instances" "name_filtered" {
   description_regex = "^test-.*"
 }
 ```
