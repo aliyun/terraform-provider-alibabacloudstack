@@ -31,10 +31,12 @@ func resourceAlibabacloudStackAPIGateWayV2Domain() *schema.Resource {
 			"certificate_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"ca_certificate_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"client_auth": {
 				Type:         schema.TypeString,
@@ -45,14 +47,16 @@ func resourceAlibabacloudStackAPIGateWayV2Domain() *schema.Resource {
 			"subject_dn": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"issuer_dn": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"domain_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 		},
 	}

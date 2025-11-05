@@ -11,12 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackAPIGateWayV2Certificates() *schema.Resource {
+func dataSourceAlibabacloudStackAPIGateWayV2Domains() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackAPIGateWayV2CertificatesRead,
+		Read: dataSourceAlibabacloudStackAPIGateWayV2DomainsRead,
 
 		Schema: map[string]*schema.Schema{
-			"name_regex": {
+			"domain_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -27,16 +27,16 @@ func dataSourceAlibabacloudStackAPIGateWayV2Certificates() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"sni": {
+			"domain": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"cert_type": {
+			"protocol": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"0", "1"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"HTTPS", "HTTP"}, false),
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -45,7 +45,7 @@ func dataSourceAlibabacloudStackAPIGateWayV2Certificates() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			// Computed values.
-			"certificates": {
+			"domains": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -54,34 +54,41 @@ func dataSourceAlibabacloudStackAPIGateWayV2Certificates() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"instance_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"domain": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"protocol": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"certificate_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"cert_type": {
+						"ca_certificate_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"certificate_name": {
+						"client_auth": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"expire_time": {
+						"subject_dn": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"create_time": {
+						"issuer_dn": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"update_time": {
+						"domain_id": {
 							Type:     schema.TypeString,
 							Computed: true,
-						},
-						"snis": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -90,20 +97,18 @@ func dataSourceAlibabacloudStackAPIGateWayV2Certificates() *schema.Resource {
 	}
 }
 
-// dataSourceAlibabacloudStackAPIGateWayV2CertificateDescriptionRead performs the AlibabacloudStack Image lookup.
-func dataSourceAlibabacloudStackAPIGateWayV2CertificatesRead(d *schema.ResourceData, meta interface{}) error {
+// dataSourceAlibabacloudStackAPIGateWayV2DomainDescriptionRead performs the AlibabacloudStack Image lookup.
+func dataSourceAlibabacloudStackAPIGateWayV2DomainsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	instanceId := d.Get("instance_id").(string)
 	request := map[string]interface{}{
-		"gwInstanceId": d.Get("instance_id").(string),
+		"gwInstanceId": instanceId,
 		"regionId":     client.RegionId,
 	}
-	if v, ok := d.GetOk("sni"); ok {
-		request["sni"] = v.(string)
+	if v, ok := d.GetOk("domain"); ok {
+		request["domain"] = v.(string)
 	}
-	if v, ok := d.GetOk("cert_type"); ok {
-		request["certType"] = v.(string)
-	}
-	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListCertificates", "/certificate/listCertificates", nil, nil, request)
+	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListDomains", "/domain/listDomains", nil, nil, request)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -118,13 +123,13 @@ func dataSourceAlibabacloudStackAPIGateWayV2CertificatesRead(d *schema.ResourceD
 		}
 	}
 	var ids []string
-	var certificates []map[string]interface{}
+	var domains []map[string]interface{}
 	for _, v := range records.([]interface{}) {
 		record := v.(map[string]interface{})
-		id := fmt.Sprintf("%s:%v", d.Get("instance_id").(string), record["certificateId"])
-		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
-			r := regexp.MustCompile(description_regex.(string))
-			if !r.MatchString(record["certificateName"].(string)) {
+		id := fmt.Sprintf("%s:%v", instanceId, record["domainId"])
+		if domain_regex, ok := d.GetOk("domain_regex"); ok {
+			r := regexp.MustCompile(domain_regex.(string))
+			if !r.MatchString(record["domain"].(string)) {
 				continue
 			}
 		}
@@ -134,21 +139,26 @@ func dataSourceAlibabacloudStackAPIGateWayV2CertificatesRead(d *schema.ResourceD
 				continue
 			}
 		}
-		certificates = append(certificates, map[string]interface{}{
-			"id":               id,
-			"certificate_id":   record["certificateId"],
-			"certificate_name": record["certificateName"],
-			"expire_time":      record["expireTime"],
-			"update_time":      record["updateTime"],
-			"create_time":      record["createTime"],
-			"cert_type":        record["certType"],
-			"snis":             record["snis"],
+		if protocol, ok := d.GetOk("protocol"); ok && record["protocol"].(string) != protocol.(string) {
+			continue
+		}
+		domains = append(domains, map[string]interface{}{
+			"id":                id,
+			"instance_id":       instanceId,
+			"domain":            record["domain"],
+			"domain_id":         record["domainId"],
+			"protocol":          record["protocol"],
+			"certificate_id":    record["certificateId"],
+			"client_auth":       record["clientAuth"],
+			"ca_certificate_id": record["caCertificateId"],
+			"subject_dn":        record["subjectDn"],
+			"issuer_dn":         record["issuerDn"],
 		})
 		ids = append(ids, id)
 	}
 
 	d.SetId(dataResourceIdHash(ids))
-	if err := d.Set("certificates", certificates); err != nil {
+	if err := d.Set("domains", domains); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
