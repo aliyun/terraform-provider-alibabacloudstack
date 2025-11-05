@@ -15,5 +15,13 @@ type GetTopicResult struct {
 	LastModifyTime int64  `json:"LastModifyTime"`
 	Storage        int
 	//TopicStatus    TopicStatus   `json:"Status"`
-	//ExpandMode     ExpandMode    `json:"ExpandMode"`
+	EnableSchemaRegistry bool `json:"EnableSchemaRegistry"`
+	ExpandMode           bool `json:"ExpandMode"`
+}
+
+type DataHubRecordSchema struct {
+	Name      string `json:"Name"`
+	Type      string `json:"Type"`
+	AllowNull bool   `json:"AllowNull"`
+	Comment   string `json:"Comment"`
 }

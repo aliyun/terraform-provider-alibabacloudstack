@@ -267,19 +267,3 @@ func isTerraformTestingDatahubObject(name string) bool {
 
 	return false
 }
-
-func getDefaultRecordSchemainMap() map[string]interface{} {
-
-	return map[string]interface{}{
-		"string_field": "STRING",
-	}
-}
-
-func recordSchemaToMap(fields []datahub.Field) map[string]string {
-	result := make(map[string]string)
-	for _, f := range fields {
-		result[f.Name] = f.Type.String()
-	}
-
-	return result
-}
