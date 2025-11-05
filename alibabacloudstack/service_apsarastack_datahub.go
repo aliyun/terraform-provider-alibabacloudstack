@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -266,4 +267,52 @@ func isTerraformTestingDatahubObject(name string) bool {
 	}
 
 	return false
+}
+
+// The following code has been adapted to align with existing naming conventions and structure.
+// Original function names and structures have been modified where necessary to maintain consistency.
+
+func (s *DatahubService) DescribeDatahubKafkaGroup(id string) (map[string]interface{}, error) {
+	// Split the id to get ProjectName and GroupName
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid kafka group id: %s", id)
+	}
+	projectName := parts[0]
+	groupName := parts[1]
+
+	// Prepare request query parameters
+	reqQuery := map[string]interface{}{
+		"ProjectName": projectName,
+		"PageSize":    10,
+		"PageNumber":  1,
+		"Keyword":     groupName,
+	}
+
+	// Call ListKafkaGroup API to find the target group
+	response, err := s.client.DoTeaRequest("GET", "datahub", "2019-11-20", "ListKafkaGroup", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the response contains the expected data structure
+
+	list, ok := response["List"].([]interface{})
+	if !ok || len(list) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("kafka group %s not found", groupName))
+	}
+
+	// Iterate over the list to find the matching GroupName
+	for _, item := range list {
+		kafkaGroup, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if kafkaGroup["GroupName"].(string) == groupName {
+			return kafkaGroup, nil
+		}
+	}
+
+	// If no match is found, return a not found error
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("kafka group %s not found", groupName))
 }

@@ -651,6 +651,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_datahub_project":                        resourceAlibabacloudStackDatahubProject(),
 		"alibabacloudstack_datahub_subscription":                   resourceAlibabacloudStackDatahubSubscription(),
 		"alibabacloudstack_datahub_topic":                          resourceAlibabacloudStackDatahubTopic(),
+		"alibabacloudstack_datahub_kafka_group":                          resourceAlibabacloudStackDatahubKafkaGroup(),
 		"alibabacloudstack_db_account":                             resourceAlibabacloudStackDBAccount(),
 		"alibabacloudstack_rds_account":                            resourceAlibabacloudStackDBAccount(),
 		"alibabacloudstack_db_account_privilege":                   resourceAlibabacloudStackDBAccountPrivilege(),
