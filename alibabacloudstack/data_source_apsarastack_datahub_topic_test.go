@@ -10,51 +10,51 @@ func TestAccAlibabacloudStackDatahubTopicsDataSource(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
 
-	idsConf := dataSourceTestAccConfig{
+	namesConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackDatahubTopicsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_topics.default.id}"]`,
+			"names": `["${alibabacloudstack_datahub_topic.default.name}"]`,
+			"project_name": `"${alibabacloudstack_datahub_topic.default.project_name}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackDatahubTopicsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_topics.default.id}_fake"]`,
+			"names": `["${alibabacloudstack_datahub_topic.default.name}_fake"]`,
+			"project_name": `"${alibabacloudstack_datahub_topic.default.project_name}"`,
 		}),
 	}
 
-	project_nameConf := dataSourceTestAccConfig{
+	projectNameConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackDatahubTopicsSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_datahub_topics.default.id}"]`,
-			"project_name": `"${alibabacloudstack_datahub_topics.default.ProjectName}"`,
+			"project_name": `"${alibabacloudstack_datahub_topic.default.project_name}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackDatahubTopicsSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_datahub_topics.default.id}_fake"]`,
-			"project_name": `"${alibabacloudstack_datahub_topics.default.ProjectName}_fake"`,
+			"project_name": `"${alibabacloudstack_datahub_topic.default.project_name}_fake"`,
 		}),
 	}
 
-	topic_nameConf := dataSourceTestAccConfig{
+	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackDatahubTopicsSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_datahub_topics.default.id}"]`,
-			"topic_name": `"${alibabacloudstack_datahub_topics.default.TopicName}"`,
+			"name_regex": `"^${alibabacloudstack_datahub_topic.default.name}$"`,
+			"project_name": `"${alibabacloudstack_datahub_topic.default.project_name}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackDatahubTopicsSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_datahub_topics.default.id}_fake"]`,
-			"topic_name": `"${alibabacloudstack_datahub_topics.default.TopicName}_fake"`,
+			"name_regex": `"fake_topic_name"`,
+			"project_name": `"${alibabacloudstack_datahub_topic.default.project_name}"`,
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackDatahubTopicsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_topics.default.id}"]`,
-
-			"project_name": `"${alibabacloudstack_datahub_topics.default.ProjectName}"`,
-			"topic_name":   `"${alibabacloudstack_datahub_topics.default.TopicName}"`}),
+			"names":        `["${alibabacloudstack_datahub_topic.default.name}"]`,
+			"project_name": `"${alibabacloudstack_datahub_topic.default.project_name}"`,
+			"name_regex":   `"^${alibabacloudstack_datahub_topic.default.name}$"`,
+		}),
 		fakeConfig: testAccCheckAlibabacloudstackDatahubTopicsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_topics.default.id}_fake"]`,
-
-			"project_name": `"${alibabacloudstack_datahub_topics.default.ProjectName}_fake"`,
-			"topic_name":   `"${alibabacloudstack_datahub_topics.default.TopicName}_fake"`}),
+			"names":        `["${alibabacloudstack_datahub_topic.default.name}_fake"]`,
+			"project_name": `"${alibabacloudstack_datahub_topic.default.project_name}_fake"`,
+			"name_regex":   `"fake_topic_name"`,
+		}),
 	}
 
-	AlibabacloudstackDatahubTopicsCheckInfo.dataSourceTestCheck(t, rand, idsConf, project_nameConf, topic_nameConf, allConf)
+	AlibabacloudstackDatahubTopicsCheckInfo.dataSourceTestCheck(t, rand, projectNameConf, namesConf, nameRegexConf, allConf)
 }
 
 var existAlibabacloudstackDatahubTopicsMapFunc = func(rand int) map[string]string {
@@ -83,13 +83,26 @@ func testAccCheckAlibabacloudstackDatahubTopicsSourceConfig(rand int, attrMap ma
 	}
 	config := fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackDatahubTopics%d"
+	default = "tf_testdatahubtopics%d"
+}
+resource "alibabacloudstack_datahub_project" "default" {
+  comment = "test"
+  name    = var.name
 }
 
+resource "alibabacloudstack_datahub_topic" "default" {
+  name = var.name
+  record_schemas {
+    type       = "STRING"
+    allow_null = false
+    comment    = "test comment 1"
+    name       = "test1"
+  }
 
-
-
-
+  comment      = "test"
+  record_type  = "TUPLE"
+  project_name = alibabacloudstack_datahub_project.default.name
+}
 
 data "alibabacloudstack_datahub_topics" "default" {
 %s

@@ -25,3 +25,21 @@ type DataHubRecordSchema struct {
 	AllowNull bool   `json:"AllowNull"`
 	Comment   string `json:"Comment"`
 }
+
+type ListTopicResult struct {
+	RequestId    string `json:"RequestId"`
+	Success      bool   `json:"Success"`
+	AsapiSuccess bool   `json:"asapiSuccess"`
+	List         struct {
+		Topic []struct {
+			TopicName  string `json:"TopicName"`
+			Comment    string `json:"Comment"`
+			ShardCount int    `json:"ShardCount"`
+			RecordType string `json:"RecordType"`
+			LifeCycle  int    `json:"LifeCycle"`
+			CreateTime int64  `json:"CreateTime"`
+			UpdateTime int64  `json:"UpdateTime"`
+			Storage    int    `json:"Storage"`
+		} `json:"Topic"`
+	} `json:"List"`
+}
