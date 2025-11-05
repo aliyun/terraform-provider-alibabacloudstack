@@ -143,12 +143,14 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 			} else {
 				request.QueryParams["RecordSchema"] = string(content)
 			}
+		} else {
+			return fmt.Errorf("record_type TUPLE must need record_schemas")
 		}
 	} else if recordType == string(datahub.BLOB) {
 		request.QueryParams["RecordType"] = "BLOB"
 		if v, ok := d.GetOk("record_schemas"); ok {
 			if len(v.(*schema.Set).List()) > 0 {
-				return fmt.Errorf("record_type BLOB does not support record_schema")
+				return fmt.Errorf("record_type BLOB does not support record_schemas")
 			}
 		}
 	}

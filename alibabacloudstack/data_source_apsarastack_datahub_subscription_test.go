@@ -12,49 +12,29 @@ func TestAccAlibabacloudStackDatahubSubscriptionsDataSource(t *testing.T) {
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackDatahubSubscriptionsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_subscriptions.default.id}"]`,
+			"sub_ids": `["${alibabacloudstack_datahub_subscription.default.sub_id}"]`,
+			"project_name": `"${alibabacloudstack_datahub_subscription.default.project_name}"`,
+			"topic_name": `"${alibabacloudstack_datahub_subscription.default.topic_name}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackDatahubSubscriptionsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_subscriptions.default.id}_fake"]`,
-		}),
-	}
-
-	project_nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackDatahubSubscriptionsSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_datahub_subscriptions.default.id}"]`,
-			"project_name": `"${alibabacloudstack_datahub_subscriptions.default.ProjectName}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackDatahubSubscriptionsSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_datahub_subscriptions.default.id}_fake"]`,
-			"project_name": `"${alibabacloudstack_datahub_subscriptions.default.ProjectName}_fake"`,
+			"sub_ids": `["${alibabacloudstack_datahub_subscription.default.sub_id}_fake"]`,
+			"project_name": `"${alibabacloudstack_datahub_subscription.default.project_name}"`,
+			"topic_name": `"${alibabacloudstack_datahub_subscription.default.topic_name}"`,
 		}),
 	}
 
 	topic_nameConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackDatahubSubscriptionsSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_datahub_subscriptions.default.id}"]`,
-			"topic_name": `"${alibabacloudstack_datahub_subscriptions.default.TopicName}"`,
+			"project_name": `"${alibabacloudstack_datahub_subscription.default.project_name}"`,
+			"topic_name": `"${alibabacloudstack_datahub_subscription.default.topic_name}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackDatahubSubscriptionsSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_datahub_subscriptions.default.id}_fake"]`,
-			"topic_name": `"${alibabacloudstack_datahub_subscriptions.default.TopicName}_fake"`,
+			"project_name": `"${alibabacloudstack_datahub_subscription.default.project_name}"`,
+			"topic_name": `"${alibabacloudstack_datahub_subscription.default.topic_name}_fake"`,
 		}),
 	}
 
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackDatahubSubscriptionsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_subscriptions.default.id}"]`,
-
-			"project_name": `"${alibabacloudstack_datahub_subscriptions.default.ProjectName}"`,
-			"topic_name":   `"${alibabacloudstack_datahub_subscriptions.default.TopicName}"`}),
-		fakeConfig: testAccCheckAlibabacloudstackDatahubSubscriptionsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_datahub_subscriptions.default.id}_fake"]`,
-
-			"project_name": `"${alibabacloudstack_datahub_subscriptions.default.ProjectName}_fake"`,
-			"topic_name":   `"${alibabacloudstack_datahub_subscriptions.default.TopicName}_fake"`}),
-	}
-
-	AlibabacloudstackDatahubSubscriptionsCheckInfo.dataSourceTestCheck(t, rand, idsConf, project_nameConf, topic_nameConf, allConf)
+	AlibabacloudstackDatahubSubscriptionsCheckInfo.dataSourceTestCheck(t, rand, idsConf, topic_nameConf)
 }
 
 var existAlibabacloudstackDatahubSubscriptionsMapFunc = func(rand int) map[string]string {
@@ -83,13 +63,26 @@ func testAccCheckAlibabacloudstackDatahubSubscriptionsSourceConfig(rand int, att
 	}
 	config := fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackDatahubSubscriptions%d"
+	default = "tf_test_scriptions%d"
 }
 
+resource "alibabacloudstack_datahub_project" "default" {
+  comment = "test"
+  name    = var.name
+}
 
-
-
-
+resource "alibabacloudstack_datahub_topic" "default" {
+  name = var.name
+  comment      = "test"
+  record_type  = "BLOB"
+  project_name = alibabacloudstack_datahub_project.default.name
+}
+resource "alibabacloudstack_datahub_subscription" "default" {
+  comment          = "terraform subscription datasource test"
+  application_name = "tf_acc_test"
+  project_name     = "${alibabacloudstack_datahub_project.default.name}"
+  topic_name       = "${alibabacloudstack_datahub_topic.default.name}"
+}
 
 data "alibabacloudstack_datahub_subscriptions" "default" {
 %s
