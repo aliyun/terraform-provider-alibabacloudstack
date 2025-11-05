@@ -59,19 +59,36 @@ func TestAccAlibabacloudStackDatahubProject0(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-
-			// 			{
-			// 				Config: testAccConfig(map[string]interface{}{
-			//
-			// 					"comment": "update_test",
-			// 				}),
-			// 				Check: resource.ComposeTestCheckFunc(
-			// 					testAccCheck(map[string]string{
-			//
-			// 						"comment": "update_test",
-			// 					}),
-			// 				),
-			// 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"vpc_ids": []string{"${alibabacloudstack_vpc_vpc.default.0.id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vpc_ids.#": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"vpc_ids": []string{"${alibabacloudstack_vpc_vpc.default.0.id}", "${alibabacloudstack_vpc_vpc.default.1.id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vpc_ids.#": "2",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"vpc_ids": []string{"${alibabacloudstack_vpc_vpc.default.1.id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vpc_ids.#": "1",
+					}),
+				),
+			},
 		},
 	})
 }
@@ -91,7 +108,17 @@ variable "name" {
     default = "%s"
 }
 
-
+resource "alibabacloudstack_vpc_vpc" "default" {
+  count = 2
+  vpc_name = "${var.name}_vpc_${count.index}"
+  cidr_block = "172.16.${count.index}.0/24"
+  lifecycle {
+      ignore_changes = [
+		secondary_cidr_blocks,
+        tags
+      ]
+  }
+}
 
 `, name)
 }
