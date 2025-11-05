@@ -41,9 +41,6 @@ func resourceAlibabacloudStackDatahubTopic() *schema.Resource {
 				Optional:     true,
 				Default:      3,
 				ValidateFunc: validation.IntBetween(1, 7),
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return strings.ToLower(old) != "" && strings.ToLower(new) != strings.ToLower(old)
-				},
 			},
 			"comment": {
 				Type:         schema.TypeString,
@@ -191,8 +188,10 @@ func resourceAlibabacloudStackDatahubTopicRead(d *schema.ResourceData, meta inte
 	d.Set("enable_schema_registry", object.EnableSchemaRegistry)
 
 	var recordSchemas []DataHubRecordSchema
-	if err = json.Unmarshal([]byte(object.RecordSchema), &recordSchemas); err != nil {
-		return err
+	if len(object.RecordSchema) > 0 {
+		if err = json.Unmarshal([]byte(object.RecordSchema), &recordSchemas); err != nil {
+			return err
+		}
 	}
 
 	data := []map[string]interface{}{}
@@ -239,7 +238,7 @@ func resourceAlibabacloudStackDatahubTopicUpdate(d *schema.ResourceData, meta in
 		for k, v := range old_maps {
 			if new_v, existed := new_maps[k]; !existed {
 				return fmt.Errorf("Deleting schemas is currently not supported.")
-			} else if  !reflect.DeepEqual(new_v, v) {
+			} else if !reflect.DeepEqual(new_v, v) {
 				return fmt.Errorf("Updating schemas is currently not supported.")
 			}
 		}
@@ -260,7 +259,7 @@ func resourceAlibabacloudStackDatahubTopicUpdate(d *schema.ResourceData, meta in
 				if v, err := json.Marshal(requestQuery["Fields"]); err != nil {
 					return err
 				} else {
-					requestQuery["Fields"] =string(v) 
+					requestQuery["Fields"] = string(v)
 				}
 				if _, err := client.DoTeaRequest("POST", "datahub", "2019-11-20", "AppendField", "", nil, requestQuery, nil); err != nil {
 					return err
