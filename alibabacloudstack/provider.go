@@ -1082,6 +1082,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_hologram_instance_backup_policy":                 resourceAlibabacloudStackHologramInstanceBackupPolicy(),
 		"alibabacloudstack_lindorm_instance":                                resourceAlibabacloudStackLindormInstance(),
 		"alibabacloudstack_lindorm_lts_instance":                            resourceAlibabacloudStackLindormLtsInstance(),
+		"alibabacloudstack_lindorm_connection":                              resourceAlibabacloudStackLindormConnection(),
 		"alibabacloudstack_api_gateway_v2_k8s_cluster":                      resourceAlibabacloudStackAPIGatewayV2K8sCluster(),
 		"alibabacloudstack_api_gateway_v2_instance":                         resourceAlibabacloudStackAPIGatewayV2Instance(),
 		"alibabacloudstack_api_gateway_v2_certificate":                      resourceAlibabacloudStackAPIGatewayV2Certificate(),

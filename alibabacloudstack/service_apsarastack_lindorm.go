@@ -1,6 +1,8 @@
 package alibabacloudstack
 
 import (
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -45,4 +47,26 @@ func (s *LindormService) LindormInstanceStateRefreshFunc(id string, failStates [
 		}
 		return object, instanceStatus, nil
 	}
+}
+
+func (s *LindormService) DescribeLindormConnection(id string) (map[string]interface{}, error) {
+	params := strings.Split(id, ":")
+	request := map[string]interface{}{
+		"InstanceId": params[0],
+	}
+	resp, err := s.client.DoTeaRequest("GET", "hitsdb", "2020-06-15", "GetLindormInstanceEngineList", "", nil, request, nil)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	data, ok := resp["EngineList"]
+	if !ok {
+		return nil, errmsgs.Error("GetLindormInstanceEngineList Failed! %v", resp)
+	}
+	for _, v := range data.([]interface{}) {
+		item := v.(map[string]interface{})
+		if item["EngineType"] == params[1] {
+			return item, nil
+		}
+	}
+	return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Lindorm Connection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
