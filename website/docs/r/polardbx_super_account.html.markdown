@@ -102,8 +102,8 @@ resource "alibabacloudstack_polardbx_super_account" "default" {
 
 The following arguments are supported:
 
-* `instance_id` - (Required, Forces new resource) POLARDB-X instance ID. Format: `pxc-************`
-* `admin_account_name` - (Required, Forces new resource) Super account name. 1-16 characters (letters, digits, underscores, hyphens).
+* `instance_id` - (Required, ForceNew) POLARDB-X instance ID. Format: `pxc-************`
+* `admin_account_name` - (Required, ForceNew) Super account name. 1-16 characters (letters, digits, underscores, hyphens).
 * `admin_account_password` - (Required) Super account password. 8-32 characters containing uppercase, lowercase, digits, and special characters.
 * `admin_account_description` - (Optional) Super account description. 2-256 characters.
 * `security_account_name` - (Optional) Security admin account name. Must coexist with `audit_account_name`.

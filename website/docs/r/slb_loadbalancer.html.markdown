@@ -57,7 +57,7 @@ The following arguments are supported:
 * `address_type` - (Optional, ForceNew) The network type of the SLB instance. Valid values: ["internet", "intranet"]. If the load balancer is launched in VPC, this value must be "intranet".
   * `internet`: After an Internet SLB instance is created, the system allocates a public IP address so that the instance can forward requests from the Internet.
   * `intranet`: After an intranet SLB instance is created, the system allocates an intranet IP address so that the instance can only forward intranet requests.
-* `vswitch_id` - (Required for a VPC SLB, Forces New Resource) The ID of the VSwitch to launch the SLB in. If `address_type` is set to "internet", this field will be ignored.
+* `vswitch_id` - (Required for a VPC SLB, ForceNew) The ID of the VSwitch to launch the SLB in. If `address_type` is set to "internet", this field will be ignored.
 * `specification` - (Optional) The specification of the Server Load Balancer instance. Default to an empty string indicating it is a "Shared-Performance" instance. Valid values include:
   * `slb.s1.small`
   * `slb.s2.small`

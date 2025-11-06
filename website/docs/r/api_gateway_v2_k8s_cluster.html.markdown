@@ -144,10 +144,10 @@ resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
 
 The following arguments are supported:
 
-* `k8s_cluster_name` - (Required, Forces new resource) The name of the K8s cluster. It can be 1 to 128 characters in length and can contain letters, digits, hyphens (-), and underscores (_).
-* `cs_cluster_id` - (Optional, Forces new resource) The ID of the Container Service cluster. If provided, the cluster name and configuration content will be automatically queried.
-* `vpc_id` - (Optional, Forces new resource) The ID of the VPC network. If provided, the internal network SLB type will be used; otherwise, the public network SLB type will be used.
-* `config_content` - (Optional, Forces new resource) The configuration content of the K8s cluster. This parameter is required when `cs_cluster_id` is not provided, used for importing self-built clusters.
+* `k8s_cluster_name` - (Required, ForceNew) The name of the K8s cluster. It can be 1 to 128 characters in length and can contain letters, digits, hyphens (-), and underscores (_).
+* `cs_cluster_id` - (Optional, ForceNew) The ID of the Container Service cluster. If provided, the cluster name and configuration content will be automatically queried.
+* `vpc_id` - (Optional, ForceNew) The ID of the VPC network. If provided, the internal network SLB type will be used; otherwise, the public network SLB type will be used.
+* `config_content` - (Optional, ForceNew) The configuration content of the K8s cluster. This parameter is required when `cs_cluster_id` is not provided, used for importing self-built clusters.
 
 ## Attributes Reference
 
