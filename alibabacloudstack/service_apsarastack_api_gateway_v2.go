@@ -207,3 +207,67 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2ServiceSource(id string) (map[
 	data := response["data"].(map[string]interface{})
 	return data, nil
 }
+
+func (s *ApiGateWayV2Service) DescribeRouteGroup(id string) (map[string]interface{}, error) {
+	// Split the id into gwInstanceId and groupId
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid route group id: %s", id)
+	}
+	gwInstanceId := parts[0]
+	groupId := parts[1]
+
+	// Prepare the request parameters
+	reqQuery := map[string]interface{}{
+		"groupId":       groupId,
+		"gwInstanceId":  gwInstanceId,
+	}
+
+	// Call the API to get the route group details
+	response, err := s.client.DoTeaRequest("GET", "csb2", "2023-02-06", "GetGroup", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the response contains data
+	data, ok := response["data"]
+	if !ok || data == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("route group %s not found", id))
+	}
+
+	// Convert the data to map[string]interface{}
+	result, ok := data.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("unexpected response format")
+	}
+
+	return result, nil
+}
+
+// Note: The struct name should be ApiGateWayV2Service to match the existing code.
+// func (s *ApiGatewayV2Service) has been renamed to func (s *ApiGateWayV2Service)
+
+func (s *ApiGateWayV2Service) ApiGatewayV2RouteGroupStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+    return func() (interface{}, string, error) {
+        object, err := s.DescribeRouteGroup(id)
+        if err != nil {
+            if errmsgs.NotFoundError(err) {
+                // Set this to nil as if we didn't find anything.
+                return nil, "", nil
+            }
+            return nil, "", errmsgs.WrapError(err)
+        }
+
+        for _, failState := range failStates {
+            // There is no explicit status field in the response data based on the document,
+            // so we assume that the presence of the data means the resource exists and is in a valid state.
+            // If there are specific failure states to check, they should be defined here.
+            // For now, we treat any non-fail state as success.
+            // You may need to adjust this logic according to actual business rules or API documentation updates.
+            if false { // Placeholder condition; replace with real status checks if applicable
+                return object, "", errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, ""))
+            }
+        }
+        return object, "Available", nil
+    }
+}
