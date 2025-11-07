@@ -112,6 +112,59 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_basic(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackApiGatewayV2ServiceSource_Eureka(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alibabacloudstack_api_gateway_v2_service_source.default"
+	ra := resourceAttrInit(resourceId, map[string]string{})
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeApiGatewayV2ServiceSource")
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000, 2000)
+	name := fmt.Sprintf("testtf-apigw-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApiGatewayV2ServiceSourceCommonTestCase)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"source_name":     "${var.name}",
+					"source_type":     "3",
+					"instance_id":     "${alibabacloudstack_api_gateway_v2_instance.default.id}",
+					"description":     "${var.name}",
+					"eureka_registry": "https://127.0.0.1:8000",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"source_name":     name,
+						"source_type":     "3",
+						"description":     name,
+						"eureka_registry": "https://127.0.0.1:8000",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"eureka_registry": "https://127.0.0.1:8888",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"eureka_registry": "https://127.0.0.1:8888",
+					}),
+				),
+			},
+		},
+	})
+}
+
 func ApiGatewayV2ServiceSourceCommonTestCase(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
