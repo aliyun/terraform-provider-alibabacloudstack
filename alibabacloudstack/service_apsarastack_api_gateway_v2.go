@@ -64,29 +64,28 @@ func (s *ApiGateWayV2Service) GetCustomDeployConfig(id string) (map[string]inter
 	return data.(map[string]interface{}), nil
 }
 
- func (s *ApiGateWayV2Service) DescribeApigatewayv2K8sCluster(id string) (map[string]interface{}, error) {
-    reqBody := map[string]interface{}{
-        "current": 1,
-        "size":    100,
-    }
+func (s *ApiGateWayV2Service) DescribeApigatewayv2K8sCluster(id string) (map[string]interface{}, error) {
+	reqBody := map[string]interface{}{
+		"current": 1,
+		"size":    100,
+	}
 
-    response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListClusters", "/k8s/listClusters", nil, nil, reqBody)
-    if err != nil {
-        return nil, err
-    }
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListClusters", "/k8s/listClusters", nil, nil, reqBody)
+	if err != nil {
+		return nil, err
+	}
 
-    if records, ok := response["data"].(map[string]interface{})["records"].([]interface{}); ok {
-        for _, record := range records {
-            item := record.(map[string]interface{})
-            if k8sClusterCode, ok := item["k8sClusterCode"].(string); ok && k8sClusterCode == id {
-                return item, nil
-            }
-        }
-    }
+	if records, ok := response["data"].(map[string]interface{})["records"].([]interface{}); ok {
+		for _, record := range records {
+			item := record.(map[string]interface{})
+			if k8sClusterCode, ok := item["k8sClusterCode"].(string); ok && k8sClusterCode == id {
+				return item, nil
+			}
+		}
+	}
 
-    return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Apigatewayv2 K8s Cluster %s was not found", id))
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Apigatewayv2 K8s Cluster %s was not found", id))
 }
-
 
 func (s *ApiGateWayV2Service) DescribeApiGatewayV2Certificate(id string) (map[string]interface{}, error) {
 	params := strings.Split(id, ":")
@@ -125,4 +124,34 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Domain(id string) (map[string]
 		return nil, errmsgs.Error("GetDomain Failed! %v", response)
 	}
 	return data.(map[string]interface{}), nil
+}
+func (s *ApiGateWayV2Service) DescribeApiGatewayV2Signature(id string) (map[string]interface{}, error) {
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("invalid signature id: %s", id))
+	}
+	gwInstanceId := parts[0]
+	sigSchemeId := parts[1]
+
+	reqQuery := map[string]interface{}{
+		"gwInstanceId": gwInstanceId,
+		"current":      1,
+		"size":         100,
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListSignatureSchemes", "/signatureScheme/listSignatureSchemes", nil, nil, reqQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	if records, ok := response["data"].(map[string]interface{})["records"].([]interface{}); ok {
+		for _, record := range records {
+			r := record.(map[string]interface{})
+			if r["sigSchemeId"].(string) == sigSchemeId {
+				return r, nil
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("signature scheme %s not found", id))
 }
