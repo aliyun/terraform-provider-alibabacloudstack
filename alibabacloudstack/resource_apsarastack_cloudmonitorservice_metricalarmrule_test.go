@@ -97,12 +97,19 @@ resource "alibabacloudstack_cms_alarm" "default" {
   enabled =      true
   contact_groups     = ["test-group"]
   effective_interval = "0:00-2:00"
+  webhook = "http://www.alibabacloud.com"
 }
 `, getAccTestRandInt(1000000, 9999999))
 }
 
 var testAccCheckAlarm = map[string]string{
-	"name":    CHECKSET,
-	"project": CHECKSET,
-	"metric":  CHECKSET,
+	"name":                   CHECKSET,
+	"project":                CHECKSET,
+	"metric":                 CHECKSET,
+	"dimensions.%":           "1",
+	"enabled":                CHECKSET,
+	"contact_groups.0":       "test-group",
+	"effective_interval":     CHECKSET,
+	"escalations_critical.#": "1",
+	"webhook":                "http://www.alibabacloud.com",
 }
