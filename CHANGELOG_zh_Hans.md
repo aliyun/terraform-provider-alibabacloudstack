@@ -1,3 +1,16 @@
+# 3.16.21
+
+## 变更
+
+1.  oss object调度不再依赖用户配置oss cluster的endpoint地址，terraform会自动获取
+
+## 修复
+
+1. oss bucket编排时accountinfo错误导致编排失败的问题
+2. cms_alarm 资源创建时没有正确传输webhook属性的问题
+
+---
+
 # 3.16.20
 
 ## 修复
