@@ -359,6 +359,7 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 		"SilenceTime":                             fmt.Sprint(request.SilenceTime),
 		"Format":                                  "JSON",
 		"SignatureVersion":                        "1.0",
+		"Webhook":                                 d.Get("webhook").(string),
 	})
 
 	response, err := client.ProcessCommonRequest(nrequest)
@@ -505,6 +506,7 @@ func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interfac
 	d.Set("status", alarm.AlertState)
 	d.Set("enabled", alarm.EnableState)
 	d.Set("contact_groups", strings.Split(alarm.ContactGroups, ","))
+	d.Set("webhook", alarm.Webhook)
 	if alarm.Resources != "" {
 		var res []interface{}
 		resources := make(map[string]string)
@@ -520,7 +522,6 @@ func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interfac
 				}
 			}
 		}
-
 		connectivity.SetResourceData(d, resources, "dimensions", "resources")
 	}
 	return nil
