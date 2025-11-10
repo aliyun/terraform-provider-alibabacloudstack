@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -15,9 +16,12 @@ func TestAccAlibabacloudStackApiGatewayV2Signature_basic(t *testing.T) {
 		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeApiGatewayV2Signature")
 
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc-sign%d", rand)
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, APIGatewayV2SignatureDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -28,24 +32,32 @@ func TestAccAlibabacloudStackApiGatewayV2Signature_basic(t *testing.T) {
 		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: ApiGatewayV2SignatureBasicTestCase,
+				Config: testAccConfig(map[string]interface{}{
+					"sig_scheme_name": "${var.signature_name}",
+					"sig_alg":         "${var.signature_algorithm}",
+					"gw_instance_id":  "${alibabacloudstack_api_gateway_v2_instance.default.id}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"sig_scheme_name": "test",
+						"sig_scheme_name": name,
 						"sig_alg":         "HmacSM3",
 					}),
 				),
 			},
 			{
-				Config: ApiGatewayV2SignatureUpdateNameTestCase,
+				Config: testAccConfig(map[string]interface{}{
+					"sig_scheme_name": "${var.signature_name}_update",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"sig_scheme_name": "test-update",
+						"sig_scheme_name": name + "_update",
 					}),
 				),
 			},
 			{
-				Config: ApiGatewayV2SignatureUpdateStatusTestCase,
+				Config: testAccConfig(map[string]interface{}{
+					"status": "0",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"status": "0",
@@ -53,7 +65,9 @@ func TestAccAlibabacloudStackApiGatewayV2Signature_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: ApiGatewayV2SignatureUpdateStatus2TestCase,
+				Config: testAccConfig(map[string]interface{}{
+					"status": "1",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"status": "1",
@@ -69,9 +83,10 @@ func TestAccAlibabacloudStackApiGatewayV2Signature_basic(t *testing.T) {
 	})
 }
 
-const ApiGatewayV2SignatureBasicTestCase = `
+func APIGatewayV2SignatureDependence(name string) string {
+	return fmt.Sprintf(`
 variable "signature_name" {
-  default = "test"
+  default = "%s"
 }
 
 variable "signature_algorithm" {
@@ -79,105 +94,12 @@ variable "signature_algorithm" {
 }
 
 resource "alibabacloudstack_api_gateway_v2_instance" "default" {
-  instance_name      = "testtf-apigw-instance"
+  instance_name      = var.signature_name
   node_number        = "1"
   instance_class     = "mini"
   broker_engine_type = "SCG"
   deploy_mode        = "custom"
 }
 
-data "alibabacloudstack_api_gateway_v2_instances" "default" {
-  name_regex = alibabacloudstack_api_gateway_v2_instance.default.instance_name
+`, name)
 }
-
-resource "alibabacloudstack_api_gateway_v2_signature" "default" {
-  sig_scheme_name = var.signature_name
-  sig_alg         = var.signature_algorithm
-  gw_instance_id  = alibabacloudstack_api_gateway_v2_instance.default.id
-}
-`
-
-const ApiGatewayV2SignatureUpdateNameTestCase = `
-variable "signature_name" {
-  default = "test-update"
-}
-
-variable "signature_algorithm" {
-  default = "HmacSM3"
-}
-
-resource "alibabacloudstack_api_gateway_v2_instance" "default" {
-  instance_name      = "testtf-apigw-instance"
-  node_number        = "1"
-  instance_class     = "mini"
-  broker_engine_type = "SCG"
-  deploy_mode        = "custom"
-}
-
-data "alibabacloudstack_api_gateway_v2_instances" "default" {
-  name_regex = alibabacloudstack_api_gateway_v2_instance.default.instance_name
-}
-
-resource "alibabacloudstack_api_gateway_v2_signature" "default" {
-  sig_scheme_name = var.signature_name
-  sig_alg         = var.signature_algorithm
-  gw_instance_id  = alibabacloudstack_api_gateway_v2_instance.default.id
-}
-`
-
-const ApiGatewayV2SignatureUpdateStatusTestCase = `
-variable "signature_name" {
-  default = "test-update"
-}
-
-variable "signature_algorithm" {
-  default = "HmacSM3"
-}
-
-resource "alibabacloudstack_api_gateway_v2_instance" "default" {
-  instance_name      = "testtf-apigw-instance"
-  node_number        = "1"
-  instance_class     = "mini"
-  broker_engine_type = "SCG"
-  deploy_mode        = "custom"
-}
-
-data "alibabacloudstack_api_gateway_v2_instances" "default" {
-  name_regex = alibabacloudstack_api_gateway_v2_instance.default.instance_name
-}
-
-resource "alibabacloudstack_api_gateway_v2_signature" "default" {
-  sig_scheme_name = var.signature_name
-  sig_alg         = var.signature_algorithm
-  gw_instance_id  = alibabacloudstack_api_gateway_v2_instance.default.id
-  status          = "0"
-}
-`
-const ApiGatewayV2SignatureUpdateStatus2TestCase = `
-variable "signature_name" {
-  default = "test-update"
-}
-
-variable "signature_algorithm" {
-  default = "HmacSM3"
-}
-
-resource "alibabacloudstack_api_gateway_v2_instance" "default" {
-  instance_name      = "testtf-apigw-instance"
-  node_number        = "1"
-  instance_class     = "mini"
-  broker_engine_type = "SCG"
-  deploy_mode        = "custom"
-}
-
-data "alibabacloudstack_api_gateway_v2_instances" "default" {
-  name_regex = alibabacloudstack_api_gateway_v2_instance.default.instance_name
-}
-
-resource "alibabacloudstack_api_gateway_v2_signature" "default" {
-  sig_scheme_name = var.signature_name
-  sig_alg         = var.signature_algorithm
-  gw_instance_id  = alibabacloudstack_api_gateway_v2_instance.default.id
-  status          = "1"
-}
-`
