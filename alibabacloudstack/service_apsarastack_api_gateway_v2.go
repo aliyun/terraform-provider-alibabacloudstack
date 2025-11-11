@@ -185,29 +185,25 @@ func (s *ApiGateWayV2Service) DescribeAPIGatewayV2Consumer(id string) (map[strin
 }
 
 
-func (s *ApiGateWayV2Service) DescribeAPIGatewayV2Consumer(id string) (map[string]interface{}, error) {
 
+
+func (s *ApiGateWayV2Service) DescribeApiGatewayV2ServiceSource(id string) (map[string]interface{}, error) {
 	parts := strings.SplitN(id, ":", 2)
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid id format, expected gwInstanceId:appId")
+		return nil, fmt.Errorf("invalid id format, expected gwInstanceId:sourceId")
 	}
 	gwInstanceId := parts[0]
-	appId := parts[1]
+	sourceId := parts[1]
 
 	reqQuery := map[string]interface{}{
-		"appId":        appId,
+		"sourceId":     sourceId,
 		"gwInstanceId": gwInstanceId,
 	}
 
-	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetApp", "/application/getApp", nil, nil, reqQuery)
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetSource", "/source/getSource", nil, nil, reqQuery)
 	if err != nil {
 		return nil, err
 	}
-
-	if fmt.Sprint(response["code"]) != "200" {
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("api gateway v2 consumer %s not found", id))
-	}
-
 	data := response["data"].(map[string]interface{})
 	return data, nil
 }

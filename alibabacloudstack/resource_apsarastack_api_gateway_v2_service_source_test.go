@@ -143,6 +143,126 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_basic(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackApiGatewayV2ServiceSource_2(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alibabacloudstack_api_gateway_v2_service_source.default"
+	ra := resourceAttrInit(resourceId, map[string]string{})
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeApiGatewayV2ServiceSource")
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000, 2000)
+	name := fmt.Sprintf("testtf-apigw-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApiGatewayV2ServiceSourceCommonTestCase)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"instance_id":          "${alibabacloudstack_api_gateway_v2_instance.default.id}",
+					"description":          "database",
+					"source_name":          "test5",
+					"source_type":          "5",
+					"check_type":           "2",
+					"type":                 "0",
+					"max_connection":       "10",
+					"max_idle_connection":  "5",
+					"connection_idle_time": "60",
+					"database_type":        "0",
+					"jdbc_url":             "jdbc:mysql://127.0.0.1:3306/testtf",
+					"username":             "root",
+					"password":             "123456",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description":          "database",
+						"source_name":          "test5",
+						"source_type":          "5",
+						"check_type":           "2",
+						"type":                 "0",
+						"max_connection":       "10",
+						"max_idle_connection":  "5",
+						"connection_idle_time": "60",
+						"database_type":        "0",
+						"jdbc_url":             "jdbc:mysql://127.0.0.1:3306/testtf",
+						"username":             "root",
+					}),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackApiGatewayV2ServiceSource_3(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alibabacloudstack_api_gateway_v2_service_source.default"
+	ra := resourceAttrInit(resourceId, map[string]string{})
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeApiGatewayV2ServiceSource")
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000, 2000)
+	name := fmt.Sprintf("testtf-apigw-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApiGatewayV2ServiceSourceCommonTestCase)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description":          "${var.name}",
+					"source_name":          "${var.name}",
+					"instance_id":          "${alibabacloudstack_api_gateway_v2_instance.default.id}",
+					"source_type":          "2",
+					"check_type":           "1",
+					"edas_end_point_port":  "8080",
+					"type":                 "1",
+					"max_connection":       "10",
+					"max_idle_connection":  "5",
+					"connection_idle_time": "60",
+					"database_type":        "0",
+					"edas_name_space_id":   "test1234",
+					"edas_access_key":      "root",
+					"edas_secret_key":      "1234",
+					"edas_end_point":       "127.0.0.1",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description":          name,
+						"source_name":          name,
+						"source_type":          "2",
+						"check_type":           "1",
+						"edas_end_point_port":  "8080",
+						"type":                 "1",
+						"max_connection":       "10",
+						"max_idle_connection":  "5",
+						"connection_idle_time": "60",
+						"database_type":        "0",
+						"edas_name_space_id":   "test1234",
+						"edas_access_key":      "root",
+						"edas_end_point":       "127.0.0.1",
+					}),
+				),
+			},
+		},
+	})
+}
+
 func TestAccAlibabacloudStackApiGatewayV2ServiceSource_Eureka(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_api_gateway_v2_service_source.default"

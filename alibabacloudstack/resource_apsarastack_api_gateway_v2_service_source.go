@@ -84,7 +84,7 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceSource() *schema.Resource {
 				Optional: true,
 			},
 			"database_type": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"nacos_registry": {
@@ -284,7 +284,8 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceSourceRead(d *schema.ResourceDa
 		d.Set("eureka_registry", v)
 	}
 	if v, exists := sourceStruct["jdbcUrl"]; exists {
-		d.Set("jdbc_url", v)
+		urls := strings.Split(v.(string), "?")
+		d.Set("jdbc_url", urls[0])
 	}
 	if v, exists := sourceStruct["username"]; exists {
 		d.Set("username", v)
