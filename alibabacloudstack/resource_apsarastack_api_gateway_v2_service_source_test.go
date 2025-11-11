@@ -108,6 +108,37 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_basic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description":          "database",
+					"source_name":          "test5",
+					"source_type":          "5",
+					"check_type":           "2",
+					"type":                 "0",
+					"max_connection":       "10",
+					"max_idle_connection":  "5",
+					"connection_idle_time": "60",
+					"database_type":        "0",
+					"jdbc_url":             "jdbc:mysql://127.0.0.1:3306/testtf",
+					"username":             "root",
+					"password":             "123456",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description":          "database",
+						"source_name":          "test5",
+						"source_type":          "5",
+						"check_type":           "2",
+						"type":                 "0",
+						"max_connection":       "10",
+						"max_idle_connection":  "5",
+						"connection_idle_time": "60",
+						"database_type":        "0",
+						"jdbc_url":             "jdbc:mysql://127.0.0.1:3306/testtf",
+						"username":             "root",
+					}),
+				),
+			},
 		},
 	})
 }
