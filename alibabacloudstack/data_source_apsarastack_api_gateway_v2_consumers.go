@@ -1,10 +1,10 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
+	"fmt"
 	"regexp"
-	"strings"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,6 +20,10 @@ func dataSourceAlibabacloudStackAPIGatewayV2Consumers() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"appid": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"name_regex": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -33,6 +37,10 @@ func dataSourceAlibabacloudStackAPIGatewayV2Consumers() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"app_name": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -107,7 +115,6 @@ func dataSourceAlibabacloudStackAPIGatewayV2Consumers() *schema.Resource {
 						"oauth2_payload": {
 							Type:     schema.TypeList,
 							Computed: true,
-							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"authorization_code": {
@@ -169,107 +176,51 @@ func dataSourceAlibabacloudStackAPIGatewayV2ConsumersRead(d *schema.ResourceData
 
 	// Parse gwInstanceId from schema
 	gwInstanceId := d.Get("gw_instance_id").(string)
-
-	// Handle ids filter
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
-
-	// Handle name_regex filter
 	var nameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {
 		nameRegex = regexp.MustCompile(v.(string))
 	}
 
-	// Since there is no list API, we need to get all consumers by calling GetApp for each appId
-	// However, we don't have a list of appIds. In this case, we can only return empty list
-	// unless we have specific appIds to query.
-	// But according to the schema, it seems like this data source should be able to list consumers
-	// based on gw_instance_id. This might require an additional API or method to list all apps.
-
-	// For now, we'll assume that if no specific filters are provided, we return empty list
-	// If specific IDs are provided, we try to fetch them
-
-	if len(idsMap) == 0 && nameRegex == nil {
-		// No specific consumers requested, return empty list
-		d.SetId("")
-		if err := d.Set("consumers", []interface{}{}); err != nil {
-			return errmsgs.WrapError(err)
-		}
-		if err := d.Set("ids", []string{}); err != nil {
-			return errmsgs.WrapError(err)
-		}
-		return nil
+	request := map[string]interface{}{
+		"gwInstanceId": gwInstanceId,
+		"current":      1,
+		"size":         10,
 	}
-
-	// Collect results
+	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListApps", "/application/listApps", nil, nil, request)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	data, err := jsonpath.Get("$.data.records", resp)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			idsMap[Trim(vv.(string))] = Trim(vv.(string))
+		}
+	}
 	var consumers []map[string]interface{}
-	var resultIds []string
+	var ids []string
 
-	// For each ID in idsMap, we assume the ID format is "gwInstanceId:appId"
-	for id := range idsMap {
-		parts := strings.Split(id, ":")
-		if len(parts) != 2 {
+	for _, v := range data.([]interface{}) {
+		appData := v.(map[string]interface{})
+		if v, ok := d.GetOk("appid"); ok && appData["appId"] != v {
 			continue
 		}
-
-		// Check if gwInstanceId matches
-		if parts[0] != gwInstanceId {
-			continue
-		}
-
-		appId := parts[1]
-
-		// Call GetApp API
-		request := map[string]interface{}{
-			"appId":        appId,
-			"gwInstanceId": gwInstanceId,
-		}
-
-		resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetApp", "/application/getApp", nil, nil, request)
-		if err != nil {
-			// If resource not found, continue with others
-			if errmsgs.NotFoundError(err) {
+		appId := fmt.Sprintf("%s:%s", gwInstanceId, appData["appId"])
+		appName, _ := appData["appName"].(string)
+		if len(idsMap) > 0 {
+			if _, exist := idsMap[appId]; !exist {
 				continue
 			}
-			return errmsgs.WrapError(err)
 		}
-
-		// Check if response is successful
-		if success, ok := resp["asapiSuccess"].(bool); !ok || !success {
-			continue
-		}
-
-		data, ok := resp["data"]
-		if !ok || data == nil {
-			continue
-		}
-
-		dataBytes, err := json.Marshal(data)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-
-		var appData map[string]interface{}
-		if err := json.Unmarshal(dataBytes, &appData); err != nil {
-			return errmsgs.WrapError(err)
-		}
-
-		appName, _ := appData["appName"].(string)
-
-		// Apply name_regex filter
 		if nameRegex != nil && !nameRegex.MatchString(appName) {
 			continue
 		}
 
-		// Build consumer object
 		consumer := map[string]interface{}{
+			"id":             appId,
 			"app_name":       appName,
 			"description":    appData["description"],
 			"groups":         appData["groups"],
@@ -355,15 +306,13 @@ func dataSourceAlibabacloudStackAPIGatewayV2ConsumersRead(d *schema.ResourceData
 		}
 
 		consumers = append(consumers, consumer)
-		resultIds = append(resultIds, id)
+		ids = append(ids, appId)
 	}
-
-	// Set results
-	d.SetId(dataResourceIdHash(resultIds))
+	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("consumers", consumers); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if err := d.Set("ids", resultIds); err != nil {
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
