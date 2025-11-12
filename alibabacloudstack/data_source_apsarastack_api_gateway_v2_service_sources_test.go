@@ -97,7 +97,7 @@ resource "alibabacloudstack_api_gateway_v2_service_source" "default" {
 	check_type = "1"
 	nacos_access_key = "root"
 	nacos_secret_key = "12345"
-	nacos_registry = "127.0.0.1:8000"
+	nacos_registry = "172.16.100.1:8000"
 }
 
 data "alibabacloudstack_api_gateway_v2_service_sources" "default" {

@@ -39,7 +39,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_basic(t *testing.T) {
 					"check_type":       "1",
 					"nacos_access_key": "root",
 					"nacos_secret_key": "12345",
-					"nacos_registry":   "127.0.0.1:8000",
+					"nacos_registry":   "172.16.100.1:8000",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -49,7 +49,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_basic(t *testing.T) {
 						"check_type":       "1",
 						"nacos_access_key": "root",
 						"nacos_secret_key": "12345",
-						"nacos_registry":   "127.0.0.1:8000",
+						"nacos_registry":   "172.16.100.1:8000",
 					}),
 				),
 			},
@@ -90,7 +90,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_basic(t *testing.T) {
 					"edas_name_space_id":   "test1234",
 					"edas_access_key":      "root",
 					"edas_secret_key":      "1234",
-					"edas_end_point":       "127.0.0.1",
+					"edas_end_point":       "172.16.100.1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -104,7 +104,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_basic(t *testing.T) {
 						"database_type":        "0",
 						"edas_name_space_id":   "test1234",
 						"edas_access_key":      "root",
-						"edas_end_point":       "127.0.0.1",
+						"edas_end_point":       "172.16.100.1",
 					}),
 				),
 			},
@@ -119,7 +119,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_basic(t *testing.T) {
 					"max_idle_connection":  "5",
 					"connection_idle_time": "60",
 					"database_type":        "0",
-					"jdbc_url":             "jdbc:mysql://127.0.0.1:3306/testtf",
+					"jdbc_url":             "jdbc:mysql://172.16.100.1:3306/testtf",
 					"username":             "root",
 					"password":             "123456",
 				}),
@@ -134,7 +134,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_basic(t *testing.T) {
 						"max_idle_connection":  "5",
 						"connection_idle_time": "60",
 						"database_type":        "0",
-						"jdbc_url":             "jdbc:mysql://127.0.0.1:3306/testtf",
+						"jdbc_url":             "jdbc:mysql://172.16.100.1:3306/testtf",
 						"username":             "root",
 					}),
 				),
@@ -177,7 +177,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_2(t *testing.T) {
 					"max_idle_connection":  "5",
 					"connection_idle_time": "60",
 					"database_type":        "0",
-					"jdbc_url":             "jdbc:mysql://127.0.0.1:3306/testtf",
+					"jdbc_url":             "jdbc:mysql://172.16.100.1:3306/testtf",
 					"username":             "root",
 					"password":             "123456",
 				}),
@@ -192,7 +192,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_2(t *testing.T) {
 						"max_idle_connection":  "5",
 						"connection_idle_time": "60",
 						"database_type":        "0",
-						"jdbc_url":             "jdbc:mysql://127.0.0.1:3306/testtf",
+						"jdbc_url":             "jdbc:mysql://172.16.100.1:3306/testtf",
 						"username":             "root",
 					}),
 				),
@@ -239,7 +239,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_3(t *testing.T) {
 					"edas_name_space_id":   "test1234",
 					"edas_access_key":      "root",
 					"edas_secret_key":      "1234",
-					"edas_end_point":       "127.0.0.1",
+					"edas_end_point":       "172.16.100.1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -255,7 +255,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_3(t *testing.T) {
 						"database_type":        "0",
 						"edas_name_space_id":   "test1234",
 						"edas_access_key":      "root",
-						"edas_end_point":       "127.0.0.1",
+						"edas_end_point":       "172.16.100.1",
 					}),
 				),
 			},
@@ -291,24 +291,24 @@ func TestAccAlibabacloudStackApiGatewayV2ServiceSource_Eureka(t *testing.T) {
 					"source_type":     "3",
 					"instance_id":     "${alibabacloudstack_api_gateway_v2_instance.default.id}",
 					"description":     "${var.name}",
-					"eureka_registry": "https://127.0.0.1:8000",
+					"eureka_registry": "https://172.16.100.1:8000",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"source_name":     name,
 						"source_type":     "3",
 						"description":     name,
-						"eureka_registry": "https://127.0.0.1:8000",
+						"eureka_registry": "https://172.16.100.1:8000",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"eureka_registry": "https://127.0.0.1:8888",
+					"eureka_registry": "https://172.16.100.1:8888",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"eureka_registry": "https://127.0.0.1:8888",
+						"eureka_registry": "https://172.16.100.1:8888",
 					}),
 				),
 			},
