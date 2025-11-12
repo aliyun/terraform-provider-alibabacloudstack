@@ -355,3 +355,50 @@ func (s *ApiGateWayV2Service) DescribeApigwV2Route(id string) (map[string]interf
 		return item, nil
 	}
 }
+
+func (s *ApiGateWayV2Service) DescribeMcpserver(id string) (map[string]interface{}, error) {
+	// The resource ID is composed of gwInstanceId and name, separated by ":"
+	parts := strings.Split(id, ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid mcpserver id: %s", id)
+	}
+	gwInstanceId := parts[0]
+	name := parts[1]
+
+	reqBody := map[string]interface{}{
+		"mcpServerName": name,
+		"gwInstanceId":  gwInstanceId,
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetMcpServer", "/mcpServer/getMcpServer", nil, nil, reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	data, ok := response["data"].(map[string]interface{})
+	if !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Mcpserver %s not found", id))
+	}
+
+	return data, nil
+}
+
+func (s *ApiGateWayV2Service) DescribeService(serviceId, gwInstanceId string) (map[string]interface{}, error) {
+
+	reqBody := map[string]interface{}{
+		"serviceId":    serviceId,
+		"gwInstanceId": gwInstanceId,
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetService", "/microservice/getService", nil, nil, reqBody)
+	if err != nil {
+		return nil, err
+	}
+	data, ok := response["data"].(map[string]interface{})
+	if !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("APIGateway Service %s not found", serviceId))
+	}
+
+	return data, nil
+}
+
