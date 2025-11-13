@@ -996,6 +996,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_api_gateway_v2_route_group":                      resourceAlibabacloudStackApiGatewayV2RouteGroup(),
 		"alibabacloudstack_api_gateway_v2_cascade_link":                     resourceAlibabacloudStackApiGatewayV2CascadeLink(),
 		"alibabacloudstack_api_gateway_v2_cascade_instance":                 resourceAlibabacloudStackAPIGatewayV2CascadeInstance(),
+		"alibabacloudstack_api_gateway_v2_service":                          resourceAlibabacloudStackAPIGatewayV2Service(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

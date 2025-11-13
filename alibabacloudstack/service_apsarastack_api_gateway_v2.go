@@ -272,3 +272,28 @@ func (s *ApiGateWayV2Service) DescribeCascadeInstance(id string) (map[string]int
 
 	return response["data"].(map[string]interface{}), nil
 }
+func (s *ApiGateWayV2Service) DescribeApiGatewayV2Service(id string) (map[string]interface{}, error) {
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid id format, expected gwInstanceId:serviceId")
+	}
+	gwInstanceId := parts[0]
+	serviceId := parts[1]
+
+	reqQuery := map[string]interface{}{
+		"serviceId":    serviceId,
+		"gwInstanceId": gwInstanceId,
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetService", "/microservice/getService", nil, nil, reqQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	if fmt.Sprint(response["code"]) != "200" {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("service %s not found", id))
+	}
+
+	data := response["data"].(map[string]interface{})
+	return data, nil
+}
