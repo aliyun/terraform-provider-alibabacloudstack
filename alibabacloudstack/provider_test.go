@@ -102,6 +102,24 @@ func testAccPreYunCheck(t *testing.T) {
 	}
 }
 
+func testAccApigwV2ServicePreCheck(t *testing.T) {
+	if v := os.Getenv("ALIBABACLOUDSTACK_EDAS_ACCESS_KEY"); v == "" {
+		t.Fatal("ALIBABACLOUDSTACK_EDAS_ACCESS_KEY must be set for create service with service source test")
+	}
+	if v := os.Getenv("ALIBABACLOUDSTACK_EDAS_SECRET_KEY"); v == "" {
+		t.Fatal("ALIBABACLOUDSTACK_EDAS_ACCESS_KEY must be set for create service with service source test")
+	}
+	if v := os.Getenv("ALIBABACLOUDSTACK_EDAS_ENDPOINT_PORT"); v == "" {
+		t.Fatal("ALIBABACLOUDSTACK_EDAS_ENDPOINT_PORT must be set for create service with service source test")
+	}
+	if v := os.Getenv("ALIBABACLOUDSTACK_EDAS_ENDPOINT"); v == "" {
+		t.Fatal("ALIBABACLOUDSTACK_EDAS_ENDPOINT must be set for create service with service source test")
+	}
+	if v := os.Getenv("ALIBABACLOUDSTACK_EDAS_NAMESPACE_ID"); v == "" {
+		t.Fatal("ALIBABACLOUDSTACK_EDAS_NAMESPACE_ID must be set for create service with service source test")
+	}
+}
+
 func testAccPreCheckWithAccountSiteType(t *testing.T, account AccountSite) {
 	defaultAccount := string(DomesticSite)
 	if v := strings.TrimSpace(os.Getenv("ALIBABACLOUDSTACK_ACCOUNT_SITE")); v != "" {
