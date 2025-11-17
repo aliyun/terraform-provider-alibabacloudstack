@@ -297,3 +297,39 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Service(id string) (map[string
 	data := response["data"].(map[string]interface{})
 	return data, nil
 }
+
+func (s *ApiGateWayV2Service) DescribeApigwV2Route(id string) (map[string]interface{}, error) {
+	// Split the id into gwInstanceId and groupId
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid route group id: %s", id)
+	}
+	gwInstanceId := parts[0]
+	routeId := parts[1]
+
+	// Prepare the request parameters
+	reqQuery := map[string]interface{}{
+		"routeId":      routeId,
+		"gwInstanceId": gwInstanceId,
+	}
+
+	// Call the API to get the route group details
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetRoute", "/group/getGroup", nil, nil, reqQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the response contains data
+	data, ok := response["data"]
+	if !ok || data == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("route group %s not found", id))
+	}
+
+	// Convert the data to map[string]interface{}
+	result, ok := data.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("unexpected response format")
+	}
+
+	return result, nil
+}

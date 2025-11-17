@@ -1,0 +1,172 @@
+package alibabacloudstack
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+)
+
+func ApiGatewayV2RouteDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
+}
+
+resource "alibabacloudstack_api_gateway_v2_instance" "default" {
+  instance_name      = var.name
+  node_number        = "1"
+  instance_class     = "mini"
+  broker_engine_type = "SCG"
+  deploy_mode        = "custom"
+}
+
+resource "alibabacloudstack_api_gateway_v2_service_source" "default" {
+  source_name      = var.name
+  source_type      = "1"
+  instance_id      = alibabacloudstack_api_gateway_v2_instance.default.id
+  description      = var.name
+  check_type       = "1"
+  nacos_access_key = "root"
+  nacos_secret_key = "12345"
+  nacos_registry   = "172.16.100.1:8000"
+}
+
+resource "alibabacloudstack_api_gateway_v2_domain" "default" {
+  domain         = "${var.name}.com"
+  instance_id    = alibabacloudstack_api_gateway_v2_instance.default.id
+  protocol       = "HTTP"
+}
+
+`, name)
+}
+
+func TestAccAlibabacloudStackApiGatewayV2Route_basic(t *testing.T) {
+	var v map[string]interface{}
+
+	resourceId := "alibabacloudstack_api_gateway_v2_route.default"
+	ra := resourceAttrInit(resourceId, nil)
+	serviceFunc := func() interface{} {
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := "tf-testAccApiGatewayV2Route"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApiGatewayV2RouteGroupCommonTestCase)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"gw_instance_id": "${alibabacloudstack_api_gateway_v2_instance.default.id}",
+					"route_name":     "${var.name}",
+					"strip_prefix":   "2",
+					"order":          "100",
+					"route_path":     []string{"/testtc", "/test/aaa"},
+					"methods":        []string{"GET", "POST", "PUT", "DELETE"},
+					"header": []map[string]interface{}{
+						{
+							"key":   "header",
+							"value": "aaaaa",
+						},
+					},
+
+					"cookie": []map[string]interface{}{
+						{
+							"key":   "cookie",
+							"value": "bbbbb",
+						},
+					},
+
+					"query_param": []map[string]interface{}{
+						{
+							"key":   "query",
+							"value": "ccccc",
+						},
+					},
+
+					"domain_ids": []string{"${alibabacloudstack_api_gateway_v2_domain.default.domain_id}"},
+
+					"service_ids": []map[string]interface{}{
+						{
+							"service_id": "${alibabacloudstack_api_gateway_v2_service_source.default.service_source_id}",
+							"weight":     "100",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"route_name":               name,
+						"strip_prefix":             "2",
+						"order":                    "100",
+						"methods.#":                "4",
+						"route_path.#":             "2",
+						"header.#":                 "1",
+						"header.0.key":             "header",
+						"cookie.#":                 "1",
+						"cookie.0.key":             "cookie",
+						"query_param.#":            "1",
+						"query_param.0.key":        "query",
+						"domain_ids.#":             "1",
+						"service_ids.#":            "1",
+						"service_ids.0.service_id": CHECKSET,
+						"service_ids.0.weight":     "100",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"strip_prefix": "3",
+					"order":        "80",
+
+					"route_path": []string{"/testtc/aaaa/*", "/test/aaa"},
+
+					"methods": []string{"GET", "POST", "DELETE"},
+
+					"header": []map[string]interface{}{
+						{
+							"key":   "header",
+							"value": "aaaaa",
+						},
+						{
+							"key":   "header2",
+							"value": "aaaaa2",
+						},
+					},
+
+					"domain_ids": []string{"${alibabacloudstack_api_gateway_v2_domain.default.domain_id}"},
+
+					"service_ids": REMOVEKEY,
+					"service_id":  "${alibabacloudstack_api_gateway_v2_service_source.default.service_source_id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"route_name":        name,
+						"open_strip_prefix": "true",
+						"strip_prefix":      "3",
+						"order":             "80",
+						"methods.#":         "3",
+						"route_path.#":      "3",
+						"header.#":          "2",
+						"service_ids":       REMOVEKEY,
+						"service_id":        CHECKSET,
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{" dry_run ", " force "},
+			},
+		},
+	})
+}
