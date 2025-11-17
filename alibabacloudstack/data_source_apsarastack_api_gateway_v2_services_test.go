@@ -68,30 +68,7 @@ variable "name" {
   default = "testtf-apigw-%d"
 }
 
-data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
-	sorted_by = "CPU"
-}
-
-resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
-	cs_cluster_id =   "${local.k8s_cluster_id}"
-	k8s_cluster_name = "${var.name}"
-}
-
 %s
-
-resource "alibabacloudstack_api_gateway_v2_instance" "default" {
-  	instance_name = "${var.name}"
-	node_number = "1"
-	instance_class = "mini"
-	broker_engine_type = "SCG"
-	deploy_mode = "k8s"
-	deploy_cluster_code = "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.id}"
-	deploy_cluster_namespace = "${var.name}-namespace"
-	ingress_class_name = "${var.name}-class"
-	sls_enabled = true
-	prometheus_enabled = true
-}
-
 
 resource "alibabacloudstack_api_gateway_v2_service" "default" {
   name = "${var.name}"
@@ -117,7 +94,7 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
 	http_failures = "0"
   }
 }
- `, rand, AckK8sCommonTestCase())
+ `, rand, ApiGatwayV2K8sInstanceTestCase("SCG", "apig_k8s"))
 }
 func ApiGatewayV2ServicesDataSourceNew(rand int, attrMap map[string]string) string {
 	var pairs []string

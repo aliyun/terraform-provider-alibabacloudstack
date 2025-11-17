@@ -1621,8 +1621,43 @@ resource "alibabacloudstack_kms_key" "key" {
   pending_window_in_days  = "7"
   key_state               = "Enabled"
 }
-
 `
+
+func ApiGatwayV2K8sInstanceTestCase(engineType, deployMode string) string {
+	ingressClass := ""
+	if deployMode == "apig_k8s" {
+		ingressClass = `ingress_class_name = "${var.name}-class"`
+	}
+	return fmt.Sprintf(`
+	data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
+		sorted_by = "CPU"
+	}
+
+	%s
+
+	data "alibabacloudstack_api_gateway_v2_k8s_clusters" "default" {
+		k8s_cluster_name = local.k8s_cluster_name
+	}
+
+	resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
+		count = length(data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids) > 0 ? 0 : 1
+		cs_cluster_id =   local.k8s_cluster_id
+		k8s_cluster_name = local.k8s_cluster_name
+	}
+
+	resource "alibabacloudstack_api_gateway_v2_instance" "default" {
+	  instance_name      = "${var.name}-apigw"
+	  node_number        = 1
+	  instance_class     = "mini"
+	  broker_engine_type = "%s"
+	  deploy_mode        = "%s"
+	  deploy_cluster_code = length(data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids) > 0 ? "${data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids.0}" : "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.0.id}"
+	  deploy_cluster_namespace = "${var.name}-namespace"
+	  %s
+	  sls_enabled = "true"
+	  prometheus_enabled = "true"
+	}`, ApiGatwayV2K8sInstanceTestCase("apig_k8s", "SCG"), engineType, deployMode, ingressClass)
+}
 
 func ServerCertificateTestCase() string {
 	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err == nil && v {

@@ -27,9 +27,10 @@ func TestAccAlibabacloudStackApiGatewayV2Service_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  nil,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -147,9 +148,10 @@ func TestUatAlibabacloudStackApiGatewayV2Service_HSF(t *testing.T) {
 			testAccPreCheck(t)
 			testAccApigwV2ServicePreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  nil,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -203,32 +205,11 @@ func ApiGatewayV2ServiceCommonTestCase(name string) string {
 variable "name" {
   default = "%s"
 }
-data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
-	sorted_by = "CPU"
-}
-
-resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
-	cs_cluster_id =   "${local.k8s_cluster_id}"
-	k8s_cluster_name = "${var.name}"
-}
 
 %s
 
-resource "alibabacloudstack_api_gateway_v2_instance" "default" {
-  	instance_name = "${var.name}"
-	node_number = "1"
-	instance_class = "mini"
-	broker_engine_type = "SCG"
-	deploy_mode = "k8s"
-	deploy_cluster_code = "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.id}"
-	deploy_cluster_namespace = "${var.name}-namespace"
-	ingress_class_name = "${var.name}-class"
-	sls_enabled = true
-	prometheus_enabled = true
-}
 
-
-`, name, AckK8sCommonTestCase())
+`, name, ApiGatwayV2K8sInstanceTestCase("SCG", "apig_k8s"))
 }
 
 func ApiGatewayV2ServiceForServiceSourceTestCase(name string) string {
