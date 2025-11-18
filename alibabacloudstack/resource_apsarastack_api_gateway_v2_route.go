@@ -227,7 +227,7 @@ func resourceAlibabacloudStackApiGatewayV2RouteCreate(d *schema.ResourceData, me
 	}
 
 	if v, ok := d.GetOk("header"); ok {
-		headers := v.(*schema.Set).List()
+		headers := make([]map[string]interface{}, 0)
 		for _, item := range v.(*schema.Set).List() {
 			header := item.(map[string]interface{})
 			h := make(map[string]interface{})
@@ -486,7 +486,7 @@ func resourceAlibabacloudStackApiGatewayV2RouteUpdate(d *schema.ResourceData, me
 	}
 
 	if v, ok := d.GetOk("header"); ok {
-		headers := v.(*schema.Set).List()
+		headers := make([]map[string]interface{}, 0)
 		for _, item := range v.(*schema.Set).List() {
 			header := item.(map[string]interface{})
 			h := make(map[string]interface{})
