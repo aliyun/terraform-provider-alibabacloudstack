@@ -33,9 +33,48 @@ func resourceAlibabacloudStackAPIGatewayV2Instance() *schema.Resource {
 				ForceNew: true,
 			},
 			"access_mode": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"access_mode_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"clusterip": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"external_ips": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"ips": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"load_balancer_address_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"load_balancer_network_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"ports": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"service_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 			"tid": {
 				Type:     schema.TypeString,
@@ -55,7 +94,7 @@ func resourceAlibabacloudStackAPIGatewayV2Instance() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"k8s", "edas", "custom"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"k8s", "edas", "custom", "apig_k8s"}, false),
 			},
 			"node_number": {
 				Type:     schema.TypeInt,
@@ -152,6 +191,7 @@ func resourceAlibabacloudStackAPIGatewayV2InstanceCreate(d *schema.ResourceData,
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	apigatewayv2Service := ApiGateWayV2Service{client}
 	broker_engine_type := d.Get("broker_engine_type").(string)
+	deployMode := d.Get("deploy_mode").(string)
 	request := map[string]interface{}{
 		"RegionId":         client.RegionId,
 		"Department":       client.Department,
@@ -160,9 +200,20 @@ func resourceAlibabacloudStackAPIGatewayV2InstanceCreate(d *schema.ResourceData,
 		"instanceNumber":   d.Get("node_number"),
 		"instanceClass":    d.Get("instance_class"),
 		"brokerEngineType": broker_engine_type,
-		"deployMode":       d.Get("deploy_mode"),
+		"deployMode":       deployMode,
 	}
-	if broker_engine_type == "SCG" {
+	switch deployMode {
+	case "k8s":
+		request["clusterCode"] = d.Get("deploy_cluster_code")
+		request["namespace"] = d.Get("deploy_cluster_namespace")
+		request["ingressClassName"] = d.Get("ingress_class_name")
+		request["slsEnabled"] = d.Get("sls_enabled")
+		request["prometheusEnabled"] = d.Get("prometheus_enabled")
+		request["o11y"] = map[string]interface{}{
+			"slsEnabled":        d.Get("sls_enabled"),
+			"prometheusEnabled": d.Get("prometheus_enabled"),
+		}
+	case "edas":
 		edasAppInfos := make([]map[string]interface{}, 0)
 		for _, v := range d.Get("edas_app_infos").(*schema.Set).List() {
 			edasAppInfo := v.(map[string]interface{})
@@ -175,19 +226,19 @@ func resourceAlibabacloudStackAPIGatewayV2InstanceCreate(d *schema.ResourceData,
 				"regionId":        client.RegionId,
 			})
 		}
-		if len(edasAppInfos) > 0 {
-			request["edasAppInfos"] = edasAppInfos
-		}
-	} else {
+		request["edasAppInfos"] = edasAppInfos
+	case "apig_k8s":
 		request["clusterCode"] = d.Get("deploy_cluster_code")
 		request["namespace"] = d.Get("deploy_cluster_namespace")
-		request["ingressClassName"] = d.Get("ingress_class_name")
 		request["slsEnabled"] = d.Get("sls_enabled")
 		request["prometheusEnabled"] = d.Get("prometheus_enabled")
 		request["o11y"] = map[string]interface{}{
 			"slsEnabled":        d.Get("sls_enabled"),
 			"prometheusEnabled": d.Get("prometheus_enabled"),
 		}
+	case "custom":
+	default:
+		return errmsgs.Error("deploy_mode must be one of [k8s, edas, custom]")
 	}
 	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "AscmCreateInstance", "/gatewayInstance/ascmCreateInstance", nil, nil, request)
 	if err != nil {
@@ -220,7 +271,6 @@ func resourceAlibabacloudStackAPIGatewayV2InstanceRead(d *schema.ResourceData, m
 	d.Set("deploy_cluster_namespace", instance["deployClusterNamespace"])
 	d.Set("broker_engine_version", instance["brokerEngineVersion"])
 	d.Set("ingress_class_name", instance["ingressClassName"])
-	d.Set("access_mode", instance["accessMode"])
 	d.Set("tid", instance["tid"])
 	d.Set("k8s_cluster_id", instance["k8sClusterId"])
 	d.Set("broker_engine_type", instance["brokerEngineType"])
@@ -234,6 +284,41 @@ func resourceAlibabacloudStackAPIGatewayV2InstanceRead(d *schema.ResourceData, m
 	d.Set("edas_namespace_id", instance["edasNamespaceId"])
 	d.Set("edas_app_id", instance["edasAppId"])
 	d.Set("status", instance["status"])
+
+	if accessMode, ok := instance["accessMode"].([]interface{}); ok {
+		accessModeList := make([]map[string]interface{}, 0)
+		for _, item := range accessMode {
+			if mode, ok := item.(map[string]interface{}); ok {
+				modeInfo := make(map[string]interface{})
+				if v, ok := mode["accessModeType"]; ok {
+					modeInfo["access_mode_type"] = v
+				}
+				if v, ok := mode["clusterIp"]; ok {
+					modeInfo["clusterip"] = v
+				}
+				if v, ok := mode["externalIps"]; ok {
+					modeInfo["external_ips"] = v
+				}
+				if v, ok := mode["ips"]; ok {
+					modeInfo["ips"] = v
+				}
+				if v, ok := mode["loadBalancerAddressType"]; ok {
+					modeInfo["load_balancer_address_type"] = v
+				}
+				if v, ok := mode["loadBalancerNetworkType"]; ok {
+					modeInfo["load_balancer_network_type"] = v
+				}
+				if v, ok := mode["ports"]; ok {
+					modeInfo["ports"] = v
+				}
+				if v, ok := mode["serviceName"]; ok {
+					modeInfo["service_name"] = v
+				}
+				accessModeList = append(accessModeList, modeInfo)
+			}
+		}
+		d.Set("access_mode", accessModeList)
+	}
 
 	// Handle edas_app_infos
 	if edasAppInfos, ok := instance["edasAppInfos"].([]interface{}); ok {

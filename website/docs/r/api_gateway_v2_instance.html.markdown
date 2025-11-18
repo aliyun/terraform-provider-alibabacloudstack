@@ -122,16 +122,34 @@ resource "alibabacloudstack_api_gateway_v2_instance" "edas_example" {
 }
 ```
 
+### APIGW K8s Deployment Mode
+
+```hcl
+resource "alibabacloudstack_api_gateway_v2_instance" "edas_example" {
+	instance_name             = "${var.name}"
+	node_number               = "1"
+	instance_class            = "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}"
+	broker_engine_type        = "SCG"
+	deploy_mode               = "apig_k8s"
+	deploy_cluster_code       = "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.id}"
+	deploy_cluster_namespace  = "${var.name}-namespace"
+	sls_enabled               = "true"
+	prometheus_enabled        = "true"
+}
+```
+
 ### AiGateway Mode
 
 ```hcl
 resource "alibabacloudstack_api_gateway_v2_instance" "custom_example" {
   instance_name         = "custom-instance"
-  deploy_mode           = "custom"
+  node_number               = "1"
+  deploy_mode           = "k8s"
   broker_engine_type    = "HIGRESS"
   deploy_cluster_code   = "cluster-code"
   deploy_cluster_namespace = "testnamespace"
-  ingress_class_name    = "testingress"
+  ingress_class_name =       "test-class"
+  instance_class     = "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}"
   prometheus_enabled    = true
   sls_enabled           = true
 }
@@ -142,7 +160,7 @@ resource "alibabacloudstack_api_gateway_v2_instance" "custom_example" {
 The following arguments are supported:
 
 * `instance_name` - (Required) The name of the API Gateway instance.
-* `deploy_mode` - (Optional, ForceNew) The deployment mode of the instance. Valid values: `k8s`, `edas`, `custom`.
+* `deploy_mode` - (Optional, ForceNew) The deployment mode of the instance. Valid values: `k8s`, `edas`, `custom`, `apig_k8s`(APIGateWay K8s).
 * `broker_engine_type` - (Optional, ForceNew) The broker engine type. Valid values: `HIGRESS`(AIGateWay), `SCG`(APIGateWay).
 * `instance_class` - (Optional, ForceNew) The instance class/specification.
 * `node_number` - (Optional, ForceNew) The number of nodes for the instance.

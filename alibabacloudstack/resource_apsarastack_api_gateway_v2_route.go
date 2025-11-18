@@ -25,10 +25,12 @@ func resourceAlibabacloudStackApiGatewayV2Route() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "DEFAULT",
+				ForceNew: true,
 			},
 			"route_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"path": {
 				Type:     schema.TypeList,
@@ -177,9 +179,9 @@ func resourceAlibabacloudStackApiGatewayV2RouteCreate(d *schema.ResourceData, me
 	// Prepare request parameters
 	reqBody := make(map[string]interface{})
 
-	reqBody["gwInstanceId"] = d.Get("gw_instance_id").(string)
-	reqBody["routeName"] = d.Get("route_name").(string)
-	reqBody["groupId"] = d.Get("group_id").(bool)
+	reqBody["gwInstanceId"] = d.Get("gw_instance_id")
+	reqBody["routeName"] = d.Get("route_name")
+	reqBody["groupId"] = d.Get("group_id")
 
 	// if v, ok := d.GetOk("path"); ok && len(v.([]interface{})) > 0 {
 	// 	pathMap := v.([]interface{})[0].(map[string]interface{})
@@ -395,21 +397,25 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 		}
 		d.Set("domain_ids", domainIds)
 	}
-
-	if serviceIds, ok := object["serviceIds"].([]interface{}); ok {
-		var services []map[string]interface{}
-		for _, item := range serviceIds {
-			if m, ok := item.(map[string]interface{}); ok {
-				services = append(services, map[string]interface{}{
-					"service_id": m["serviceId"],
-					"weight":     m["weight"],
-				})
+	if object["serviceType"].(string) == "MULTI" {
+		if serviceIds, ok := object["serviceIds"].([]interface{}); ok {
+			var services []map[string]interface{}
+			for _, item := range serviceIds {
+				if m, ok := item.(map[string]interface{}); ok {
+					services = append(services, map[string]interface{}{
+						"service_id": m["serviceId"],
+						"weight":     m["weight"],
+					})
+				}
 			}
+			d.Set("service_ids", services)
+			d.Set("service_id", nil)
 		}
-		d.Set("service_ids", services)
-	}
+	} else {
+		d.Set("service_ids", nil)
+		d.Set("service_id", object["serviceId"])
 
-	d.Set("service_id", object["serviceId"])
+	}
 	d.Set("route_id", object["routeId"])
 
 	return nil
@@ -433,8 +439,8 @@ func resourceAlibabacloudStackApiGatewayV2RouteUpdate(d *schema.ResourceData, me
 	reqBody := make(map[string]interface{})
 	reqBody["routeId"] = routeId
 	reqBody["gwInstanceId"] = gwInstanceId
-	reqBody["routeName"] = d.Get("route_name").(string)
-	reqBody["groupId"] = d.Get("group_id").(bool)
+	reqBody["routeName"] = d.Get("route_name")
+	reqBody["groupId"] = d.Get("group_id")
 
 	// if v, ok := d.GetOk("path"); ok && len(v.([]interface{})) > 0 {
 	// 	pathMap := v.([]interface{})[0].(map[string]interface{})

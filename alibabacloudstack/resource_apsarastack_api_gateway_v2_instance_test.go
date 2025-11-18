@@ -26,10 +26,10 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:  nil,
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -77,6 +77,74 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_basic(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackAPIGatewayV2Instance_k8s(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alibabacloudstack_api_gateway_v2_instance.default"
+	ra := resourceAttrInit(resourceId, map[string]string{})
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeApiGatewayV2Instance")
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000, 2000)
+	name := fmt.Sprintf("testtf-apigw-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AIGateWayV2InstanceK8sDepDependence)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"instance_name":            "${var.name}",
+					"node_number":              "1",
+					"instance_class":           "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}",
+					"broker_engine_type":       "SCG",
+					"deploy_mode":              "apig_k8s",
+					"deploy_cluster_code":      "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.id}",
+					"deploy_cluster_namespace": "${var.name}-namespace",
+					"sls_enabled":              "true",
+					"prometheus_enabled":       "true",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_name":            name,
+						"node_number":              "1",
+						"instance_class":           "mini",
+						"broker_engine_type":       "SCG",
+						"deploy_mode":              "apig_k8s",
+						"deploy_cluster_code":      CHECKSET,
+						"deploy_cluster_namespace": fmt.Sprintf("%s-namespace", name),
+						"sls_enabled":              "true",
+						"prometheus_enabled":       "true",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"instance_name": "${var.name}_update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_name": fmt.Sprintf("%s_update", name),
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccAlibabacloudStackAPIGatewayV2Instance_custom(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_api_gateway_v2_instance.default"
@@ -95,10 +163,10 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_custom(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:  nil,
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -124,9 +192,10 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_custom(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"sls_enabled", "prometheus_enabled"},
 			},
 		},
 	})
@@ -150,10 +219,10 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_HIGRESS(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:  nil,
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -231,12 +300,12 @@ data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
 	sorted_by = "CPU"
 }
 
+%s
+
 resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
 	cs_cluster_id =   "${local.k8s_cluster_id}"
 	k8s_cluster_name = "${var.name}"
 }
-
-%s
 
 `, name, AckK8sCommonTestCase())
 }

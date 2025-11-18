@@ -122,16 +122,35 @@ resource "alibabacloudstack_api_gateway_v2_instance" "edas_example" {
 }
 ```
 
+
+### API网关K8s部署模式
+
+```hcl
+resource "alibabacloudstack_api_gateway_v2_instance" "edas_example" {
+	instance_name             = "${var.name}"
+	node_number               = "1"
+	instance_class            = "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}"
+	broker_engine_type        = "SCG"
+	deploy_mode               = "apig_k8s"
+	deploy_cluster_code       = "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.id}"
+	deploy_cluster_namespace  = "${var.name}-namespace"
+	sls_enabled               = "true"
+	prometheus_enabled        = "true"
+}
+```
+
 ### AI网关模式
 
 ```hcl
 resource "alibabacloudstack_api_gateway_v2_instance" "custom_example" {
   instance_name         = "custom-instance"
-  deploy_mode           = "custom"
+  node_number               = "1"
+  deploy_mode           = "k8s"
   broker_engine_type    = "HIGRESS"
   deploy_cluster_code   = "cluster-code"
   deploy_cluster_namespace = "testnamespace"
-  ingress_class_name    = "testingress"
+  ingress_class_name =       "test-class"
+  instance_class     = "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}"
   prometheus_enabled    = true
   sls_enabled           = true
 }
@@ -142,7 +161,7 @@ resource "alibabacloudstack_api_gateway_v2_instance" "custom_example" {
 支持以下参数：
 
 * `instance_name` - (必需) API 网关实例的名称。
-* `deploy_mode` - (可选，强制新建) 实例的部署模式。有效值：`k8s`、`edas`、`custom`。
+* `deploy_mode` - (可选，强制新建) 实例的部署模式。有效值：`k8s`、`edas`、`custom`、`apig_k8s`。
 * `broker_engine_type` - (可选，强制新建) broker 引擎类型。有效值：`HIGRESS`(AI网关)、`SCG`(API网关)。
 * `instance_class` - (可选，强制新建) 实例类别/规格。
 * `node_number` - (可选，强制新建) 实例的节点数量。

@@ -314,22 +314,15 @@ func (s *ApiGateWayV2Service) DescribeApigwV2Route(id string) (map[string]interf
 	}
 
 	// Call the API to get the route group details
-	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetRoute", "/group/getGroup", nil, nil, reqQuery)
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetRoute", "/route/getRoute", nil, nil, reqQuery)
 	if err != nil {
 		return nil, err
 	}
 
 	// Check if the response contains data
 	data, ok := response["data"]
-	if !ok || data == nil {
+	if !ok || data == nil || !data.(map[string]interface{})["enableStatus"].(bool) {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("route group %s not found", id))
 	}
-
-	// Convert the data to map[string]interface{}
-	result, ok := data.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("unexpected response format")
-	}
-
-	return result, nil
+	return data.(map[string]interface{}), nil
 }
