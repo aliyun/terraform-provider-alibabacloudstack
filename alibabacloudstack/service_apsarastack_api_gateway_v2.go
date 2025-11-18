@@ -157,7 +157,6 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Signature(id string) (map[stri
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("signature scheme %s not found", id))
 }
 
-
 func (s *ApiGateWayV2Service) DescribeAPIGatewayV2Consumer(id string) (map[string]interface{}, error) {
 
 	parts := strings.SplitN(id, ":", 2)
@@ -184,9 +183,6 @@ func (s *ApiGateWayV2Service) DescribeAPIGatewayV2Consumer(id string) (map[strin
 	data := response["data"].(map[string]interface{})
 	return data, nil
 }
-
-
-
 
 func (s *ApiGateWayV2Service) DescribeApiGatewayV2ServiceSource(id string) (map[string]interface{}, error) {
 	parts := strings.SplitN(id, ":", 2)
@@ -243,4 +239,36 @@ func (s *ApiGateWayV2Service) DescribeRouteGroup(id string) (map[string]interfac
 	}
 
 	return result, nil
+}
+func (s *ApiGateWayV2Service) DescribeCascadeLink(id string) (map[string]interface{}, error) {
+
+	reqQuery := map[string]interface{}{
+		"linkId": id,
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetCascadeLink", "/cascadeLink/getCascadeLink", nil, nil, reqQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	if fmt.Sprint(response["code"]) != "200" {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("cascade link %s not found", id))
+	}
+
+	data := response["data"].(map[string]interface{})
+	return data, nil
+}
+
+func (s *ApiGateWayV2Service) DescribeCascadeInstance(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{"instanceId": id}
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetCascadeInstance", "/cascadeInstance/getCascadeInstance", nil, nil, reqQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	if !response["asapiSuccess"].(bool) || response["data"] == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("CascadeInstance %s not found", id))
+	}
+
+	return response["data"].(map[string]interface{}), nil
 }
