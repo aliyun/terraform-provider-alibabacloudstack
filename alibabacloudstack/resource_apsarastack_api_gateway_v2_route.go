@@ -129,6 +129,7 @@ func resourceAlibabacloudStackApiGatewayV2Route() *schema.Resource {
 			"domain_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -351,7 +352,9 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 	d.Set("route_name", object["routeName"])
 	d.Set("strip_prefix", object["stripPrefix"])
 	d.Set("order", object["order"])
-	d.Set("enable_status", object["enableStatus"])
+	if v, ok := object["serviceType"]; ok && v != nil {
+		d.Set("enable_status", object["enableStatus"])
+	}
 
 	if v, ok := object["routePath"].([]interface{}); ok {
 		d.Set("route_path", v)
@@ -402,7 +405,7 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 		}
 		d.Set("query_param", params)
 	}
-
+	var domainIds []string
 	if domainVOs, ok := object["domainVO"].([]interface{}); ok {
 		var domainIds []string
 		for _, item := range domainVOs {
@@ -412,8 +415,8 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 				}
 			}
 		}
-		d.Set("domain_ids", domainIds)
 	}
+	d.Set("domain_ids", domainIds)
 	serviceType, ok := object["serviceType"]
 	if ok && serviceType.(string) == "MULTI" {
 		if serviceIds, ok := object["serviceIds"].([]interface{}); ok {
@@ -436,14 +439,14 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 	}
 	linkRouteRelations, ok := object["linkRouteRelations"]
 	if ok && linkRouteRelations != nil {
-		cls := make([]interface{}, 0)
+		link_ids := make([]interface{}, 0)
 		for _, item := range linkRouteRelations.([]interface{}) {
 			data := item.(map[string]interface{})
-			if cascadeInstanceId, ok := data["cascadeInstanceId"]; ok {
-				cls = append(cls, cascadeInstanceId)
+			if linkId, ok := data["linkId"]; ok {
+				link_ids = append(link_ids, linkId)
 			}
 		}
-		d.Set("cascade_link_ids", cls)
+		d.Set("cascade_link_ids", link_ids)
 	}
 	d.Set("route_id", object["routeId"])
 
