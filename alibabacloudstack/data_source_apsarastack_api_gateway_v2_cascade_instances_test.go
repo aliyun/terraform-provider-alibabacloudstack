@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackAPIGatewayV2CascadeInstancesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackApiGatewayV2CascadeInstancesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	testAcc := dataSourceAttr{
 		resourceId: "data.alibabacloudstack_api_gateway_v2_cascade_instances.default",

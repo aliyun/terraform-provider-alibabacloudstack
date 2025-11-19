@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
-func TestAccAlibabacloudStackAPIGatewayV2CascadeLinksDataSource(t *testing.T) {
+func TestAccAlibabacloudStackApiGatewayV2CascadeLinksDataSource(t *testing.T) {
 	rand := acctest.RandInt()
 	resourceId := "data.alibabacloudstack_api_gateway_v2_cascade_links.default"
 
