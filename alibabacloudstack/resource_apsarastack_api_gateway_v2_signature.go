@@ -50,6 +50,14 @@ func resourceAlibabacloudStackAPIGatewayV2Signature() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"0", "1"}, false),
 			},
+			"cascade_link_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackAPIGatewayV2SignatureCreate, resourceAlibabacloudStackAPIGatewayV2SignatureRead, resourceAlibabacloudStackAPIGatewayV2SignatureUpdate, resourceAlibabacloudStackAPIGatewayV2SignatureDelete)
@@ -59,14 +67,28 @@ func resourceAlibabacloudStackAPIGatewayV2Signature() *schema.Resource {
 func resourceAlibabacloudStackAPIGatewayV2SignatureCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	gwInstanceId := d.Get("gw_instance_id").(string)
-
+	cascade_link_ids := d.Get("cascade_link_ids").(*schema.Set).List()
 	reqBody := map[string]interface{}{
 		"sigSchemeName": d.Get("sig_scheme_name").(string),
 		"sigAlg":        d.Get("sig_alg").(string),
 		"gwInstanceId":  gwInstanceId,
 	}
 
-	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "CreateSignatureScheme", "/signatureScheme/createSignatureScheme", nil, nil, reqBody)
+	action := "CreateSignatureScheme"
+	pattern := "/signatureScheme/createSignatureScheme"
+	idpre := "sig"
+	if len(cascade_link_ids) > 0 {
+		cascadeLinkIds := make([]string, 0)
+		for _, item := range cascade_link_ids {
+			cascadeLinkIds = append(cascadeLinkIds, item.(string))
+		}
+		reqBody["cascadeLinkIds"] = cascadeLinkIds
+		action = "CreateSourceSigScheme"
+		pattern = "/sourceSigScheme/createSourceSigScheme"
+		idpre = "sourceSig"
+	}
+
+	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqBody)
 	if err != nil {
 		return err
 	}
@@ -77,7 +99,7 @@ func resourceAlibabacloudStackAPIGatewayV2SignatureCreate(d *schema.ResourceData
 	}
 
 	// Generate resource ID
-	resourceId := fmt.Sprintf("%s:%s", gwInstanceId, sigSchemeId)
+	resourceId := fmt.Sprintf("%s:%s:%s", idpre, gwInstanceId, sigSchemeId)
 	d.SetId(resourceId)
 	return nil
 }
@@ -85,11 +107,11 @@ func resourceAlibabacloudStackAPIGatewayV2SignatureCreate(d *schema.ResourceData
 func resourceAlibabacloudStackAPIGatewayV2SignatureRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	apiGatewayV2Service := ApiGateWayV2Service{client}
-	parts, err := ParseResourceId(d.Id(), 2)
+	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
 		return err
 	}
-	gwInstanceId := parts[0]
+	gwInstanceId := parts[1]
 	object, err := apiGatewayV2Service.DescribeApiGatewayV2Signature(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
@@ -122,12 +144,13 @@ func resourceAlibabacloudStackAPIGatewayV2SignatureRead(d *schema.ResourceData, 
 func resourceAlibabacloudStackAPIGatewayV2SignatureUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	parts, err := ParseResourceId(d.Id(), 2)
+	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
 		return err
 	}
-	gwInstanceId := parts[0]
-	sigSchemeId := parts[1]
+	idpre := parts[0]
+	gwInstanceId := parts[1]
+	sigSchemeId := parts[2]
 
 	if d.IsNewResource() {
 		return nil
@@ -139,8 +162,14 @@ func resourceAlibabacloudStackAPIGatewayV2SignatureUpdate(d *schema.ResourceData
 			"sigSchemeName": d.Get("sig_scheme_name"),
 			"gwInstanceId":  gwInstanceId,
 		}
+		action := "ModifySignatureScheme"
+		pattern := "/signatureScheme/modifySignatureScheme"
+		if idpre == "sourceSig" {
+			action = "ModifySourceSigScheme"
+			pattern = "/sourceSigScheme/modifySourceSigScheme"
+		}
 
-		if _, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ModifySignatureScheme", "/signatureScheme/modifySignatureScheme", nil, nil, reqBody); err != nil {
+		if _, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqBody); err != nil {
 			return fmt.Errorf("failed to modify signature scheme: %v", err)
 		}
 	}
@@ -162,21 +191,28 @@ func resourceAlibabacloudStackAPIGatewayV2SignatureUpdate(d *schema.ResourceData
 func resourceAlibabacloudStackAPIGatewayV2SignatureDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	parts, err := ParseResourceId(d.Id(), 2)
+	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	gwInstanceId := parts[0]
-	sigSchemeId := parts[1]
-
+	gwInstanceId := parts[1]
+	sigSchemeId := parts[2]
+	idpre := parts[0]
 	reqQuery := map[string]interface{}{
 		"gwInstanceId": gwInstanceId,
 		"sigSchemeId":  sigSchemeId,
 	}
 
-	raw, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "DeleteSignatureScheme", "/signatureScheme/deleteSignatureScheme", nil, nil, reqQuery)
+	action := "ModifySignatureScheme"
+	pattern := "/signatureScheme/modifySignatureScheme"
+	if idpre == "sourceSig" {
+		action = "ModifySourceSigScheme"
+		pattern = "/sourceSigScheme/deleteSourceSigScheme"
+	}
+
+	raw, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqQuery)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteSignatureScheme", raw)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, raw)
 	}
 
 	return nil

@@ -20,6 +20,11 @@ func dataSourceAlibabacloudStackAPIGatewayV2Routes() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"is_source_route": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -94,14 +99,20 @@ func dataSourceAlibabacloudStackAPIGatewayV2RoutesRead(d *schema.ResourceData, m
 
 	// Get gwInstanceId from schema
 	gwInstanceId := d.Get("gw_instance_id").(string)
-
+	is_source_route := d.Get("is_source_route").(bool)
 	// Prepare request body for ListRoutes API
 	reqBody := map[string]interface{}{
 		"gwInstanceId": gwInstanceId,
 	}
 
-	// Call ListRoutes API
-	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListRoutes", "/route/listRoutes", nil, nil, reqBody)
+	action := "ListRoutes"
+	pattern := "/route/listRoutes"
+	if is_source_route {
+		action = "ListSourceRoutes"
+		pattern = "/sourceRoute/listSourceRoutes"
+	}
+
+	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqBody)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}

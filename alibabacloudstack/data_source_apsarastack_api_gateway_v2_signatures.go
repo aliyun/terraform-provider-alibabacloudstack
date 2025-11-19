@@ -20,6 +20,10 @@ func dataSourceAlibabacloudStackAPIGatewayV2Signatures() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"is_source_route": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -115,8 +119,14 @@ func dataSourceAlibabacloudStackAPIGatewayV2SignaturesRead(d *schema.ResourceDat
 		"current":      1,
 		"size":         100,
 	}
+	action := "ListSignatureSchemes"
+	pattern := "/signatureScheme/listSignatureSchemes"
+	if d.Get("is_source_route").(bool) {
+		action = "ListSourceSigSchemes"
+		pattern = "/sourceSigScheme/listSourceSigSchemes"
+	}
 
-	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListSignatureSchemes", "/signatureScheme/listSignatureSchemes", nil, nil, requestBody)
+	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, requestBody)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}

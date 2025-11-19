@@ -133,6 +133,14 @@ func resourceAlibabacloudStackApiGatewayV2Route() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"cascade_link_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"enable_status": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -182,21 +190,20 @@ func resourceAlibabacloudStackApiGatewayV2RouteCreate(d *schema.ResourceData, me
 	reqBody["gwInstanceId"] = d.Get("gw_instance_id")
 	reqBody["routeName"] = d.Get("route_name")
 	reqBody["groupId"] = d.Get("group_id")
-
-	// if v, ok := d.GetOk("path"); ok && len(v.([]interface{})) > 0 {
-	// 	pathMap := v.([]interface{})[0].(map[string]interface{})
-	// 	path := make(map[string]interface{})
-	// 	if val, ok := pathMap["match_type"]; ok {
-	// 		path["matchType"] = val.(string)
-	// 	}
-	// 	if val, ok := pathMap["match_value"]; ok {
-	// 		path["matchValue"] = val.(string)
-	// 	}
-	// 	if val, ok := pathMap["case_sensitive"]; ok {
-	// 		path["caseSensitive"] = val.(bool)
-	// 	}
-	// 	reqBody["path"] = path
-	// }
+	cascade_link_ids := d.Get("cascade_link_ids").(*schema.Set).List()
+	action := "CreateRoute"
+	pattern := "/route/createRoute"
+	idpre := "route"
+	if len(cascade_link_ids) > 0 {
+		cascadeLinkIds := make([]string, 0)
+		for _, item := range cascade_link_ids {
+			cascadeLinkIds = append(cascadeLinkIds, item.(string))
+		}
+		reqBody["cascadeLinkIds"] = cascadeLinkIds
+		action = "CreateSourceRoute"
+		pattern = "/sourceRoute/createSourceRoute"
+		idpre = "sourceRoute"
+	}
 
 	if v, ok := d.GetOk("route_path"); ok {
 		routePaths := make([]string, 0)
@@ -235,6 +242,12 @@ func resourceAlibabacloudStackApiGatewayV2RouteCreate(d *schema.ResourceData, me
 			h["value"] = header["value"]
 			headers = append(headers, h)
 		}
+		if len(cascade_link_ids) > 0 {
+			headers = append(headers, map[string]interface{}{
+				"key":   "csb_cascade",
+				"value": "true",
+			})
+		}
 		reqBody["header"] = headers
 	}
 
@@ -262,14 +275,6 @@ func resourceAlibabacloudStackApiGatewayV2RouteCreate(d *schema.ResourceData, me
 		reqBody["queryParam"] = queryParams
 	}
 
-	if v, ok := d.GetOk("domain_ids"); ok {
-		domainIds := make([]string, 0)
-		for _, item := range v.(*schema.Set).List() {
-			domainIds = append(domainIds, item.(string))
-		}
-		reqBody["domainIds"] = domainIds
-	}
-
 	if v, ok := d.GetOk("enable_status"); ok {
 		reqBody["enableStatus"] = v.(bool)
 	}
@@ -291,9 +296,16 @@ func resourceAlibabacloudStackApiGatewayV2RouteCreate(d *schema.ResourceData, me
 		reqBody["serviceId"] = v.(string)
 		reqBody["serviceType"] = "SINGLE"
 	}
+	if v, ok := d.GetOk("domain_ids"); ok {
+		domainIds := make([]string, 0)
+		for _, item := range v.(*schema.Set).List() {
+			domainIds = append(domainIds, item.(string))
+		}
+		reqBody["domainIds"] = domainIds
+	}
 
 	// Call the API to create the route group
-	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "CreateRoute", "/route/createRoute", nil, nil, reqBody)
+	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqBody)
 	if err != nil {
 		return err
 	}
@@ -307,7 +319,7 @@ func resourceAlibabacloudStackApiGatewayV2RouteCreate(d *schema.ResourceData, me
 
 	// Construct resource ID using gwInstanceId and routeId
 	gwInstanceId := reqBody["gwInstanceId"].(string)
-	resourceId := fmt.Sprintf("%s:%s", gwInstanceId, routeId)
+	resourceId := fmt.Sprintf("%s:%s:%s", idpre, gwInstanceId, routeId)
 	d.SetId(resourceId)
 
 	return nil
@@ -326,14 +338,16 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 		}
 		return errmsgs.WrapError(err)
 	}
-	parts, err := ParseResourceId(d.Id(), 2)
+	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
 		return err
 	}
-	gwInstanceId := parts[0]
+	gwInstanceId := parts[1]
 
 	d.Set("gw_instance_id", gwInstanceId)
-	d.Set("group_id", object["groupId"])
+	if v, ok := object["groupId"]; ok && v != nil {
+		d.Set("group_id", v)
+	}
 	d.Set("route_name", object["routeName"])
 	d.Set("strip_prefix", object["stripPrefix"])
 	d.Set("order", object["order"])
@@ -351,6 +365,9 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 		var headers []map[string]interface{}
 		for _, item := range headerList {
 			if m, ok := item.(map[string]interface{}); ok {
+				if m["key"] == "csb_cascade" {
+					continue
+				}
 				headers = append(headers, map[string]interface{}{
 					"value": m["value"],
 					"key":   m["key"],
@@ -397,7 +414,8 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 		}
 		d.Set("domain_ids", domainIds)
 	}
-	if object["serviceType"].(string) == "MULTI" {
+	serviceType, ok := object["serviceType"]
+	if ok && serviceType.(string) == "MULTI" {
 		if serviceIds, ok := object["serviceIds"].([]interface{}); ok {
 			var services []map[string]interface{}
 			for _, item := range serviceIds {
@@ -416,6 +434,17 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 		d.Set("service_id", object["serviceId"])
 
 	}
+	linkRouteRelations, ok := object["linkRouteRelations"]
+	if ok && linkRouteRelations != nil {
+		cls := make([]interface{}, 0)
+		for _, item := range linkRouteRelations.([]interface{}) {
+			data := item.(map[string]interface{})
+			if cascadeInstanceId, ok := data["cascadeInstanceId"]; ok {
+				cls = append(cls, cascadeInstanceId)
+			}
+		}
+		d.Set("cascade_link_ids", cls)
+	}
 	d.Set("route_id", object["routeId"])
 
 	return nil
@@ -423,12 +452,12 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 
 func resourceAlibabacloudStackApiGatewayV2RouteUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	parts, err := ParseResourceId(d.Id(), 2)
+	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
 		return err
 	}
-	gwInstanceId := parts[0]
-	routeId := parts[1]
+	gwInstanceId := parts[1]
+	routeId := parts[2]
 
 	if d.IsNewResource() {
 		// For new resources, no update is needed as all fields are already set in Create
@@ -441,6 +470,18 @@ func resourceAlibabacloudStackApiGatewayV2RouteUpdate(d *schema.ResourceData, me
 	reqBody["gwInstanceId"] = gwInstanceId
 	reqBody["routeName"] = d.Get("route_name")
 	reqBody["groupId"] = d.Get("group_id")
+	cascade_link_ids := d.Get("cascade_link_ids").(*schema.Set).List()
+	action := "ModifyRoute"
+	pattern := "/route/modifyRoute"
+	if len(cascade_link_ids) > 0 {
+		cascadeLinkIds := make([]string, 0)
+		for _, item := range cascade_link_ids {
+			cascadeLinkIds = append(cascadeLinkIds, item.(string))
+		}
+		reqBody["cascadeLinkIds"] = cascadeLinkIds
+		action = "ModifySourceRoute"
+		pattern = "/sourceRoute/modifySourceRoute"
+	}
 
 	// if v, ok := d.GetOk("path"); ok && len(v.([]interface{})) > 0 {
 	// 	pathMap := v.([]interface{})[0].(map[string]interface{})
@@ -494,6 +535,12 @@ func resourceAlibabacloudStackApiGatewayV2RouteUpdate(d *schema.ResourceData, me
 			h["value"] = header["value"]
 			headers = append(headers, h)
 		}
+		if len(cascade_link_ids) > 0 {
+			headers = append(headers, map[string]interface{}{
+				"key":   "csb_cascade",
+				"value": "true",
+			})
+		}
 		reqBody["header"] = headers
 	}
 
@@ -520,15 +567,6 @@ func resourceAlibabacloudStackApiGatewayV2RouteUpdate(d *schema.ResourceData, me
 		}
 		reqBody["queryParam"] = queryParams
 	}
-
-	if v, ok := d.GetOk("domain_ids"); ok {
-		domainIds := make([]string, 0)
-		for _, item := range v.(*schema.Set).List() {
-			domainIds = append(domainIds, item.(string))
-		}
-		reqBody["domainIds"] = domainIds
-	}
-
 	if v, ok := d.GetOk("enable_status"); ok {
 		reqBody["enableStatus"] = v.(bool)
 	}
@@ -550,10 +588,18 @@ func resourceAlibabacloudStackApiGatewayV2RouteUpdate(d *schema.ResourceData, me
 		reqBody["serviceId"] = v.(string)
 		reqBody["serviceType"] = "SINGLE"
 	}
-	_, err = client.DoTeaRequest("POST", "csb2", "2023-02-06", "ModifyRoute", "/route/modifyRoute", nil, nil, reqBody)
+	if v, ok := d.GetOk("domain_ids"); ok {
+		domainIds := make([]string, 0)
+		for _, item := range v.(*schema.Set).List() {
+			domainIds = append(domainIds, item.(string))
+		}
+		reqBody["domainIds"] = domainIds
+	}
+
+	_, err = client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqBody)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_api_gateway_v2_route_group", "ModifyRoute", errmsgs.AlibabacloudStackSdkGoERROR)
+			"alibabacloudstack_api_gateway_v2_route_group", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	return nil
@@ -563,19 +609,26 @@ func resourceAlibabacloudStackApiGatewayV2RouteDelete(d *schema.ResourceData, me
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	parts := strings.Split(d.Id(), ":")
-	if len(parts) != 2 {
+	if len(parts) != 3 {
 		return errmsgs.WrapError(fmt.Errorf("invalid resource id: %s", d.Id()))
 	}
-	gwInstanceId := parts[0]
-	routeId := parts[1]
+	idpre := parts[0]
+	gwInstanceId := parts[1]
+	routeId := parts[2]
 
 	reqQuery := map[string]interface{}{
 		"routeId":      routeId,
 		"gwInstanceId": gwInstanceId,
 	}
+	action := "DeleteRoute"
+	pattern := "/route/deleteRoute"
+	if idpre == "sourceRoute" {
+		action = "DeleteSourceRoute"
+		pattern = "/sourceRoute/deleteSourceRoute"
+	}
 
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
-		_, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "DeleteRoute", "/route/deleteRoute", nil, nil, reqQuery)
+		_, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqQuery)
 		if err != nil {
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteRoute", errmsgs.AlibabacloudStackSdkGoERROR, "")
 			return resource.RetryableError(err)

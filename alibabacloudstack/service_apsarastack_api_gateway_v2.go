@@ -127,20 +127,27 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Domain(id string) (map[string]
 }
 
 func (s *ApiGateWayV2Service) DescribeApiGatewayV2Signature(id string) (map[string]interface{}, error) {
-	parts := strings.SplitN(id, ":", 2)
-	if len(parts) != 2 {
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("invalid signature id: %s", id))
+	parts, err := ParseResourceId(id, 3)
+	if err != nil {
+		return nil, err
 	}
-	gwInstanceId := parts[0]
-	sigSchemeId := parts[1]
+	idpre := parts[0]
+	gwInstanceId := parts[1]
+	sigSchemeId := parts[2]
 
 	reqQuery := map[string]interface{}{
 		"gwInstanceId": gwInstanceId,
 		"current":      1,
 		"size":         100,
 	}
+	action := "ListSignatureSchemes"
+	pattern := "/signatureScheme/listSignatureSchemes"
+	if idpre == "sourceSig" {
+		action = "ListSourceSigSchemes"
+		pattern = "/sourceSigScheme/listSourceSigSchemes"
+	}
 
-	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListSignatureSchemes", "/signatureScheme/listSignatureSchemes", nil, nil, reqQuery)
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -300,29 +307,31 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Service(id string) (map[string
 
 func (s *ApiGateWayV2Service) DescribeApigwV2Route(id string) (map[string]interface{}, error) {
 	// Split the id into gwInstanceId and groupId
-	parts := strings.SplitN(id, ":", 2)
-	if len(parts) != 2 {
+	parts := strings.SplitN(id, ":", 3)
+	if len(parts) != 3 {
 		return nil, fmt.Errorf("invalid route group id: %s", id)
 	}
-	gwInstanceId := parts[0]
-	routeId := parts[1]
-
-	// Prepare the request parameters
+	idpre := parts[0]
+	gwInstanceId := parts[1]
+	routeId := parts[2]
+	action := "GetRoute"
+	pattern := "/route/getRoute"
+	if idpre == "sourceRoute" {
+		action = "GetSourceRoute"
+		pattern = "/sourceRoute/getSourceRoute"
+	}
 	reqQuery := map[string]interface{}{
 		"routeId":      routeId,
 		"gwInstanceId": gwInstanceId,
 	}
-
-	// Call the API to get the route group details
-	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetRoute", "/route/getRoute", nil, nil, reqQuery)
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqQuery)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if the response contains data
 	data, ok := response["data"]
-	if !ok || data == nil || !data.(map[string]interface{})["enableStatus"].(bool) {
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("route group %s not found", id))
+	if !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ApigwV2 route %s not found", id))
 	}
 	return data.(map[string]interface{}), nil
 }
