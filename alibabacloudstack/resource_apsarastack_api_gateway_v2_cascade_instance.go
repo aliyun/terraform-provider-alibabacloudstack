@@ -8,18 +8,17 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackAPIGatewayV2CascadeInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"instance_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"0", "1"}, false),
-			},
+			// "instance_type": {
+			// 	Type:         schema.TypeString,
+			// 	Required:     true,
+			// 	ForceNew:     true,
+			// 	ValidateFunc: validation.StringInSlice([]string{"0", "1"}, false),
+			// },
 			"instance_name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -30,21 +29,21 @@ func resourceAlibabacloudStackAPIGatewayV2CascadeInstance() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"console_address": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"console_ak": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"console_sk": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
+			// "console_address": {
+			// 	Type:     schema.TypeString,
+			// 	Optional: true,
+			// 	ForceNew: true,
+			// },
+			// "console_ak": {
+			// 	Type:     schema.TypeString,
+			// 	Optional: true,
+			// 	ForceNew: true,
+			// },
+			// "console_sk": {
+			// 	Type:     schema.TypeString,
+			// 	Optional: true,
+			// 	ForceNew: true,
+			// },
 		},
 	}
 
@@ -56,12 +55,13 @@ func resourceAlibabacloudStackAPIGatewayV2CascadeInstanceCreate(d *schema.Resour
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := make(map[string]interface{})
-	request["instanceType"] = d.Get("instance_type")
+	// request["instanceType"] = d.Get("instance_type")
+	request["instanceType"] = "0"
 	request["instanceName"] = d.Get("instance_name")
 	request["cascadeInstanceId"] = d.Get("cascade_instance_id")
-	request["consoleAddress"] = d.Get("console_address")
-	request["consoleAk"] = d.Get("console_ak")
-	request["consoleSk"] = d.Get("console_sk")
+	// request["consoleAddress"] = d.Get("console_address")
+	// request["consoleAk"] = d.Get("console_ak")
+	// request["consoleSk"] = d.Get("console_sk")
 
 	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "CreateCascadeInstance", "/cascadeInstance/createCascadeInstance", nil, nil, request)
 	if err != nil {
@@ -96,12 +96,12 @@ func resourceAlibabacloudStackAPIGatewayV2CascadeInstanceRead(d *schema.Resource
 		return err
 	}
 
-	d.Set("instance_type", object["instanceType"])
+	// d.Set("instance_type", object["instanceType"])
 	d.Set("instance_name", object["instanceName"])
 	d.Set("cascade_instance_id", object["cascadeInstanceId"])
-	d.Set("console_address", object["consoleAddress"])
-	d.Set("console_ak", object["consoleAk"])
-	d.Set("console_sk", object["consoleSk"])
+	// d.Set("console_address", object["consoleAddress"])
+	// d.Set("console_ak", object["consoleAk"])
+	// d.Set("console_sk", object["consoleSk"])
 
 	return nil
 }

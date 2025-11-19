@@ -31,13 +31,13 @@ func TestAccAlibabacloudStackApiGatewayV2CascadeInstance_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_type":       "0",
+					// "instance_type":       "0",
 					"instance_name":       "${var.name}",
 					"cascade_instance_id": "${alibabacloudstack_api_gateway_v2_instance.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"instance_type":       "0",
+						// "instance_type":       "0",
 						"instance_name":       name,
 						"cascade_instance_id": CHECKSET,
 					}),
