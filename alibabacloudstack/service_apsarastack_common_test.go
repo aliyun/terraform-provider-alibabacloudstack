@@ -1625,7 +1625,7 @@ resource "alibabacloudstack_kms_key" "key" {
 
 func ApiGatwayV2K8sInstanceTestCase(engineType, deployMode string) string {
 	ingressClass := ""
-	if deployMode == "apig_k8s" {
+	if deployMode == "k8s" {
 		ingressClass = `ingress_class_name = "${var.name}-class"`
 	}
 	return fmt.Sprintf(`
@@ -1656,7 +1656,7 @@ func ApiGatwayV2K8sInstanceTestCase(engineType, deployMode string) string {
 	  %s
 	  sls_enabled = "true"
 	  prometheus_enabled = "true"
-	}`, ApiGatwayV2K8sInstanceTestCase("apig_k8s", "SCG"), engineType, deployMode, ingressClass)
+	}`, AckK8sCommonTestCase(), engineType, deployMode, ingressClass)
 }
 
 func ServerCertificateTestCase() string {
