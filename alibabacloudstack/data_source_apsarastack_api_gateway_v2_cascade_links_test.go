@@ -38,7 +38,7 @@ func TestAccAlibabacloudStackAPIGatewayV2CascadeLinksDataSource(t *testing.T) {
 		// Test by name_regex
 		dataSourceTestAccConfig{
 			existConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"name_regex": "${alibabacloudstack_api_gateway_v2_cascade_link.default.link_name}",
+				"name_regex": `"${alibabacloudstack_api_gateway_v2_cascade_link.default.link_name}"`,
 			}),
 			fakeConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
 				"name_regex": "\"fake-name-regex\"",
@@ -56,7 +56,7 @@ func TestAccAlibabacloudStackAPIGatewayV2CascadeLinksDataSource(t *testing.T) {
 		// Test by source_instance_name
 		dataSourceTestAccConfig{
 			existConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"source_instance_name": "\"${alibabacloudstack_api_gateway_v2_cascade_link.source_instance_name}\"",
+				"source_instance_name": "\"${alibabacloudstack_api_gateway_v2_cascade_link.default.source_instance_name}\"",
 			}),
 			fakeConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
 				"source_instance_name": "\"fake-source-instance-name\"",
@@ -65,7 +65,7 @@ func TestAccAlibabacloudStackAPIGatewayV2CascadeLinksDataSource(t *testing.T) {
 		// Test by cascade_instance_name
 		dataSourceTestAccConfig{
 			existConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"cascade_instance_name": "\"${alibabacloudstack_api_gateway_v2_cascade_link.cascade_instance_name}\"",
+				"cascade_instance_name": "\"${alibabacloudstack_api_gateway_v2_cascade_link.default.cascade_instance_name}\"",
 			}),
 			fakeConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
 				"cascade_instance_name": "\"fake-cascade-instance-name\"",
@@ -101,7 +101,7 @@ resource "alibabacloudstack_api_gateway_v2_instance" "cascade" {
   deploy_mode        = "custom"
 }
 
-resource "            nstance" "default" {
+resource "alibabacloudstack_api_gateway_v2_cascade_instance" "default" {
   instance_type       = "0"
   instance_name       = "${var.name}"
   cascade_instance_id = "${alibabacloudstack_api_gateway_v2_instance.cascade.id}"
