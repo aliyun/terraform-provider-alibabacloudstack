@@ -107,7 +107,7 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_k8s(t *testing.T) {
 					"instance_class":           "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}",
 					"broker_engine_type":       "SCG",
 					"deploy_mode":              "apig_k8s",
-					"deploy_cluster_code":      "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.id}",
+					"deploy_cluster_code":      "${local.apigw_k8s_cluster_id}",
 					"deploy_cluster_namespace": "${var.name}-namespace",
 					"sls_enabled":              "true",
 					"prometheus_enabled":       "true",
@@ -231,7 +231,7 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_HIGRESS(t *testing.T) {
 					"instance_class":           "${data.alibabacloudstack_api_gateway_v2_instance_types.default.instance_types[0].id}",
 					"broker_engine_type":       "HIGRESS",
 					"deploy_mode":              "k8s",
-					"deploy_cluster_code":      "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.id}",
+					"deploy_cluster_code":      "${local.apigw_k8s_cluster_id}",
 					"deploy_cluster_namespace": "${var.name}-namespace",
 					"ingress_class_name":       "${var.name}-class",
 					"sls_enabled":              "true",
@@ -302,10 +302,18 @@ data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
 
 %s
 
-resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
-	cs_cluster_id =   "${local.k8s_cluster_id}"
-	k8s_cluster_name = "${var.name}"
+data "alibabacloudstack_api_gateway_v2_k8s_clusters" "default" {
+	k8s_cluster_name = local.k8s_cluster_name
 }
 
+resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
+	count = length(data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids) > 0 ? 0 : 1
+	cs_cluster_id =   local.k8s_cluster_id
+	k8s_cluster_name = local.k8s_cluster_name
+}
+
+locals {
+	apigw_k8s_cluster_id = length(data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids) > 0 ? "${data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids.0}" : "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.0.id}"
+}
 `, name, AckK8sCommonTestCase())
 }
