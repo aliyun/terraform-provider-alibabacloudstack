@@ -29,7 +29,8 @@ The following arguments are supported:
 * `gw_instance_id` - (Required) The ID of the API Gateway V2 instance.
 * `ids` - (Optional) A list of signature IDs.
 * `name_regex` - (Optional) A regex string to filter results by signature name.
-* `names` - A list of signature names to filter signatures by name.
+* `names` - (Optional) A list of signature names to filter signatures by name.
+* `is_source_signature` - (Optional) Whether the signature is a source signature. Default value: `false`.
 
 ## Attributes Reference
 

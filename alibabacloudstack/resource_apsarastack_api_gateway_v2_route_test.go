@@ -308,6 +308,8 @@ func TestAccAlibabacloudStackApiGatewayV2Route_Cascade(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				// "SourceRoute does not have a 'group_id' attribute."
+				ImportStateVerifyIgnore: []string{"group_id"},
 			},
 		},
 	})

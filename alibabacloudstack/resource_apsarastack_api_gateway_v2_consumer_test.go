@@ -496,6 +496,76 @@ func TestAccAlibabacloudStackApiGatewayV2Consumer_Csb(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackApiGatewayV2Consumer_SourceConsumer(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alibabacloudstack_api_gateway_v2_consumer.default"
+	ra := resourceAttrInit(resourceId, nil)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeAPIGatewayV2Consumer")
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApiGatewayV2SourceConsumerDependence)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"auth_type":        "7",
+					"app_name":         "${var.name}",
+					"description":      "${var.name}",
+					"key":              "aaaaaaaaaaaaaaaaaa",
+					"gw_instance_id":   "${alibabacloudstack_api_gateway_v2_instance.default.id}",
+					"groups":           []string{"test"},
+					"cascade_link_ids": []string{"${alibabacloudstack_api_gateway_v2_cascade_link.default.id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"auth_type":          "7",
+						"app_name":           name,
+						"description":        name,
+						"key":                "aaaaaaaaaaaaaaaaaa",
+						"gw_instance_id":     CHECKSET,
+						"groups.#":           "1",
+						"access_key":         CHECKSET,
+						"secret_key":         CHECKSET,
+						"app_secret":         CHECKSET,
+						"cascade_link_ids.#": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description": "updated_description",
+					"app_name":    "${var.name}_updated",
+					"groups":      []string{"test", "updated_group"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description": "updated_description",
+						"app_name":    name + "_updated",
+						"groups.#":    "2",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func ApiGatewayV2ConsumerDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
@@ -515,4 +585,31 @@ resource "alibabacloudstack_api_gateway_v2_instance" "default" {
 }
 
 `, name)
+}
+
+func ApiGatewayV2SourceConsumerDependence(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "alibabacloudstack_api_gateway_v2_instance" "cascade" {
+  instance_name      = "${var.name}-cascade"
+  node_number        = "1"
+  instance_class     = "mini"
+  broker_engine_type = "SCG"
+  deploy_mode        = "custom"
+}
+
+resource "alibabacloudstack_api_gateway_v2_cascade_instance" "default" {
+  instance_name      = "${var.name}"
+  cascade_instance_id = "${alibabacloudstack_api_gateway_v2_instance.cascade.id}"
+}
+
+resource "alibabacloudstack_api_gateway_v2_cascade_link" "default" {
+  cascade_instance_id = "${alibabacloudstack_api_gateway_v2_cascade_instance.default.id}"
+  link_name = "${var.name}"
+  source_instance_address =  "10.17.94.180"
+  source_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
+}
+
+`, APIGatewayV2SignatureDependence(name))
 }

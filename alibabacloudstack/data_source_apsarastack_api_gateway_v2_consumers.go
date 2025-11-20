@@ -32,6 +32,11 @@ func dataSourceAlibabacloudStackAPIGatewayV2Consumers() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"is_source_consumer": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"consumers": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -186,7 +191,16 @@ func dataSourceAlibabacloudStackAPIGatewayV2ConsumersRead(d *schema.ResourceData
 		"current":      1,
 		"size":         10,
 	}
-	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListApps", "/application/listApps", nil, nil, request)
+	action := "ListApps"
+	pattern := "/application/listApps"
+	idpre := "app"
+	if d.Get("is_source_route").(bool) {
+		action = "ListSourceApplications"
+		pattern = "/sourceApplication/listSourceApplications"
+		idpre = "sourceApp"
+	}
+
+	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, request)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -208,7 +222,7 @@ func dataSourceAlibabacloudStackAPIGatewayV2ConsumersRead(d *schema.ResourceData
 		if v, ok := d.GetOk("appid"); ok && appData["appId"] != v {
 			continue
 		}
-		appId := fmt.Sprintf("%s:%s", gwInstanceId, appData["appId"])
+		appId := fmt.Sprintf("%s:%s:%s", idpre, gwInstanceId, appData["appId"])
 		appName, _ := appData["appName"].(string)
 		if len(idsMap) > 0 {
 			if _, exist := idsMap[appId]; !exist {

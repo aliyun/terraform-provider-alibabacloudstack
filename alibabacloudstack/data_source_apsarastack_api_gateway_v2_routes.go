@@ -92,8 +92,6 @@ func dataSourceAlibabacloudStackAPIGatewayV2Routes() *schema.Resource {
 	}
 }
 
-// ... existing code ...
-
 func dataSourceAlibabacloudStackAPIGatewayV2RoutesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
@@ -107,9 +105,11 @@ func dataSourceAlibabacloudStackAPIGatewayV2RoutesRead(d *schema.ResourceData, m
 
 	action := "ListRoutes"
 	pattern := "/route/listRoutes"
+	idpre := "route"
 	if is_source_route {
 		action = "ListSourceRoutes"
 		pattern = "/sourceRoute/listSourceRoutes"
+		idpre = "sourceRoute"
 	}
 
 	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqBody)
@@ -148,7 +148,7 @@ func dataSourceAlibabacloudStackAPIGatewayV2RoutesRead(d *schema.ResourceData, m
 
 		routeId := route["routeId"].(string)
 		// Construct full ID as gwInstanceId:routeId
-		resourceId := fmt.Sprintf("%s:%s", gwInstanceId, routeId)
+		resourceId := fmt.Sprintf("%s:%s:%s", idpre, gwInstanceId, routeId)
 
 		// Filter by ids if specified
 		if len(idsMap) > 0 {

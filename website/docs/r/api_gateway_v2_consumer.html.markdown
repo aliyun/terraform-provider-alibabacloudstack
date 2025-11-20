@@ -162,6 +162,7 @@ The following arguments are supported:
   * `redirect_uris` - (Optional) The redirect URIs, separated by commas.
 * `password` - (Optional) The password for Basic authentication.
 * `payload` - (Optional) The payload information for JWT authentication, in key-value pair format.
+* `cascade_link_ids` - (Optional) The list of cascade link IDs. Set this attribute to create the source consumer.
 
 ## Attributes Reference
 

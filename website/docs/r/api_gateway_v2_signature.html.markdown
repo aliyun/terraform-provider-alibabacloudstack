@@ -53,6 +53,8 @@ The following arguments are supported:
 * `sig_alg` - (Required, Forces new resource) The signature algorithm. Valid values: `HmacSHA256`, `HmacSHA1`, `HmacSM3`.
 * `sig_scheme_name` - (Required) The name of the signature scheme. A unique name that identifies the signature scheme. The length limit is determined by the API Gateway service.
 * `status` - (Optional) The status of the signature scheme. Valid values: `0` (disabled), `1` (enabled). Default is empty, which means to keep the current status.
+* `cascade_link_ids` - (Optional) The list of cascade link IDs, used for CSB authentication. Set this attribute to create the source signature.
+
 
 ## Attributes Reference
 

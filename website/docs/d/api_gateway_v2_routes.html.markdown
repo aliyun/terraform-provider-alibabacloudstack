@@ -1,13 +1,21 @@
-# alibabacloudstack_api_gateway_v2_route
+---
+subcategory: "API Gateway"
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_api_gateway_v2_routes"
+sidebar_current: "docs-alibabacloudstack-datasource-api-gateway-v2-routes"
+description: |-
+  Provides a list of Api Gateway V2 Routes to be used by the Terraform engine.
+---
 
-> API Gateway v2 Route Management
+# alibabacloudstack\_api\_gateway\_v2\_routes
+
+This data source provides a list of API Gateway V2 Routes in an Alibaba Cloud API Gateway V2 instance according to the specified filters.
 
 ## Example Usage
 
 ```hcl
-
 variable "name" {
-  default = "tf-testacca-13005"
+  default = "tf-testacc-route-12345"
 }
 
 resource "alibabacloudstack_api_gateway_v2_instance" "default" {
@@ -33,125 +41,49 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
   }
 }
 
-resource "alibabacloudstack_api_gateway_v2_domain" "default" {
-  domain      = "${var.name}.com"
-  instance_id = alibabacloudstack_api_gateway_v2_instance.default.id
-  protocol    = "HTTP"
-}
-
 resource "alibabacloudstack_api_gateway_v2_route" "default" {
   gw_instance_id = alibabacloudstack_api_gateway_v2_instance.default.id
   route_name     = var.name
   strip_prefix   = "2"
   order          = "100"
-  route_path     = ["/testtc", "/test/aaa"]
-  methods        = ["GET", "POST", "PUT", "DELETE"]
-  header {
-    key   = "header"
-    value = "aaaaa"
-  }
-  cookie {
-    key   = "cookie"
-    value = "bbbbb"
-  }
-  query_param {
-    key   = "query"
-    value = "ccccc"
-  }
-  domain_ids = ["${alibabacloudstack_api_gateway_v2_domain.default.domain_id}"]
-  service_id = alibabacloudstack_api_gateway_v2_service.default.service_id
+  route_path     = ["/test", "/api"]
+  methods        = ["GET", "POST"]
+  service_id     = alibabacloudstack_api_gateway_v2_service.default.service_id
 }
 
 data "alibabacloudstack_api_gateway_v2_routes" "default" {
   gw_instance_id = alibabacloudstack_api_gateway_v2_route.default.gw_instance_id
-  name_regex     = "tf-testacca-13005"
-  ids            = ["${alibabacloudstack_api_gateway_v2_route.default.id}"]
+  name_regex     = "tf-testacc-route-*"
+  ids            = [alibabacloudstack_api_gateway_v2_route.default.id]
 }
 
+output "route_info" {
+  value = data.alibabacloudstack_api_gateway_v2_routes.default.routes
+}
 ```
 
 ## Argument Reference
 
 The following arguments are supported:
 
-### Required
-
-* `domainIds` (List): List of domain IDs, used to specify the domains bound to the route.
-
-* `enableStatus` (Boolean): Whether to enable the route, true means enabled, false means disabled.
-
-* `methods` (List): List of HTTP methods, such as ["GET", "POST"], etc.
-
-* `openStripPrefix` (Boolean): Whether to enable path prefix stripping.
-
-* `order` (Integer): Route priority, the smaller the value, the higher the priority.
-
-* `routePath` (List): List of route paths, such as ["/test", "/api"], etc.
-
-* `serviceIds` (List): List of service IDs, used to specify the backend services of the route.
-
-* `serviceType` (String): Service type, such as "SINGLE" or "MULTI".
-
-* `stripPrefix` (Integer): Path prefix stripping length.
-
-### Force New
-
-* `groupId` (String): Group ID, specifying the group to which the route belongs. (Force new when changed)
-
-* `gwInstanceId` (String): Gateway instance ID, specifying the gateway instance to which the route belongs. (Force new when changed)
-
-* `routeName` (String): Route name, used to identify the route. (Force new when changed)
-
-### Optional
-
-* `cookie` (List): Cookie configuration, used to set cookies in the request.
-
-* `header` (List): Request header configuration, used to set headers in the request.
-
-* `queryParam` (List): Query parameter configuration, used to set query parameters in the request.
-
-* `serviceId` (String): Service ID, used when serviceType is "SINGLE".
+* `gw_instance_id` - (Required) The ID of the API Gateway V2 instance.
+* `is_source_route` - (Optional) Whether to query source routes. Default to `false`.
+* `ids` - (Optional) A list of route IDs.
+* `name_regex` - (Optional) A regex string to filter routes by name.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` (String): Resource ID, in the format "{gwInstanceId}:{routeId}".
-
-* `basePath` (String): Base path.
-
-* `create_time` (String): Route creation time.
-
-* `domainVO` (List): Domain information, including domain name, protocol, etc.
-
-* `group_name` (String): Group name.
-
-* `isOpenCross` (Boolean): Whether cross-origin is enabled.
-
-* `isOpenFreeCert` (Boolean): Whether free certificate is enabled.
-
-* `isOpenMock` (Boolean): Whether mock is enabled.
-
-* `isOpenPlugin` (Boolean): Whether plugin is enabled.
-
-* `isOpenResponseCache` (Boolean): Whether response caching is enabled.
-
-* `isOpenSig` (Boolean): Whether signature is enabled.
-
-* `isOpenTimeOut` (Boolean): Whether timeout is enabled.
-
-* `isOpenTraffic` (Boolean): Whether traffic control is enabled.
-
-* `loadBalanceType` (Integer): Load balancing type.
-
-* `loadBalanceTypeName` (String): Load balancing type name.
-
-* `serviceCreateTime` (String): Service creation time.
-
-* `serviceDescription` (String): Service description.
-
-* `serviceName` (String): Service name.
-
-* `upstreamType` (Integer): Backend type.
-
-* `upstreamTypeName` (String): Backend type name.
+* `ids` - A list of route IDs.
+* `routes` - A list of routes. Each element contains the following attributes:
+  * `id` - The ID of the route, formatted as `{prefix}:{gwInstanceId}:{routeId}`.
+  * `route_id` - The ID of the route.
+  * `route_name` - The name of the route.
+  * `group_id` - The ID of the route group.
+  * `group_name` - The name of the route group.
+  * `service_name` - The name of the service.
+  * `route_path` - A list of route paths.
+  * `service_id` - The ID of the service.
+  * `enable_status` - Whether the route is enabled.
+  * `create_time` - The creation time of the route.

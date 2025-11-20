@@ -123,8 +123,10 @@ resource "alibabacloudstack_api_gateway_v2_route" "default" {
   * `service_id` - (可选) 后端服务ID。
   * `weight` - (可选) 权重，取值范围1-100。
 * `strip_prefix` - (可选) 需要剥离的前缀长度。当值大于0时，会自动启用前缀剥离功能。
+* `cascade_link_ids` - (可选) 级联链接的ID列表, 设置该参数以创建源路由.
 
-注意：`service_ids`和`service_id`是互斥的，只能设置其中一个。
+-> **注意:**  当`cascade_link_ids` 不为空时，仅支持使用`service_id`设置服务。
+-> **注意:**  `service_ids`和`service_id`是互斥的，只能设置其中一个。
 
 ## 属性说明
 

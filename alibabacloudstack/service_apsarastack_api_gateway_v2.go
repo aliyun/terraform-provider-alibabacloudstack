@@ -137,48 +137,64 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Signature(id string) (map[stri
 
 	reqQuery := map[string]interface{}{
 		"gwInstanceId": gwInstanceId,
-		"current":      1,
-		"size":         100,
 	}
 	action := "ListSignatureSchemes"
 	pattern := "/signatureScheme/listSignatureSchemes"
 	if idpre == "sourceSig" {
-		action = "ListSourceSigSchemes"
-		pattern = "/sourceSigScheme/listSourceSigSchemes"
+		action = "GetSourceSigScheme"
+		pattern = "/sourceSigScheme/getSourceSigScheme"
+		reqQuery["sigSchemeId"] = sigSchemeId
+	} else {
+		reqQuery["current"] = 1
+		reqQuery["size"] = 100
 	}
 
 	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqQuery)
 	if err != nil {
 		return nil, err
 	}
-
-	if records, ok := response["data"].(map[string]interface{})["records"].([]interface{}); ok {
-		for _, record := range records {
-			r := record.(map[string]interface{})
-			if r["sigSchemeId"].(string) == sigSchemeId {
-				return r, nil
+	if action == "GetSourceSigScheme" {
+		if data, ok := response["data"]; ok {
+			return data.(map[string]interface{}), nil
+		}
+	} else {
+		records, err := jsonpath.Get("$.data.records", response)
+		if err != nil {
+			return nil, errmsgs.Error("ListSignatureSchemes Failed! %v", response)
+		}
+		for _, v := range records.([]interface{}) {
+			record := v.(map[string]interface{})
+			if record["sigSchemeId"].(string) == sigSchemeId {
+				return record, nil
 			}
 		}
 	}
-
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("signature scheme %s not found", id))
 }
 
 func (s *ApiGateWayV2Service) DescribeAPIGatewayV2Consumer(id string) (map[string]interface{}, error) {
 
-	parts := strings.SplitN(id, ":", 2)
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid id format, expected gwInstanceId:appId")
+	parts := strings.SplitN(id, ":", 3)
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("invalid id format, expected idpre:gwInstanceId:appId")
 	}
-	gwInstanceId := parts[0]
-	appId := parts[1]
+
+	idpre := parts[0]
+	gwInstanceId := parts[1]
+	appId := parts[2]
 
 	reqQuery := map[string]interface{}{
 		"appId":        appId,
 		"gwInstanceId": gwInstanceId,
 	}
+	action := "GetApp"
+	pattern := "/application/getApp"
+	if idpre == "sourceApp" {
+		action = "GetSourceApplication"
+		pattern = "/sourceApplication/getSourceApplication"
+	}
 
-	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetApp", "/application/getApp", nil, nil, reqQuery)
+	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqQuery)
 	if err != nil {
 		return nil, err
 	}

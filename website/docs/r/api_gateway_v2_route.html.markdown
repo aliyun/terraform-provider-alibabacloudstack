@@ -120,8 +120,11 @@ The following arguments are supported:
   * `service_id` - (Optional) The backend service ID.
   * `weight` - (Optional) The weight, ranging from 1 to 100.
 * `strip_prefix` - (Optional) The length of the prefix to strip. When the value is greater than 0, the prefix stripping feature is automatically enabled.
+* `cascade_link_ids` - (Optional) The list of cascade link IDs, used for CSB authentication. Set this attribute to create the source route. 
 
-Note: `service_ids` and `service_id` are mutually exclusive; only one of them can be set.
+-> **NOTE:** When `cascade_link_ids` is not empty, only the `service_id` attribute is supported for setting the server.
+
+-> **NOTE:**  `service_ids` and `service_id` are mutually exclusive; only one of them can be set.
 
 ## Attributes Reference
 

@@ -160,6 +160,7 @@ resource "alibabacloudstack_api_gateway_v2_consumer" "default" {
   * `redirect_uris` - (可选) 重定向URI，多个URI用逗号分隔。
 * `password` - (可选) Basic认证方式的密码。
 * `payload` - (可选) JWT认证方式的负载信息，格式为键值对。
+* `cascade_link_ids` - (可选) 级联链接的ID列表, 设置该参数以创建源消费者.
 
 ## 属性说明
 

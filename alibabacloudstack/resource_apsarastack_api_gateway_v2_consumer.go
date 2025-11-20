@@ -119,6 +119,14 @@ func resourceAlibabacloudStackAPIGatewayV2Consumer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"cascade_link_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"token": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -234,15 +242,23 @@ func resourceAlibabacloudStackAPIGatewayV2ConsumerCreate(d *schema.ResourceData,
 	if v, ok := d.GetOk("app_code"); ok {
 		request["appCode"] = v.(string)
 	}
-
-	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "CreateApp", "/application/createApp", nil, nil, request)
+	action := "CreateApp"
+	pattern := "/application/createApp"
+	idpre := "app"
+	if v, ok := d.GetOk("cascade_link_ids"); ok && v.(*schema.Set).Len() > 0 {
+		action = "CreateSourceApplication"
+		pattern = "/sourceApplication/createSourceApplication"
+		idpre = "sourceApp"
+		request["cascadeLinkIds"] = v.(*schema.Set).List()
+	}
+	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, request)
 	if err != nil {
 		return err
 	}
 
 	appId := resp["data"].(string)
 	gwInstanceId := d.Get("gw_instance_id").(string)
-	d.SetId(fmt.Sprintf("%s:%s", gwInstanceId, appId))
+	d.SetId(fmt.Sprintf("%s:%s:%s", idpre, gwInstanceId, appId))
 
 	return nil
 }
@@ -267,7 +283,7 @@ func resourceAlibabacloudStackAPIGatewayV2ConsumerRead(d *schema.ResourceData, m
 	d.Set("auth_type", object["authType"])
 	d.Set("auth_type_name", object["authTypeName"])
 	d.Set("app_id", object["appId"])
-	d.Set("gw_instance_id", strings.Split(d.Id(), ":")[0])
+	d.Set("gw_instance_id", strings.Split(d.Id(), ":")[1])
 	d.Set("token", object["token"])
 	d.Set("use_white_list", object["useWhiteList"])
 	d.Set("enable", object["enable"])
@@ -340,6 +356,17 @@ func resourceAlibabacloudStackAPIGatewayV2ConsumerRead(d *schema.ResourceData, m
 
 		d.Set("oauth2_payload", []map[string]interface{}{oauth2Data})
 	}
+	linkEntityRelations, ok := object["linkEntityRelations"]
+	if ok && linkEntityRelations != nil {
+		link_ids := make([]interface{}, 0)
+		for _, item := range linkEntityRelations.([]interface{}) {
+			data := item.(map[string]interface{})
+			if linkId, ok := data["linkId"]; ok {
+				link_ids = append(link_ids, linkId)
+			}
+		}
+		d.Set("cascade_link_ids", link_ids)
+	}
 
 	return nil
 }
@@ -350,12 +377,13 @@ func resourceAlibabacloudStackAPIGatewayV2ConsumerUpdate(d *schema.ResourceData,
 	if d.IsNewResource() {
 		return nil
 	}
-	params, err := ParseResourceId(d.Id(), 2)
+	params, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	gwInstanceId := params[0]
-	appId := params[1]
+	idpre := params[0]
+	gwInstanceId := params[1]
+	appId := params[2]
 	request := make(map[string]interface{})
 	request["gwInstanceId"] = gwInstanceId
 	request["appId"] = appId
@@ -429,8 +457,20 @@ func resourceAlibabacloudStackAPIGatewayV2ConsumerUpdate(d *schema.ResourceData,
 		}
 		request["oauth2Payload"] = oauth2Payload
 	}
+	action := "ModifyApp"
+	pattern := "/application/modifyApp"
+	if idpre == "sourceApp" {
+		cascadeLinkIds := make([]string, 0)
+		cascade_link_ids := d.Get("cascade_link_ids").(*schema.Set).List()
+		for _, item := range cascade_link_ids {
+			cascadeLinkIds = append(cascadeLinkIds, item.(string))
+		}
+		request["cascadeLinkIds"] = cascadeLinkIds
+		action = "ModifySourceApplication"
+		pattern = "/sourceApplication/modifySourceApplication"
+	}
 
-	_, err = client.DoTeaRequest("POST", "csb2", "2023-02-06", "ModifyApp", "/application/modifyApp", nil, nil, request)
+	_, err = client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, request)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_api_gateway_v2_consumer", "ModifyApp", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -440,22 +480,28 @@ func resourceAlibabacloudStackAPIGatewayV2ConsumerUpdate(d *schema.ResourceData,
 
 func resourceAlibabacloudStackAPIGatewayV2ConsumerDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
-	params, err := ParseResourceId(d.Id(), 2)
+	params, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	gwInstanceId := params[0]
-	appId := params[1]
+	idpre := params[0]
+	gwInstanceId := params[1]
+	appId := params[2]
 
 	reqQuery := map[string]interface{}{
 		"appId":        appId,
 		"gwInstanceId": gwInstanceId,
 	}
+	action := "DeleteApp"
+	pattern := "/application/deleteApp"
+	if idpre == "sourceApp" {
+		action = "DeleteSourceApplication"
+		pattern = "/sourceApplication/deleteSourceApplication"
+	}
 
-	_, err = client.DoTeaRequest("POST", "csb2", "2023-02-06", "DeleteApp", "/application/deleteApp", nil, nil, reqQuery)
+	_, err = client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqQuery)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteApp", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	return nil

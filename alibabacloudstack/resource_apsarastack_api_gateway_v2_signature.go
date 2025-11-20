@@ -129,6 +129,8 @@ func resourceAlibabacloudStackAPIGatewayV2SignatureRead(d *schema.ResourceData, 
 	sigAlg, ok := APIGateWayV2SignatureAlgMap[object["sigAlg"].(string)]
 	if ok {
 		d.Set("sig_alg", sigAlg)
+	} else {
+		d.Set("sig_alg", object["sigAlg"])
 	}
 	d.Set("gw_instance_id", gwInstanceId)
 	d.Set("sig_scheme_name", object["sigSchemeName"])
@@ -137,7 +139,15 @@ func resourceAlibabacloudStackAPIGatewayV2SignatureRead(d *schema.ResourceData, 
 	d.Set("create_time", object["createTime"])
 	d.Set("update_time", object["updateTime"])
 	d.Set("status", object["sigSchemeStatus"])
-
+	linkEntityRelations, ok := object["linkEntityRelations"]
+	if ok {
+		linkIds := make([]string, 0)
+		for _, v := range linkEntityRelations.([]interface{}) {
+			linkEntityRelation := v.(map[string]interface{})
+			linkIds = append(linkIds, linkEntityRelation["linkId"].(string))
+		}
+		d.Set("cascade_link_ids", linkIds)
+	}
 	return nil
 }
 
@@ -179,8 +189,13 @@ func resourceAlibabacloudStackAPIGatewayV2SignatureUpdate(d *schema.ResourceData
 			"sigSchemeStatus": d.Get("status"),
 			"gwInstanceId":    gwInstanceId,
 		}
-
-		if _, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ModifySignatureSchemeStatus", "/signatureScheme/modifySignatureSchemeStatus", nil, nil, reqBody); err != nil {
+		action := "ModifySignatureSchemeStatus"
+		pattern := "/signatureScheme/modifySignatureSchemeStatus"
+		if idpre == "sourceSig" {
+			action = "ModifySourceSigSchemeStatus"
+			pattern = "/sourceSigScheme/modifySourceSigSchemeStatus"
+		}
+		if _, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqBody); err != nil {
 			return fmt.Errorf("failed to modify signature scheme: %v", err)
 		}
 	}

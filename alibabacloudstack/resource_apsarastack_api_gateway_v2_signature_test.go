@@ -33,7 +33,7 @@ func TestAccAlibabacloudStackApiGatewayV2Signature_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"sig_scheme_name": "${var.signature_name}",
+					"sig_scheme_name": "${var.name}",
 					"sig_alg":         "${var.signature_algorithm}",
 					"gw_instance_id":  "${alibabacloudstack_api_gateway_v2_instance.default.id}",
 				}),
@@ -46,7 +46,84 @@ func TestAccAlibabacloudStackApiGatewayV2Signature_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"sig_scheme_name": "${var.signature_name}_update",
+					"sig_scheme_name": "${var.name}_update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sig_scheme_name": name + "_update",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"status": "0",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"status": "0",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"status": "1",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"status": "1",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackApiGatewayV2SourceSignature_cascade(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alibabacloudstack_api_gateway_v2_signature.default"
+	ra := resourceAttrInit(resourceId, nil)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeApiGatewayV2Signature")
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc-sign%d", rand)
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApiGatewayV2SourceSignatureDependence)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sig_scheme_name":  "${var.name}",
+					"sig_alg":          "${var.signature_algorithm}",
+					"gw_instance_id":   "${alibabacloudstack_api_gateway_v2_instance.default.id}",
+					"cascade_link_ids": []string{"${alibabacloudstack_api_gateway_v2_cascade_link.default.id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sig_scheme_name":    name,
+						"sig_alg":            "HmacSM3",
+						"cascade_link_ids.#": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sig_scheme_name": "${var.name}_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -85,7 +162,7 @@ func TestAccAlibabacloudStackApiGatewayV2Signature_basic(t *testing.T) {
 
 func APIGatewayV2SignatureDependence(name string) string {
 	return fmt.Sprintf(`
-variable "signature_name" {
+variable "name" {
   default = "%s"
 }
 
@@ -94,7 +171,7 @@ variable "signature_algorithm" {
 }
 
 resource "alibabacloudstack_api_gateway_v2_instance" "default" {
-  instance_name      = var.signature_name
+  instance_name      = var.name
   node_number        = "1"
   instance_class     = "mini"
   broker_engine_type = "SCG"
@@ -102,4 +179,31 @@ resource "alibabacloudstack_api_gateway_v2_instance" "default" {
 }
 
 `, name)
+}
+
+func ApiGatewayV2SourceSignatureDependence(name string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "alibabacloudstack_api_gateway_v2_instance" "cascade" {
+  instance_name      = "${var.name}-cascade"
+  node_number        = "1"
+  instance_class     = "mini"
+  broker_engine_type = "SCG"
+  deploy_mode        = "custom"
+}
+
+resource "alibabacloudstack_api_gateway_v2_cascade_instance" "default" {
+  instance_name      = "${var.name}"
+  cascade_instance_id = "${alibabacloudstack_api_gateway_v2_instance.cascade.id}"
+}
+
+resource "alibabacloudstack_api_gateway_v2_cascade_link" "default" {
+  cascade_instance_id = "${alibabacloudstack_api_gateway_v2_cascade_instance.default.id}"
+  link_name = "${var.name}"
+  source_instance_address =  "10.17.94.180"
+  source_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
+}
+
+`, APIGatewayV2SignatureDependence(name))
 }

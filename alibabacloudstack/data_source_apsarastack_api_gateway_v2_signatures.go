@@ -20,7 +20,7 @@ func dataSourceAlibabacloudStackAPIGatewayV2Signatures() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"is_source_route": {
+			"is_source_signature": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
@@ -121,9 +121,11 @@ func dataSourceAlibabacloudStackAPIGatewayV2SignaturesRead(d *schema.ResourceDat
 	}
 	action := "ListSignatureSchemes"
 	pattern := "/signatureScheme/listSignatureSchemes"
-	if d.Get("is_source_route").(bool) {
+	idpre := "sig"
+	if d.Get("is_source_signature").(bool) {
 		action = "ListSourceSigSchemes"
 		pattern = "/sourceSigScheme/listSourceSigSchemes"
+		idpre = "sourceSig"
 	}
 
 	response, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, requestBody)
@@ -150,7 +152,7 @@ func dataSourceAlibabacloudStackAPIGatewayV2SignaturesRead(d *schema.ResourceDat
 
 		sigSchemeId := r["sigSchemeId"].(string)
 		sigSchemeName := r["sigSchemeName"].(string)
-		id := fmt.Sprintf("%s:%s", gwInstanceId, sigSchemeId)
+		id := fmt.Sprintf("%s:%s:%s", idpre, gwInstanceId, sigSchemeId)
 		if len(idsMap) > 0 {
 			if _, ok := idsMap[id]; !ok {
 				continue
