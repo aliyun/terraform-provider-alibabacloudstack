@@ -14,22 +14,27 @@ func dataSourceAlibabacloudStackAPIGatewayV2K8sClusters() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"ids": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "A list of k8s cluster IDs to filter results by.",
 			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
-				Description: "A regex string to filter results by k8s cluster name.",
+				Description:  "A regex string to filter results by k8s cluster name.",
 			},
 			"k8s_cluster_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
 				Description: "The name of the k8s cluster used as a filter.",
+			},
+			"cs_cluster_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The container service cluster ID as a filter.",
 			},
 			"clusters": {
 				Type:     schema.TypeList,
@@ -37,38 +42,38 @@ func dataSourceAlibabacloudStackAPIGatewayV2K8sClusters() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
 							Description: "The ID of the k8s cluster.",
 						},
 						"k8s_cluster_name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
 							Description: "The name of the k8s cluster.",
 						},
 						"cluster_type": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
 							Description: "The type of the k8s cluster.",
 						},
 						"cs_cluster_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
 							Description: "The container service cluster ID.",
 						},
 						"cs_cluster_name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
 							Description: "The container service cluster name.",
 						},
 						"slb_type": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
 							Description: "The SLB type of the k8s cluster.",
 						},
 						"vpc_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
 							Description: "The VPC ID associated with the k8s cluster.",
 						},
 					},
@@ -131,6 +136,11 @@ func dataSourceAlibabacloudStackAPIGatewayV2K8sClustersRead(d *schema.ResourceDa
 		nameRegex = regexp.MustCompile(v.(string))
 	}
 
+	var csClusterId string
+	if v, ok := d.GetOk("cs_cluster_id"); ok && v.(string) != "" {
+		csClusterId = v.(string)
+	}
+
 	var filteredRecords []interface{}
 	for _, record := range records {
 		r, ok := record.(map[string]interface{})
@@ -177,6 +187,9 @@ func dataSourceAlibabacloudStackAPIGatewayV2K8sClustersRead(d *schema.ResourceDa
 
 		// Extract k8sClusterAttribute
 		if attrData, ok := r["k8sClusterAttribute"].(map[string]interface{}); ok {
+			if csClusterId != "" && csClusterId != attrData["csClusterId"] {
+				continue
+			}
 			cluster["cs_cluster_id"] = attrData["csClusterId"]
 			cluster["cs_cluster_name"] = attrData["csClusterName"]
 			cluster["slb_type"] = attrData["slbType"]
