@@ -194,7 +194,7 @@ func dataSourceAlibabacloudStackAPIGatewayV2ConsumersRead(d *schema.ResourceData
 	action := "ListApps"
 	pattern := "/application/listApps"
 	idpre := "app"
-	if d.Get("is_source_route").(bool) {
+	if d.Get("is_source_consumer").(bool) {
 		action = "ListSourceApplications"
 		pattern = "/sourceApplication/listSourceApplications"
 		idpre = "sourceApp"

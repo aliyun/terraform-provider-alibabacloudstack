@@ -1,5 +1,3 @@
-#file:d:\terraform_copy\terraform-provider-apsarastack\website\docs\r\ascm_service_ram_role_zh.html.markdown
-ascm_service_ram_role_zh.html.markdown
 ---
 subcategory: "ASCM"
 layout: "alibabacloudstack"

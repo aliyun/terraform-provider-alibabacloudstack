@@ -217,11 +217,11 @@ func resourceAlibabacloudStackAPIGatewayV2SignatureDelete(d *schema.ResourceData
 		"gwInstanceId": gwInstanceId,
 		"sigSchemeId":  sigSchemeId,
 	}
-
-	action := "ModifySignatureScheme"
-	pattern := "/signatureScheme/modifySignatureScheme"
+	
+	action := "DeleteSignatureScheme"
+	pattern := "/signatureScheme/deleteSignatureScheme"
 	if idpre == "sourceSig" {
-		action = "ModifySourceSigScheme"
+		action = "DeleteSourceSigScheme"
 		pattern = "/sourceSigScheme/deleteSourceSigScheme"
 	}
 
