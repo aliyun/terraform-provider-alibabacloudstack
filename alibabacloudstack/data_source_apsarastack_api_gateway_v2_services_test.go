@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackAPIGatewayV2ServicesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackApiGatewayV2ServicesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	testAcc := dataSourceAttr{
 		resourceId: "data.alibabacloudstack_api_gateway_v2_services.default",

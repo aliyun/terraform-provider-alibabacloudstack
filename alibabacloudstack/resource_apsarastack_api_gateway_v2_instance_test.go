@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -291,6 +292,9 @@ data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
 }
 
 func AIGateWayV2InstanceK8sDepDependence(name string) string {
+	if k8sId := os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"); k8sId != "" {
+		CheckOrCreateApiGatewayV2K8sInstance(k8sId)
+	}
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"
@@ -303,17 +307,17 @@ data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
 %s
 
 data "alibabacloudstack_api_gateway_v2_k8s_clusters" "default" {
-	k8s_cluster_name = local.k8s_cluster_name
+	cs_cluster_id = local.k8s_cluster_id
 }
 
 resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
-	count = length(data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids) > 0 ? 0 : 1
+	count = var.existed_k8s_cluster_id == "" ? 1 : 0
 	cs_cluster_id =   local.k8s_cluster_id
 	k8s_cluster_name = local.k8s_cluster_name
 }
 
 locals {
-	apigw_k8s_cluster_id = length(data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids) > 0 ? "${data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids.0}" : "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.0.id}"
+	apigw_k8s_cluster_id = var.existed_k8s_cluster_id != "" ? "${data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids.0}" : "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.0.id}"
 }
 `, name, AckK8sCommonTestCase())
 }

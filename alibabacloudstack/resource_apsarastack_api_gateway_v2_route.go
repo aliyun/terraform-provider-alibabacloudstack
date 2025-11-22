@@ -407,7 +407,6 @@ func resourceAlibabacloudStackApiGatewayV2RouteRead(d *schema.ResourceData, meta
 	}
 	var domainIds []string
 	if domainVOs, ok := object["domainVO"].([]interface{}); ok {
-		var domainIds []string
 		for _, item := range domainVOs {
 			if m, ok := item.(map[string]interface{}); ok {
 				if domainId, ok := m["domainId"].(string); ok {
