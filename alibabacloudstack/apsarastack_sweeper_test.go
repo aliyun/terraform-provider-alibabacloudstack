@@ -46,6 +46,14 @@ func sharedClientForRegion(region string) (interface{}, error) {
 		protocol = "HTTP"
 	}
 	
+	if region == "" {
+		if v := os.Getenv("ALIBABACLOUDSTACK_REGION"); v == "" {
+			return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_REGION")
+		} else {
+			region = v
+		}
+	}
+	
 	if is_center_region_str := os.Getenv("ALIBABACLOUDSTACK_CENTER_REGION"); is_center_region_str == "" {
 		is_center_region = true
 	}else {

@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"reflect"
@@ -10,8 +11,10 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"log"
@@ -1514,20 +1517,91 @@ locals {
 `, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1))
 }
 
+func checkOrCreateEdasK8sInstance(k8sId string) error {
+	rawClient, err := sharedClientForRegion("")
+	if err != nil {
+		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	edasService := EdasService{client}
+	{
+		request := edas.CreateListClusterRequest()
+		client.InitRoaRequest(*request.RoaRequest)
+		request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+
+		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
+			return edasClient.ListCluster(request)
+		})
+
+		response, ok := raw.(*edas.ListClusterResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_clusters", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+
+		if response.Code != 200 {
+			return errmsgs.WrapError(errmsgs.Error(response.Message))
+		}
+
+		for _, cluster := range response.ClusterList.Cluster {
+			if k8sId == cluster.ClusterId {
+				return nil
+			}
+		}
+	}
+
+	{
+		request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "ImportK8sCluster", "/pop/v5/import_k8s_cluster")
+		request.QueryParams["ClusterId"] = k8sId
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		response := ImportK8sClusterResponse{}
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+
+		log.Printf("unmarshal response for read %v", &response)
+
+		if len(response.Data) == 0 {
+			return errmsgs.WrapError(errmsgs.Error("null cluster id after import k8s cluster"))
+		}
+		// Wait until import succeed
+		edasService := EdasService{client}
+		stateConf := BuildStateConf([]string{"3"}, []string{"1"}, 5*time.Minute, 10*time.Second, edasService.ClusterImportK8sStateRefreshFunc(k8sId, []string{"0", "2", "4"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, k8sId)
+		}
+		return nil
+	}
+}
+
 func EdasClusterCommonTestCase() string {
+	k8sId:= os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID")
+	checkOrCreateEdasK8sInstance(k8sId)
 	return AckK8sCommonTestCase() + `
 	
 data "alibabacloudstack_edas_clusters" "default" {
-	name_regex = "^${local.k8s_cluster_name}$"
+	ids = ["^${local.k8s_cluster_id}$"]
 }
 
 resource "alibabacloudstack_edas_k8s_cluster" "default" {
-	count			= length(data.alibabacloudstack_edas_clusters.default.ids) > 0 ? 0 : 1
+	count			= var.existed_k8s_cluster_id == "" ? 1 : 0
 	cs_cluster_id	= local.k8s_cluster_id
 }
 
 locals {
-	edas_cluster_id = length(data.alibabacloudstack_edas_clusters.default.ids) > 0 ? data.alibabacloudstack_edas_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
+	edas_cluster_id = var.existed_k8s_cluster_id != "" ? data.alibabacloudstack_edas_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
 }
 `
 }
@@ -1623,11 +1697,97 @@ resource "alibabacloudstack_kms_key" "key" {
 }
 `
 
+func CheckOrCreateApiGatewayV2K8sInstance(k8sId string) error {
+	rawClient, err := sharedClientForRegion("")
+	if err != nil {
+		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
+	}
+	notFoundError := fmt.Errorf("error getting K8s Cluster client: %s", k8sId)
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	csService := CsService{client}
+	object, err := csService.DescribeCsKubernetes(k8sId)
+	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			return notFoundError
+		}
+		return notFoundError
+	}
+	k8sName := object.Name
+
+	requestParams := map[string]interface{}{
+		"current": 1,
+		"size":    100,
+	}
+
+	notFound := false
+	if resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListClusters", "/k8s/listClusters", nil, nil, requestParams); err != nil {
+		return notFoundError
+	} else {
+		data, ok := resp["data"]
+		if !ok || data == nil {
+			notFound = true
+		} else {
+			recordsData, ok := data.(map[string]interface{})["records"]
+			if !ok || recordsData == nil {
+				notFound = true
+			} else {
+
+				records := recordsData.([]interface{})
+				if len(records) == 0 {
+					notFound = true
+				} else {
+					for _, record := range records {
+						r, ok := record.(map[string]interface{})
+						if !ok {
+							continue
+						}
+						if attrData, ok := r["k8sClusterAttribute"].(map[string]interface{}); ok {
+							if attrData["csClusterId"] == k8sId {
+								return nil
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if notFound {
+		reqBody := map[string]interface{}{
+			"k8sClusterType": "container-service",
+			"csClusterId":    k8sId,
+			"csClusterName":  k8sName,
+			"slbType":        "internet",
+			"k8sClusterAttribute": map[string]interface{}{
+				"csClusterId":   k8sId,
+				"csClusterName": k8sName,
+				"slbType":       "internet",
+			},
+			"k8sClusterName": "acctestautocreated",
+		}
+		if configContent, err := csService.GetK8sClusterKubeConfig(k8sId, false); err != nil {
+			return err
+		} else {
+			reqBody["configContent"] = configContent
+		}
+
+		if _, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ImportCluster", "/k8s/importCluster", nil, nil, reqBody); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func ApiGatwayV2K8sInstanceTestCase(engineType, deployMode string) string {
 	ingressClass := ""
 	if deployMode == "k8s" {
 		ingressClass = `ingress_class_name = "${var.name}-class"`
 	}
+
+	if k8sId := os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"); k8sId != "" {
+		CheckOrCreateApiGatewayV2K8sInstance(k8sId)
+	}
+
 	return fmt.Sprintf(`
 	data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
 		sorted_by = "CPU"
@@ -1636,11 +1796,11 @@ func ApiGatwayV2K8sInstanceTestCase(engineType, deployMode string) string {
 	%s
 
 	data "alibabacloudstack_api_gateway_v2_k8s_clusters" "default" {
-		k8s_cluster_name = local.k8s_cluster_name
+		cs_cluster_id = local.k8s_cluster_id
 	}
 
 	resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
-		count = length(data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids) > 0 ? 0 : 1
+		count = var.existed_k8s_cluster_id == "" ? 1 : 0
 		cs_cluster_id =   local.k8s_cluster_id
 		k8s_cluster_name = local.k8s_cluster_name
 	}
@@ -1651,7 +1811,7 @@ func ApiGatwayV2K8sInstanceTestCase(engineType, deployMode string) string {
 	  instance_class     = "mini"
 	  broker_engine_type = "%s"
 	  deploy_mode        = "%s"
-	  deploy_cluster_code = length(data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids) > 0 ? "${data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids.0}" : "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.0.id}"
+	  deploy_cluster_code = var.existed_k8s_cluster_id == "" ? "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.0.id}" : "${data.alibabacloudstack_api_gateway_v2_k8s_clusters.default.ids.0}" 
 	  deploy_cluster_namespace = "${var.name}-namespace"
 	  %s
 	  sls_enabled = "true"

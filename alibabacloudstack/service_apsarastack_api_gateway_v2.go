@@ -345,9 +345,13 @@ func (s *ApiGateWayV2Service) DescribeApigwV2Route(id string) (map[string]interf
 		return nil, err
 	}
 
-	data, ok := response["data"]
-	if !ok {
+	if data, ok := response["data"]; !ok {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ApigwV2 route %s not found", id))
+	} else if item, ok := data.(map[string]interface{}); !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ApigwV2 route %s not found", id))
+	} else if _, existed := item["routeId"]; ! existed {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ApigwV2 route %s not found", id))
+	} else {
+		return item, nil
 	}
-	return data.(map[string]interface{}), nil
 }
