@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -157,10 +158,41 @@ func (s *OnsService) DescribeMqttInstance(id string) (map[string]interface{}, er
 	if err != nil {
 		return nil, err
 	}
-
 	if data, ok := response["Data"]; !ok || data == nil {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("MqttInstance %s not found", id))
 	} else {
 		return data.(map[string]interface{}), nil
 	}
+}
+
+func (s *OnsService) DescribeOnsMqttTopic(id string) (map[string]interface{}, error) {
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid id format, expected {InstanceId}:{Topic}")
+	}
+	instanceId := parts[0]
+	topic := parts[1]
+
+	reqQuery := map[string]interface{}{
+		"InstanceId":  instanceId,
+		"CurrentPage": 1,
+		"PageSize":    100,
+		"isFuzzy":     false,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "Ons-inner", "2018-02-05", "ConsoleTopicListInPage", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+	if data, ok := response["Data"].([]interface{}); ok {
+		for _, item := range data {
+			if topicItem, ok := item.(map[string]interface{}); ok {
+				if topicItem["topic"].(string) == topic {
+					return topicItem, nil
+				}
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Mqtt Topic %s not found", id))
 }
