@@ -146,7 +146,8 @@ func resourceAlibabacloudStackAPIGatewayV2McpserverCreate(d *schema.ResourceData
 		request["serviceProtocol"] = "MCP"
 	}
 	apiGatewayV2Service := ApiGateWayV2Service{client}
-	services, err := apiGatewayV2Service.DescribeService(d.Get("service").(string), d.Get("gw_instance_id").(string))
+
+	services, err := apiGatewayV2Service.DescribeApiGatewayV2Service(fmt.Sprintf("%s:%s", d.Get("service").(string), d.Get("gw_instance_id").(string)))
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -321,7 +322,7 @@ func resourceAlibabacloudStackAPIGatewayV2McpserverUpdate(d *schema.ResourceData
 		request["service"] = d.Get("service")
 		request["description"] = d.Get("description")
 		apiGatewayV2Service := ApiGateWayV2Service{client}
-		services, err := apiGatewayV2Service.DescribeService(d.Get("service").(string), d.Get("gw_instance_id").(string))
+		services, err := apiGatewayV2Service.DescribeApiGatewayV2Service(fmt.Sprintf("%s:%s", d.Get("service").(string), d.Get("gw_instance_id").(string)))
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}

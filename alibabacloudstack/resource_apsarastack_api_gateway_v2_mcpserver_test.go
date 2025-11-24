@@ -14,28 +14,15 @@ variable "name" {
   default = "%s"
 }
 
-data "alibabacloudstack_api_gateway_v2_instance_types" "default" {
-	sorted_by = "CPU"
-}
-
 %s
 
-resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
-	cs_cluster_id =   "${local.k8s_cluster_id}"
-	k8s_cluster_name = "${var.name}"
-}
-
-resource "alibabacloudstack_api_gateway_v2_instance" "default" {
-  instance_name      = "${var.name}-apigw"
-  node_number        = 1
-  instance_class     = "mini"
-  broker_engine_type = "HIGRESS"
-  deploy_mode        = "k8s"
-  deploy_cluster_code = "${alibabacloudstack_api_gateway_v2_k8s_cluster.default.id}"
-  deploy_cluster_namespace = "${var.name}-namespace"
-  ingress_class_name = "${var.name}-class"
-  sls_enabled = "true"
-  prometheus_enabled = "true"
+resource "alibabacloudstack_api_gateway_v2_service" "default" {
+  name = "${var.name}"
+  description = "${var.name}"
+  protocol = "HTTP"
+  upstream_type = "1"
+  load_balance_type = "1"
+  gw_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
 }
 
 resource "alibabacloudstack_api_gateway_v2_domain" "default" {
@@ -43,7 +30,7 @@ resource "alibabacloudstack_api_gateway_v2_domain" "default" {
 	instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
 	protocol = "HTTP"
 }
-`, name, AckK8sCommonTestCase())
+`, name, ApiGatwayV2K8sInstanceTestCase("HIGRESS", "k8s"))
 }
 
 func TestAccAlibabacloudStackApiGatewayV2Mcpserver_basic(t *testing.T) {
@@ -53,12 +40,10 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_basic(t *testing.T) {
 		"name":              "testtf",
 		"description":       "testddd",
 		"type":              "OPEN_API",
-		"service":           "kubernetes.default.svc.cluster.local",
 		"domains.#":         "1",
 		"domains.0":         CHECKSET,
 		"consumer_auth":     "true",
 		"services.#":        "1",
-		"services.0.name":   "kubernetes.default.svc.cluster.local",
 		"services.0.port":   "443",
 		"services.0.weight": "100",
 	})
@@ -75,16 +60,16 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
-
-		CheckDestroy: nil,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name":        "${var.name}",
 					"description": "testddd",
 					"type":        "OPEN_API",
-					"service":     "kubernetes.default.svc.cluster.local",
+					"service":     "${alibabacloudstack_api_gateway_v2_service.default.id}",
 					"domains": []string{
 						"${alibabacloudstack_api_gateway_v2_domain.default.id}",
 					},
@@ -96,12 +81,12 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_basic(t *testing.T) {
 						"name":              "testtf",
 						"description":       "testddd",
 						"type":              "OPEN_API",
-						"service":           "kubernetes.default.svc.cluster.local",
+						"service":           CHECKSET,
 						"domains.#":         "1",
 						"domains.0":         CHECKSET,
 						"consumer_auth":     "true",
 						"services.#":        "1",
-						"services.0.name":   "kubernetes.default.svc.cluster.local",
+						"services.0.name":   CHECKSET,
 						"services.0.port":   "443",
 						"services.0.weight": "100",
 					}),
@@ -141,16 +126,16 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_database(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
-
-		CheckDestroy: nil,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name":        "${var.name}",
 					"description": "${var.name}",
 					"type":        "DATABASE",
-					"service":     "kubernetes.default.svc.cluster.local",
+					"service":     "${alibabacloudstack_api_gateway_v2_service.default.id}",
 					"domains": []string{
 						"${alibabacloudstack_api_gateway_v2_domain.default.id}",
 					},
@@ -171,12 +156,12 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_database(t *testing.T) {
 					testAccCheck(map[string]string{
 						"name":              name,
 						"description":       name,
-						"service":           "kubernetes.default.svc.cluster.local",
+						"service":           CHECKSET,
 						"domains.#":         "1",
 						"domains.0":         CHECKSET,
 						"consumer_auth":     "true",
 						"services.#":        "1",
-						"services.0.name":   "kubernetes.default.svc.cluster.local",
+						"services.0.name":   CHECKSET,
 						"services.0.port":   "443",
 						"services.0.weight": "100",
 					}),
@@ -239,16 +224,16 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_directRoute(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
-
-		CheckDestroy: nil,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name":        "${var.name}",
 					"description": "${var.name}",
 					"type":        "DIRECT_ROUTE",
-					"service":     "kubernetes.default.svc.cluster.local",
+					"service":     "${alibabacloudstack_api_gateway_v2_service.default.id}",
 					"domains": []string{
 						"${alibabacloudstack_api_gateway_v2_domain.default.id}",
 					},
@@ -262,14 +247,14 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_directRoute(t *testing.T) {
 						"name":              name,
 						"description":       name,
 						"type":              "DIRECT_ROUTE",
-						"service":           "kubernetes.default.svc.cluster.local",
+						"service":           CHECKSET,
 						"domains.#":         "1",
 						"domains.0":         CHECKSET,
 						"consumer_auth":     "false",
 						"direct_route_path": "/sse",
 						"direct_route_type": "sse",
 						"services.#":        "1",
-						"services.0.name":   "kubernetes.default.svc.cluster.local",
+						"services.0.name":   CHECKSET,
 						"services.0.port":   "443",
 						"services.0.weight": "100",
 					}),

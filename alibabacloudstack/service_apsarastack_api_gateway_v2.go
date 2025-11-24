@@ -383,22 +383,3 @@ func (s *ApiGateWayV2Service) DescribeMcpserver(id string) (map[string]interface
 	return data, nil
 }
 
-func (s *ApiGateWayV2Service) DescribeService(serviceId, gwInstanceId string) (map[string]interface{}, error) {
-
-	reqBody := map[string]interface{}{
-		"serviceId":    serviceId,
-		"gwInstanceId": gwInstanceId,
-	}
-
-	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetService", "/microservice/getService", nil, nil, reqBody)
-	if err != nil {
-		return nil, err
-	}
-	data, ok := response["data"].(map[string]interface{})
-	if !ok {
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("APIGateway Service %s not found", serviceId))
-	}
-
-	return data, nil
-}
-
