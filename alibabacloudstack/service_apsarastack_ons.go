@@ -2,6 +2,8 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
@@ -141,4 +143,24 @@ func (s *OnsService) DescribeOnsGroup(id string) (response *OnsGroup, err error)
 	}
 
 	return resp, nil
+}
+
+func (s *OnsService) DescribeMqttInstance(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{
+		"Platform":       "onsConsole",
+		"OnsRegionId":    s.client.RegionId,
+		"MqttInstanceId": id,
+		"PreventCache":   time.Now().UnixNano() / 1e6,
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "Ons-inner", "2018-02-05", "ConsoleMqttInstanceBaseInfo", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if data, ok := response["Data"]; !ok || data == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("MqttInstance %s not found", id))
+	} else {
+		return data.(map[string]interface{}), nil
+	}
 }

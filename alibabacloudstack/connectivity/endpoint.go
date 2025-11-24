@@ -74,6 +74,7 @@ const (
 	HOLOGRAMCode         = ServiceCode("HOLOGRAM")
 	HitsdbCode           = ServiceCode("HITSDB")
 	CSB2Code             = ServiceCode("CSB2")
+	OnsInnerCode         = ServiceCode("ONS_INNER")
 	// undefined code, add first
 	GDBCode                   = ServiceCode("GDB")
 	ARMSCode                  = ServiceCode("ARMS")
@@ -333,6 +334,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	BastionHostCode: PopEndpoint{
 		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
 		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
+	},
+	OnsInnerCode: PopEndpoint{
+		"ons-biz.{{.region}}.{{.domain}}",
+		"ons-biz.{{.region}}.{{.domain}}",
 	},
 	OtsCode: PopEndpoint{
 		"ots.{{.domain}}",
