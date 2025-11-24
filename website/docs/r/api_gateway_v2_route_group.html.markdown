@@ -71,7 +71,7 @@ resource "alibabacloudstack_api_gateway_v2_route_group" "default" {
 The following arguments are supported:
 
 * `base_path` - (Required) The base path of the route group. Must start with a slash (/), such as "/api". This path will serve as the common prefix for all APIs under this group.
-* `instance_id` - (Required, ForceNew when changed) The ID of the API Gateway instance. Specifies the gateway instance to which the route group belongs
+* `instance_id` - (Required, ForceNew) The ID of the API Gateway instance. Specifies the gateway instance to which the route group belongs
 * `name` - (Required) The name of the route group. The name length is limited to 1-128 characters and cannot contain special characters.
 * `description` - (Optional) The description of the route group. The description length is limited to 1-256 characters.
 * `domain_ids` - (Optional) A list of associated domain IDs. Each domain ID corresponds to a configured custom domain used to access APIs under this route group.

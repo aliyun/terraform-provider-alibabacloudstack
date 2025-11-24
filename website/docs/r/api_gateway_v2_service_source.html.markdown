@@ -101,7 +101,7 @@ resource "alibabacloudstack_api_gateway_v2_service_source" "example" {
 
 The following arguments are supported:
 
-* `instance_id` - (Required, Forces new resource) The ID of the API Gateway instance.
+* `instance_id` - (Required, ForceNew) The ID of the API Gateway instance.
 * `source_name` - (Required) The name of the service source.
 * `source_type` - (Required) The type of the service source. Valid values:
   * `1`: NACOS

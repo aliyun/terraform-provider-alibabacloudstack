@@ -53,10 +53,10 @@ resource "alibabacloudstack_api_gateway_v2_cascade_link" "default" {
 
 The following arguments are supported:
 
-* `cascade_instance_id` - (Required, Forces new resource when changed) The ID of the cascade instance. Specifies the unique identifier of the target API Gateway instance for establishing cascade relationships.
-* `link_name` - (Required, Forces new resource when changed) The name of the link. A custom name for the link, used to identify the cascade link.
+* `cascade_instance_id` - (Required, ForceNew) The ID of the cascade instance. Specifies the unique identifier of the target API Gateway instance for establishing cascade relationships.
+* `link_name` - (Required, ForceNew) The name of the link. A custom name for the link, used to identify the cascade link.
 * `source_instance_address` - (Required) The address of the source instance. The IP address or domain name of the source service instance, used for API request routing.
-* `source_instance_id` - (Required, Forces new resource when changed) The ID of the source instance. The unique identifier of the source service instance, which must match the source instance address.
+* `source_instance_id` - (Required, ForceNew) The ID of the source instance. The unique identifier of the source service instance, which must match the source instance address.
 * `cascade_instance_name` - (Optional) The name of the cascade instance. The display name of the cascade API Gateway instance, used for identification only.
 * `cascade_service_id` - (Optional) The ID of the cascade service. The unique identifier of the associated cascade service, used for service cascade management.
 * `source_instance_name` - (Optional) The name of the source instance. The display name of the source service instance, used for identification only.

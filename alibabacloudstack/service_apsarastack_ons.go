@@ -174,10 +174,13 @@ func (s *OnsService) DescribeOnsMqttTopic(id string) (map[string]interface{}, er
 	topic := parts[1]
 
 	reqQuery := map[string]interface{}{
-		"InstanceId":  instanceId,
-		"CurrentPage": 1,
-		"PageSize":    100,
-		"isFuzzy":     false,
+		"PreventCache":   time.Now().UnixNano() / 1e6,
+		"Dauth_url_hash": "mqtt%2Fconsole%2Finstances%2FinstanceDetail",
+		"OnsRegionId":    s.client.RegionId,
+		"InstanceId":     instanceId,
+		"CurrentPage":    1,
+		"PageSize":       100,
+		"isFuzzy":        false,
 	}
 
 	response, err := s.client.DoTeaRequest("GET", "Ons-inner", "2018-02-05", "ConsoleTopicListInPage", "", nil, reqQuery, nil)

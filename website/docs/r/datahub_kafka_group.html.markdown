@@ -47,8 +47,8 @@ resource "alibabacloudstack_datahub_kafka_group" "default" {
 The following arguments are supported:
 
 * `comment` - (Required) The description of the Kafka group. Cannot be modified after creation.
-* `group_name` - (Required, ForceNew when changed) The name of the Kafka group. Must comply with DataHub naming conventions, with a length limit of 1-128 characters.
-* `project_name` - (Required, ForceNew when changed) The name of the DataHub project. Must already exist and comply with DataHub project naming conventions.
+* `group_name` - (Required, ForceNew) The name of the Kafka group. Must comply with DataHub naming conventions, with a length limit of 1-128 characters.
+* `project_name` - (Required, ForceNew) The name of the DataHub project. Must already exist and comply with DataHub project naming conventions.
 * `topic_list` - (Optional) The list of topics bound to this Kafka group. At least one topic must be specified, and topic names must comply with DataHub topic naming conventions. When updating, the `UpdateTopicsForKafkaGroup` API is called to change the binding relationship.
 
 ## Attributes Reference

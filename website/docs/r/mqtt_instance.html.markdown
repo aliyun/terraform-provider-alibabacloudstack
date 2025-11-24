@@ -46,7 +46,7 @@ resource "alibabacloudstack_mqtt_instance" "default" {
 The following arguments are supported:
 
 * `instance_name` - (Required) The name of the MQTT instance. The name must be 1 to 128 characters in length and cannot start with `http://` or `https://`.
-* `cluster_name` - (Required, Forces new resource when changed) The name of the cluster. Default value is "mqtt4Private", indicating the use of a private cluster.
+* `cluster_name` - (Required, ForceNew) The name of the cluster. Default value is "mqtt4Private", indicating the use of a private cluster.
 * `independent_naming` - (Optional) Whether to use an independent namespace. Default value is `true`, indicating that independent namespace is enabled.
 * `max_conn` - (Optional) The maximum number of connections. Valid values: 1000 to 100000.
 * `max_down_tps` - (Optional) The maximum downstream TPS (transactions per second). Valid values: 1000 to 100000.

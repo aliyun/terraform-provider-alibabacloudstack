@@ -184,8 +184,8 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
 
 The following arguments are supported:
 
-* `gw_instance_id` - (Required, Forces new resource) The ID of the API Gateway instance.
-* `name` - (Required, Forces new resource) The name of the service.
+* `gw_instance_id` - (Required, ForceNew) The ID of the API Gateway instance.
+* `name` - (Required, ForceNew) The name of the service.
 * `description` - (Optional) The description of the service.
 * `load_balance_type` - (Optional) The load balancing type.
 * `protocol` - (Optional) The service protocol type, such as HTTP.

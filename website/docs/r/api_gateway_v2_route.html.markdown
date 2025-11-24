@@ -94,9 +94,9 @@ resource "alibabacloudstack_api_gateway_v2_route" "default" {
 
 The following arguments are supported:
 
-* `gw_instance_id` - (Required, Forces new resource) The ID of the API Gateway instance.
-* `route_name` - (Required, Forces new resource) The name of the route.
-* `group_id` - (Optional, Forces new resource) The group ID. Default value is "DEFAULT".
+* `gw_instance_id` - (Required, ForceNew) The ID of the API Gateway instance.
+* `route_name` - (Required, ForceNew) The name of the route.
+* `group_id` - (Optional, ForceNew) The group ID. Default value is "DEFAULT".
 * `cookie` - (Optional) A list of cookie matching rules. Each rule contains the following attributes:
   * `key` - (Required) The name of the cookie.
   * `value` - (Required) The value of the cookie.

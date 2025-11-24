@@ -134,14 +134,14 @@ resource "alibabacloudstack_api_gateway_v2_consumer" "default" {
 The following arguments are supported:
 
 * `app_name` - (Required) The name of the application. It must be 1 to 128 characters in length.
-* `auth_type` - (Required, Forces new resource when changed) The authentication type. Valid values:
+* `auth_type` - (Required, ForceNew) The authentication type. Valid values:
   * `1`: Basic authentication
   * `2`: OAuth 2.0 authentication
   * `3`: JWT authentication
   * `5`: API Key authentication
   * `6`: API Gateway application authentication
   * `7`: CSB authentication
-* `gw_instance_id` - (Required, Forces new resource when changed) The ID of the gateway instance. The format is `i-xxx`.
+* `gw_instance_id` - (Required, ForceNew) The ID of the gateway instance. The format is `i-xxx`.
 * `app_code` - (Optional) The application code for API Gateway authentication.
 * `app_secret` - (Optional) The application secret, used for authentication methods such as API Key and JWT.
 * `description` - (Optional) The description of the application. It must be 1 to 256 characters in length.

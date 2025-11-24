@@ -2,17 +2,19 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackMqttTopic() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"instance_id": {
+			"store_instance_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -28,9 +30,10 @@ func resourceAlibabacloudStackMqttTopic() *schema.Resource {
 				ForceNew: true,
 			},
 			"order_type": {
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntInSlice([]int{0, 1}),
 			},
 			"independent_naming": {
 				Type:     schema.TypeBool,
@@ -68,10 +71,6 @@ func resourceAlibabacloudStackMqttTopic() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"id": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
 			"channel_id": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -93,7 +92,7 @@ func resourceAlibabacloudStackMqttTopic() *schema.Resource {
 func resourceAlibabacloudStackMqttTopicCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	instanceId := d.Get("instance_id").(string)
+	instanceId := d.Get("store_instance_id").(string)
 	topic := d.Get("topic").(string)
 
 	reqBody := map[string]interface{}{
@@ -110,7 +109,7 @@ func resourceAlibabacloudStackMqttTopicCreate(d *schema.ResourceData, meta inter
 		reqBody["Remark"] = remark.(string)
 	}
 
-	_, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "ConsoleTopicCreate", "", nil, nil, reqBody)
+	_, err := client.DoTeaRequest("POST", "Ons-inner", "2018-02-05", "ConsoleTopicCreate", "", nil, nil, reqBody)
 	if err != nil {
 		return err
 	}
@@ -131,7 +130,7 @@ func resourceAlibabacloudStackMqttTopicRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	d.Set("instance_id", object["namespaceId"])
+	d.Set("store_instance_id", object["namespaceId"])
 	d.Set("topic", object["topic"])
 	d.Set("remark", object["remark"])
 	d.Set("order_type", object["orderType"])
@@ -144,7 +143,6 @@ func resourceAlibabacloudStackMqttTopicRead(d *schema.ResourceData, meta interfa
 	d.Set("unit_flag", object["unitFlag"])
 	d.Set("status_name", object["statusName"])
 	d.Set("channel_name", object["channelName"])
-	d.Set("id", object["id"])
 	d.Set("channel_id", object["channelId"])
 	d.Set("status", object["status"])
 
@@ -154,8 +152,9 @@ func resourceAlibabacloudStackMqttTopicRead(d *schema.ResourceData, meta interfa
 func resourceAlibabacloudStackMqttTopicDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	instanceId := d.Get("instance_id").(string)
-	topic := d.Get("topic").(string)
+	param := strings.Split(d.Id(), ":")
+	instanceId := param[0]
+	topic := param[1]
 
 	reqQuery := map[string]interface{}{
 		"InstanceId":     instanceId,
