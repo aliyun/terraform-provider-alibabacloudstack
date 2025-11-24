@@ -200,6 +200,99 @@ func TestUatAlibabacloudStackApiGatewayV2Service_HSF(t *testing.T) {
 	})
 }
 
+func TestUatAlibabacloudStackApiGatewayV2Service_AIGwService(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alibabacloudstack_api_gateway_v2_service.aigw_service"
+	ra := resourceAttrInit(resourceId, map[string]string{})
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &ApiGateWayV2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeApiGatewayV2Service")
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(2000, 3000)
+	name := fmt.Sprintf("testtf-hsf-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApiGatewayV2ServiceAIgwServiceTestCase)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"gw_instance_id":      "${alibabacloudstack_api_gateway_v2_instance.default.id}",
+					"name":                "${var.name}",
+					"service_source_type": "ip",
+					"protocol":            "HTTP",
+					"service_nodes": []map[string]interface{}{
+						{
+							"ip":     "127.0.0.1",
+							"port":   "80",
+							"weight": "80",
+							"enable": "true",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name":                   name,
+						"description":            name,
+						"service_source_type":    "ip",
+						"protocol":               "HTTP",
+						"service_nodes.#":        "1",
+						"service_nodes.0.ip":     "127.0.0.1",
+						"service_nodes.0.port":   "80",
+						"service_nodes.0.weight": "80",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"service_source_type": "dns",
+					"protocol":            "HTTPS",
+					"service_nodes": []map[string]interface{}{
+						{
+							"ip":     "aaaa.com",
+							"port":   "443",
+							"weight": "100",
+							"enable": "true",
+						},
+						{
+							"ip":     "bbbb.com",
+							"port":   "9999",
+							"weight": "0",
+							"enable": "true",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"service_source_type":    "dns",
+						"protocol":               "HTTPS",
+						"service_nodes.#":        "2",
+						"service_nodes.0.ip":     "aaaa.com",
+						"service_nodes.0.port":   "443",
+						"service_nodes.0.weight": "100",
+						"service_nodes.1.ip":     "bbbb.com",
+						"service_nodes.1.port":   "9999",
+						"service_nodes.1.weight": "0",
+					}),
+				),
+			},
+		},
+	})
+}
+
 func ApiGatewayV2ServiceCommonTestCase(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
@@ -208,8 +301,18 @@ variable "name" {
 
 %s
 
-
 `, name, ApiGatwayV2K8sInstanceTestCase("SCG", "apig_k8s"))
+}
+
+func ApiGatewayV2ServiceAIgwServiceTestCase(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
+}
+
+%s
+
+`, name, ApiGatwayV2K8sInstanceTestCase("HIGRESS", "k8s"))
 }
 
 func ApiGatewayV2ServiceForServiceSourceTestCase(name string) string {

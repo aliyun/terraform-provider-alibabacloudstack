@@ -8,6 +8,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackAPIGatewayV2Service() *schema.Resource {
@@ -60,6 +61,11 @@ func resourceAlibabacloudStackAPIGatewayV2Service() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+			},
+			"service_source_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"dns", "ip"}, false),
 			},
 			"service_nodes": {
 				Type:     schema.TypeList,
@@ -234,6 +240,16 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceCreate(d *schema.ResourceData, 
 	} else {
 		request["isOpenHealthCheck"] = false
 	}
+	if v, ok := d.GetOk("service_source_type"); ok {
+		switch v.(string) {
+		case "dns":
+			request["serviceSourceType"] = 8
+		case "ip":
+			request["serviceSourceType"] = 7
+		default:
+			return errmsgs.WrapError(fmt.Errorf("invalid service_source_type: %s", v.(string)))
+		}
+	}
 	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "CreateService", "/microservice/createService", nil, nil, request)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_api_gateway_v2_service", "CreateService", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -290,6 +306,12 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceRead(d *schema.ResourceData, me
 	d.Set("load_balance_type", object["loadBalanceType"])
 	d.Set("protocol", object["protocol"])
 	d.Set("service_id", object["serviceId"])
+	switch object["serviceSourceType"].(int) {
+	case 8:
+		d.Set("service_source_type", "dns")
+	case 7:
+		d.Set("service_source_type", "ip")
+	}
 
 	if serviceStruct, ok := object["serviceStruct"]; ok && serviceStruct != nil {
 		serviceStructMap := serviceStruct.(map[string]interface{})
@@ -395,6 +417,16 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceUpdate(d *schema.ResourceData, 
 		request["isOpenHealthCheck"] = true
 	} else {
 		request["isOpenHealthCheck"] = false
+	}
+	if v, ok := d.GetOk("service_source_type"); ok {
+		switch v.(string) {
+		case "dns":
+			request["serviceSourceType"] = 8
+		case "ip":
+			request["serviceSourceType"] = 7
+		default:
+			return errmsgs.WrapError(fmt.Errorf("invalid service_source_type: %s", v.(string)))
+		}
 	}
 	_, err = client.DoTeaRequest("POST", "csb2", "2023-02-06", "ModifyService", "/microservice/modifyService", nil, nil, request)
 	if err != nil {
