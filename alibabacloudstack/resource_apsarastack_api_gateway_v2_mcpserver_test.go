@@ -56,7 +56,7 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_basic(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf_testAcc%d", rand)
+	name := fmt.Sprintf("tf-mcp%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, buildBasicGwInstance)
 
 	ResourceTest(t, resource.TestCase{
