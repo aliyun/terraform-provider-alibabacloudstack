@@ -206,7 +206,7 @@ func dataSourceAlibabacloudStackAPIGatewayV2ServicesRead(d *schema.ResourceData,
 	for _, v := range records.([]interface{}) {
 		record := v.(map[string]interface{})
 		serviceId := record["serviceId"].(string)
-		resourceId := fmt.Sprintf("%s:%s", gwInstanceId, serviceId)
+		resourceId := fmt.Sprintf("%s^%s", gwInstanceId, serviceId)
 
 		obj, err := apiGatewayService.DescribeApiGatewayV2Service(resourceId)
 		if err != nil {

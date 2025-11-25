@@ -1,7 +1,9 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -31,10 +33,12 @@ func resourceAlibabacloudStackAPIGatewayV2Service() *schema.Resource {
 			"upstream_type": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"load_balance_type": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"protocol": {
 				Type:     schema.TypeString,
@@ -83,10 +87,12 @@ func resourceAlibabacloudStackAPIGatewayV2Service() *schema.Resource {
 						"weight": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 						"enable": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -254,13 +260,30 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceCreate(d *schema.ResourceData, 
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_api_gateway_v2_service", "CreateService", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	serviceId, ok := resp["data"].(string)
+	data, ok := resp["data"].(string)
 	if !ok {
 		return errmsgs.WrapError(fmt.Errorf("failed to retrieve serviceId from response data"))
 	}
 
 	gwInstanceId := d.Get("gw_instance_id").(string)
-	d.SetId(fmt.Sprintf("%s:%s", gwInstanceId, serviceId))
+	apiGatewayService := ApiGateWayV2Service{client}
+	time.Sleep(time.Duration(5) * time.Second)
+	services, err := apiGatewayService.ListApiGatewayV2Service(gwInstanceId)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_api_gateway_v2_service", "ListServices", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	serviceId := ""
+	for _, v := range services {
+		service := v.(map[string]interface{})
+		params := strings.Split(service["name"].(string), ".")
+		if params[0] == data {
+			serviceId = service["serviceId"].(string)
+		}
+	}
+	if serviceId == "" {
+		return errmsgs.WrapError(fmt.Errorf("failed to find serviceId"))
+	}
+	d.SetId(fmt.Sprintf("%s^%s", gwInstanceId, serviceId))
 
 	return nil
 }
@@ -294,23 +317,31 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceRead(d *schema.ResourceData, me
 		}
 		return err
 	}
-	parts, err := ParseResourceId(d.Id(), 2)
+	parts := strings.Split(d.Id(), "^")
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 	gwInstanceId := parts[0]
 	d.Set("gw_instance_id", gwInstanceId)
-	d.Set("name", object["name"])
+	params := strings.Split(object["name"].(string), ".")
+	d.Set("name", params[0])
 	d.Set("description", object["description"])
 	d.Set("upstream_type", object["upstreamType"])
 	d.Set("load_balance_type", object["loadBalanceType"])
 	d.Set("protocol", object["protocol"])
 	d.Set("service_id", object["serviceId"])
-	switch object["serviceSourceType"].(int) {
-	case 8:
-		d.Set("service_source_type", "dns")
-	case 7:
-		d.Set("service_source_type", "ip")
+	serviceSourceType, ok := object["serviceSourceType"]
+	if ok {
+		v, err := serviceSourceType.(json.Number).Int64()
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		switch v {
+		case 8:
+			d.Set("service_source_type", "dns")
+		case 7:
+			d.Set("service_source_type", "ip")
+		}
 	}
 
 	if serviceStruct, ok := object["serviceStruct"]; ok && serviceStruct != nil {
@@ -370,10 +401,7 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceRead(d *schema.ResourceData, me
 func resourceAlibabacloudStackAPIGatewayV2ServiceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
+	parts := strings.Split(d.Id(), "^")
 	gwInstanceId := parts[0]
 	serviceId := parts[1]
 
@@ -428,7 +456,7 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceUpdate(d *schema.ResourceData, 
 			return errmsgs.WrapError(fmt.Errorf("invalid service_source_type: %s", v.(string)))
 		}
 	}
-	_, err = client.DoTeaRequest("POST", "csb2", "2023-02-06", "ModifyService", "/microservice/modifyService", nil, nil, request)
+	_, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ModifyService", "/microservice/modifyService", nil, nil, request)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_api_gateway_v2_service", "ModifyService", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -439,10 +467,7 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceUpdate(d *schema.ResourceData, 
 func resourceAlibabacloudStackAPIGatewayV2ServiceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
+	parts := strings.Split(d.Id(), "^")
 	gwInstanceId := parts[0]
 	serviceId := parts[1]
 
@@ -451,7 +476,7 @@ func resourceAlibabacloudStackAPIGatewayV2ServiceDelete(d *schema.ResourceData, 
 		"gwInstanceId": gwInstanceId,
 	}
 
-	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 		raw, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "DeleteService", "/microservice/deleteService", nil, nil, reqQuery)
 		if err != nil {
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteService", errmsgs.AlibabacloudStackSdkGoERROR, "")

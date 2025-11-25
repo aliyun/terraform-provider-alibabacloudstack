@@ -18,10 +18,12 @@ variable "name" {
 
 resource "alibabacloudstack_api_gateway_v2_service" "default" {
   name = "${var.name}"
-  description = "${var.name}"
+  service_source_type = "ip"
   protocol = "HTTP"
-  upstream_type = "1"
-  load_balance_type = "1"
+  service_nodes {
+	ip = "192.168.1.1"
+	port = 443
+  }
   gw_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
 }
 
@@ -53,7 +55,8 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := "testtf"
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("tf_testAcc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, buildBasicGwInstance)
 
 	ResourceTest(t, resource.TestCase{
@@ -78,7 +81,7 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":              "testtf",
+						"name":              name,
 						"description":       "testddd",
 						"type":              "OPEN_API",
 						"service":           CHECKSET,

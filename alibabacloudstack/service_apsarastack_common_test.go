@@ -1587,7 +1587,7 @@ func checkOrCreateEdasK8sInstance(k8sId string) error {
 }
 
 func EdasClusterCommonTestCase() string {
-	k8sId:= os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID")
+	k8sId := os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID")
 	checkOrCreateEdasK8sInstance(k8sId)
 	return AckK8sCommonTestCase() + `
 	

@@ -296,7 +296,7 @@ func (s *ApiGateWayV2Service) DescribeCascadeInstance(id string) (map[string]int
 	return response["data"].(map[string]interface{}), nil
 }
 func (s *ApiGateWayV2Service) DescribeApiGatewayV2Service(id string) (map[string]interface{}, error) {
-	parts := strings.SplitN(id, ":", 2)
+	parts := strings.SplitN(id, "^", 2)
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid id format, expected gwInstanceId:serviceId")
 	}
@@ -319,6 +319,26 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Service(id string) (map[string
 
 	data := response["data"].(map[string]interface{})
 	return data, nil
+}
+
+func (s *ApiGateWayV2Service) ListApiGatewayV2Service(instanceId string) ([]interface{}, error) {
+	request := map[string]interface{}{
+		"gwInstanceId": instanceId,
+		"current":      1,
+		"size":         100, // Assuming a reasonable page size; adjust if needed
+	}
+
+	resp, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListServices", "/microservice/listServices", nil, nil, request)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_api_gateway_v2_services", "ListServices", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	// Parse response
+	records, err := jsonpath.Get("$.data.records", resp)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_api_gateway_v2_services", "ListServices", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return records.([]interface{}), nil
 }
 
 func (s *ApiGateWayV2Service) DescribeApigwV2Route(id string) (map[string]interface{}, error) {
@@ -349,7 +369,7 @@ func (s *ApiGateWayV2Service) DescribeApigwV2Route(id string) (map[string]interf
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ApigwV2 route %s not found", id))
 	} else if item, ok := data.(map[string]interface{}); !ok {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ApigwV2 route %s not found", id))
-	} else if _, existed := item["routeId"]; ! existed {
+	} else if _, existed := item["routeId"]; !existed {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ApigwV2 route %s not found", id))
 	} else {
 		return item, nil
@@ -382,4 +402,3 @@ func (s *ApiGateWayV2Service) DescribeMcpserver(id string) (map[string]interface
 
 	return data, nil
 }
-
