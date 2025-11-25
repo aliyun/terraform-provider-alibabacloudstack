@@ -199,3 +199,48 @@ func (s *OnsService) DescribeOnsMqttTopic(id string) (map[string]interface{}, er
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Mqtt Topic %s not found", id))
 }
+
+func (s *OnsService) DescribeOnsMqttGroup(id string) (map[string]interface{}, error) {
+	parts, err := ParseResourceId(id, 2)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	instanceId := parts[0]
+	groupId := parts[1]
+
+	// Prepare parameters for the API call
+	query := map[string]interface{}{
+		"MqttInstanceId": instanceId,
+		"currentPage":    1,
+		"pageSize":       100,
+		"Platform":       "onsConsole",
+		"OnsRegionId":    s.client.RegionId,
+		"PreventCache":   time.Now().UnixNano() / 1e6, // milliseconds
+		"Dauth_url_hash": "mqtt%2Fconsole%2Finstances%2FinstanceDetail",
+	}
+
+	resp, err := s.client.DoTeaRequest("POST", "Ons-inner", "2018-02-05", "ConsoleMqttListGroupIdInPage", "", nil, query, nil)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+
+	dataList, ok := resp["Data"].([]interface{})
+	if !ok || len(dataList) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString("Resource Mqtt GroupId not found")
+	}
+
+	var targetGroup map[string]interface{}
+	for _, item := range dataList {
+		if groupInfo, ok := item.(map[string]interface{}); ok {
+			if groupInfo["groupId"] == groupId {
+				targetGroup = groupInfo
+				break
+			}
+		}
+	}
+	if targetGroup == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString("Resource Mqtt GroupId not found")
+	}
+
+	return targetGroup, nil
+}
