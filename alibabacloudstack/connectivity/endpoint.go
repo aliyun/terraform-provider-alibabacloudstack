@@ -75,6 +75,7 @@ const (
 	HitsdbCode           = ServiceCode("HITSDB")
 	CSB2Code             = ServiceCode("CSB2")
 	OnsInnerCode         = ServiceCode("ONS_INNER")
+	UniversalDnsCode     = ServiceCode("UNIVERSALDNS")
 	// undefined code, add first
 	GDBCode                   = ServiceCode("GDB")
 	ARMSCode                  = ServiceCode("ARMS")
@@ -371,6 +372,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	CSB2Code: PopEndpoint{
 		"csb-cop-api-biz.{{.domain}}",
 		"csb-cop-api-biz.{{.region}}.{{.domain}}",
+	},
+	UniversalDnsCode: PopEndpoint{
+		"dns-universal-control.pop.{{.domain}}",
+		"dns-universal-control.pop.{{.region}}.{{.domain}}",
 	},
 	// 3.18.3 new sites will not be opened
 	OneRouterCode: PopEndpoint{
