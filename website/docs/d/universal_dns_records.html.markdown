@@ -14,7 +14,6 @@ description: |-
 ## Example Usage
 
 ```hcl
-data "alibabacloudstack_universal_dns_records" "example" {
   
 variable "name" {
   default = "tf-testacc56057"
@@ -43,8 +42,6 @@ resource "alibabacloudstack_universal_dns_record" "default" {
 data "alibabacloudstack_universal_dns_records" "default" {
   zone_id    = alibabacloudstack_universal_dns_record.default.zone_id
   name_regex = "tf-testacc[0-9]+"
-}
-
 }
 ```
 
