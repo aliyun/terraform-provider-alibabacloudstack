@@ -291,3 +291,43 @@ func SplitDnsZone(zone_id string) string {
 	}
 	return zone_id
 }
+
+// TODO: function already exists in old code
+func (s *DnsService) DescribeDnsForwardDomain(id string) (map[string]interface{}, error) {
+
+	reqQuery := map[string]interface{}{
+		"PageNumber": 1,
+		"PageSize":   100,
+	}
+
+	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalForwardZones", "")
+	request.Scheme = "HTTP"
+	for key, value := range reqQuery {
+		request.QueryParams[key] = fmt.Sprint(value)
+	}
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		return nil, err
+	}
+
+	var respMap map[string]interface{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &respMap)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+
+	data, ok := respMap["Data"].([]interface{})
+	if !ok || len(data) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("DNS forward domain %s not found", id))
+	}
+
+	for _, item := range data {
+		domain := item.(map[string]interface{})
+		if domain["Id"].(string) == id {
+			return domain, nil
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("DNS forward domain %s not found", id))
+}
