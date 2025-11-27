@@ -37,26 +37,32 @@ func TestAccAlibabacloudStackUniversalDnsRecord_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"zone_id":      "${alibabacloudstack_universal_dns_domain.default.id}",
 					"name":         "${var.name}",
+					"remark":       "test remark0",
 					"type":         "A",
 					"ttl":          300,
-					"lba_strategy": "ALL_RR",
+					"lba_strategy": "RATIO",
 					"line_ids":     []string{"default"},
 					"rdatas": []map[string]interface{}{
 						{
-							"value": "192.168.1.1",
+							"value":      "192.168.1.1",
+							"lba_weight": "20",
 						},
 						{
-							"value": "127.0.0.1",
+							"value":      "127.0.0.1",
+							"lba_weight": "80",
 						},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":       name,
-						"type":       "A",
-						"ttl":        "300",
-						"line_ids.#": "1",
-						"rdatas.#":   "2",
+						"name":                name,
+						"remark":              "test remark0",
+						"type":                "A",
+						"ttl":                 "300",
+						"line_ids.#":          "1",
+						"rdatas.#":            "2",
+						"rdatas.0.lba_weight": "20",
+						"rdatas.1.lba_weight": "80",
 					}),
 				),
 			},
@@ -93,6 +99,26 @@ func TestAccAlibabacloudStackUniversalDnsRecord_basic(t *testing.T) {
 						"rdatas.0.lba_weight": "0",
 						"rdatas.1.value":      "test2.",
 						"rdatas.1.lba_weight": "100",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"lba_strategy": "ALL_RR",
+					"rdatas": []map[string]interface{}{
+						{
+							"value": "test1.",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"lba_strategy":        "ALL_RR",
+						"rdatas.#":            "1",
+						"rdatas.0.value":      "test1.",
+						"rdatas.0.lba_weight": REMOVEKEY,
+						"rdatas.1.value":      REMOVEKEY,
+						"rdatas.1.lba_weight": REMOVEKEY,
 					}),
 				),
 			},

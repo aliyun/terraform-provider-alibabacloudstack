@@ -82,9 +82,6 @@ func resourceAlibabacloudStackUniversalDnsRecordCreate(d *schema.ResourceData, m
 	reqBody["Type"] = d.Get("type")
 	reqBody["Ttl"] = d.Get("ttl")
 	reqBody["LbaStrategy"] = d.Get("lba_strategy")
-	if v, ok := d.GetOk("remark"); ok {
-		reqBody["Remark"] = v
-	}
 
 	// Handle rdatas as indexed list in the format RDatas.index.Key
 	rdatas := d.Get("rdatas").([]interface{})
@@ -180,10 +177,6 @@ func resourceAlibabacloudStackUniversalDnsRecordUpdate(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// If this is a new resource, do nothing and return early
-	if d.IsNewResource() {
-		return nil
-	}
-
 	// Handle remark update separately using dedicated API
 	if d.HasChange("remark") {
 		request := make(map[string]interface{})
@@ -192,12 +185,15 @@ func resourceAlibabacloudStackUniversalDnsRecordUpdate(d *schema.ResourceData, m
 		request["Remark"] = d.Get("remark").(string)
 		request["ZoneId"] = d.Get("zone_id").(string)
 
-		_, err := client.DoTeaRequest("POST", "UniversalDns", "2021-06-24", "UpdateUniversalZoneRemark", "", nil, nil, request)
+		_, err := client.DoTeaRequest("POST", "UniversalDns", "2021-06-24", "UpdateUniversalZoneRecordRemark", "", nil, nil, request)
 		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_universal_dns_record", "UpdateUniversalZoneRemark", errmsgs.AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_universal_dns_record", "UpdateUniversalZoneRecordRemark", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
 
+	if d.IsNewResource() {
+		return nil
+	}
 	// Handle updates for all other fields using the main update API
 	if d.HasChanges("type", "ttl", "lba_strategy", "rdatas", "line_ids") {
 		request := make(map[string]interface{})
