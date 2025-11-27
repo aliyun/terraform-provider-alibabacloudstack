@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackUniversalDnsLine_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%d", rand)
+	name := fmt.Sprintf("tfacc%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccUniversalDnsLinedependence)
 
@@ -68,8 +68,8 @@ func TestAccAlibabacloudStackUniversalDnsLine_basic(t *testing.T) {
 						"name":           fmt.Sprintf("%s_update", name),
 						"v4_addresses.#": "2",
 						"v6_addresses.#": "1",
-						"v4_addresses.0": "192.168.2.1",
-						"v4_addresses.1": "127.0.0.1",
+						"v4_addresses.0": CHECKSET,
+						"v4_addresses.1": CHECKSET,
 						"v6_addresses.0": "2020:148:4:28::",
 						"v6_addresses.1": REMOVEKEY,
 					}),

@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
 func TestAccAlibabacloudStackUniversalDnsLinesDataSource(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_universal_dns_lines.default"
 
 	// Define the dataSourceAttr with exist and fake check functions
@@ -19,11 +17,11 @@ func TestAccAlibabacloudStackUniversalDnsLinesDataSource(t *testing.T) {
 			return map[string]string{
 				"ids.#":                    "1",
 				"lines.#":                  "1",
-				"lines.0.name":             fmt.Sprintf("tf-testacc%d", rand),
+				"lines.0.name":             fmt.Sprintf("tfacc%d", rand),
 				"lines.0.priority":         CHECKSET,
 				"lines.0.id":               CHECKSET,
-				"lines.v4_addresses.#":     "1",
-				"lines.v6_addresses.#":     "2",
+				"lines.0.v4_addresses.#":   "1",
+				"lines.0.v6_addresses.#":   "2",
 				"lines.0.create_timestamp": CHECKSET,
 				"lines.0.update_timestamp": CHECKSET,
 			}
@@ -75,11 +73,11 @@ func AlibabacloudTestAccUniversalDnsLinesConfigDependence(rand int, attrMap map[
 	}
 	config := fmt.Sprintf(`
 variable "name" {
-	default = "tf-testacc%d"
+	default = "tfacc%d"
 }
 
 resource "alibabacloudstack_universal_dns_line" "default" {
-	name   = "${var.name}.example."
+	name   = "${var.name}"
 	v4_addresses = ["192.168.0.1"]
 	v6_addresses = ["2020:148:2:28::", "2020:148:3:28::"]
 }

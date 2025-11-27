@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -46,9 +47,15 @@ func resourceAlibabacloudStackUniversalDnsLineCreate(d *schema.ResourceData, met
 	if len(v4Addresses) == 0 && len(v6Addresses) == 0 {
 		return fmt.Errorf("only one of v4_addresses and v6_addresses can be set")
 	}
-	request["V4Addresses"] = v4Addresses
-	request["V6Addresses"] = v6Addresses
-	response, err := client.DoTeaRequest("POST", "UniversalDns", "2021-06-24", "AddUniversalLine", "", nil, request, nil)
+	if len(v4Addresses) > 0 {
+		stringV4Addresses, _ := json.Marshal(v4Addresses)
+		request["V4Addresses"] = string(stringV4Addresses)
+	}
+	if len(v6Addresses) > 0 {
+		stringV6Addresses, _ := json.Marshal(v6Addresses)
+		request["V6Addresses"] = string(stringV6Addresses)
+	}
+	response, err := client.DoTeaRequest("POST", "UniversalDns", "2021-06-24", "AddUniversalLine", "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -94,13 +101,20 @@ func resourceAlibabacloudStackUniversalDnsLineUpdate(d *schema.ResourceData, met
 		updateReq := make(map[string]interface{})
 		updateReq["Id"] = d.Id()
 		updateReq["Name"] = d.Get("name")
+		updateReq["Priority"] = d.Get("priority")
 		v4Addresses := d.Get("v4_addresses").(*schema.Set).List()
 		v6Addresses := d.Get("v6_addresses").(*schema.Set).List()
 		if len(v4Addresses) == 0 && len(v6Addresses) == 0 {
 			return fmt.Errorf("only one of v4_addresses and v6_addresses can be set")
 		}
-		updateReq["V4Addresses"] = v4Addresses
-		updateReq["V6Addresses"] = v6Addresses
+		if len(v4Addresses) > 0 {
+			stringV4Addresses, _ := json.Marshal(v4Addresses)
+			updateReq["V4Addresses"] = string(stringV4Addresses)
+		}
+		if len(v6Addresses) > 0 {
+			stringV6Addresses, _ := json.Marshal(v6Addresses)
+			updateReq["V6Addresses"] = string(stringV6Addresses)
+		}
 		_, err := client.DoTeaRequest("POST", "UniversalDns", "2021-06-24", "UpdateUniversalLine", "", nil, nil, updateReq)
 		if err != nil {
 			return fmt.Errorf("failed to update Universal DNS Line: %v", err)
