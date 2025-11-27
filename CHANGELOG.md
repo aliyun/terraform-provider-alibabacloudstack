@@ -1,3 +1,36 @@
+# 3.18.20
+
+## New
+
+
+1.Query capability for API Gateway V2 instance types (`alibabacloudstack_api_gateway_v2_instance_types`)
+2. Orchestration capability for API Gateway V2 instances (`alibabacloudstack_api_gateway_v2_instance`)
+3. Orchestration capability for API Gateway V2 cascade instances (`alibabacloudstack_api_gateway_v2_cascade_instance`)
+4. Orchestration capability for API Gateway V2 cascade links (`alibabacloudstack_api_gateway_v2_cascade_link`)
+5. Import capability for API Gateway V2 Kubernetes clusters (`alibabacloudstack_api_gateway_v2_k8s_cluster`)
+6. Orchestration capability for API Gateway V2 certificates (`alibabacloudstack_api_gateway_v2_certificate`)
+7. Orchestration capability for API Gateway V2 consumers (`alibabacloudstack_api_gateway_v2_consumer`)
+8. Orchestration capability for API Gateway V2 domains (`alibabacloudstack_api_gateway_v2_domain`)
+9. Orchestration capability for API Gateway V2 MCP services (`alibabacloudstack_api_gateway_v2_mcpservice`)
+10. Orchestration capability for API Gateway V2 route groups (`alibabacloudstack_api_gateway_v2_route_group`)
+11. Orchestration capability for API Gateway V2 routes (`alibabacloudstack_api_gateway_v2_route`)
+12. Orchestration capability for API Gateway V2 services (`alibabacloudstack_api_gateway_v2_service`)
+13. Orchestration capability for API Gateway V2 service sources (`alibabacloudstack_api_gateway_v2_service_source`)
+14. Orchestration capability for API Gateway V2 signatures (`alibabacloudstack_api_gateway_v2_signature`)
+15. Orchestration capability for DataHub Kafka consumer groups (`alibabacloudstack_datahub_kafka_group`)
+16. Orchestration capability for ApsaraDB for Lindorm instances (`alibabacloudstack_lindorm_instance`)
+17. Query capability for ApsaraDB for Lindorm instance types (`alibabacloudstack_lindorm_instance_types`)
+18. Orchestration capability for ApsaraDB for Lindorm LTS instances (`alibabacloudstack_lindorm_lts_instance`)
+19. Orchestration capability for Message Queue for MQTT instances (`alibabacloudstack_mqtt_instance`)
+20. Orchestration capability for Message Queue for MQTT topics (`alibabacloudstack_mqtt_topic`)
+21. Orchestration capability for Message Queue for MQTT groups (`alibabacloudstack_mqtt_group`)
+22. Orchestration capability for Universal DNS domains (`alibabacloudstack_universal_dns_domain`)
+23. Orchestration capability for Universal DNS record configurations (`alibabacloudstack_universal_dns_record`)
+24. Orchestration capability for Universal DNS resolution lines (`alibabacloudstack_universal_dns_line`)
+
+
+---
+
 # 3.18.19
 
 ## New

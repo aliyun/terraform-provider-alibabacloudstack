@@ -200,7 +200,7 @@ func TestUatAlibabacloudStackApiGatewayV2Service_HSF(t *testing.T) {
 	})
 }
 
-func TestUatAlibabacloudStackApiGatewayV2Service_AIGwService(t *testing.T) {
+func TestAccAlibabacloudStackApiGatewayV2Service_AIGwService(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_api_gateway_v2_service.aigw_service"
 	ra := resourceAttrInit(resourceId, map[string]string{})

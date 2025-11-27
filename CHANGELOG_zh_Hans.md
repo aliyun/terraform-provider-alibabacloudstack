@@ -1,3 +1,34 @@
+# 3.18.20
+
+## 新增
+
+1. API网关V2版本实例类型的查询能力（`alibabacloudstack_api_gateway_v2_instance_types`）
+2. API网关V2版本实例的编排能力（`alibabacloudstack_api_gateway_v2_instance`）
+3. API网关V2版本级联实例的编排能力（`alibabacloudstack_api_gateway_v2_cascade_instance`）
+4. API网关V2版本级联链路的编排能力（`alibabacloudstack_api_gateway_v2_cascade_link`）
+5. API网关V2版本K8s集群的导入能力（`alibabacloudstack_api_gateway_v2_k8s_cluster`）
+6. API网关V2版本证书的编排能力（`alibabacloudstack_api_gateway_v2_certificate`）
+7. API网关V2版本消费者的编排能力（`alibabacloudstack_api_gateway_v2_consumer`）
+8. API网关V2版本域名的编排能力（`alibabacloudstack_api_gateway_v2_domain`）
+9. API网关V2版本MCP服务的编排能力（`alibabacloudstack_api_gateway_v2_mcpservice`）
+10. API网关V2版本路由组的编排能力（`alibabacloudstack_api_gateway_v2_route_group`）
+11. API网关V2版本路由的编排能力（`alibabacloudstack_api_gateway_v2_route`）
+12. API网关V2版本服务的编排能力（`alibabacloudstack_api_gateway_v2_service`）
+13. API网关V2版本服务来源的编排能力（`alibabacloudstack_api_gateway_v2_service_source`）
+14. API网关V2版本签名的编排能力（`alibabacloudstack_api_gateway_v2_signature`）
+15. 数据总线的消息组的编排能力(`alibabacloudstack_datahub_kafka_group`)
+16. 云原生多模数据库 Lindorm数据库实例的编排能力(`alibabacloudstack_lindorm_instance`)
+17. 云原生多模数据库 Lindorm数据库实例规格的查询能力(`alibabacloudstack_lindorm_instance_types`)
+18. 云原生多模数据库 Lindorm数据库LTS实例的编排能力(`alibabacloudstack_lindorm_lts_instance`)
+19. 微消息队列 MQTT 版实例的编排能力(`alibabacloudstack_mqtt_instance`)
+20. 微消息队列 MQTT 版Topic的编排能力(`alibabacloudstack_mqtt_topic`)
+21. 微消息队列 MQTT 版Group的编排能力(`alibabacloudstack_mqtt_group`)
+22. 跨云解析DNS域名的编排能力(`alibabacloudstack_universal_dns_domain`)
+23. 跨云解析DNS解析配置的编排能力(`alibabacloudstack_universal_dns_record`)
+24. 跨云解析DNS解析线路的编排能力(`alibabacloudstack_universal_dns_line`)
+
+---
+
 # 3.18.19
 
 ## 新增
