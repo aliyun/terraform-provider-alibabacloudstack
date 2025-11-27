@@ -141,7 +141,7 @@ func resourceAlibabacloudStackAPIGatewayV2McpserverCreate(d *schema.ResourceData
 	if d.Get("type").(string) == "DIRECT_ROUTE" {
 		directRouteConfig := make(map[string]string)
 		directRouteConfig["path"] = d.Get("direct_route_path").(string)
-		directRouteConfig["type"] = d.Get("direct_route_type").(string)
+		directRouteConfig["transportType"] = d.Get("direct_route_type").(string)
 		request["directRouteConfig"] = directRouteConfig
 		request["serviceProtocol"] = "MCP"
 	}
@@ -347,7 +347,7 @@ func resourceAlibabacloudStackAPIGatewayV2McpserverUpdate(d *schema.ResourceData
 		if d.Get("type").(string) == "DIRECT_ROUTE" {
 			directRouteConfig := make(map[string]string)
 			directRouteConfig["path"] = d.Get("direct_route_path").(string)
-			directRouteConfig["type"] = d.Get("direct_route_type").(string)
+			directRouteConfig["transportType"] = d.Get("direct_route_type").(string)
 			request["directRouteConfig"] = directRouteConfig
 			request["serviceProtocol"] = "MCP"
 		}

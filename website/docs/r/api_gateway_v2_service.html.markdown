@@ -179,6 +179,19 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
   gw_instance_id = alibabacloudstack_api_gateway_v2_instance.default.id
 }
 ```
+### AiGw service  Usage
+```hcl
+resource "alibabacloudstack_api_gateway_v2_service" "default" {
+  name = "${var.name}"
+  service_source_type = "ip"
+  protocol = "HTTP"
+  service_nodes {
+	ip = "192.168.1.1"
+	port = 80
+  }
+  gw_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
+}
+```
 
 ## Argument Reference
 
@@ -193,6 +206,7 @@ The following arguments are supported:
 * `service_group` - (Optional) The service group.
 * `service_version` - (Optional) The service version.
 * `source_group` - (Optional) The source group.
+* `service_source_type` - (Optional) service source type, optional values: `dns`, `ip`, required when creating AI gateway service.
 * `source_id` - (Optional) The source ID.
 * `upstream_type` - (Optional) The upstream type.
 * `health_check_struct` - (Optional) The health check configuration structure.

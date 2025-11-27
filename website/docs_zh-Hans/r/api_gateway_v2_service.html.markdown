@@ -179,6 +179,20 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
   gw_instance_id = alibabacloudstack_api_gateway_v2_instance.default.id
 }
 ```
+### Ai网关服务用法
+```hcl
+resource "alibabacloudstack_api_gateway_v2_service" "default" {
+  name = "${var.name}"
+  service_source_type = "ip"
+  protocol = "HTTP"
+  service_nodes {
+	ip = "192.168.1.1"
+	port = 80
+  }
+  gw_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
+}
+```
+
 
 ## 参数说明
 
@@ -193,6 +207,7 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
 * `service_group` - (可选) 服务分组。
 * `service_version` - (可选) 服务版本。
 * `source_group` - (可选) 源分组。
+* `service_source_type` - (可选) 源类型, 可选值：`dns`, `ip`, 创建AI网关的服务时必填。
 * `source_id` - (可选) 源ID。
 * `upstream_type` - (可选) 上游类型。
 * `health_check_struct` - (可选) 健康检查配置结构。

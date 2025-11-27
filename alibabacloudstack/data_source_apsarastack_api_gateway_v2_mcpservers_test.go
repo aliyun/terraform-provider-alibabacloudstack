@@ -59,7 +59,7 @@ func testAccConfigNew(rand int, attrMap map[string]string) string {
 	}
 	return fmt.Sprintf(`
 	variable "name" {
-	  default = "tf-acctest-mcp-%d"
+	  default = "tfaccmcp%d"
 	}
 
 	%s
@@ -70,12 +70,22 @@ func testAccConfigNew(rand int, attrMap map[string]string) string {
 		protocol = "HTTP"
 	}
 
+	resource "alibabacloudstack_api_gateway_v2_service" "default" {
+		name = "${var.name}"
+		service_source_type = "ip"
+		protocol = "HTTP"
+		service_nodes {
+			ip = "192.168.1.1"
+			port = 80
+		}
+		gw_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
+	}
 	resource "alibabacloudstack_api_gateway_v2_mcpserver" "default" {
 	  name             = "${var.name}"
 	  description      = "${var.name}"
 	  type             = "OPEN_API"
-	  service          = "kubernetes.default.svc.cluster.local"
-	  domains          = ["testtf.com"]
+	  service          = "${alibabacloudstack_api_gateway_v2_service.default.service_id}"
+	  domains          = ["${alibabacloudstack_api_gateway_v2_domain.default.domain_id}"]
 	  consumer_auth    = true
 	  gw_instance_id   = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
 	}

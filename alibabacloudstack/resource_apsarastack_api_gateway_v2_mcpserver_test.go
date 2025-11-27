@@ -22,7 +22,7 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
   protocol = "HTTP"
   service_nodes {
 	ip = "192.168.1.1"
-	port = 443
+	port = 80
   }
   gw_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
 }
@@ -46,7 +46,7 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_basic(t *testing.T) {
 		"domains.0":         CHECKSET,
 		"consumer_auth":     "true",
 		"services.#":        "1",
-		"services.0.port":   "443",
+		"services.0.port":   "80",
 		"services.0.weight": "100",
 	})
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
@@ -72,9 +72,9 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_basic(t *testing.T) {
 					"name":        "${var.name}",
 					"description": "testddd",
 					"type":        "OPEN_API",
-					"service":     "${alibabacloudstack_api_gateway_v2_service.default.id}",
+					"service":     "${alibabacloudstack_api_gateway_v2_service.default.service_id}",
 					"domains": []string{
-						"${alibabacloudstack_api_gateway_v2_domain.default.id}",
+						"${alibabacloudstack_api_gateway_v2_domain.default.domain_id}",
 					},
 					"consumer_auth":  "true",
 					"gw_instance_id": "${alibabacloudstack_api_gateway_v2_instance.default.id}",
@@ -90,7 +90,7 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_basic(t *testing.T) {
 						"consumer_auth":     "true",
 						"services.#":        "1",
 						"services.0.name":   CHECKSET,
-						"services.0.port":   "443",
+						"services.0.port":   "80",
 						"services.0.weight": "100",
 					}),
 				),
@@ -138,9 +138,9 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_database(t *testing.T) {
 					"name":        "${var.name}",
 					"description": "${var.name}",
 					"type":        "DATABASE",
-					"service":     "${alibabacloudstack_api_gateway_v2_service.default.id}",
+					"service":     "${alibabacloudstack_api_gateway_v2_service.default.service_id}",
 					"domains": []string{
-						"${alibabacloudstack_api_gateway_v2_domain.default.id}",
+						"${alibabacloudstack_api_gateway_v2_domain.default.domain_id}",
 					},
 					"consumer_auth": "true",
 					"db_host":       "172.24.1.220",
@@ -165,7 +165,7 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_database(t *testing.T) {
 						"consumer_auth":     "true",
 						"services.#":        "1",
 						"services.0.name":   CHECKSET,
-						"services.0.port":   "443",
+						"services.0.port":   "80",
 						"services.0.weight": "100",
 					}),
 				),
@@ -236,13 +236,13 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_directRoute(t *testing.T) {
 					"name":        "${var.name}",
 					"description": "${var.name}",
 					"type":        "DIRECT_ROUTE",
-					"service":     "${alibabacloudstack_api_gateway_v2_service.default.id}",
+					"service":     "${alibabacloudstack_api_gateway_v2_service.default.service_id}",
 					"domains": []string{
-						"${alibabacloudstack_api_gateway_v2_domain.default.id}",
+						"${alibabacloudstack_api_gateway_v2_domain.default.domain_id}",
 					},
 					"consumer_auth":     "false",
-					"direct_route_path": "/sse",
-					"direct_route_type": "sse",
+					"direct_route_path": "/test",
+					"direct_route_type": "streamable",
 					"gw_instance_id":    "${alibabacloudstack_api_gateway_v2_instance.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -254,11 +254,11 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_directRoute(t *testing.T) {
 						"domains.#":         "1",
 						"domains.0":         CHECKSET,
 						"consumer_auth":     "false",
-						"direct_route_path": "/sse",
-						"direct_route_type": "sse",
+						"direct_route_path": "/test",
+						"direct_route_type": "streamable",
 						"services.#":        "1",
 						"services.0.name":   CHECKSET,
-						"services.0.port":   "443",
+						"services.0.port":   "80",
 						"services.0.weight": "100",
 					}),
 				),
@@ -266,14 +266,14 @@ func TestAccAlibabacloudStackApiGatewayV2Mcpserver_directRoute(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description":       "${var.name}_update",
-					"direct_route_path": "/test",
-					"direct_route_type": "streamable",
+					"direct_route_path": "/sse",
+					"direct_route_type": "sse",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"description":       fmt.Sprintf("%s_update", name),
-						"direct_route_path": "/test",
-						"direct_route_type": "streamable",
+						"direct_route_path": "/sse",
+						"direct_route_type": "sse",
 					}),
 				),
 			},

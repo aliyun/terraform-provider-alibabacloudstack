@@ -121,7 +121,10 @@ func resourceAlibabacloudStackAPIGatewayV2DomainRead(d *schema.ResourceData, met
 	d.Set("domain_id", domain["domainId"])
 	d.Set("protocol", domain["protocol"])
 	d.Set("certificate_id", domain["certificateId"])
-	d.Set("client_auth", domain["clientAuth"])
+	client_auth, ok := domain["clientAuth"]
+	if ok {
+		d.Set("client_auth", client_auth)
+	}
 	d.Set("ca_certificate_id", domain["caCertificateId"])
 	d.Set("subject_dn", domain["subjectDn"])
 	d.Set("issuer_dn", domain["issuerDn"])
