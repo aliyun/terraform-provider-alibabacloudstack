@@ -363,3 +363,29 @@ func (s *DnsService) DescribeGlobalLine(id string) (map[string]interface{}, erro
 	}
 	return nil, errmsgs.WrapError(errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Resource DnsLines:%s not found", id)))
 }
+
+func (s *DnsService) DescribeDnsRecursorAcl(id string) (map[string]interface{}, error) {
+	query := map[string]interface{}{
+		"PageNumber": 1,
+		"PageSize":   100,
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "CloudDns", "2022-06-24", "DescribeRecursorAcls", "", nil, nil, query)
+	if err != nil {
+		return nil, err
+	}
+
+	if data, ok := response["Data"]; ok && data != nil {
+		if items, ok := data.([]interface{}); ok {
+			for _, item := range items {
+				if acl, ok := item.(map[string]interface{}); ok {
+					if aclId, exists := acl["Id"]; exists && aclId == id {
+						return acl, nil
+					}
+				}
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Universal DNS Recursor ACL %s was not found", id))
+}
