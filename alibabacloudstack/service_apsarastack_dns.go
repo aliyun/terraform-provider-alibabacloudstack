@@ -389,3 +389,34 @@ func (s *DnsService) DescribeDnsRecursorAcl(id string) (map[string]interface{}, 
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Universal DNS Recursor ACL %s was not found", id))
 }
+func (s *DnsService) DescribePrivateZone(id string) (map[string]interface{}, error) {
+
+	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribePrivateZones", "")
+	request.Scheme = "HTTP"
+	request.QueryParams["Id"] = id
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("DescribePrivateZones", bresponse, request, request.QueryParams)
+	if err != nil {
+		return nil, err
+	}
+
+	var respMap map[string]interface{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &respMap)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+
+	data, ok := respMap["Data"].([]interface{})
+	if !ok || len(data) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Private zone %s not found", id))
+	}
+
+	for _, item := range data {
+		domain := item.(map[string]interface{})
+		if domain["Id"].(string) == id {
+			return domain, nil
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Private zone %s not found", id))
+}
