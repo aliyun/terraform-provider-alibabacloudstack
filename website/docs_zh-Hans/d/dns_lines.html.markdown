@@ -1,13 +1,13 @@
 ---
-subcategory: "Universal DNS"
+subcategory: "DNS"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_lines"
-sidebar_current: "docs-Alibabacloudstack-datasource-universal-dns-lines"
+page_title: "Alibabacloudstack: alibabacloudstack_dns_lines"
+sidebar_current: "docs-Alibabacloudstack-datasource-dns-lines"
 description: |-
-  查询跨云解析路线列表
+  查询云解析全局线路列表
 ---
 
-# alibabacloudstack_universal_dns_lines
+# alibabacloudstack_dns_lines
 
 查询阿里云跨云解析线路列表。
 
@@ -19,14 +19,14 @@ variable "name" {
   default = "tfacc20899"
 }
 
-resource "alibabacloudstack_universal_dns_line" "default" {
+resource "alibabacloudstack_dns_line" "default" {
   name         = var.name
   v4_addresses = ["192.168.0.1"]
   v6_addresses = ["2020:148:2:28::", "2020:148:3:28::"]
 }
 
-data "alibabacloudstack_universal_dns_lines" "default" {
-  name_regex = alibabacloudstack_universal_dns_line.default.name
+data "alibabacloudstack_dns_lines" "default" {
+  name_regex = alibabacloudstack_dns_line.default.name
 }
 
 ```
@@ -34,8 +34,8 @@ data "alibabacloudstack_universal_dns_lines" "default" {
 ## 参数说明
 以下参数用于过滤查询结果：
 
-* `name_regex` (字符串, 可选)：用于通过正则表达式过滤Universal DNS line名称。
-* `ids` (字符串列表, 可选)：Universal DNS line ID列表，用于精确匹配指定ID的线路。
+* `name_regex` (字符串, 可选)：用于通过正则表达式过滤DNS Cloud line名称。
+* `ids` (字符串列表, 可选)：DNS Cloud line ID列表，用于精确匹配指定ID的线路。
 
 ## 属性说明
 以下属性被导出：
