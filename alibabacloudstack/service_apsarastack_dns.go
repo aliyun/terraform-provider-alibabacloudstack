@@ -421,7 +421,6 @@ func (s *DnsService) DescribePrivateZone(id string) (map[string]interface{}, err
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Private zone %s not found", id))
 }
 
-
 func (s *DnsService) DescribePrivateZoneRecord(id string) (map[string]interface{}, error) {
 	parts := strings.SplitN(id, ":", 2)
 	if len(parts) != 2 {
@@ -459,4 +458,36 @@ func (s *DnsService) DescribePrivateZoneRecord(id string) (map[string]interface{
 	}
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("record %s not found", id))
+}
+
+func (s *DnsService) DescribePrivateLine(id string) (map[string]interface{}, error) {
+	query := map[string]interface{}{
+		"PageNumber": 1,
+		"PageSize":   100,
+	}
+
+	resp, err := s.client.DoTeaRequest("POST", "CloudDns", "2021-06-24", "DescribePrivateLines", "", nil, nil, query)
+	if err != nil {
+		return nil, err
+	}
+
+	if success, ok := resp["success"].(bool); !ok || !success {
+		return nil, errmsgs.WrapError(fmt.Errorf("Failed to describe universal lines: %v", resp))
+	}
+
+	data, ok := resp["Data"].([]interface{})
+	if !ok || data == nil {
+		return nil, errmsgs.WrapError(errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Resource PrivateLine:%s not found", id)))
+	}
+	for _, item := range data {
+		itemMap, isMap := item.(map[string]interface{})
+		if !isMap {
+			continue
+		}
+		lineId, idOk := itemMap["Id"].(string)
+		if idOk && lineId == id {
+			return itemMap, nil
+		}
+	}
+	return nil, errmsgs.WrapError(errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Resource PrivateLine:%s not found", id)))
 }
