@@ -2,7 +2,7 @@
 subcategory: "Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_record"
-sidebar_current: "docs-Alibabacloudstack-private-dns-record"
+sidebar_current: "docs-Alibabacloudstack-dns-private-record"
 description: |-
   云解析私有域名解析
 ---
