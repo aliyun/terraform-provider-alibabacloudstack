@@ -1,5 +1,5 @@
 ---
-subcategory: "Universal DNS"
+subcategory: "DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_line"
 sidebar_current: "docs-Alibabacloudstack-resource-dns-private-line"
