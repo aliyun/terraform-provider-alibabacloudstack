@@ -44,6 +44,7 @@ func (s *UniversalDnsService) DescribeUniversalZones(id string) (map[string]inte
 	}
 	return nil, errmsgs.WrapError(errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Resource UniversalZones:%s not found", id)))
 }
+
 func (s *UniversalDnsService) DescribeUniversalDNSRecord(id string) (map[string]interface{}, error) {
 	parts := strings.SplitN(id, ":", 2)
 	if len(parts) != 2 {
@@ -82,6 +83,7 @@ func (s *UniversalDnsService) DescribeUniversalDNSRecord(id string) (map[string]
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("record %s not found", id))
 }
+
 func (s *UniversalDnsService) DescribeUniversalDnsLine(id string) (map[string]interface{}, error) {
 	query := map[string]interface{}{
 		"PageNumber": 1,

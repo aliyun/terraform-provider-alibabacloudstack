@@ -420,3 +420,43 @@ func (s *DnsService) DescribePrivateZone(id string) (map[string]interface{}, err
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Private zone %s not found", id))
 }
+
+
+func (s *DnsService) DescribePrivateZoneRecord(id string) (map[string]interface{}, error) {
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid id format, expected {ZoneId}:{Id}")
+	}
+	zoneId := parts[0]
+	recordId := parts[1]
+
+	query := map[string]interface{}{
+		"ZoneId":     zoneId,
+		"PageNumber": 1,
+		"PageSize":   100,
+	}
+
+	resp, err := s.client.DoTeaRequest("POST", "CloudDns", "2021-06-24", "DescribePrivateZoneRecords", "", nil, nil, query)
+	if err != nil {
+		return nil, err
+	}
+
+	data, ok := resp["Data"]
+	if !ok || data == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("record %s not found", id))
+	}
+
+	records, ok := data.([]interface{})
+	if !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("record %s not found", id))
+	}
+
+	for _, v := range records {
+		record := v.(map[string]interface{})
+		if record["Id"].(string) == recordId {
+			return record, nil
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("record %s not found", id))
+}

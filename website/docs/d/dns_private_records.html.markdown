@@ -1,15 +1,15 @@
 ---
-subcategory: "Universal DNS"
+subcategory: "Cloud DNS"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_records"
-sidebar_current: "docs-Alibabacloudstack-datasource-universal_dns_records"
+page_title: "Alibabacloudstack: alibabacloudstack_dns_private_records"
+sidebar_current: "docs-Alibabacloudstack-datasource-dns-private-records"
 description: |-
-  Query Alibaba Cloud Universal DNS domain resolution records
+  Query Alibaba Cloud DNS private domain resolution records
 ---
 
-# alibabacloudstack_universal_dns_records
+# alibabacloudstack_dns_private_records
 
-> Data source for querying Universal DNS domain resolution records
+> Data source for querying DNS private domain resolution records
 
 ## Example Usage
 
@@ -19,13 +19,13 @@ variable "name" {
   default = "tf-testacc56057"
 }
 
-resource "alibabacloudstack_universal_dns_domain" "default" {
+resource "alibabacloudstack_dns_private_domain" "default" {
   name   = "${var.name}.testtf."
   remark = "Created by Terraform for DNS record test"
 }
 
-resource "alibabacloudstack_universal_dns_record" "default" {
-  zone_id      = alibabacloudstack_universal_dns_domain.default.id
+resource "alibabacloudstack_dns_private_record" "default" {
+  zone_id      = alibabacloudstack_dns_private_domain.default.id
   name         = var.name
   type         = "A"
   ttl          = 300
@@ -39,8 +39,8 @@ resource "alibabacloudstack_universal_dns_record" "default" {
   }
 }
 
-data "alibabacloudstack_universal_dns_records" "default" {
-  zone_id    = alibabacloudstack_universal_dns_record.default.zone_id
+data "alibabacloudstack_dns_private_domains" "default" {
+  zone_id    = alibabacloudstack_dns_private_record.default.zone_id
   name_regex = "tf-testacc[0-9]+"
 }
 ```
