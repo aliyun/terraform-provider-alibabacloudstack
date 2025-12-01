@@ -491,3 +491,27 @@ func (s *DnsService) DescribePrivateLine(id string) (map[string]interface{}, err
 	}
 	return nil, errmsgs.WrapError(errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Resource PrivateLine:%s not found", id)))
 }
+
+func (s *DnsService) DescribeDnsGtmInstance(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{
+		"PageNumber": 1,
+		"PageSize":   100,
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "CloudDns", "2021-06-24", "DescribeDnsGtmInstances", "", nil, nil, reqQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	if data, ok := response["Data"]; ok {
+		for _, item := range data.([]interface{}) {
+			if instance, ok := item.(map[string]interface{}); ok {
+				if instanceId, ok := instance["Id"].(string); ok && instanceId == id {
+					return instance, nil
+				}
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("DNS GTM instance %s was not found", id))
+}
