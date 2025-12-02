@@ -10,6 +10,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackDnsGtmAccessStrategy() *schema.Resource {
@@ -46,6 +47,7 @@ func resourceAlibabacloudStackDnsGtmAccessStrategy() *schema.Resource {
 			"failover_gtm_address_pool_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{"DOMAIN", "IPV6", "IPV4"}, false),
 			},
 			"failover_min_available_addr_num": {
 				Type:     schema.TypeInt,
@@ -54,6 +56,7 @@ func resourceAlibabacloudStackDnsGtmAccessStrategy() *schema.Resource {
 			"switch_mode": {
 				Type:     schema.TypeString,
 				Required: true,
+				ValidateFunc: validation.StringInSlice([]string{"BY_PROBE_RESULT", "BY_HAND"}, false),
 			},
 			"line_ids": {
 				Type:     schema.TypeSet,
@@ -64,6 +67,13 @@ func resourceAlibabacloudStackDnsGtmAccessStrategy() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{"DEFAULT", "FAILOVER"}, false),
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool{
+					if d.Get("switch_mode").(string) == "BY_PROBE_RESULT" {
+						return true
+					}
+					return oldValue == newValue
+				},
 			},
 			"default_available_addr_num": {
 				Type:     schema.TypeInt,

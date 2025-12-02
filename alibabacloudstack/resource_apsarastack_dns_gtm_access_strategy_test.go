@@ -95,7 +95,8 @@ func TestAccAlibabacloudStackDnsGtmAccessStrategy_basic(t *testing.T) {
 					"failover_gtm_address_pool_id":    "${alibabacloudstack_dns_gtm_addresspool.failover.id}",
 					"failover_gtm_address_pool_type":  "IPV4",
 					"failover_min_available_addr_num": "1",
-					"switch_mode":                     "BY_PROBE_RESULT",
+					"switch_mode":                     "BY_HAND",
+					"specified_gtm_address_pool":      "DEFAULT",
 					"line_ids":                        []string{"${alibabacloudstack_dns_private_line.default.id}"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -108,19 +109,31 @@ func TestAccAlibabacloudStackDnsGtmAccessStrategy_basic(t *testing.T) {
 						"failover_gtm_address_pool_id":    CHECKSET,
 						"failover_gtm_address_pool_type":  "IPV4",
 						"failover_min_available_addr_num": "1",
-						"switch_mode":                     "BY_PROBE_RESULT",
+						"switch_mode":                     "BY_HAND",
+						"specified_gtm_address_pool":      "DEFAULT",
 						"line_ids.#":                      "1",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"switch_mode":                  "BY_HAND",
+					"specified_gtm_address_pool": "FAILOVER",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"specified_gtm_address_pool": "FAILOVER",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"switch_mode":                  "BY_PROBE_RESULT",
 					"failover_gtm_address_pool_id": "${alibabacloudstack_dns_gtm_addresspool.update.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"switch_mode":                  "BY_HAND",
+						"switch_mode":                  "BY_PROBE_RESULT",
+						"specified_gtm_address_pool":   REMOVEKEY,
 						"failover_gtm_address_pool_id": CHECKSET,
 					}),
 				),
