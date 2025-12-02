@@ -30,27 +30,33 @@ func TestAccAlibabacloudStackDnsGtmAddressPoolsDataSource(t *testing.T) {
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
+			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
 			"name_regex": `"${alibabacloudstack_dns_gtm_addresspool.default.name}"`,
 		}),
 		fakeConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
+			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
 			"name_regex": `"^fake.*"`,
 		}),
 	}
 
 	typeConf := dataSourceTestAccConfig{
 		existConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
+			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
 			"type": `"A"`,
 		}),
 		fakeConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
+			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
 			"type": `"AAAA"`,
 		}),
 	}
 
 	lbaStrategyConf := dataSourceTestAccConfig{
 		existConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
+			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
 			"lba_strategy": `"RATIO"`,
 		}),
 		fakeConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
+			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
 			"lba_strategy": `"ALL_RR"`,
 		}),
 	}
@@ -64,7 +70,7 @@ func TestAccAlibabacloudStackDnsGtmAddressPoolsDataSource(t *testing.T) {
 		}),
 	}
 
-	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, typeConf, lbaStrategyConf, idsConf)
+	testAcc.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, typeConf, lbaStrategyConf)
 }
 
 func testAccDnsGtmAddressPoolsDependenceNew(rand int, attrMap map[string]string) string {
