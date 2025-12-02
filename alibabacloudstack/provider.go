@@ -591,6 +591,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_dns_private_lines":                                dataSourceAlibabacloudStackDnsPrivateLines(),
 		"alibabacloudstack_dns_gtm_instances":                                dataSourceAlibabacloudStackDnsGtmInstances(),
 		"alibabacloudstack_dns_gtm_addresspools":                             dataSourceAlibabacloudStackDnsGtmAddressPools(),
+		"alibabacloudstack_dns_gtm_access_strategies":                        dataSourceAlibabacloudStackDnsGtmAccessStrategies(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
@@ -1030,6 +1031,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_dns_private_line":                                resourceAlibabacloudStackDnsPrivateLine(),
 		"alibabacloudstack_dns_gtm_instance":                                resourceAlibabacloudStackDnsGtmInstance(),
 		"alibabacloudstack_dns_gtm_addresspool":                             resourceAlibabacloudStackDnsGtmAddressPool(),
+		"alibabacloudstack_dns_gtm_access_strategy":                         resourceAlibabacloudStackDnsGtmAccessStrategy(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
