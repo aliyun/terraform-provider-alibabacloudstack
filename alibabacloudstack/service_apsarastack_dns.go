@@ -515,3 +515,25 @@ func (s *DnsService) DescribeDnsGtmInstance(id string) (map[string]interface{}, 
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("DNS GTM instance %s was not found", id))
 }
+func (s *DnsService) DescribeDnsGtmAddressPool(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{
+		"Id": id,
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "CloudDns", "2021-06-24", "DescribeDnsGtmAddressPools", "", nil, nil, reqQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	if data, ok := response["Data"].([]interface{}); ok && len(data) > 0 {
+		for _, item := range data {
+			if pool, ok := item.(map[string]interface{}); ok {
+				if pool["Id"].(string) == id {
+					return pool, nil
+				}
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("DNS GTM Address Pool %s not found", id))
+}
