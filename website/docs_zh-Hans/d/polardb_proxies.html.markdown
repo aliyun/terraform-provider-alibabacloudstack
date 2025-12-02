@@ -1,5 +1,5 @@
 ---
-subcategory: "RDS"
+subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_proxies"
 sidebar_current: "docs-Alibabacloudstack-datasource-polardb-proxies"

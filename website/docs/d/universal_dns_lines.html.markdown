@@ -1,3 +1,12 @@
+---
+subcategory: "Universal DNS"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_lines"
+sidebar_current: "docs-Alibabacloudstack-datasource-universal-dns-lines"
+description: |-
+  Queries the list of cross-cloud DNS lins.
+---
+
 # alibabacloudstack_universal_dns_lines
 
 This data source queries the list of Universal DNS lines in Alibaba Cloud.

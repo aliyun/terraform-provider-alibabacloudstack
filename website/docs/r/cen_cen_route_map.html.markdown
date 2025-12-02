@@ -1,5 +1,5 @@
 ---
-subcategory: "CEN"
+subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_cenroutemap"
 sidebar_current: "docs-Alibabacloudstack-cen-cenroutemap"

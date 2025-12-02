@@ -1,5 +1,5 @@
 ---
-subcategory: "API GatewayV2"
+subcategory: "API Gateway V2"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_instance"
 sidebar_current: "docs-alibabacloudstack-resource-api-gateway-v2-instance"

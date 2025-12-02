@@ -1,5 +1,5 @@
 ---
-subcategory: "CEN"
+subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_vbr_health_check"
 sidebar_current: "docs-alibabacloudstack-resource-cen-vbr-health-check"

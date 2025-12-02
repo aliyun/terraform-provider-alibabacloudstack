@@ -1,5 +1,5 @@
 ---
-subcategory: "CEN"
+subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
 page_title: "阿里云栈: alibabacloudstack_cen_transit_router_route_entries"
 sidebar_current: "docs-Alibabacloudstack-datasource-cen-cen-transit-router-route-entries"

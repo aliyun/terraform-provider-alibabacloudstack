@@ -1,5 +1,5 @@
 ---
-subcategory: "polardb"
+subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_proxy"
 sidebar_current: "docs-Alibabacloudstack-polardb-proxy"
