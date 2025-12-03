@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -15,16 +16,15 @@ func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"storage_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Capacity", "Performance", "standard", "advance"}, false),
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"protocol_type": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"NFS", "SMB"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"NFS", "SMB", "CPFS"}, false),
 			},
 			"description": {
 				Type:         schema.TypeString,
@@ -42,7 +42,7 @@ func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"extreme", "standard"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"extreme", "standard", "bmcpfs"}, false),
 				Default:      "standard",
 			},
 			"capacity": {
@@ -82,12 +82,15 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 		request["FileSystemType"] = v
 	}
 	request["StorageType"] = d.Get("storage_type")
-	request["EncryptType"] = d.Get("encrypt_type")
+	request["ClusterId"] = d.Get("cluster_id")
+	if v, ok := d.GetOk("encrypt_type"); ok {
+		request["EncryptType"] = v
+	}
 	if v, ok := d.GetOk("zone_id"); ok {
 		request["ZoneId"] = v
 	}
 	if v, ok := d.GetOk("capacity"); ok {
-		request["Capacity"] = v
+		request["Capacity"] = v.(int) * 1024
 	}
 	if v, ok := d.GetOk("kms_key_id"); ok {
 		request["KmsKeyId"] = v
@@ -100,8 +103,6 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 	}
 
 	d.SetId(fmt.Sprint(response["FileSystemId"]))
-	// Creating an extreme filesystem is asynchronous, so you need to block and wait until the creation is complete
-	//if d.Get("file_system_type") == "extreme" {
 	nasService := NasService{client}
 	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutRead), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Pending", []string{"Stopped", "Stopping", "Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
@@ -117,8 +118,10 @@ func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta i
 		"RegionId":     client.RegionId,
 		"FileSystemId": d.Id(),
 	}
-	if d.HasChange("description") {
+	if d.HasChanges("description", "capacity") {
 		request["Description"] = d.Get("description")
+		request["Capacity"] = d.Get("capacity").(int) * 1024
+		request["newCapacity"] = d.Get("capacity").(int) * 1024
 		action := "ModifyFileSystem"
 		_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 		if err != nil {
@@ -146,6 +149,11 @@ func resourceAlibabacloudStackNasFileSystemRead(d *schema.ResourceData, meta int
 	d.Set("storage_type", object["StorageType"])
 	d.Set("encrypt_type", object["EncryptType"])
 	d.Set("file_system_type", object["FileSystemType"])
+	capacity, ok := object["Capacity"]
+	if ok {
+		v, _ := capacity.(json.Number).Int64()
+		d.Set("capacity", int(v/1024))
+	}
 	d.Set("capacity", object["Capacity"])
 	d.Set("zone_id", object["ZoneId"])
 	d.Set("kms_key_id", object["KMSKeyId"])
@@ -167,6 +175,11 @@ func resourceAlibabacloudStackNasFileSystemDelete(d *schema.ResourceData, meta i
 			return nil
 		}
 		return err
+	}
+	nasService := NasService{client}
+	stateConf := BuildStateConf([]string{"Stopped", "Stopping", "Deleting"}, []string{}, d.Timeout(schema.TimeoutRead), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Deleting", []string{"Running", "Pending"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return nil
 }

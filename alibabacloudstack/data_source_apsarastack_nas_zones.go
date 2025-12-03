@@ -21,6 +21,10 @@ func dataSourceAlibabacloudStackNasZones() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"file_system_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -74,7 +78,7 @@ func dataSourceAlibabacloudStackNasZones() *schema.Resource {
 						"protocols": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Elem:  schema.TypeString,
+							Elem:     schema.TypeString,
 						},
 					},
 				},
@@ -86,8 +90,12 @@ func dataSourceAlibabacloudStackNasZones() *schema.Resource {
 func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
+	request := make(map[string]interface{})
+	if v, ok := d.GetOk("file_system_type"); ok {
+		request["FileSystemType"] = v
+	}
 
-	response, err := client.DoTeaRequest("GET", "NAS", "2017-06-26", "DescribeZones", "", nil, nil, nil)
+	response, err := client.DoTeaRequest("GET", "NAS", "2017-06-26", "DescribeZones", "", nil, request, nil)
 	if err != nil {
 		return err
 	}
@@ -104,7 +112,7 @@ func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interf
 	if v, ok := d.GetOk("protocol"); ok {
 		protocol = v.(string)
 	}
-	
+
 	s := make([]map[string]interface{}, 0)
 	for _, r := range resp.([]interface{}) {
 		object := r.(map[string]interface{})
@@ -112,44 +120,52 @@ func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interf
 			continue
 		}
 		var protocols []string
-		for _, v := range object["Performance"].(map[string]interface{})["Protocol"].([]interface{}) {
-			protocols = append(protocols, v.(string))
-		}
-		if protocol != "" && !slices.Contains(protocols, protocol) {
-			continue
+		if v, ok := object["Performance"]; ok {
+			for _, v := range v.(map[string]interface{})["Protocol"].([]interface{}) {
+				protocols = append(protocols, v.(string))
+			}
+			if protocol != "" && !slices.Contains(protocols, protocol) {
+				continue
+			}
 		}
 		zoneIds = append(zoneIds, zoneId)
-		
+
 		clusters := []map[string]interface{}{}
-		for _, ci := range object["Clusters"].(map[string]interface {})["Cluster"].([]interface{}) {
+		for _, ci := range object["Clusters"].(map[string]interface{})["Cluster"].([]interface{}) {
 			c := ci.(map[string]interface{})
 			cluster := map[string]interface{}{
 				"cluster_id": c["ClusterId"],
-				"cluster_type": c["ClusterType"],
-				"cluster_version": c["ClusterVersion"],
+			}
+			if v, ok := c["ClusterType"]; ok {
+				cluster["cluster_type"] = v
+			}
+			if v, ok := c["ClusterVersion"]; ok {
+				cluster["cluster_version"] = v
 			}
 			instanceTypes := []map[string]interface{}{}
-			for _, i := range c["InstanceTypes"].(map[string]interface{})["InstanceType"].([]interface{}){
+			for _, i := range c["InstanceTypes"].(map[string]interface{})["InstanceType"].([]interface{}) {
 				instanceType := i.(map[string]interface{})
-				instanceTypes = append(instanceTypes, map[string]interface{}{
+				itype := map[string]interface{}{
 					"storage_type": instanceType["StorageType"],
-					"protocol_type": instanceType["ProtocolType"],
-				})
+				}
+				if v, ok := instanceType["ProtocolType"]; ok {
+					itype["protocol_type"] = v
+				}
+				instanceTypes = append(instanceTypes, itype)
 			}
 			if len(instanceTypes) < 1 {
 				continue
 			}
 			cluster["instance_types"] = instanceTypes
 			clusters = append(clusters, cluster)
-			}
+		}
 		if len(clusters) < 1 {
 			continue
 		}
 		mapping := map[string]interface{}{
-			"zone_id": object["ZoneId"],
-			"clusters": clusters,
-			"protocols": object["Performance"].(map[string]interface{})["Protocol"].([]interface{}),
-			
+			"zone_id":   object["ZoneId"],
+			"clusters":  clusters,
+			"protocols": protocols,
 		}
 		s = append(s, mapping)
 	}
