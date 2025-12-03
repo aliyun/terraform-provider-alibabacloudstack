@@ -1033,6 +1033,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_dns_gtm_instance":                                resourceAlibabacloudStackDnsGtmInstance(),
 		"alibabacloudstack_dns_gtm_addresspool":                             resourceAlibabacloudStackDnsGtmAddressPool(),
 		"alibabacloudstack_dns_gtm_access_strategy":                         resourceAlibabacloudStackDnsGtmAccessStrategy(),
+		"alibabacloudstack_prometheus_v2_instance":                          resourceAlibabacloudStackPrometheusV2Instance(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps

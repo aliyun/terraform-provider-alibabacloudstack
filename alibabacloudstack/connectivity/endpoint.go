@@ -91,6 +91,7 @@ const (
 	WAFONECSCode              = ServiceCode("WAF_ONECS")
 	ALIKAFKACode              = ServiceCode("ALIKAFKA")
 	DataworksPrivateCloudCode = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
+	Prometheus2Code           = ServiceCode("PROMETHEUS2")
 	// Self-built gateway fake Code
 	SlSDataCode = ServiceCode("SLSDATA")
 	BssDataCode = ServiceCode("BSSDATA")
@@ -328,6 +329,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	ONSCode: PopEndpoint{
 		"ons-biz.{{.region}}.{{.domain}}",
 		"ons-biz.{{.region}}.{{.domain}}",
+	},
+	Prometheus2Code: PopEndpoint{
+		"prometheus2-biz.pop.{{.domain}}",
+		"prometheus2-biz.pop.{{.region}}.{{.domain}}",
 	},
 	CDNCode:     PopEndpoint{"", ""},
 	QuickbiCode: PopEndpoint{"", ""},
