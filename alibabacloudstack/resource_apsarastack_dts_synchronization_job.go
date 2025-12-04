@@ -233,7 +233,6 @@ func resourceAlibabacloudStackDtsSynchronizationJobCreate(d *schema.ResourceData
 	var response map[string]interface{}
 	action := "ConfigureDtsJob"
 	request := client.NewCommonRequest("POST", "Dts", "2020-01-01", action, "")
-	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-type"] = "application/json"
 	mergeMaps(request.QueryParams, map[string]string{
@@ -495,7 +494,6 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 		// d.SetPartial("dts_job_name")
 	}
 	modifyDtsJobPasswordReq := client.NewCommonRequest("POST", "Dts", "2020-01-01", "", "")
-	modifyDtsJobPasswordReq.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	modifyDtsJobPasswordReq.Headers["x-acs-content-type"] = "application/json"
 	modifyDtsJobPasswordReq.Headers["Content-type"] = "application/json"
 	modifyDtsJobPasswordReq.QueryParams["DtsJobId"] = d.Id()
@@ -609,7 +607,6 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 
 	update = false
 	transferInstanceClassReq := client.NewCommonRequest("POST", "Dts", "2020-01-01", "", "")
-	transferInstanceClassReq.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	transferInstanceClassReq.Headers["x-acs-content-type"] = "application/json"
 	transferInstanceClassReq.Headers["Content-type"] = "application/json"
 	transferInstanceClassReq.QueryParams["DtsJobId"] = d.Id()
@@ -711,7 +708,6 @@ func resourceAlibabacloudStackDtsSynchronizationJobStatusFlow(d *schema.Resource
 		if target == "Synchronizing" || target == "Suspending" {
 			action := "StartDtsJob"
 			request := client.NewCommonRequest("POST", "Dts", "2020-01-01", action, "")
-			request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 			request.Headers["x-acs-content-type"] = "application/json"
 			request.Headers["Content-type"] = "application/json"
 			request.QueryParams["DtsJobId"] = d.Id()
@@ -753,7 +749,6 @@ func resourceAlibabacloudStackDtsSynchronizationJobStatusFlow(d *schema.Resource
 		if target == "Suspending" {
 			action := "SuspendDtsJob"
 			request := client.NewCommonRequest("POST", "Dts", "2020-01-01", action, "")
-			request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 			request.Headers["x-acs-content-type"] = "application/json"
 			request.Headers["Content-type"] = "application/json"
 			request.QueryParams["DtsJobId"] = d.Id()

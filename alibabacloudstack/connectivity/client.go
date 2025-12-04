@@ -1034,7 +1034,7 @@ func (client *AlibabacloudStackClient) defaultHeaders(popcode string) map[string
 		"EagleEye-RpcId":        client.Eagleeye.GetRpcId(),
 		"x-acs-territory":       "US",
 		"x-acs-lang":            "EN",
-		//"x-acs-caller-sdk-source": "Terraform"
+		"x-acs-caller-sdk-source": "Terraform",
 		//"x-acs-asapi-gateway-version": "3.0"  This specifies to use the ASAPI v3 gateway process, currently maintained is v4, by default it will use v4. Specifying to use v3 is not recommended unless there are compatibility issues that require it.
 	}
 }

@@ -72,7 +72,6 @@ func resourceAlibabacloudStackDbsBackupPlanCreate(d *schema.ResourceData, meta i
 	var response map[string]interface{}
 	action := "CreateBackupPlan"
 	request := client.NewCommonRequest("POST", "dbs", "2019-03-06", action, "")
-	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-type"] = "application/json"
 	request.QueryParams["Period"] = "Year"

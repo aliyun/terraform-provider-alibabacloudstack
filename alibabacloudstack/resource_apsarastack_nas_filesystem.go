@@ -119,6 +119,7 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 
 func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	nasService := NasService{client}
 	request := map[string]interface{}{
 		"RegionId":     client.RegionId,
 		"FileSystemId": d.Id(),
@@ -136,6 +137,10 @@ func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta i
 		_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 		if err != nil {
 			return err
+		}
+		stateConf := BuildStateConf([]string{"Pending", "Extending"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Pending", []string{"Stopped", "Stopping", "Deleting"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
 	return nil

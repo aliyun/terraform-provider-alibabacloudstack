@@ -101,7 +101,6 @@ func resourceAlibabacloudStackDtsSynchronizationInstanceCreate(d *schema.Resourc
 	var response map[string]interface{}
 	action := "CreateDtsInstance"
 	request := client.NewCommonRequest("POST", "Dts", "2020-01-01", action, "")
-	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // Required, source of the call
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-type"] = "application/json"
 	mergeMaps(request.QueryParams, map[string]string{
