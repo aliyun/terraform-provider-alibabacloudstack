@@ -223,24 +223,24 @@ func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            "${var.name}",
 					"db_instance_storage_type": "local_ssd",
+					"tde_status":               "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"instance_name": name,
-						"encryption":    "true",
+						"instance_name":  name,
+						"encryption":     "true",
+						"tde_status":     "true",
+						"encryption_key": CHECKSET,
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"enable_ssl": "true",
-					"tde_status": "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"tde_status":     "true",
-						"enable_ssl":     "true",
-						"encryption_key": CHECKSET,
+						"enable_ssl": "true",
 					}),
 				),
 			},
