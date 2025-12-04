@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackLogonPolicy_basic(t *testing.T) {
+func TestAccAlibabacloudStackAscmLogonPolicy_basic(t *testing.T) {
 	var v *LoginPolicy
 	resourceId := "alibabacloudstack_ascm_logon_policy.default"
 	ra := resourceAttrInit(resourceId, ascmLogonPolicyBasicMap)

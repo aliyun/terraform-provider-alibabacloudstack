@@ -3,11 +3,8 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -102,24 +99,27 @@ func dataSourceAlibabacloudStackAscmLogonPoliciesRead(d *schema.ResourceData, me
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	name := d.Get("name_regex").(string)
 
-	request := client.NewCommonRequest("GET", "ascm", "2019-05-10", "ListLoginPolicies", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListLoginPolicies", "/ascm/auth/loginPolicy/listLoginPolicies")
 	request.QueryParams["name"] = name
 
 	response := LoginPolicy{}
 
-	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" rsponse of raw ListLoginPolicies : %s", raw)
+	page := 1
 
-		bresponse, ok := raw.(*responses.CommonResponse)
+	for {
+		request.QueryParams["currentPage"] = fmt.Sprintf("%d", page)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_logon_policies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_acm_configuration", "ListLoginPolicies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if err != nil {
+			return errmsgs.WrapError(err)
 		}
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
@@ -129,6 +129,7 @@ func dataSourceAlibabacloudStackAscmLogonPoliciesRead(d *schema.ResourceData, me
 		if response.Code == "200" {
 			break
 		}
+		page += 1
 	}
 
 	var r *regexp.Regexp
