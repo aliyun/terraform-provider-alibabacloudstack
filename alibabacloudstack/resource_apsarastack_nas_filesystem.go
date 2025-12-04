@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -19,12 +18,13 @@ func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{"Capacity", "Performance", "standard", "advance"}, false),
 			},
 			"protocol_type": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"NFS", "SMB", "CPFS"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"NFS", "SMB"}, false),
 			},
 			"description": {
 				Type:         schema.TypeString,
@@ -42,7 +42,7 @@ func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"extreme", "standard", "bmcpfs"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"extreme", "standard"}, false),
 				Default:      "standard",
 			},
 			"capacity": {
@@ -90,7 +90,7 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 		request["ZoneId"] = v
 	}
 	if v, ok := d.GetOk("capacity"); ok {
-		request["Capacity"] = v.(int) * 1024
+		request["Capacity"] = v
 	}
 	if v, ok := d.GetOk("kms_key_id"); ok {
 		request["KmsKeyId"] = v
@@ -120,8 +120,8 @@ func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta i
 	}
 	if d.HasChanges("description", "capacity") {
 		request["Description"] = d.Get("description")
-		request["Capacity"] = d.Get("capacity").(int) * 1024
-		request["newCapacity"] = d.Get("capacity").(int) * 1024
+		request["Capacity"] = d.Get("capacity")
+		request["newCapacity"] = d.Get("capacity")
 		action := "ModifyFileSystem"
 		_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 		if err != nil {
@@ -149,11 +149,6 @@ func resourceAlibabacloudStackNasFileSystemRead(d *schema.ResourceData, meta int
 	d.Set("storage_type", object["StorageType"])
 	d.Set("encrypt_type", object["EncryptType"])
 	d.Set("file_system_type", object["FileSystemType"])
-	capacity, ok := object["Capacity"]
-	if ok {
-		v, _ := capacity.(json.Number).Int64()
-		d.Set("capacity", int(v/1024))
-	}
 	d.Set("capacity", object["Capacity"])
 	d.Set("zone_id", object["ZoneId"])
 	d.Set("kms_key_id", object["KMSKeyId"])

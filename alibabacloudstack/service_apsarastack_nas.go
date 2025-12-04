@@ -177,6 +177,10 @@ func (s *NasService) DescribeNasFileSystemStateRefreshFunc(id string, defaultRet
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeNasFileSystem(id)
 		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				return nil, "", nil
+			}
+			
 			if errmsgs.NeedRetry(err) && errmsgs.IsExpectedErrors(err, []string{errmsgs.InvalidFileSystemStatus_Ordering}) {
 				return nil, defaultRetryState, nil
 			}
