@@ -2,12 +2,10 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
 )
 
 func dataSourceAlibabacloudStackEcsInstanceFamilies() *schema.Resource {
@@ -54,33 +52,22 @@ func dataSourceAlibabacloudStackEcsInstanceFamilies() *schema.Resource {
 
 func dataSourceAlibabacloudStackEcsInstanceFamiliesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("GET", "ascm", "2019-05-10", "DescribeInstanceTypeFamilies", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DescribeInstanceTypeFamilies", "/ascm/manage/saleconf/ecsSpec/describeInstanceTypeFamilies")
 
 	response := EcsInstanceFamily{}
 
-	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw DescribeInstanceTypeFamilies : %s", raw)
-
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ecs_instance_families", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	bresponse, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_acm_configuration", "DescribeInstanceTypeFamilies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
 
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		if response.Code == 200 || len(response.Data.InstanceTypeFamilies) < 1 {
-			break
-		}
-
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return errmsgs.WrapError(err)
 	}
 
 	var ids []string
