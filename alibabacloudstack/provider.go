@@ -818,6 +818,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_nas_lifecycle_policy":                            resourceAlibabacloudStackNasLifecyclepolicy(),
 		"alibabacloudstack_nas_mount_target":                                resourceAlibabacloudStackNasMountTarget(),
 		"alibabacloudstack_nas_mounttarget":                                 resourceAlibabacloudStackNasMountTarget(),
+		"alibabacloudstack_cpfs_file_system":                                resourceAlibabacloudStackCpfsFileSystem(),
 		"alibabacloudstack_nat_gateway":                                     resourceAlibabacloudStackNatGateway(),
 		"alibabacloudstack_natgateway_natgateway":                           resourceAlibabacloudStackNatGateway(),
 		"alibabacloudstack_network_acl":                                     resourceAlibabacloudStackNetworkAcl(),
