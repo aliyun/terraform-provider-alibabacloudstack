@@ -140,6 +140,7 @@ func TestAccAlibabacloudStackNasFileSystem_basic(t *testing.T) {
 					"zone_id":       "${data.alibabacloudstack_nas_zones.default.zones.0.zone_id}",
 					"cluster_id":    "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.cluster_id}",
 					"description":   name,
+					"capacity":      100,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -149,14 +150,25 @@ func TestAccAlibabacloudStackNasFileSystem_basic(t *testing.T) {
 						"zone_id":       CHECKSET,
 						"cluster_id":    CHECKSET,
 						"description":   name,
+						"capacity":      "100",
 					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"cluster_id"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"capacity": 200,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"capacity": "200",
+					}),
+				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

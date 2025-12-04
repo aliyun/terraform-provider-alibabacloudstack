@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -15,9 +16,9 @@ func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"storage_type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Capacity", "Performance", "standard", "advance"}, false),
 			},
 			"protocol_type": {
@@ -89,8 +90,12 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 	if v, ok := d.GetOk("zone_id"); ok {
 		request["ZoneId"] = v
 	}
-	if v, ok := d.GetOk("capacity"); ok {
-		request["Capacity"] = v
+	if d.Get("protocol_type") == "CPFS" {
+		request["Capacity"] = d.Get("capacity")
+	} else {
+		if v, ok := d.GetOk("capacity"); ok {
+			request["VolumeSize"] = v.(int) * 1024 * 1024 * 1024
+		}
 	}
 	if v, ok := d.GetOk("kms_key_id"); ok {
 		request["KmsKeyId"] = v
@@ -104,7 +109,7 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 
 	d.SetId(fmt.Sprint(response["FileSystemId"]))
 	nasService := NasService{client}
-	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutRead), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Pending", []string{"Stopped", "Stopping", "Deleting"}))
+	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Pending", []string{"Stopped", "Stopping", "Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -120,8 +125,13 @@ func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta i
 	}
 	if d.HasChanges("description", "capacity") {
 		request["Description"] = d.Get("description")
-		request["Capacity"] = d.Get("capacity")
-		request["newCapacity"] = d.Get("capacity")
+		if d.Get("protocol_type") == "CPFS" {
+			request["Capacity"] = d.Get("capacity")
+		} else {
+			if v, ok := d.GetOk("capacity"); ok {
+				request["VolumeSize"] = v.(int) * 1024 * 1024 * 1024
+			}
+		}
 		action := "ModifyFileSystem"
 		_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 		if err != nil {
@@ -149,7 +159,12 @@ func resourceAlibabacloudStackNasFileSystemRead(d *schema.ResourceData, meta int
 	d.Set("storage_type", object["StorageType"])
 	d.Set("encrypt_type", object["EncryptType"])
 	d.Set("file_system_type", object["FileSystemType"])
-	d.Set("capacity", object["Capacity"])
+	if d.Get("protocol_type") == "CPFS" {
+		d.Set("capacity", object["Capacity"])
+	} else {
+		v, _ := object["VolumeSize"].(json.Number).Int64()
+		d.Set("capacity", int(v)/1024/1024/1024)
+	}
 	d.Set("zone_id", object["ZoneId"])
 	d.Set("kms_key_id", object["KMSKeyId"])
 	if d.Get("cluster_id").(string) == "" {
@@ -172,7 +187,7 @@ func resourceAlibabacloudStackNasFileSystemDelete(d *schema.ResourceData, meta i
 		return err
 	}
 	nasService := NasService{client}
-	stateConf := BuildStateConf([]string{"Stopped", "Stopping", "Deleting"}, []string{}, d.Timeout(schema.TimeoutRead), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Deleting", []string{"Running", "Pending"}))
+	stateConf := BuildStateConf([]string{"Stopped", "Stopping", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Deleting", []string{"Running", "Pending"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackCpfsFileSystem(t *testing.T) {
 					"zone_id":          "${data.alibabacloudstack_nas_zones.default.zones.0.zone_id}",
 					"cluster_id":       "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.cluster_id}",
 					"description":      "${var.name}",
-					"capacity":         "20480",
+					"capacity":         20480,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
