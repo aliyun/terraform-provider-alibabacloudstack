@@ -99,7 +99,7 @@ The following arguments are supported:
 * `zone_id` - (Optional, ForceNew) The zone ID. The usable area refers to the physical area where power and network are independent of each other in the same region.
   * When `file_system_type = standard`, this parameter is optional. By default, a zone that meets the conditions is randomly selected based on the `protocol_type` and `storage_type` configurations.
   * This parameter is required when `file_system_type = extreme` or `file_system_type = cpfs`.
-
+* `cluster_id` - (Required, ForceNew) The cluster ID.
 * `kms_key_id` - (Optional) The id of the KMS key. Required when `encrypt_type = 2`.
 
 ## Attributes Reference

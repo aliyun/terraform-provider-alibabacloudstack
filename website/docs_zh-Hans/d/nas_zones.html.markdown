@@ -26,7 +26,7 @@ output "alibabacloudstack_nas_zones_id" {
 
 支持以下参数：
 
-* `file_system_type` - (可选，强制新，v1.152.0+可用) 文件系统的类型。有效值：`standard`、`extreme`、`cpfs`。
+* `file_system_type` - (可选，强制新，v1.152.0+可用) 文件系统的类型。有效值：`standard`、`extreme`、`cpfs`、`bmcpfs`。
 
 ## 属性说明
 

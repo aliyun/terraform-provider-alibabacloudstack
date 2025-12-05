@@ -99,7 +99,7 @@ resource "alibabacloudstack_nas_file_system" "foo" {
 * `zone_id` - (选填，变更时重建) 可用区ID。可用区是指在同一地域内电力和网络互相独立的物理区域。
   * 当 `file_system_type = standard` 时，此参数为可选项。默认情况下，会根据 `protocol_type` 和 `storage_type` 配置随机选择一个符合条件的可用区。
   * 当 `file_system_type = extreme` 或 `file_system_type = cpfs` 时，此参数为必填项。
-
+* `cluster_id` - (必填，变更时重建) 集群ID。
 * `kms_key_id` - (选填) KMS密钥ID。当 `encrypt_type = 2` 时为必填项。
 
 ## 属性说明
