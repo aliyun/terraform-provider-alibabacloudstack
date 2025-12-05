@@ -26,7 +26,7 @@ output "alibabacloudstack_nas_zones_id" {
 
 The following arguments are supported:
 
-* `file_system_type` - (Optional, ForceNew, Available in v1.152.0+) The type of the file system.  Valid values: `standard`, `extreme`, `cpfs`, `bmcpfs`.
+* `file_system_type` - (Optional, ForceNew) The type of the file system.  Valid values: `standard`, `extreme`, `cpfs`, `bmcpfs`.
 
 ## Attributes Reference
 
