@@ -51,7 +51,7 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 
 	var requestInfo *ecs.Client
 	name := d.Get("name").(string)
-	check, err := ascmService.DescribeAscmOrganization(name)
+	check, err := ascmService.DescribeAscmOrganizationByName(name)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_organization", "ORG alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -84,7 +84,7 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 		addDebug("CreateOrganization", bresponse, requestInfo, bresponse.GetHttpContentString())
 	}
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		check, err = ascmService.DescribeAscmOrganization(name)
+		check, err = ascmService.DescribeAscmOrganizationByName(name)
 		if err != nil {
 			return resource.NonRetryableError(err)
 		}
@@ -101,7 +101,7 @@ func resourceAlibabacloudStackAscmOrganizationUpdate(d *schema.ResourceData, met
 	ascmService := AscmService{client}
 	name := d.Get("name").(string)
 	attributeUpdate := false
-	check, err := ascmService.DescribeAscmOrganization(name)
+	_, err := ascmService.DescribeAscmOrganization(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsOrganizationExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -110,13 +110,7 @@ func resourceAlibabacloudStackAscmOrganizationUpdate(d *schema.ResourceData, met
 		if v, ok := d.GetOk("name"); ok {
 			name = v.(string)
 		}
-		check.Data[0].Name = name
 		attributeUpdate = true
-	} else {
-		if v, ok := d.GetOk("name"); ok {
-			name = v.(string)
-		}
-		check.Data[0].Name = name
 	}
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateOrganization", "/ascm/auth/organization/update")
 	request.QueryParams["name"] = name
@@ -136,15 +130,13 @@ func resourceAlibabacloudStackAscmOrganizationUpdate(d *schema.ResourceData, met
 		addDebug(request.GetActionName(), bresponse, request)
 	}
 
-	d.SetId(fmt.Sprint(check.Data[0].ID))
-
 	return nil
 }
 
 func resourceAlibabacloudStackAscmOrganizationRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
-	object, err := ascmService.DescribeAscmOrganization(d.Get("name").(string))
+	object, err := ascmService.DescribeAscmOrganization(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -152,14 +144,10 @@ func resourceAlibabacloudStackAscmOrganizationRead(d *schema.ResourceData, meta 
 		}
 		return errmsgs.WrapError(err)
 	}
-	if len(object.Data) == 0 {
-		d.SetId("")
-		return nil
-	}
 
-	d.Set("org_id", object.Data[0].UUID)
-	d.Set("name", object.Data[0].Name)
-	d.Set("parent_id", strconv.Itoa(object.Data[0].ParentID))
+	d.Set("org_id", object.Data.UUID)
+	d.Set("name", object.Data.Name)
+	d.Set("parent_id", strconv.Itoa(object.Data.ParentID))
 
 	return nil
 }
@@ -168,32 +156,28 @@ func resourceAlibabacloudStackAscmOrganizationDelete(d *schema.ResourceData, met
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	var requestInfo *ecs.Client
-	check, err := ascmService.DescribeAscmOrganization(d.Get("name").(string))
+	check, err := ascmService.DescribeAscmOrganization(d.Id())
 	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			return nil
+		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsOrganizationExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	addDebug("IsOrganizationExist", check, requestInfo, map[string]string{"id": d.Id()})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-		if len(check.Data) != 0 {
-			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveOrganization", "/ascm/auth/organization/delete")
-			request.QueryParams["id"] = d.Id()
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveOrganization", "/ascm/auth/organization/delete")
+		request.QueryParams["id"] = d.Id()
 
-			bresponse, err := client.ProcessCommonRequest(request)
-			if err != nil {
-				if bresponse == nil {
-					return resource.RetryableError(err)
-				}
-				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organization", "RemoveOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return resource.RetryableError(err)
 			}
-			check, err = ascmService.DescribeAscmOrganization(d.Id())
-
-			if err != nil {
-				return resource.NonRetryableError(err)
-			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organization", "RemoveOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		return nil
 	})
-	return nil
+	return err
 }

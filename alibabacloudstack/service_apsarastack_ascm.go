@@ -486,11 +486,34 @@ func (s *AscmService) DescribeAscmDeletedUser(id string) (response *DeletedUser,
 	return resp, nil
 }
 
-func (s *AscmService) DescribeAscmOrganization(id string) (response *Organization, err error) {
-	did := strings.Split(id, COLON_SEPARATED)
+func (s *AscmService) DescribeAscmOrganization(id string) (response *OrganizationResponse, err error) {
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetOrganization", "/ascm/auth/organization/query")
+	request.QueryParams["id"] = id
+	var resp = &OrganizationResponse{}
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("GetOrganization", bresponse, request, request.QueryParams)
+	if err != nil {
+		errmsg := ""
+		if bresponse != nil {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		} else {
+			return nil, err
+		}
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorOrganizationNotFound", "EntityNotExist.Organization"}) {
+			return nil, errmsgs.ResourceNotFoundError("Organization", id)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	return resp, nil
+}
+func (s *AscmService) DescribeAscmOrganizationByName(name string) (response *OrganizationListResponse, err error) {
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetOrganizationList", "/ascm/auth/organization/queryList")
-	request.QueryParams["name"] = did[0]
-	var resp = &Organization{}
+	request.QueryParams["name"] = name
+	var resp = &OrganizationListResponse{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug("GetOrganization", bresponse, request, request.QueryParams)
 
@@ -504,15 +527,11 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorOrganizationNotFound"}) {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, name, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, errmsgs.WrapError(err)
-	}
-
-	if resp.Code == "200" {
 		return resp, errmsgs.WrapError(err)
 	}
 

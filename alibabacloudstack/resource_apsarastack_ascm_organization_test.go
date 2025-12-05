@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -9,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
-	var v *Organization
+func TestAccAlibabacloudStackAscmOrganizationBasic(t *testing.T) {
+	var v *OrganizationResponse
 
 	resourceId := "alibabacloudstack_ascm_organization.default"
 	ra := resourceAttrInit(resourceId, testAccCheckAscmOrg)
@@ -20,6 +21,9 @@ func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-ascmorg%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccAscm_e_Organization_resource)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -31,7 +35,10 @@ func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckAscm_E_OrganizationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAscm_e_Organization_resource,
+				Config: testAccConfig(map[string]interface{}{
+					"name":      "${var.name}",
+					"parent_id": "1",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -70,11 +77,13 @@ func testAccCheckAscm_E_OrganizationDestroy(s *terraform.State) error { //destro
 	return nil
 }
 
-const testAccAscm_e_Organization_resource = `
-resource "alibabacloudstack_ascm_organization" "default" {
-  name = "Tf-testingresource-org"
-  parent_id = "1"
-}`
+func testAccAscm_e_Organization_resource(name string) string {
+	return fmt.Sprintf(`
+	variable name{
+	 default = "%s"
+	}
+	`, name)
+}
 
 var testAccCheckAscmOrg = map[string]string{
 	"name":      CHECKSET,
