@@ -8,7 +8,7 @@ description: |-
 ---
 # alibabacloudstack_ascm_password_policy
 
-使用Provider配置的凭证在指定的资源集下编排Ascm密码策略。
+使用Provider配置的凭证在指定的资源集下编排Ascm密码策略。必须使用`Supper`用户进行操作。
 
 ## 示例用法
 

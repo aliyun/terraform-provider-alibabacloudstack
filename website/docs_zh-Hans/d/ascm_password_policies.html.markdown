@@ -10,7 +10,7 @@ description: |-
 
 # alibabacloudstack_ascm_password_policies  
 
-根据指定过滤条件列出当前凭证权限可以访问的密码策略列表。  
+根据指定过滤条件列出当前凭证权限可以访问的密码策略列表。必须使用`Supper`用户进行操作。
 
 ## 示例用法  
 

@@ -9,7 +9,7 @@ description: |-
 
 # alibabacloudstack_ascm_password_policies
 
-This data source provides the password policies of the current Apsara Stack Cloud user.
+This data source provides the password policies of the current Apsara Stack Cloud user. Arranging must be done using `Supper` user.
 
 ## Example Usage
 
