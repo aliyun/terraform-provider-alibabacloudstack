@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -77,7 +76,7 @@ func dataSourceAlibabacloudStackPrometheusV2NotifyGroups() *schema.Resource {
 							Type:     schema.TypeSet,
 							Computed: true,
 							Elem: &schema.Schema{
-								Type: schema.TypeInt,
+								Type: schema.TypeString,
 							},
 						},
 					},
@@ -144,7 +143,6 @@ func dataSourceAlibabacloudStackPrometheusV2NotifyGroupsRead(d *schema.ResourceD
 				continue
 			}
 			idsMap[vv.(string)] = vv.(string)
-			log.Printf("======================================================================vv: %v", vv)
 		}
 	}
 
@@ -158,7 +156,6 @@ func dataSourceAlibabacloudStackPrometheusV2NotifyGroupsRead(d *schema.ResourceD
 	var ids []string
 	for _, item := range pageResult.Data {
 		idStr := fmt.Sprintf("%v", item.ID)
-		log.Printf("======================================================================idStr: %v", idStr)
 		// Apply id filter
 		if len(idsMap) > 0 {
 			if _, exists := idsMap[idStr]; !exists {
