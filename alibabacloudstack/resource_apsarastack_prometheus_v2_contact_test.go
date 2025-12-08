@@ -10,7 +10,6 @@ import (
 
 func TestAccAlibabacloudStackPrometheusV2Contact_basic(t *testing.T) {
 	var v map[string]interface{}
-
 	resourceId := "alibabacloudstack_prometheus_v2_contact.default"
 	ra := resourceAttrInit(resourceId, nil)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
@@ -20,8 +19,14 @@ func TestAccAlibabacloudStackPrometheusV2Contact_basic(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tfacc-contact-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, nil)
+	name := fmt.Sprintf("tfacc-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, func(name string) string {
+		return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
+}		
+`, name)
+	})
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -38,9 +43,23 @@ func TestAccAlibabacloudStackPrometheusV2Contact_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"username": "tf-testAccPrometheusV2Contact",
+						"username": name,
 						"mobile":   "13812345678",
 						"mail":     "test@example.com",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"username": "${var.name}_update",
+					"mobile":   "13812345677",
+					"mail":     "test1@example.com",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"username": fmt.Sprintf("%s_update", name),
+						"mobile":   "13812345677",
+						"mail":     "test1@example.com",
 					}),
 				),
 			},
@@ -48,51 +67,6 @@ func TestAccAlibabacloudStackPrometheusV2Contact_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"username": "tf-testAccPrometheusV2Contact-update",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"username": "tf-testAccPrometheusV2Contact-update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"mobile": "13987654321",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"mobile": "13987654321",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"mail": "update@example.com",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"mail": "update@example.com",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"username":  "${var.name}",
-					"mobile":    "13812345678",
-					"mail":      "test@example.com",
-					"group_ids": []string{},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"username": "tf-testAccPrometheusV2Contact",
-						"mobile":   "13812345678",
-						"mail":     "test@example.com",
-					}),
-				),
 			},
 		},
 	})

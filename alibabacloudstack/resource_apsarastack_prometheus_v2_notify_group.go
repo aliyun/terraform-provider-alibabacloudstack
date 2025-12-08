@@ -54,7 +54,7 @@ func resourceAlibabacloudStackPrometheusV2NotifyGroup() *schema.Resource {
 			"contact_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -81,7 +81,7 @@ func resourceAlibabacloudStackPrometheusV2NotifyGroupCreate(d *schema.ResourceDa
 		body["im"] = im
 	}
 	if groupType == "CONTACT" {
-		contactIds := d.Get("contactIds").(*schema.Set).List()
+		contactIds := d.Get("contact_ids").(*schema.Set).List()
 		if len(contactIds) == 0 {
 			return fmt.Errorf("contactIds is required when type is %s", groupType)
 		}
@@ -163,7 +163,15 @@ func resourceAlibabacloudStackPrometheusV2NotifyGroupRead(d *schema.ResourceData
 	d.Set("name", object["name"])
 	d.Set("description", object["description"])
 	d.Set("im", object["im"])
-
+	if object["type"].(string) == "CONTACT" {
+		contactIds, err := prometheusService.ListGroupContactIds(d.Id())
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		d.Set("contact_ids", contactIds)
+	} else {
+		d.Set("contact_ids", []string{})
+	}
 	if webhookData, ok := object["webhook"].(map[string]interface{}); ok {
 		if url, ok := webhookData["url"].(string); ok {
 			d.Set("webhook_url", url)
@@ -208,7 +216,7 @@ func resourceAlibabacloudStackPrometheusV2NotifyGroupUpdate(d *schema.ResourceDa
 		body["im"] = im
 	}
 	if groupType == "CONTACT" {
-		contactIds := d.Get("contactIds").(*schema.Set).List()
+		contactIds := d.Get("contact_ids").(*schema.Set).List()
 		if len(contactIds) == 0 {
 			return fmt.Errorf("contactIds is required when type is %s", groupType)
 		}

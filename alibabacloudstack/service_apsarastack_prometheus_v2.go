@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
@@ -139,14 +140,39 @@ func (s *PrometheusService) DescribePrometheusV2Contact(id string) (map[string]i
 	}
 
 	for _, item := range dataList {
-		contact, ok := item.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		if contactId, ok := contact["id"].(float64); ok && fmt.Sprintf("%.0f", contactId) == id {
+		contact := item.(map[string]interface{})
+		if fmt.Sprint(contact["id"]) == id {
 			return contact, nil
 		}
 	}
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("contact %s not found", id))
+}
+
+func (s *PrometheusService) ListGroupContactIds(id string) ([]string, error) {
+	reqBody := map[string]interface{}{
+		"keyword": "",
+		"groupId": id,
+	}
+	// path := fmt.Sprintf("/log/api/v2/alert/contact/list?groupId=%s", id)
+	response, err := s.client.DoTeaRequest("GET", "prometheus2", "2023-04-13", "ListContact", "/log/api/v2/alert/contact/list", nil, reqBody, reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	if success, ok := response["success"].(bool); !ok || !success {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("contactIds %s not found", id))
+	}
+	result := []string{}
+	data, err := jsonpath.Get("$.data", response)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	if len(data.([]interface{})) > 0 {
+		for _, item := range data.([]interface{}) {
+			contact := item.(map[string]interface{})
+			result = append(result, fmt.Sprint(contact["id"]))
+		}
+	}
+	return result, nil
 }
