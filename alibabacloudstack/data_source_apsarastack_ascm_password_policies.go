@@ -3,10 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -126,18 +123,13 @@ func dataSourceAlibabacloudStackAscmPasswordPoliciesRead(d *schema.ResourceData,
 	response := PasswordPolicy{}
 
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw GetPasswordPolicy : %s", raw)
-
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_password_policies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_password_policies", "GetPasswordPolicy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)

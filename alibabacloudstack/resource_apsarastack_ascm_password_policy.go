@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -56,6 +54,7 @@ func resourceAlibabacloudStackAscmPasswordPolicy() *schema.Resource {
 				Optional: true,
 			},
 		},
+		DeprecationMessage: "The globally unique resource, it is not recommended to use Terraform for configuration and is scheduled for removal in version 3.19.0",
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackAscmPasswordPolicyCreate, resourceAlibabacloudStackAscmPasswordPolicyRead, resourceAlibabacloudStackAscmPasswordPolicyUpdate, resourceAlibabacloudStackAscmPasswordPolicyDelete)
 	return resource
@@ -69,20 +68,15 @@ func resourceAlibabacloudStackAscmPasswordPolicyCreate(d *schema.ResourceData, m
 	request.QueryParams["minimumPasswordLength"] = value123
 
 	var response = PasswordPolicy{}
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_password_policy", "", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_password_policy", "SetPasswordPolicy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	addDebug("SetPasswordPolicy", raw, request)
 	if bresponse.GetHttpStatus() != 200 {
 		errmsg := ""
 		if bresponse != nil {
@@ -90,7 +84,6 @@ func resourceAlibabacloudStackAscmPasswordPolicyCreate(d *schema.ResourceData, m
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_password_policy", "", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("SetPasswordPolicy", raw, request, bresponse.GetHttpContentString())
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 
 	d.SetId(fmt.Sprint(response.Data.ID))
@@ -139,18 +132,14 @@ func resourceAlibabacloudStackAscmPasswordPolicyDelete(d *schema.ResourceData, m
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ResetPasswordPolicy", "/ascm/auth/user/resetPasswordPolicy")
-		request.QueryParams["id"] = d.Id()
 
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
 			}
-			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "ResetPasswordPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_password_policy", "SetPasswordPolicy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		_, err = ascmService.DescribeAscmPasswordPolicy(d.Id())
 
