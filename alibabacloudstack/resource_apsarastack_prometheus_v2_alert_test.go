@@ -1,116 +1,83 @@
-func buildBasicPrometheusInstance(name string) string {
-	return fmt.Sprintf(`
-resource "alibabacloudstack_prometheus_v2_instance" "default" {
-  cluster_name = "%s"
-  tags         = ["test1", "test2"]
-}
+package alibabacloudstack
 
-data "alibabacloudstack_prometheus_v2_instances" "default" {
-  name_regex = alibabacloudstack_prometheus_v2_instance.default.cluster_name
-}
-`, name)
-}
+import (
+	"fmt"
+	"testing"
 
-func buildBasicNotifyGroup(name string) string {
-	return fmt.Sprintf(`
-resource "alibabacloudstack_prometheus_v2_notify_group" "default" {
-  name        = "%s_notify_group"
-  type        = "WEBHOOK"
-  description = "%s_notify_group_description"
-  webhook_url = "https://oapi.dingtalk.com/robot/send?access_token=56b42bc6e7cad53bab514a583847db73c68fa1804b0e72af7167954b66f7aea8"
-  webhook_header_params {
-    key   = "Content-Type"
-    value = "application/json"
-  }
-}
-
-data "alibabacloudstack_prometheus_v2_notify_groups" "default" {
-  name_regex = alibabacloudstack_prometheus_v2_notify_group.default.name
-}
-`, name, name)
-}
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+)
 
 func TestAccAlibabacloudStackPrometheusV2Alert_basic(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_prometheus_v2_alert.default"
-	ra := resourceAttrInit(resourceId, map[string]string{
-		"name":                 "tfacc_alert",
-		"alert_type":           "PROMETHEUS",
-		"notify_recovered":     "true",
-		"tag_set.#":            "2",
-		"tag_set.0":            "aaa",
-		"tag_set.1":            "ccc",
-		"recover_notification": "��ض���\\${alert_source} \\n�ָ�ʱ�䣺\\${alert_time}",
-	})
-	serviceFunc := func() interface{} {
+	ra := resourceAttrInit(resourceId, map[string]string{})
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &PrometheusService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	}, "DescribePrometheusV2Alert")
+
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := "tfacc_alert"
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, func(name string) string {
-		instanceConfig := buildBasicPrometheusInstance(name)
-		groupConfig := buildBasicNotifyGroup(name)
-
-		return fmt.Sprintf(`
-%s
-%s
-
-resource "alibabacloudstack_prometheus_v2_alert" "default" {
-  name               = "%s"
-  alert_type         = "PROMETHEUS"
-  notify_recovered   = true
-  is_check_all       = false
-  tag_set            = ["aaa", "ccc"]
-  recover_notification = "��ض���\\${alert_source} \\n�ָ�ʱ�䣺\\${alert_time}"
-
-  trigger_rule = {
-    clusterIds = [data.alibabacloudstack_prometheus_v2_instances.default.instances.0.id]
-    promql     = "select testfield from testtable where testfield >= 0"
-    period     = "5m"
-    severity   = "warning"
-    cron       = "0 /5 * * * ?"
-    timeType   = 1
-  }
-
-  notification = {
-    message = "����������$${condition}\\n���м�¼��$${alert_result}"
-  }
-
-  alert_notify_params {
-    notify_types      = ["EMAIL", "SMS"]
-    notify_group_ids  = [data.alibabacloudstack_prometheus_v2_notify_groups.default.groups.0.id]
-    notify_interval   = "10m"
-  }
-}
-`, instanceConfig, groupConfig, name)
-	})
-
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tfacc%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcekPrometheusV2AlertDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:         testAccProviders,
-		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:      rac.checkResourceDestroy(),
+		Providers:    testAccProviders,
+		CheckDestroy: rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccConfig(map[string]interface{}{}),
+				Config: testAccConfig(map[string]interface{}{
+					"name":                 "${var.name}",
+					"notify_recovered":     "true",
+					"is_check_all":         "false",
+					"tag_set":              []string{"aaa", "ccc"},
+					"trigger_clusters":     []string{"${alibabacloudstack_prometheus_v2_instance.default.id}"},
+					"trigger_promql":       "select testfield from testtable where testfield >= 0",
+					"trigger_period":       "5m",
+					"trigger_severity":     "warning",
+					"trigger_cron":         "0 /5 * * * ?",
+					"recover_notification": "Trigger condition\\\\$${alert_source} \\\\Hit record\\\\$${alert_time}",
+					"notification":         "Trigger condition: {condition}\\nHit record :{alert_result}",
+					"notify_types":         []string{"EMAIL", "SMS"},
+					"notify_group_ids":     []string{"${alibabacloudstack_prometheus_v2_notify_group.default.id}"},
+					"notify_interval":      "10m",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"name":               name,
+						"notify_recovered":   "true",
+						"is_check_all":       "false",
+						"tag_set.#":          "2",
+						"trigger_clusters.#": "1",
+						"trigger_period":     "5m",
+						"trigger_promql":     "select testfield from testtable where testfield >= 0",
+						"trigger_severity":   "warning",
+						"trigger_cron":       "0 /5 * * * ?",
+						"notify_types.#":     "2",
+						"notify_group_ids.#": "1",
+						"notification":       "Trigger condition: {condition}\nHit record :{alert_result}",
+					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name":             "tfacc_alert_updated",
+					"name":             "${var.name}_updated",
 					"notify_recovered": false,
+					"trigger_period":   "5m",
+					"trigger_promql":   "select testfield from testtable where testfield == 0",
+					"notification":     "Trigger condition: {condition}\\nHit record :{alert_result}111",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":             "tfacc_alert_updated",
+						"name":             fmt.Sprintf("%s_updated", name),
 						"notify_recovered": "false",
+						"trigger_period":   "5m",
+						"trigger_promql":   "select testfield from testtable where testfield == 0",
+						"notification":     "Trigger condition: {condition}\nHit record :{alert_result}111",
 					}),
 				),
 			},
@@ -121,4 +88,28 @@ resource "alibabacloudstack_prometheus_v2_alert" "default" {
 			},
 		},
 	})
+}
+
+func resourcekPrometheusV2AlertDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
+}
+
+resource "alibabacloudstack_prometheus_v2_instance" "default" {
+  cluster_name = "${var.name}"
+  tags         = ["test1", "test2"]
+}
+
+resource "alibabacloudstack_prometheus_v2_notify_group" "default" {
+  name        = "${var.name}_notify_group"
+  type        = "WEBHOOK"
+  description = "${var.name}_notify_group_description"
+  webhook_url = "https://test.com"
+  webhook_header_params {
+    key   = "Content-Type"
+    value = "application/json"
+  }
+}
+ `, name)
 }
