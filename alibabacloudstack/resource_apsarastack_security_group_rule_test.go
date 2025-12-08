@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackSecurityGroupRuleBasic(t *testing.T) {
+func TestAccAlibabacloudStackSecurityGroupRule_sg(t *testing.T) {
 	var v ecs.Permission
 	resourceId := "alibabacloudstack_security_group_rule.default"
 	ra := resourceAttrInit(resourceId, testAccCheckSecurityGroupRuleBasicMap)
@@ -50,7 +50,7 @@ func TestAccAlibabacloudStackSecurityGroupRuleBasic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description":              "abc",
+						"description": "abc",
 					}),
 				),
 			},
@@ -81,16 +81,26 @@ func TestAccAlibabacloudStackSecurityGroupRuleBasic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"type": "egress",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"type": "egress",
+					}),
+				),
+			},
 		},
 	})
 
 }
 
-func TestAccAlibabacloudStackSecurityGroupEgressRule(t *testing.T) {
+func TestAccAlibabacloudStackSecurityGroupRule_cidr(t *testing.T) {
 	var v ecs.Permission
 	resourceId := "alibabacloudstack_security_group_rule.default"
 	ra := resourceAttrInit(resourceId, map[string]string{
-		"type":        "egress",
+		"type":        "ingress",
 		"policy":      "accept",
 		"description": "SHDRP-7513",
 		"port_range":  "443/443",
@@ -106,7 +116,70 @@ func TestAccAlibabacloudStackSecurityGroupEgressRule(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc_sg_rule%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccSecurityGroupEgressRule)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccSecurityGroupRuleBasic)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+		},
+
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckSecurityGroupRuleDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"type":              "ingress",
+					"ip_protocol":       "tcp",
+					"policy":            "accept",
+					"port_range":        "443/443",
+					"priority":          "1",
+					"security_group_id": "${alibabacloudstack_security_group.default.0.id}",
+					"cidr_ip":           "182.254.11.243/32",
+					"description":       "SHDRP-7513",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description": "SHDRP-7513",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"type": "egress",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"type": "egress",
+					}),
+				),
+			},
+		},
+	})
+
+}
+
+func TestAccAlibabacloudStackSecurityGroupRule_cidrv6(t *testing.T) {
+	var v ecs.Permission
+	resourceId := "alibabacloudstack_security_group_rule.default"
+	ra := resourceAttrInit(resourceId, map[string]string{
+		"policy":      "accept",
+		"description": "SHDRP-7513",
+		"port_range":  "443/443",
+		"priority":    "1",
+		"ipv6_cidr_ip":     "2001:0DB8::1428:57ab/128",
+	})
+	serviceFunc := func() interface{} {
+		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc_sg_rule%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccSecurityGroupRuleBasic)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -125,13 +198,24 @@ func TestAccAlibabacloudStackSecurityGroupEgressRule(t *testing.T) {
 					"policy":            "accept",
 					"port_range":        "443/443",
 					"priority":          "1",
-					"security_group_id": "${alibabacloudstack_security_group.default.id}",
-					"cidr_ip":           "182.254.11.243/32",
+					"security_group_id": "${alibabacloudstack_security_group.default.0.id}",
+					"ipv6_cidr_ip":      "2001:0DB8::1428:57ab/128",
 					"description":       "SHDRP-7513",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"type":        "egress",
 						"description": "SHDRP-7513",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"type": "ingress",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"type": "ingress",
 					}),
 				),
 			},
