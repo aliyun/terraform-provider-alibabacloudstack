@@ -109,3 +109,44 @@ func (s *PrometheusService) DescribePrometheusV2NotifyGroup(id string) (map[stri
 
 	return nil, errmsgs.Error(errmsgs.NotFoundMsg, fmt.Sprintf("prometheus notify group %s not found", clusterId))
 }
+func (s *PrometheusService) DescribePrometheusV2Contact(id string) (map[string]interface{}, error) {
+	reqBody := map[string]interface{}{
+		"keyword":         "",
+		"pageNumber":      1,
+		"pageSize":        10,
+		"direction":       "desc",
+		"page":            1,
+		"selectedRowKeys": []interface{}{},
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "prometheus2", "2023-04-13", "PageContact", "/log/api/v2/alert/contact/page", nil, nil, reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	if success, ok := response["success"].(bool); !ok || !success {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("contact %s not found", id))
+	}
+
+	data, ok := response["data"].(map[string]interface{})
+	if !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("contact %s not found", id))
+	}
+
+	dataList, ok := data["data"].([]interface{})
+	if !ok || len(dataList) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("contact %s not found", id))
+	}
+
+	for _, item := range dataList {
+		contact, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if contactId, ok := contact["id"].(float64); ok && fmt.Sprintf("%.0f", contactId) == id {
+			return contact, nil
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("contact %s not found", id))
+}
