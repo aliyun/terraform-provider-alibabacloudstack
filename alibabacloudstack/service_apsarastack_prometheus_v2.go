@@ -176,3 +176,22 @@ func (s *PrometheusService) ListGroupContactIds(id string) ([]string, error) {
 	}
 	return result, nil
 }
+
+func (s *PrometheusService) DescribePrometheusV2Alert(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{"id": id}
+	response, err := s.client.DoTeaRequest("GET", "prometheus2", "2023-04-13", "DescribeAlert", "/log/api/v2/alert/detail", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if success, ok := response["success"].(bool); !ok || !success {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("prometheus v2 alert %s not found", id))
+	}
+
+	data, ok := response["data"].(map[string]interface{})
+	if !ok || data == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("prometheus v2 alert %s not found", id))
+	}
+
+	return data, nil
+}
