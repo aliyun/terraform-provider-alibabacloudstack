@@ -85,19 +85,19 @@ func resourceAlibabacloudStackSchedulerx2AppGroup() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"load5": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Optional: true,
-							Default:  0,
+							Default:  "0",
 						},
 						"heap5_usage": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Default:  90,
+							Default:  "90",
 						},
 						"disk_usage": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Default:  95,
+							Default:  "95",
 						},
 					},
 				},
