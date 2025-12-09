@@ -1,3 +1,30 @@
+# 3.18.21
+
+## New
+
+
+1. Orchestration capability for Alibaba Cloud DNS forward domains (`alibabacloudstack_dns_forward_domain`)
+2. Orchestration capability for Alibaba Cloud DNS line configurations (`alibabacloudstack_dns_line`)
+3. Orchestration capability for Alibaba Cloud private DNS domains (`alibabacloudstack_dns_private_domain`)
+4. Orchestration capability for DNS record configurations of private domains (`alibabacloudstack_dns_private_record`)
+5. Orchestration capability for recursive ACL policies of private DNS domains (`alibabacloudstack_dns_recursor_acl`)
+6. Orchestration capability for line configurations of private DNS domains (`alibabacloudstack_dns_private_line`)
+7. Orchestration capability for Global Traffic Manager (GTM) instances (`alibabacloudstack_dns_gtm_instance`)
+8. Orchestration capability for GTM address pools (`alibabacloudstack_dns_gtm_addresspool`)
+9. Orchestration capability for GTM instance access strategies (`alibabacloudstack_dns_gtm_access_strategy`)
+10. Orchestration capability for CPFS file system resources (`alibabacloudstack_cpfs_file_system`)
+11. Orchestration capability for Prometheus v2 monitoring instances (`alibabacloudstack_prometheus_v2_instance`)
+12. Orchestration capability for configuring alert notification recipients in Prometheus v2 (`alibabacloudstack_prometheus_v2_contact`)
+13. Orchestration capability for notification groups in Prometheus v2 (`alibabacloudstack_prometheus_v2_notify_group`)
+14. Orchestration capability for alert rules in Prometheus v2 (`alibabacloudstack_prometheus_v2_alert`)
+
+
+## Removals
+
+1. Deprecation of the query capability for ECS instance metering data (`alibabacloudstack_ascm_metering_query_ecs`)
+
+---
+
 # 3.18.20
 
 ## New
@@ -65,7 +92,7 @@
 
 # 3.18.17
 
-## New Features
+## New
 
 1. Orchestration capability for CEN border router network instance connections (`alibabacloudstack_cen_transit_router_vbr_attachment`)
 2. Orchestration capability for CEN Connect network instance connections (`alibabacloudstack_cen_transit_router_connect_attachment`)

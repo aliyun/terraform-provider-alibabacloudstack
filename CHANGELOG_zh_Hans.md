@@ -1,3 +1,28 @@
+# 3.18.21
+
+## 新增
+
+1. 云解析服务转发域名的编排能力（`alibabacloudstack_dns_forward_domain`）
+2. 云解析服务线路的编排能力（`alibabacloudstack_dns_line`）
+3. 云解析私有域名的编排能力（`alibabacloudstack_dns_private_domain`）
+4. 云解析私有域名解析配置记录的编排能力（`alibabacloudstack_dns_private_record`）
+5. 云解析私有域名递归ACL策略的编排能力（`alibabacloudstack_dns_recursor_acl`）
+6. 云解析私有域名线路的编排能力（`alibabacloudstack_dns_private_line`）
+7. 云解析全局流量管理(GTM)实例的编排能力（`alibabacloudstack_dns_gtm_instance`）
+8. 云解析全局调度地址池的编排能力（`alibabacloudstack_dns_gtm_addresspool`）
+9. 云解析全局调度实例访问策略的编排能力（`alibabacloudstack_dns_gtm_access_strategy`）
+10. CPFS文件系统资源的编排能力（`alibabacloudstack_cpfs_file_system`）
+11. Prometheus v2监控实例的编排能力（`alibabacloudstack_prometheus_v2_instance`）
+12. Prometheus v2配置告警通知接收人信息的编排能力（`alibabacloudstack_prometheus_v2_contact`）
+13. Prometheus v2的通知组的编排能力（`alibabacloudstack_prometheus_v2_notify_group`）
+14. Prometheus v2警告规则的编排能力（`alibabacloudstack_prometheus_v2_alert`）
+
+## 下线
+
+1. 下线ECS实例的计量数据的查询能力(`alibabacloudstack_ascm_metering_query_ecs`)
+
+---
+
 # 3.18.20
 
 ## 新增
