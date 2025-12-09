@@ -20,8 +20,7 @@ func TestAccAlibabacloudStackSchedulerx2AppGroup_basic(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_schedulerx2_app_group.example"
 	ra := resourceAttrInit(resourceId, map[string]string{
-		"app_key":      CHECKSET,
-		"app_group_id": CHECKSET,
+		"app_key": CHECKSET,
 	})
 	rc := resourceCheckInit(resourceId, &v, func() interface{} {
 		return &Schedulerx2Service{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -37,13 +36,11 @@ func TestAccAlibabacloudStackSchedulerx2AppGroup_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:         testAccProviders,
-		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:      rac.checkResourceDestroy(),
+		Providers:    testAccProviders,
+		CheckDestroy: rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"namespace":       "system_namespace",
 					"group_id":        "${var.name}.terra",
 					"app_name":        "${var.name}",
 					"description":     "${var.name}",
@@ -72,7 +69,6 @@ func TestAccAlibabacloudStackSchedulerx2AppGroup_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"namespace":                       "system_namespace",
 						"group_id":                        fmt.Sprintf("%s.terra", name),
 						"app_name":                        name,
 						"description":                     name,
@@ -124,20 +120,22 @@ func TestAccAlibabacloudStackSchedulerx2AppGroup_basic(t *testing.T) {
 						"description":                     fmt.Sprintf("%s_update", name),
 						"max_jobs":                        "20",
 						"max_concurrency":                 "5",
-						"monitor_config.0.send_channel":   "mail1",
-						"contacts.0.username":             "test",
+						"monitor_config.0.send_channel":   "mail",
+						"contacts.0.username":             "test1",
 						"contacts.0.user_email":           "123@333.com",
 						"contacts.0.dingding_ak":          "testakkkkkkkk",
-						"metrics_threshold.#":             "5",
-						"metrics_threshold.0.load5":       "90",
+						"metrics_threshold.#":             "1",
+						"metrics_threshold.0.load5":       "5",
 						"metrics_threshold.0.heap5_usage": "90",
+						"metrics_threshold.0.disk_usage":  "90",
 					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"namespace"},
 			},
 		},
 	})

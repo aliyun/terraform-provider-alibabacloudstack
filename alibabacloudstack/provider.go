@@ -596,6 +596,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_prometheus_v2_notify_groups":                      dataSourceAlibabacloudStackPrometheusV2NotifyGroups(),
 		"alibabacloudstack_prometheus_v2_contacts":                           dataSourceAlibabacloudStackPrometheusV2Contacts(),
 		"alibabacloudstack_prometheus_v2_alerts":                             dataSourceAlibabacloudStackPrometheusV2Alerts(),
+		"alibabacloudstack_schedulerx2_app_groups":                           dataSourceAlibabacloudStackSchedulerx2AppGroups(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps

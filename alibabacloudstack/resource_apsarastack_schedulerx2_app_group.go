@@ -15,8 +15,8 @@ func resourceAlibabacloudStackSchedulerx2AppGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"namespace": {
 				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Optional: true,
+				Default:  "system_namespace",
 			},
 			"group_id": {
 				Type:     schema.TypeString,
@@ -110,10 +110,6 @@ func resourceAlibabacloudStackSchedulerx2AppGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"app_group_id": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackSchedulerx2AppGroupCreate, resourceAlibabacloudStackSchedulerx2AppGroupRead, resourceAlibabacloudStackSchedulerx2AppGroupUpdate, resourceAlibabacloudStackSchedulerx2AppGroupDelete)
@@ -150,20 +146,20 @@ func resourceAlibabacloudStackSchedulerx2AppGroupCreate(d *schema.ResourceData, 
 	}
 	if v, ok := d.GetOk("contacts"); ok {
 		contacts := v.(*schema.Set).List()
-		contactlist := make([]map[string]interface{}, len(contacts))
+		contactlist := make([]map[string]interface{}, 0)
 		for _, v := range contacts {
 			contact := v.(map[string]interface{})
 			contactlist = append(contactlist, map[string]interface{}{
-				"userName":  contact["username"],
-				"userEmail": contact["user_email"],
-				"dingding":  contact["dingding_ak"],
+				"userName": contact["username"],
+				"userMail": contact["user_email"],
+				"ding":     contact["dingding_ak"],
 			})
 		}
 		contactsJson, err := json.Marshal(contactlist)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		reqBody["ContactsJson"] = string(contactsJson)
+		reqBody["MonitorContactsJson"] = string(contactsJson)
 	}
 	if v, ok := d.GetOk("metrics_threshold"); ok {
 		metricsThreshold := v.(*schema.Set).List()[0].(map[string]interface{})
@@ -181,10 +177,7 @@ func resourceAlibabacloudStackSchedulerx2AppGroupCreate(d *schema.ResourceData, 
 	if v, ok := d.GetOk("accept_language"); ok {
 		reqBody["AcceptLanguage"] = v
 	}
-	reqBody["Action"] = "CreateAppGroup"
-	reqBody["AccessKeyId"] = client.AccessKey
-	reqBody["SignatureMethod"] = "HMAC-SHA1"
-	resp, err := client.DoTeaRequest("POST", "schedulerx2", "2019-04-30", "CreateAppGroup", "/openapi/v2/group/create", nil, reqBody, nil)
+	resp, err := client.DoTeaRequest("POST", "schedulerx2", "2019-04-30", "CreateAppGroup", "", nil, reqBody, nil)
 	if err != nil {
 		return err
 	}
@@ -194,12 +187,12 @@ func resourceAlibabacloudStackSchedulerx2AppGroupCreate(d *schema.ResourceData, 
 		return fmt.Errorf("failed to get Data from response")
 	}
 
-	appGroupId, ok := data["AppGroupId"].(float64)
+	appGroupId, ok := data["AppGroupId"]
 	if !ok {
 		return fmt.Errorf("failed to get AppGroupId from response data")
 	}
 
-	d.SetId(fmt.Sprintf("%d", int64(appGroupId)))
+	d.SetId(fmt.Sprint(appGroupId))
 
 	return nil
 }
@@ -220,6 +213,20 @@ func resourceAlibabacloudStackSchedulerx2AppGroupRead(d *schema.ResourceData, me
 	d.Set("description", object["Description"])
 	d.Set("max_jobs", object["MaxJobs"])
 	d.Set("max_concurrency", object["MaxConcurrency"])
+	if v, ok := object["Contact"]; ok {
+		contact := make([]interface{}, 0)
+		contacts := make([]map[string]interface{}, 0)
+		_ = json.Unmarshal([]byte(v.(string)), &contact)
+		for _, item := range contact {
+			c := item.(map[string]interface{})
+			contacts = append(contacts, map[string]interface{}{
+				"username":    c["userName"],
+				"user_email":  c["userMail"],
+				"dingding_ak": c["ding"],
+			})
+		}
+		d.Set("contacts", contacts)
+	}
 	if v, ok := object["MonitorConfig"]; ok {
 		monitorConfig := make(map[string]interface{})
 		_ = json.Unmarshal([]byte(v.(string)), &monitorConfig)
@@ -283,20 +290,20 @@ func resourceAlibabacloudStackSchedulerx2AppGroupUpdate(d *schema.ResourceData, 
 		}
 		if v, ok := d.GetOk("contacts"); ok {
 			contacts := v.(*schema.Set).List()
-			contactlist := make([]map[string]interface{}, len(contacts))
+			contactlist := make([]map[string]interface{}, 0)
 			for _, v := range contacts {
 				contact := v.(map[string]interface{})
 				contactlist = append(contactlist, map[string]interface{}{
-					"userName":  contact["username"],
-					"userEmail": contact["user_email"],
-					"dingding":  contact["dingding_ak"],
+					"userName": contact["username"],
+					"userMail": contact["user_email"],
+					"ding":     contact["dingding_ak"],
 				})
 			}
 			contactsJson, err := json.Marshal(contactlist)
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}
-			request["ContactsJson"] = string(contactsJson)
+			request["MonitorContactsJson"] = string(contactsJson)
 		}
 		if v, ok := d.GetOk("metrics_threshold"); ok {
 			metricsThreshold := v.(*schema.Set).List()[0].(map[string]interface{})
@@ -316,7 +323,7 @@ func resourceAlibabacloudStackSchedulerx2AppGroupUpdate(d *schema.ResourceData, 
 		}
 		request["Action"] = "UpdateAppGroup"
 		request["AccessKeyId"] = client.AccessKey
-		_, err := client.DoTeaRequest("POST", "schedulerx2", "2019-04-30", "UpdateAppGroup", "/openapi/v1/group/update", nil, request, nil)
+		_, err := client.DoTeaRequest("POST", "schedulerx2", "2019-04-30", "UpdateAppGroup", "", nil, request, nil)
 		if err != nil {
 			return fmt.Errorf("failed to update schedulerx2 app group: %v", err)
 		}
@@ -333,7 +340,7 @@ func resourceAlibabacloudStackSchedulerx2AppGroupDelete(d *schema.ResourceData, 
 		"GroupId":   d.Get("group_id"),
 	}
 	reqQuery["Action"] = "DeleteAppGroup"
-	_, err := client.DoTeaRequest("POST", "schedulerx2", "2019-04-30", "DeleteAppGroup", "/openapi/v2/group/delete", nil, reqQuery, nil)
+	_, err := client.DoTeaRequest("POST", "schedulerx2", "2019-04-30", "DeleteAppGroup", "", nil, reqQuery, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteAppGroup", errmsgs.AlibabacloudStackSdkGoERROR)
 	}

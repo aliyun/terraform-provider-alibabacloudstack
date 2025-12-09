@@ -21,7 +21,7 @@ func (s *Schedulerx2Service) DescribeSchedulerx2AppGroup(id string) (map[string]
 		"PageNum":     1,
 		"PageSize":    10,
 	}
-	response, err := s.client.DoTeaRequest("GET", "schedulerx2", "2019-04-30", "ListGroups", "/openapi/v2/group/list", nil, reqQuery, nil)
+	response, err := s.client.DoTeaRequest("POST", "schedulerx2", "2019-04-30", "ListGroups", "", nil, reqQuery, nil)
 	if err != nil {
 		return nil, err
 	}
