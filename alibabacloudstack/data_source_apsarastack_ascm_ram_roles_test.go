@@ -1,11 +1,13 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"fmt"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAscm_Roles_DataSource(t *testing.T) {
+func TestAccAlibabacloudStackAscmRamRoles_DataSource(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -13,7 +15,7 @@ func TestAccAlibabacloudStackAscm_Roles_DataSource(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: dataSourceAlibabacloudStackAscm_Roles,
+				Config: dataSourceAlibabacloudStackAscm_Roles(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ascm_roles.default"),
 					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.id"),
@@ -27,16 +29,18 @@ func TestAccAlibabacloudStackAscm_Roles_DataSource(t *testing.T) {
 	})
 }
 
-const dataSourceAlibabacloudStackAscm_Roles = `
+func dataSourceAlibabacloudStackAscm_Roles() string {
+	return fmt.Sprintf(`
 resource "alibabacloudstack_ascm_ram_role" "default" {
-  role_name = "TestRamRoles"
+  role_name = "tftestrole%d"
   description = "TestingRam"
   organization_visibility = "global"
-role_range = "roleRange.allOrganizations"
+  role_range = "roleRange.userGroup"
 }
 
 data "alibabacloudstack_ascm_roles" "default" {
   name_regex = alibabacloudstack_ascm_ram_role.default.role_name
 }
 
-`
+`, getAccTestRandInt(1000000, 9999999))
+}

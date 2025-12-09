@@ -114,12 +114,12 @@ func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRol
 	return resp, nil
 }
 
-func (s *AscmService) DescribeAscmRamRole(id string) (response *AscmRoles, err error) {
+func (s *AscmService) DescribeAscmRamRole(id string) (response *ListAscmRolesResponse, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "/ascm/auth/role/listRoles")
 	request.QueryParams["roleName"] = did[0]
 	request.QueryParams["roleType"] = "ROLETYPE_RAM"
-	var resp = &AscmRoles{}
+	var resp = &ListAscmRolesResponse{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 
 	if err != nil {

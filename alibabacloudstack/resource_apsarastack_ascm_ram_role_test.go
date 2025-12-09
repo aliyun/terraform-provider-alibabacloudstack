@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -9,16 +10,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscm_RamRoleBasic(t *testing.T) {
-	var v *AscmRoles
+func TestAccAlibabacloudStackAscmRamRoleBasic(t *testing.T) {
+	var v *ListAscmRolesResponse
 	resourceId := "alibabacloudstack_ascm_ram_role.default"
 	ra := resourceAttrInit(resourceId, testAccCheckAscmRamRole)
 	serviceFunc := func() interface{} {
 		return &AscmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("tftestrole%d", rand)
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccAscm_RamRole_resource)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -30,9 +34,19 @@ func TestAccAlibabacloudStackAscm_RamRoleBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckAscm_RamRoleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAscm_RamRole_resource,
+				Config: testAccConfig(map[string]interface{}{
+					"role_name":               name,
+					"description":             "TestRole",
+					"organization_visibility": "global",
+					"role_range":              "roleRange.userGroup",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"role_name":               name,
+						"description":             "TestRole",
+						"organization_visibility": "global",
+						"role_range":              "roleRange.userGroup",
+					}),
 				),
 			},
 			{
@@ -69,14 +83,9 @@ func testAccCheckAscm_RamRoleDestroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccAscm_RamRole_resource = `
-resource "alibabacloudstack_ascm_ram_role" "default" {
-  role_name = "Test_Ram_Role"
-  description = "TestRole"
-  organization_visibility = "global"
-  role_range = "roleRange.userGroup"
+func testAccAscm_RamRole_resource(name string) string {
+	return ""
 }
-`
 
 var testAccCheckAscmRamRole = map[string]string{
 	"role_name":               CHECKSET,
