@@ -8,7 +8,7 @@ description: |-
 ---
 # alibabacloudstack_ascm_password_policy
 
-Provides an Ascm Password Policy resource. Arranging must be done using `Supper` user.
+Provides an Ascm Password Policy resource. Arranging must be done using `Super` user.
 
 ## Example Usage
 
