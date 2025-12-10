@@ -2,14 +2,12 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"log"
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackInstanceFamilies() *schema.Resource {
@@ -31,6 +29,7 @@ func dataSourceAlibabacloudStackInstanceFamilies() *schema.Resource {
 			"resource_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{"DRDS"}, false),
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -87,19 +86,18 @@ func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, met
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DescribeSeriesIdFamilies", "/ascm/manage/saleconf/drdsSpec/describeSeriesIdFamilies")
 	response := InstanceFamily{}
+	if v, ok := d.GetOk("resource_type"); ok {
+		request.QueryParams["resourceType"] = v.(string)
+	}
 
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw DescribeSeriesIdFamilies : %s", raw)
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_instance_families", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)

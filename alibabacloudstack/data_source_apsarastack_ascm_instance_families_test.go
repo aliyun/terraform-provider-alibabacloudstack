@@ -15,10 +15,10 @@ func TestAccAlibabacloudStackAscm_Instance_families_DataSource(t *testing.T) {
 			{
 				Config: dataSourceAlibabacloudStackAscm_Instance_families,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ascm_ecs_instance_families.default"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ecs_instance_families.default", "families.id"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ecs_instance_families.default", "families.status"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ecs_instance_families.default", "families.resource_type"),
+					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ascm_instance_families.default"),
+					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_instance_families.default", "families.id"),
+					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_instance_families.default", "families.status"),
+					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_instance_families.default", "families.resource_type"),
 				),
 			},
 		},
@@ -27,7 +27,8 @@ func TestAccAlibabacloudStackAscm_Instance_families_DataSource(t *testing.T) {
 
 const dataSourceAlibabacloudStackAscm_Instance_families = `
 
-data "alibabacloudstack_ascm_ecs_instance_families" "default" {
+data "alibabacloudstack_ascm_instance_families" "default" {
 status = "Available"
+resource_type="DRDS"
 }
 `

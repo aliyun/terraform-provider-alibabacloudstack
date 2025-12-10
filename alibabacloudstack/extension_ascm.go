@@ -624,19 +624,19 @@ type AscmRoleData struct {
 	UserCount              int    `json:"userCount"`
 }
 type CreateAscmRolesResponse struct {
-	Code            string       `json:"code"`
-	Cost            int          `json:"cost"`
-	Data            AscmRoleData `json:"data"`
-	Message         string       `json:"message"`
-	Success         bool         `json:"success"`
+	Code    string       `json:"code"`
+	Cost    int          `json:"cost"`
+	Data    AscmRoleData `json:"data"`
+	Message string       `json:"message"`
+	Success bool         `json:"success"`
 }
 type ListAscmRolesResponse struct {
-	Code            string       `json:"code"`
-	Cost            int          `json:"cost"`
-	EagleEyeTraceID string       `json:"eagleEyeTraceId"`
-	AsapiSuccess    bool         `json:"asapiSuccess"`
+	Code            string         `json:"code"`
+	Cost            int            `json:"cost"`
+	EagleEyeTraceID string         `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool           `json:"asapiSuccess"`
 	Data            []AscmRoleData `json:"data"`
-	Message         string       `json:"message"`
+	Message         string         `json:"message"`
 	PageInfo        struct {
 		CurrentPage int `json:"currentPage"`
 		PageSize    int `json:"pageSize"`
@@ -804,7 +804,7 @@ type InstanceFamily struct {
 	Code           int    `json:"code"`
 	AsapiRequestID string `json:"asapiRequestId"`
 	Data           []struct {
-		GmtModified string `json:"gmtModified"`
+		GmtModified int    `json:"gmtModified"`
 		Creator     string `json:"creator"`
 		SeriesName  string `json:"seriesName"`
 		Modifier    string `json:"modifier"`
@@ -812,7 +812,7 @@ type InstanceFamily struct {
 		OrderBy     struct {
 			ID string `json:"id"`
 		} `json:"orderBy"`
-		GmtCreate       string `json:"gmtCreate"`
+		GmtCreate       int    `json:"gmtCreate"`
 		SeriesID        string `json:"seriesId"`
 		PageOrder       string `json:"pageOrder"`
 		Deleted         bool   `json:"deleted"`
