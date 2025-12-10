@@ -63,7 +63,6 @@ func TestAccAlibabacloudStackSchedulerx2AppGroup_basic(t *testing.T) {
 						{
 							"load5":       10,
 							"heap5_usage": 100,
-							"disk_usage":  100,
 						},
 					},
 				}),
