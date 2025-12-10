@@ -54,8 +54,8 @@ func TestAccAlibabacloudStackSchedulerx2Job_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"execute_mode":                "Standalone",
-					"priority":                    "1",
+					"execute_mode":                "standalone",
+					"priority":                    "5",
 					"name":                        "${var.name}",
 					"group_id":                    "${alibabacloudstack_schedulerx2_app_group.example.group_id}",
 					"description":                 "ddddddd",
@@ -66,7 +66,7 @@ func TestAccAlibabacloudStackSchedulerx2Job_basic(t *testing.T) {
 					"max_concurrency":             "2",
 					"time_type":                   "1",
 					"time_expression":             "8 59 15 */1 * ?",
-					"content":                     "{\"className\":\"Create\"}",
+					"content":                     "{\\\"className\\\":\\\"Create\\\"}",
 					"monitor_timeout_enable":      "true",
 					"monitor_timeout_kill_enable": "true",
 					"monitor_fail_enable":         "true",
@@ -76,8 +76,8 @@ func TestAccAlibabacloudStackSchedulerx2Job_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":                        name,
-						"execute_mode":                "Standalone",
-						"priority":                    "1",
+						"execute_mode":                "standalone",
+						"priority":                    "5",
 						"description":                 "ddddddd",
 						"job_type":                    "java",
 						"parameters":                  "testargs=1",
@@ -97,10 +97,8 @@ func TestAccAlibabacloudStackSchedulerx2Job_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"execute_mode":                "Standalone",
-					"priority":                    "5",
+					"execute_mode":                "broadcast",
 					"name":                        "${var.name}_updated",
-					"group_id":                    "${alibabacloudstack_schedulerx2_app_group.example.group_id}",
 					"description":                 "updated description",
 					"job_type":                    "java",
 					"parameters":                  "testargs=1 updated",
@@ -109,7 +107,7 @@ func TestAccAlibabacloudStackSchedulerx2Job_basic(t *testing.T) {
 					"max_concurrency":             "3",
 					"time_type":                   "1",
 					"time_expression":             "0 0 12 */1 * ?",
-					"content":                     "{\"className\":\"Updated\"}",
+					"content":                     "{\\\"className\\\":\\\"Update\\\"}",
 					"monitor_timeout_enable":      "false",
 					"monitor_timeout_kill_enable": "false",
 					"monitor_fail_enable":         "false",
@@ -119,8 +117,7 @@ func TestAccAlibabacloudStackSchedulerx2Job_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":                        name + "_updated",
-						"execute_mode":                "Standalone",
-						"priority":                    "5",
+						"execute_mode":                "broadcast",
 						"description":                 "updated description",
 						"job_type":                    "java",
 						"parameters":                  "testargs=1 updated",
@@ -129,7 +126,7 @@ func TestAccAlibabacloudStackSchedulerx2Job_basic(t *testing.T) {
 						"max_concurrency":             "3",
 						"time_type":                   "1",
 						"time_expression":             "0 0 12 */1 * ?",
-						"content":                     "{\"className\":\"Updated\"}",
+						"content":                     "{\"className\":\"Update\"}",
 						"monitor_timeout_enable":      "false",
 						"monitor_timeout_kill_enable": "false",
 						"monitor_fail_enable":         "false",

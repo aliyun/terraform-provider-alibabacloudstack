@@ -42,6 +42,7 @@ func resourceAlibabacloudStackSchedulerx2AppGroup() *schema.Resource {
 			"monitor_config": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -61,6 +62,7 @@ func resourceAlibabacloudStackSchedulerx2AppGroup() *schema.Resource {
 			"contacts": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"username": {
@@ -81,6 +83,7 @@ func resourceAlibabacloudStackSchedulerx2AppGroup() *schema.Resource {
 			"metrics_threshold": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

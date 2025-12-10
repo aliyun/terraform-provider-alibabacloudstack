@@ -198,6 +198,7 @@ func resourceAlibabacloudStackSchedulerx2JobUpdate(d *schema.ResourceData, meta 
 	}
 
 	request := make(map[string]interface{})
+	request["JobId"] = d.Id()
 	request["Namespace"] = d.Get("namespace")
 	request["GroupId"] = d.Get("group_id")
 	request["Name"] = d.Get("name")

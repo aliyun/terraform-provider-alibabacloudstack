@@ -41,7 +41,6 @@ func (s *Schedulerx2Service) DescribeSchedulerx2AppGroup(id string) (map[string]
 }
 
 func (s *Schedulerx2Service) DescribeSchedulerx2Job(id string) (map[string]interface{}, error) {
-	jobId := id
 
 	reqQuery := map[string]interface{}{
 		"Action":      "ListJobs",
@@ -59,7 +58,7 @@ func (s *Schedulerx2Service) DescribeSchedulerx2Job(id string) (map[string]inter
 	if records, err := jsonpath.Get("$.Data.Records", response); err == nil {
 		for _, record := range records.([]interface{}) {
 			r := record.(map[string]interface{})
-			if fmt.Sprintf("%v", r["JobId"]) == jobId {
+			if fmt.Sprintf("%v", r["JobId"]) == id {
 				return r, nil
 			}
 		}
@@ -67,5 +66,5 @@ func (s *Schedulerx2Service) DescribeSchedulerx2Job(id string) (map[string]inter
 		return nil, errmsgs.WrapError(err)
 	}
 
-	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Schedulerx2 Job %s was not found", jobId))
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Schedulerx2 Job %s was not found", id))
 }
