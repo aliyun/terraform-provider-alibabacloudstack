@@ -54,7 +54,6 @@ resource "alibabacloudstack_schedulerx2_app_group" "example" {
 
 * `app_name` - (必填) 应用名称。长度为1-128个字符，不能以`http://`或`https://`开头。
 * `group_id` - (必填, 变更时重建) 应用组唯一标识。格式为字符串，通常为应用的唯一命名空间标识。
-* `accept_language` - (可选) 接受的语言。有效值：`zh`（中文）、`en`（英文）。默认值为空。
 * `description` - (可选) 应用描述信息。长度为1-256个字符，不能以`http://`或`https://`开头。
 * `max_concurrency` - (可选) 最大并发数。表示该应用组能同时执行的最大任务数。
 * `max_jobs` - (可选) 最大任务数。表示该应用组能同时运行的最大任务数量。

@@ -54,7 +54,6 @@ The following arguments are supported:
 
 * `app_name` - (Required) The name of the application. It must be 1 to 128 characters in length and cannot start with `http://` or `https://`.
 * `group_id` - (Required, Forces new resource) The unique identifier of the application group. It is a string, typically representing the unique namespace identifier of the application.
-* `accept_language` - (Optional) The language to accept. Valid values: `zh` (Chinese), `en` (English). Default value: empty.
 * `description` - (Optional) The description of the application. It must be 1 to 256 characters in length and cannot start with `http://` or `https://`.
 * `max_concurrency` - (Optional) The maximum concurrency. It indicates the maximum number of tasks that can be executed simultaneously by the application group.
 * `max_jobs` - (Optional) The maximum number of jobs. It indicates the maximum number of tasks that can run simultaneously in the application group.

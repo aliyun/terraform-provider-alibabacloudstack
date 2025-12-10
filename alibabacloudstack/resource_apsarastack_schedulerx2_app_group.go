@@ -102,10 +102,6 @@ func resourceAlibabacloudStackSchedulerx2AppGroup() *schema.Resource {
 					},
 				},
 			},
-			"accept_language": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"app_key": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -173,9 +169,6 @@ func resourceAlibabacloudStackSchedulerx2AppGroupCreate(d *schema.ResourceData, 
 			return errmsgs.WrapError(err)
 		}
 		reqBody["MetricsThresholdJson"] = string(metrics_threshold_json)
-	}
-	if v, ok := d.GetOk("accept_language"); ok {
-		reqBody["AcceptLanguage"] = v
 	}
 	resp, err := client.DoTeaRequest("POST", "schedulerx2", "2019-04-30", "CreateAppGroup", "", nil, reqBody, nil)
 	if err != nil {
@@ -249,7 +242,6 @@ func resourceAlibabacloudStackSchedulerx2AppGroupRead(d *schema.ResourceData, me
 		}
 		d.Set("metrics_threshold", []interface{}{metricsThreshold})
 	}
-	d.Set("accept_language", object["AcceptLang"])
 	d.Set("app_key", object["AppKey"])
 
 	return nil
@@ -262,7 +254,7 @@ func resourceAlibabacloudStackSchedulerx2AppGroupUpdate(d *schema.ResourceData, 
 		return nil
 	}
 	if d.HasChanges("namespace", "app_name", "description", "max_jobs",
-		"max_concurrency", "monitor_config", "contacts", "metrics_threshold", "accept_language") {
+		"max_concurrency", "monitor_config", "contacts", "metrics_threshold") {
 		request := make(map[string]interface{})
 		request["Namespace"] = d.Get("namespace")
 		request["GroupId"] = d.Get("group_id")
@@ -317,9 +309,6 @@ func resourceAlibabacloudStackSchedulerx2AppGroupUpdate(d *schema.ResourceData, 
 				return errmsgs.WrapError(err)
 			}
 			request["MetricsThresholdJson"] = string(metrics_threshold_json)
-		}
-		if v, ok := d.GetOk("accept_language"); ok {
-			request["AcceptLanguage"] = v
 		}
 		request["Action"] = "UpdateAppGroup"
 		request["AccessKeyId"] = client.AccessKey
