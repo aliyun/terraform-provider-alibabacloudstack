@@ -77,6 +77,7 @@ const (
 	OnsInnerCode         = ServiceCode("ONS_INNER")
 	UniversalDnsCode     = ServiceCode("UNIVERSALDNS")
 	SCHEDULERX2Code      = ServiceCode("SCHEDULERX2")
+	EFSCode              = ServiceCode("EFS")
 	// undefined code, add first
 	GDBCode                   = ServiceCode("GDB")
 	ARMSCode                  = ServiceCode("ARMS")
@@ -386,6 +387,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	SCHEDULERX2Code: PopEndpoint{
 		"schedulerx2-api-{{.region}}.{{.domain}}",
 		"schedulerx2-api-{{.region}}.{{.domain}}",
+	},
+	EFSCode: PopEndpoint{
+		"efs-pub.{{.region}}.{{.domain}}",
+		"efs-pub.{{.region}}.{{.domain}}",
 	},
 	// 3.18.3 new sites will not be opened
 	OneRouterCode: PopEndpoint{
