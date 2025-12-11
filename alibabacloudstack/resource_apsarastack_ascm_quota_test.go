@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -9,16 +10,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscm_QuotaBasic(t *testing.T) {
+func TestAccAlibabacloudStackAscmQuota_Basic(t *testing.T) {
 	var v *AscmQuota
 	resourceId := "alibabacloudstack_ascm_quota.default"
 	ra := resourceAttrInit(resourceId, testAccCheckQuota)
 	serviceFunc := func() interface{} {
 		return &AscmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
+
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-ascmorg%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCheckAscm_Quota)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -31,7 +36,23 @@ func TestAccAlibabacloudStackAscm_QuotaBasic(t *testing.T) {
 		CheckDestroy: testAccCheckAscm_Quota_Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAscm_Quota,
+				Config: testAccConfig(map[string]interface{}{
+					"quota_type":                  "organization",
+					"quota_type_id":               "${alibabacloudstack_ascm_organization.default.id}",
+					"product_name":                "VPC",
+					"total_vpc":                   10,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(nil),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"quota_type":                  "organization",
+					"quota_type_id":               "${alibabacloudstack_ascm_organization.default.id}",
+					"product_name":                "VPC",
+					"total_vpc":                   20,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -69,23 +90,13 @@ func testAccCheckAscm_Quota_Destroy(s *terraform.State) error { //destroy functi
 	return nil
 }
 
-const testAccCheckAscm_Quota = `
+func testAccCheckAscm_Quota(name string) string {
+	return fmt.Sprintf(`
 resource "alibabacloudstack_ascm_organization" "default" {
- name = "TestQuota"
+ name = "%s"
  parent_id = "1"
+}`, name)
 }
-
-resource "alibabacloudstack_ascm_quota" "default" {
-  quota_type = "organization"
-  quota_type_id = alibabacloudstack_ascm_organization.default.org_id
-    product_name = "ECS"
-	total_cpu = 100
-    total_mem = 100
-    total_gpu = 100
-    total_disk_cloud_ssd = 100
-    total_disk_cloud_efficiency = 100
-}
-`
 
 var testAccCheckQuota = map[string]string{
 	"product_name":  CHECKSET,

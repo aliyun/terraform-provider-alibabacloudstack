@@ -3,10 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -155,7 +152,7 @@ func dataSourceAlibabacloudStackQuotas() *schema.Resource {
 
 func dataSourceAlibabacloudStackQuotasRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("GET", "ascm", "2019-05-10", "GetQuota", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetQuota", "/ascm/manage/quota/query")
 	productName := d.Get("product_name").(string)
 	quotaType := d.Get("quota_type").(string)
 	quotaTypeId := d.Get("quota_type_id").(string)
@@ -169,17 +166,12 @@ func dataSourceAlibabacloudStackQuotasRead(d *schema.ResourceData, meta interfac
 	response := AscmQuota{}
 
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw GetQuota : %s", raw)
-
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_quotas", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
