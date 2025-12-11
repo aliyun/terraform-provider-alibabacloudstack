@@ -47,7 +47,7 @@ resource "alibabacloudstack_schedulerx2_workflow" "example" {
   description     = "Initial description"
   time_type       = "cron"
   time_zone       = "PRC"
-  time_expression = "34 14 14 */1 * ?"*
+  time_expression = "34 14 14 */1 * ?"
   max_concurrency = 1
 }
 

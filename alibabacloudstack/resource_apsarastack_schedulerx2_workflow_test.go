@@ -38,6 +38,7 @@ func TestAccAlibabacloudStackSchedulerx2Workflow_basic(t *testing.T) {
 					"time_expression": "34 14 14 */1 * ?",
 					"time_zone":       "PRC",
 					"max_concurrency": "1",
+					"enabled":         true,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -46,6 +47,7 @@ func TestAccAlibabacloudStackSchedulerx2Workflow_basic(t *testing.T) {
 						"time_type":       "cron",
 						"time_expression": "34 14 14 */1 * ?",
 						"max_concurrency": "1",
+						"enabled":         "true",
 					}),
 				),
 			},
