@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -9,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscm_RamPolicyBasic(t *testing.T) {
+func TestAccAlibabacloudStackAscmRamPolicyBasic(t *testing.T) {
 	var v *RamPolicies
 
 	resourceId := "alibabacloudstack_ascm_ram_policy.default"
@@ -19,6 +20,9 @@ func TestAccAlibabacloudStackAscm_RamPolicyBasic(t *testing.T) {
 	}
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-ascmrampolicy%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccAscm_e_Organization_resource)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -31,7 +35,21 @@ func TestAccAlibabacloudStackAscm_RamPolicyBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckAscm_RamPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAscm_RamPolicy_resource,
+				Config: testAccConfig(map[string]interface{}{
+					"name":            "${var.name}",
+					"description":     "Testing Policy",
+					"policy_document": `{\"Statement\":[{\"Action\":\"ecs:*\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"1\"}`,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(nil),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name":            "${var.name}Update",
+					"description":     "Testing Policy2",
+					"policy_document": `{\"Statement\":[{\"Action\":\"vpc:*\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"1\"}`,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -70,13 +88,13 @@ func testAccCheckAscm_RamPolicyDestroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccAscm_RamPolicy_resource = `
-resource "alibabacloudstack_ascm_ram_policy" "default" {
-  name = "TestingRamPolicy"
-  description = "Testing Policy"
-  policy_document = "{\"Statement\":[{\"Action\":\"ecs:*\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"1\"}"
+func testAccAscm_RamPolicy_resource(name string) string {
+	return fmt.Sprintf(`
+variables "name" {
+	default = "%s"
 }
-`
+`, name)
+}
 
 var testAccCheckAscmRamPolicy = map[string]string{
 	"name":            CHECKSET,

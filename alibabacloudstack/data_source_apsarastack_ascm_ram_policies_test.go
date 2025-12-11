@@ -1,8 +1,10 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"fmt"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAscmRamPoliciesDataSource(t *testing.T) {
@@ -13,7 +15,7 @@ func TestAccAlibabacloudStackAscmRamPoliciesDataSource(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: datasourcealibabacloudstackascmRamPolicies,
+				Config: datasourcealibabacloudstackascmRamPolicies(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ascm_ram_policies.default"),
 					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_policies.default", "policies.id"),
@@ -29,9 +31,10 @@ func TestAccAlibabacloudStackAscmRamPoliciesDataSource(t *testing.T) {
 	})
 }
 
-const datasourcealibabacloudstackascmRamPolicies = `
+func datasourcealibabacloudstackascmRamPolicies() string {
+	return fmt.Sprintf(`
 resource "alibabacloudstack_ascm_ram_policy" "default" {
-  name = "TestingRamPolicy"
+  name = "TestingRamPolicy%d"
   description = "Testing Policy"
   policy_document = "{\"Statement\":[{\"Action\":\"ecs:*\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"1\"}"
 }
@@ -39,4 +42,5 @@ resource "alibabacloudstack_ascm_ram_policy" "default" {
 data "alibabacloudstack_ascm_ram_policies" "default" {
   name_regex = alibabacloudstack_ascm_ram_policy.default.name
 }
-`
+`, getAccTestRandInt(10000, 20000))
+}
