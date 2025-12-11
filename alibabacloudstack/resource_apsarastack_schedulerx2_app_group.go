@@ -326,7 +326,6 @@ func resourceAlibabacloudStackSchedulerx2AppGroupUpdate(d *schema.ResourceData, 
 
 func resourceAlibabacloudStackSchedulerx2AppGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
 	reqQuery := map[string]interface{}{
 		"Namespace": d.Get("namespace"),
 		"GroupId":   d.Get("group_id"),

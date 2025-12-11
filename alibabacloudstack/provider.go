@@ -295,7 +295,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ascm_password_policies":                           dataSourceAlibabacloudStackAscmPasswordPolicies(),
 		"alibabacloudstack_ascm_quotas":                                      dataSourceAlibabacloudStackQuotas(),
 		"alibabacloudstack_ascm_roles":                                       dataSourceAlibabacloudStackAscmRoles(),
-		"alibabacloudstack_ascm_ram_roles":                                       dataSourceAlibabacloudStackAscmRoles(),
+		"alibabacloudstack_ascm_ram_roles":                                   dataSourceAlibabacloudStackAscmRoles(),
 		"alibabacloudstack_ascm_ram_policies":                                dataSourceAlibabacloudStackAscmRamPolicies(),
 		"alibabacloudstack_ascm_ram_policies_for_user":                       dataSourceAlibabacloudStackAscmRamPoliciesForUser(),
 		"alibabacloudstack_common_bandwidth_packages":                        dataSourceAlibabacloudStackCommonBandwidthPackages(),
@@ -598,6 +598,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_prometheus_v2_alerts":                             dataSourceAlibabacloudStackPrometheusV2Alerts(),
 		"alibabacloudstack_schedulerx2_app_groups":                           dataSourceAlibabacloudStackSchedulerx2AppGroups(),
 		"alibabacloudstack_schedulerx2_jobs":                                 dataSourceAlibabacloudStackSchedulerx2Jobs(),
+		"alibabacloudstack_schedulerx2_workflows":                            dataSourceAlibabacloudStackSchedulerx2Workflows(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
@@ -1045,6 +1046,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_prometheus_v2_alert":                             resourceAlibabacloudStackPrometheusV2Alert(),
 		"alibabacloudstack_schedulerx2_app_group":                           resourceAlibabacloudStackSchedulerx2AppGroup(),
 		"alibabacloudstack_schedulerx2_job":                                 resourceAlibabacloudStackSchedulerx2Job(),
+		"alibabacloudstack_schedulerx2_workflow":                            resourceAlibabacloudStackSchedulerx2Workflow(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps

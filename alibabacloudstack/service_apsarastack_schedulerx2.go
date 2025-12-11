@@ -19,7 +19,7 @@ func (s *Schedulerx2Service) DescribeSchedulerx2AppGroup(id string) (map[string]
 		"AccessKeyId": s.client.AccessKey,
 		"Namespace":   "system_namespace",
 		"PageNum":     1,
-		"PageSize":    10,
+		"PageSize":    100,
 	}
 	response, err := s.client.DoTeaRequest("POST", "schedulerx2", "2019-04-30", "ListGroups", "", nil, reqQuery, nil)
 	if err != nil {
@@ -67,4 +67,30 @@ func (s *Schedulerx2Service) DescribeSchedulerx2Job(id string) (map[string]inter
 	}
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Schedulerx2 Job %s was not found", id))
+}
+func (s *Schedulerx2Service) DescribeSchedulerx2Workflow(id string) (map[string]interface{}, error) {
+	workflowId := id
+
+	reqQuery := map[string]interface{}{
+		"Namespace": "system_namespace",
+		"PageNum":   1,
+		"PageSize":  100,
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "schedulerx2", "2019-04-30", "ListWorkflows", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if records, ok := response["Data"].(map[string]interface{})["Records"].([]interface{}); ok {
+		for _, record := range records {
+			if workflow, ok := record.(map[string]interface{}); ok {
+				if fmt.Sprintf("%v", workflow["WorkflowId"]) == workflowId {
+					return workflow, nil
+				}
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Schedulerx2 Workflow %s not found", workflowId))
 }
