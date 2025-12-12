@@ -3,7 +3,8 @@ subcategory: "MongoDB"
 layout: "alibabacloudstack" 
 page_title: "Alibabacloudstack: 
 alibabacloudstack_mongodb_account" 
-sidebar_current: "docs-Alibabacloudstack-mongodb-account" description: |- 
+sidebar_current: "docs-Alibabacloudstack-mongodb-account"
+description: |- 
 提供一个 MongoDB 账号资源。
 ---
 

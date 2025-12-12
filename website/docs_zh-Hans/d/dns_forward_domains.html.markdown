@@ -1,3 +1,12 @@
+---
+subcategory: "DNS"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dns_forward_domains"
+sidebar_current: "docs-Alibabacloudstack-datasource-dns-forward-domains"
+description: |-
+  查询DNS转发域名
+---
+
 # alibabacloudstack_dns_forward_domains
 
 > 查询阿里云DNS全局转发域名列表

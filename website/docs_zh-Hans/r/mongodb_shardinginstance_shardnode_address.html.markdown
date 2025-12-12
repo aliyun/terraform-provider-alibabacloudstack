@@ -2,7 +2,8 @@
 subcategory: "MongoDB" 
 layout: "alibabacloudstack" 
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_shardinginstance_shardnode_address" 
-sidebar_current: "docs-Alibabacloudstack-shardinginstance-shardnode-address" description: |- 
+sidebar_current: "docs-Alibabacloudstack-shardinginstance-shardnode-address"
+description: |- 
 管理Mongodb分片实例shard节点的网络链接地址。
 ---
 

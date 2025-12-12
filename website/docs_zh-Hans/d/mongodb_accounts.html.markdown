@@ -2,7 +2,8 @@
 subcategory: "MongoDB" 
 layout: "alibabacloudstack" 
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_accounts" 
-sidebar_current: "docs-Alibabacloudstack-数据源-mongodb-accounts" description: |- 
+sidebar_current: "docs-Alibabacloudstack-数据源-mongodb-accounts"
+description: |- 
 提供一个由 Alibabacloudstack 账户拥有的 MongoDB 账号列表。
 ---
 # alibabacloudstack\_mongodb\_accounts
