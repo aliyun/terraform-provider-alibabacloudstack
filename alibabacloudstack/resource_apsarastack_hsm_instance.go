@@ -9,6 +9,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackHsmInstance() *schema.Resource {
@@ -25,9 +26,10 @@ func resourceAlibabacloudStackHsmInstance() *schema.Resource {
 				ForceNew: true,
 			},
 			"vsm_type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"evsm", "gvsm", "svsm"}, false),
 			},
 			"zone_no": {
 				Type:     schema.TypeString,
