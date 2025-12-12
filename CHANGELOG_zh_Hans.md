@@ -152,7 +152,7 @@
 4. maxcompute_cu 资源适配3.18
 5. maxcompute_user 资源适配3.18
 6. maxcompute_project 资源适配3.18
-  
+
 ---
 
 # 3.18.13

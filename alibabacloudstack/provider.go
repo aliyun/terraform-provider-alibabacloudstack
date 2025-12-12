@@ -291,7 +291,6 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ascm_service_cluster_by_product":                  dataSourceAlibabacloudStackServiceClusterByProduct(),
 		"alibabacloudstack_ascm_ecs_instance_families":                       dataSourceAlibabacloudStackEcsInstanceFamilies(),
 		"alibabacloudstack_ascm_specific_fields":                             dataSourceAlibabacloudStackSpecificFields(),
-		"alibabacloudstack_ascm_environment_services_by_product":             dataSourceAlibabacloudStackAscmEnvironmentServicesByProduct(),
 		"alibabacloudstack_ascm_password_policies":                           dataSourceAlibabacloudStackAscmPasswordPolicies(),
 		"alibabacloudstack_ascm_quotas":                                      dataSourceAlibabacloudStackQuotas(),
 		"alibabacloudstack_ascm_roles":                                       dataSourceAlibabacloudStackAscmRoles(),

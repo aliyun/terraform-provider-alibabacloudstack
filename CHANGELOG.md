@@ -2,7 +2,6 @@
 
 ## New
 
-
 1. Orchestration capability for Alibaba Cloud DNS forward domains (`alibabacloudstack_dns_forward_domain`)
 2. Orchestration capability for Alibaba Cloud DNS line configurations (`alibabacloudstack_dns_line`)
 3. Orchestration capability for Alibaba Cloud private DNS domains (`alibabacloudstack_dns_private_domain`)
@@ -18,7 +17,6 @@
 13. Orchestration capability for notification groups in Prometheus v2 (`alibabacloudstack_prometheus_v2_notify_group`)
 14. Orchestration capability for alert rules in Prometheus v2 (`alibabacloudstack_prometheus_v2_alert`)
 
-
 ## Removals
 
 1. Deprecation of the query capability for ECS instance metering data (`alibabacloudstack_ascm_metering_query_ecs`)
@@ -28,7 +26,6 @@
 # 3.18.20
 
 ## New
-
 
 1.Query capability for API Gateway V2 instance types (`alibabacloudstack_api_gateway_v2_instance_types`)
 2. Orchestration capability for API Gateway V2 instances (`alibabacloudstack_api_gateway_v2_instance`)
@@ -55,7 +52,6 @@
 23. Orchestration capability for Universal DNS record configurations (`alibabacloudstack_universal_dns_record`)
 24. Orchestration capability for Universal DNS resolution lines (`alibabacloudstack_universal_dns_line`)
 
-
 ---
 
 # 3.18.19
@@ -77,7 +73,6 @@
 
 1. Query capability for OSS clusters
 2. Configuration management capability for auto-scaling rules of EDAS K8s applications
-
 
 ## Fixes
 
@@ -120,7 +115,6 @@
 
 # 3.18.15
 
-
 ## Changes
 1. Added support for dynamically retrieving available TLS cipher policy options in the environment for `alibabacloudstack_slb_listener`
 
@@ -146,7 +140,6 @@
 
 1. Added support for ACL functionality configuration in PolarDB  
 2. Added authorization resources for service roles  
-  
 
 ## Fixes
 
@@ -184,7 +177,6 @@
 19. Added support for binding accounts and databases in Polardbx 2.0 (polardbx_account_database_binding)
 20. Added support for configuring Polardbx 2.0 instance log engines (polardbx_log_engine)
 21. Added support for configuring read/write splitting in Polardbx 2.0 (polardbx_read_write_splitting_config)
-
 
 ---
 
