@@ -35,9 +35,9 @@ func TestAccAlibabacloudStackApfsFileSystem_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"zone_id":      "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"cluster_id":   "EfsStorageCluster-A-20251125-0131",
-					"storage_type": "parastor_advance_300",
+					"zone_id":      "${data.alibabacloudstack_apfs_zones.default.zones.0.zone_id}",
+					"cluster_id":   "${data.alibabacloudstack_apfs_zones.default.zones.0.clusters.0.cluster_id}",
+					"storage_type": "${data.alibabacloudstack_apfs_zones.default.zones.0.clusters.0.storage_type}",
 					"volume_size":  "1024",
 					"description":  "${var.name}",
 				}),
@@ -74,9 +74,8 @@ func ApfsFileSystemDependence(name string) string {
 variable "name" {
   default = "%s"
 }
-
-data "alibabacloudstack_zones" "default" {
-  enable_details = true
+data "alibabacloudstack_apfs_zones" "default" {
 }
+
 `, name)
 }

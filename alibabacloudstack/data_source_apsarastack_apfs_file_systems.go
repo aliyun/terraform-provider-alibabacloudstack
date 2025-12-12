@@ -27,11 +27,6 @@ func dataSourceAlibabacloudStackApfsFileSystems() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "A regex string to filter results by file system description.",
 			},
-			"file_system_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The type of the file system. Default is 'efs'.",
-			},
 			"status": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -138,9 +133,6 @@ func dataSourceAlibabacloudStackApfsFileSystemsRead(d *schema.ResourceData, meta
 
 	// Prepare request parameters
 	request := make(map[string]interface{})
-	if v, ok := d.GetOk("file_system_type"); ok {
-		request["FileSystemType"] = v
-	}
 	if v, ok := d.GetOk("status"); ok {
 		request["Status"] = v
 	}

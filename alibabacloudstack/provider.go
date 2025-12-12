@@ -600,6 +600,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_schedulerx2_jobs":                                 dataSourceAlibabacloudStackSchedulerx2Jobs(),
 		"alibabacloudstack_schedulerx2_workflows":                            dataSourceAlibabacloudStackSchedulerx2Workflows(),
 		"alibabacloudstack_apfs_file_systems":                                dataSourceAlibabacloudStackApfsFileSystems(),
+		"alibabacloudstack_apfs_zones":                                       dataSourceAlibabacloudStackApfsZones(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps

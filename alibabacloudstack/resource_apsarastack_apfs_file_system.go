@@ -82,7 +82,7 @@ func resourceAlibabacloudStackApfsFileSystemCreate(d *schema.ResourceData, meta 
 		"StorageType":    d.Get("storage_type"),
 		"ZoneId":         d.Get("zone_id"),
 		"ClusterId":      d.Get("cluster_id"),
-		"VolumeSize":     d.Get("volume_size"),
+		"Capacity":       d.Get("volume_size"),
 		"Description":    d.Get("description"),
 	}
 
@@ -149,7 +149,7 @@ func resourceAlibabacloudStackApfsFileSystemUpdate(d *schema.ResourceData, meta 
 		query := make(map[string]interface{})
 		query["FileSystemId"] = d.Id()
 		query["Description"] = d.Get("description")
-		query["VolumeSize"] = d.Get("volume_size")
+		query["Capacity"] = d.Get("volume_size")
 		_, err := client.DoTeaRequest("POST", "EFS", "2017-06-26", "ModifyFileSystem", "", nil, query, nil)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,

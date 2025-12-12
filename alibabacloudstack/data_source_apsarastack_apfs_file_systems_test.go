@@ -29,17 +29,6 @@ func TestAccAlibabacloudStackApfsFileSystemsDataSource_basic(t *testing.T) {
 		}),
 	}
 
-	typeConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"file_system_type": "efs",
-			"ids":              []string{"${alibabacloudstack_apfs_file_system.default.id}"},
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"file_system_type": "standard",
-			"ids":              []string{"${alibabacloudstack_apfs_file_system.default.id}"},
-		}),
-	}
-
 	statusConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"status": "Running",
@@ -53,16 +42,14 @@ func TestAccAlibabacloudStackApfsFileSystemsDataSource_basic(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex":       "${alibabacloudstack_apfs_file_system.default.description}",
-			"ids":              []string{"${alibabacloudstack_apfs_file_system.default.id}"},
-			"file_system_type": "efs",
-			"status":           "Running",
+			"name_regex": "${alibabacloudstack_apfs_file_system.default.description}",
+			"ids":        []string{"${alibabacloudstack_apfs_file_system.default.id}"},
+			"status":     "Running",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex":       "${alibabacloudstack_apfs_file_system.default.description}",
-			"ids":              []string{"${alibabacloudstack_apfs_file_system.default.id}"},
-			"file_system_type": "efs",
-			"status":           "Stopped",
+			"name_regex": "${alibabacloudstack_apfs_file_system.default.description}",
+			"ids":        []string{"${alibabacloudstack_apfs_file_system.default.id}"},
+			"status":     "Stopped",
 		}),
 	}
 
@@ -90,7 +77,7 @@ func TestAccAlibabacloudStackApfsFileSystemsDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeApfsFileSystemsMapFunc,
 	}
 
-	apfsFileSystemsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, typeConf, statusConf, allConf)
+	apfsFileSystemsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, statusConf, allConf)
 }
 
 func ApfsFileSystemDependenceNew(name string) string {
@@ -99,14 +86,13 @@ variable "name" {
   default = "%s"
 }
 
-data "alibabacloudstack_zones" "default" {
-  enable_details = true
+data "alibabacloudstack_apfs_zones" "default" {
 }
 
 resource "alibabacloudstack_apfs_file_system" "default" {
-  zone_id      = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  cluster_id   = "EfsStorageCluster-A-20251125-0131"
-  storage_type = "parastor_advance_300"
+  zone_id      = "${data.alibabacloudstack_apfs_zones.default.zones.0.zone_id}"
+  cluster_id   = "${data.alibabacloudstack_apfs_zones.default.zones.0.clusters.0.cluster_id}"
+  storage_type = "${data.alibabacloudstack_apfs_zones.default.zones.0.clusters.0.storage_type}"
   volume_size  = 1024
   description  = "${var.name}"
 }`, name)
