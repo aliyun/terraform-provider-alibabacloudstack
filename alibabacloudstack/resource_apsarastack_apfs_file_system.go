@@ -12,6 +12,11 @@ import (
 
 func resourceAlibabacloudStackApfsFileSystem() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(45 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"protocol_type": {
 				Type:     schema.TypeString,
@@ -101,7 +106,7 @@ func resourceAlibabacloudStackApfsFileSystemCreate(d *schema.ResourceData, meta 
 	d.SetId(fileSystemId)
 
 	efsService := EfsService{client}
-	stateConf := BuildStateConf([]string{"Pending"}, []string{"Running"}, d.Timeout(schema.TimeoutDelete), 10*time.Second, efsService.ApfsFileSystemStateRefreshFunc(d.Id(), []string{""}))
+	stateConf := BuildStateConf([]string{"Pending"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, efsService.ApfsFileSystemStateRefreshFunc(d.Id(), []string{""}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("waiting for APFS file system to be ready failed: %v", err)
 	}
@@ -157,7 +162,7 @@ func resourceAlibabacloudStackApfsFileSystemUpdate(d *schema.ResourceData, meta 
 		}
 
 		efsService := EfsService{client}
-		stateConf := BuildStateConf([]string{"MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutDelete), 10*time.Second, efsService.ApfsFileSystemStateRefreshFunc(d.Id(), []string{""}))
+		stateConf := BuildStateConf([]string{"MODIFYING", "Pending", "Extending"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, efsService.ApfsFileSystemStateRefreshFunc(d.Id(), []string{""}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return fmt.Errorf("waiting for APFS file system to be ready failed: %v", err)
 		}

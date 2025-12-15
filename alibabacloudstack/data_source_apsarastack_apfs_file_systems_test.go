@@ -93,7 +93,7 @@ resource "alibabacloudstack_apfs_file_system" "default" {
   zone_id      = "${data.alibabacloudstack_apfs_zones.default.zones.0.zone_id}"
   cluster_id   = "${data.alibabacloudstack_apfs_zones.default.zones.0.clusters.0.cluster_id}"
   storage_type = "${data.alibabacloudstack_apfs_zones.default.zones.0.clusters.0.storage_type}"
-  volume_size  = 1024
+  volume_size  = 128
   description  = "${var.name}"
 }`, name)
 }
