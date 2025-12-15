@@ -7,6 +7,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestAccAlibabacloudStackHsmInstance_basic(t *testing.T) {
@@ -14,8 +15,10 @@ func TestAccAlibabacloudStackHsmInstance_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_hsm_instance.default"
 
 	ra := resourceAttrInit(resourceId, map[string]string{})
+	commonProvider := Provider()
+	yundunProvider := Provider()
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &HsmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &HsmService{yundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeHsmInstance")
 	rac := resourceAttrCheckInit(rc, ra)
 	rand := getAccTestRandInt(1000, 9999)
@@ -25,22 +28,46 @@ func TestAccAlibabacloudStackHsmInstance_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreYunCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: rac.checkResourceDestroy(),
+		IDRefreshName: resourceId,
+		Providers: func() map[string]*schema.Provider {
+			yundunProvider.Schema["access_key"] = &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY", ""),
+				Description: descriptions["access_key"],
+			}
+			yundunProvider.Schema["secret_key"] = &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY", ""),
+				Description: descriptions["secret_key"],
+			}
+			yundunProvider.Schema["role_arn"] = &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["assume_role_role_arn"],
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN", ""),
+			}
+			return map[string]*schema.Provider{
+				"alibabacloudstack":        yundunProvider,
+				"alibabacloudstack-common": commonProvider,
+			}
+		}(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"product_code": "jnta.SJJ1528",
-					"vendor_code":  "jnta",
+					"product_code": "${data.alibabacloudstack_hsm_vendors.default.vendors.0.products.0.code}",
+					"vendor_code":  "${data.alibabacloudstack_hsm_vendors.default.vendors.0.code}",
 					"vsm_type":     "gvsm",
 					"zone_no":      "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"remark":       "test-tf-hsm-instance",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"product_code": "jnta.SJJ1528",
-						"vendor_code":  "jnta",
+						"product_code": CHECKSET,
+						"vendor_code":  CHECKSET,
 						"vsm_type":     "gvsm",
 						"zone_no":      CHECKSET,
 						"remark":       "test-tf-hsm-instance",
@@ -59,17 +86,17 @@ func TestAccAlibabacloudStackHsmInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"vpc_id":     "vpc-u4j8obg11ilr3btib78n5",
-					"vswitch_id": "vsw-u4jeh1248tpm5mc78g9fd",
-					"ip":         "172.16.1.100",
-					"white_list": "192.168.1.0/24",
+					"vpc_id":     "${alibabacloudstack_vpc.vpc.id}",
+					"vswitch_id": "${alibabacloudstack_vswitch.vsw.id}",
+					"ip":         "192.168.0.100",
+					"white_list": "192.168.0.123/24",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"vpc_id":     CHECKSET,
 						"vswitch_id": CHECKSET,
-						"ip":         "172.16.1.100",
-						"white_list": "192.168.1.0/24",
+						"ip":         "192.168.0.100",
+						"white_list": "192.168.0.123/24",
 					}),
 				),
 			},
@@ -89,7 +116,24 @@ variable "name" {
 }
 
 data "alibabacloudstack_zones" "default" {
-  enable_details = true
+	provider = alibabacloudstack-common
+	available_resource_creation = "VSwitch"
+}
+
+data "alibabacloudstack_hsm_vendors" "default" {
+}
+
+resource "alibabacloudstack_vpc" "vpc" {	
+	provider = alibabacloudstack-common
+	vpc_name = var.name
+	cidr_block = "192.168.0.0/16" # VPC CIDR block
+}
+
+resource "alibabacloudstack_vswitch" "vsw" {
+	provider = alibabacloudstack-common
+	vpc_id = alibabacloudstack_vpc.vpc.id
+	cidr_block = "192.168.0.0/24" # VSwitch CIDR block
+	availability_zone = data.alibabacloudstack_zones.default.zones.0.id # Availability zone
 }
 
 `, name)

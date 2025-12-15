@@ -91,10 +91,6 @@ resource "alibabacloudstack_hsm_instance" "default" {
 	vsm_type = "gvsm"
 	zone_no = "${data.alibabacloudstack_zones.default.zones.0.id}"
 	remark = "${var.name}"
-	vpc_id = "vpc-u4j8obg11ilr3btib78n5"
-	vswitch_id =  "vsw-u4jeh1248tpm5mc78g9fd"
-	ip = "172.16.1.100"
-	white_list = "192.168.1.0/24"
 }
 
 data "alibabacloudstack_hsm_instances" "default" {
