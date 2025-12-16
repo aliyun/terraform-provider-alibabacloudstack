@@ -8,16 +8,17 @@ import (
 
 func TestAccAlibabacloudStackHsmClustersDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
-	resourceId := "data.alibabacloudstack_hsvccm_clusters.default"
+	resourceId := "data.alibabacloudstack_hsm_clusters.default"
 	testAcc := dataSourceAttr{
 		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
-				"ids.#":                   "1",
-				"clusters.#":              "1",
-				"clusters.0.cluster_name": fmt.Sprintf("tf_hsm_cluster%d", rand),
-				"clusters.0.vsm_type":     "gvsm",
-				"clusters.0.cluster_size": "1",
+				"ids.#":                          "1",
+				"clusters.#":                     "1",
+				"clusters.0.cluster_name":        fmt.Sprintf("tf_hsm_cluster%d", rand),
+				"clusters.0.vsm_type":            "gvsm",
+				"clusters.0.cluster_zones.#":     "1",
+				"clusters.0.hsm_cluster_items.#": "1",
 			}
 		},
 		fakeMapFunc: func(rand int) map[string]string {
@@ -26,6 +27,7 @@ func TestAccAlibabacloudStackHsmClustersDataSource_basic(t *testing.T) {
 				"clusters.#": "0",
 			}
 		},
+		Providers: testYunDunProviders(),
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
@@ -63,11 +65,11 @@ func TestAccAlibabacloudStackHsmClustersDataSource_basic(t *testing.T) {
 			"zone_no": `"fake-zone-no"`,
 		}),
 	}
-
-	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, instanceIdConf, vsmTypeConf, zoneNoConf)
+	preCheck := func() {
+	}
+	testAcc.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, instanceIdConf, vsmTypeConf, zoneNoConf)
 }
 
-// buildHsmClusterDependenciesNew generates the necessary dependencies for testing
 func buildHsmClusterDependenciesNew(rand int, attrMap map[string]string) string {
 	var pairs []string
 	for k, v := range attrMap {
@@ -79,7 +81,7 @@ variable "name" {
 }
 
 data "alibabacloudstack_zones" "default" {
-  provider = alibabacloudstack-common
+//   provider = alibabacloudstack-common
   available_resource_creation = "VSwitch"
 }
 
@@ -100,6 +102,8 @@ resource "alibabacloudstack_vswitch" "default" {
 data "alibabacloudstack_hsm_vendors" "default" {
 }
 
+%s
+
 resource "alibabacloudstack_hsm_instance" "default" {
 	product_code = "${data.alibabacloudstack_hsm_vendors.default.vendors.0.products.0.code}"
 	vendor_code = "${data.alibabacloudstack_hsm_vendors.default.vendors.0.code}"
@@ -109,16 +113,17 @@ resource "alibabacloudstack_hsm_instance" "default" {
 }
 
 resource "alibabacloudstack_hsm_cluster" "default" {
-  cluster_name     = "${var.name}"
+  cluster_name       = "${var.name}"
   master_instance_id = alibabacloudstack_hsm_instance.default.id
-  vpc_id           = alibabacloudstack_vpc.default.id
-  vswitch_ids      = [alibabacloudstack_vswitch.default.id]
-  zone_nos         = [data.alibabacloudstack_zones.default.zones.0.id]
-  ip_white_list    = ["123.12.13.1/16"]
+  vpc_id             = alibabacloudstack_vpc.default.id
+  vswitch_ids        = alibabacloudstack_vpc.default.id
+  zone_nos           = data.alibabacloudstack_zones.default.zones.0.id
+  ip_white_list      = "123.12.13.1/16"
+  password           = random_password.password.0.result
 }
 
 data "alibabacloudstack_hsm_clusters" "default" {
  %s
 }
-`, rand, strings.Join(pairs, "\n   "))
+`, rand, RandomPasswordTestCase(12, 1), strings.Join(pairs, "\n   "))
 }
