@@ -28,6 +28,7 @@ func TestAccAlibabacloudStackApiGatewayV2ServicesDataSource(t *testing.T) {
 				"services.#": "0",
 			}
 		},
+		ExternalProviders: testAccExternalProviders,
 	}
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: ApiGatewayV2ServicesDataSourceNew(rand, map[string]string{

@@ -28,6 +28,7 @@ func TestAccAlibabacloudStackApiGatewayV2McpserversDataSource_basic(t *testing.T
 				"mcp_servers.#": "0",
 			}
 		},
+		ExternalProviders: testAccExternalProviders,
 	}
 
 	// Run tests using customized test method

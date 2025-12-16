@@ -79,9 +79,10 @@ func TestAccAlibabacloudStackPolardbxCdcClassesDataSource(t *testing.T) {
 	}
 
 	var PolardbxCdcClassesCheckInfo = dataSourceAttr{
-		resourceId:   resourceId,
-		existMapFunc: existPolardbxCdcClassesMapFunc,
-		fakeMapFunc:  fakePolardbxCdcClassesMapFunc,
+		resourceId:        resourceId,
+		existMapFunc:      existPolardbxCdcClassesMapFunc,
+		fakeMapFunc:       fakePolardbxCdcClassesMapFunc,
+		ExternalProviders: testAccExternalProviders,
 	}
 
 	PolardbxCdcClassesCheckInfo.dataSourceTestCheck(t, rand, baseConf, idsConf, cpuConf, memoryConf)

@@ -44,13 +44,14 @@ func TestAccAlibabacloudStackPolardbxAccountsDataSource(t *testing.T) {
 	}
 
 	var CheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_polardbx_accounts.default",
-		existMapFunc: exisMapFunc,
-		fakeMapFunc:  fakeMapFunc,
+		resourceId:        "data.alibabacloudstack_polardbx_accounts.default",
+		existMapFunc:      exisMapFunc,
+		fakeMapFunc:       fakeMapFunc,
+		ExternalProviders: testAccExternalProviders,
 	}
 	preCheck := func() {
 	}
-	CheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, instanceIdRegexConf, namesRegexConf,)
+	CheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, instanceIdRegexConf, namesRegexConf)
 }
 
 func testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name string, attrMap map[string]string) string {
@@ -80,6 +81,6 @@ resource "alibabacloudstack_polardbx_account" "default" {
 data "alibabacloudstack_polardbx_accounts" "default" {
   %s
 }
-`, name, RandomPasswordTestCase(12,1), VSwitchCommonTestCase, PolardbxReadOrCreateCommonTestCase(), strings.Join(pairs, "\n  "))
+`, name, RandomPasswordTestCase(12, 1), VSwitchCommonTestCase, PolardbxReadOrCreateCommonTestCase(), strings.Join(pairs, "\n  "))
 	return config
 }

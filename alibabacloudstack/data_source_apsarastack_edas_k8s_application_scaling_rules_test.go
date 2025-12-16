@@ -53,9 +53,10 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRulesDataSource(t *testing
 		}
 	}
 	var alibabacloudstackEdasScalingRulesCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_edas_k8s_application_scaling_rules.default",
-		existMapFunc: existAlibabacloudStackEdasScalingRulesDataSourceNameMapFunc,
-		fakeMapFunc:  fakeAlibabacloudStackEdasScalingRulesDataSourceNameMapFunc,
+		resourceId:        "data.alibabacloudstack_edas_k8s_application_scaling_rules.default",
+		existMapFunc:      existAlibabacloudStackEdasScalingRulesDataSourceNameMapFunc,
+		fakeMapFunc:       fakeAlibabacloudStackEdasScalingRulesDataSourceNameMapFunc,
+		ExternalProviders: testAccExternalProviders,
 	}
 
 	preCheck := func() {

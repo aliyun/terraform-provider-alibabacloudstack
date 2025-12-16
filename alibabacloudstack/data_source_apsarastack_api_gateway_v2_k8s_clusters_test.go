@@ -28,6 +28,7 @@ func TestAccAlibabacloudStackApigatewayv2K8sClustersDataSource(t *testing.T) {
 				"clusters.#": "0",
 			}
 		},
+		ExternalProviders: testAccExternalProviders,
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
@@ -47,7 +48,7 @@ func TestAccAlibabacloudStackApigatewayv2K8sClustersDataSource(t *testing.T) {
 			"k8s_cluster_name": `"fake-name"`,
 		}),
 	}
-	
+
 	csClusterIdConf := dataSourceTestAccConfig{
 		existConfig: APIGateWayV2InstanceClusterDependenceNew(randInt, map[string]string{
 			"cs_cluster_id": `"${local.k8s_cluster_id}"`,
@@ -56,7 +57,7 @@ func TestAccAlibabacloudStackApigatewayv2K8sClustersDataSource(t *testing.T) {
 			"cs_cluster_id": `"fake-name"`,
 		}),
 	}
-	
+
 	idsConf := dataSourceTestAccConfig{
 		existConfig: APIGateWayV2InstanceClusterDependenceNew(randInt, map[string]string{
 			"ids": `["${alibabacloudstack_api_gateway_v2_k8s_cluster.default.id}"]`,
@@ -79,7 +80,7 @@ func TestAccAlibabacloudStackApigatewayv2K8sClustersDataSource(t *testing.T) {
 		}),
 	}
 
-	testAcc.dataSourceTestCheck(t, randInt, idsConf, nameRegexConf, k8sClusterNameConf, csClusterIdConf,  allConf)
+	testAcc.dataSourceTestCheck(t, randInt, idsConf, nameRegexConf, k8sClusterNameConf, csClusterIdConf, allConf)
 }
 
 func APIGateWayV2InstanceClusterDependenceNew(rand int, attrMap map[string]string) string {

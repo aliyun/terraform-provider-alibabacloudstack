@@ -71,9 +71,10 @@ func TestAccAlibabacloudStackEdasSwimmingLanesDataSource(t *testing.T) {
 	}
 
 	var EdasSwimmingLanesCheckInfo = dataSourceAttr{
-		resourceId:   resourceId,
-		existMapFunc: existEdasSwimmingLanesMapFunc,
-		fakeMapFunc:  fakeEdasSwimmingLanesMapFunc,
+		resourceId:        resourceId,
+		existMapFunc:      existEdasSwimmingLanesMapFunc,
+		fakeMapFunc:       fakeEdasSwimmingLanesMapFunc,
+		ExternalProviders: testAccExternalProviders,
 	}
 
 	EdasSwimmingLanesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)

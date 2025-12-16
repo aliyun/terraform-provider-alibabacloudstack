@@ -68,9 +68,10 @@ var fakeAlibabacloudstackPolardbClusterAccountsDataMapFunc = func(rand int) map[
 }
 
 var AlibabacloudstackPolardbClusterAccountsDataCheckInfo = dataSourceAttr{
-	resourceId:   "data.alibabacloudstack_polardb_cluster_accounts.default",
-	existMapFunc: existAlibabacloudstackPolardbClusterAccountsDataMapFunc,
-	fakeMapFunc:  fakeAlibabacloudstackPolardbClusterAccountsDataMapFunc,
+	resourceId:        "data.alibabacloudstack_polardb_cluster_accounts.default",
+	existMapFunc:      existAlibabacloudstackPolardbClusterAccountsDataMapFunc,
+	fakeMapFunc:       fakeAlibabacloudstackPolardbClusterAccountsDataMapFunc,
+	ExternalProviders: testAccExternalProviders,
 }
 
 func datasourcePolardbClusterAccountsConfigDependence(name string) string {
