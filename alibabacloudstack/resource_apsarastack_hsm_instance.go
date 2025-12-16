@@ -44,18 +44,22 @@ func resourceAlibabacloudStackHsmInstance() *schema.Resource {
 			"vpc_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"white_list": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"remark": {
 				Type:     schema.TypeString,
