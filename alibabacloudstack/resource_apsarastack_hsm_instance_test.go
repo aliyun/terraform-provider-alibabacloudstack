@@ -153,7 +153,7 @@ func TestAccAlibabacloudStackHsmInstance_IsAppointDevice(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf_hsm_instance%v", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceHsmInstanceDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceHsmInstanceIsAppointDeviceDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
