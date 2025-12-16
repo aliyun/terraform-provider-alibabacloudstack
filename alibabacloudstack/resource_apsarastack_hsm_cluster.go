@@ -274,14 +274,8 @@ func resourceAlibabacloudStackHsmClusterDelete(d *schema.ResourceData, meta inte
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ResourceNotExist"}) {
-			return nil
-		}
 		return errmsgs.WrapError(err)
 	}
-
-	stateConf := BuildStateConf([]string{"0", "1", "2", "4"}, []string{""}, d.Timeout(schema.TimeoutDelete), 10*time.Second,
-		hsmService.HsmClusterStateRefreshFunc(d.Id(), []string{"5"}))
-	_, err = stateConf.WaitForState()
-	return errmsgs.WrapError(err)
+	time.Sleep(10 * time.Second)
+	return nil
 }

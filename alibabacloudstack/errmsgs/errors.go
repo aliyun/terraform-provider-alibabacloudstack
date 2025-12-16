@@ -103,11 +103,11 @@ func NotFoundError(err error) bool {
 	}
 
 	if e, ok := err.(*sdkerrors.ServerError); ok {
-		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound") 
+		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound")
 	}
 
 	if e, ok := err.(*ProviderError); ok {
-		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound") 
+		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound")
 	}
 
 	if e, ok := err.(oss.ServiceError); ok {
@@ -170,7 +170,7 @@ func IsExpectedErrors(err error, expectCodes []string) bool {
 	if err == nil {
 		return false
 	}
-	
+
 	if e, ok := err.(*tea.SDKError); ok {
 		for _, code := range expectCodes {
 			if *e.Code == code || strings.Contains(*e.Code, code) {

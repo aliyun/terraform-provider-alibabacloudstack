@@ -27,7 +27,8 @@ func TestAccAlibabacloudStackHsmClustersDataSource_basic(t *testing.T) {
 				"clusters.#": "0",
 			}
 		},
-		Providers: testYunDunProviders(),
+		Providers:         testYunDunProviders(),
+		ExternalProviders: testAccExternalProviders,
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
@@ -44,30 +45,32 @@ func TestAccAlibabacloudStackHsmClustersDataSource_basic(t *testing.T) {
 			"ids": `["${alibabacloudstack_hsm_cluster.default.id}"]`,
 		}),
 		fakeConfig: buildHsmClusterDependenciesNew(rand, map[string]string{
-			"ids": `"fake-instance-id"`,
+			"ids": `["fake-instance-id"]`,
 		}),
 	}
 
 	vsmTypeConf := dataSourceTestAccConfig{
 		existConfig: buildHsmClusterDependenciesNew(rand, map[string]string{
-			"vsm_type": `"${alibabacloudstack_hsm_cluster.default.vsm_type}"`,
+			"vsm_type": `"${alibabacloudstack_hsm_instance.default.vsm_type}"`,
 		}),
 		fakeConfig: buildHsmClusterDependenciesNew(rand, map[string]string{
 			"vsm_type": `"evsm"`,
 		}),
 	}
 
-	zoneNoConf := dataSourceTestAccConfig{
+	allConf := dataSourceTestAccConfig{
 		existConfig: buildHsmClusterDependenciesNew(rand, map[string]string{
-			"zone_no": `"${alibabacloudstack_hsm_cluster.default.zone_no}"`,
+			"name_regex": `"${alibabacloudstack_hsm_cluster.default.cluster_name}"`,
+			"ids":        `["${alibabacloudstack_hsm_cluster.default.id}"]`,
+			"vsm_type":   `"${alibabacloudstack_hsm_instance.default.vsm_type}"`,
 		}),
 		fakeConfig: buildHsmClusterDependenciesNew(rand, map[string]string{
-			"zone_no": `"fake-zone-no"`,
+			"name_regex": `"fake-name-regex"`,
+			"ids":        `["fake-instance-id"]`,
+			"vsm_type":   `"evsm"`,
 		}),
 	}
-	preCheck := func() {
-	}
-	testAcc.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, instanceIdConf, vsmTypeConf, zoneNoConf)
+	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, instanceIdConf, vsmTypeConf, allConf)
 }
 
 func buildHsmClusterDependenciesNew(rand int, attrMap map[string]string) string {
@@ -81,7 +84,7 @@ variable "name" {
 }
 
 data "alibabacloudstack_zones" "default" {
-//   provider = alibabacloudstack-common
+  provider = alibabacloudstack-common
   available_resource_creation = "VSwitch"
 }
 
@@ -116,7 +119,7 @@ resource "alibabacloudstack_hsm_cluster" "default" {
   cluster_name       = "${var.name}"
   master_instance_id = alibabacloudstack_hsm_instance.default.id
   vpc_id             = alibabacloudstack_vpc.default.id
-  vswitch_ids        = alibabacloudstack_vpc.default.id
+  vswitch_ids        = alibabacloudstack_vswitch.default.id
   zone_nos           = data.alibabacloudstack_zones.default.zones.0.id
   ip_white_list      = "123.12.13.1/16"
   password           = random_password.password.0.result

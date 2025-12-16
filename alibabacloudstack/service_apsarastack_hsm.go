@@ -43,7 +43,7 @@ func (s *HsmService) DescribeHsmCluster(id string) (map[string]interface{}, erro
 
 	response, err := s.client.DoTeaRequest("GET", "hsm-private", "2018-06-30", "DescribeClusters", "", nil, reqQuery, nil)
 	if err != nil {
-		return nil, errmsgs.WrapError(err)
+		return nil, err
 	}
 
 	clusters, ok := response["HsmClusters"].([]interface{})
