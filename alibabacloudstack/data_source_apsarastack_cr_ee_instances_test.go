@@ -61,11 +61,11 @@ func TestAccAlibabacloudStackCrEeInstancesDataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existCrEeInstancesMapFunc,
 		fakeMapFunc:  fakeCrEeInstancesMapFunc,
+		PreCheck: func() {
+			testAccPreCheckWithCrEe(t)
+		},
 	}
-	preCheck := func() {
-		testAccPreCheckWithCrEe(t)
-	}
-	crEEInstancesCheckInfo.dataSourceTestCheckWithPreCheck(t, 0, preCheck, nameRegexConf, idsConf, allConf)
+	crEEInstancesCheckInfo.dataSourceTestCheck(t, 0, nameRegexConf, idsConf, allConf)
 }
 
 func dataSourceCrEeInstancesConfigDependence(name string) string {

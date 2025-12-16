@@ -49,9 +49,7 @@ func TestAccAlibabacloudStackPolardbxAccountsDataSource(t *testing.T) {
 		fakeMapFunc:       fakeMapFunc,
 		ExternalProviders: testAccExternalProviders,
 	}
-	preCheck := func() {
-	}
-	CheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, instanceIdRegexConf, namesRegexConf)
+	CheckInfo.dataSourceTestCheck(t, rand, instanceIdRegexConf, namesRegexConf)
 }
 
 func testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name string, attrMap map[string]string) string {

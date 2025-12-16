@@ -58,9 +58,7 @@ func TestAccAlibabacloudStackPolardbxDatabasesDataSource(t *testing.T) {
 		existMapFunc: exisMapFunc,
 		fakeMapFunc:  fakeMapFunc,
 	}
-	preCheck := func() {
-	}
-	CheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, polardbxInstanceIdRegexConf, idsConf, namesConf)
+	CheckInfo.dataSourceTestCheck(t, rand, polardbxInstanceIdRegexConf, idsConf, namesConf)
 }
 
 func testAccCheckAlibabacloudStackPolardbxDatabasesSourceConfig(name string, attrMap map[string]string) string {

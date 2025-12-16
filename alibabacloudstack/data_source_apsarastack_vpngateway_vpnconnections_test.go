@@ -10,10 +10,6 @@ func TestAccAlibabacloudStackVpnConnectionsDataSourceBasic(t *testing.T) {
 	resourceId := "data.alibabacloudstack_vpn_connections.default"
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf-testAccVpnConnDataResource%d", rand)
-	preCheck := func() {
-		testAccPreCheck(t)
-		testAccPreCheckWithAccountSiteType(t, DomesticSite)
-	}
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		name, dataSourceVpnConnectionsConfigDependence)
 
@@ -107,8 +103,12 @@ func TestAccAlibabacloudStackVpnConnectionsDataSourceBasic(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existVpnConnectionsMapFunc,
 		fakeMapFunc:  fakeVpnConnectionsMapFunc,
+		PreCheck: 		func() {
+			testAccPreCheck(t)
+			testAccPreCheckWithAccountSiteType(t, DomesticSite)
+		},
 	}
-	vpnConnectionsCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, idsConfig, vpnGateWayIdConfig,
+	vpnConnectionsCheckInfo.dataSourceTestCheck(t, rand, idsConfig, vpnGateWayIdConfig,
 		customerGatewayIdConfig, nameRegexConfig, allConfig)
 
 }

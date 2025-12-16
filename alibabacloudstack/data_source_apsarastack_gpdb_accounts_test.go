@@ -70,10 +70,7 @@ func TestAccAlibabacloudStackGpdbAccountsDataSource(t *testing.T) {
 		fakeMapFunc:  fakeAlibabacloudStackGpdbAccountsDataSourceNameMapFunc,
 	}
 
-	preCheck := func() {
-		testAccPreCheck(t)
-	}
-	alibabacloudstackGpdbAccountsCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, idsConf, nameRegexConf, statusConf, allConf)
+	alibabacloudstackGpdbAccountsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, statusConf, allConf)
 }
 func testAccCheckAlibabacloudStackGpdbAccountsDataSourceName(rand int, attrMap map[string]string) string {
 	var pairs []string

@@ -49,11 +49,7 @@ func TestAccAlibabacloudStackWafInstancesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeDnsRecordsMapFunc,
 	}
 
-	var perCheck = func() {
-		testAccPreCheck(t)
-	}
-
-	wafInstancesRecordsCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, perCheck, idsConf)
+	wafInstancesRecordsCheckInfo.dataSourceTestCheck(t, rand, idsConf)
 
 }
 

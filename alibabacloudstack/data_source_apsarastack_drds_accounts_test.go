@@ -72,9 +72,7 @@ func TestAccAlibabacloudStackDrdsAccountsDataSource(t *testing.T) {
 		existMapFunc: exisMapFunc,
 		fakeMapFunc:  fakeMapFunc,
 	}
-	preCheck := func() {
-	}
-	CheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, drdsInstanceIdRegexConf, namesRegexConf, defaultAccountTypeRegexConf, userAccountTypeRegexConf)
+	CheckInfo.dataSourceTestCheck(t, rand, drdsInstanceIdRegexConf, namesRegexConf, defaultAccountTypeRegexConf, userAccountTypeRegexConf)
 }
 
 func testAccCheckAlibabacloudStackDrdsAccountsSourceConfig(name string, attrMap map[string]string) string {

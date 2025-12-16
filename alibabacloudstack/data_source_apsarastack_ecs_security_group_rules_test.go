@@ -80,9 +80,7 @@ func TestAccAlibabacloudStackSecurityGroupRulesDataSource(t *testing.T) {
 		existMapFunc: exisMapFunc,
 		fakeMapFunc:  fakeMapFunc,
 	}
-	preCheck := func() {
-	}
-	CheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, GroupIdConf, DirectionConf, NicTypeConf, IpProtocolConf, PolicyConf)
+	CheckInfo.dataSourceTestCheck(t, rand, GroupIdConf, DirectionConf, NicTypeConf, IpProtocolConf, PolicyConf)
 }
 
 func testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name string, attrMap map[string]string) string {

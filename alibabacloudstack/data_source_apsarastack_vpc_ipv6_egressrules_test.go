@@ -112,14 +112,13 @@ func TestAccAlibabacloudStackVpcIpv6EgressRulesDataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existVpcIpv6EgressRuleMapFunc,
 		fakeMapFunc:  fakeVpcIpv6EgressRuleMapFunc,
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckWithEnvVariable(t, "ECS_WITH_IPV6_ADDRESS")
+		},
 	}
 
-	preCheck := func() {
-		testAccPreCheck(t)
-		testAccPreCheckWithEnvVariable(t, "ECS_WITH_IPV6_ADDRESS")
-	}
-
-	VpcIpv6EgressRuleCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, statusConf, instanceIdConf, ipv6EgressRuleNameConf, allConf)
+	VpcIpv6EgressRuleCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, statusConf, instanceIdConf, ipv6EgressRuleNameConf, allConf)
 }
 
 func dataSourceVpcIpv6EgressRulesDependence(name string) string {

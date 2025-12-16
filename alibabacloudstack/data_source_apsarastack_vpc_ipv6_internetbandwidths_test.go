@@ -88,14 +88,13 @@ func TestAccAlibabacloudStackVpcIpv6InternetBandwidthsDataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existVpcIpv6InternetBandwidthMapFunc,
 		fakeMapFunc:  fakeVpcIpv6InternetBandwidthMapFunc,
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckWithEnvVariable(t, "ECS_WITH_IPV6_ADDRESS")
+		},
 	}
 
-	preCheck := func() {
-		testAccPreCheck(t)
-		testAccPreCheckWithEnvVariable(t, "ECS_WITH_IPV6_ADDRESS")
-	}
-
-	VpcIpv6InternetBandwidthCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, idsConf, ipv6InternetBandwidthIdConf, ipv6AddressIdConf, statusConf, allConf)
+	VpcIpv6InternetBandwidthCheckInfo.dataSourceTestCheck(t, rand, idsConf, ipv6InternetBandwidthIdConf, ipv6AddressIdConf, statusConf, allConf)
 }
 
 func dataSourceVpcIpv6InternetBandwidthsDependence(name string) string {

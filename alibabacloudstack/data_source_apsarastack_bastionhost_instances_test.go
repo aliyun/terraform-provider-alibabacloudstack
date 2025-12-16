@@ -88,13 +88,12 @@ func TestAccAlibabacloudStackBastionhostInstancesDataSource(t *testing.T) {
 		resourceId:   "data.alibabacloudstack_bastionhost_instances.default",
 		existMapFunc: existYundunBastionhostInstanceMapFunc,
 		fakeMapFunc:  fakeYundunBastionhostInstanceMapFunc,
+		PreCheck: func() {
+			testAccPreCheckWithAccountSiteType(t, DomesticSite)
+		},
 	}
 
-	preCheck := func() {
-		testAccPreCheckWithAccountSiteType(t, DomesticSite)
-	}
-
-	yundunBastionhostInstanceCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, idsConf)
+	yundunBastionhostInstanceCheckInfo.dataSourceTestCheck(t, rand, idsConf)
 
 }
 

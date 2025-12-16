@@ -59,10 +59,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRulesDataSource(t *testing
 		ExternalProviders: testAccExternalProviders,
 	}
 
-	preCheck := func() {
-		testAccPreCheck(t)
-	}
-	alibabacloudstackEdasScalingRulesCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, idsConf, nameRegexConf, allConf)
+	alibabacloudstackEdasScalingRulesCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
 func testAccCheckAlibabacloudStackEdasScalingRulesDataSourceName(rand int, attrMap map[string]string) string {
 	var pairs []string

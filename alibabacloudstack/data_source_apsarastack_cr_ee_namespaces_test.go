@@ -73,11 +73,11 @@ func TestAccAlibabacloudStackCrEeNamespacesDataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existCrEeNamespacesMapFunc,
 		fakeMapFunc:  fakeCrEeNamespacesMapFunc,
+		PreCheck: func() {
+			testAccPreCheckWithCrEe(t)
+		},
 	}
-	preCheck := func() {
-		testAccPreCheckWithCrEe(t)
-	}
-	crEENamespacesCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, allConf)
+	crEENamespacesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
 func dataSourceCrEeNamespacesConfigDependence(name string) string {

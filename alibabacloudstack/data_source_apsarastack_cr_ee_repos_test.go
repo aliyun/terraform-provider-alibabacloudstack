@@ -83,11 +83,11 @@ func TestAccAlibabacloudStackCrEeReposDataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existCrEeReposMapFunc,
 		fakeMapFunc:  fakeCrEeReposMapFunc,
+		PreCheck: func() {
+			testAccPreCheckWithCrEe(t)
+		},
 	}
-	preCheck := func() {
-		testAccPreCheckWithCrEe(t)
-	}
-	crEEReposCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, allConf)
+	crEEReposCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
 func dataSourceCrEeReposConfigDependence(name string) string {

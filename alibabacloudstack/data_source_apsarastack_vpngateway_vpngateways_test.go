@@ -8,9 +8,14 @@ import (
 
 func TestAccAlibabacloudStackVpnGatewaysDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
-	preCheck := func() {
-		testAccPreCheck(t)
-		testAccPreCheckWithAccountSiteType(t, IntlSite)
+	var vpnGatewaysCheckInfo = dataSourceAttr{
+		resourceId:   "data.alibabacloudstack_vpn_gateways.default",
+		existMapFunc: existVpnGatewaysMapFunc,
+		fakeMapFunc:  fakeVpnGatewaysMapFunc,
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckWithAccountSiteType(t, IntlSite)
+		},
 	}
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
@@ -79,7 +84,7 @@ func TestAccAlibabacloudStackVpnGatewaysDataSourceBasic(t *testing.T) {
 		}),
 	}
 
-	vpnGatewaysCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, idsConf, nameRegexConf, vpcIdConf, statusConf, businessStatusConf, allConf)
+	vpnGatewaysCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, vpcIdConf, statusConf, businessStatusConf, allConf)
 }
 
 func testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand int, attrMap map[string]string) string {
@@ -154,10 +159,4 @@ var fakeVpnGatewaysMapFunc = func(rand int) map[string]string {
 		"names.#":    "0",
 		"gateways.#": "0",
 	}
-}
-
-var vpnGatewaysCheckInfo = dataSourceAttr{
-	resourceId:   "data.alibabacloudstack_vpn_gateways.default",
-	existMapFunc: existVpnGatewaysMapFunc,
-	fakeMapFunc:  fakeVpnGatewaysMapFunc,
 }

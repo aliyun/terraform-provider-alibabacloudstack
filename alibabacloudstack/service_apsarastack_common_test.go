@@ -527,6 +527,8 @@ type dataSourceAttr struct {
 	Providers map[string]*schema.Provider
 
 	ExternalProviders map[string]resource.ExternalProvider
+
+	PreCheck func()
 }
 
 // get exist and empty resourceAttrMapUpdate function
@@ -554,26 +556,20 @@ func (dsa *dataSourceAttr) dataSourceTestCheck(t *testing.T, rand int, configs .
 	} else {
 		externalProviders = map[string]resource.ExternalProvider{}
 	}
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers:         providers,
-		ExternalProviders: externalProviders,
-		Steps:             steps,
-	})
-}
 
-// according to configs generate step list and execute the test with preCheck
-func (dsa *dataSourceAttr) dataSourceTestCheckWithPreCheck(t *testing.T, rand int, preCheck func(), configs ...dataSourceTestAccConfig) {
-	var steps []resource.TestStep
-	for _, conf := range configs {
-		steps = append(steps, conf.buildDataSourceSteps(t, dsa, rand)...)
+	var preCheck func()
+	if dsa.PreCheck != nil {
+		preCheck = dsa.PreCheck
+	} else {
+		preCheck = func() {
+			testAccPreCheck(t)
+		}
 	}
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck:          preCheck,
-		Providers:         testAccProviders,
-		ExternalProviders: testAccExternalProviders,
+		Providers:         providers,
+		ExternalProviders: externalProviders,
 		Steps:             steps,
 	})
 }

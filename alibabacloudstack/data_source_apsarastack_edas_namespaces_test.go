@@ -59,10 +59,7 @@ func TestAccAlibabacloudStackEdasNamespacesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeAlibabacloudStackEdasNamespacesDataSourceNameMapFunc,
 	}
 
-	preCheck := func() {
-		testAccPreCheck(t)
-	}
-	alibabacloudstackEdasNamespacesCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, idsConf, nameRegexConf, allConf)
+	alibabacloudstackEdasNamespacesCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
 func testAccCheckAlibabacloudStackEdasNamespacesDataSourceName(rand int, attrMap map[string]string) string {
 	var pairs []string

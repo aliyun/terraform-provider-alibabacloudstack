@@ -7,9 +7,6 @@ import (
 )
 
 func TestAccAlibabacloudStackRouteTablesDataSourceBasic(t *testing.T) {
-	preCheck := func() {
-		testAccPreCheck(t)
-	}
 	rand := getAccTestRandInt(10000, 20000)
 
 	allConfig := dataSourceTestAccConfig{
@@ -25,7 +22,7 @@ func TestAccAlibabacloudStackRouteTablesDataSourceBasic(t *testing.T) {
 		}),
 	}
 
-	routeTablesCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, allConfig)
+	routeTablesCheckInfo.dataSourceTestCheck(t, rand, allConfig)
 }
 
 func testAccCheckAlibabacloudStackRouteTablesDataSourceConfigBasic(rand int, attrMap map[string]string) string {

@@ -117,9 +117,7 @@ func TestAccAlibabacloudStackMongoDBInstancesDataSource(t *testing.T) {
 		existMapFunc: exisMapFunc,
 		fakeMapFunc:  fakeMapFunc,
 	}
-	preCheck := func() {
-	}
-	CheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, instanceTypeConf, instanceClassConf, availabilityZoneConf, allConf)
+	CheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, instanceTypeConf, instanceClassConf, availabilityZoneConf, allConf)
 }
 
 func testAccCheckAlibabacloudStackMongoDBDataSourceConfig(rand int, attrMap map[string]string) string {
