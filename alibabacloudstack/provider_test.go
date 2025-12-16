@@ -55,6 +55,32 @@ func TestProvider(t *testing.T) {
 	}
 }
 
+func testYunDunProviders() map[string]*schema.Provider {
+	yundunProvider := Provider()
+	yundunProvider.Schema["access_key"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY", ""),
+		Description: descriptions["access_key"],
+	}
+	yundunProvider.Schema["secret_key"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY", ""),
+		Description: descriptions["secret_key"],
+	}
+	yundunProvider.Schema["role_arn"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: descriptions["assume_role_role_arn"],
+		DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN", ""),
+	}
+	return map[string]*schema.Provider{
+		"alibabacloudstack":        yundunProvider,
+		"alibabacloudstack-common": testAccProvider,
+	}
+}
+
 func TestProvider_impl(t *testing.T) {
 	var _ *schema.Provider = Provider()
 }

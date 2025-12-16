@@ -10,7 +10,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func init() {
@@ -100,12 +99,10 @@ func testSweepBastionhostInstances(region string) error {
 
 func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 	var v map[string]interface{}
-	commonProvider := Provider()
-	yundunProvider := Provider()
 	resourceId := "alibabacloudstack_bastionhost_instance.default"
 	ra := resourceAttrInit(resourceId, bastionhostInstanceBasicMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &YundunBastionhostService{yundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &YundunBastionhostService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeBastionhostInstance")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -118,30 +115,7 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 			testAccPreYunCheck(t)
 		},
 		IDRefreshName: resourceId,
-		Providers: func() map[string]*schema.Provider {
-			yundunProvider.Schema["access_key"] = &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY", ""),
-				Description: descriptions["access_key"],
-			}
-			yundunProvider.Schema["secret_key"] = &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY", ""),
-				Description: descriptions["secret_key"],
-			}
-			yundunProvider.Schema["role_arn"] = &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: descriptions["assume_role_role_arn"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN", ""),
-			}
-			return map[string]*schema.Provider{
-				"alibabacloudstack":        yundunProvider,
-				"alibabacloudstack-common": commonProvider,
-			}
-		}(),
+		Providers: testYunDunProviders(),
 		// resource "alibabacloudstack_bastionhost_instance" "default" {
 		// 	vswitch_id = alibabacloudstack_vswitch.vsw.id
 		// 	license_code = "bastionhostah_small_lic"

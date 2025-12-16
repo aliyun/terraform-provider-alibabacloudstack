@@ -23,6 +23,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
@@ -522,6 +523,10 @@ type dataSourceAttr struct {
 
 	// get fakeMap function
 	fakeMapFunc func(rand int) map[string]string
+
+	Providers map[string]*schema.Provider
+
+	ExternalProviders map[string]resource.ExternalProvider
 }
 
 // get exist and empty resourceAttrMapUpdate function
@@ -537,12 +542,24 @@ func (dsa *dataSourceAttr) dataSourceTestCheck(t *testing.T, rand int, configs .
 	for _, conf := range configs {
 		steps = append(steps, conf.buildDataSourceSteps(t, dsa, rand)...)
 	}
+	var providers map[string]*schema.Provider
+	if len(dsa.Providers) > 0 {
+		providers = dsa.Providers
+	} else {
+		providers = testAccProviders
+	}
+	var externalProviders map[string]resource.ExternalProvider
+	if len(dsa.ExternalProviders) > 0 {
+		externalProviders = dsa.ExternalProviders
+	} else {
+		externalProviders = map[string]resource.ExternalProvider{}
+	}
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:         testAccProviders,
-		ExternalProviders: testAccExternalProviders,
+		Providers:         providers,
+		ExternalProviders: externalProviders,
 		Steps:             steps,
 	})
 }

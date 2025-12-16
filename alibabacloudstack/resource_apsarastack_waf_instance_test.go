@@ -6,17 +6,14 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestAccAlibabacloudStackWafInstance_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_waf_instance.default"
 	var v map[string]interface{}
 	ra := resourceAttrInit(resourceId, WafInstanceBasicMap)
-	commonProvider := Provider()
-	yundunProvider := Provider()
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &WafOpenapiService{yundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &WafOpenapiService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeWafInstance")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -29,30 +26,7 @@ func TestAccAlibabacloudStackWafInstance_basic(t *testing.T) {
 			testAccPreYunCheck(t)
 		},
 		IDRefreshName: resourceId,
-		Providers: func() map[string]*schema.Provider {
-			yundunProvider.Schema["access_key"] = &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY", ""),
-				Description: descriptions["access_key"],
-			}
-			yundunProvider.Schema["secret_key"] = &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY", ""),
-				Description: descriptions["secret_key"],
-			}
-			yundunProvider.Schema["role_arn"] = &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: descriptions["assume_role_role_arn"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN", ""),
-			}
-			return map[string]*schema.Provider{
-				"alibabacloudstack":        yundunProvider,
-				"alibabacloudstack-common": commonProvider,
-			}
-		}(),
+		Providers: testYunDunProviders(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{

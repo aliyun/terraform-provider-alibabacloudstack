@@ -30,14 +30,17 @@ func TestAccAlibabacloudStackHsmInstancesDataSource(t *testing.T) {
 				"instances.#": "0",
 			}
 		},
+		Providers: testYunDunProviders(),
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAcc.dataSourceHsmInstancesConfigDependenceNew(rand, map[string]string{
 			"name_regex": `"test-tf-hsm-instance"`,
+			"instance_id": `"${alibabacloudstack_hsm_instance.default.id}"`,
 		}),
 		fakeConfig: testAcc.dataSourceHsmInstancesConfigDependenceNew(rand, map[string]string{
 			"name_regex": `"fake-name-regex"`,
+			"instance_id": `"${alibabacloudstack_hsm_instance.default.id}"`,
 		}),
 	}
 
@@ -53,18 +56,22 @@ func TestAccAlibabacloudStackHsmInstancesDataSource(t *testing.T) {
 	vsmTypeConf := dataSourceTestAccConfig{
 		existConfig: testAcc.dataSourceHsmInstancesConfigDependenceNew(rand, map[string]string{
 			"vsm_type": `"gvsm"`,
+			"instance_id": `"${alibabacloudstack_hsm_instance.default.id}"`,
 		}),
 		fakeConfig: testAcc.dataSourceHsmInstancesConfigDependenceNew(rand, map[string]string{
 			"vsm_type": `"evsm"`,
+			"instance_id": `"${alibabacloudstack_hsm_instance.default.id}"`,
 		}),
 	}
 
 	zoneNoConf := dataSourceTestAccConfig{
 		existConfig: testAcc.dataSourceHsmInstancesConfigDependenceNew(rand, map[string]string{
 			"zone_no": `"${data.alibabacloudstack_zones.default.zones.0.id}"`,
+			"instance_id": `"${alibabacloudstack_hsm_instance.default.id}"`,
 		}),
 		fakeConfig: testAcc.dataSourceHsmInstancesConfigDependenceNew(rand, map[string]string{
 			"zone_no": `"fake-zone-no"`,
+			"instance_id": `"${alibabacloudstack_hsm_instance.default.id}"`,
 		}),
 	}
 
