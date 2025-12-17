@@ -79,6 +79,7 @@ const (
 	SCHEDULERX2Code      = ServiceCode("SCHEDULERX2")
 	EFSCode              = ServiceCode("EFS")
 	HSMPRIVATECode       = ServiceCode("HSM_PRIVATE")
+	CSPPRIVATECode       = ServiceCode("CSPPRIVATE")
 	BMSCode              = ServiceCode("BMS")
 	AEGISCode            = ServiceCode("AEGIS")
 	// undefined code, add first
@@ -398,6 +399,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	HSMPRIVATECode: PopEndpoint{
 		"hsmprivate.{{.region}}.{{.domain}}",
 		"hsmprivate.{{.region}}.{{.domain}}",
+	},
+	CSPPRIVATECode: PopEndpoint{
+		"kms-csp-pop-biz.{{.region}}.{{.domain}}",
+		"kms-csp-pop-biz.{{.region}}.{{.domain}}",
 	},
 	BMSCode: PopEndpoint{
 		"baremetalservice.{{.region}}.{{.domain}}",
