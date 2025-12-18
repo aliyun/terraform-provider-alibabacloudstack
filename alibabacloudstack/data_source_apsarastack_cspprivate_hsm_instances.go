@@ -179,7 +179,7 @@ func dataSourceAlibabacloudStackCspprivateHsmInstancesRead(d *schema.ResourceDat
 			"vendor_code":  inst["VendorCode"],
 			"product_code": inst["ProductCode"],
 			"vsm_type":     inst["VsmType"],
-			"zone_id":      inst["ZoneNo"],
+			"zone_id":      inst["ZoneId"],
 		}
 		names = append(names, alias_name)
 		ids = append(ids, instanceId)

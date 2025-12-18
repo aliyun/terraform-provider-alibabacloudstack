@@ -12,15 +12,15 @@ func TestAccAlibabacloudStackCspprivateHsmInstancesDataSource(t *testing.T) {
 		resourceId: "data.alibabacloudstack_cspprivate_hsm_instances.default",
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
-				"ids.#":                    "1",
-				"names.#":                  "1",
-				"instances.#":              "1",
-				"instances.0.instance_id":  CHECKSET,
-				"instances.0.alias_name":   fmt.Sprintf("test-tf-cspprivate-hsm%d", rand),
-				"instances.0.vsm_type":     "gvsm",
-				"instances.0.zone_id":      CHECKSET,
-				"instances.0.vendor_code":  CHECKSET,
-				"instances.0.product_code": CHECKSET,
+				"id":                      CHECKSET,
+				"ids.#":                   "1",
+				"names.#":                 "1",
+				"instances.#":             "1",
+				"instances.0.instance_id": CHECKSET,
+				"instances.0.alias_name":  fmt.Sprintf("test-tf-cspprivate-hsm%d", rand),
+				"instances.0.vsm_type":    "gvsm",
+				"instances.0.zone_id":     CHECKSET,
+				"instances.0.vendor_code": CHECKSET,
 			}
 		},
 		fakeMapFunc: func(rand int) map[string]string {
@@ -35,7 +35,7 @@ func TestAccAlibabacloudStackCspprivateHsmInstancesDataSource(t *testing.T) {
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAcc.dataSourceCspprivateHsmInstancesConfigDependenceNew(rand, map[string]string{
-			"name_regex": `"test-tf-hsm-instance"`,
+			"name_regex": `"${alibabacloudstack_cspprivate_hsm_instance.default.alias_name}"`,
 		}),
 		fakeConfig: testAcc.dataSourceCspprivateHsmInstancesConfigDependenceNew(rand, map[string]string{
 			"name_regex": `"fake-name-regex"`,
@@ -53,11 +53,11 @@ func TestAccAlibabacloudStackCspprivateHsmInstancesDataSource(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAcc.dataSourceCspprivateHsmInstancesConfigDependenceNew(rand, map[string]string{
-			"name_regex": `"test-tf-hsm-instance"`,
+			"name_regex": `"${alibabacloudstack_cspprivate_hsm_instance.default.alias_name}"`,
 			"ids":        `["${alibabacloudstack_cspprivate_hsm_instance.default.id}"]`,
 		}),
 		fakeConfig: testAcc.dataSourceCspprivateHsmInstancesConfigDependenceNew(rand, map[string]string{
-			"name_regex": `"test-tf-hsm-instance"`,
+			"name_regex": `"fake-name-regex"`,
 			"ids":        `["fake-instance-id"]`,
 		}),
 	}
@@ -71,7 +71,7 @@ func (dsa *dataSourceAttr) dataSourceCspprivateHsmInstancesConfigDependenceNew(r
 	}
 	config := fmt.Sprintf(`
 variable "name" {
-	default = "test-tf-hsm-instance%d"
+	default = "test-tf-cspprivate-hsm%d"
 }
 
 data "alibabacloudstack_zones" "default" {

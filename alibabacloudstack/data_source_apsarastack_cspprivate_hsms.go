@@ -1,6 +1,9 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
+
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -50,25 +53,39 @@ func dataSourceAlibabacloudStackCspprivateHsms() *schema.Resource {
 
 func dataSourceAlibabacloudStackCspprivateHsmsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	querydata := map[string]interface{}{
+		"HttpMethod":  "post",
+		"ContentType": "application/x-www-form-urlencoded",
+		"Uri":         "/api/hsm/gethsmids",
+		"Data": map[string]interface{}{
+			"vendorCode":  d.Get("vendor_code"),
+			"zoneId":      d.Get("zone_id"),
+			"productCode": d.Get("product_code"),
+			"regionId":    client.RegionId,
+		},
+	}
+	queryString, _ := json.Marshal(querydata)
 
 	request := map[string]interface{}{
-		"ZoneId":      d.Get("zone_id"),
-		"VendorCode":  d.Get("vendor_code"),
-		"ProductCode": d.Get("product_code"),
+		"CryptoServiceId": "testid",
+		"Data":            string(queryString),
 	}
 
-	response, err := client.DoTeaRequest("GET", "hsm-private", "2018-06-30", "GetHsmIds", "", nil, request, nil)
+	response, err := client.DoTeaRequest("POST", "Cspprivate", "2022-02-17", "DescribeProxyCryptoService", "", nil, request, nil)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	hsmIds, ok := response["HsmIds"].([]interface{})
-	if !ok {
-		return errmsgs.WrapError(errmsgs.GetNotFoundErrorFromString("No hms ids found"))
+	hsmIds, err := jsonpath.Get("$.data.HsmIds", response)
+	if err != nil {
+		hsmIds, err = jsonpath.Get("$.data.hsmIds", response)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
 	}
 
 	var hsms []map[string]interface{}
 	var ids []string
-	for _, v := range hsmIds {
+	for _, v := range hsmIds.([]interface{}) {
 		hsmId := v.(string)
 		hsms = append(hsms, map[string]interface{}{
 			"id": hsmId,

@@ -27,6 +27,10 @@ func dataSourceAlibabacloudStackCspprivateVendors() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"code": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -86,6 +90,7 @@ func dataSourceAlibabacloudStackCspprivateVendorsRead(d *schema.ResourceData, me
 	for _, v := range vendorsRaw.([]interface{}) {
 		vendor := v.(map[string]interface{})
 		vendorMapping := map[string]interface{}{
+			"id":   vendor["code"],
 			"code": vendor["code"],
 			"name": vendor["name"],
 		}
