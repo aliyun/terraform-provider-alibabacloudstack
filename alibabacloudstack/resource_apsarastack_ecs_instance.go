@@ -136,7 +136,7 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 				Default:      DiskCloudEfficiency,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"all", "cloud", "ephemeral_ssd", "cloud_efficiency", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"all", "cloud", "ephemeral_ssd", "cloud_efficiency", "cloud_ssd", "cloud_pperf", "cloud_sperf", "cloud_essd"}, false),
 			},
 			"system_disk_size": {
 				Type:     schema.TypeInt,
@@ -179,7 +179,7 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 						"category": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"all", "cloud", "ephemeral_ssd", "cloud_efficiency", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"all", "cloud", "ephemeral_ssd", "cloud_efficiency", "cloud_ssd", "cloud_pperf", "cloud_sperf", "cloud_essd"}, false),
 							Default:      DiskCloudEfficiency,
 							ForceNew:     true,
 						},
