@@ -20,11 +20,13 @@ func resourceAlibabacloudStackBmsKeypair() *schema.Resource {
 			"public_key": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				Computed: true,
 			},
 			"private_key": {
 				Type:      schema.TypeString,
 				Computed:  true,
+				ForceNew: true,
 				Sensitive: true,
 			},
 			"key_pair_fingerprint": {
@@ -48,10 +50,6 @@ func resourceAlibabacloudStackBmsKeypairCreate(d *schema.ResourceData, meta inte
 		"cloudType":  "private",
 		"DeployType": "bms",
 		"Name":       d.Get("name").(string),
-	}
-
-	if v, ok := d.GetOk("name"); ok {
-		reqBody["Name"] = v.(string)
 	}
 	if v, ok := d.GetOk("public_key"); ok {
 		reqBody["PublicKey"] = v.(string)
@@ -95,12 +93,6 @@ func resourceAlibabacloudStackBmsKeypairRead(d *schema.ResourceData, meta interf
 	}
 
 	d.Set("name", target["name"])
-	if v, ok := target["privateKey"].(string); ok && v != "" {
-		d.Set("private_key", v)
-	}
-	if v, ok := target["publicKey"].(string); ok && v != "" {
-		d.Set("public_key", v)
-	}
 	d.Set("key_pair_fingerprint", target["keyPairFingerPrint"])
 
 	return nil

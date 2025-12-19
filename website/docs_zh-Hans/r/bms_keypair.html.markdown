@@ -37,7 +37,7 @@ resource "alibabacloudstack_bms_keypair" "default" {
 
 * `name` - (必填, 变更时重建) 密钥对的名称。长度为1-128个字符，支持字母、数字、下划线（_）和短划线（-）。
 
-* `public_key` - (可选) 公钥内容。如果不提供，系统将自动生成密钥对。公钥格式应为SSH公钥格式，如"ssh-rsa AAAAB3NzaC1yc2EAAA..."。
+* `public_key` - (可选, 变更时重建) 公钥内容。如果不提供，系统将自动生成密钥对。公钥格式应为SSH公钥格式，如"ssh-rsa AAAAB3NzaC1yc2EAAA..."。
 
 ## 属性说明
 
