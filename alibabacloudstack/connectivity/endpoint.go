@@ -79,6 +79,7 @@ const (
 	SCHEDULERX2Code      = ServiceCode("SCHEDULERX2")
 	EFSCode              = ServiceCode("EFS")
 	HSMPRIVATECode       = ServiceCode("HSM_PRIVATE")
+	BMSCode              = ServiceCode("BMS")
 	// undefined code, add first
 	GDBCode                   = ServiceCode("GDB")
 	ARMSCode                  = ServiceCode("ARMS")
@@ -396,6 +397,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	HSMPRIVATECode: PopEndpoint{
 		"hsmprivate.{{.region}}.{{.domain}}",
 		"hsmprivate.{{.region}}.{{.domain}}",
+	},
+	BMSCode: PopEndpoint{
+		"baremetalservice.{{.region}}.{{.domain}}",
+		"baremetalservice.{{.region}}.{{.domain}}",
 	},
 	// 3.18.3 new sites will not be opened
 	OneRouterCode: PopEndpoint{

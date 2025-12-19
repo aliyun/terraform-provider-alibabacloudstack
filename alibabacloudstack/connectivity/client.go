@@ -1023,17 +1023,17 @@ func (client *AlibabacloudStackClient) NewBastionhostClient() (*rpc.Client, erro
 
 func (client *AlibabacloudStackClient) defaultHeaders(popcode string) map[string]string {
 	return map[string]string{
-		"RegionId":              client.RegionId, //	ASAPI
-		"x-acs-organizationid":  client.Department,
-		"x-acs-resourcegroupid": client.ResourceGroup,
-		"x-acs-regionid":        client.RegionId,
-		"x-acs-request-version": "v1",
-		"x-acs-asapi-product":   popcode,
-		"x-ascm-product-name":   popcode,
-		"EagleEye-TraceId":      client.Eagleeye.GetTraceId(),
-		"EagleEye-RpcId":        client.Eagleeye.GetRpcId(),
-		"x-acs-territory":       "US",
-		"x-acs-lang":            "EN",
+		"RegionId":                client.RegionId, //	ASAPI
+		"x-acs-organizationid":    client.Department,
+		"x-acs-resourcegroupid":   client.ResourceGroup,
+		"x-acs-regionid":          client.RegionId,
+		"x-acs-request-version":   "v1",
+		"x-acs-asapi-product":     popcode,
+		"x-ascm-product-name":     popcode,
+		"EagleEye-TraceId":        client.Eagleeye.GetTraceId(),
+		"EagleEye-RpcId":          client.Eagleeye.GetRpcId(),
+		"x-acs-territory":         "US",
+		"x-acs-lang":              "EN",
 		"x-acs-caller-sdk-source": "Terraform",
 		//"x-acs-asapi-gateway-version": "3.0"  This specifies to use the ASAPI v3 gateway process, currently maintained is v4, by default it will use v4. Specifying to use v3 is not recommended unless there are compatibility issues that require it.
 	}
@@ -1145,8 +1145,8 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 	} else {
 		protocol = "http"
 	}
-	if popcode == "CloudDns" {
-		// CloudDns does not support HTTPS
+	if popcode == "CloudDns" || popcode == "bms" {
+		// CloudDns / bms does not support HTTPS
 		protocol = "http"
 	}
 	authType := "AK"
@@ -1288,12 +1288,12 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 	if domain == "" {
 		domain = conn.Domain
 	}
-	
+
 	if popcode == OneRouterCode {
 		// special logic, 3.16.2 mandatory, no longer required after 3.18.1
 		request.QueryParams["AccountInfo"] = client.GetAccountInfo()
 	}
-	
+
 	if strings.HasPrefix(domain, "internal.asapi.") || strings.HasPrefix(domain, "public.asapi.") {
 		// asapi compatibility logic
 		// # asapi When using common SDK, pathpattern cannot be concatenated, otherwise an error will be reported
