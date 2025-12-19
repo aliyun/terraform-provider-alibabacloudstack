@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -86,7 +85,7 @@ func dataSourceAlibabacloudStackAqsOssScanconfigs() *schema.Resource {
 							Computed: true,
 						},
 						"last_modified_start_time": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"bucket_count": {
@@ -222,24 +221,6 @@ func dataSourceAlibabacloudStackAqsOssScanconfigsRead(d *schema.ResourceData, me
 			keyPrefix = kpl[0].(string)
 		}
 
-		// Handle LastModifiedStartTime
-		lastModifiedStartTimeStr := ""
-		if lmts, ok := config["LastModifiedStartTime"].(json.Number); ok {
-			lastModifiedStartTimeStr, err = formatUnixTimestamp(lmts)
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-		}
-
-		// Handle LastUpdateTime
-		lastUpdateTimeStr := ""
-		if lut, ok := config["LastUpdateTime"].(json.Number); ok {
-			lastUpdateTimeStr, err = formatUnixTimestamp(lut)
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-		}
-
 		// Handle RealTimeIncr
 		realTimeIncr := false
 		if rti, ok := config["RealTimeIncr"].(bool); ok {
@@ -264,11 +245,11 @@ func dataSourceAlibabacloudStackAqsOssScanconfigsRead(d *schema.ResourceData, me
 			"decryption":               decryption,
 			"key_suffix":               keySuffix,
 			"key_prefix":               keyPrefix,
-			"last_modified_start_time": lastModifiedStartTimeStr,
+			"last_modified_start_time": config["LastModifiedStartTime"],
 			"bucket_count":             config["BucketCount"],
 			"real_time_incr":           realTimeIncr,
 			"all_key_prefix":           allKeyPrefix,
-			"last_update_time":         lastUpdateTimeStr,
+			"last_update_time":         config["LastUpdateTime"],
 		}
 
 		filteredConfigs = append(filteredConfigs, result)
@@ -284,16 +265,9 @@ func dataSourceAlibabacloudStackAqsOssScanconfigsRead(d *schema.ResourceData, me
 	if err := d.Set("names", names); err != nil {
 		return errmsgs.WrapError(err)
 	}
+	if err := d.Set("ids", ids); err != nil {
+		return errmsgs.WrapError(err)
+	}
 
 	return nil
-}
-
-// Helper function to format unix timestamp to string
-func formatUnixTimestamp(lastModifiedStartTime interface{}) (string, error) {
-	t, err := lastModifiedStartTime.(json.Number).Int64()
-	if err != nil {
-		return "", errmsgs.WrapError(err)
-	}
-	formattedTime := time.Unix(t, 0).Format("2006-01-02 15:04:05")
-	return formattedTime, nil
 }

@@ -15,7 +15,7 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	// commonProvider := Provider()
 	yundunProvider := Provider()
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+	rc := resourceCheckInitWithDescribeMethod(resourceId, v, func() interface{} {
 		return &AqsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeAqsOssScanConfig")
 	rac := resourceAttrCheckInit(rc, ra)

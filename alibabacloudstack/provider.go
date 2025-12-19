@@ -605,6 +605,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_hsms":                                             dataSourceAlibabacloudStackHsms(),
 		"alibabacloudstack_hsm_clusters":                                     dataSourceAlibabacloudStackHsmClusters(),
 		"alibabacloudstack_bms_keypairs":                                     dataSourceAlibabacloudStackBmsKeypairs(),
+		"alibabacloudstack_aqs_oss_scanconfigs":                              dataSourceAlibabacloudStackAqsOssScanconfigs(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
