@@ -80,6 +80,7 @@ const (
 	EFSCode              = ServiceCode("EFS")
 	HSMPRIVATECode       = ServiceCode("HSM_PRIVATE")
 	BMSCode              = ServiceCode("BMS")
+	AEGISCode            = ServiceCode("AEGIS")
 	// undefined code, add first
 	GDBCode                   = ServiceCode("GDB")
 	ARMSCode                  = ServiceCode("ARMS")
@@ -401,6 +402,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	BMSCode: PopEndpoint{
 		"baremetalservice.{{.region}}.{{.domain}}",
 		"baremetalservice.{{.region}}.{{.domain}}",
+	},
+	AEGISCode: PopEndpoint{
+		"aegis-biz.{{.region}}.{{.domain}}",
+		"aegis-biz.{{.region}}.{{.domain}}",
 	},
 	// 3.18.3 new sites will not be opened
 	OneRouterCode: PopEndpoint{
