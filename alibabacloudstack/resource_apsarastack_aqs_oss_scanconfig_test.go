@@ -6,22 +6,19 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_aqs_oss_scanconfig.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
-	// commonProvider := Provider()
-	yundunProvider := Provider()
 	rc := resourceCheckInitWithDescribeMethod(resourceId, v, func() interface{} {
 		return &AqsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeAqsOssScanConfig")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
-	name := fmt.Sprintf("tf-testAcc%d", rand)
+	name := fmt.Sprintf("tf-testacc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAqsOssScanconfigDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -29,30 +26,7 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		CheckDestroy: nil,
-		Providers: func() map[string]*schema.Provider {
-			yundunProvider.Schema["access_key"] = &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY", ""),
-				Description: descriptions["access_key"],
-			}
-			yundunProvider.Schema["secret_key"] = &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY", ""),
-				Description: descriptions["secret_key"],
-			}
-			yundunProvider.Schema["role_arn"] = &schema.Schema{
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: descriptions["assume_role_role_arn"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN", ""),
-			}
-			return map[string]*schema.Provider{
-				"alibabacloudstack": yundunProvider,
-				// "alibabacloudstack-common": commonProvider,
-			}
-		}(),
+		Providers:    testYunDunProviders(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -61,8 +35,8 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 					"end_time":      "03:00:00",
 					"scan_day_list": []int{4, 5},
 					"scan_mode":     "1",
-					// "bucket_name":              "${alibabacloudstack_oss_bucket.default.bucket}",
-					"bucket_name":              "testtf",
+					"bucket_name":   "${alibabacloudstack_oss_bucket.default.bucket}",
+					// "bucket_name":              "testtf",
 					"decryption":               "OSS",
 					"key_suffix":               "all",
 					"key_prefix":               "test",
@@ -129,9 +103,14 @@ variable "name" {
 	default = "%s"
 }
 
-// resource "alibabacloudstack_oss_bucket" "default" {
-//   provider = alibabacloudstack-common
-//   bucket = "${var.name}"
-// }
+data "alibabacloudstack_oss_clusters" "default" {
+}
+
+resource "alibabacloudstack_oss_bucket" "default" {
+  provider = alibabacloudstack-common
+  bucket = "${var.name}"
+  oss_cluster = "${data.alibabacloudstack_oss_clusters.default.clusters.0.id}"
+//   oss_cluster = "OssHybridCluster-A-20251125-0096"
+}
 	`, name)
 }

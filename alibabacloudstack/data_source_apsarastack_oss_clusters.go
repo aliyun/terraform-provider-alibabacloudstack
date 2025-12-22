@@ -116,7 +116,7 @@ func dataSourceAlibabacloudStackOssClustersRead(d *schema.ResourceData, meta int
 	if v, ok := d.GetOk("region_id"); ok {
 		region = v.(string)
 	}
-	request.QueryParams["Params"] = fmt.Sprintf("{\"params\":{\"region\":\"%s\"}}", region)
+	request.QueryParams["Params"] = fmt.Sprintf("{\"region\":\"%s\", \"params\":{\"region\":\"%s\"}}", region, region)
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug("GetOssEndpointList", bresponse, request, request.QueryParams)
 	if err != nil {
