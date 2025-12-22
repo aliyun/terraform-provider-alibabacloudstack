@@ -26,3 +26,45 @@ func (s *AqsService) DescribeAqsOssScanConfig(id string) (object map[string]inte
 	}
 	return data, nil
 }
+
+func (s *AqsService) DescribeAntiBruteForceRule(id string) (map[string]interface{}, error) {
+	request := map[string]interface{}{
+		"Id":   id,
+		"From": "sas",
+	}
+
+	action := "DescribeAntiBruteForceRules"
+	response, err := s.client.DoTeaRequest("GET", "aegis", "2016-11-11", action, "", nil, request, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	rules, ok := response["Rules"].([]interface{})
+	if !ok || len(rules) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString("Resource not found")
+	}
+	for _, v := range rules {
+		rule := v.(map[string]interface{})
+		if fmt.Sprint(rule["Id"]) == id {
+			return rule, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString("Resource not found")
+}
+
+func (s *AqsService) DescribeCloudCenterInstances() ([]interface{}, error) {
+	request := map[string]interface{}{
+		"From":         "sas",
+		"MachineTypes": "ecs",
+	}
+	response, err := s.client.DoTeaRequest("GET", "aegis", "2016-11-11", "DescribeCloudCenterInstances", "", nil, request, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	instances, ok := response["Instances"].([]interface{})
+	if !ok || len(instances) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString("Resource not found")
+	}
+	return instances, nil
+}

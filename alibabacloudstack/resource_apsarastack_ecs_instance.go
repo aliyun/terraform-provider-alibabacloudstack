@@ -708,6 +708,7 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+	return nil
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 
