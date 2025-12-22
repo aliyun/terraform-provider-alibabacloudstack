@@ -60,6 +60,14 @@ func resourceAlibabacloudStackAqsOssScanconfig() *schema.Resource {
 			"last_modified_start_time": {
 				Type:     schema.TypeString,
 				Optional: true,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					oldTime, _ := ParseToTimestampWithLocalTimezone(oldValue)
+					newTime, _ := ParseToTimestampWithLocalTimezone(newValue)
+					if oldTime == newTime || RoundToNearestThousand(newTime) == RoundToNearestThousand(oldTime) {
+						return true
+					}
+					return false
+				},
 			},
 		},
 	}
@@ -301,4 +309,20 @@ func resourceAlibabacloudStackAqsOssScanconfigDelete(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteOssScanConfig", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil
+}
+
+func ParseToTimestampWithLocalTimezone(timeStr string) (int64, error) {
+	t, err := time.Parse("2006-01-02 15:04:05", timeStr)
+	if err != nil {
+		return 0, err
+	}
+	return t.In(time.Local).Unix(), nil
+}
+
+func RoundToNearestThousand(value int64) int64 {
+	remainder := value % 1000
+	if remainder >= 500 {
+		return ((value / 1000) + 1) * 1000
+	}
+	return (value / 1000) * 1000
 }

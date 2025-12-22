@@ -30,17 +30,16 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"enable":        true,
-					"start_time":    "00:00:00",
-					"end_time":      "03:00:00",
-					"scan_day_list": []int{4, 5},
-					"scan_mode":     "1",
-					"bucket_name":   "${alibabacloudstack_oss_bucket.default.bucket}",
-					// "bucket_name":              "testtf",
+					"enable":                   true,
+					"start_time":               "00:00:00",
+					"end_time":                 "03:00:00",
+					"scan_day_list":            []int{4, 5},
+					"scan_mode":                "1",
+					"bucket_name":              "${alibabacloudstack_oss_bucket.default.bucket}",
 					"decryption":               "OSS",
 					"key_suffix":               "all",
 					"key_prefix":               "test",
-					"last_modified_start_time": "2025-12-12 12:20:27",
+					"last_modified_start_time": "2025-12-17 14:04:00",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -51,11 +50,11 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 						"scan_day_list.0":          "4",
 						"scan_day_list.1":          "5",
 						"scan_mode":                "1",
-						"bucket_name":              "testtf",
+						"bucket_name":              name,
 						"decryption":               "OSS",
 						"key_suffix":               "all",
 						"key_prefix":               "test",
-						"last_modified_start_time": "2025-12-12 12:20:27",
+						"last_modified_start_time": CHECKSET,
 					}),
 				),
 			},
@@ -74,13 +73,13 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 					"decryption":               "No",
 					"key_suffix":               ".bz2",
 					"key_prefix":               "test222",
-					"last_modified_start_time": "2025-12-17 14:10:26",
+					"last_modified_start_time": "2025-12-17 14:30:00",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"enable":                   "false",
 						"start_time":               "02:02:00",
-						"end_time":                 "03:00:00",
+						"end_time":                 "05:00:00",
 						"scan_day_list.#":          "3",
 						"scan_day_list.0":          "1",
 						"scan_day_list.1":          "3",
@@ -89,7 +88,7 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 						"decryption":               "No",
 						"key_suffix":               ".bz2",
 						"key_prefix":               "test222",
-						"last_modified_start_time": "2025-12-17 14:10:26",
+						"last_modified_start_time": CHECKSET,
 					}),
 				),
 			},
@@ -103,8 +102,8 @@ variable "name" {
 	default = "%s"
 }
 
-<<<<<<< Upstream, based on origin/v3.18xR
 data "alibabacloudstack_oss_clusters" "default" {
+  provider = alibabacloudstack-common
 }
 
 resource "alibabacloudstack_oss_bucket" "default" {
@@ -112,11 +111,6 @@ resource "alibabacloudstack_oss_bucket" "default" {
   bucket = "${var.name}"
   oss_cluster = "${data.alibabacloudstack_oss_clusters.default.clusters.0.id}"
 //   oss_cluster = "OssHybridCluster-A-20251125-0096"
-=======
-resource "alibabacloudstack_oss_bucket" "default" {
-  provider = alibabacloudstack-common
-  bucket = "${var.name}"
->>>>>>> b076f23 fix some bugs
 }
 	`, name)
 }
