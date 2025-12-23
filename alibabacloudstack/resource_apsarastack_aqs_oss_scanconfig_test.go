@@ -66,6 +66,21 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"enable":                   false,
+					"key_suffix":               REMOVEKEY,
+					"key_prefix":               REMOVEKEY,
+					"last_modified_start_time": "2025-12-17 14:30:00",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable":     "false",
+						"key_suffix": REMOVEKEY,
+						"key_prefix": REMOVEKEY,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable":                   true,
 					"start_time":               "02:02:00",
 					"end_time":                 "05:00:00",
 					"scan_day_list":            []int{1, 3, 5},
@@ -77,7 +92,7 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"enable":                   "false",
+						"enable":                   "true",
 						"start_time":               "02:02:00",
 						"end_time":                 "05:00:00",
 						"scan_day_list.#":          "3",

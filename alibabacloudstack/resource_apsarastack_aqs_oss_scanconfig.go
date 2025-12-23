@@ -52,6 +52,7 @@ func resourceAlibabacloudStackAqsOssScanconfig() *schema.Resource {
 			"key_suffix": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "all",
 			},
 			"key_prefix": {
 				Type:     schema.TypeString,
@@ -108,11 +109,7 @@ func resourceAlibabacloudStackAqsOssScanconfigCreate(d *schema.ResourceData, met
 		reqBody["AllKeyPrefix"] = true
 	}
 
-	if v, ok := d.GetOk("key_suffix"); ok && v.(string) != "" {
-		reqBody["KeySuffixList"] = []string{v.(string)}
-	} else {
-		reqBody["KeySuffixList"] = []string{"all"}
-	}
+	reqBody["KeySuffixList"] = []string{d.Get("key_suffix").(string)}
 
 	_, err = client.DoTeaRequest("POST", "aegis", "2016-11-11", "CreateOssScanConfig", "", nil, reqBody, nil)
 	if err != nil {
@@ -237,11 +234,7 @@ func resourceAlibabacloudStackAqsOssScanconfigUpdate(d *schema.ResourceData, met
 		reqBody["AllKeyPrefix"] = true
 	}
 
-	if v, ok := d.GetOk("key_suffix"); ok && v.(string) != "" {
-		reqBody["KeySuffixList"] = []string{v.(string)}
-	} else {
-		reqBody["KeySuffixList"] = []string{"all"}
-	}
+	reqBody["KeySuffixList"] = []string{d.Get("key_suffix").(string)}
 
 	_, err = client.DoTeaRequest("POST", "aegis", "2016-11-11", "UpdateOssScanConfig", "", nil, reqBody, nil)
 	if err != nil {
@@ -287,11 +280,7 @@ func resourceAlibabacloudStackAqsOssScanconfigDelete(d *schema.ResourceData, met
 			reqBody["AllKeyPrefix"] = true
 		}
 
-		if v, ok := d.GetOk("key_suffix"); ok && v.(string) != "" {
-			reqBody["KeySuffixList"] = []string{v.(string)}
-		} else {
-			reqBody["KeySuffixList"] = []string{"all"}
-		}
+		reqBody["KeySuffixList"] = []string{d.Get("key_suffix").(string)}
 		_, err = client.DoTeaRequest("POST", "aegis", "2016-11-11", "UpdateOssScanConfig", "", nil, reqBody, nil)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_aqs_oss_scanconfig", "UpdateOssScanConfig", errmsgs.AlibabacloudStackSdkGoERROR)

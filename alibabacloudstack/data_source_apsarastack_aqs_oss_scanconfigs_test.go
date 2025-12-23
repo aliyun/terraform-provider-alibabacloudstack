@@ -90,8 +90,6 @@ resource "alibabacloudstack_aqs_oss_scanconfig" "default" {
   scan_mode                  = "1"
   bucket_name                = alibabacloudstack_oss_bucket.default.bucket
   decryption                 = "OSS"
-  key_prefix                 = "test"
-  key_suffix                 = ".py"
   last_modified_start_time   = "2025-12-21 00:00:00"
 }
 
