@@ -59,9 +59,9 @@ func TestAccAlibabacloudStackAqsAntiBruteForceRule_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name":           "${var.name}_updated",
-					"span":           "10",
-					"fail_count":     "80",
-					"forbidden_time": "360",
+					"span":           "20",
+					"fail_count":     "60",
+					"forbidden_time": "300",
 					"default_rule":   "false",
 					"instance_ids":   []string{"${alibabacloudstack_ecs_instance.default0.id}"},
 				}),

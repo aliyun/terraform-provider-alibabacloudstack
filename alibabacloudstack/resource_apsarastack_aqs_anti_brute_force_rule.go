@@ -1,9 +1,7 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -60,7 +58,11 @@ func resourceAlibabacloudStackAqsAntiBruteForceRule() *schema.Resource {
 
 func resourceAlibabacloudStackAqsAntiBruteForceRuleCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
+	aqsService := AqsService{client}
+	err := aqsService.RefreshAssets("ecs")
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
 	reqQuery := map[string]interface{}{
 		"From":          "sas",
 		"Name":          d.Get("name"),
@@ -71,25 +73,29 @@ func resourceAlibabacloudStackAqsAntiBruteForceRuleCreate(d *schema.ResourceData
 	}
 	if v, ok := d.GetOk("instance_ids"); ok {
 		instance_ids := v.(*schema.Set).List()
-		reqQuery["UuidList"] = InstanceIdsHandler(instance_ids, "instanceId", meta)
+		uuids, err := InstanceIdsHandler(instance_ids, "instanceId", meta)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		reqQuery["UuidList"] = uuids
 	}
 
 	resp, err := client.DoTeaRequest("POST", "aegis", "2016-11-11", "CreateAntiBruteForceRule", "", nil, reqQuery, nil)
 	if err != nil {
-		return errmsgs.WrapError(err)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_aqs_operate_common_overall_config", "CreateAntiBruteForceRule", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	data, ok := resp["data"].(string)
-	ruledata := make(map[string]interface{})
-	if ok {
-		log.Printf("[DEBUG] alibabacloudstack_aqs_operate_common_overall_config CreateAntiBruteForceRule response.data: %s", data)
-		err = json.Unmarshal([]byte(data), &ruledata)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-	ruleId, err := jsonpath.Get("$.CreateAntiBruteForceRule.RuleId", ruledata)
+	// data, ok := resp["data"].(string)
+	// ruledata := make(map[string]interface{})
+	// if ok {
+	// 	log.Printf("[DEBUG] alibabacloudstack_aqs_operate_common_overall_config CreateAntiBruteForceRule response.data: %s", data)
+	// 	err = json.Unmarshal([]byte(data), &ruledata)
+	// 	if err != nil {
+	// 		return errmsgs.WrapError(err)
+	// 	}
+	// }
+	ruleId, err := jsonpath.Get("$.CreateAntiBruteForceRule.RuleId", resp)
 	if err != nil {
-		return errmsgs.WrapError(err)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_aqs_operate_common_overall_config", "CreateAntiBruteForceRule", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	d.SetId(fmt.Sprint(ruleId))
 
@@ -113,7 +119,10 @@ func resourceAlibabacloudStackAqsAntiBruteForceRuleRead(d *schema.ResourceData, 
 	d.Set("fail_count", targetRule["FailCount"])
 	d.Set("forbidden_time", targetRule["ForbiddenTime"])
 	d.Set("default_rule", targetRule["DefaultRule"])
-	instance_ids := InstanceIdsHandler(targetRule["UuidList"].([]interface{}), "uuid", meta)
+	instance_ids, err := InstanceIdsHandler(targetRule["UuidList"].([]interface{}), "uuid", meta)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
 	d.Set("instance_ids", instance_ids)
 	d.Set("enable_smart_rule", targetRule["EnableSmartRule"])
 	d.Set("machine_count", targetRule["MachineCount"])
@@ -141,7 +150,11 @@ func resourceAlibabacloudStackAqsAntiBruteForceRuleUpdate(d *schema.ResourceData
 		}
 		if v, ok := d.GetOk("instance_ids"); ok {
 			instance_ids := v.(*schema.Set).List()
-			request["UuidList"] = InstanceIdsHandler(instance_ids, "instanceId", meta)
+			uuids, err := InstanceIdsHandler(instance_ids, "instanceId", meta)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			request["UuidList"] = uuids
 		}
 
 		_, err := client.DoTeaRequest("POST", "aegis", "2016-11-11", "ModifyAntiBruteForceRule", "", nil, request, nil)
@@ -167,12 +180,12 @@ func resourceAlibabacloudStackAqsAntiBruteForceRuleDelete(d *schema.ResourceData
 	return nil
 }
 
-func InstanceIdsHandler(ids []interface{}, parameterType string, meta interface{}) []string {
+func InstanceIdsHandler(ids []interface{}, parameterType string, meta interface{}) ([]string, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	aqsService := AqsService{client}
 	instances, err := aqsService.DescribeCloudCenterInstances()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	result := make([]string, 0)
 	if parameterType == "uuid" {
@@ -194,5 +207,8 @@ func InstanceIdsHandler(ids []interface{}, parameterType string, meta interface{
 			}
 		}
 	}
-	return result
+	if len(result) != len(ids) {
+		return nil, errmsgs.Error(fmt.Sprintf("DescribeCloudCenterInstances Error ! instance_ids is not found!: [%#v]", ids))
+	}
+	return result, nil
 }

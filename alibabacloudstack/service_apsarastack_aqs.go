@@ -68,3 +68,15 @@ func (s *AqsService) DescribeCloudCenterInstances() ([]interface{}, error) {
 	}
 	return instances, nil
 }
+
+func (s *AqsService) RefreshAssets(assetType string) error {
+	request := map[string]interface{}{
+		"From":      "sas",
+		"AssetType": assetType,
+	}
+	_, err := s.client.DoTeaRequest("POST", "aegis", "2016-11-11", "RefreshAssets", "", nil, request, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
