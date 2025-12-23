@@ -13,7 +13,7 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_aqs_oss_scanconfig.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &AqsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &AqsService{testYundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeAqsOssScanConfig")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -110,7 +110,6 @@ resource "alibabacloudstack_oss_bucket" "default" {
   provider = alibabacloudstack-common
   bucket = "${var.name}"
   oss_cluster = "${data.alibabacloudstack_oss_clusters.default.clusters.0.id}"
-//   oss_cluster = "OssHybridCluster-A-20251125-0096"
 }
 	`, name)
 }

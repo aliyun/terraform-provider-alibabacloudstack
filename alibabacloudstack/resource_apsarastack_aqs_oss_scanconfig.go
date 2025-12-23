@@ -83,8 +83,7 @@ func resourceAlibabacloudStackAqsOssScanconfigCreate(d *schema.ResourceData, met
 		enable = 1
 	}
 	lastModifiedStartTime := d.Get("last_modified_start_time").(string)
-	loc, _ := time.LoadLocation("Asia/Shanghai")
-	t, err := time.ParseInLocation("2006-01-02 15:04:05", lastModifiedStartTime, loc)
+	t, err := time.ParseInLocation("2006-01-02 15:04:05", lastModifiedStartTime, time.Local)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_aqs_oss_scanconfig", "CreateOssScanConfig", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -123,11 +122,12 @@ func resourceAlibabacloudStackAqsOssScanconfigCreate(d *schema.ResourceData, met
 		"From":        "sas",
 		"CurrentPage": 1,
 		"PageSize":    100,
+		"bucketName":  d.Get("bucket_name"),
 	}
 	response, err := client.DoTeaRequest("POST", "aegis", "2016-11-11", "ListOssScanConfig", "", nil, getReq, nil)
 	configs, ok := response["Data"].([]interface{})
 	if !ok {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_aqs_oss_scanconfig", "CreateOssScanConfig", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_aqs_oss_scanconfig", "ListOssScanConfig", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	resourceId := ""
 	for _, v := range configs {
@@ -211,8 +211,7 @@ func resourceAlibabacloudStackAqsOssScanconfigUpdate(d *schema.ResourceData, met
 		enable = 1
 	}
 	lastModifiedStartTime := d.Get("last_modified_start_time").(string)
-	loc, _ := time.LoadLocation("Asia/Shanghai")
-	t, err := time.ParseInLocation("2006-01-02 15:04:05", lastModifiedStartTime, loc)
+	t, err := time.ParseInLocation("2006-01-02 15:04:05", lastModifiedStartTime, time.Local)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_aqs_oss_scanconfig", "UpdateOssScanConfig", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -262,8 +261,7 @@ func resourceAlibabacloudStackAqsOssScanconfigDelete(d *schema.ResourceData, met
 	if fmt.Sprint(data["Enable"]) == "1" {
 		// if the config is enabled, we need to disable it first
 		lastModifiedStartTime := d.Get("last_modified_start_time").(string)
-		loc, _ := time.LoadLocation("Asia/Shanghai")
-		t, err := time.ParseInLocation("2006-01-02 15:04:05", lastModifiedStartTime, loc)
+		t, err := time.ParseInLocation("2006-01-02 15:04:05", lastModifiedStartTime, time.Local)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_aqs_oss_scanconfig", "UpdateOssScanConfig", errmsgs.AlibabacloudStackSdkGoERROR)
 		}

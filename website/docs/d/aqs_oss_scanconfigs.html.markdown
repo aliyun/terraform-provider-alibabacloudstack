@@ -7,10 +7,11 @@ description: |-
   Provides a list of AQS OSS Scan Configs available to Alibaba Cloud Stack users.
 ---
 
-# alibabacloudstack\_aqs\_oss\_scanconfigs
+# alibabacloudstack_aqs_oss_scanconfigs
 
 This data source provides a list of AQS OSS Scan Configs in an Alibaba Cloud Stack account according to the specified filters.
 
+> Note: Orchestrating this resource requires installing a specific version (Version 3.18.6-6.6.0.2 and later versions) of AQS.
 
 ## Example Usage
 

@@ -7,9 +7,11 @@ description: |-
   提供阿里云专有云安骑士 OSS扫描配置资源。
 ---
 
-# alibabacloudstack\_aqs\_oss\_scanconfig
+# alibabacloudstack_aqs_oss_scanconfig
 
 提供一个安骑士 OSS扫描配置资源。
+
+> 注意：编排该资源需要安装特定版本（3.18.6-6.6.0.2及后续版本）的安骑士。
 
 ## 使用示例
 

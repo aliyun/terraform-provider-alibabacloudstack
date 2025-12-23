@@ -7,10 +7,11 @@ description: |-
   提供阿里云专有云用户可用的AQS OSS扫描配置列表。
 ---
 
-# alibabacloudstack\_aqs\_oss\_scanconfigs
+# alibabacloudstack_aqs_oss_scanconfigs
 
 本数据源根据指定的过滤条件，提供阿里云专有云账户中AQS OSS扫描配置的列表。
 
+> 注意：编排该资源需要安装特定版本（3.18.6-6.6.0.2及后续版本）的安骑士。
 
 ## Example Usage
 

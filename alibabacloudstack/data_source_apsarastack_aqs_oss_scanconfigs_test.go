@@ -69,7 +69,7 @@ func resourceAqsOssScanconfigDependenceNew(rand int, attrMap map[string]string) 
 	}
 	return fmt.Sprintf(`
 variable "name" {
-	default = "testacc%d"
+	default = "testacc-agsoss-%d"
 }
 
 data "alibabacloudstack_oss_clusters" "default" {
