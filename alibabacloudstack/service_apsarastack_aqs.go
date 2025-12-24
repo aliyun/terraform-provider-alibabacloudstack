@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -77,6 +78,76 @@ func (s *AqsService) RefreshAssets(assetType string) error {
 	_, err := s.client.DoTeaRequest("POST", "aegis", "2016-11-11", "RefreshAssets", "", nil, request, nil)
 	if err != nil {
 		return err
+	}
+	time.Sleep(time.Second * 10)
+	return nil
+}
+
+func (s *AqsService) DescribeWebLockInstance(id string) (map[string]interface{}, error) {
+	request := map[string]interface{}{
+		"From":        "sas",
+		"CurrentPage": 1,
+		"PageSize":    100,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "aegis", "2016-11-11", "DescribeWebLockBindList", "", nil, request, nil)
+	if err != nil {
+		return nil, err
+	}
+	bindlist, ok := response["BindList"].([]interface{})
+	if !ok && len(bindlist) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString("Resource not found")
+	}
+	for _, v := range bindlist {
+		bind := v.(map[string]interface{})
+		if bind["Uuid"] == id {
+			return bind, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString("Resource not found")
+}
+
+func (s *AqsService) ListWebLockConfigs(id string) ([]interface{}, error) {
+	request := map[string]interface{}{
+		"From": "sas",
+		"Uuid": id,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "aegis", "2016-11-11", "DescribeWebLockConfigList", "", nil, request, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	configList, ok := response["ConfigList"].([]interface{})
+	if !ok || len(configList) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString("WebLockConfig not found")
+	}
+
+	// result := map[string]interface{}{
+	// 	"uuid":                config["Uuid"],
+	// 	"dir":                 config["Dir"],
+	// 	"inclusive_file_type": config["InclusiveFileType"],
+	// 	"exclusive_file":      config["ExclusiveFile"],
+	// 	"exclusive_dir":       config["ExclusiveDir"],
+	// 	"defence_mode":        config["DefenceMode"],
+	// 	"mode":                config["Mode"],
+	// 	"local_backup_dir":    config["LocalBackupDir"],
+	// 	"exclusive_file_type": config["ExclusiveFileType"],
+	// 	"id":                  config["Id"],
+	// }
+
+	return configList, nil
+}
+
+func (s *AqsService) DeleteWebLockConfig(uuid string, configId int) error {
+	deleteConReq := map[string]interface{}{
+		"From": "sas",
+		"Uuid": uuid,
+		"Id":   configId,
+	}
+	_, err := s.client.DoTeaRequest("GET", "aegis", "2016-11-11", "ModifyWebLockDeleteConfig", "", nil, deleteConReq, nil)
+	if err != nil {
+		return errmsgs.WrapError(err)
 	}
 	return nil
 }
