@@ -177,7 +177,8 @@ func dataSourceAlibabacloudStackAqsWebLocksRead(d *schema.ResourceData, meta int
 			}
 		}
 		if filterUuid == "" {
-			d.SetId("")
+			// d.SetId("")
+			d.SetId(dataResourceIdHash([]string{}))
 			return nil
 		}
 	}
@@ -193,7 +194,7 @@ func dataSourceAlibabacloudStackAqsWebLocksRead(d *schema.ResourceData, meta int
 	}
 	bindlist, ok := response["BindList"].([]interface{})
 	if !ok && len(bindlist) == 0 {
-		d.SetId("")
+		d.SetId(dataResourceIdHash([]string{}))
 		return nil
 	}
 	ids := make([]string, 0)
