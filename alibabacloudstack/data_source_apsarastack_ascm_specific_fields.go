@@ -2,10 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"log"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -61,18 +58,14 @@ func dataSourceAlibabacloudStackSpecificFieldsRead(d *schema.ResourceData, meta 
 	response := SpecificField{}
 
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw GroupCommonSpec : %s", raw)
-
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_specific_fields", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_specific_fields", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
