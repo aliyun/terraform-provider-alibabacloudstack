@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/PaesslerAG/jsonpath"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 
 	"time"
 
@@ -1887,28 +1887,23 @@ func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub_patch.
 	request.QueryParams["PageNumber"] = "1"
 	request.QueryParams["PageSize"] = "20"
 	//response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
-	raw, err := s.client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-		return EcsClient.ProcessCommonRequest(request)
-	})
-	addDebug("DescribeStorageSets", raw, request)
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidRegionId.NotFound", "Operation.Forbidden"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("EcsEbsStorageSet", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return resp, err
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return resp, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		return resp, err
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	//v, err := jsonpath.Get("$.Commands.Command", bresponse)
 	if err != nil {
-		return resp, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Commands.Command", raw)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Commands.Command", resp)
 	}
 	//if len(v.([]interface{})) < 1 {
 	//	return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ECS", id)), errmsgs.NotFoundWithResponse, raw)
@@ -2153,7 +2148,6 @@ func (s *EcsService) SnapshotGroupsStatusRefreshFunc(id string, failStates []str
 	}
 }
 
-
 type EcsDescribededicatedhostclustersResponse struct {
 	DedicatedHostClusters struct {
 		DedicatedHostCluster []struct {
@@ -2221,7 +2215,6 @@ func (s *EcsService) DoEcsDescribededicatedhostclustersRequest(id string) (*EcsD
 
 	return EcsDescribededicatedhostclustersResponse, nil
 }
-
 
 type EcsDescribeinvocationresultsResponse struct {
 	RequestId string `json:"RequestId"`
