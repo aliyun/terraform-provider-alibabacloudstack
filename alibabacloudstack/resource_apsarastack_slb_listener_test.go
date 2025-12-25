@@ -294,7 +294,7 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 						"scheduler":                            "wrr",
 						"acl_id":                               CHECKSET,
 						"logs_download_attributes.#":           "1",
-						"logs_download_attributes.0.log_store": fmt.Sprintf("%s_store", name),
+						"logs_download_attributes.0.log_store": name,
 					}),
 				),
 			},
@@ -303,19 +303,19 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 }
 
 func AlibabacloudTestAccSlbListenerLogStoredependence(name string) string {
-	return AlibabacloudTestAccSlbListenerBasicdependence(name) + fmt.Sprintf(`
+	return AlibabacloudTestAccSlbListenerBasicdependence(name) + `
 	resource "alibabacloudstack_log_project" "default" {
 		name = "${var.name}"
 		description = "test"
 	}
 	resource "alibabacloudstack_log_store" "default" {
 		name = "${var.name}"
-		project = "${alibabacloudstack_log_project.default.name}"	
+		project = "${alibabacloudstack_log_project.default.name}"
 		retention_period      = "30"
 		shard_count           = "2"
 		enable_web_tracking   = false
 		auto_split            = true
 		max_split_shard_count = "64"
 		append_meta           = true
-	}`)
+	}`
 }

@@ -382,20 +382,14 @@ func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta int
 			request.QueryParams["ServerCertificateId"] = scId
 		}
 	}
-	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-		return slbClient.ProcessCommonRequest(request)
-	})
-	if err != nil {
-		errmsg := ""
-		if raw != nil {
-			response, ok := raw.(*responses.CommonResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), raw, request, request.QueryParams)
 	d.SetId(lb_id + ":" + protocol + ":" + strconv.Itoa(frontend))
 
 	if err := slbService.WaitForSlbListener(d.Id(), Stopped, DefaultTimeout); err != nil {
@@ -409,7 +403,7 @@ func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta int
 	startLoadBalancerListenerRequest.ListenerProtocol = protocol
 
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		raw, err = client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
+		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 			return slbClient.StartLoadBalancerListener(startLoadBalancerListenerRequest)
 		})
 		if err != nil {
@@ -732,20 +726,14 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 		default:
 			request = httpArgs
 		}
-		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-			return slbClient.ProcessCommonRequest(request)
-		})
-		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+			if err != nil {
+				if bresponse == nil {
+					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 				}
+				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
 	}
 	if protocol == Https && d.HasChange("logs_download_attributes") {
 		slbService := SlbService{client}
