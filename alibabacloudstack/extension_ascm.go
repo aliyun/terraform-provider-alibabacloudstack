@@ -1016,27 +1016,27 @@ type RamPolicies struct {
 }
 
 type RamPolicyUser struct {
-	Redirect        bool   `json:"redirect"`
-	EagleEyeTraceID string `json:"eagleEyeTraceId"`
-	AsapiSuccess    bool   `json:"asapiSuccess"`
-	Code            string `json:"code"`
-	Cost            int    `json:"cost"`
-	Data            []struct {
-		PolicyDocument string `json:"policyDocument"`
-		PolicyName     string `json:"policyName"`
-		AttachDate     int64  `json:"attachDate"`
-		PolicyType     string `json:"policyType"`
-		Description    string `json:"description"`
-		DefaultVersion string `json:"defaultVersion"`
+	Code string `json:"code"`
+	Cost int    `json:"cost"`
+	Data struct {
+		DataItem []struct {
+			PolicyDocument string `json:"policyDocument"`
+			PolicyName     string `json:"policyName"`
+			AttachDate     int64  `json:"attachDate"` // 根据实际API响应，这是数字类型
+			PolicyType     string `json:"policyType"`
+			Description    string `json:"description"`
+			DefaultVersion string `json:"defaultVersion"`
+		} `json:"dataItem"`
 	} `json:"data"`
-	Message        string `json:"message"`
-	ServerRole     string `json:"serverRole"`
-	AsapiRequestID string `json:"asapiRequestId"`
-	Success        bool   `json:"success"`
-	Domain         string `json:"domain"`
-	PureListData   bool   `json:"pureListData"`
-	API            string `json:"api"`
-	AsapiErrorCode string `json:"asapiErrorCode"`
+	Success  bool `json:"success"`
+	PageInfo struct {
+		Total       int `json:"total"`
+		TotalPage   int `json:"totalPage"`
+		PageSize    int `json:"pageSize"`
+		CurrentPage int `json:"currentPage"`
+	} `json:"pageInfo"`
+	Message         string `json:"message"`
+	SuccessResponse string `json:"successResponse"` // 可能也存在这个字段，根据实际情况
 }
 
 type InitPasswordListResponse struct {
