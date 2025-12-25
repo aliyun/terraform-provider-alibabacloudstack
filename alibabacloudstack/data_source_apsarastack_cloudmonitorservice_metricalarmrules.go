@@ -172,7 +172,7 @@ func dataSourceAlibabacloudStackCmsAlarms() *schema.Resource {
 
 func dataSourceAlibabacloudStackCmsAlarmsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("GET", "cms", "2019-01-01", "DescribeMetricRuleList", "")
+	request := client.NewCommonRequest("GET", "Cms", "2019-01-01", "DescribeMetricRuleList", "")
 	response := AlarmsData{}
 
 	for {

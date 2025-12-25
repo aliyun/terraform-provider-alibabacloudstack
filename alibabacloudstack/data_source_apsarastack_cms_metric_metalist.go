@@ -81,9 +81,8 @@ func dataSourceAlibabacloudStackCmsMetricMetalistRead(d *schema.ResourceData, me
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	Namespace := d.Get("namespace").(string)
 
-	request := client.NewCommonRequest("GET", "cms", "2019-01-01", "DescribeMetricMetaList", "")
+	request := client.NewCommonRequest("GET", "Cms", "2019-01-01", "DescribeMetricMetaList", "")
 	request.QueryParams["Namespace"] = Namespace
-	request.QueryParams["ProductName"] = "cms"
 
 	response := MetaList{}
 

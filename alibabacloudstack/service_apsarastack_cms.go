@@ -114,7 +114,6 @@ func (s *CmsService) DoCmsDescribesitemonitorattributeRequest(id, keyword string
 func (s *CmsService) DescribeSiteMonitor(id, keyword string) (siteMonitor cms.SiteMonitor, err error) {
 	listRequest := cms.CreateDescribeSiteMonitorListRequest()
 	s.client.InitRpcRequest(*listRequest.RpcRequest)
-	listRequest.QueryParams["Product"] = "cms"
 	listRequest.Keyword = keyword
 	listRequest.TaskId = id
 	raw, err := s.client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
@@ -143,7 +142,6 @@ func (s *CmsService) DescribeSiteMonitor(id, keyword string) (siteMonitor cms.Si
 func (s *CmsService) GetIspCities(id string) (ispCities IspCities, err error) {
 	request := cms.CreateDescribeSiteMonitorAttributeRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
-	request.QueryParams["Product"] = "cms"
 	request.TaskId = id
 
 	raw, err := s.client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
@@ -176,7 +174,6 @@ func (s *CmsService) DoCmsDescribecontactlistRequest(id string) (object cms.Cont
 func (s *CmsService) DescribeCmsAlarmContact(id string) (object cms.Contact, err error) {
 	request := cms.CreateDescribeContactListRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
-	request.QueryParams["Product"] = "cms"
 	request.ContactName = id
 
 	raw, err := s.client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
@@ -216,7 +213,6 @@ func (s *CmsService) DoCmsDescribecontactgrouplistRequest(id string) (object cms
 func (s *CmsService) DescribeCmsAlarmContactGroup(id string) (object cms.ContactGroup, err error) {
 	request := cms.CreateDescribeContactGroupListRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
-	request.QueryParams["Product"] = "cms"
 	request.PageNumber = requests.NewInteger(1)
 	request.PageSize = requests.NewInteger(20)
 	for {

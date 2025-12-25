@@ -845,7 +845,7 @@ func (client *AlibabacloudStackClient) NewAdsClient() (*rpc.Client, error) {
 }
 
 func (client *AlibabacloudStackClient) NewCmsClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("cms", client.Config.Endpoints[CMSCode])
+	return client.NewTeaSDkClient("Cms", client.Config.Endpoints[CMSCode])
 }
 
 func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string, do func(*tablestore.TableStoreClient) (interface{}, error)) (interface{}, error) {

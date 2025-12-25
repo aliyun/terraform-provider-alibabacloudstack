@@ -338,7 +338,7 @@ func resourceAlibabacloudStackCmsMetricRuleTemplateUpdate(d *schema.ResourceData
 	update := false
 
 	if v, ok := d.GetOk("enable"); ok && v.(bool) {
-		request := client.NewCommonRequest("POST", "cms", "2019-01-01", "ApplyMetricRuleTemplate", "")
+		request := client.NewCommonRequest("POST", "Cms", "2019-01-01", "ApplyMetricRuleTemplate", "")
 		request.QueryParams["TemplateId"] = "[]"
 		request.QueryParams["TemplateIds"] = d.Id()
 		request.QueryParams["GroupId"] = client.ResourceGroup

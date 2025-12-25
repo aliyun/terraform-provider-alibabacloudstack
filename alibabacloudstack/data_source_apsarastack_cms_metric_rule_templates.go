@@ -110,7 +110,7 @@ func dataSourceAlibabacloudStackCmsMetricRuleTemplatesRead(d *schema.ResourceDat
 		}
 	}
 
-	request := client.NewCommonRequest("GET", "cms", "2019-01-01", "DescribeMetricRuleTemplateList", "")
+	request := client.NewCommonRequest("GET", "Cms", "2019-01-01", "DescribeMetricRuleTemplateList", "")
 	request.QueryParams["pageSize"] = "10"
 	request.QueryParams["IsDefault"] = fmt.Sprint(d.Get("is_default").(bool))
 	request.QueryParams["History"] = fmt.Sprint(d.Get("history").(bool))

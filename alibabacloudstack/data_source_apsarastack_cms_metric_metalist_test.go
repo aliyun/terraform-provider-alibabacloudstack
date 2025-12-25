@@ -6,7 +6,6 @@ import (
 )
 
 func TestAccAlibabacloudStackCms_Projectmetalist_DataSource(t *testing.T) {
-	testAccPreCheckWithAPIIsNotSupport(t)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
