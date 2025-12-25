@@ -19,7 +19,7 @@ func TestAccAlibabacloudStackAqsWebLock_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf-testacc%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, func(name string) string { return "" })
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAqsWebLockDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
