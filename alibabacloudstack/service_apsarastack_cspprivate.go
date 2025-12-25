@@ -55,3 +55,27 @@ func (s *CspprivateService) DescribeProxyCryptoService(id string) (objects []map
 	}
 	return vendors.([]map[string]interface{}), nil
 }
+
+func (s *CspprivateService) DescribeCspprivateHsmGroup(id string) (map[string]interface{}, error) {
+	request := map[string]interface{}{
+		"PageSize":   100,
+		"PageNumber": 1,
+	}
+
+	resp, err := s.client.DoTeaRequest("GET", "Cspprivate", "2022-02-17", "DescribeHsmGroups", "", nil, request, nil)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+
+	hsmGroups, err := jsonpath.Get("$.HsmGroups.HsmGroup", resp)
+	if err != nil || len(hsmGroups.([]interface{})) == 0 {
+		return nil, errmsgs.WrapError(err)
+	}
+	for _, v := range hsmGroups.([]interface{}) {
+		hsmGroup := v.(map[string]interface{})
+		if hsmGroup["GroupName"].(string) == id {
+			return hsmGroup, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString("Resource not found: Cspprivate Hsm Group " + id)
+}

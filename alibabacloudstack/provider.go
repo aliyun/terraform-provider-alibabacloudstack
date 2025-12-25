@@ -1063,6 +1063,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_hsm_instance":                                    resourceAlibabacloudStackHsmInstance(),
 		"alibabacloudstack_hsm_cluster":                                     resourceAlibabacloudStackHsmCluster(),
 		"alibabacloudstack_cspprivate_hsm_instance":                         resourceAlibabacloudStackCspprivateHsmInstance(),
+		"alibabacloudstack_cspprivate_hsm_group":                            resourceAlibabacloudStackCspprivateHsmGroup(),
 		"alibabacloudstack_bms_keypair":                                     resourceAlibabacloudStackBmsKeypair(),
 		"alibabacloudstack_aqs_oss_scanconfig":                              resourceAlibabacloudStackAqsOssScanconfig(),
 		"alibabacloudstack_aqs_anti_brute_force_rule":                       resourceAlibabacloudStackAqsAntiBruteForceRule(),
