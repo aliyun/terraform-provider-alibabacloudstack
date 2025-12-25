@@ -123,6 +123,103 @@ func TestAccAlibabacloudStackAqsWebLock_basic(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackAqsWebLock_blacklist(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alibabacloudstack_aqs_web_lock.default"
+	ra := resourceAttrInit(resourceId, map[string]string{
+		"client_status":  CHECKSET,
+		"defence_type":   CHECKSET,
+		"os":             CHECKSET,
+		"os_name":        CHECKSET,
+		"dir_count":      CHECKSET,
+		"intranet_ip":    CHECKSET,
+		"instance_name":  CHECKSET,
+		"audit_count":    CHECKSET,
+		"service_status": CHECKSET,
+		"block_count":    CHECKSET,
+	})
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &AqsService{testYundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeWebLockInstance")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000, 9999)
+	name := fmt.Sprintf("tf-testacc%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAqsWebLockDependence)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		CheckDestroy: nil,
+		Providers:    testYunDunProviders(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"instanceid": "${alibabacloudstack_ecs_instance.default.id}",
+					"status":     "on",
+					"lock_configs": []map[string]interface{}{
+						{
+							"dir":                 "/test3/tf/",
+							"local_backup_dir":    "/usr/local/aegis/bak3",
+							"exclusive_file_type": "log;txt;ldb",
+							"exclusive_file":      "aaa.txt",
+							"exclusive_dir":       "testpath",
+							"defence_mode":        "audit",
+							"mode":                "blacklist",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"status":              "on",
+						"lock_configs.#":      "1",
+						"lock_configs.0.dir":  "/test3/tf/",
+						"lock_configs.0.mode": "blacklist",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"status": "off",
+					"lock_configs": []map[string]interface{}{
+						{
+							"dir":                 "/test/tf/",
+							"local_backup_dir":    "/usr/local/aegis/bak1",
+							"inclusive_file_type": "php;jsp;asp;aspx;js;cgi;html;htm;xml;shtml;shtm;jpg;gif;png;jspx",
+							"defence_mode":        "block",
+							"mode":                "whitelist",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"status":              "off",
+						"lock_configs.#":      "1",
+						"lock_configs.0.dir":  "/test/tf/",
+						"lock_configs.0.mode": "whitelist",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"status": "on",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"status": "on",
+					}),
+				),
+			},
+		},
+	})
+}
+
 func resourceAqsWebLockDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {

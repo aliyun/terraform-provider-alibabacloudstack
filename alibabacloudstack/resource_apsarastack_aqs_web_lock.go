@@ -325,7 +325,7 @@ func resourceAlibabacloudStackAqsWebLockUpdate(d *schema.ResourceData, meta inte
 			config := v.(map[string]interface{})
 			id, ok := config["id"]
 			if ok {
-				err := aqsService.DeleteWebLockConfig(d.Id(), id.(int))
+				err := aqsService.DeleteWebLockConfig(d.Id(), id)
 				if err != nil {
 					return errmsgs.WrapError(err)
 				}
@@ -433,7 +433,7 @@ func AddInterimLockConfig(uuid string, meta interface{}) error {
 	request := map[string]interface{}{
 		"From":              "sas",
 		"Uuid":              uuid,
-		"Dir":               "/terraforminterimdir/dome",
+		"Dir":               "/terraforminterimdir/dome/",
 		"InclusiveFileType": "php",
 		"LocalBackupDir":    "/usr/local/aegis/bak",
 		"DefenceMode":       "block",
@@ -457,8 +457,8 @@ func DeleteInterimLockConfig(uuid string, meta interface{}) error {
 	}
 	for _, v := range configs {
 		config := v.(map[string]interface{})
-		if config["Dir"].(string) == "/terraforminterimdir/dome" {
-			err := aqsService.DeleteWebLockConfig(uuid, config["Id"].(int))
+		if config["Dir"].(string) == "/terraforminterimdir/dome/" {
+			err := aqsService.DeleteWebLockConfig(uuid, config["Id"])
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}

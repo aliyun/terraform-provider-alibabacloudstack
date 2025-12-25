@@ -139,7 +139,7 @@ func (s *AqsService) ListWebLockConfigs(id string) ([]interface{}, error) {
 	return configList, nil
 }
 
-func (s *AqsService) DeleteWebLockConfig(uuid string, configId int) error {
+func (s *AqsService) DeleteWebLockConfig(uuid string, configId interface{}) error {
 	deleteConReq := map[string]interface{}{
 		"From": "sas",
 		"Uuid": uuid,
