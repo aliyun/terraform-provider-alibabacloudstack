@@ -1,5 +1,5 @@
 ---
-subcategory: "Security"
+subcategory: "AQS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_aqs_web_locks"
 sidebar_current: "docs-Alibabacloudstack-datasource-aqs-web-locks"
