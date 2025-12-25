@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackVSwitchesDataSourceBasic(t *testing.T) {
+func TestAccAlibabacloudStackVpcVswitchesDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{

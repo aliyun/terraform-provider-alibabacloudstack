@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackVpcIpv6GatewaysDataSource(t *testing.T) {
+func TestAccAlibabacloudStackVPCIpv6GatewaysDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_vpc_ipv6_gateways.default"
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-vpcipv6gateway-%d", rand)

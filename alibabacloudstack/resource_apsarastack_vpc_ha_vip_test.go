@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackVpcHavip_basic(t *testing.T) {
+func TestAccAlibabacloudStackVpcHaVip_basic(t *testing.T) {
 	var v *VpcDescribehavipsResponse
 	resourceId := "alibabacloudstack_vpc_ha_vip.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})

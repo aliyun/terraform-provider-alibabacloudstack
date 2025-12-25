@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackVpcIpv6EgressRulesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackVPCIpv6EgressRulesDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_vpc_ipv6_egress_rules.default"
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-vpcipv6egressrule-%d", rand)
