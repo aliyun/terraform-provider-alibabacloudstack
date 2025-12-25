@@ -45,7 +45,7 @@ resource "alibabacloudstack_ecs_securitygroup" "default" {
 
 data "alibabacloudstack_images" "default" {
   provider = alibabacloudstack-common
-  name_regex  = "^ubuntu_"
+  name_regex  = "^aliyun_"
   most_recent = true
   owners      = "system"
 }
@@ -71,7 +71,6 @@ resource "alibabacloudstack_ecs_instance" "default" {
 
 resource "alibabacloudstack_aqs_web_lock" "default" {
   instanceid = "${alibabacloudstack_ecs_instance.default.id}"
-  status = "on"
   lock_configs {
 	dir = "/test/tf/"
 	local_backup_dir = "/usr/local/aegis/bak1"
@@ -121,7 +120,7 @@ func TestAccAlibabacloudStackAqsWebLocksDataSource(t *testing.T) {
 				"ids": `["${alibabacloudstack_aqs_web_lock.default.id}_fake"]`,
 			}),
 		},
-		// Test with name_regex filter
+		// Test with instanceid filter
 		dataSourceTestAccConfig{
 			existConfig: resourceAqsWebLocksDependenceNew(rand, map[string]string{
 				"instanceid": `"${alibabacloudstack_aqs_web_lock.default.instanceid}"`,
@@ -137,7 +136,7 @@ func TestAccAlibabacloudStackAqsWebLocksDataSource(t *testing.T) {
 				"instanceid": `"${alibabacloudstack_aqs_web_lock.default.instanceid}"`,
 			}),
 			fakeConfig: resourceAqsWebLocksDependenceNew(rand, map[string]string{
-				"name_regex": `"${alibabacloudstack_aqs_web_lock.default.name}_fake"`,
+				"ids":        `["${alibabacloudstack_aqs_web_lock.default.id}_fake"]`,
 				"instanceid": `"${alibabacloudstack_aqs_web_lock.default.instanceid}_fake"`,
 			}),
 		},

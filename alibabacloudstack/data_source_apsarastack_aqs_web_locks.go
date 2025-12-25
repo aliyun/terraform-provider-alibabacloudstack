@@ -18,9 +18,8 @@ func dataSourceAlibabacloudStackAqsWebLocks() *schema.Resource {
 				Description: "A list of Web Lock Config IDs.",
 			},
 			"instanceid": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The UUID of the server to query web lock configurations for.",
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"weblocks": {
 				Type:     schema.TypeList,
@@ -176,6 +175,10 @@ func dataSourceAlibabacloudStackAqsWebLocksRead(d *schema.ResourceData, meta int
 			if instance["InstanceId"].(string) == d.Get("instanceid").(string) {
 				filterUuid = instance["Uuid"].(string)
 			}
+		}
+		if filterUuid == "" {
+			d.SetId("")
+			return nil
 		}
 	}
 	request := map[string]interface{}{
