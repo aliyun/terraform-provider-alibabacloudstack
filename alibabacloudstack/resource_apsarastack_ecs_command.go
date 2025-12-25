@@ -7,8 +7,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
@@ -66,7 +64,6 @@ func resourceAlibabacloudStackEcsCommand() *schema.Resource {
 
 func resourceAlibabacloudStackEcsCommandCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	action := "CreateCommand"
 	response := &datahub_patch.EcsCreate{}
 
 	CommandContent := d.Get("command_content").(string)
@@ -104,23 +101,18 @@ func resourceAlibabacloudStackEcsCommandCreate(d *schema.ResourceData, meta inte
 
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		raw, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-			return EcsClient.ProcessCommonRequest(request)
-		})
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			if errmsgs.NeedRetry(err) {
 				wait()
 				return resource.RetryableError(err)
 			}
-			bresponse, ok := raw.(*responses.CommonResponse)
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
 			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_command", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_command", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(action, raw, request)
-		bresponse := raw.(*responses.CommonResponse)
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), response)
 		d.SetId(fmt.Sprint(response.CommandId))
 		return nil
@@ -144,8 +136,12 @@ func resourceAlibabacloudStackEcsCommandRead(d *schema.ResourceData, meta interf
 		}
 		return errmsgs.WrapError(err)
 	}
-
-	// d.Set("command_content", object.Commands.Command[0].CommandContent)
+	command_content := object.Commands.Command[0].CommandContent
+	decodedBytes, err := base64.StdEncoding.DecodeString(command_content)
+	if err == nil {
+		command_content = string(decodedBytes)
+	}
+	d.Set("command_content", command_content)
 	d.Set("description", object.Commands.Command[0].Description)
 	d.Set("enable_parameter", object.Commands.Command[0].EnableParameter)
 	d.Set("name", object.Commands.Command[0].Name)
@@ -157,29 +153,24 @@ func resourceAlibabacloudStackEcsCommandRead(d *schema.ResourceData, meta interf
 
 func resourceAlibabacloudStackEcsCommandDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	action := "DeleteCommand"
 
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", "DeleteCommand", "")
 	request.QueryParams["CommandId"] = d.Id()
 
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		raw, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-			return EcsClient.ProcessCommonRequest(request)
-		})
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			if errmsgs.NeedRetry(err) {
 				wait()
 				return resource.RetryableError(err)
 			}
-			bresponse, ok := raw.(*responses.CommonResponse)
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
 			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_command", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(action, raw, request)
 		return nil
 	})
 	if err != nil {

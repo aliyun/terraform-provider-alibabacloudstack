@@ -496,7 +496,7 @@ func (s *EcsService) QueryInstancesWithKeyPair(instanceIdsStr, keyPair string) (
 			return
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		if len(object.Instances.Instance) < 0 {
+		if len(object.Instances.Instance) == 0 {
 			return
 		}
 		for _, inst := range object.Instances.Instance {
@@ -1897,7 +1897,7 @@ func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub_patch.
 			return resp, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
@@ -1932,28 +1932,23 @@ func (s *EcsService) DescribeEcsCommand(id string) (result *datahub_patch.EcsDes
 	})
 
 	//response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
-	raw, err := s.client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-		return EcsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidRegionId.NotFound", "Operation.Forbidden"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("EcsCommand", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return resp, err
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return resp, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		return resp, err
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(action, raw, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	//v, err := jsonpath.Get("$.Commands.Command", bresponse)
 	if err != nil {
-		return resp, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Commands.Command", raw)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Commands.Command", bresponse)
 	}
 	//if len(v.([]interface{})) < 1 {
 	//	return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ECS", id)), errmsgs.NotFoundWithResponse, raw)

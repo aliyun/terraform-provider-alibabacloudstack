@@ -61,12 +61,15 @@ func resourceAlibabacloudStackEcsEbsStorageSetsCreate(d *schema.ResourceData, me
 	err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
+			if errmsgs.NeedRetry(err) {
+							wait()
+							return resource.RetryableError(err)
+						}
 			if bresponse == nil {
-				wait()
-				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), response)
 		d.SetId(fmt.Sprint(response.StorageSetId))
@@ -121,12 +124,15 @@ func resourceAlibabacloudStackEcsEbsStorageSetsDelete(d *schema.ResourceData, me
 	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
+			if errmsgs.NeedRetry(err) {
+							wait()
+							return resource.RetryableError(err)
+						}
 			if bresponse == nil {
-				wait()
-				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_ebs_storage_set", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		return nil
 	})

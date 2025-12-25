@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/base64"
 	"fmt"
 	"regexp"
 
@@ -28,11 +29,11 @@ func dataSourceAlibabacloudStackEcsCommands() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			"content_encoding": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
+			//			"content_encoding": {
+			//				Type:     schema.TypeString,
+			//				Optional: true,
+			//				ForceNew: true,
+			//			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -124,9 +125,6 @@ func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta int
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
 
-	if v, ok := d.GetOk("content_encoding"); ok {
-		request["ContentEncoding"] = v
-	}
 	if v, ok := d.GetOk("description"); ok {
 		request["Description"] = v
 	}
@@ -196,8 +194,15 @@ func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta int
 	names := make([]interface{}, 0)
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
+		var command_content string
+		decodedBytes, err := base64.StdEncoding.DecodeString(object["CommandContent"].(string))
+		if err != nil {
+			command_content = object["CommandContent"].(string)
+		} else {
+			command_content = string(decodedBytes)
+		}
 		mapping := map[string]interface{}{
-			"command_content":  object["CommandContent"],
+			"command_content":  command_content,
 			"id":               fmt.Sprint(object["CommandId"]),
 			"command_id":       fmt.Sprint(object["CommandId"]),
 			"description":      object["Description"],

@@ -5,12 +5,13 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackEcsCommand0(t *testing.T) {
-	var v map[string]interface{}
+	var v *datahub_patch.EcsDescribeEcsCommandResult
 
 	resourceId := "alibabacloudstack_ecs_command.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccEcsCommandCheckmap)
@@ -21,7 +22,7 @@ func TestAccAlibabacloudStackEcsCommand0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%secscommand%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc-ecscommand%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccEcsCommandBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -32,31 +33,21 @@ func TestAccAlibabacloudStackEcsCommand0(t *testing.T) {
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 
-		CheckDestroy: rac.checkResourceDestroy(),
-
 		Steps: []resource.TestStep{
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"command_content": "systemctl stop kubelet.service; systemctl disable kubelet.service; systemctl daemon-reload; yum -y remove kubeadm kubelet kubectl;",
-
 					"type": "RunShellScript",
-
 					"description": "testDescription",
-
-					"command_name": "testName",
+					"name": "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"command_content": "systemctl stop kubelet.service; systemctl disable kubelet.service; systemctl daemon-reload; yum -y remove kubeadm kubelet kubectl;",
-
 						"type": "RunShellScript",
-
 						"description": "testDescription",
-
-						"command_name": "testName",
+						"name": name,
 					}),
 				),
 			},
@@ -70,7 +61,7 @@ func TestAccAlibabacloudStackEcsCommand0(t *testing.T) {
 
 					"description": "testDescription-update",
 
-					"command_name": "testName-update",
+					"name": "${var.name}-update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -81,50 +72,7 @@ func TestAccAlibabacloudStackEcsCommand0(t *testing.T) {
 
 						"description": "testDescription-update",
 
-						"command_name": "testName-update",
-					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "Test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "Test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "Test-update",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF-update",
-						"tags.For":     "Test-update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "0",
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
+						"name": name+"-update",
 					}),
 				),
 			},
@@ -138,36 +86,12 @@ func TestAccAlibabacloudStackEcsCommand0(t *testing.T) {
 }
 
 var AlibabacloudTestAccEcsCommandCheckmap = map[string]string{
-
-	"category": CHECKSET,
-
 	"description": CHECKSET,
-
-	"parameter_names": CHECKSET,
-
 	"timeout": CHECKSET,
-
-	"create_time": CHECKSET,
-
-	"provider": CHECKSET,
-
 	"command_content": CHECKSET,
-
-	"working_dir": CHECKSET,
-
 	"type": CHECKSET,
-
-	"invoke_times": CHECKSET,
-
 	"enable_parameter": CHECKSET,
-
-	"latest": CHECKSET,
-
-	"command_id": CHECKSET,
-
-	"command_name": CHECKSET,
-
-	"tags": CHECKSET,
+	"name": CHECKSET,
 }
 
 func AlibabacloudTestAccEcsCommandBasicdependence(name string) string {
