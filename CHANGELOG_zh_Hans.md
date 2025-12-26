@@ -1,3 +1,31 @@
+# 3.18.22
+
+## 新增
+
+1. schedulerx应用组的编排能力（`alibabacloudstack_schedulerx2_app_group`）
+2. schedulerx任务的编排能力（`alibabacloudstack_schedulerx2_job`）
+3. schedulerx工作流的编排能力（`alibabacloudstack_schedulerx2_workflow`）
+4. APFS可用区的查询能力（`alibabacloudstack_apfs_zones`）
+5. APFS文件系统的编排能力（`alibabacloudstack_apfs_file_system`）
+6. 密码机厂商及其产品的查询能力（`alibabacloudstack_hsm_vendors`）
+7. 密码机HSM实例列表的查询能力（`alibabacloudstack_hsms`）
+8. 密码机实例的编排能力（`alibabacloudstack_hsm_instances`）
+9. 密码机集群的编排能力（`alibabacloudstack_hsm_clusters`）
+10. 裸机管理密钥对的编排能力（`alibabacloudstack_bms_keypairs`）
+11. 安骑士OSS扫描配置的编排能力（`alibabacloudstack_aqs_oss_scanconfigs`）
+12. 安骑士主机防暴力破解防护规则的编排能力（`alibabacloudstack_aqs_anti_brute_force_rules`）
+13. 安骑士Web防篡改配置的编排能力（`alibabacloudstack_aqs_web_locks`）
+14. 密码服务密码机厂商及其产品的查询能力（`alibabacloudstack_cspprivate_hsm_vendors`）
+15. 密码服务密码机HSM实例列表的查询能力（`alibabacloudstack_cspprivate_hsms`）
+16. 密码服务密码机实例的编排能力（`alibabacloudstack_cspprivate_hsm_instance`）
+17. 密码服务密码机集群的编排能力（`alibabacloudstack_cspprivate_hsm_group`）
+
+## 下线
+
+1. 环境下服务列表的查询能力(`environment_services_by_product`)
+
+---
+
 # 3.18.21
 
 ## 新增

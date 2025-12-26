@@ -1,3 +1,31 @@
+# 3.18.22
+
+## New
+
+1. Orchestration support for SchedulerX application groups (`alibabacloudstack_schedulerx2_app_group`)
+2. Orchestration support for SchedulerX jobs (`alibabacloudstack_schedulerx2_job`)
+3. Orchestration support for SchedulerX workflows (`alibabacloudstack_schedulerx2_workflow`)
+4. Data source for querying APFS zones (`alibabacloudstack_apfs_zones`)
+5. Orchestration support for APFS file systems (`alibabacloudstack_apfs_file_system`)
+6. Data source for querying HSM vendors and their products (`alibabacloudstack_hsm_vendors`)
+7. Data source for listing HSM instances (`alibabacloudstack_hsms`)
+8. Orchestration support for HSM instances (`alibabacloudstack_hsm_instances`)
+9. Orchestration support for HSM clusters (`alibabacloudstack_hsm_clusters`)
+10. Orchestration support for bare metal server (BMS) key pairs (`alibabacloudstack_bms_keypairs`)
+11. Orchestration support for AQS OSS scan configurations (`alibabacloudstack_aqs_oss_scanconfigs`)
+12. Orchestration support for AQS anti-brute-force protection rules for hosts (`alibabacloudstack_aqs_anti_brute_force_rules`)
+13. Orchestration support for AQS web tamper protection configurations (`alibabacloudstack_aqs_web_locks`)
+14. Data source for querying CSP Private HSM vendors and their products (`alibabacloudstack_cspprivate_hsm_vendors`)
+15. Data source for listing CSP Private HSM instances (`alibabacloudstack_cspprivate_hsms`)
+16. Orchestration support for CSP Private HSM instances (`alibabacloudstack_cspprivate_hsm_instance`)
+17. Orchestration support for CSP Private HSM clusters (`alibabacloudstack_cspprivate_hsm_group`)
+
+## Removals
+
+1. Data source for querying service lists under an environment (`environment_services_by_product`)
+
+---
+
 # 3.18.21
 
 ## New
