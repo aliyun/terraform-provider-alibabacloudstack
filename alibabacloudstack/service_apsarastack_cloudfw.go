@@ -1,6 +1,8 @@
 package alibabacloudstack
 
 import (
+	"fmt"
+
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -23,10 +25,10 @@ func (s *CloudfwService) DescribeCloudFirewallControlPolicy(id string) (object m
 		return
 	}
 	request := map[string]interface{}{
-		"AclUuid":   parts[0],
-		"Direction": parts[1],
+		"AclUuid":     parts[0],
+		"Direction":   parts[1],
 		"CurrentPage": 1,
-		"PageSize":  100,
+		"PageSize":    100,
 	}
 
 	response, err = s.client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
@@ -42,4 +44,31 @@ func (s *CloudfwService) DescribeCloudFirewallControlPolicy(id string) (object m
 	}
 	object = v.([]interface{})[0].(map[string]interface{})
 	return object, nil
+}
+func (s *CloudfwService) DescribeAddressBook(id string) (map[string]interface{}, error) {
+	parts, err := ParseResourceId(id, 2)
+	if err != nil {
+		return nil, err
+	}
+	reqQuery := map[string]interface{}{
+		"SourceCode":  "yundun",
+		"CurrentPage": 1,
+		"PageSize":    100,
+		"GroupType":   parts[0],
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "Cloudfw", "2017-12-07", "DescribeAddressBook", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+	if response["Acls"] != nil {
+		for _, v := range response["Acls"].([]interface{}) {
+			acl := v.(map[string]interface{})
+			if acl["GroupUuid"] != nil && acl["GroupUuid"].(string) == parts[1] {
+				return acl, nil
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Address book with GroupUuid %s not found", id))
 }

@@ -613,6 +613,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_aqs_anti_brute_force_rules":                       dataSourceAlibabacloudStackAqsAntiBruteForceRules(),
 		"alibabacloudstack_aqs_web_locks":                                    dataSourceAlibabacloudStackAqsWebLocks(),
 		"alibabacloudstack_cr_ee_attestor_lifecycle_rules":                   dataSourceAlibabacloudStackCrEEAttestorLifecycleRules(),
+		"alibabacloudstack_cloudfw_address_books":                            dataSourceAlibabacloudStackCloudfwAddressBooks(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
@@ -1071,6 +1072,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_aqs_anti_brute_force_rule":                       resourceAlibabacloudStackAqsAntiBruteForceRule(),
 		"alibabacloudstack_aqs_web_lock":                                    resourceAlibabacloudStackAqsWebLock(),
 		"alibabacloudstack_cr_ee_attestor_lifecycle_rule":                   resourceAlibabacloudStackCrEEArtifactLifecycleRule(),
+		"alibabacloudstack_cloudfw_address_book":                            resourceAlibabacloudStackCloudfwAddressBook(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
