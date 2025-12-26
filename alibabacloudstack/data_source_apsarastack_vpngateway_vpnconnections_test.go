@@ -105,7 +105,6 @@ func TestAccAlibabacloudStackVpnConnectionsDataSourceBasic(t *testing.T) {
 		fakeMapFunc:  fakeVpnConnectionsMapFunc,
 		PreCheck: 		func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithAccountSiteType(t, DomesticSite)
 		},
 	}
 	vpnConnectionsCheckInfo.dataSourceTestCheck(t, rand, idsConfig, vpnGateWayIdConfig,

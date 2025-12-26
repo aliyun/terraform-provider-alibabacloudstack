@@ -78,7 +78,7 @@ func dataSourceFlinkNamespacesConfigDependence(rand int, attrMap map[string]stri
 	}
 	return fmt.Sprintf(`
 variable name{
- default = "tf-testacc-flink-ns-%d"
+ default = "tf-testacc-flink-ns-data-%d"
 }
 
 resource "alibabacloudstack_ascm_user" "default" {

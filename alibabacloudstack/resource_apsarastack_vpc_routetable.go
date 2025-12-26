@@ -1,8 +1,6 @@
 package alibabacloudstack
 
 import (
-	"strings"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -50,19 +48,10 @@ func resourceAliyunRouteTableCreate(d *schema.ResourceData, meta interface{}) er
 	vpcService := VpcService{client}
 
 	request := vpc.CreateCreateRouteTableRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+	client.InitRpcRequest(*request.RpcRequest)
 	request.VpcId = d.Get("vpc_id").(string)
 	request.RouteTableName = d.Get("name").(string)
 	request.Description = d.Get("description").(string)
-	request.ClientToken = buildClientToken(request.GetActionName())
 
 	raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 		return vpcClient.CreateRouteTable(request)

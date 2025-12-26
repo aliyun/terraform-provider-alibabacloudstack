@@ -147,6 +147,8 @@ func resourceAlibabacloudStackVpnGatewayCreate(d *schema.ResourceData, meta inte
 	request := vpc.CreateCreateVpnGatewayRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VpcId = d.Get("vpc_id").(string)
+	// must have to use https
+	request.SetScheme("HTTPS")
 
 	if v, ok := connectivity.GetResourceDataOk(d, "vpn_gateway_name", "name"); ok && v.(string) != "" {
 		request.Name = v.(string)

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackSnatEntriesDataSourceBasic(t *testing.T) {
+func TestAccAlibabacloudStackNatgatewaySnatentriesDataSourceBasic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -18,7 +18,7 @@ func TestAccAlibabacloudStackSnatEntriesDataSourceBasic(t *testing.T) {
 
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_snat_entries.default"),
 					//resource.TestCheckResourceAttr("data.alibabacloudstack_snat_entries.default", "snat_table_id", "0"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_snat_entries.default", "ids.#"),
+					resource.TestCheckResourceAttr("data.alibabacloudstack_snat_entries.default", "ids.#", "1"),
 				),
 			},
 		},
@@ -68,5 +68,6 @@ resource "alibabacloudstack_snat_entry" "default" {
 }
 
 data "alibabacloudstack_snat_entries" "default" {
+	ids = [alibabacloudstack_snat_entry.default.snat_entry_id]
     snat_table_id = "${alibabacloudstack_nat_gateway.default.snat_table_ids}"
 }`

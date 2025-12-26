@@ -32,7 +32,6 @@ func TestAccAlibabacloudStackVpnRouteEntry_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithAccountSiteType(t, IntlSite)
 		},
 		// module name
 		IDRefreshName: resourceId,

@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackVpngatewayVpngateway0(t *testing.T) {
+func TestAccAlibabacloudStackVpnGateway0(t *testing.T) {
 	var v vpc.DescribeVpnGatewayResponse
 
 	resourceId := "alibabacloudstack_vpngateway_vpngateway.default"

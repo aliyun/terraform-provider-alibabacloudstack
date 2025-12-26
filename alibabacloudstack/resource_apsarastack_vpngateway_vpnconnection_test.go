@@ -43,7 +43,7 @@ func testAccCheckVpnConnectionAttr(vpnConn *vpc.DescribeVpnConnectionResponse, l
 		return nil
 	}
 }
-func TestAccAlibabacloudstackVpnConnectionBasic(t *testing.T) {
+func TestAccAlibabacloudStackVpnConnectionBasic(t *testing.T) {
 	var v vpc.DescribeVpnConnectionResponse
 
 	resourceId := "alibabacloudstack_vpn_connection.default"
@@ -64,7 +64,6 @@ func TestAccAlibabacloudstackVpnConnectionBasic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithAccountSiteType(t, IntlSite)
 		},
 
 		// module name
@@ -217,7 +216,7 @@ func TestAccAlibabacloudstackVpnConnectionBasic(t *testing.T) {
 
 }
 
-func TestAccAlibabacloudstackVpnConnectionMulti(t *testing.T) {
+func TestAccAlibabacloudStackVpnConnectionMulti(t *testing.T) {
 	var v vpc.DescribeVpnConnectionResponse
 
 	resourceId := "alibabacloudstack_vpn_connection.default.1"
@@ -238,7 +237,6 @@ func TestAccAlibabacloudstackVpnConnectionMulti(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithAccountSiteType(t, IntlSite)
 		},
 
 		// module name

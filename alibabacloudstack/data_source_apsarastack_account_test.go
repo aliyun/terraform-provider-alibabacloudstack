@@ -7,8 +7,6 @@ import (
 )
 
 func TestAccAlibabacloudStackAccountDataSource_basic(t *testing.T) {
-	// sts not supported, skip test
-	t.Skip()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)

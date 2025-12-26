@@ -14,7 +14,6 @@ func TestAccAlibabacloudStackVpnGatewaysDataSourceBasic(t *testing.T) {
 		fakeMapFunc:  fakeVpnGatewaysMapFunc,
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithAccountSiteType(t, IntlSite)
 		},
 	}
 	idsConf := dataSourceTestAccConfig{
