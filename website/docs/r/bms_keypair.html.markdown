@@ -37,7 +37,7 @@ The following arguments are supported:
 
 * `name` - (Required, ForcesNew) The name of the key pair. It can be up to 1-128 characters in length and can contain letters, digits, underscores (_), and hyphens (-).
 
-* `public_key` - (Optional，ForcesNew) The public key content. If not provided, the system will automatically generate a key pair. The public key format should be in SSH public key format, such as "ssh-rsa AAAAB3NzaC1yc2EAAA...".
+* `public_key` - (Optional, ForcesNew) The public key content. If not provided, the system will automatically generate a key pair. The public key format should be in SSH public key format, such as "ssh-rsa AAAAB3NzaC1yc2EAAA...".
 
 ## Attributes Reference
 

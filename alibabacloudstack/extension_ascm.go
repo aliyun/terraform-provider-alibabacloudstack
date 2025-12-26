@@ -1022,7 +1022,7 @@ type RamPolicyUser struct {
 		DataItem []struct {
 			PolicyDocument string `json:"policyDocument"`
 			PolicyName     string `json:"policyName"`
-			AttachDate     int64  `json:"attachDate"` // 根据实际API响应，这是数字类型
+			AttachDate     int64  `json:"attachDate"` // According to the actual API response, this is a numeric type.
 			PolicyType     string `json:"policyType"`
 			Description    string `json:"description"`
 			DefaultVersion string `json:"defaultVersion"`
@@ -1036,7 +1036,7 @@ type RamPolicyUser struct {
 		CurrentPage int `json:"currentPage"`
 	} `json:"pageInfo"`
 	Message         string `json:"message"`
-	SuccessResponse string `json:"successResponse"` // 可能也存在这个字段，根据实际情况
+	SuccessResponse string `json:"successResponse"` // This field may also exist, depending on the actual situation.
 }
 
 type InitPasswordListResponse struct {
