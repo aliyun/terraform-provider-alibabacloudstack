@@ -104,8 +104,12 @@ func dataSourceAlibabacloudStackCspprivateHsmGroupsRead(d *schema.ResourceData, 
 
 		// Parse the response
 		hsmGroups, err := jsonpath.Get("$.HsmGroups.HsmGroup", response)
-		if err != nil || len(hsmGroups.([]interface{})) == 0 {
+		if err != nil {
 			return errmsgs.WrapError(err)
+		}
+		groups := hsmGroups.([]interface{})
+		if len(groups) == 0 {
+			break // No more data, exit loop normally
 		}
 
 		// Filter results based on ids and name_regex
