@@ -607,6 +607,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cspprivate_hsm_instances":                         dataSourceAlibabacloudStackCspprivateHsmInstances(),
 		"alibabacloudstack_cspprivate_hsm_vendors":                           dataSourceAlibabacloudStackCspprivateVendors(),
 		"alibabacloudstack_cspprivate_hsms":                                  dataSourceAlibabacloudStackCspprivateHsms(),
+		"alibabacloudstack_cspprivate_hsm_groups":                            dataSourceAlibabacloudStackCspprivateHsmGroups(),
 		"alibabacloudstack_bms_keypairs":                                     dataSourceAlibabacloudStackBmsKeypairs(),
 		"alibabacloudstack_aqs_oss_scanconfigs":                              dataSourceAlibabacloudStackAqsOssScanconfigs(),
 		"alibabacloudstack_aqs_anti_brute_force_rules":                       dataSourceAlibabacloudStackAqsAntiBruteForceRules(),
