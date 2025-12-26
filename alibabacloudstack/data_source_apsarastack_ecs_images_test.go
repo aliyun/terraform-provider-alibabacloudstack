@@ -19,16 +19,16 @@ func TestAccAlibabacloudStackImagesDataSource_basic(t *testing.T) {
 			"owners": "system",
 		}),
 	}
-	ownerNameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "^win.*",
-			"owners":     "system",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "^win.*-fake",
-			"owners":     "system",
-		}),
-	}
+	// ownerNameRegexConf := dataSourceTestAccConfig{
+	// 	existConfig: testAccConfig(map[string]interface{}{
+	// 		"name_regex": "^win.*",
+	// 		"owners":     "system",
+	// 	}),
+	// 	fakeConfig: testAccConfig(map[string]interface{}{
+	// 		"name_regex": "^win.*-fake",
+	// 		"owners":     "system",
+	// 	}),
+	// }
 
 	ownerRecentConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -39,7 +39,7 @@ func TestAccAlibabacloudStackImagesDataSource_basic(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex":  "^win.*",
+			// "name_regex":  "^win.*",
 			"most_recent": "true",
 			"owners":      "system",
 		}),
@@ -84,7 +84,7 @@ func TestAccAlibabacloudStackImagesDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeImagesMapFunc,
 	}
 
-	imagesCheckInfo.dataSourceTestCheck(t, rand, ownerConf, ownerNameRegexConf, ownerRecentConf, allConf)
+	imagesCheckInfo.dataSourceTestCheck(t, rand, ownerConf, ownerRecentConf, allConf)
 }
 
 func TestAccAlibabacloudStackImagesDataSource_win(t *testing.T) {

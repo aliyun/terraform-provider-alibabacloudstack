@@ -2373,3 +2373,85 @@ func (s *EcsService) DoEcsDescribeinvocationsRequest(d *schema.ResourceData, cli
 
 	return EcsDescribeinvocationsResponseObj, nil
 }
+
+// API响应主结构体
+type DescribeImagesResponse struct {
+	EagleEyeTraceId string     `json:"eagleEyeTraceId"`
+	TotalCount      int        `json:"TotalCount"`
+	AsapiSuccess    bool       `json:"asapiSuccess"`
+	ResponseVersion string     `json:"responseVersion"`
+	PageSize        int        `json:"PageSize"`
+	RequestId       string     `json:"RequestId"`
+	PageNumber      int        `json:"PageNumber"`
+	Success         bool       `json:"success"`
+	RequestID       string     `json:"requestId"` // 注意：API响应中是小写的requestId
+	Images          ImagesData `json:"Images"`
+	RegionId        string     `json:"RegionId"`
+}
+
+// Images数据结构体
+type ImagesData struct {
+	Image []ecs.Image `json:"Image"`
+}
+
+// 镜像详细信息结构体
+type Image struct {
+	ImageOwnerAlias           string                 `json:"ImageOwnerAlias"`
+	Shared                    int                    `json:"shared"`
+	IsSelfShared              string                 `json:"IsSelfShared"`
+	Description               string                 `json:"Description"`
+	SecurityLevelTagTextColor string                 `json:"SecurityLevelTagTextColer"` // 注意：原响应中的拼写错误
+	Platform                  string                 `json:"Platform"`
+	ResourceGroupId           string                 `json:"ResourceGroupId"`
+	Size                      int                    `json:"Size"`
+	IsSubscribed              bool                   `json:"IsSubscribed"`
+	BootMode                  string                 `json:"BootMode"`
+	OSName                    string                 `json:"OSName"`
+	ShareType                 int                    `json:"shareType"`
+	Department                int                    `json:"Department"`
+	IsPublic                  bool                   `json:"IsPublic"`
+	ImageId                   string                 `json:"ImageId"`
+	DetectionOptions          map[string]interface{} `json:"DetectionOptions"`
+	SecurityLevelTagBackColor string                 `json:"SecurityLevelTagBackgroundColer"` // 注意：原响应中的拼写错误
+	Features                  map[string]string      `json:"Features"`
+	RMRegionId                string                 `json:"RMRegionId"`
+	OSNameEn                  string                 `json:"OSNameEn"`
+	ResourceGroup             int                    `json:"ResourceGroup"`
+	LoginAsNonRootSupported   bool                   `json:"LoginAsNonRootSupported"`
+	Status                    string                 `json:"Status"`
+	SecurityLevelTag          string                 `json:"SecurityLevelTag"`
+	Progress                  string                 `json:"Progress"`
+	Usage                     string                 `json:"Usage"`
+	Architecture              string                 `json:"Architecture"`
+	ProductCode               string                 `json:"ProductCode"`
+	IsCopied                  bool                   `json:"IsCopied"`
+	ImageFamily               string                 `json:"ImageFamily"`
+	AscmCreateUser            string                 `json:"AscmCreateUser"`
+	IsSupportIoOptimized      bool                   `json:"IsSupportIoOptimized"`
+	IsSupportCloudinit        bool                   `json:"IsSupportCloudinit"`
+	ImageName                 string                 `json:"ImageName"`
+	DiskDeviceMappings        DiskDeviceMappings     `json:"DiskDeviceMappings"`
+	ImageVersion              string                 `json:"ImageVersion"`
+	OSType                    string                 `json:"OSType"`
+	CreationTime              string                 `json:"CreationTime"` // 时间格式为 "2025-12-24T09:52:48Z"
+	DepartmentName            string                 `json:"DepartmentName"`
+	RegionId                  string                 `json:"RegionId"`
+	ResourceGroupName         string                 `json:"ResourceGroupName"`
+}
+
+// 磁盘设备映射结构体
+type DiskDeviceMappings struct {
+	DiskDeviceMapping []DiskDeviceMapping `json:"DiskDeviceMapping"`
+}
+
+type DiskDeviceMapping struct {
+	SnapshotId      string `json:"SnapshotId"`
+	Type            string `json:"Type"`
+	Progress        string `json:"Progress"`
+	Format          string `json:"Format"`
+	Device          string `json:"Device"`
+	Size            string `json:"Size"`
+	Encrypted       bool   `json:"Encrypted"`
+	ImportOSSBucket string `json:"ImportOSSBucket"`
+	ImportOSSObject string `json:"ImportOSSObject"`
+}
