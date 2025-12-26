@@ -79,3 +79,27 @@ func (s *CspprivateService) DescribeCspprivateHsmGroup(id string) (map[string]in
 	}
 	return nil, errmsgs.GetNotFoundErrorFromString("Resource not found: Cspprivate Hsm Group " + id)
 }
+
+func (s *CspprivateService) GetCspprivateHsmList(groupId string) (hsm_list []string, err error) {
+
+	request := make(map[string]interface{})
+	request["PageSize"] = 100
+	request["PageNumber"] = 1
+	request["HsmGroup"] = groupId
+
+	resp, err := s.client.DoTeaRequest("POST", "Cspprivate", "2022-02-17", "DescribeHsms", "", nil, request, nil)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	instances, err := jsonpath.Get("$.HsmInfos.HsmInfo", resp)
+	if err != nil || len(instances.([]interface{})) == 0 {
+		return nil, errmsgs.WrapError(err)
+	}
+	for _, v := range instances.([]interface{}) {
+		instance := v.(map[string]interface{})
+		if fmt.Sprint(instance["HsmGroup"]) == groupId {
+			hsm_list = append(hsm_list, fmt.Sprint(instance["HsmId"]))
+		}
+	}
+	return hsm_list, nil
+}

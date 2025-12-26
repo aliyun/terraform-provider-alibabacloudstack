@@ -8,6 +8,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackCspprivateHsmGroup() *schema.Resource {
@@ -15,7 +16,6 @@ func resourceAlibabacloudStackCspprivateHsmGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"vpc_id": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"hsm_list": {
@@ -33,12 +33,13 @@ func resourceAlibabacloudStackCspprivateHsmGroup() *schema.Resource {
 				},
 			},
 			"hsm_count": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(1),
 			},
-			"hsm_password": {
+			"password": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -68,18 +69,22 @@ func resourceAlibabacloudStackCspprivateHsmGroup() *schema.Resource {
 
 func resourceAlibabacloudStackCspprivateHsmGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	hsm_list, err := json.Marshal(d.Get("hsm_list").(*schema.Set).List())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	zoneIds, err := json.Marshal(d.Get("zone_ids").(*schema.Set).List())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 	request := map[string]interface{}{
-		"ZoneIds":  string(zoneIds),
-		"HsmList":  string(hsm_list),
-		"HsmCount": d.Get("hsm_list").(*schema.Set).Len(),
+		"HsmCount": d.Get("hsm_count"),
+	}
+	if v, exists := d.GetOk("hsm_list"); exists && v.(*schema.Set).Len() > 0 {
+		hsm_list, err := json.Marshal(d.Get("hsm_list").(*schema.Set).List())
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request["HsmList"] = string(hsm_list)
+	}
+	if v, exists := d.GetOk("zone_ids"); exists && v.(*schema.Set).Len() > 0 {
+		zoneIds, err := json.Marshal(d.Get("zone_ids").(*schema.Set).List())
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request["ZoneIds"] = string(zoneIds)
 	}
 
 	response, err := client.DoTeaRequest("POST", "cspprivate", "2022-02-17", "CreateHsmGroup", "", nil, request, nil)
@@ -92,6 +97,17 @@ func resourceAlibabacloudStackCspprivateHsmGroupCreate(d *schema.ResourceData, m
 
 	// Set the ID temporarily
 	d.SetId(groupName)
+	reqQuery := map[string]interface{}{
+		"GroupName":   d.Id(),
+		"InstanceId":  d.Id(),
+		"HsmUser":     "tass",
+		"HsmPassword": d.Get("password").(string),
+	}
+	_, err = client.DoTeaRequest("POST", "cspprivate", "2022-02-17", "InitializeHsmGroup", "", nil, reqQuery, nil)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -125,10 +141,11 @@ func resourceAlibabacloudStackCspprivateHsmGroupRead(d *schema.ResourceData, met
 		}
 		d.Set("zone_ids", zoneIds)
 	}
-	if hsmList, exists := object["HsmList"]; exists {
-		d.Set("hsm_list", hsmList)
+	hsmList, err := cspprivateService.GetCspprivateHsmList(d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
 	}
-
+	d.Set("hsm_list", hsmList)
 	return nil
 }
 
@@ -138,26 +155,22 @@ func resourceAlibabacloudStackCspprivateHsmGroupUpdate(d *schema.ResourceData, m
 	if d.IsNewResource() {
 		return nil
 	}
-
-	if d.HasChanges("hsm_list", "zone_ids", "hsm_count") {
+	err := noUpdatesAllowedCheck(d, []string{"zone_ids", "vpc_id", "zone_ids", "hsm_count", "password"})
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if d.HasChanges("hsm_list") {
+		hsm_list, err := json.Marshal(d.Get("hsm_list").(*schema.Set).List())
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
 		request := map[string]interface{}{
+			"HsmList":    string(hsm_list),
 			"GroupName":  d.Id(),
 			"InstanceId": d.Id(),
 		}
 
-		if d.HasChange("hsm_list") {
-			request["HsmList"] = d.Get("hsm_list").(string)
-		}
-
-		if d.HasChange("zone_ids") {
-			request["ZoneIds"] = d.Get("zone_ids").(string)
-		}
-
-		if d.HasChange("hsm_count") {
-			request["HsmCount"] = d.Get("hsm_count").(int)
-		}
-
-		_, err := client.DoTeaRequest("POST", "cspprivate", "2022-02-17", "UpdateHsmGroupHsms", "", nil, request, nil)
+		_, err = client.DoTeaRequest("POST", "cspprivate", "2022-02-17", "UpdateHsmGroupHsms", "", nil, request, nil)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_cspprivate_hsm_group", "UpdateHsmGroupHsms", errmsgs.AlibabacloudStackSdkGoERROR)

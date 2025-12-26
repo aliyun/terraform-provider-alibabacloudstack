@@ -15,7 +15,7 @@ func TestAccAlibabacloudStackCspprivateHsmGroup_basic(t *testing.T) {
 
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &CspprivateService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &CspprivateService{testYundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeCspprivateHsmGroup")
 	rac := resourceAttrCheckInit(rc, ra)
 	rand := getAccTestRandInt(1000, 9999)
@@ -27,29 +27,44 @@ func TestAccAlibabacloudStackCspprivateHsmGroup_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreYunCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testYunDunProviders(),
+		IDRefreshName:     resourceId,
+		ExternalProviders: testAccExternalProviders,
+		Providers:         testYunDunProviders(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					// "vpc_id":    "${alibabacloudstack_cspprivate_hsm_instance.default[0].vpc_id}",
-					"hsm_list": []string{"${alibabacloudstack_cspprivate_hsm_instance.default.id}", "${alibabacloudstack_cspprivate_hsm_instance.default1.id}"},
-					"zone_ids": []string{"${alibabacloudstack_cspprivate_hsm_instance.default.zone_id}"},
+					"hsm_count": "3",
+					"hsm_list":  []string{"${alibabacloudstack_cspprivate_hsm_instance.default.id}", "${alibabacloudstack_cspprivate_hsm_instance.default1.id}"},
+					"zone_ids":  []string{"${alibabacloudstack_cspprivate_hsm_instance.default.zone_id}"},
+					"password":  "${random_password.password.0.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"vpc_id":     CHECKSET,
-						"hsm_count":  "2",
-						"zone_ids":   CHECKSET,
+						"hsm_count":  "3",
+						"hsm_list.#": "2",
+						"zone_ids.#": "1",
 						"status":     CHECKSET,
 						"group_name": CHECKSET,
 					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: testAccConfig(map[string]interface{}{
+					// "vpc_id":    "${alibabacloudstack_cspprivate_hsm_instance.default[0].vpc_id}",
+					"hsm_list": []string{"${alibabacloudstack_cspprivate_hsm_instance.default.id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"hsm_list.#": "1",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
 			},
 		},
 	})
@@ -130,5 +145,7 @@ resource "alibabacloudstack_cspprivate_hsm_instance" "default1" {
 	ip = "192.168.0.101"
 }
 
-`, name)
+%s
+
+`, name, RandomPasswordTestCase(12, 1))
 }
