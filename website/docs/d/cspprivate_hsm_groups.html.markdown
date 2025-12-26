@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Security Product (CSP)"
+subcategory: "Cspprivate HSM"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cspprivate_hsm_group"
 sidebar_current: "docs-alibabacloudstack-datasource-cspprivate-hsm-group"

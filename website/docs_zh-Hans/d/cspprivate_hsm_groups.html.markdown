@@ -1,3 +1,12 @@
+---
+subcategory: "Cspprivate HSM"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cspprivate_hsm_group"
+sidebar_current: "docs-alibabacloudstack-datasource-cspprivate-hsm-group"
+description: |-
+    Provides a data source for CSP Private HSM Group to query HSM group information in Alibaba Cloud CSP Private HSM service.
+---
+
 # alibabacloudstack_cspprivate_hsm_group
 
 > 密码机组数据源，用于查询阿里云密码机服务中的密码机组信息

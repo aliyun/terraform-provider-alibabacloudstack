@@ -1,5 +1,5 @@
 ---
-subcategory: "CSPPRIVATE"
+subcategory: "Cspprivate HSM"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cspprivate_hsm_group"
 sidebar_current: "docs-Alibabacloudstack-cspprivate-hsm_group"
