@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -15,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudstackRamAccessKey() *schema.Resource {
+func resourceAlibabacloudstackAscmAccessKey() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"user_name": {
@@ -62,31 +60,17 @@ func resourceAlibabacloudstackAscmAccessKeyCreate(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := client.NewCommonRequest("POST", "Ascm", "2015-05-01", "RamCreateAccessKey", "")
-
+	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 	var response = AccessKeyInCreateAccessKey{}
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_access_key", "", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_access_key", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	addDebug("RamCreateAccessKey", raw, request)
-
-	if bresponse.GetHttpStatus() != 200 {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_access_key", "", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug("RamCreateAccessKey", raw, request, bresponse.GetHttpContentString())
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 
 	d.SetId(fmt.Sprint(response.AccessKeyId))
@@ -121,19 +105,16 @@ func resourceAlibabacloudstackAscmAccessKeyDelete(d *schema.ResourceData, meta i
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RamDeleteAccessKey", "/ascm/auth/ramCompatible/deleteAccessKey")
+		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 		request.QueryParams["id"] = d.Id()
 
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
-		})
-
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
 			}
-			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ram_access_key", "RamDeleteAccessKey", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_access_key", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		_, err = ascmService.DescribeAscmKeypolicy(d.Id())
 
@@ -150,25 +131,18 @@ func resourceAlibabacloudstackAscmAccessKeyDelete(d *schema.ResourceData, meta i
 
 func (s *AscmService) DescribeAscmKeypolicy(id string) (response *AccessKeyInCreateAccessKey, err error) {
 	request := s.client.NewCommonRequest("POST", "Ascm", "2015-05-01", "RamListAccessKeys", "")
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	request.QueryParams["id"] = id
 
 	var value = &AccessKeyInCreateAccessKey{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorQuotaNotFound"}) {
-			return value, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		if bresponse == nil {
+			return value, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return value, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetQuota", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return value, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_access_key", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("RamListAccessKeys", response, nil, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), value)
 	if err != nil {

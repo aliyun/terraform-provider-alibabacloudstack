@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -34,7 +33,6 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachment() *schema.Resource
 
 func resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ecs.Client
 
 	RgId := d.Get("rg_id").(string)
 	userIds := d.Get("user_id").(string)
@@ -43,27 +41,14 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate(d *schema.Re
 	request.QueryParams["ascm_user_ids"] = fmt.Sprintf("%s", userIds)
 	request.QueryParams["resource_group_id"] = RgId
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	log.Printf("response of raw BindAscmUserAndResourceGroup is : %s", raw)
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_resource_group_user_attachment", "BindAscmUserAndResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("BindAscmUserAndResourceGroup", raw, requestInfo, request)
-	if bresponse.GetHttpStatus() != 200 {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_resource_group_user_attachment", "BindAscmUserAndResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug("BindAscmUserAndResourceGroup", raw, requestInfo, bresponse.GetHttpContentString())
 	d.SetId(RgId)
 	return nil
 }

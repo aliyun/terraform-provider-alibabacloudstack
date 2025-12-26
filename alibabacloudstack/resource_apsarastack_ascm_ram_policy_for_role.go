@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -42,27 +40,14 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d *schema.ResourceData,
 	request.QueryParams["RamPolicyId"] = ram_id
 	request.QueryParams["RoleId"] = fmt.Sprint(roleid)
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policy_for_role", "AddRAMPolicyToRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
-	addDebug("AddRAMPolicyToRole", raw, request)
-	if bresponse.GetHttpStatus() != 200 {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policy_for_role", "AddRAMPolicyToRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug("AddRAMPolicyToRole", raw, request, bresponse.GetHttpContentString())
 
 	d.SetId(ram_id + COLON_SEPARATED + fmt.Sprint(roleid))
 
@@ -106,17 +91,14 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleDelete(d *schema.ResourceData,
 		request.QueryParams["ramPolicyId"] = did[0]
 		request.QueryParams["roleId"] = did[1]
 
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+			if err != nil {
+				if bresponse == nil {
+					return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
+				}
+				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policy_for_role", "AddRAMPolicyToRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
-			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "RemoveRAMPolicyFromRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-		}
 		check, err = ascmService.DescribeAscmRamPolicyForRole(d.Id())
 
 		if err != nil {

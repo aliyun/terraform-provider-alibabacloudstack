@@ -26,12 +26,10 @@ func dataSourceAlibabacloudStackAscmRoles() *schema.Resource {
 			},
 			"description": {
 				Type:     schema.TypeString,
-				Computed: true,
 				Optional: true,
 			},
 			"role_type": {
 				Type:     schema.TypeString,
-				Computed: true,
 				Optional: true,
 			},
 			"output_file": {
@@ -144,45 +142,30 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 		if r != nil && !r.MatchString(rg.RoleName) {
 			continue
 		}
-		if id != 0 && rg.ID == id {
-			mapping := map[string]interface{}{
-				"id":                    rg.ID,
-				"name":                  rg.RoleName,
-				"owner_organization_id": rg.OwnerOrganizationID,
-				"description":           rg.Description,
-				"user_count":            rg.UserCount,
-				"role_level":            rg.RoleLevel,
-				"role_type":             rg.RoleType,
-				"role_range":            rg.RoleRange,
-				"ram_role":              rg.RAMRole,
-				"enable":                rg.Enable,
-				"active":                rg.Active,
-				"default":               rg.Default,
-				"code":                  rg.Code,
-			}
-			ids = append(ids, fmt.Sprint(rg.ID))
-			s = append(s, mapping)
-			break
+		if id != 0 && rg.ID != id {
+			continue
 		}
-		if id == 0 && roleType != "" && rg.RoleType == roleType {
-			mapping := map[string]interface{}{
-				"id":                    rg.ID,
-				"name":                  rg.RoleName,
-				"owner_organization_id": rg.OwnerOrganizationID,
-				"description":           rg.Description,
-				"user_count":            rg.UserCount,
-				"role_level":            rg.RoleLevel,
-				"role_type":             rg.RoleType,
-				"role_range":            rg.RoleRange,
-				"ram_role":              rg.RAMRole,
-				"enable":                rg.Enable,
-				"active":                rg.Active,
-				"default":               rg.Default,
-				"code":                  rg.Code,
-			}
-			ids = append(ids, fmt.Sprint(rg.ID))
-			s = append(s, mapping)
+		if roleType != "" && rg.RoleType != roleType {
+			continue
 		}
+		mapping := map[string]interface{}{
+			"id":                    rg.ID,
+			"name":                  rg.RoleName,
+			"owner_organization_id": rg.OwnerOrganizationID,
+			"description":           rg.Description,
+			"user_count":            rg.UserCount,
+			"role_level":            rg.RoleLevel,
+			"role_type":             rg.RoleType,
+			"role_range":            rg.RoleRange,
+			"ram_role":              rg.RAMRole,
+			"enable":                rg.Enable,
+			"active":                rg.Active,
+			"default":               rg.Default,
+			"code":                  rg.Code,
+		}
+		ids = append(ids, fmt.Sprint(rg.ID))
+		s = append(s, mapping)
+		break
 	}
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("roles", s); err != nil {

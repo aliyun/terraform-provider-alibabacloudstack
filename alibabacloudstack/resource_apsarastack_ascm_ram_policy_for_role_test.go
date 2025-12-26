@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -20,6 +21,9 @@ func TestAccAlibabacloudStackAscm_RamPolicyForRoleBasic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccAscm_RamPolicyForRole_resource)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -30,7 +34,10 @@ func TestAccAlibabacloudStackAscm_RamPolicyForRoleBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckAscm_RamPolicyForRoleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAscm_RamPolicyForRole_resource,
+				Config: testAccConfig(map[string]interface{}{
+					"ram_policy_id": "${alibabacloudstack_ascm_ram_policy.default.ram_id}",
+					"role_id":       "${alibabacloudstack_ascm_ram_role.default.role_id}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -69,27 +76,28 @@ func testAccCheckAscm_RamPolicyForRoleDestroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccAscm_RamPolicyForRole_resource = `
+func testAccAscm_RamPolicyForRole_resource(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+	default = "%s"
+}
+	
 resource "alibabacloudstack_ascm_ram_policy" "default" {
-  name = "TestPolicyRole"
+  name = var.name
   description = "Testing Complete"
   policy_document = "{\"Statement\":[{\"Action\":\"ecs:*\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"1\"}"
 
 }
 
 resource "alibabacloudstack_ascm_ram_role" "default" {
-  role_name = "TestPolicyRole"
+  role_name = var.name
   description = "TestingRole"
   organization_visibility = "global"
 role_range = "roleRange.allOrganizations"
 }
 
-resource "alibabacloudstack_ascm_ram_policy_for_role" "default" {
-  ram_policy_id = alibabacloudstack_ascm_ram_policy.default.ram_id
-  role_id = alibabacloudstack_ascm_ram_role.default.role_id
+`, name)
 }
-
-`
 
 var testAccCheckAscmRamPolicyForRole = map[string]string{
 	"ram_policy_id": CHECKSET,

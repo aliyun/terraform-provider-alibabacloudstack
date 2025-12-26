@@ -1,11 +1,9 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"log"
 	"regexp"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -180,65 +178,59 @@ func dataSourceAlibabacloudStackImagesRead(d *schema.ResourceData, meta interfac
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	nameRegex, nameRegexOk := d.GetOk("name_regex")
-	_, ownersOk := d.GetOk("owners")
+	owners, ownersOk := d.GetOk("owners")
 	mostRecent, mostRecentOk := d.GetOk("most_recent")
 
 	if !nameRegexOk && !ownersOk && !mostRecentOk {
 		return errmsgs.WrapError(errmsgs.Error("One of name_regex, owners or most_recent must be assigned"))
 	}
 
-	request := client.NewCommonRequest("POST", "ecs", "2014-05-26", "DescribeImages", "")
-	AcmimagesObj := DescribeImagesResponse{}
+	request := ecs.CreateDescribeImagesRequest()
+	client.InitRpcRequest(*request.RpcRequest)
+	request.PageNumber = requests.NewInteger(1)
+	request.PageSize = requests.NewInteger(PageSizeLarge)
 
-	if v, ok := d.GetOk("owners"); ok {
-		request.QueryParams["ImageOwnerAlias"] = v.(string)
+	if ownersOk {
+		request.ImageOwnerAlias = owners.(string)
 	} else {
-		request.QueryParams["ImageOwnerAlias"] = "self"
+		request.ImageOwnerAlias = "self"
 	}
-	request.QueryParams["PageNumber"] = string(requests.NewInteger(1))
-	request.QueryParams["PageSize"] = string(requests.NewInteger(PageSizeLarge))
+
+	var allImages []ecs.Image
+
 	for {
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.DescribeImages(request)
+		})
+		response, ok := raw.(*ecs.DescribeImagesResponse)
 		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_images", "DescribeImages", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_images", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		if response == nil || len(response.Images.Image) < 1 {
+			break
 		}
 
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &AcmimagesObj)
+		allImages = append(allImages, response.Images.Image...)
 
+		if len(response.Images.Image) < PageSizeLarge {
+			break
+		}
+
+		page, err := getNextpageNumber(request.PageNumber)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		if AcmimagesObj.Success == true {
-			if len(AcmimagesObj.Images.Image) == 0 {
-				break
-			}
-			if len(AcmimagesObj.Images.Image) < 50 {
-				break
-			}
-			pageNumber, err := strconv.Atoi(request.QueryParams["PageNumber"])
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-			page, err := getNextpageNumber(requests.NewInteger(pageNumber))
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-			request.QueryParams["PageNumber"] = string(page)
-		} else {
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_images", "DescribeImages", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
+		request.PageNumber = page
 	}
 
 	var filteredImages []ecs.Image
 	if nameRegexOk {
 		r := regexp.MustCompile(nameRegex.(string))
-		for _, image := range AcmimagesObj.Images.Image {
+		for _, image := range allImages {
 			// Check for a very rare case where the response would include no
 			// image name. No name means nothing to attempt a match against,
 			// therefore we are skipping such image.
@@ -253,7 +245,7 @@ func dataSourceAlibabacloudStackImagesRead(d *schema.ResourceData, meta interfac
 			}
 		}
 	} else {
-		filteredImages = AcmimagesObj.Images.Image[:]
+		filteredImages = allImages[:]
 	}
 
 	var images []ecs.Image
@@ -264,6 +256,7 @@ func dataSourceAlibabacloudStackImagesRead(d *schema.ResourceData, meta interfac
 	} else {
 		images = filteredImages
 	}
+
 	return imagesDescriptionAttributes(d, images, meta)
 }
 

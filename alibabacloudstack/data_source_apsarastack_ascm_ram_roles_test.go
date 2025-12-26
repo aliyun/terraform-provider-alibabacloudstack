@@ -18,6 +18,7 @@ func TestAccAlibabacloudStackAscmRamRoles_DataSource(t *testing.T) {
 				Config: dataSourceAlibabacloudStackAscm_Roles(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ascm_roles.default"),
+					resource.TestCheckResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.#", "1"),
 					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.id"),
 					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.name"),
 					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.role_level"),
