@@ -41,10 +41,6 @@ func resourceAlibabacloudStackCspprivateHsmGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"group_name": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -126,7 +122,6 @@ func resourceAlibabacloudStackCspprivateHsmGroupRead(d *schema.ResourceData, met
 
 	d.Set("vpc_id", object["VpcId"])
 	d.Set("hsm_count", object["HsmCount"])
-	d.Set("status", object["Status"])
 	d.Set("group_name", object["GroupName"])
 	d.Set("create_time", object["CreateTime"])
 	d.Set("update_time", object["UpdateTime"])
