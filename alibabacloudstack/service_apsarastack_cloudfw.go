@@ -45,6 +45,7 @@ func (s *CloudfwService) DescribeCloudFirewallControlPolicy(id string) (object m
 	object = v.([]interface{})[0].(map[string]interface{})
 	return object, nil
 }
+
 func (s *CloudfwService) DescribeAddressBook(id string) (map[string]interface{}, error) {
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
@@ -71,4 +72,37 @@ func (s *CloudfwService) DescribeAddressBook(id string) (map[string]interface{},
 	}
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Address book with GroupUuid %s not found", id))
+}
+
+func (s *CloudfwService) DescribeCloudfwVpcControlPolicy(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{
+		"SourceCode":  "yundun",
+		"CurrentPage": 1,
+		"PageSize":    100,
+		"AclUuid":     id,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "Cloudfw", "2017-12-07", "DescribeVpcFirewallControlPolicy", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	policys, ok := response["Policys"]
+	if !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString("cloudfw control policy not found")
+	}
+
+	policyList, ok := policys.([]interface{})
+	if !ok || len(policyList) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString("cloudfw control policy not found")
+	}
+
+	for _, policy := range policyList {
+		policyMap := policy.(map[string]interface{})
+		if policyMap["AclUuid"] == id {
+			return policyMap, nil
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString("cloudfw control policy not found")
 }

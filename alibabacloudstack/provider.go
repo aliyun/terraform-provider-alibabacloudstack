@@ -1073,6 +1073,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_aqs_web_lock":                                    resourceAlibabacloudStackAqsWebLock(),
 		"alibabacloudstack_cr_ee_attestor_lifecycle_rule":                   resourceAlibabacloudStackCrEEArtifactLifecycleRule(),
 		"alibabacloudstack_cloudfw_address_book":                            resourceAlibabacloudStackCloudfwAddressBook(),
+		"alibabacloudstack_cloudfw_vpc_control_policy":                      resourceAlibabacloudStackCloudfwVpcControlPolicy(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
