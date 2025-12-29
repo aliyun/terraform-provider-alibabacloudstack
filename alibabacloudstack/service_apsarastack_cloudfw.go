@@ -76,10 +76,11 @@ func (s *CloudfwService) DescribeAddressBook(id string) (map[string]interface{},
 
 func (s *CloudfwService) DescribeCloudfwVpcControlPolicy(id string) (map[string]interface{}, error) {
 	reqQuery := map[string]interface{}{
-		"SourceCode":  "yundun",
-		"CurrentPage": 1,
-		"PageSize":    100,
-		"AclUuid":     id,
+		"SourceCode":    "yundun",
+		"CurrentPage":   1,
+		"PageSize":      100,
+		"AclUuid":       id,
+		"VpcFirewallId": "",
 	}
 
 	response, err := s.client.DoTeaRequest("GET", "Cloudfw", "2017-12-07", "DescribeVpcFirewallControlPolicy", "", nil, reqQuery, nil)
@@ -89,12 +90,12 @@ func (s *CloudfwService) DescribeCloudfwVpcControlPolicy(id string) (map[string]
 
 	policys, ok := response["Policys"]
 	if !ok {
-		return nil, errmsgs.GetNotFoundErrorFromString("cloudfw control policy not found")
+		return nil, errmsgs.GetNotFoundErrorFromString("Cloudfw control policy not found")
 	}
 
 	policyList, ok := policys.([]interface{})
 	if !ok || len(policyList) == 0 {
-		return nil, errmsgs.GetNotFoundErrorFromString("cloudfw control policy not found")
+		return nil, errmsgs.GetNotFoundErrorFromString("Cloudfw control policy not found")
 	}
 
 	for _, policy := range policyList {
@@ -104,5 +105,5 @@ func (s *CloudfwService) DescribeCloudfwVpcControlPolicy(id string) (map[string]
 		}
 	}
 
-	return nil, errmsgs.GetNotFoundErrorFromString("cloudfw control policy not found")
+	return nil, errmsgs.GetNotFoundErrorFromString("Cloudfw control policy not found")
 }

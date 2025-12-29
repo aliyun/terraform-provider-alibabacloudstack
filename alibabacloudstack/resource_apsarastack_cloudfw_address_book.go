@@ -78,7 +78,7 @@ func resourceAlibabacloudStackCloudfwAddressBookCreate(d *schema.ResourceData, m
 		"AddressList": strings.Join(addlist, ","),
 	}
 
-	response, err := client.DoTeaRequest("POST", "cloudfw", "2017-12-07", "AddAddressBook", "", nil, request, nil)
+	response, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", "AddAddressBook", "", nil, request, nil)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -96,9 +96,9 @@ func resourceAlibabacloudStackCloudfwAddressBookCreate(d *schema.ResourceData, m
 
 func resourceAlibabacloudStackCloudfwAddressBookRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	cloudfwService := CloudfwService{client}
+	CloudfwService := CloudfwService{client}
 
-	object, err := cloudfwService.DescribeAddressBook(d.Id())
+	object, err := CloudfwService.DescribeAddressBook(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -151,7 +151,7 @@ func resourceAlibabacloudStackCloudfwAddressBookUpdate(d *schema.ResourceData, m
 		_, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", "ModifyAddressBook", "", nil, requestInfo, nil)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_cloudfw_address_book", "ModifyAddressBook", errmsgs.AlibabacloudStackSdkGoERROR)
+				"alibabacloudstack_Cloudfw_address_book", "ModifyAddressBook", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
 
@@ -173,7 +173,7 @@ func resourceAlibabacloudStackCloudfwAddressBookDelete(d *schema.ResourceData, m
 	_, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", "DeleteAddressBook", "", nil, reqQuery, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-			"alibabacloudstack_cloudfw_address_book", "DeleteAddressBook", errmsgs.AlibabacloudStackSdkGoERROR)
+			"alibabacloudstack_Cloudfw_address_book", "DeleteAddressBook", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	return nil

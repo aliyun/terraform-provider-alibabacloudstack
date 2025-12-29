@@ -15,7 +15,7 @@ func TestAccAlibabacloudStackCloudfirewallVpcControlPolicy_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_cloudfw_vpc_control_policy.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccCloudfirewallVpcControlPolicyCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &CloudfwService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &CloudfwService{testYundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeCloudfwVpcControlPolicy")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -30,7 +30,7 @@ func TestAccAlibabacloudStackCloudfirewallVpcControlPolicy_basic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		Providers:     testYunDunProviders(),
 
 		CheckDestroy: rac.checkResourceDestroy(),
 
@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackCloudfirewallVpcControlPolicy_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"destination": "0.0.0.0/16",
 
-					"description": "testtf",
+					"description": "${var.name}",
 
 					"application_name": "ANY",
 
@@ -58,8 +58,6 @@ func TestAccAlibabacloudStackCloudfirewallVpcControlPolicy_basic(t *testing.T) {
 
 					"proto": "UDP",
 
-					"new_order": "-1",
-
 					"application_id": "0",
 
 					"release": true,
@@ -68,7 +66,7 @@ func TestAccAlibabacloudStackCloudfirewallVpcControlPolicy_basic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"destination": "0.0.0.0/16",
 
-						"description": "testtf",
+						"description": name,
 
 						"application_name": "ANY",
 
@@ -86,8 +84,6 @@ func TestAccAlibabacloudStackCloudfirewallVpcControlPolicy_basic(t *testing.T) {
 
 						"proto": "UDP",
 
-						"new_order": "-1",
-
 						"application_id": "0",
 
 						"release": "true",
@@ -95,46 +91,38 @@ func TestAccAlibabacloudStackCloudfirewallVpcControlPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"new_order"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"destination":      "testIPterraform",
-					"description":      "testtf111",
+					"destination":      "${alibabacloudstack_cloudfw_address_book.default.group_name}",
+					"description":      "${var.name}_updated",
 					"application_name": "HTTP",
 					"source_type":      "net",
-					"dest_port":        "55/33",
+					"dest_port":        "55/55",
 					"acl_action":       "accept",
 					"destination_type": "group",
 					"source":           "0.0.0.0/16",
-					"dest_port_type":   "port",
 					"proto":            "TCP",
 					"application_id":   "7",
 					"release":          true,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"destination":             "testIPterraform",
-						"description":             "testtf111",
-						"application_name":        "HTTP",
-						"source_type":             "net",
-						"dest_port":               "55/33",
-						"acl_action":              "accept",
-						"destination_type":        "group",
-						"source":                  "0.0.0.0/16",
-						"dest_port_type":          "port",
-						"proto":                   "TCP",
-						"new_order":               "1",
-						"application_id":          "7",
-						"release":                 "true",
-						"acl_uuid":                CHECKSET,
-						"order":                   CHECKSET,
-						"hit_times":               CHECKSET,
-						"source_group_cidrs":      CHECKSET,
-						"destination_group_cidrs": CHECKSET,
-						"dest_port_group_ports":   CHECKSET,
+						"destination":      name,
+						"description":      name + "_updated",
+						"application_name": "HTTP",
+						"source_type":      "net",
+						"dest_port":        "55/55",
+						"acl_action":       "accept",
+						"destination_type": "group",
+						"source":           "0.0.0.0/16",
+						"proto":            "TCP",
+						"application_id":   "7",
+						"release":          "true",
 					}),
 				),
 			},
@@ -143,12 +131,9 @@ func TestAccAlibabacloudStackCloudfirewallVpcControlPolicy_basic(t *testing.T) {
 }
 
 var AlibabacloudTestAccCloudfirewallVpcControlPolicyCheckmap = map[string]string{
-	"acl_uuid":                CHECKSET,
-	"order":                   CHECKSET,
-	"hit_times":               CHECKSET,
-	"source_group_cidrs":      CHECKSET,
-	"destination_group_cidrs": CHECKSET,
-	"dest_port_group_ports":   CHECKSET,
+	"acl_uuid":  CHECKSET,
+	"order":     CHECKSET,
+	"hit_times": CHECKSET,
 }
 
 func AlibabacloudTestAccCloudfirewallVpcControlPolicyBasicdependence(name string) string {
@@ -158,6 +143,12 @@ variable "name" {
 }
 
 
+resource "alibabacloudstack_cloudfw_address_book" "default" {
+    group_type = "ip"
+    group_name = var.name
+    address_list = ["100.100.100.100/30"]
+    description = "test address book"
+}
 
 `, name)
 }

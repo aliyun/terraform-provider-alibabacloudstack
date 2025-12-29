@@ -49,11 +49,12 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicy() *schema.Resource {
 			},
 			"new_order": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  -1,
 			},
 			"vpc_firewall_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"dest_port": {
 				Type:     schema.TypeString,
@@ -146,7 +147,7 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicyCreate(d *schema.ResourceDa
 		request["Release"] = v.(string)
 	}
 
-	response, err := client.DoTeaRequest("POST", "cloudfw", "2017-12-07", "CreateVpcFirewallVpcControlPolicy", "", nil, request, nil)
+	response, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", "CreateVpcFirewallControlPolicy", "", nil, request, nil)
 	if err != nil {
 		return err
 	}
@@ -165,9 +166,9 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicyCreate(d *schema.ResourceDa
 
 func resourceAlibabacloudStackCloudfwVpcControlPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	cloudfwService := CloudfwService{client}
+	CloudfwService := CloudfwService{client}
 
-	object, err := cloudfwService.DescribeCloudfwVpcControlPolicy(d.Id())
+	object, err := CloudfwService.DescribeCloudfwVpcControlPolicy(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -254,8 +255,7 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicyUpdate(d *schema.ResourceDa
 		"Proto":           d.Get("proto"),
 		"Source":          d.Get("source"),
 		"SourceType":      d.Get("source_type"),
-		"AclUuid":         d.Id(), // Use the resource ID as AclUuid
-		"Order":           d.Get("new_order"),
+		"AclUuid":         d.Id(),   // Use the resource ID as AclUuid
 		"SourceCode":      "yundun", // Required parameter
 	}
 
@@ -274,10 +274,10 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicyUpdate(d *schema.ResourceDa
 	}
 
 	// Call the modify API
-	_, err := client.DoTeaRequest("POST", "cloudfw", "2017-12-07", "ModifyVpcFirewallVpcControlPolicy", "", nil, requestInfo, nil)
+	_, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", "ModifyVpcFirewallControlPolicy", "", nil, requestInfo, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-			"alibabacloudstack_cloudfw_control_policy", "ModifyVpcFirewallVpcControlPolicy", errmsgs.AlibabacloudStackSdkGoERROR)
+			"alibabacloudstack_Cloudfw_control_policy", "ModifyVpcFirewallControlPolicy", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	return nil
@@ -292,7 +292,7 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicyDelete(d *schema.ResourceDa
 		"VpcFirewallId": d.Get("vpc_firewall_id"),
 	}
 
-	_, err := client.DoTeaRequest("POST", "cloudfw", "2017-12-07", "DeleteVpcFirewallVpcControlPolicy", "", nil, reqQuery, nil)
+	_, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", "DeleteVpcFirewallControlPolicy", "", nil, reqQuery, nil)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
