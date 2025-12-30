@@ -2,10 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackCloudfwVpcControlPolicy() *schema.Resource {
@@ -73,8 +76,10 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicy() *schema.Resource {
 				Optional: true,
 			},
 			"direction": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"inout", "in", "out"}, false),
 			},
 			"acl_uuid": {
 				Type:     schema.TypeString,
@@ -134,6 +139,9 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicyCreate(d *schema.ResourceDa
 	}
 
 	// Add optional parameters if they exist
+	if v, ok := d.GetOk("direction"); ok {
+		request["Direction"] = v.(string)
+	}
 	if v, ok := d.GetOk("dest_port"); ok {
 		request["DestPort"] = v.(string)
 	}
@@ -158,9 +166,9 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicyCreate(d *schema.ResourceDa
 		return fmt.Errorf("AclUuid not found in response")
 	}
 
-	// Set the resource ID using the AclUuid
-	d.SetId(aclUuid.(string))
-
+	resourceId := fmt.Sprintf("%s:%s", aclUuid.(string), d.Get("direction").(string))
+	d.SetId(resourceId)
+	log.Printf("[DEBUG] alibabacloudstack_cloudfw_vpc_control_policy.go: Created Cloudfw Vpc Control Policy %s: %s", resourceId, response)
 	return nil
 }
 
@@ -243,7 +251,7 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicyUpdate(d *schema.ResourceDa
 		return nil
 	}
 
-	// Prepare request parameters for update
+	parst := strings.Split(d.Id(), ":")
 	requestInfo := map[string]interface{}{
 		"AclAction":       d.Get("acl_action"),
 		"ApplicationId":   d.Get("application_id"),
@@ -255,8 +263,11 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicyUpdate(d *schema.ResourceDa
 		"Proto":           d.Get("proto"),
 		"Source":          d.Get("source"),
 		"SourceType":      d.Get("source_type"),
-		"AclUuid":         d.Id(),   // Use the resource ID as AclUuid
-		"SourceCode":      "yundun", // Required parameter
+		"AclUuid":         parst[0],
+		"SourceCode":      "yundun",
+	}
+	if parst[1] != "" {
+		requestInfo["Direction"] = parst[1]
 	}
 
 	// Add optional parameters if they exist
@@ -285,11 +296,14 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicyUpdate(d *schema.ResourceDa
 
 func resourceAlibabacloudStackCloudfwVpcControlPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
+	parst := strings.Split(d.Id(), ":")
 	reqQuery := map[string]interface{}{
 		"SourceCode":    "yundun",
-		"AclUuid":       d.Id(),
+		"AclUuid":       parst[0],
 		"VpcFirewallId": d.Get("vpc_firewall_id"),
+	}
+	if parst[1] != "" {
+		reqQuery["Direction"] = parst[1]
 	}
 
 	_, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", "DeleteVpcFirewallControlPolicy", "", nil, reqQuery, nil)

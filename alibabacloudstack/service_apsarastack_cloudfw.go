@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -75,12 +76,16 @@ func (s *CloudfwService) DescribeAddressBook(id string) (map[string]interface{},
 }
 
 func (s *CloudfwService) DescribeCloudfwVpcControlPolicy(id string) (map[string]interface{}, error) {
+	parst := strings.Split(id, ":")
 	reqQuery := map[string]interface{}{
 		"SourceCode":    "yundun",
 		"CurrentPage":   1,
 		"PageSize":      100,
-		"AclUuid":       id,
+		"AclUuid":       parst[0],
 		"VpcFirewallId": "",
+	}
+	if parst[1] != "" {
+		reqQuery["Direction"] = parst[1]
 	}
 
 	response, err := s.client.DoTeaRequest("GET", "Cloudfw", "2017-12-07", "DescribeVpcFirewallControlPolicy", "", nil, reqQuery, nil)
@@ -100,7 +105,7 @@ func (s *CloudfwService) DescribeCloudfwVpcControlPolicy(id string) (map[string]
 
 	for _, policy := range policyList {
 		policyMap := policy.(map[string]interface{})
-		if policyMap["AclUuid"] == id {
+		if policyMap["AclUuid"] == parst[0] {
 			return policyMap, nil
 		}
 	}

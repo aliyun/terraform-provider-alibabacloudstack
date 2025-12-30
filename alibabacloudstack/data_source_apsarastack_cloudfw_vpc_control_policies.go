@@ -269,10 +269,9 @@ func dataSourceAlibabacloudStackCloudfwVpcControlPoliciesRead(d *schema.Resource
 	for _, policy := range policiesList {
 		policyMap := policy.(map[string]interface{})
 
-		// Check if policy id is in ids filter
+		id := fmt.Sprintf("%s:%s", policyMap["AclUuid"], policyMap["Direction"])
 		if len(idsMap) > 0 {
-			aclUuid := policyMap["AclUuid"].(string)
-			if _, ok := idsMap[aclUuid]; !ok {
+			if _, ok := idsMap[id]; !ok {
 				continue
 			}
 		}
@@ -302,8 +301,8 @@ func dataSourceAlibabacloudStackCloudfwVpcControlPoliciesRead(d *schema.Resource
 		policyMap := policy.(map[string]interface{})
 
 		mapping := map[string]interface{}{}
-
-		mapping["id"] = policyMap["AclUuid"]
+		id := fmt.Sprintf("%s:%s", policyMap["AclUuid"], policyMap["Direction"])
+		mapping["id"] = id
 		mapping["acl_uuid"] = policyMap["AclUuid"]
 		mapping["order"] = policyMap["Order"]
 		mapping["source"] = policyMap["Source"]

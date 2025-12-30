@@ -62,6 +62,7 @@ The following arguments are supported:
 * `new_order` - (Optional) The new policy order. Default value: `-1` (indicating adding to the end of the policy list).
 * `release` - (Optional) Whether to publish the policy. Valid values: `true` (publish), `false` (do not publish).
 * `vpc_firewall_id` - (Optional) The VPC firewall instance ID. If not specified, the default firewall instance is used.
+* `direction` - The policy direction. Valid value: `inout` (bidirectional traffic)、`in` (inbound traffic)、`out` (outbound traffic).
 
 ## Attributes Reference
 

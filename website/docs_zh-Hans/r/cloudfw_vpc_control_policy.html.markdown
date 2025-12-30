@@ -66,6 +66,7 @@ resource "alibabacloudstack_cloudfw_vpc_control_policy" "default" {
 * `new_order` - (可选) 新的策略顺序。默认值：`-1`（表示添加到策略列表末尾）。
 * `release` - (可选) 是否发布策略。取值：`true`（发布）、`false`（不发布）。
 * `vpc_firewall_id` - (可选) VPC防火墙实例ID。当未指定时，使用默认防火墙实例。
+* `direction` - (可选) 策略方向。取值：`inout`（双向流量）（默认）、`out`（出站流量）、`in`（入站流量）。
 
 ## 属性说明
 
