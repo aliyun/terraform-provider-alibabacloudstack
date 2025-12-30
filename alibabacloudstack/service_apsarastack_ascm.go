@@ -33,7 +33,7 @@ func (s *AscmService) DescribeAscmLogonPolicy(id string) (response *LoginPolicy,
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListLoginPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("LoginPolicy", response, request, request.QueryParams)
+	addDebug("LoginPolicy", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -100,7 +100,7 @@ func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRol
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListRoles", response, request, request.QueryParams)
+	addDebug("ListRoles", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -118,9 +118,9 @@ func (s *AscmService) DescribeAscmRamRole(id string) (response *ListAscmRolesRes
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "/ascm/auth/role/listRoles")
 	request.QueryParams["roleName"] = did[0]
-	request.QueryParams["roleType"] = "ROLETYPE_RAM"
 	var resp = &ListAscmRolesResponse{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("ListRoles", bresponse, request, request.QueryParams)
 
 	if err != nil {
 		errmsg := ""
@@ -134,7 +134,6 @@ func (s *AscmService) DescribeAscmRamRole(id string) (response *ListAscmRolesRes
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListRoles", response, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -167,7 +166,7 @@ func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, 
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMServiceRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListRAMServiceRoles", response, request, request.QueryParams)
+	addDebug("ListRAMServiceRoles", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -211,7 +210,7 @@ func (s *AscmService) DescribeAscmResourceGroupUserAttachment(id string) (respon
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListAscmUsersInsideResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListAscmUsersInsideResourceGroup", response, request, request.QueryParams)
+	addDebug("ListAscmUsersInsideResourceGroup", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -248,7 +247,7 @@ func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *Lis
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "ListResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListResourceGroup", response, request, request.QueryParams)
+	addDebug("ListResourceGroup", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -401,7 +400,7 @@ func (s *AscmService) DescribeAscmUserGroupRoleBinding(id string) (response *Use
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUserGroups", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUserGroups", response, request, request.QueryParams)
+	addDebug("ListUserGroups", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -441,7 +440,7 @@ func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, er
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUsers", response, request, request.QueryParams)
+	addDebug("ListUsers", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -473,7 +472,7 @@ func (s *AscmService) DescribeAscmDeletedUser(id string) (response *DeletedUser,
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListDeletedUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListDeletedUsers", response, request, request.QueryParams)
+	addDebug("ListDeletedUsers", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -544,6 +543,7 @@ func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, e
 	request.QueryParams["policyName"] = did[0]
 	var resp = &RamPolicies{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("ListRAMPolicies", bresponse, request, request.QueryParams)
 
 	if err != nil {
 		errmsg := ""
@@ -557,7 +557,6 @@ func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, e
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListRAMPolicies", response, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -577,6 +576,7 @@ func (s *AscmService) DescribeAscmRamPolicyForRole(id string) (response *RamPoli
 	request.QueryParams["RamPolicyId"] = did[0]
 	var resp = &RamPolicies{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("ListRAMPolicies", bresponse, request, request.QueryParams)
 
 	if err != nil {
 		errmsg := ""
@@ -670,7 +670,7 @@ func (s *AscmService) DescribeAscmPasswordPolicy(id string) (response *PasswordP
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetPasswordPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("GetPasswordPolicy", response, request, request.QueryParams)
+	addDebug("GetPasswordPolicy", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -702,7 +702,7 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsersInUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUsersInUserGroup", response, request, request.QueryParams)
+	addDebug("ListUsersInUserGroup", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {

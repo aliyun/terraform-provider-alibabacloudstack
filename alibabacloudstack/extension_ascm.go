@@ -604,24 +604,25 @@ type AscmCustomRole struct {
 }
 
 type AscmRoleData struct {
-	Active                 bool   `json:"active"`
-	ArID                   string `json:"arId"`
-	Code                   string `json:"code"`
-	Default                bool   `json:"default"`
-	Description            string `json:"description,omitempty"`
-	Enable                 bool   `json:"enable"`
-	ID                     int    `json:"id"`
-	OrganizationVisibility string `json:"organizationVisibility"`
-	OwnerOrganizationID    int    `json:"ownerOrganizationId"`
-	RAMRole                bool   `json:"rAMRole"`
-	RoleLevel              int64  `json:"roleLevel"`
-	RoleID                 int    `json:"roleId"`
-	NewRoleName            string `json:"newRoleName"`
-	NewDescription         string `json:"newDescription"`
-	RoleName               string `json:"roleName"`
-	RoleRange              string `json:"roleRange"`
-	RoleType               string `json:"roleType"`
-	UserCount              int    `json:"userCount"`
+	Active                   bool   `json:"active"`
+	ArID                     string `json:"arId"`
+	Code                     string `json:"code"`
+	Default                  bool   `json:"default"`
+	Description              string `json:"description,omitempty"`
+	Enable                   bool   `json:"enable"`
+	ID                       int    `json:"id"`
+	OrganizationVisibility   string `json:"organizationVisibility"`
+	OwnerOrganizationID      int    `json:"ownerOrganizationId"`
+	RAMRole                  bool   `json:"rAMRole"`
+	RoleLevel                int64  `json:"roleLevel"`
+	RoleID                   int    `json:"roleId"`
+	NewRoleName              string `json:"newRoleName"`
+	NewDescription           string `json:"newDescription"`
+	RoleName                 string `json:"roleName"`
+	RoleRange                string `json:"roleRange"`
+	RoleType                 string `json:"roleType"`
+	UserCount                int    `json:"userCount"`
+	assumeRolePolicyDocument string `json:"assumeRolePolicyDocument"`
 }
 type CreateAscmRolesResponse struct {
 	Code    string       `json:"code"`

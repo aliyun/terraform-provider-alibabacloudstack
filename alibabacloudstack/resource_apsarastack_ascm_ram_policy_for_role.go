@@ -41,6 +41,7 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d *schema.ResourceData,
 	request.QueryParams["RoleId"] = fmt.Sprint(roleid)
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug("AddRAMPolicyToRole", bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -92,13 +93,13 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleDelete(d *schema.ResourceData,
 		request.QueryParams["roleId"] = did[1]
 
 		bresponse, err := client.ProcessCommonRequest(request)
-			if err != nil {
-				if bresponse == nil {
-					return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
-				}
-				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policy_for_role", "AddRAMPolicyToRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		if err != nil {
+			if bresponse == nil {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policy_for_role", "AddRAMPolicyToRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		}
 		check, err = ascmService.DescribeAscmRamPolicyForRole(d.Id())
 
 		if err != nil {

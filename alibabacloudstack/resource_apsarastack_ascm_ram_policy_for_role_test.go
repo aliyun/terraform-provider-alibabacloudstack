@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -77,6 +78,10 @@ func testAccCheckAscm_RamPolicyForRoleDestroy(s *terraform.State) error {
 }
 
 func testAccAscm_RamPolicyForRole_resource(name string) string {
+	ram_role_policy := os.Getenv("ALIBABACLOUDSTACK_RAM_ROLE_POLICY")
+
+	assumeRolePolicyDocument := fmt.Sprintf(`"{\"Version\":\"1\",\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":[],\"RAM\":[\"%s\"]}}]}"`, ram_role_policy)
+
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
@@ -93,10 +98,11 @@ resource "alibabacloudstack_ascm_ram_role" "default" {
   role_name = var.name
   description = "TestingRole"
   organization_visibility = "global"
-role_range = "roleRange.allOrganizations"
+  role_range = "roleRange.rawRamRole"
+  assume_role_policy_document = %s
 }
 
-`, name)
+`, name, assumeRolePolicyDocument)
 }
 
 var testAccCheckAscmRamPolicyForRole = map[string]string{

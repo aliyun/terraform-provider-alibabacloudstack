@@ -21,6 +21,10 @@ func resourceAlibabacloudStackAscmRamRole() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 			},
+			"assume_role_policy_document": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -36,7 +40,7 @@ func resourceAlibabacloudStackAscmRamRole() *schema.Resource {
 			"role_range": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"roleRange.orgAndSubOrgs", "roleRange.allOrganizations", "roleRange.userGroup"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"roleRange.orgAndSubOrgs", "roleRange.allOrganizations", "roleRange.userGroup", "roleRange.rawRamRole"}, false),
 			},
 		},
 	}
@@ -51,6 +55,8 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 	description := d.Get("description").(string)
 	rolerange := d.Get("role_range").(string)
 	organizationvisibility := d.Get("organization_visibility").(string)
+	assumeRolePolicyDocument := d.Get("assume_role_policy_document").(string)
+
 	check, err := ascmService.DescribeAscmRamRole(name)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "check role failed", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -58,16 +64,25 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 	if len(check.Data) > 0 {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "role alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
+
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateRole", "/ascm/auth/role/createRole")
-	mergeMaps(request.QueryParams, map[string]string{
+
+	// Prepare the base parameters
+	params := map[string]string{
 		"roleName":               name,
 		"description":            description,
 		"roleRange":              rolerange,
-		"roleType":               "ROLETYPE_RAM",
 		"organizationVisibility": organizationvisibility,
-	})
+	}
+
+	if assumeRolePolicyDocument != "" {
+		params["AssumeRolePolicyDocument"] = assumeRolePolicyDocument
+	}
+
+	mergeMaps(request.QueryParams, params)
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug("CreateRole", bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -103,7 +118,13 @@ func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta inter
 	d.Set("organization_visibility", object.Data[0].OrganizationVisibility)
 	d.Set("role_id", object.Data[0].ID)
 	d.Set("description", object.Data[0].Description)
-	d.Set("role_range", object.Data[0].RoleRange)
+	if object.Data[0].assumeRolePolicyDocument != "" {
+		d.Set("assume_role_policy_document", object.Data[0].assumeRolePolicyDocument)
+	}
+	if object.Data[0].RoleRange != "-" {
+		d.Set("role_range", object.Data[0].RoleRange)
+	}
+
 	return nil
 }
 
@@ -130,6 +151,7 @@ func resourceAlibabacloudStackAscmRamRoleDelete(d *schema.ResourceData, meta int
 		request.QueryParams["roleName"] = did[0]
 
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("RemoveRole", bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))

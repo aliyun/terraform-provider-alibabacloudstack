@@ -23,6 +23,7 @@ func resourceAlibabacloudStackAscmRamPolicy() *schema.Resource {
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(0, 128),
 			},
 			"policy_document": {
@@ -58,6 +59,7 @@ func resourceAlibabacloudStackAscmRamPolicyCreate(d *schema.ResourceData, meta i
 		request.QueryParams["policyDocument"] = policyDoc
 
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("CreateRAMPolicy", bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -97,7 +99,9 @@ func resourceAlibabacloudStackAscmRamPolicyRead(d *schema.ResourceData, meta int
 
 	d.Set("name", did[0])
 	d.Set("ram_id", did[1])
-	d.Set("description", response.Data[0].Description)
+	if response.Data[0].Description != "" {
+		d.Set("description", response.Data[0].Description)
+	}
 	d.Set("policy_document", response.Data[0].PolicyDocument)
 	return nil
 }
@@ -105,11 +109,11 @@ func resourceAlibabacloudStackAscmRamPolicyRead(d *schema.ResourceData, meta int
 func resourceAlibabacloudStackAscmRamPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
-	
+
 	if d.IsNewResource() {
 		return nil
 	}
-	
+
 	_, err := ascmService.DescribeAscmRamPolicy(d.Id())
 	if err != nil {
 		return err
