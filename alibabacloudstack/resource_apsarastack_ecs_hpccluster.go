@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
@@ -24,6 +24,10 @@ func resourceAlibabacloudStackEcsHpcCluster() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"hpc_cluster_id": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -48,18 +52,15 @@ func resourceAlibabacloudStackEcsHpcClusterCreate(d *schema.ResourceData, meta i
 	request.QueryParams["ClientToken"] = ClientToken
 	request.QueryParams["Description"] = Description
 
-	raw, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-		return EcsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_hpc_cluster", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_hpc_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(action, raw, request)
+	addDebug(action, bresponse, request)
 
 	resp := &ecs.CreateHpcClusterResponse{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
@@ -81,6 +82,7 @@ func resourceAlibabacloudStackEcsHpcClusterRead(d *schema.ResourceData, meta int
 	}
 	d.Set("description", object.HpcClusters.HpcCluster[0].Description)
 	d.Set("name", object.HpcClusters.HpcCluster[0].Name)
+	d.Set("hpc_cluster_id", object.HpcClusters.HpcCluster[0].HpcClusterId)
 	return nil
 }
 
@@ -89,7 +91,7 @@ func resourceAlibabacloudStackEcsHpcClusterUpdate(d *schema.ResourceData, meta i
 	update := false
 	Description := d.Get("description").(string)
 	var Name string
-	if d.HasChange("name") {
+	if d.HasChanges("name", "description") {
 		update = true
 		if v, ok := d.GetOk("name"); ok {
 			Name = fmt.Sprint(v.(string))
@@ -108,16 +110,10 @@ func resourceAlibabacloudStackEcsHpcClusterUpdate(d *schema.ResourceData, meta i
 		request.QueryParams["Description"] = Description
 		request.QueryParams["Name"] = Name
 
-		response, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-			return EcsClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := response.(*responses.CommonResponse)
-		addDebug(action, response, request)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(action, bresponse, request, request.QueryParams)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
@@ -136,16 +132,10 @@ func resourceAlibabacloudStackEcsHpcClusterDelete(d *schema.ResourceData, meta i
 	request.QueryParams["HpcClusterId"] = HpcClusterId
 	request.QueryParams["ClientToken"] = ClientToken
 
-	response, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-		return EcsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := response.(*responses.CommonResponse)
-	addDebug(action, response, request)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(action, bresponse, request, request.QueryParams)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	return nil
