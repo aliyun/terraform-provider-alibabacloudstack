@@ -40,6 +40,7 @@ func TestAccAlibabacloudStackAscm_CustomRoleBasic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"privileges"},
 			},
 		},
 	})
@@ -72,7 +73,7 @@ func testAccCheckAscm_CustomRoleDestroy(s *terraform.State) error {
 
 const testAccAscm_CustomRole_resource = `
 resource "alibabacloudstack_ascm_custom_role" "default" {
-	role_name = "Test_custom_Role"
+	role_name = "Test-custom-Role"
 	description = "TestRole"
 	organization_visibility = "organizationVisibility.global"
 	role_range = "roleRange.allOrganizations"

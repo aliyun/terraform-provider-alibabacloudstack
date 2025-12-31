@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -53,7 +54,6 @@ func resourceAlibabacloudStackAscmRole() *schema.Resource {
 
 func resourceAlibabacloudStackAscmRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ecs.Client
 	ascmService := AscmService{client}
 	name := d.Get("role_name").(string)
 	description := d.Get("description").(string)
@@ -84,28 +84,21 @@ func resourceAlibabacloudStackAscmRoleCreate(d *schema.ResourceData, meta interf
 			"organizationVisibility": organizationvisibility,
 			"params":                 fmt.Sprintf("{\"privileges\":%s}", priv),
 		})
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-
-		bresponse, ok := raw.(*responses.CommonResponse)
+		response := responses.CommonResponse{}
+		bresponse, err := client.ProcessCommonRequest(request)
+		log.Printf(" response of raw CreateRole : %s", bresponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_custom_role", "CreateRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_custom_role", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug("CreateRole", raw, requestInfo, request)
 
-		if bresponse.GetHttpStatus() != 200 {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_custom_role", "CreateRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if err != nil {
+			return errmsgs.WrapError(err)
 		}
-		addDebug("CreateRole", raw, requestInfo, bresponse.GetHttpContentString())
 	}
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 		check, err = ascmService.DescribeAscmCustomRole(name)
@@ -139,6 +132,7 @@ func resourceAlibabacloudStackAscmRoleRead(d *schema.ResourceData, meta interfac
 	d.Set("organization_visibility", object.Data[0].OrganizationVisibility)
 	d.Set("role_id", object.Data[0].ID)
 	d.Set("description", object.Data[0].Description)
+	d.Set("role_range", object.Data[0].RoleRange)
 	return nil
 }
 
@@ -156,16 +150,9 @@ func resourceAlibabacloudStackAscmRoleDelete(d *schema.ResourceData, meta interf
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRole", "/ascm/auth/role/removeRole")
 		request.QueryParams["roleName"] = did[0]
-
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_custom_role", "RemoveRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		_, err = ascmService.DescribeAscmCustomRole(d.Id())
