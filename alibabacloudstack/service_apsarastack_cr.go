@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	"errors"
+	"strconv"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"strconv"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
@@ -646,4 +647,27 @@ func (c *CrService) GenResourceId(args ...string) string {
 
 func (c *CrService) ParseResourceId(id string) []string {
 	return strings.Split(id, COLON_SEPARATED)
+}
+func (c *CrService) DescribeCrArtifactLifecycleRule(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{
+		"PageNo":     1,
+		"PageSize":   30,
+		"InstanceId": "cri-private",
+		"RuleId":     id,
+	}
+
+	if response, err := c.client.DoTeaRequest("GET", "cr-ee", "2018-12-01", "ListArtifactLifecycleRule", "", nil, reqQuery, nil); err != nil {
+		return nil, err
+	} else {
+		if rules, ok := response["Rules"].([]interface{}); ok {
+			for _, rule := range rules {
+				ruleMap := rule.(map[string]interface{})
+				if ruleId, ok := ruleMap["RuleId"].(string); ok && ruleId == id {
+					return ruleMap, nil
+				}
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("CrArtifactLifecycleRule %s not found", id))
 }
