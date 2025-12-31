@@ -6,9 +6,6 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -96,17 +93,14 @@ func resourceAlibabacloudStackEcsDeploymentSetCreate(d *schema.ResourceData, met
 	})
 	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
-	raw, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-		return EcsClient.ProcessCommonRequest(request)
-	})
-	addDebug(action, raw, request)
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(action, bresponse, request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_deployment_set", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_deployment_set", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	resp := &datahub_patch.EcsDeploymentSetCreateResult{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
@@ -166,16 +160,10 @@ func resourceAlibabacloudStackEcsDeploymentSetUpdate(d *schema.ResourceData, met
 	request.QueryParams["DeploymentSetId"] = DeploymentSetId
 	request.QueryParams["Description"] = Description
 	if update {
-		response, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-			return EcsClient.ProcessCommonRequest(request)
-		})
-		addDebug(action, response, request, request.QueryParams)
-		bresponse, ok := response.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(action, bresponse, request, request.QueryParams)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
@@ -189,16 +177,10 @@ func resourceAlibabacloudStackEcsDeploymentSetDelete(d *schema.ResourceData, met
 
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
 	request.QueryParams["DeploymentSetId"] = DeploymentSetId
-	response, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-		return EcsClient.ProcessCommonRequest(request)
-	})
-	addDebug(action, response, request)
-	bresponse, ok := response.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(action, bresponse, request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	return nil
