@@ -1328,11 +1328,11 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			wait()
 			return resource.RetryableError(err)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "LockTimeout", "ServiceUnavailable", "RequestTimeout", "asapi.server.timeout.socket"}) {
+		if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "LockTimeout", "Throttling", "RequestTimeout", "asapi.server.timeout.socket"}) {
 			wait()
 			return resource.RetryableError(err)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound"}) && retryTimes > 0 {
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable"}) && retryTimes > 0 {
 			retryTimes -= 1
 			wait()
 			return resource.RetryableError(err)

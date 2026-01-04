@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackCreeAttestorLifecycleRulesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackCrEEArtifactLifecycleRulesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	idsConf := dataSourceTestAccConfig{
 		existConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
