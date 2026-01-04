@@ -91,10 +91,10 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRuleCreate(d *schema.Resource
 		"EnableDeleteTag":   d.Get("enable_delete_tag").(bool),
 		"RecentPullKeep":    d.Get("recent_pull_keep").(int),
 		"RecentPushKeep":    d.Get("recent_push_keep").(int),
+		"Auto":              false,
 	}
 	if v, ok := d.GetOk("tag_regexp"); ok {
 		reqQuery["TagRegexp"] = v.(string)
-		reqQuery["Auto"] = true
 		reqQuery["sTagRegexp"] = true
 	}
 	if scope == "REPO" {
@@ -174,10 +174,10 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRuleUpdate(d *schema.Resource
 			"EnableDeleteTag":   d.Get("enable_delete_tag").(bool),
 			"RecentPullKeep":    d.Get("recent_pull_keep").(int),
 			"RecentPushKeep":    d.Get("recent_push_keep").(int),
+			"Auto":              false,
 		}
 		if v, ok := d.GetOk("tag_regexp"); ok {
 			reqQuery["TagRegexp"] = v.(string)
-			reqQuery["Auto"] = true
 			reqQuery["sTagRegexp"] = true
 		}
 		if scope == "REPO" {

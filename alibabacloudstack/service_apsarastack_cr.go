@@ -650,10 +650,11 @@ func (c *CrService) DescribeCrEEArtifactLifecycleRule(id string) (map[string]int
 	instanceId := strRet[0]
 	ruleId := strRet[1]
 	reqQuery := map[string]interface{}{
-		"PageNo":     1,
-		"PageSize":   30,
-		"InstanceId": instanceId,
-		"RuleId":     ruleId,
+		"PageNo":          1,
+		"PageSize":        30,
+		"InstanceId":      instanceId,
+		"RuleId":          ruleId,
+		"EnableDeleteTag": true,
 	}
 
 	if response, err := c.client.DoTeaRequest("GET", "cr-ee", "2018-12-01", "ListArtifactLifecycleRule", "", nil, reqQuery, nil); err != nil {

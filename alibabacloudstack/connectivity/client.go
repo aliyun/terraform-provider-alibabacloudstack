@@ -1325,10 +1325,11 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			return nil
 		}
 		if response == nil {
+			retryTimes -= 1
 			wait()
 			return resource.RetryableError(err)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "LockTimeout", "Throttling", "RequestTimeout", "asapi.server.timeout.socket"}) {
+		if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "LockTimeout", "Throttling.User", "RequestTimeout", "asapi.server.timeout.socket"}) {
 			wait()
 			return resource.RetryableError(err)
 		}
