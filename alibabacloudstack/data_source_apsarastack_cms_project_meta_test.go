@@ -1,12 +1,13 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackCms_Projectmeta_DataSource(t *testing.T) {
-	testAccPreCheckWithAPIIsNotSupport(t)
+	// testAccPreCheckWithAPIIsNotSupport(t)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
