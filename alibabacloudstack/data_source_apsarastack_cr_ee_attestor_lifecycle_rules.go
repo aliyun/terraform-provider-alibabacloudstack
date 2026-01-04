@@ -1,8 +1,9 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
+	"fmt"
 	"regexp"
-	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -31,11 +32,6 @@ func dataSourceAlibabacloudStackCrEEAttestorLifecycleRules() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The instance ID associated with the lifecycle rules.",
-			},
-			"enable_delete_tag": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Filter rules by whether tag deletion is enabled.",
 			},
 			"enable_delete_untagged_manifest": {
 				Type:        schema.TypeBool,
@@ -107,6 +103,14 @@ func dataSourceAlibabacloudStackCrEEAttestorLifecycleRules() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"recent_pull_keep": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"recent_push_keep": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -125,10 +129,6 @@ func dataSourceAlibabacloudStackCrEEAttestorLifecycleRulesRead(d *schema.Resourc
 
 	if v, ok := d.GetOk("enable_delete_tag"); ok {
 		request["EnableDeleteTag"] = v.(bool)
-	}
-
-	if v, ok := d.GetOk("enable_delete_untagged_manifest"); ok {
-		request["EnableDeleteUntaggedManifest"] = v.(bool)
 	}
 
 	// Initialize filters
@@ -154,25 +154,13 @@ func dataSourceAlibabacloudStackCrEEAttestorLifecycleRulesRead(d *schema.Resourc
 	for {
 		request["PageNo"] = pageNumber
 
-		response, err := client.DoTeaRequest("POST", "cr-ee", "2018-12-01", "ListArtifactLifecycleRule", "", nil, request, nil)
+		response, err := client.DoTeaRequest("GET", "cr-ee", "2018-12-01", "ListArtifactLifecycleRule", "", nil, request, nil)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
 
-		// Check if request was successful
-		isSuccess, ok := response["IsSuccess"]
-		if !ok || !isSuccess.(bool) {
-			return errmsgs.WrapErrorf(err, "Failed to list artifact lifecycle rules")
-		}
-
-		// Extract rules from response
-		rules, ok := response["Rules"]
-		if !ok {
-			break
-		}
-
-		rulesList := rules.([]interface{})
-		if len(rulesList) == 0 {
+		rulesList, ok := response["Rules"].([]interface{})
+		if !ok || len(rulesList) == 0 {
 			break
 		}
 
@@ -180,14 +168,16 @@ func dataSourceAlibabacloudStackCrEEAttestorLifecycleRulesRead(d *schema.Resourc
 		for _, rule := range rulesList {
 			ruleMap := rule.(map[string]interface{})
 
-			// Check if rule id is in the ids filter
-			ruleId := ""
-			if id, ok := ruleMap["RuleId"]; ok {
-				ruleId = id.(string)
+			ruleId, ok := ruleMap["RuleId"]
+			if !ok {
+				return fmt.Errorf("RuleId not found in response")
 			}
 
+			// Generate resource ID
+			resourceId := fmt.Sprintf("%s:%s", d.Get("instance_id").(string), ruleId.(string))
+
 			if len(idsMap) > 0 {
-				if _, ok := idsMap[ruleId]; !ok {
+				if _, ok := idsMap[resourceId]; !ok {
 					continue
 				}
 			}
@@ -207,8 +197,9 @@ func dataSourceAlibabacloudStackCrEEAttestorLifecycleRulesRead(d *schema.Resourc
 
 		// Check if we've reached the end of results
 		totalCount := 0
-		if count, ok := response["TotalCount"]; ok {
-			totalCount = int(count.(float64))
+		if v, ok := response["TotalCount"]; ok {
+			count, _ := v.(json.Number).Int64()
+			totalCount = int(count)
 		}
 
 		if len(allRules) >= totalCount {
@@ -247,11 +238,7 @@ func dataSourceAlibabacloudStackCrEEAttestorLifecycleRulesRead(d *schema.Resourc
 		}
 
 		if v, ok := ruleMap["RetentionTagCount"]; ok {
-			if count, err := strconv.Atoi(v.(string)); err == nil {
-				mapping["retention_tag_count"] = count
-			} else {
-				mapping["retention_tag_count"] = int(v.(float64))
-			}
+			mapping["retention_tag_count"] = v
 		}
 
 		if v, ok := ruleMap["TagRegexp"]; ok {
@@ -271,19 +258,11 @@ func dataSourceAlibabacloudStackCrEEAttestorLifecycleRulesRead(d *schema.Resourc
 		}
 
 		if v, ok := ruleMap["ModifiedTime"]; ok {
-			if time, err := strconv.Atoi(v.(string)); err == nil {
-				mapping["modified_time"] = time
-			} else {
-				mapping["modified_time"] = int(v.(float64))
-			}
+			mapping["modified_time"] = v
 		}
 
 		if v, ok := ruleMap["CreateTime"]; ok {
-			if time, err := strconv.Atoi(v.(string)); err == nil {
-				mapping["create_time"] = time
-			} else {
-				mapping["create_time"] = int(v.(float64))
-			}
+			mapping["create_time"] = v
 		}
 
 		if v, ok := ruleMap["ScheduleTime"]; ok {
@@ -291,11 +270,13 @@ func dataSourceAlibabacloudStackCrEEAttestorLifecycleRulesRead(d *schema.Resourc
 		}
 
 		if v, ok := ruleMap["NextTime"]; ok {
-			if time, err := strconv.Atoi(v.(string)); err == nil {
-				mapping["next_time"] = time
-			} else {
-				mapping["next_time"] = int(v.(float64))
-			}
+			mapping["next_time"] = v
+		}
+		if v, ok := ruleMap["RecentPullKeep"]; ok {
+			mapping["recent_pull_keep"] = v
+		}
+		if v, ok := ruleMap["RecentPushKeep"]; ok {
+			mapping["recent_push_keep"] = v
 		}
 
 		rules = append(rules, mapping)

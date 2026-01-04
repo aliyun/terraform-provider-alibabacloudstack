@@ -168,9 +168,6 @@ func resourceAlibabacloudStackCrEeNamespaceDelete(d *schema.ResourceData, meta i
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if !response["asapiSuccess"].(bool) {
-		return fmt.Errorf("delete ee namespace failed, %s", response["asapiErrorMessage"].(string))
-	}
 
 	return nil
 }

@@ -17,6 +17,10 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRule() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"REPO", "NAMESPACE"}, false),
 			},
+			"instance_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"retention_tag_count": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -37,6 +41,14 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRule() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"recent_pull_keep": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"recent_push_keep": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 			"schedule": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -55,7 +67,7 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRule() *schema.Resource {
 			},
 			"modified_time": {
 				Type:     schema.TypeInt,
-				Optional: true,
+				Computed: true,
 			},
 			"create_time": {
 				Type:     schema.TypeInt,
@@ -71,14 +83,16 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRuleCreate(d *schema.Resource
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	scope := d.Get("scope").(string)
 	reqQuery := map[string]interface{}{
-		"InstanceId":        "cri-private",
+		"InstanceId":        d.Get("instance_id"),
 		"Scope":             scope,
 		"Schedule":          "MANUAL",
 		"NamespaceName":     d.Get("namespace_name"),
 		"RetentionTagCount": d.Get("retention_tag_count").(int),
 		"EnableDeleteTag":   d.Get("enable_delete_tag").(bool),
+		"RecentPullKeep":    d.Get("recent_pull_keep").(int),
+		"RecentPushKeep":    d.Get("recent_push_keep").(int),
 	}
-	if v, ok := d.GetOk("TagRegexp"); ok {
+	if v, ok := d.GetOk("tag_regexp"); ok {
 		reqQuery["TagRegexp"] = v.(string)
 		reqQuery["Auto"] = true
 		reqQuery["sTagRegexp"] = true
@@ -87,7 +101,7 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRuleCreate(d *schema.Resource
 		reqQuery["RepoName"] = d.Get("repo_name")
 	}
 
-	response, err := client.DoTeaRequest("POST", "cr-ee", "2018-12-01", "CreateAttestor", "", nil, reqQuery, nil)
+	response, err := client.DoTeaRequest("POST", "cr-ee", "2018-12-01", "CreateArtifactLifecycleRule", "", nil, reqQuery, nil)
 	if err != nil {
 		return err
 	}
@@ -99,7 +113,8 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRuleCreate(d *schema.Resource
 	}
 
 	// Generate resource ID
-	d.SetId(ruleId.(string))
+	resourceId := fmt.Sprintf("%s:%s", d.Get("instance_id").(string), ruleId.(string))
+	d.SetId(resourceId)
 
 	return nil
 }
@@ -108,7 +123,7 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRuleRead(d *schema.ResourceDa
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := CrService{client}
 
-	object, err := crService.DescribeCrArtifactLifecycleRule(d.Id())
+	object, err := crService.DescribeCrEEArtifactLifecycleRule(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -116,9 +131,10 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRuleRead(d *schema.ResourceDa
 		}
 		return errmsgs.WrapError(err)
 	}
-
+	if v, ok := object["Scope"]; ok && v.(string) != "" {
+		d.Set("scope", v.(string))
+	}
 	d.Set("rule_id", object["RuleId"])
-	d.Set("scope", object["Scope"])
 	d.Set("schedule", object["Schedule"])
 	d.Set("retention_tag_count", object["RetentionTagCount"])
 	d.Set("tag_regexp", object["TagRegexp"])
@@ -129,6 +145,8 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRuleRead(d *schema.ResourceDa
 	d.Set("enable_delete_untagged_manifest", object["EnableDeleteUntaggedManifest"])
 	d.Set("modified_time", object["ModifiedTime"])
 	d.Set("create_time", object["CreateTime"])
+	d.Set("recent_pull_keep", object["RecentPullKeep"])
+	d.Set("recent_push_keep", object["RecentPushKeep"])
 
 	return nil
 }
@@ -140,18 +158,24 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRuleUpdate(d *schema.Resource
 		return nil
 	}
 
-	if d.HasChanges("scope", "tag_regexp", "namespace_name", "retention_tag_count") {
+	if d.HasChanges("scope", "tag_regexp", "namespace_name", "retention_tag_count", "recent_pull_keep", "recent_push_keep") {
 		scope := d.Get("scope").(string)
+		crService := CrService{client}
+		strRet := crService.ParseResourceId(d.Id())
+		instanceId := strRet[0]
+		ruleId := strRet[1]
 		reqQuery := map[string]interface{}{
-			"RuleId":            d.Id(),
-			"InstanceId":        "cri-private",
+			"RuleId":            ruleId,
+			"InstanceId":        instanceId,
 			"Scope":             scope,
 			"Schedule":          "MANUAL",
 			"NamespaceName":     d.Get("namespace_name"),
 			"RetentionTagCount": d.Get("retention_tag_count").(int),
 			"EnableDeleteTag":   d.Get("enable_delete_tag").(bool),
+			"RecentPullKeep":    d.Get("recent_pull_keep").(int),
+			"RecentPushKeep":    d.Get("recent_push_keep").(int),
 		}
-		if v, ok := d.GetOk("TagRegexp"); ok {
+		if v, ok := d.GetOk("tag_regexp"); ok {
 			reqQuery["TagRegexp"] = v.(string)
 			reqQuery["Auto"] = true
 			reqQuery["sTagRegexp"] = true
@@ -169,10 +193,13 @@ func resourceAlibabacloudStackCrEEArtifactLifecycleRuleUpdate(d *schema.Resource
 
 func resourceAlibabacloudStackCrEEArtifactLifecycleRuleDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
+	crService := CrService{client}
+	strRet := crService.ParseResourceId(d.Id())
+	instanceId := strRet[0]
+	ruleId := strRet[1]
 	request := map[string]interface{}{
-		"InstanceId": "cri-private",
-		"RuleId":     d.Id(),
+		"InstanceId": instanceId,
+		"RuleId":     ruleId,
 	}
 
 	_, err := client.DoTeaRequest("POST", "cr-ee", "2018-12-01", "DeleteArtifactLifecycleRule", "", nil, request, nil)

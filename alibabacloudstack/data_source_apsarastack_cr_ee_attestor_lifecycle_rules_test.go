@@ -30,25 +30,16 @@ func TestAccAlibabacloudStackCreeAttestorLifecycleRulesDataSource(t *testing.T) 
 		}),
 	}
 
-	enableDeleteTagConf := dataSourceTestAccConfig{
+	allConf := dataSourceTestAccConfig{
 		existConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
-			"instance_id":       `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
-			"enable_delete_tag": "true",
+			"instance_id":     `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
+			"ids":             `["${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.id}"]`,
+			"namespace_regex": `"${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.namespace_name}"`,
 		}),
 		fakeConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
-			"instance_id":       `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
-			"enable_delete_tag": "false",
-		}),
-	}
-
-	enableDeleteUntaggedManifestConf := dataSourceTestAccConfig{
-		existConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
-			"instance_id":                     `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
-			"enable_delete_untagged_manifest": "false",
-		}),
-		fakeConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
-			"instance_id":                     `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
-			"enable_delete_untagged_manifest": "true",
+			"instance_id":     `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
+			"ids":             `["${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.id}_fake"]`,
+			"namespace_regex": `"${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.namespace_name}_fake"`,
 		}),
 	}
 
@@ -76,7 +67,7 @@ func TestAccAlibabacloudStackCreeAttestorLifecycleRulesDataSource(t *testing.T) 
 		fakeMapFunc:  fakeMapFunc,
 	}
 
-	dataSourceAttr.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, enableDeleteTagConf, enableDeleteUntaggedManifestConf)
+	dataSourceAttr.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
 
 // Generate dependency resource template for CreeAttestorLifecycleRules
@@ -101,11 +92,14 @@ resource "alibabacloudstack_cr_ee_namespace" "default" {
 }
 
 resource "alibabacloudstack_cr_ee_attestor_lifecycle_rule" "default" {
+    instance_id = "${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"
 	scope = "NAMESPACE"
 	retention_tag_count = "30"
 	tag_regexp = "release-v.*"
 	enable_delete_tag = "true"
 	namespace_name = "${alibabacloudstack_cr_ee_namespace.default.name}"
+	recent_pull_keep = 30
+	recent_push_keep = 20
 }
 
 data "alibabacloudstack_cr_ee_attestor_lifecycle_rules" "default" {

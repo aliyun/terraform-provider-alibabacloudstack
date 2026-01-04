@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
@@ -163,9 +163,4 @@ resource "alibabacloudstack_cr_namespace" "default" {
 `, name)
 }
 
-var crRepoMap = map[string]string{
-	"namespace": CHECKSET,
-	"name":      CHECKSET,
-	"summary":   "summary",
-	"repo_type": "PUBLIC",
-}
+var crRepoMap = map[string]string{}

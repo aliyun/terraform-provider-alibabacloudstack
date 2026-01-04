@@ -320,9 +320,6 @@ func (c *CrService) ListCrEeInstances(pageNo int, pageSize int) (map[string]inte
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	if !response["asapiSuccess"].(bool) {
-		return nil, fmt.Errorf("read ee repo failed, %s", response["asapiErrorMessage"].(string))
-	}
 	repoList := response["Instances"].([]interface{})
 	if len(repoList) == 0 {
 		return nil, errmsgs.WrapError(fmt.Errorf("cr-ee instance not found"))
@@ -384,8 +381,8 @@ func (c *CrService) GetCrEeInstanceUsage(instanceId string) (map[string]interfac
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	if !response["asapiSuccess"].(bool) {
-		return nil, fmt.Errorf("read ee repo failed, %s", response["asapiErrorMessage"].(string))
+	if code, ok := response["Code"].(string); ok && code != "success" {
+		return nil, fmt.Errorf("read ee repo failed, %s", response)
 	}
 
 	return response, nil
@@ -648,12 +645,15 @@ func (c *CrService) GenResourceId(args ...string) string {
 func (c *CrService) ParseResourceId(id string) []string {
 	return strings.Split(id, COLON_SEPARATED)
 }
-func (c *CrService) DescribeCrArtifactLifecycleRule(id string) (map[string]interface{}, error) {
+func (c *CrService) DescribeCrEEArtifactLifecycleRule(id string) (map[string]interface{}, error) {
+	strRet := c.ParseResourceId(id)
+	instanceId := strRet[0]
+	ruleId := strRet[1]
 	reqQuery := map[string]interface{}{
 		"PageNo":     1,
 		"PageSize":   30,
-		"InstanceId": "cri-private",
-		"RuleId":     id,
+		"InstanceId": instanceId,
+		"RuleId":     ruleId,
 	}
 
 	if response, err := c.client.DoTeaRequest("GET", "cr-ee", "2018-12-01", "ListArtifactLifecycleRule", "", nil, reqQuery, nil); err != nil {
@@ -662,7 +662,7 @@ func (c *CrService) DescribeCrArtifactLifecycleRule(id string) (map[string]inter
 		if rules, ok := response["Rules"].([]interface{}); ok {
 			for _, rule := range rules {
 				ruleMap := rule.(map[string]interface{})
-				if ruleId, ok := ruleMap["RuleId"].(string); ok && ruleId == id {
+				if rule_id, ok := ruleMap["RuleId"].(string); ok && rule_id == ruleId {
 					return ruleMap, nil
 				}
 			}
