@@ -1981,25 +1981,16 @@ func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub_patch.Ecs
 	request := s.client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
 	request.QueryParams["HpcClusterIds"] = string(ids)
 	request.QueryParams["ClientToken"] = ClientToken
-
-	raw, err := s.client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-		return EcsClient.ProcessCommonRequest(request)
-	})
-	//response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	log.Printf(" response of raw DescribeHpcClusters : %s", bresponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"NotExists.HpcCluster"}) {
-			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("EcsHpcCluster", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-			return resp, err
+		if bresponse == nil {
+			return resp, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		return resp, err
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeEcsHpcCluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(action, raw, request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
 		return resp, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
