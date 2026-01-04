@@ -192,36 +192,131 @@ type BindResourceAndUsers struct {
 	AscmUserIds     string `json:"ascm_user_ids"`
 }
 
-func (s *AscmService) DescribeAscmResourceGroupUserAttachment(id string) (response *AscmResourceGroupUser, err error) {
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListAscmUsersInsideResourceGroup", "/ascm/auth/resource_group/list_ascm_users")
-	request.QueryParams["resourceGroupId"] = id
-	var resp = &AscmResourceGroupUser{}
-	bresponse, err := s.client.ProcessCommonRequest(request)
+type ListAscmUsersResponse struct {
+	Code     string       `json:"code"`
+	Cost     int          `json:"cost"`
+	Data     []AscmUserv2 `json:"data"`
+	Success  bool         `json:"success"`
+	PageInfo PageInfo     `json:"pageInfo"`
+	Message  string       `json:"message"`
+}
 
+type AscmUserv2 struct {
+	ID                 int            `json:"id"`
+	LoginName          string         `json:"loginName"`
+	DisplayName        string         `json:"displayName"`
+	Email              string         `json:"email"`
+	CellphoneNum       string         `json:"cellphoneNum"`
+	Status             string         `json:"status"`
+	Deleted            bool           `json:"deleted"`
+	Organization       Organizationv2 `json:"organization"`
+	DefaultRole        Rolev2         `json:"defaultRole"`
+	Roles              []Rolev2       `json:"roles"`
+	UserRoles          []Rolev2       `json:"userRoles"`
+	LoginPolicy        LoginPolicyv2  `json:"loginPolicy"`
+	PrimaryKey         string         `json:"primaryKey"`
+	ParentPk           string         `json:"parentPk"`
+	EnableEmail        bool           `json:"enableEmail"`
+	EnableShortMessage bool           `json:"enableShortMessage"`
+	EnableDingTalk     bool           `json:"enableDingTalk"`
+	MobileNationCode   string         `json:"mobileNationCode"`
+	UserGroups         []interface{}  `json:"userGroups"`
+	UserGroupRoles     []interface{}  `json:"userGroupRoles"`
+}
+
+type Organizationv2 struct {
+	ID                int      `json:"id"`
+	Name              string   `json:"name"`
+	Alias             string   `json:"alias"`
+	Level             string   `json:"level"`
+	ParentID          int      `json:"parentId"`
+	UUID              string   `json:"uuid"`
+	MTime             int64    `json:"mtime"`
+	CTime             int64    `json:"ctime"`
+	MUserID           string   `json:"muserId"`
+	CUserID           string   `json:"cuserId"`
+	Internal          bool     `json:"internal"`
+	MultiCloudStatus  string   `json:"multiCloudStatus"`
+	SupportRegions    string   `json:"supportRegions"`
+	SupportRegionList []string `json:"supportRegionList"`
+}
+
+type Rolev2 struct {
+	ID                     int    `json:"id"`
+	Name                   string `json:"roleName"`
+	Code                   string `json:"code"`
+	Description            string `json:"description"`
+	RoleType               string `json:"roleType"`
+	RoleRange              string `json:"roleRange"`
+	OrganizationVisibility string `json:"organizationVisibility"`
+	OwnerOrganizationID    int    `json:"ownerOrganizationId"`
+	Level                  int    `json:"roleLevel"`
+	Active                 bool   `json:"active"`
+	Enable                 bool   `json:"enable"`
+	Default                bool   `json:"default"`
+	ArID                   string `json:"arId"`
+	RAMRole                bool   `json:"rAMRole"`
+}
+
+type LoginPolicyv2 struct {
+	ID                     int         `json:"id"`
+	Name                   string      `json:"name"`
+	Rule                   string      `json:"rule"`
+	Default                bool        `json:"default"`
+	Enable                 bool        `json:"enable"`
+	OwnerOrganizationID    int         `json:"ownerOrganizationId"`
+	OrganizationVisibility string      `json:"organizationVisibility"`
+	IPRanges               []IPRange   `json:"ipRanges"`
+	TimeRanges             []TimeRange `json:"timeRanges"`
+	MUserID                string      `json:"muserId"`
+	CUserID                string      `json:"cuserId"`
+	LPID                   string      `json:"lpId"`
+}
+
+type IPRange struct {
+	ID       int    `json:"loginPolicyId"`
+	Protocol string `json:"protocol"`
+	IPRange  string `json:"ipRange"`
+}
+
+type TimeRange struct {
+	ID        int    `json:"loginPolicyId"`
+	StartTime string `json:"startTime"`
+	EndTime   string `json:"endTime"`
+}
+
+type PageInfo struct {
+	Total       int `json:"total"`
+	TotalPage   int `json:"totalPage"`
+	PageSize    int `json:"pageSize"`
+	CurrentPage int `json:"currentPage"`
+}
+
+func (s *AscmService) DescribeAscmResourceGroupUserAttachment(rgId string) (*ListAscmUsersResponse, error) {
+	client := s.client
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListAscmUsersInsideResourceGroup", "/ascm/inner/user/listUsersInsideRg")
+
+	request.QueryParams["resourceGroupId"] = rgId
+
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		} else {
-			return nil, err
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorListAscmUsersInsideResourceGroupNotFound"}) {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListAscmUsersInsideResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_resource_group_user_attachment", "ListAscmUsersInsideResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListAscmUsersInsideResourceGroup", bresponse, request, request.QueryParams)
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+	var response ListAscmUsersResponse
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
-		return resp, errmsgs.WrapError(err)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "ListAscmUsersInsideResourceGroup", "ListAscmUsersInsideResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	if resp.ResourceGroupID != 0 {
-		return resp, errmsgs.WrapError(err)
+	if response.Code != "200" {
+		return nil, errmsgs.Error(response.Message)
 	}
-
-	return resp, nil
+	return &response, nil
 }
 
 func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *ListResourceGroup, err error) {

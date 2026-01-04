@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"strconv"
@@ -119,7 +120,7 @@ func (s *CmsService) DescribeSiteMonitor(id, keyword string) (siteMonitor cms.Si
 	raw, err := s.client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
 		return cmsClient.DescribeSiteMonitorList(listRequest)
 	})
-	list ,ok := raw.(*cms.DescribeSiteMonitorListResponse)
+	list, ok := raw.(*cms.DescribeSiteMonitorListResponse)
 	if err != nil {
 		errmsg := ""
 		if ok {
@@ -127,7 +128,7 @@ func (s *CmsService) DescribeSiteMonitor(id, keyword string) (siteMonitor cms.Si
 		}
 		return siteMonitor, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeSiteMonitor", listRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	
+
 	if len(list.SiteMonitors.SiteMonitor) < 1 {
 		return siteMonitor, errmsgs.GetNotFoundErrorFromString(errmsgs.GetNotFoundMessage("Site Monitor", id))
 	}
@@ -193,7 +194,7 @@ func (s *CmsService) DescribeCmsAlarmContact(id string) (object cms.Contact, err
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	
+
 	if response.Code != "200" {
 		err = errmsgs.Error("DescribeContactList failed for " + response.Message)
 		return
@@ -234,7 +235,7 @@ func (s *CmsService) DescribeCmsAlarmContactGroup(id string) (object cms.Contact
 			return object, err
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		
+
 		if response.Code != "200" {
 			err = errmsgs.Error("DescribeContactGroupList failed for " + response.Message)
 			return object, err
@@ -283,7 +284,7 @@ func (s *CmsService) DescribeCmsMetricRuleTemplateList() (templates []cms.Templa
 			}
 			return templates, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeMetricRuleTemplateList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		
+
 		if response.Code != 200 {
 			err = errmsgs.Error("DescribeMetricRuleTemplateList failed for " + response.Message)
 			return templates, err
@@ -314,26 +315,32 @@ func (s *CmsService) DescribeCmsMetricRuleTemplateDetail(id string) (object cms.
 }
 
 func (s *CmsService) DescribeMetricRuleTemplateAttribute(id string) (object *cms.DescribeMetricRuleTemplateAttributeResponse, err error) {
-	request := cms.CreateDescribeMetricRuleTemplateAttributeRequest()
-	s.client.InitRpcRequest(*request.RpcRequest)
-	request.TemplateId = id
-	raw, err := s.client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
-		return cmsClient.DescribeMetricRuleTemplateAttribute(request)
-	})
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	bresponse, ok := raw.(*cms.DescribeMetricRuleTemplateAttributeResponse)
-	if err != nil || bresponse.Code != 200{
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	request := s.client.NewCommonRequest("POST", "Cms", "2019-01-01", "DescribeMetricRuleTemplateAttribute", "")
+	request.QueryParams["TemplateId"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw DescribeMetricRuleTemplateAttribute : %s", bresponse)
+
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"TemplateNotExists", "errmsgs.ResourceNotfound"}) {
-			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DescribeMetricRuleTemplateAttribute", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-			return object, err
-		}
-		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		return object, err
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeMetricRuleTemplateAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	
-		return bresponse, nil
+	if bresponse == nil {
+		return nil, errmsgs.Error("DescribeMetricRuleTemplateAttribute response is nil")
+	}
+
+	responseBytes, err := json.Marshal(bresponse)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, "Failed to marshal CommonResponse to JSON")
+	}
+
+	typedResponse := &cms.DescribeMetricRuleTemplateAttributeResponse{}
+	if err := json.Unmarshal(responseBytes, typedResponse); err != nil {
+		return nil, errmsgs.WrapErrorf(err, "Failed to unmarshal response to DescribeMetricRuleTemplateAttributeResponse")
+	}
+	return typedResponse, nil
 }

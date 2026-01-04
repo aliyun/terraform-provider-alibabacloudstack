@@ -670,6 +670,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ascm_user_group_role_binding":           resourceAlibabacloudStackAscmUserGroupRoleBinding(),
 		"alibabacloudstack_ascm_user_role_binding":                 resourceAlibabacloudStackAscmUserRoleBinding(),
 		"alibabacloudstack_ascm_usergroup_user":                    resourceAlibabacloudStackAscmUserGroupUser(),
+		"alibabacloudstack_ascm_resource_group_user_attachment":    resourceAlibabacloudStackAscmResourceGroupUserAttachment(),
 		"alibabacloudstack_ascm_service_ram_role":                  resourceAlibabacloudStackAscmServiceRamRole(),
 		"alibabacloudstack_ascm_ram_service_role":                  resourceAlibabacloudStackAscmServiceRamRole(),
 		"alibabacloudstack_cms_alarm":                              resourceAlibabacloudStackCmsAlarm(),
