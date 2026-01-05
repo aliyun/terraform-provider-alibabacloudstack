@@ -57,7 +57,6 @@ The following arguments are supported:
 * `source` - (Required) The source address. Supports CIDR format (e.g., `192.168.1.0/24`) or address book name.
 * `source_type` - (Required) The source address type. Valid values: `net` (network segment), `group` (address book).
 * `dest_port` - (Optional) The destination port range. Format: `start_port/end_port` (e.g., `80/80`).
-* `dest_port_group` - (Optional) The destination port group name, which takes effect when `dest_port_type` is `group`.
 * `dest_port_type` - (Optional) The destination port type. Valid values: `port` (port), `group` (port group).
 * `new_order` - (Optional) The new policy order. Default value: `-1` (indicating adding to the end of the policy list).
 * `release` - (Optional) Whether to publish the policy. Valid values: `true` (publish), `false` (do not publish).

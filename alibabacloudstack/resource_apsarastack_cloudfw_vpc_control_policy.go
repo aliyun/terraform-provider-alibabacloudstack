@@ -69,7 +69,7 @@ func resourceAlibabacloudStackCloudfwVpcControlPolicy() *schema.Resource {
 			},
 			"dest_port_group": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"release": {
 				Type:     schema.TypeString,

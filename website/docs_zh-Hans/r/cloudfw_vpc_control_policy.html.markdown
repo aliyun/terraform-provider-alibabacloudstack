@@ -61,7 +61,6 @@ resource "alibabacloudstack_cloudfw_vpc_control_policy" "default" {
 * `source` - (必填) 源地址。支持CIDR格式（如`192.168.1.0/24`）或地址簿名称。
 * `source_type` - (必填) 源地址类型。取值：`net`（网段）、`group`（地址簿）。
 * `dest_port` - (可选) 目的端口范围。格式：`起始端口/结束端口`（如`80/80`）。
-* `dest_port_group` - (可选) 目的端口组名称，当`dest_port_type`为`group`时生效。
 * `dest_port_type` - (可选) 目的端口类型。取值：`port`（端口）、`group`（端口簿）。
 * `new_order` - (可选) 新的策略顺序。默认值：`-1`（表示添加到策略列表末尾）。
 * `release` - (可选) 是否发布策略。取值：`true`（发布）、`false`（不发布）。
