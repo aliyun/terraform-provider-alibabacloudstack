@@ -96,7 +96,6 @@ func testSweepExpressConnectVirtualBorderRouters(region string) error {
 			request := map[string]interface{}{
 				"VbrId":          vbrId,
 				"RegionId":       client.RegionId,
-				"ClientToken":    buildClientToken("DeleteVirtualBorderRouter"),
 				"Product":        "Vpc",
 				"OrganizationId": client.Department,
 			}

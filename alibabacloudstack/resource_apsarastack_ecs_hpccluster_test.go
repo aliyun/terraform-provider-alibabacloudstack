@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackEcsHpccluster0(t *testing.T) {
+func TestAccAlibabacloudStackEcsHpcCluster0(t *testing.T) {
 	var v *datahub_patch.EcsDescribeEcsHpcClusterResult
 
 	resourceId := "alibabacloudstack_ecs_hpccluster.default"

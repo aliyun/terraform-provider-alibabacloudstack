@@ -18,7 +18,6 @@ func (s *DbsService) DescribeDbsBackupPlan(id string) (object map[string]interfa
 		"PageSize":     PageSizeLarge,
 		"PageNumber":   1,
 	}
-	request["ClientToken"] = buildClientToken("DescribeBackupPlanList")
 
 	response, err = s.client.DoTeaRequest("POST", "dbs", "2019-03-06", "DescribeBackupPlanList", "", nil, nil, request)
 	if err != nil {

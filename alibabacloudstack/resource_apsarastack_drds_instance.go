@@ -77,7 +77,6 @@ func resourceAlibabacloudStackDRDSInstanceCreate(d *schema.ResourceData, meta in
 		"Specification":  d.Get("specification").(string),
 		"Description":    d.Get("description").(string),
 		"Quantity":       "1",
-		"ClientToken":    buildClientToken(action),
 		"ZoneId":         d.Get("zone_id").(string),
 		"PayType":        d.Get("instance_charge_type").(string),
 	}

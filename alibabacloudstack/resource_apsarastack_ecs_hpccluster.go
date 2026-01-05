@@ -45,11 +45,9 @@ func resourceAlibabacloudStackEcsHpcClusterCreate(d *schema.ResourceData, meta i
 	Name := d.Get("name").(string)
 	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
-	ClientToken := buildClientToken("CreateHpcCluster")
 
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
 	request.QueryParams["Name"] = Name
-	request.QueryParams["ClientToken"] = ClientToken
 	request.QueryParams["Description"] = Description
 
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -102,11 +100,9 @@ func resourceAlibabacloudStackEcsHpcClusterUpdate(d *schema.ResourceData, meta i
 		action := "ModifyHpcClusterAttribute"
 		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
-		ClientToken := buildClientToken("ModifyHpcClusterAttribute")
 
 		request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
 		request.QueryParams["HpcClusterId"] = HpcClusterId
-		request.QueryParams["ClientToken"] = ClientToken
 		request.QueryParams["Description"] = Description
 		request.QueryParams["Name"] = Name
 
@@ -126,11 +122,9 @@ func resourceAlibabacloudStackEcsHpcClusterDelete(d *schema.ResourceData, meta i
 	HpcClusterId := d.Id()
 	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
-	ClientToken := buildClientToken("DeleteHpcCluster")
 
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
 	request.QueryParams["HpcClusterId"] = HpcClusterId
-	request.QueryParams["ClientToken"] = ClientToken
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(action, bresponse, request, request.QueryParams)

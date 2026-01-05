@@ -66,7 +66,6 @@ func (s *RosService) DescribeRosStack(id string) (object map[string]interface{},
 	request := map[string]interface{}{
 		"StackId": id,
 	}
-	request["ClientToken"] = buildClientToken("GetStack")
 	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetStack", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"StackNotFound"}) {

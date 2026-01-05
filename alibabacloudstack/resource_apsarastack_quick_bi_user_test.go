@@ -94,7 +94,6 @@ func testSweepQuickBIUser(region string) error {
 			request := map[string]interface{}{
 				"UserId": item["UserId"],
 			}
-			request["ClientToken"] = buildClientToken("DeleteUser")
 			_, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-08-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 			if err != nil {
 				log.Printf("[ERROR] Failed to delete QuickBI User (%s): %s", item["UserId"].(string), err)

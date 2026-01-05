@@ -1117,11 +1117,9 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 	}
 
 	reqHeaders := make(map[string]*string)
-	if headers != nil {
-		for key, value := range headers {
-			v := value
-			reqHeaders[key] = &v
-		}
+	for key, value := range headers {
+		v := value
+		reqHeaders[key] = &v
 	}
 	for key, value := range client.defaultHeaders(popcode) {
 		v := value
@@ -1293,6 +1291,8 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		// special logic, 3.16.2 mandatory, no longer required after 3.18.1
 		request.QueryParams["AccountInfo"] = client.GetAccountInfo()
 	}
+	
+	request.QueryParams["ClientToken"] = buildClientToken(request.Product, request.Version, request.ApiName)
 
 	if strings.HasPrefix(domain, "internal.asapi.") || strings.HasPrefix(domain, "public.asapi.") {
 		// asapi compatibility logic

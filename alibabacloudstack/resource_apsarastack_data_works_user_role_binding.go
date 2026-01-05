@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -53,7 +52,6 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingCreate(d *schema.ResourceD
 		request["RoleCode"] = v.(string)
 	}
 
-	request["ClientToken"] = fmt.Sprint(uuid.NewRandom())
 	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err

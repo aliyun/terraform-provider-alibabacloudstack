@@ -76,7 +76,6 @@ func resourceAlibabacloudStackDbsBackupPlanCreate(d *schema.ResourceData, meta i
 	request.Headers["Content-type"] = "application/json"
 	request.QueryParams["Period"] = "Year"
 	request.QueryParams["UsedTime"] = "1"
-	request.QueryParams["ClientToken"] = buildClientToken("CreateBackupPlan")
 
 	if v, ok := d.GetOk("backup_method"); ok {
 		request.QueryParams["BackupMethod"] = v.(string)
@@ -179,7 +178,6 @@ func resourceAlibabacloudStackDbsBackupPlanUpdate(d *schema.ResourceData, meta i
 	}
 
 	action := "ModifyBackupPlanName"
-	request["ClientToken"] = buildClientToken("ModifyBackupPlanName")
 
 	_, err := client.DoTeaRequest("POST", "DBS", "2019-03-06", action, "", nil, nil, request)
 	if err != nil {

@@ -125,7 +125,6 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceCreate(d *schema.ResourceDa
 	request["DBNodeStorage"] = d.Get("db_node_storage")
 	request["DBInstanceVersion"] = d.Get("db_version")
 	request["PayType"] = convertGraphDatabaseDbInstancePaymentTypeRequest(d.Get("payment_type").(string))
-	request["ClientToken"] = buildClientToken("CreateDBInstance")
 	if v, ok := d.GetOk("vswitch_id"); ok {
 		request["VSwitchId"] = v
 	}
@@ -280,7 +279,6 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d *schema.ResourceDa
 	if update {
 		modifyDBInstanceSpecReq["DBInstanceStorageType"] = d.Get("db_instance_storage_type")
 		action := "ModifyDBInstanceSpec"
-		modifyDBInstanceSpecReq["ClientToken"] = buildClientToken("ModifyDBInstanceSpec")
 		_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, nil, modifyDBInstanceSpecReq)
 		if err != nil {
 			return err

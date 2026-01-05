@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -14,7 +13,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
-	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -333,11 +331,6 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 	if len(d.Get("security_ips").(*schema.Set).List()) > 0 {
 		SecurityIPList = strings.Join(expandStringList(d.Get("security_ips").(*schema.Set).List())[:], COMMA_SEPARATED)
 	}
-	uuid, err := uuid.GenerateUUID()
-	if err != nil {
-		uuid = resource.UniqueId()
-	}
-	ClientToken := fmt.Sprintf("Terraform-AlibabacloudStack-%d-%s", time.Now().Unix(), uuid)
 
 	request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "CreateDBInstance", "")
 	mergeMaps(request.QueryParams, map[string]string{
@@ -353,7 +346,6 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		"PayType":               payType,
 		"DBInstanceStorageType": DBInstanceStorageType,
 		"SecurityIPList":        SecurityIPList,
-		"ClientToken":           ClientToken,
 		"ZoneIdSlave1":          ZoneIdSlave1,
 		"ZoneIdSlave2":          ZoneIdSlave2,
 		"EncryptionKey":         EncryptionKey,

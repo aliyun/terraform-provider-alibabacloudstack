@@ -227,7 +227,6 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceCreate(d *schema.ResourceDa
 		request.QueryParams["VPCId"] = vsw.VpcId
 	}
 	request.QueryParams["PayType"] = string(Postpaid)
-	request.QueryParams["ClientToken"] = buildClientToken(request.GetActionName())
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {

@@ -94,7 +94,6 @@ func testSweepEcsDeploymentSet(region string) error {
 				"DeploymentSetId": item["DeploymentSetId"],
 				"RegionId":        client.RegionId,
 			}
-			request["ClientToken"] = buildClientToken("DeleteDeploymentSet")
 			_, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 			if err != nil {
 				log.Printf("[ERROR] Failed to delete Ecs DeploymentSet (%s): %s", item["DeploymentSetId"].(string), err)

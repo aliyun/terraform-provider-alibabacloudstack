@@ -69,7 +69,6 @@ func resourceAlibabacloudStackEcsDeploymentSetCreate(d *schema.ResourceData, met
 	if v, ok := d.GetOk("strategy"); ok {
 		Strategy = fmt.Sprint(v.(string))
 	}
-	ClientToken := buildClientToken("CreateDeploymentSet")
 
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
 	mergeMaps(request.QueryParams, map[string]string{
@@ -78,7 +77,6 @@ func resourceAlibabacloudStackEcsDeploymentSetCreate(d *schema.ResourceData, met
 		"Description":                      Description,
 		"Granularity":                      d.Get("granularity").(string),
 		"Strategy":                         Strategy,
-		"ClientToken":                      ClientToken,
 	})
 	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)

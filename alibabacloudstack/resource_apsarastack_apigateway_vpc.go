@@ -47,7 +47,6 @@ func resourceAlibabacloudStackApigatewayVpcAccessCreate(d *schema.ResourceData, 
 	request["VpcId"] = d.Get("vpc_id")
 	request["Port"] = d.Get("port")
 	request["InstanceId"] = d.Get("instance_id")
-	request["ClientToken"] = buildClientToken("SetVpcAccess")
 
 	_, err = client.DoTeaRequest("POST", "CloudAPI", "2016-07-14", "SetVpcAccess", "", nil, nil, request)
 	d.SetId(fmt.Sprintf("%s%s%s%s%s%s%s", request["Name"], COLON_SEPARATED, request["VpcId"], COLON_SEPARATED, request["InstanceId"], COLON_SEPARATED, request["Port"]))

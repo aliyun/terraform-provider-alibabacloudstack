@@ -1977,10 +1977,8 @@ func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub_patch.Ecs
 	//	"HpcClusterIds": string(ids),
 	//}
 
-	ClientToken := buildClientToken("DescribeHpcClusters")
 	request := s.client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
 	request.QueryParams["HpcClusterIds"] = string(ids)
-	request.QueryParams["ClientToken"] = ClientToken
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	log.Printf(" response of raw DescribeHpcClusters : %s", bresponse)
 	if err != nil {

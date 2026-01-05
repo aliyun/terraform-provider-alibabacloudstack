@@ -105,9 +105,7 @@ func dataSourceAlibabacloudStackEcsHpcClustersRead(d *schema.ResourceData, meta 
 	for {
 		resp := &EcsDescribeEcsHpcClusterResult{}
 		action := "DescribeHpcClusters"
-		ClientToken := buildClientToken("DescribeHpcClusters")
 		request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
-		request.QueryParams["ClientToken"] = ClientToken
 		request.QueryParams["PageNumber"] = fmt.Sprintf("%d", pageNumber)
 		request.QueryParams["PageSize"] = fmt.Sprintf("%d", PageSizeLarge)
 

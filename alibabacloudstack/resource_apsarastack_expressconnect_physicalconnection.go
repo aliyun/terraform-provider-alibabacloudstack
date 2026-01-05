@@ -116,7 +116,6 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionCreate(d *schema.R
 	if v, ok := d.GetOk("type"); ok {
 		request["Type"] = v
 	}
-	request["ClientToken"] = buildClientToken("CreatePhysicalConnection")
 	response, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return err
@@ -216,7 +215,6 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 	}
 	if update {
 		action := "ModifyPhysicalConnectionAttribute"
-		request["ClientToken"] = buildClientToken("ModifyPhysicalConnectionAttribute")
 		_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 		if err != nil {
 			return err
@@ -234,7 +232,6 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 					"PhysicalConnectionId": d.Id(),
 				}
 				action := "CancelPhysicalConnection"
-				request["ClientToken"] = buildClientToken("CancelPhysicalConnection")
 				_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 				if err != nil {
 					return err
@@ -245,7 +242,6 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 					"PhysicalConnectionId": d.Id(),
 				}
 				action := "EnablePhysicalConnection"
-				request["ClientToken"] = buildClientToken("EnablePhysicalConnection")
 				_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 				if err != nil {
 					return err
@@ -256,7 +252,6 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 					"PhysicalConnectionId": d.Id(),
 				}
 				action := "TerminatePhysicalConnection"
-				request["ClientToken"] = buildClientToken("TerminatePhysicalConnection")
 				_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 				if err != nil {
 					return err
@@ -278,7 +273,6 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete(d *schema.R
 			"PhysicalConnectionId": d.Id(),
 		}
 		action := "CancelPhysicalConnection"
-		request["ClientToken"] = buildClientToken("CancelPhysicalConnection")
 		_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 		if err != nil {
 			return err
@@ -289,7 +283,6 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete(d *schema.R
 	request := map[string]interface{}{
 		"PhysicalConnectionId": d.Id(),
 	}
-	request["ClientToken"] = buildClientToken("DeletePhysicalConnection")
 	_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return err
