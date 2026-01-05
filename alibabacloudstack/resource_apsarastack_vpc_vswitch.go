@@ -151,6 +151,11 @@ func resourceAlibabacloudStackSwitchRead(d *schema.ResourceData, meta interface{
 	d.Set("vpc_id", vswitch.VpcId)
 	d.Set("cidr_block", vswitch.CidrBlock)
 	d.Set("ipv6_cidr_block", vswitch.Ipv6CidrBlock)
+	if vswitch.Ipv6CidrBlock != "" {
+		d.Set("enable_ipv6", true)
+	} else {
+		d.Set("enable_ipv6", false)
+	}
 	connectivity.SetResourceData(d, vswitch.VSwitchName, "vswitch_name", "name")
 	listTagResourcesObject, err := vpcService.ListTagResources(d.Id(), "vswitch")
 	if err == nil {
@@ -189,9 +194,13 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 		update = true
 	}
 
-	if d.HasChange("enable_ipv6") && d.Get("enable_ipv6").(bool) {
-		request.Ipv6CidrBlock = "0"
+	if d.HasChange("enable_ipv6") {
 		update = true
+		if d.Get("enable_ipv6").(bool) {
+			request.Ipv6CidrBlock = "0"
+		} else {
+			request.EnableIPv6 = "false"
+		}
 	}
 
 	if update {
