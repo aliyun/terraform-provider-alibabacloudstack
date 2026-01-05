@@ -29,7 +29,7 @@ data "alibabacloudstack_cloudfw_address_books" "default" {
 `, rand, strings.Join(pairs, "\n    "))
 }
 
-func TestAccDataSourceAlibabacloudStackCloudfwAddressBooks(t *testing.T) {
+func TestAccAlibabacloudStackCloudfwAddressBooksDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_cloudfw_address_books.default"
 	rand := getAccTestRandInt(10000, 20000)
 	testDataSourceAttr := dataSourceAttr{
