@@ -56,6 +56,7 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	request.SetContentType(requests.Json)
 	request.SetContent(jsonData)
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -69,7 +70,6 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 		return errmsgs.WrapError(fmt.Errorf("Error Unmarshal to JSON: %v", err))
 	}
 	log.Printf("unmarshalled response for create %v", resp)
-	addDebug(request.GetActionName(), bresponse, request)
 	create := d.Get("auto_create").(bool)
 	visibility := d.Get("default_visibility").(string)
 	if create == false || visibility == "PUBLIC" {

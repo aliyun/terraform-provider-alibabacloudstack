@@ -8,9 +8,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -48,16 +46,17 @@ func testSweepCRNamespace(region string) error {
 	request.Scheme = "http"
 	request.ApiName = "GetNamespaceList"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
-		return crClient.ProcessCommonRequest(request)
-	})
-
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw GetNamespaceList : %s", bresponse)
 	if err != nil {
-		log.Printf("[ERROR] %s ", errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
-		return nil
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetNamespaceList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	var resp crListResponse
-	bresponse := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
 	if err != nil {
 		log.Printf("[ERROR] %s", errmsgs.WrapError(err))
@@ -93,22 +92,21 @@ func testSweepCRNamespace(region string) error {
 			"Version":         "2016-06-07",
 			"Namespace":       n,
 		}
-		_, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
-			return crClient.ProcessCommonRequest(request)
-		})
+		_, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		crService := CrService{client}
-		resp1 := crDescribeNamespaceResponse{}
-		raw, err = crService.DescribeCrNamespace(n)
-		resp := raw.(*responses.CommonResponse)
-		_ = json.Unmarshal(resp.GetHttpContentBytes(), &resp1)
-		if resp1.Code != "NAMESPACE_NOT_EXIST" {
+		raw, err := crService.DescribeCrNamespace(n)
+		if err != nil {
 			if errmsgs.NotFoundError(err) {
-				return nil
+				continue
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cr_namespace", "DescribeCrNamespace", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+
+		if raw.Code != "NAMESPACE_NOT_EXIST" {
+			return errmsgs.WrapErrorf(fmt.Errorf("namespace still exists"), errmsgs.DefaultErrorMsg, "alibabacloudstack_cr_namespace", "DescribeCrNamespace", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
 	return nil
