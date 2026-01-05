@@ -24,7 +24,6 @@ output "instances" {
 支持以下参数：
 
 * `description_regex` - (可选) 用于根据实例描述进行过滤的正则表达式。
-* `Deprecated`: 此字段已弃用，将在版本 3.19.0 中移除。请改用 local_file 提供程序。
 * `ids` - (可选, ForceNew) 要过滤的一组 Bastionhost 实例 ID。
 * `tags` - (可选) 用于按标签过滤 Bastionhost 实例的键值对映射。
 ## 属性参考

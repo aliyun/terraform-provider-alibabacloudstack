@@ -72,17 +72,17 @@ func resourceAlibabacloudStackSecurityGroupRule() *schema.Resource {
 			},
 
 			"cidr_ip": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				AtLeastOneOf: []string{"cidr_ip", "ipv6_cidr_ip", "source_security_group_id"},
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				AtLeastOneOf:  []string{"cidr_ip", "ipv6_cidr_ip", "source_security_group_id"},
 				ConflictsWith: []string{"ipv6_cidr_ip", "source_security_group_id"},
 			},
 			"ipv6_cidr_ip": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				AtLeastOneOf: []string{"cidr_ip", "ipv6_cidr_ip", "source_security_group_id"},
+				AtLeastOneOf:  []string{"cidr_ip", "ipv6_cidr_ip", "source_security_group_id"},
 				ConflictsWith: []string{"cidr_ip", "source_security_group_id"},
 			},
 
@@ -90,16 +90,9 @@ func resourceAlibabacloudStackSecurityGroupRule() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				AtLeastOneOf: []string{"cidr_ip", "ipv6_cidr_ip", "source_security_group_id"},
-				ConflictsWith: []string{"cidr_ip", "ipv6_cidr_ip",},
+				AtLeastOneOf:  []string{"cidr_ip", "ipv6_cidr_ip", "source_security_group_id"},
+				ConflictsWith: []string{"cidr_ip", "ipv6_cidr_ip"},
 			},
-
-			"source_group_owner_account": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'source_group_owner_account' field is not work in apsarastack and is scheduled for removal in version 3.19.0. ",
-			},
-
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,

@@ -63,7 +63,6 @@ output "security_group_rules" {
   * `ip_protocol` - 规则所使用的协议类型，可为 `tcp`、`udp`、`icmp`、`gre` 或 `all`。
   * `port_range` - 端口范围，格式为“起始端口/结束端口”。
   * `source_cidr_ip` - 入站规则的源 IP 地址段。
-  * `source_group_owner_account` - 入站规则中源安全组所属的阿里云账户。
   * `dest_cidr_ip` - 出站规则的目标 IP 地址段。
   * `dest_group_owner_account` - 出站规则中目标安全组所属的阿里云账户。
   * `policy` - 授权策略，可为 `accept`（允许）或 `drop`（拒绝）。

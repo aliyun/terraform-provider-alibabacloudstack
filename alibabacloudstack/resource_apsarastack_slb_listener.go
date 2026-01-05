@@ -291,24 +291,6 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"logs_download_attributes": {
-				Type:       schema.TypeList,
-				Optional:   true,
-				MaxItems:   1,
-				Deprecated: "Field 'logs_download_attributes' has been deprecated from 3.19.0+ and using new resource 'alibabastack_slb_access_log' instead.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"log_project": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"log_store": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
-			},
 		},
 		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 			client := meta.(*connectivity.AlibabacloudStackClient)
@@ -452,17 +434,6 @@ func resourceAlibabacloudStackSlbListenerRead(d *schema.ResourceData, meta inter
 	d.Set("protocol", protocol)
 	d.Set("load_balancer_id", lb_id)
 	d.Set("frontend_port", port)
-	logAttr, err := slbService.DescribeAccessLogsDownloadAttribute(lb_id)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	if logAttr != nil {
-		logattr := map[string]interface{}{
-			"log_store":   logAttr.LogStore,
-			"log_project": logAttr.LogProject,
-		}
-		d.Set("logs_download_attributes", []interface{}{logattr})
-	}
 	d.SetId(lb_id + ":" + protocol + ":" + strconv.Itoa(port))
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		object, err := slbService.DescribeSlbListener(d.Id())
@@ -735,27 +706,6 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
-	if protocol == Https && d.HasChange("logs_download_attributes") {
-		slbService := SlbService{client}
-		old, new := d.GetChange("logs_download_attributes")
-		if len(old.([]interface{})) > 0 {
-			err = slbService.DeleteAccessLogsDownloadAttribute(d.Get("load_balancer_id").(string))
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if len(new.([]interface{})) > 0 {
-			logAttr := new.([]interface{})[0].(map[string]interface{})
-			load_balancer_id := d.Get("load_balancer_id").(string)
-			logs_attr_str := fmt.Sprintf("[{\"LoadBalancerId\":\"%s\",\"LogProject\":\"%s\",\"Logstore\":\"%s\",\"LogType\":\"layer7\",\"RoleName\":\"aliyunlogarchiverole\",\"Department\":\"%s\",\"ResourceGroup\":\"%s\"}]",
-				load_balancer_id, logAttr["log_project"], logAttr["log_store"], client.Department, client.ResourceGroup)
-			err = slbService.SetAccessLogsDownloadAttribute(logs_attr_str, load_balancer_id)
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-		}
-	}
-
 	d.Partial(false)
 
 	return resourceAlibabacloudStackSlbListenerRead(d, meta)

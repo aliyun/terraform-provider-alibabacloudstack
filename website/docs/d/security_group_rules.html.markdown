@@ -63,7 +63,6 @@ The following attributes are exported in addition to the arguments listed above:
   * `ip_protocol` - The protocol. Can be `tcp`, `udp`, `icmp`, `gre` or `all`.
   * `port_range` - The range of port numbers.
   * `source_cidr_ip` - Source IP address segment for ingress authorization.
-  * `source_group_owner_account` - Alibabacloudstack Cloud account of the source security group.
   * `dest_cidr_ip` - Target IP address segment for egress authorization.
   * `dest_group_owner_account` - Alibabacloudstack Cloud account of the target security group.
   * `policy` - Authorization policy. Can be either `accept` or `drop`.

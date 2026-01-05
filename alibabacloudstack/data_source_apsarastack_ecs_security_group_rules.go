@@ -70,10 +70,6 @@ func dataSourceAlibabacloudStackSecurityGroupRules() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"source_group_owner_account": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"dest_cidr_ip": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -160,17 +156,16 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 			}
 
 			mapping := map[string]interface{}{
-				"ip_protocol":                strings.ToLower(string(item.IpProtocol)),
-				"port_range":                 item.PortRange,
-				"source_cidr_ip":             item.SourceCidrIp,
-				"source_group_id":            item.SourceGroupId,
-				"source_group_owner_account": item.SourceGroupOwnerAccount,
-				"dest_cidr_ip":               item.DestCidrIp,
-				"dest_group_id":              item.DestGroupId,
-				"dest_group_owner_account":   item.DestGroupOwnerAccount,
-				"policy":                     strings.ToLower(string(item.Policy)),
-				"nic_type":                   item.NicType,
-				"direction":                  item.Direction,
+				"ip_protocol":              strings.ToLower(string(item.IpProtocol)),
+				"port_range":               item.PortRange,
+				"source_cidr_ip":           item.SourceCidrIp,
+				"source_group_id":          item.SourceGroupId,
+				"dest_cidr_ip":             item.DestCidrIp,
+				"dest_group_id":            item.DestGroupId,
+				"dest_group_owner_account": item.DestGroupOwnerAccount,
+				"policy":                   strings.ToLower(string(item.Policy)),
+				"nic_type":                 item.NicType,
+				"direction":                item.Direction,
 				//"description":                item.Description,//has been removed for Alibabacloudstack
 			}
 

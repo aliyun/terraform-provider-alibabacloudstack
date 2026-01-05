@@ -23,7 +23,6 @@ output "instances" {
 The following arguments are supported:
 
 * `description_regex` - (Optional) A regular expression to filter Bastionhost instances by their description.
-* `Deprecated`: This field is deprecated and will be removed in version 3.19.0. Use the local_file provider instead.
 * `ids` - (Optional, ForceNew) A list of Bastionhost instance IDs to filter the results.
 * `tags` - (Optional) A map of tags to filter Bastionhost instances by.
 ## Attributes Reference

@@ -53,7 +53,6 @@ resource "alibabacloudstack_security_group_rule" "allow_all_tcp" {
 * `priority` - (可选，变更时重建) 授权策略优先级，参数值范围：`1-100`，默认值：1。较低的数值表示较高的优先级。
 * `cidr_ip` - (可选，变更时重建) 目标 IP 地址范围。默认值为 0.0.0.0/0(表示没有限制)。其他支持的格式包括 10.159.6.18/12。仅支持 IPv4。
 * `source_security_group_id` - (可选，变更时重建) 同一区域内的目标安全组 ID。如果设置了此字段，则 `nic_type` 只能选择 `intranet`。
-* `source_group_owner_account` - (可选，变更时重建) 跨账户授权时目标安全组所属的阿里云用户账号 ID。如果已设置 `cidr_ip` 参数，则此参数无效。
 * `ipv6_cidr_ip` - (可选，变更时重建，自 v1.174.0 起可用) 需要访问的源 IPv6 CIDR 地址块。支持 CIDR 格式和 IPv6 格式的 IP 地址范围。注意：此参数不能与 `cidr_ip` 参数同时设置。
 * `description` - (可选) 安全组规则的描述。描述长度可以为 1 到 512 个字符，默认为 null。
 

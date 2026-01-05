@@ -53,7 +53,6 @@ The following arguments are supported:
 * `priority` - (Optional, ForceNew) Authorization policy priority, with parameter values: `1-100`, default value: 1.
 * `cidr_ip` - (Optional, ForceNew) The target IP address range. The default value is 0.0.0.0/0 (which means no restriction will be applied). Other supported formats include 10.159.6.18/12. Only IPv4 is supported.
 * `source_security_group_id` - (Optional, ForceNew) The target security group ID within the same region. If this field is specified, the `nic_type` can only select `intranet`.
-* `source_group_owner_account` - (Optional, ForceNew) The Alibaba Cloud user account Id of the target security group when security groups are authorized across accounts.  This parameter is invalid if `cidr_ip` has already been set.
 * `ipv6_cidr_ip` - (Optional, ForceNew, Available since v1.174.0) Source IPv6 CIDR address block that requires access. Supports IP address ranges in CIDR format and IPv6 format. NOTE: This parameter cannot be set at the same time as the cidr_ip parameter.
 * `description` - (Optional) The description of the security group rule. The description can be up to 1 to 512 characters in length. Defaults to null.
 * `port_range` - (Required, ForceNew)  Specifies the range of port numbers relevant to the IP protocol. It is required for defining specific ports or ranges for TCP/UDP protocols.
