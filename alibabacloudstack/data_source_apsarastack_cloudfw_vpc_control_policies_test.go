@@ -38,7 +38,7 @@ data "alibabacloudstack_cloudfw_vpc_control_policies" "default" {
 `, rand, strings.Join(pairs, "\n    "))
 }
 
-func TestAccDataSourceAlibabacloudStackCloudfwVpcControlPolicies(t *testing.T) {
+func TestAccAlibabacloudStackCloudfirewallVpcControlPolicies(t *testing.T) {
 	resourceId := "data.alibabacloudstack_cloudfw_vpc_control_policies.default"
 	rand := getAccTestRandInt(10000, 20000)
 	testDataSourceAttr := dataSourceAttr{

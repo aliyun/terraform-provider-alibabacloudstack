@@ -798,7 +798,6 @@ func formatInt(src interface{}) int {
 	default:
 		panic(fmt.Sprintf("Not support type %s", attrType.String()))
 	}
-	return 0
 }
 func convertArrayObjectToJsonString(src interface{}) (string, error) {
 	res, err := json.Marshal(&src)
