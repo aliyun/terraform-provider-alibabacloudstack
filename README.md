@@ -36,10 +36,13 @@ Download TF Core from the [Terraform](https://www.terraform.io/downloads.html) o
 >
 > + To obtain the Terraform provider versions for other Alibaba Cloud ApsaraStack versions, contact Apsara Stack customer service.
 
+> + Pre-compiled providers are not provided for non-LTS versions. Please compile them yourself if needed.
+
 | Alibaba Cloud ApsaraStack version | AlibabacloudStack version |
 | ---  | ---  |
-| v3.16.2 | < 3.18.0 |
-| v3.18.x | < 3.19.0 |
+| v3.16.2 | LTS | < 3.18.0 | Bug Support |
+| v3.18.x | LTS | < 3.19.0 | Standard Maintenance |
+| v3.19.0 | non-LTS | < 3.20.0 | Bug Support |
 
 **Solution 1: Automatic installation**
 
