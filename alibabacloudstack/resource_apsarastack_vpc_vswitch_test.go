@@ -40,9 +40,9 @@ func TestAccAlibabacloudStackVpcVswitch_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"description": "modify_description",
+					"description": "${var.name}",
 
-					"vswitch_name": name,
+					"vswitch_name": "${var.name}",
 
 					"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
 
@@ -53,7 +53,7 @@ func TestAccAlibabacloudStackVpcVswitch_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"description": "modify_description",
+						"description": name,
 
 						"vswitch_name": name,
 					}),
@@ -68,12 +68,14 @@ func TestAccAlibabacloudStackVpcVswitch_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"description": "modify_description",
+					"description":  "${var.name}_updated",
+					"vswitch_name": "${var.name}_updated",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"description": "modify_description",
+						"description":  name + "_updated",
+						"vswitch_name": name + "_updated",
 					}),
 				),
 			},
@@ -165,9 +167,9 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description": "modify_description",
+					"description": "${var.name}",
 
-					"vswitch_name": name,
+					"vswitch_name": "${var.name}",
 
 					"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
 
@@ -180,8 +182,24 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":            name,
-						"description":     "modify_description",
+						"description":     name,
 						"ipv6_cidr_block": CHECKSET,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description": "${var.name}_updated",
+
+					"vswitch_name": "${var.name}_updated",
+
+					"enable_ipv6": "false",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name":        name + "_updated",
+						"description": name + "_updated",
+						"enable_ipv6": "false",
 					}),
 				),
 			},
