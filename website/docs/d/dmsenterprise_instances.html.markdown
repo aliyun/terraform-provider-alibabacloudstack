@@ -23,8 +23,7 @@ data "alibabacloudstack_dmsenterprise_instances" "example" {
   net_type        = "VPC"
   status          = "NORMAL"
   name_regex      = "^my-instance-.*"
-  output_file     = "dms_enterprise_instances.json"
-}
+  }
 
 output "first_database_instance_id" {
   value = "${data.alibabacloudstack_dmsenterprise_instances.example.instances.0.instance_id}"

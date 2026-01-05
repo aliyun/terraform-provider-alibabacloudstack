@@ -27,8 +27,7 @@ data "alibabacloudstack_gpdb_dbinstances" "example" {
   availability_zone = data.alibabacloudstack_zones.default.zones.0.id
   vswitch_id        = alibabacloudstack_vswitch.default.id
   ids               = ["db-1234567890abcdefg"]
-  output_file       = "dbinstances.txt"
-}
+  }
 
 resource "alibabacloudstack_vswitch" "default" {
 	vpc_id         = alibabacloudstack_vpc.default.id

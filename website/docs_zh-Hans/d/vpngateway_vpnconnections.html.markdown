@@ -82,8 +82,7 @@ data "alibabacloudstack_vpn_connections" "default" {
   vpn_gateway_id      = "${alibabacloudstack_vpn_gateway.default.id}"
   customer_gateway_id = "${alibabacloudstack_vpn_customer_gateway.default.id}"
   name_regex         = "${var.name}"
-  output_file        = "vpn_connections_output.txt"
-}
+  }
 ```
 
 ## 参数说明

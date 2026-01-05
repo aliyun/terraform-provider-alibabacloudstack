@@ -16,7 +16,6 @@ description: |-
 ```
 data "alibabacloudstack_ascm_ecs_instance_families" "default" {  
   status = "Available"  
-  output_file = "ecs_instance"  
 }  
 output "ecs_instance" {  
   value = data.alibabacloudstack_ascm_ecs_instance_families.default.*  

@@ -13,8 +13,7 @@ The following example retrieves Bastionhost instances by description regex and w
 ```hcl
 data "alibabacloudstack_bastionhost_instances" "example" {
   description_regex = "^example"
-  output_file       = "output.json"
-}
+  }
 
 output "instances" {
   value = data.alibabacloudstack_bastionhost_instances.example.ids
@@ -24,7 +23,6 @@ output "instances" {
 The following arguments are supported:
 
 * `description_regex` - (Optional) A regular expression to filter Bastionhost instances by their description.
-* `output_file` - (Optional) File name to save the results to in JSON format.
 * `Deprecated`: This field is deprecated and will be removed in version 3.19.0. Use the local_file provider instead.
 * `ids` - (Optional, ForceNew) A list of Bastionhost instance IDs to filter the results.
 * `tags` - (Optional) A map of tags to filter Bastionhost instances by.

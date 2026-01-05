@@ -21,8 +21,7 @@ data "alibabacloudstack_vpngateway_vpngateways" "example" {
   status          = "Active"
   business_status = "Normal"
   name_regex      = "testAcc*"
-  output_file     = "/tmp/vpns"
-}
+  }
 ```
 
 ## Argument Reference

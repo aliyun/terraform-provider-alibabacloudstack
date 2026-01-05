@@ -18,8 +18,7 @@ This data source provides a list of autoscaling notifications in an Alibabacloud
 data "alibabacloudstack_autoscaling_notifications" "example" {
   scaling_group_id = "sg-1234567890abcdef"
   ids              = ["notification-id-1", "notification-id-2"]
-  output_file      = "notifications_output.txt"
-}
+  }
 
 output "first_notification_arn" {
   value = data.alibabacloudstack_autoscaling_notifications.example.notifications[0].notification_arn

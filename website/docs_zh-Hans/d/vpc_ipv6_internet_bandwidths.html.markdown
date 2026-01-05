@@ -41,8 +41,7 @@ data "alibabacloudstack_vpc_ipv6_internet_bandwidths" "default" {
   ipv6_internet_bandwidth_id = alibabacloudstack_vpc_ipv6_internet_bandwidth.default.id
   ipv6_address_id      = data.alibabacloudstack_vpc_ipv6_addresses.default.addresses.0.id
   status               = "Normal"
-  output_file          = "output.txt"
-}
+  }
 
 output "vpc_ipv6_internet_bandwidth_id_1" {
   value = data.alibabacloudstack_vpc_ipv6_internet_bandwidths.default.bandwidths.0.id

@@ -50,8 +50,7 @@ resource "alibabacloudstack_ots_instance_attachment" "foo" {
 data "alibabacloudstack_ots_instance_attachments" "default" {
   instance_name = "${alibabacloudstack_ots_instance_attachment.foo.instance_name}"
   name_regex    = "testvpc"
-  output_file   = "attachments.txt"
-
+  
   # 输出第一个附件的ID
   output "first_ots_attachment_id" {
     value = "${data.alibabacloudstack_ots_instance_attachments.default.attachments.0.id}"

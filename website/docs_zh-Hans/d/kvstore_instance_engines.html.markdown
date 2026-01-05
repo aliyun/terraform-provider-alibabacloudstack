@@ -23,8 +23,7 @@ data "alibabacloudstack_kvstore_instance_engines" "resources" {
   instance_charge_type = "PrePaid"
   engine               = "Redis"
   engine_version       = "5.0"
-  output_file          = "./engines.txt"
-}
+  }
 
 output "first_kvstore_instance_class" {
   value = "${data.alibabacloudstack_kvstore_instance_engines.resources.instance_engines.0.engine}"
@@ -39,7 +38,6 @@ output "first_kvstore_instance_class" {
 * `instance_charge_type` - (可选) 通过付费类型过滤结果。有效值：`PrePaid`（预付费）和 `PostPaid`（按量付费）。默认为 `PrePaid`。
 * `engine` - (可选) 数据库类型。选项为 `Redis` 和 `Memcache`。默认为 `Redis`。
 * `engine_version` - (可选) 用户所需的数据库版本。Redis 的可选项可以参考最新文档 [详细信息](https://www.alibabacloud.com/help/doc-detail/60873.htm) 中的 `EngineVersion`。对于 `Memcache`，该值应为空。
-* `output_file` - (可选) 将查询结果保存到本地文件的路径。
 
 ## 属性说明
 

@@ -23,8 +23,7 @@ data "alibabacloudstack_kvstore_instance_engines" "resources" {
   instance_charge_type = "PrePaid"
   engine               = "Redis"
   engine_version       = "5.0"
-  output_file          = "./engines.txt"
-}
+  }
 
 output "first_kvstore_instance_class" {
   value = "${data.alibabacloudstack_kvstore_instance_engines.resources.instance_engines.0.engine}"

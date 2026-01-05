@@ -19,8 +19,7 @@ data "alibabacloudstack_slb_masterslaveservergroups" "sample_ds" {
   load_balancer_id = "${alibabacloudstack_slb.sample_slb.id}"
   ids              = ["group1-id", "group2-id"]
   name_regex       = "group.*"
-  output_file      = "output.txt"
-}
+  }
 
 output "first_slb_server_group_id" {
   value = "${data.alibabacloudstack_slb_masterslaveservergroups.sample_ds.groups.0.id}"

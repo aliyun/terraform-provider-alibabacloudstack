@@ -65,8 +65,7 @@ data "alibabacloudstack_dms_enterprise_instances" "default" {
   net_type         = "CLASSIC"
   status           = "NORMAL"
   name_regex       = "^tf_testAccDmsEnterpriseInstancesDataSource_.*"
-  output_file      = "dms_enterprise_instances.json"
-}
+  }
 
 output "first_database_instance_id" {
   value = "${data.alibabacloudstack_dms_enterprise_instances.default.instances.0.instance_id}"

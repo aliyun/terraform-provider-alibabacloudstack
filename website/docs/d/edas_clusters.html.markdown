@@ -18,8 +18,7 @@ data "alibabacloudstack_edas_clusters" "clusters" {
   logical_region_id = "cn-shenzhen:xxx"
   ids               = ["addfs-dfsasd"]
   name_regex        = "test-cluster-*"
-  output_file       = "clusters.txt"
-}
+  }
 
 output "first_cluster_name" {
   value = data.alibabacloudstack_edas_clusters.clusters.clusters[0].cluster_name

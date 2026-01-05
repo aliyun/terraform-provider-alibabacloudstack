@@ -546,10 +546,6 @@ func dataSourceAlibabacloudStackPolardbDbInstancesRead(d *schema.ResourceData, m
 		return err
 	}
 
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), datas)
-	}
-
 	return nil
 
 }

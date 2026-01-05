@@ -115,8 +115,7 @@ resource "alibabacloudstack_ess_notification" "default" {
 data "alibabacloudstack_ess_notifications" "default" {
   scaling_group_id = "${alibabacloudstack_ess_notification.default.scaling_group_id}"
   ids              = ["notification-id-1", "notification-id-2"]
-  output_file      = "notifications_output.txt"
-}
+  }
 
 output "first_notification_arn" {
   value = data.alibabacloudstack_ess_notifications.default.notifications[0].notification_arn

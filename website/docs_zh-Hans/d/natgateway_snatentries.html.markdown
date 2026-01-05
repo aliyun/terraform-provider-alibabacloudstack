@@ -60,8 +60,7 @@ data "alibabacloudstack_natgateway_snatentries" "default" {
   snat_table_id = "${alibabacloudstack_nat_gateway.default.snat_table_ids}"
   source_cidr   = "172.16.0.0/21"
   ids           = ["${alibabacloudstack_snat_entry.default.id}"]
-  output_file   = "snat_entries_output.txt"
-}
+  }
 
 output "snat_entries" {
   value = "${data.alibabacloudstack_natgateway_snatentries.default.entries}"
@@ -75,7 +74,6 @@ output "snat_entries" {
 * `snat_table_id` - (必填，变更时重建) SNAT条目所属的SNAT表ID。这是查询SNAT条目的核心标识。
 * `source_cidr` - (选填) SNAT条目的源网段。通过指定此参数，可以筛选出与特定源网段相关的SNAT条目。
 * `ids` - (选填) SNAT条目ID的列表。通过提供此参数，可以进一步限制返回的SNAT条目范围。
-* `output_file` - (选填) 将查询结果保存到本地文件的路径。如果未指定，则不会生成文件。
 
 ## 属性说明
 

@@ -51,8 +51,7 @@ data "alibabacloudstack_vpngateway_vpngateways" "default" {
   status          = "Active"
   business_status = "Normal"
   name_regex      = "^${var.name}$"
-  output_file     = "/tmp/vpns.txt"
-}
+  }
 ```
 
 ## 参数说明

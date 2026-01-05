@@ -17,8 +17,7 @@ This data source provides a list of OTS instance attachments in an Alibabaclouds
 data "alibabacloudstack_ots_instance_attachments" "example" {
   instance_name = "sample-instance"
   name_regex    = "testvpc"
-  output_file   = "attachments.txt"
-}
+  }
 
 output "first_ots_attachment_id" {
   value = "${data.alibabacloudstack_ots_instance_attachments.example.attachments.0.id}"

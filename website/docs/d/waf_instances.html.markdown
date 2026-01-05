@@ -28,7 +28,6 @@ The following arguments are supported:
 * `name` - (Computed) The name of the WAF instance.
 * `instance_status` - (Computed) The current status of the WAF instance.
 * `instance_make_status` - (Computed) The creation or provisioning status of the WAF instance.
-* `output_file` - (Optional) File name to save the results to in JSON format.
 * `Deprecated`: This field is deprecated and will be removed in version 3.19.0. Use the local_file provider instead.
 * `vpc_vswitch` - (Computed) A list containing VPC and vSwitch configuration for the WAF instance with the following structure:
 * `vswitch_name` - Name of the vSwitch.

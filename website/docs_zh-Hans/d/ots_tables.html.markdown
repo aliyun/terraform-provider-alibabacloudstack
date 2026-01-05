@@ -18,8 +18,7 @@ description: |-
 data "alibabacloudstack_ots_tables" "tables_ds" {
   instance_name = "sample-instance"
   name_regex    = "sample-table"
-  output_file   = "tables.txt"
-}
+  }
 
 output "first_table_id" {
   value = "${data.alibabacloudstack_ots_tables.tables_ds.tables.0.id}"
@@ -32,8 +31,7 @@ output "first_table_id" {
 
 * `instance_name` - （必需）OTS 实例名称。
 * `ids` - （可选）表 ID 列表，用于筛选特定的表。
-* `name_regex` - （可选）用于通过表名筛选结果的正则表达式字符串。
-* `output_file` - （可选）将查询结果保存到文件的路径。
+* `name_regex` - （可选）用于通过表名筛选结果的正则表达式字符串
 
 ## 属性说明
 

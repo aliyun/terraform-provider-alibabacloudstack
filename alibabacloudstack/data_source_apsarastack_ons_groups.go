@@ -140,8 +140,5 @@ func dataSourceAlibabacloudStackOnsGroupsRead(d *schema.ResourceData, meta inter
 		return errmsgs.WrapError(err)
 	}
 
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		_ = writeToFile(output.(string), s)
-	}
 	return nil
 }

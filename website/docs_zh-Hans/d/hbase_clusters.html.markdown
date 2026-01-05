@@ -73,8 +73,7 @@ data "alibabacloudstack_hbase_clusters" "hbase" {
   name_regex        = "${alibabacloudstack_hbase_instance.default.name}"
   availability_zone = data.alibabacloudstack_hbase_zones.default.ids[0]
   ids               = [alibabacloudstack_hbase_instance.default.id]
-  output_file      = "hbase_clusters_output.txt"
-}
+  }
 ```
 
 ## 参数说明

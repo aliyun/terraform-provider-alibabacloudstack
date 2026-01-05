@@ -53,4 +53,3 @@ output "output" {
   * `public_endpoints` - 在公网网络上访问实例时使用的域名列表。
   * `authorization_token` - 登录注册表时使用的密码（仅当 `enable_details` 设置为 true 时返回）。
   * `temp_username` - 登录注册表时使用的临时用户名（仅当 `enable_details` 设置为 true 时返回）。
-  * `output_file` - 数据源查询结果保存的文件名（在运行 `terraform plan` 后生成）。

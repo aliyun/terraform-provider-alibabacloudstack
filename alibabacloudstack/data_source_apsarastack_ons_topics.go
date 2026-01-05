@@ -151,9 +151,5 @@ func dataSourceAlibabacloudStackOnsTopicsRead(d *schema.ResourceData, meta inter
 	if err := d.Set("topics", s); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		_ = writeToFile(output.(string), s)
-	}
 	return nil
 }

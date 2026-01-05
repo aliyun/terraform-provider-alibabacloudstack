@@ -142,8 +142,7 @@ data "alibabacloudstack_slb_master_slave_server_groups" "default" {
   load_balancer_id = "${alibabacloudstack_slb.default.id}"
   ids              = ["${alibabacloudstack_slb_master_slave_server_group.default.id}"]
   name_regex       = "${var.name}"
-  output_file      = "output.txt"
-}
+  }
 ```
 
 ## 参数说明

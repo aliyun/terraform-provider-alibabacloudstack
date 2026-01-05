@@ -111,8 +111,7 @@ data "alibabacloudstack_ecs_instances" "default" {
     Owner      = "TeamA"
   }
   ram_role_name    = "exampleRole"
-  output_file     = "instances_output.txt"
-}
+  }
 
 output "first_instance_id" {
   value = "${data.alibabacloudstack_ecs_instances.default.instances.0.id}"

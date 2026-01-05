@@ -19,8 +19,7 @@ data "alibabacloudstack_vpngateway_vpnconnections" "example" {
   vpn_gateway_id      = "vgw-1234567890abcdef"
   customer_gateway_id = "cgw-abcdefgh12345678"
   name_regex         = "example-vpn-connection"
-  output_file        = "vpn_connections_output.txt"
-}
+  }
 ```
 
 ## Argument Reference

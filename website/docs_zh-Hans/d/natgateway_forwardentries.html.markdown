@@ -64,8 +64,7 @@ data "alibabacloudstack_natgateway_forwardentries" "default" {
   external_ip      = "${alibabacloudstack_eip.default.ip_address}"
   internal_ip      = "172.16.0.3"
   name_regex       = "example.*"
-  output_file      = "forward_entries_output.txt"
-}
+  }
 
 output "natgateway_forward_entries" {
   value = "${data.alibabacloudstack_natgateway_forwardentries.default.entries}"

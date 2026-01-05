@@ -73,4 +73,3 @@ The following attributes are exported in addition to the arguments listed above:
   * `dest_group_id` - Target security group id for ingress authorization.
   * `source_group_id` - Source security group ID for ingress authorization.
   * `group_id` - The ID of the security group that owns the rules.
-  * `output_file` - File name where to save data source results (after running `terraform plan`).

@@ -19,8 +19,7 @@ data "alibabacloudstack_gpdb_dbinstances" "example" {
   name_regex        = "gp-.+\\d+"
   availability_zone = "cn-beijing-c"
   vswitch_id        = "vsw-1234567890abcdefg"
-  output_file       = "dbinstances.txt"
-}
+  }
 
 output "dbinstance_id" {
   value = "${data.alibabacloudstack_gpdb_dbinstances.example.instances.0.id}"

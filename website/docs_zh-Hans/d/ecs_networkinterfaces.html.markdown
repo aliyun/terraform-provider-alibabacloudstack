@@ -72,8 +72,7 @@ data "alibabacloudstack_ecs_networkinterfaces" "enis" {
   security_group_id = alibabacloudstack_security_group.group.id
   type           = "Secondary"
   instance_id    = alibabacloudstack_instance.instance.id
-  output_file    = "eni_list.txt"
-}
+  }
 
 output "eni_name" {
   value = data.alibabacloudstack_ecs_networkinterfaces.enis.interfaces.0.name

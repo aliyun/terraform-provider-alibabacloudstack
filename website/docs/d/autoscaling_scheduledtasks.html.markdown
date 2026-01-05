@@ -19,8 +19,7 @@ data "alibabacloudstack_autoscaling_scheduledtasks" "example" {
   scheduled_task_id = "your-scheduled-task-id"
   name_regex        = "scheduled-task-name-.*"
   ids               = ["task-id-1", "task-id-2"]
-  output_file       = "scheduled_tasks_output.txt"
-}
+  }
 
 output "first_scheduled_task_id" {
   value = data.alibabacloudstack_autoscaling_scheduledtasks.example.tasks.0.id

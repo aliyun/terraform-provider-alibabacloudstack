@@ -49,4 +49,3 @@ output "ram_policies" {
     * `cuser_id` - 策略创建者的ID，标识创建该策略的用户。  
     * `region` - 策略所属的区域名称，表示该策略适用的区域。  
     * `policy_document` - 策略文档，定义了策略的具体权限和规则。  
-    * `output_file` - （可选）保存数据源结果的文件名（在运行`terraform plan`之后）。可以通过该属性将查询结果保存到指定文件中，便于后续使用或记录。  

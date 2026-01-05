@@ -35,8 +35,7 @@ data "alibabacloudstack_edas_clusters" "default" {
   logical_region_id = "cn-shenzhen:xxx"
   ids               = ["${alibabacloudstack_edas_cluster.default.id}"]
   name_regex        = "${alibabacloudstack_edas_cluster.default.cluster_name}"
-  output_file       = "edas_clusters_output.txt"
-}
+  }
 
 output "first_cluster_name" {
   value = data.alibabacloudstack_edas_clusters.default.clusters[0].cluster_name

@@ -34,7 +34,6 @@ output "output" {
 * `instance_id` - (必填) 容器镜像企业版实例的ID。
 * `ids` - (可选) 按命名空间ID过滤结果的ID列表。
 * `name_regex` - (可选) 用于按命名空间名称过滤结果的正则表达式字符串。
-* `output_file` - (可选) 保存数据源结果的文件名（在运行`terraform plan`之后）。
 
 ## 属性说明
 

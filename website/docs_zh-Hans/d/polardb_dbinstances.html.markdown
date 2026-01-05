@@ -57,8 +57,7 @@ data "alibabacloudstack_polardb_dbinstances" "default" {
   region_id            = "${data.alibabacloudstack_zones.default.zones.0.region_id}"
   payment_type         = "PayAsYouGo"
   engine               = "MySQL"
-  output_file          = "output.txt"
-}
+  }
 ```
 
 ## 参数说明

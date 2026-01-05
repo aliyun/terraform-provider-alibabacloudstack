@@ -28,7 +28,6 @@ output "instances" {
 * `name` - (输出属性) WAF 实例的名称。
 * `instance_status` - (输出属性) WAF 实例的当前状态。
 * `instance_make_status` - (输出属性) WAF 实例的创建或供应状态。
-* `output_file` - (可选) 将结果保存为 JSON 格式的文件名。
 * `Deprecated`: 此字段已弃用，并将在版本 3.19.0 中删除。请改用 local_file 提供程序。
 * `vpc_vswitch` - (输出属性) 包含 WAF 实例的 VPC 和 vSwitch 配置的列表，其结构如下：
 * `vswitch_name` - vSwitch 的名称。
