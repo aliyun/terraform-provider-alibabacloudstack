@@ -140,7 +140,6 @@ variable "name" {
 func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 
 	var v vpc.DescribeVSwitchAttributesResponse
-	AlibabacloudTestAccVpcVswitchCheckmap["ipv6_cidr_block"] = CHECKSET
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
@@ -197,9 +196,10 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":        name + "_updated",
-						"description": name + "_updated",
-						"enable_ipv6": "false",
+						"name":            name + "_updated",
+						"description":     name + "_updated",
+						"enable_ipv6":     "false",
+						"ipv6_cidr_block": REMOVEKEY,
 					}),
 				),
 			},
