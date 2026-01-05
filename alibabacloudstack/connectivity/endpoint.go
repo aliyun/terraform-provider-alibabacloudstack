@@ -187,8 +187,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	//cloudfw endpoint
 	CLOUDFWCode: PopEndpoint{
-		"cfwctl-cloudfw-biz.{{.region}}.{{.domain}}",
-		"cfwctl-cloudfw-biz.{{.region}}.{{.domain}}",
+		"ccfw-cloudfw-biz.{{.region}}.{{.domain}}",
+		"ccfw-cloudfw-biz.{{.region}}.{{.domain}}",
 	},
 	//cr endpoint
 	CRCode: PopEndpoint{
