@@ -434,7 +434,6 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_quick_bi_users":                                   dataSourceAlibabacloudStackQuickBiUsers(),
 		"alibabacloudstack_router_interfaces":                                dataSourceAlibabacloudStackRouterInterfaces(),
 		"alibabacloudstack_expressconnect_routerinterfaces":                  dataSourceAlibabacloudStackRouterInterfaces(),
-		"alibabacloudstack_ram_service_role_products":                        dataSourceAlibabacloudStackRamServiceRoleProducts(),
 		"alibabacloudstack_route_tables":                                     dataSourceAlibabacloudStackRouteTables(),
 		"alibabacloudstack_vpc_routetables":                                  dataSourceAlibabacloudStackRouteTables(),
 		"alibabacloudstack_route_entries":                                    dataSourceAlibabacloudStackRouteEntries(),
