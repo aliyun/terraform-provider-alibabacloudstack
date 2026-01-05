@@ -203,6 +203,16 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable_ipv6": true,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable_ipv6": "true",
+					}),
+				),
+			},
 		},
 	})
 }
