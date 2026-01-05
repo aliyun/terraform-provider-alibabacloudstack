@@ -170,6 +170,7 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 	request.QueryParams["targetType"] = targetType
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -464,9 +465,7 @@ func resourceAlibabacloudStackAscmQuotaDelete(d *schema.ResourceData, meta inter
 		request.QueryParams["quotaType"] = did[1]
 		request.QueryParams["quotaTypeId"] = did[2]
 
-		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
-		})
+		_, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			return resource.RetryableError(err)
 		}

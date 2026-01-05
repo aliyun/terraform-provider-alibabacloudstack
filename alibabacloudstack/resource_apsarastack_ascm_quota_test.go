@@ -37,10 +37,10 @@ func TestAccAlibabacloudStackAscmQuota_Basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"quota_type":                  "organization",
-					"quota_type_id":               "${alibabacloudstack_ascm_organization.default.id}",
-					"product_name":                "VPC",
-					"total_vpc":                   10,
+					"quota_type":    "organization",
+					"quota_type_id": "${alibabacloudstack_ascm_organization.default.id}",
+					"product_name":  "VPC",
+					"total_vpc":     1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -48,10 +48,10 @@ func TestAccAlibabacloudStackAscmQuota_Basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"quota_type":                  "organization",
-					"quota_type_id":               "${alibabacloudstack_ascm_organization.default.id}",
-					"product_name":                "VPC",
-					"total_vpc":                   20,
+					"quota_type":    "organization",
+					"quota_type_id": "${alibabacloudstack_ascm_organization.default.id}",
+					"product_name":  "VPC",
+					"total_vpc":     2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
