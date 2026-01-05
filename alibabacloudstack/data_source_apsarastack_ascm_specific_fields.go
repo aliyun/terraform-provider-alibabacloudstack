@@ -34,11 +34,7 @@ func dataSourceAlibabacloudStackSpecificFields() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"specific_fields": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -78,17 +74,12 @@ func dataSourceAlibabacloudStackSpecificFieldsRead(d *schema.ResourceData, meta 
 
 	}
 	var ids []string
-	var s []map[string]interface{}
+	// var s []map[string]interface{}
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("specific_fields", response.Data); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
-	}
 	return nil
 }

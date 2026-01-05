@@ -27,8 +27,7 @@ data "alibabacloudstack_eip_addresses" "example" {
   ids        = [alibabacloudstack_eip.default[0].id]
   ip_addresses = ["192.168.0.1"]
 
-  output_file = "eips_output.txt"
-}
+  }
 
 output "first_eip_id" {
   value = data.alibabacloudstack_eip_addresses.example.eips.0.id

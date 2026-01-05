@@ -16,8 +16,7 @@ This data source provides the ecs instance families of the current Apsara Stack 
 ```
 data "alibabacloudstack_ascm_ecs_instance_families" "default" {
   status = "Available"
-  output_file = "ecs_instance"
-}
+  }
 output "ecs_instance" {
   value = data.alibabacloudstack_ascm_ecs_instance_families.default.*
 }

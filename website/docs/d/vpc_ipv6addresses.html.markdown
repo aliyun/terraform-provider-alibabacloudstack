@@ -20,8 +20,7 @@ data "alibabacloudstack_vpc_ipv6_addresses" "example" {
   vpc_id               = "your-vpc-id"
   status               = "Available"
 
-  output_file = "output.txt"
-}
+  }
 
 output "ipv6_address_1" {
   value = data.alibabacloudstack_vpc_ipv6_addresses.example.addresses[0].ipv6_address

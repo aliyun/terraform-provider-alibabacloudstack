@@ -147,11 +147,5 @@ func dataSourceAlibabacloudStackCenVbrHealthChecksRead(d *schema.ResourceData, m
 	if err := d.Set("vbr_health_checks", checks); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	// Write to output file if specified
-	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
-		writeToFile(outputFile.(string), checks)
-	}
-
 	return nil
 }

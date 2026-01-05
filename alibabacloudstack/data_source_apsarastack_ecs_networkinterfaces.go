@@ -55,11 +55,7 @@ func dataSourceAlibabacloudStackNetworkInterfaces() *schema.Resource {
 				Optional: true,
 			},
 			"tags": tagsSchema(),
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"names": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -268,12 +264,6 @@ func networkInterfaceDescriptionAttributes(d *schema.ResourceData, enis []ecs.Ne
 	}
 	if err := d.Set("interfaces", s); err != nil {
 		return err
-	}
-
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
 	}
 
 	return nil

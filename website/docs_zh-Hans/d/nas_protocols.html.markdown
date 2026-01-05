@@ -18,8 +18,7 @@ description: |-
 data "alibabacloudstack_nas_protocols" "default" {
   type        = "Performance"
   zone_id     = "cn-beijing-e"
-  output_file = "protocols.txt"
-}
+  }
 
 output "nas_protocols_protocol" {
   value = "${data.alibabacloudstack_nas_protocols.default.protocols.0}"

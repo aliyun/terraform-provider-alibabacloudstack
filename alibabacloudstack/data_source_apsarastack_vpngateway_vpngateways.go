@@ -59,12 +59,6 @@ func dataSourceAlibabacloudStackVpnGateways() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Normal", "FinancialLocked"}, false),
 			},
 
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
-
 			// Computed values
 			"gateways": {
 				Type:     schema.TypeList,
@@ -283,10 +277,6 @@ func vpnsDecriptionAttributes(d *schema.ResourceData, vpnSetTypes []vpc.VpnGatew
 	}
 
 	// create a json file in current directory and write data source to it.
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
-	}
+
 	return nil
 }

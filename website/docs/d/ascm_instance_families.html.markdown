@@ -15,8 +15,7 @@ This data source provides the instance families of the current Apsara Stack Clou
 
 ```
 data "alibabacloudstack_ascm_instance_families" "default" {
-  output_file = "instance_families"
-  resource_type = "DRDS"
+    resource_type = "DRDS"
   status = "Available"
 }
 output "instfam" {

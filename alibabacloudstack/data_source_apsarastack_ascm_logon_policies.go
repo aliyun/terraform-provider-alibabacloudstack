@@ -46,11 +46,6 @@ func dataSourceAlibabacloudStackAscmLogonPolicies() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
 			"policies": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -175,11 +170,6 @@ func dataSourceAlibabacloudStackAscmLogonPoliciesRead(d *schema.ResourceData, me
 
 	if err := d.Set("policies", t); err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), t); err != nil {
-			return err
-		}
 	}
 	return nil
 }

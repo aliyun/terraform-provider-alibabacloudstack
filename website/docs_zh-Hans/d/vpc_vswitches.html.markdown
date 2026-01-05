@@ -38,8 +38,7 @@ data "alibabacloudstack_vpc_vswitches" "default" {
   vpc_id     = "${alibabacloudstack_vpc.default.id}"
   zone_id    = "${data.alibabacloudstack_zones.default.zones.0.id}"
 
-  output_file = "vswitches_output.txt"
-}
+  }
 
 output "vswitch_names" {
   value = data.alibabacloudstack_vpc_vswitches.default.names

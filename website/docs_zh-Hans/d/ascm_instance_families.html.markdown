@@ -15,8 +15,7 @@ description: |-
 
 ```
 data "alibabacloudstack_ascm_instance_families" "default" {
-  output_file = "instance_families"
-  resource_type = "DRDS"
+    resource_type = "DRDS"
   status = "Available"
 }
 output "instfam" {

@@ -63,8 +63,7 @@ data "alibabacloudstack_slb_loadbalancers" "default" {
   }
 
   # 输出结果保存到文件
-  output_file = "slb_output.txt"
-}
+  }
 
 output "first_slb_id" {
   value = data.alibabacloudstack_slb_loadbalancers.default.slbs[0].id

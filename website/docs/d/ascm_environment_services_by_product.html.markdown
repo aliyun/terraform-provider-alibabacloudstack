@@ -15,8 +15,7 @@ This data source provides the environment services of the current Apsara Stack C
 
 ```
 data "alibabacloudstack_ascm_environment_services_by_product" "default" {
-  output_file = "environment"
-}
+  }
 output "envser" {
   value = data.alibabacloudstack_ascm_environment_services_by_product.default.*
 }

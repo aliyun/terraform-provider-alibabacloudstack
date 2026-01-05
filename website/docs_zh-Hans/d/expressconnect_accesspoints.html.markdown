@@ -23,8 +23,7 @@ data "alibabacloudstack_expressconnect_accesspoints" "default" {
   ids        = ["ap-cn-qingdao-env17-d01-amtest17"]
   name_regex = "^tf-testacc-expressConnectAccessPoints"
   status     = "Available"
-  output_file = "access_points_output.txt"
-}
+  }
 ```
 
 ## 参数说明

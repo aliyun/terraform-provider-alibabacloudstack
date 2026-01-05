@@ -64,11 +64,7 @@ func dataSourceAlibabacloudStackNasMountTargets() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Active", "Inactive", "Pending"}, false),
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"targets": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -205,11 +201,6 @@ func dataSourceAlibabacloudStackNasMountTargetsRead(d *schema.ResourceData, meta
 
 	if err := d.Set("targets", s); err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
 	}
 
 	return nil

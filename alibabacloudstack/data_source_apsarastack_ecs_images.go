@@ -38,11 +38,7 @@ func dataSourceAlibabacloudStackImages() *schema.Resource {
 				// must contain a valid Image owner, expected ImageOwnerSystem, ImageOwnerSelf, ImageOwnerOthers, ImageOwnerMarketplace, ImageOwnerDefault
 				ValidateFunc: validation.StringInSlice([]string{"system", "self", "others", "marketplace", ""}, false),
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"ids": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -307,11 +303,7 @@ func imagesDescriptionAttributes(d *schema.ResourceData, images []ecs.Image, met
 	}
 
 	// create a json file in current directory and write data source to it.
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
-	}
+
 	return nil
 }
 

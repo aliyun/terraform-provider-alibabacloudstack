@@ -47,8 +47,7 @@ data "alibabacloudstack_dms_enterprise_users" "default" {
   role = "USER"
   status = "NORMAL"
   tid = "1234567890"
-  output_file = "users_output.txt"
-}
+  }
 
 output "first_user_id" {
   value = data.alibabacloudstack_dms_enterprise_users.default.users.0.id

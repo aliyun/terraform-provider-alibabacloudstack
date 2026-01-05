@@ -27,11 +27,7 @@ func dataSourceAlibabacloudStackDRDSInstances() *schema.Resource {
 				ValidateFunc:  validation.StringIsValidRegExp,
 				ConflictsWith: []string{"name_regex"},
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -40,10 +36,10 @@ func dataSourceAlibabacloudStackDRDSInstances() *schema.Resource {
 				ForceNew: true,
 			},
 			"instance_type": {
-				Type: schema.TypeString,
-				Optional: true,
-				Default: "",
-				ValidateFunc:  validation.StringInSlice([]string{"RW", "RO"}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "",
+				ValidateFunc: validation.StringInSlice([]string{"RW", "RO"}, false),
 			},
 			// Computed values
 			"descriptions": {
@@ -130,7 +126,7 @@ func dataSourceAlibabacloudStackDRDSInstancesRead(d *schema.ResourceData, meta i
 	}
 
 	instanceType := d.Get("instance_type").(string)
-	
+
 	raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
 		return drdsClient.DescribeDrdsInstances(request)
 	})
@@ -156,7 +152,7 @@ func dataSourceAlibabacloudStackDRDSInstancesRead(d *schema.ResourceData, meta i
 				continue
 			}
 		}
-		
+
 		if instanceType == "RW" && item.MasterInstanceId != "" {
 			continue
 		} else if instanceType == "RO" && item.MasterInstanceId == "" {
@@ -208,10 +204,6 @@ func drdsInstancesDescription(d *schema.ResourceData, dbi []drds.Instance) error
 		return errmsgs.WrapError(err)
 	}
 	// create a json file in current directory and write data source to it
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
-	}
+
 	return nil
 }

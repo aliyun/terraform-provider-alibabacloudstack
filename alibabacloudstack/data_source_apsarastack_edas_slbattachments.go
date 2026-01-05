@@ -15,11 +15,7 @@ func dataSourceAlibabacloudStackEdasApplications() *schema.Resource {
 		Read: dataSourceAlibabacloudStackEdasApplicationsRead,
 
 		Schema: map[string]*schema.Schema{
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -170,12 +166,6 @@ func edasApplicationAttributes(d *schema.ResourceData, apps []edas.ApplicationIn
 	}
 	if err := d.Set("applications", s); err != nil {
 		return errmsgs.WrapError(err)
-	}
-
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
 	}
 
 	return nil

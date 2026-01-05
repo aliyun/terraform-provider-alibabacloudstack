@@ -18,8 +18,7 @@ This data source provides a list of apigateway apigroups in an AlibabaCloudStack
 data "alibabacloudstack_apigateway_apigroups" "example" {
   name_regex = "example-group"
   ids        = ["group1", "group2"]
-  output_file = "apigroups_output.txt"
-}
+  }
 
 output "first_group_id" {
   value = data.alibabacloudstack_apigateway_apigroups.example.groups.0.id

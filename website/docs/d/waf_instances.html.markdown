@@ -16,8 +16,7 @@ This data source provides a list of WAF instances in Alibaba Cloud Stack based o
 hcl
 data "alibabacloudstack_waf_instances" "example" {
   ids = ["waf-instance-1", "waf-instance-2"]
-  output_file = "output.json"
-}
+  }
 
 output "instances" {
   value = data.alibabacloudstack_waf_instances.example.ids

@@ -23,8 +23,7 @@ resource "alibabacloudstack_ecs_hpc_cluster" "default" {
 data "alibabacloudstack_ecs_hpc_clusters" "default" {
     ids        = [alibabacloudstack_ecs_hpc_cluster.default.id]
     name_regex = "tf-testAcc.*"
-    output_file = "hpc_clusters_output.txt"
-}
+    }
 
 output "first_hpc_cluster_id" {
     value = data.alibabacloudstack_ecs_hpc_clusters.default.clusters[0].id

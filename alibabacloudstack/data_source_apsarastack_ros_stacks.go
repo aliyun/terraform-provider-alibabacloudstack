@@ -56,11 +56,7 @@ func dataSourceAlibabacloudStackRosStacks() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"CREATE_COMPLETE", "CREATE_FAILED", "CREATE_IN_PROGRESS", "DELETE_COMPLETE", "DELETE_FAILED", "DELETE_IN_PROGRESS", "ROLLBACK_COMPLETE", "ROLLBACK_FAILED", "ROLLBACK_IN_PROGRESS"}, false),
 			},
 			"tags": tagsSchema(),
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"stacks": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -323,11 +319,6 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 
 	if err := d.Set("stacks", s); err != nil {
 		return err
-	}
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
 	}
 
 	return nil

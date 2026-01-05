@@ -31,8 +31,7 @@ resource "alibabacloudstack_ons_instance" "default" {
 
 data "alibabacloudstack_ons_instances" "instances_ds" {
   name_regex = alibabacloudstack_ons_instance.inst.name
-  output_file = "instances.txt"
-}
+  }
 
 output "first_instance_id" {
   value = data.alibabacloudstack_ons_instances.instances_ds.*

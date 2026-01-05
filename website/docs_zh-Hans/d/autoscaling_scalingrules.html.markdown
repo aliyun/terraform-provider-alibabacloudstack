@@ -139,8 +139,7 @@ data "alibabacloudstack_ess_scaling_rules" "default" {
   name_regex = "rule-name-*"
   type = "SimpleScalingConfiguration"
 
-  output_file = "scaling_rules_output.json"
-}
+  }
 
 output "first_scaling_rule_id" {
   value = data.alibabacloudstack_ess_scaling_rules.default.rules[0].id

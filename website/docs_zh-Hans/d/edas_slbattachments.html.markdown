@@ -61,8 +61,7 @@ resource "alibabacloudstack_edas_slb_attachment" "default" {
 data "alibabacloudstack_edas_slbattachments" "default" {
   ids = ["${alibabacloudstack_edas_slb_attachment.default.id}"]
   name_regex = "${alibabacloudstack_edas_slb_attachment.default.app_id}"
-  output_file = "slbattachments_output.txt"
-}
+  }
 ```
 
 ## 参数说明

@@ -20,8 +20,7 @@ data "alibabacloudstack_slb_vservergroups" "sample_ds" {
   ids             = ["vsg-12345678", "vsg-abcdefg"]
   name_regex      = "^group-.*"
 
-  output_file = "slb_vservergroups_output.txt"
-}
+  }
 
 output "first_slb_vserver_group_id" {
   value = data.alibabacloudstack_slb_vservergroups.sample_ds.slb_server_groups[0].id

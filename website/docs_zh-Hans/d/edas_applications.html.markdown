@@ -41,8 +41,7 @@ resource "alibabacloudstack_edas_application" "default" {
 data "alibabacloudstack_edas_applications" "default" {
   ids        = ["${alibabacloudstack_edas_application.default.id}"]
   name_regex = "${alibabacloudstack_edas_application.default.application_name}"
-  output_file = "edas_applications_output.txt"
-}
+  }
 
 output "application_names" {
   value = data.alibabacloudstack_edas_applications.default.names

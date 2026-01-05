@@ -19,8 +19,7 @@ This data source provides a list Container Registry Enterprise Edition instances
 # Declare the data source
 data "alibabacloudstack_cr_ee_instances" "my_instances" {
   name_regex  = "my-instances"
-  output_file = "my-instances-json"
-}
+  }
 
 output "output" {
   value = "${data.alibabacloudstack_cr_ee_instances.my_instances.instances}"

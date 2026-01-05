@@ -15,8 +15,7 @@ description: |-
 
 ```
 data "alibabacloudstack_ascm_regions_by_product" "regions" {
-  output_file = "product_regions"
-  product_name = "ecs"
+    product_name = "ecs"
 }
 output "regions" {
   value = data.alibabacloudstack_ascm_regions_by_product.regions.*

@@ -42,8 +42,7 @@ data "alibabacloudstack_vpc_vpcs" "default" {
   status      = "Available"
   name_regex  = "^${var.name}_vpc"
   is_default  = false
-  output_file = "vpc_list.txt"
-
+  
   dhcp_options_set_id = ""
   dry_run             = false
   resource_group_id   = ""

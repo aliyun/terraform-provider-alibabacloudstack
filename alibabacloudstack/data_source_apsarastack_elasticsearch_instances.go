@@ -3,8 +3,9 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/PaesslerAG/jsonpath"
 	"regexp"
+
+	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -37,16 +38,12 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-// There is an issue with Zone filtering
-// 			"zone_id": {
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+			// There is an issue with Zone filtering
+			// 			"zone_id": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 			},
+
 			// Computed values
 			"descriptions": {
 				Type:     schema.TypeList,
@@ -312,13 +309,6 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 
 	if err := d.Set("descriptions", descriptions); err != nil {
 		return errmsgs.WrapError(err)
-	}
-
-	// create a json file in current directory and write data source to it
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), filteredInstances); err != nil {
-			return err
-		}
 	}
 	return nil
 }

@@ -19,8 +19,7 @@ data "alibabacloudstack_edas_deploygroups" "example" {
   app_id   = "your_app_id"
   name_regex = "group-.*"
 
-  output_file = "deploygroups.txt"
-}
+  }
 
 output "first_group_name" {
   value = data.alibabacloudstack_edas_deploygroups.example.groups.0.group_name

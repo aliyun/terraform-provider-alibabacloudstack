@@ -48,8 +48,7 @@ data "alibabacloudstack_edas_deploy_groups" "default" {
   name_regex = "${alibabacloudstack_edas_deploy_group.default.group_name}"
   app_id     = "${alibabacloudstack_edas_application.default.id}"
 
-  output_file = "deploygroups_output.txt"
-}
+  }
 
 output "first_group_name" {
   value = data.alibabacloudstack_edas_deploy_groups.default.groups[0].group_name

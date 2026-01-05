@@ -23,8 +23,7 @@ data "alibabacloudstack_ots_instances" "instances_ds" {
     Owner      = "JohnDoe"
   }
 
-  output_file = "instances.txt"
-}
+  }
 
 output "first_instance_id" {
   value = data.alibabacloudstack_ots_instances.instances_ds.instances.0.id

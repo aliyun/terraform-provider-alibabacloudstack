@@ -40,11 +40,7 @@ func dataSourceAlibabacloudStackKVStoreInstanceEngines() *schema.Resource {
 				Default:      PrePaid,
 				ValidateFunc: validation.StringInSlice([]string{string(PostPaid), string(PrePaid)}, false),
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			// Computed values.
 			"instance_engines": {
 				Type:     schema.TypeList,
@@ -153,12 +149,6 @@ func dataSourceAlibabacloudStackKVStoreInstanceEnginesRead(d *schema.ResourceDat
 	err = d.Set("instance_engines", infos)
 	if err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if output, ok := d.GetOk("output_file"); ok {
-		err = writeToFile(output.(string), infos)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
 	}
 	return nil
 }

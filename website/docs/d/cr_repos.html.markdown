@@ -19,8 +19,7 @@ This data source provides a list Container Registry repositories on Alibabacloud
 # Declare the data source
 data "alibabacloudstack_cr_repos" "my_repos" {
   name_regex  = "my-repos"
-  output_file = "my-repo-json"
-}
+  }
 
 output "output" {
   value = "${data.alibabacloudstack_cr_repos.my_repos.repos}"

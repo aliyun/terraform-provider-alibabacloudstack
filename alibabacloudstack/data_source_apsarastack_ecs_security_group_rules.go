@@ -113,11 +113,6 @@ func dataSourceAlibabacloudStackSecurityGroupRules() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
 		},
 	}
 }
@@ -159,7 +154,7 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 			if v, ok := d.GetOk("policy"); ok && strings.ToLower(string(item.Policy)) != v.(string) {
 				continue
 			}
-			
+
 			if v, ok := d.GetOk("nic_type"); ok && strings.ToLower(string(item.NicType)) != v.(string) {
 				continue
 			}
@@ -204,12 +199,6 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 
 	if err := d.Set("rules", rules); err != nil {
 		return errmsgs.WrapError(err)
-	}
-
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), rules); err != nil {
-			return err
-		}
 	}
 	return nil
 }

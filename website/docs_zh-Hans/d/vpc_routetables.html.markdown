@@ -37,8 +37,7 @@ data "alibabacloudstack_vpc_routetables" "default" {
   tags        = {
     Environment = "Test"
   }
-  output_file = "route_tables_output.txt"
-}
+  }
 
 output "route_table_ids" {
   value = "${data.alibabacloudstack_vpc_routetables.default.ids}"

@@ -18,8 +18,7 @@ This data source provides a list of edas applications in an alibabacloudstack ac
 data "alibabacloudstack_edas_applications" "applications" {
   ids        = ["app12345"]
   name_regex = "example-application-.*"
-  output_file = "application_list.txt"
-}
+  }
 
 output "first_application_name" {
   value = data.alibabacloudstack_edas_applications.applications.applications[0].app_name

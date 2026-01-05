@@ -65,11 +65,7 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"cpu", "memory"}, false),
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"instance_classes": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -234,13 +230,6 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 	err = d.Set("instance_classes", s)
 	if err != nil {
 		return errmsgs.WrapError(err)
-	}
-
-	if output, ok := d.GetOk("output_file"); ok {
-		err = writeToFile(output.(string), Datas)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
 	}
 	return nil
 }

@@ -19,8 +19,7 @@ description: |-
 # 声明数据源
 data "alibabacloudstack_cr_repos" "my_repos" {
   name_regex  = "my-repos"
-  output_file = "my-repo-json"
-}
+  }
 
 output "output" {
   value = "${data.alibabacloudstack_cr_repos.my_repos.repos}"

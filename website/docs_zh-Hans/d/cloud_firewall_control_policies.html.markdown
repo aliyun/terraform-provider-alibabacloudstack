@@ -27,8 +27,7 @@ data "alibabacloudstack_cloud_firewall_control_policies" "example" {
   description = "示例访问控制策略"
 
   # 可选：保存结果到文件
-  output_file = "control_policies_output.txt"
-}
+  }
 ```
 
 ## 参数说明

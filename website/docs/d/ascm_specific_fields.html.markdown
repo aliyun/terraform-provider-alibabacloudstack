@@ -17,8 +17,7 @@ This data source provides the specific fields of the current Apsara Stack Cloud 
 data "alibabacloudstack_ascm_specific_fields" "specifields" {
   group_filed ="storageType"
   resource_type ="OSS"
-  output_file = "fields"
-}
+  }
 output "specifields" {
   value = data.alibabacloudstack_ascm_specific_fields.specifields.*
 }

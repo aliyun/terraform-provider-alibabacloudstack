@@ -42,11 +42,7 @@ func dataSourceAlibabacloudStackAscmUserGroups() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeInt},
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"groups": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -153,11 +149,6 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 	}
 	if err := d.Set("role_ids", roleids); err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), groups); err != nil {
-			return err
-		}
 	}
 	return nil
 }

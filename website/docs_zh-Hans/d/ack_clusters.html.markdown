@@ -82,8 +82,7 @@ resource "alibabacloudstack_cs_kubernetes" "default" {
 data "alibabacloudstack_ack_clusters" "example" {
   name_regex = "my-first-ack"
 
-  output_file = "clusters_output.txt"
-}
+  }
 
 output "ack_cluster_ids" {
   value = data.alibabacloudstack_ack_clusters.example.ids

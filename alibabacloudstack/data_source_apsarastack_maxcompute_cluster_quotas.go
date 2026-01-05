@@ -13,11 +13,7 @@ func dataSourceAlibabacloudStackMaxcomputeClusterQuotas() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackMaxcomputeClusterQutaosRead,
 		Schema: map[string]*schema.Schema{
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"cluster": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -92,11 +88,5 @@ func dataSourceAlibabacloudStackMaxcomputeClusterQutaosRead(d *schema.ResourceDa
 	d.Set("disk_total", object["diskTotal"].(string))
 
 	d.SetId(d.Get("cluster").(string))
-
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), d); err != nil {
-			return err
-		}
-	}
 	return nil
 }

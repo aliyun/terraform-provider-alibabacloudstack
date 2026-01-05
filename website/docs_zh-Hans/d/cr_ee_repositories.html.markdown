@@ -21,8 +21,7 @@ description: |-
 data "alibabacloudstack_cr_ee_repos" "my_repos" {
   instance_id = "cri-xx"
   name_regex  = "my-repos"
-  output_file = "my-repo-json"
-}
+  }
 
 output "output" {
   value = "${data.alibabacloudstack_cr_ee_repos.my_repos.repos}"

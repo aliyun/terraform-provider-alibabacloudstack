@@ -35,8 +35,7 @@ resource "alibabacloudstack_api_gateway_app" "default" {
 data "alibabacloudstack_apigateway_apps" "default" {
   name_regex = alibabacloudstack_api_gateway_app.default.name
   ids        = [alibabacloudstack_api_gateway_app.default.id]
-  output_file = "apps_list.txt"
-}
+  }
 
 output "first_app_id" {
   value = data.alibabacloudstack_apigateway_apps.default.apps.0.id

@@ -15,15 +15,11 @@ func dataSourceAlibabacloudStackEdasClusters() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"logical_region_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Deprecated: "The 'logical_region_id' field has been deprecated and is scheduled for removal in version 3.19.0. ",
-			},
-			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
+				Deprecated: "The 'logical_region_id' field has been deprecated and is scheduled for removal in version 3.19.0. ",
 			},
+
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -111,7 +107,7 @@ func dataSourceAlibabacloudStackEdasClustersRead(d *schema.ResourceData, meta in
 
 	request := edas.CreateListClusterRequest()
 	client.InitRoaRequest(*request.RoaRequest)
-	if  logicalRegionId, ok  := d.GetOk("logical_region_id"); ok {
+	if logicalRegionId, ok := d.GetOk("logical_region_id"); ok {
 		request.LogicalRegionId = logicalRegionId.(string)
 	}
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
@@ -206,12 +202,6 @@ func edasClusterDescriptionAttributes(d *schema.ResourceData, clusters []edas.Cl
 	}
 	if err := d.Set("clusters", s); err != nil {
 		return errmsgs.WrapError(err)
-	}
-
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
 	}
 
 	return nil

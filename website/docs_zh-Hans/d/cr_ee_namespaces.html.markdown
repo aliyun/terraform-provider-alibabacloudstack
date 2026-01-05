@@ -20,8 +20,7 @@ description: |-
 data "alibabacloudstack_cr_ee_namespaces" "my_namespaces" {
   instance_id = "cri-xxx"
   name_regex  = "my-namespace"
-  output_file = "my-namespace-json"
-}
+  }
 
 output "output" {
   value = "${data.alibabacloudstack_cr_ee_namespaces.my_namespaces.namespaces}"

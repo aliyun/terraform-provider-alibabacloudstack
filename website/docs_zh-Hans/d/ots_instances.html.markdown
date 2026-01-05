@@ -37,8 +37,7 @@ data "alibabacloudstack_ots_instances" "default" {
     For     = "acceptance test"
   }
 
-  output_file = "instances.txt"
-}
+  }
 
 output "first_instance_id" {
   value = data.alibabacloudstack_ots_instances.default.instances.0.id

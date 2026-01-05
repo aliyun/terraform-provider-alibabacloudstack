@@ -209,7 +209,7 @@ func dataSourceAlibabacloudStackEbsDiskReplicaPairsRead(d *schema.ResourceData, 
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_ebs_disk_replica_pair", "DescribeDiskReplicaPairs", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	
+
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok {
 		for _, vv := range v.([]interface{}) {
@@ -227,7 +227,7 @@ func dataSourceAlibabacloudStackEbsDiskReplicaPairsRead(d *schema.ResourceData, 
 				continue
 			}
 		}
-		
+
 		if len(idsMap) > 0 {
 			if _, exist := idsMap[data.ReplicaPairId]; !exist {
 				continue
@@ -275,12 +275,6 @@ func dataSourceAlibabacloudStackEbsDiskReplicaPairsRead(d *schema.ResourceData, 
 	if err := d.Set("ids", ids); err != nil {
 		return err
 	}
-
-	// create a json file in current directory and write data source to it.
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), datas)
-	}
-
 	return nil
 
 }

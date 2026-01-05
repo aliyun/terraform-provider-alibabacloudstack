@@ -33,11 +33,7 @@ func dataSourceAlibabacloudStackCmsAlarmContactGroups() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"groups": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -161,11 +157,6 @@ func dataSourceAlibabacloudStackCmsAlarmContactGroupsRead(d *schema.ResourceData
 
 	if err := d.Set("groups", s); err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
 	}
 
 	return nil

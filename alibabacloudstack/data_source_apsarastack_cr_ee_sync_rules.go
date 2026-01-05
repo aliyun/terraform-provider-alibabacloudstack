@@ -38,11 +38,6 @@ func dataSourceAlibabacloudStackCrEeSyncRules() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
 
 			// Computed values
 			"ids": {
@@ -254,12 +249,5 @@ func dataSourceAlibabacloudStackCrEeSyncRulesRead(d *schema.ResourceData, meta i
 	if err := d.Set("rules", rulesMaps); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), rulesMaps); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }

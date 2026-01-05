@@ -20,8 +20,7 @@ This data source provides a list Container Registry Enterprise Edition namespace
 data "alibabacloudstack_cr_ee_namespaces" "my_namespaces" {
   instance_id = "cri-xxx"
   name_regex  = "my-namespace"
-  output_file = "my-namespace-json"
-}
+  }
 
 output "output" {
   value = "${data.alibabacloudstack_cr_ee_namespaces.my_namespaces.namespaces}"

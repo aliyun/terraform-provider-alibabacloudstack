@@ -21,8 +21,7 @@ data "alibabacloudstack_autoscaling_scalingrules" "example" {
   name_regex       = "rule-name-*"
   type             = "SimpleScalingConfiguration"
 
-  output_file = "scaling_rules_output.json"
-}
+  }
 
 output "first_scaling_rule_id" {
   value = data.alibabacloudstack_autoscaling_scalingrules.example.rules[0].id

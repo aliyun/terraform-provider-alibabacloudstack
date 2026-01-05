@@ -24,8 +24,7 @@ resource "alibabacloudstack_vpn_customer_gateway" "default" {
 data "alibabacloudstack_vpngateway_customergateways" "example" {
   ids        = [alibabacloudstack_vpn_customer_gateway.default.id]
   name_regex = "tf-testAccVpnCgwNameDataResource.*"
-  output_file = "./customergateways_output.txt"
-}
+  }
 
 output "customergateway_ids" {
   value = data.alibabacloudstack_vpngateway_customergateways.example.ids

@@ -20,8 +20,7 @@ data "alibabacloudstack_autoscaling_scalingconfigurations" "example" {
   ids              = ["sc-abcdefgh12345678", "sc-ijklmnop90123456"]
   name_regex       = "scaling_configuration_example_.*"
 
-  output_file = "scaling_configurations_output.txt"
-}
+  }
 
 output "first_scaling_configuration_id" {
   value = data.alibabacloudstack_autoscaling_scalingconfigurations.example.configurations.0.id

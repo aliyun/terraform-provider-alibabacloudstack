@@ -2,13 +2,16 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"log"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
+	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -16,7 +19,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"time"
 )
 
 type instanceTypeWithOriginalPrice struct {
@@ -73,11 +75,7 @@ func dataSourceAlibabacloudStackInstanceTypes() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory", "Price"}, false),
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"ids": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -192,7 +190,7 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 		}
 	}
 	var instanceTypes []instanceTypeWithOriginalPrice
-	
+
 	if len(mapInstanceTypes) == 0 {
 		return instanceTypesDescriptionAttributes(d, instanceTypes, mapInstanceTypes)
 	}
@@ -349,10 +347,6 @@ func instanceTypesDescriptionAttributes(d *schema.ResourceData, types []instance
 	}
 
 	// create a json file in current directory and write data source to it.
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
-	}
+
 	return nil
 }

@@ -52,11 +52,6 @@ func dataSourceAlibabacloudStackAdbDbClusters() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"ClassChanging", "Creating", "Deleting", "NetAddressCreating", "NetAddressDeleting", "Preparing", "Restoring", "Running"}, false),
 			},
 			"tags": tagsSchema(),
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
 			"clusters": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -406,11 +401,6 @@ func dataSourceAlibabacloudStackAdbDbClustersRead(d *schema.ResourceData, meta i
 
 	if err := d.Set("clusters", s); err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
 	}
 
 	return nil

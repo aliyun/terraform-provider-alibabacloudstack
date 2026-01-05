@@ -32,11 +32,7 @@ func dataSourceAlibabacloudStackWafInstances() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"vpc_vswitch": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -149,9 +145,6 @@ func dataSourceAlibabacloudStackWafInstancesRead(d *schema.ResourceData, meta in
 	// if err := d.Set("instances", s); err != nil {
 	// 	return errmsgs.WrapError(err)
 	// }
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), s)
-	}
 
 	return nil
 }

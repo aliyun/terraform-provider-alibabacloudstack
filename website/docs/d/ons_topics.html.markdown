@@ -43,8 +43,7 @@ resource "alibabacloudstack_ons_topic" "default" {
 
 data "alibabacloudstack_ons_topics" "topics_ds" {
  instance_id = alibabacloudstack_ons_topic.topic.instance_id
-  output_file = "topics.txt"
-}
+  }
 
 output "first_topic_name" {
    value = data.alibabacloudstack_ons_topics.topics_ds.*

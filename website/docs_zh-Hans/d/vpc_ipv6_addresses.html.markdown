@@ -33,8 +33,7 @@ data "alibabacloudstack_vpc_ipv6_addresses" "default" {
   vpc_id                = data.alibabacloudstack_vpcs.default.ids[0]
   status                = "Available"
 
-  output_file = "output.txt"
-}
+  }
 
 output "ipv6_address_1" {
   value = data.alibabacloudstack_vpc_ipv6_addresses.default.addresses[0].ipv6_address

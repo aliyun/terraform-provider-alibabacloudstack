@@ -48,8 +48,7 @@ data "alibabacloudstack_ecs_disks" "default" {
     Name1 = "TerraformTest"
   }
 
-  output_file = "disks_output.txt"
-}
+  }
 
 output "first_disk_id" {
   value = "${data.alibabacloudstack_ecs_disks.default.disks.0.id}"

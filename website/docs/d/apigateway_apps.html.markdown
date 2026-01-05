@@ -18,8 +18,7 @@ This data source provides a list of API Gateway apps in an AlibabaCloudStack acc
 data "alibabacloudstack_apigateway_apps" "example" {
   name_regex = "app-.*"
   ids        = ["app12345"]
-  output_file = "applist.txt"
-}
+  }
 
 output "first_app_id" {
   value = data.alibabacloudstack_apigateway_apps.example.apps.0.id

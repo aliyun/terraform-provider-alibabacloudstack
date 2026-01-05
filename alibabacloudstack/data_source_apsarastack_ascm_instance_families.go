@@ -27,20 +27,14 @@ func dataSourceAlibabacloudStackInstanceFamilies() *schema.Resource {
 				Optional: true,
 			},
 			"resource_type": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"DRDS"}, false),
 			},
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
-
 			"families": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -136,12 +130,6 @@ func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, met
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("families", s); err != nil {
 		return errmsgs.WrapError(err)
-	}
-
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
 	}
 	return nil
 }

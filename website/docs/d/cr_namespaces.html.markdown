@@ -19,8 +19,7 @@ This data source provides a list Container Registry namespaces on Alibabacloudst
 # Declare the data source
 data "alibabacloudstack_cr_namespaces" "my_namespaces" {
   name_regex  = "my-namespace"
-  output_file = "my-namespace-json"
-}
+  }
 
 output "output" {
   value = "${data.alibabacloudstack_cr_namespaces.my_namespaces.namespaces}"

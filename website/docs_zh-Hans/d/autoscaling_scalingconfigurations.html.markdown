@@ -129,8 +129,7 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 data "alibabacloudstack_ess_scaling_configurations" "default" {
   scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
   name_regex = "${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}"
-  output_file = "scaling_configurations_output.txt"
-}
+  }
 
 output "first_scaling_configuration_id" {
   value = data.alibabacloudstack_ess_scaling_configurations.default.configurations.0.id

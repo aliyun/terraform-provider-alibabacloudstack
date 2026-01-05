@@ -66,8 +66,7 @@ data "alibabacloudstack_apigateway_apis" "default" {
     alibabacloudstack_api_gateway_api.default.api_id
   ]
 
-  output_file = "output_api_list.txt"
-}
+  }
 
 output "first_api_id" {
   value = data.alibabacloudstack_apigateway_apis.default.apis[0].id

@@ -34,8 +34,7 @@ data "alibabacloudstack_ascm_quotas" "default" {
     quota_type_id = alibabacloudstack_ascm_organization.default.parent_id
     product_name = "RDS"
     target_type = "MySql"
-    output_file = "Rds_quota"
-}
+    }
 output "quota" {
     value = data.alibabacloudstack_ascm_quotas.default.*
 }

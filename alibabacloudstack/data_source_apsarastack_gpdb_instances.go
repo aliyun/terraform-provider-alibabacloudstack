@@ -32,11 +32,7 @@ func dataSourceAlibabacloudStackGpdbInstances() *schema.Resource {
 				Optional: true,
 			},
 			"tags": tagsSchema(),
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			// Computed values
 			"ids": {
 				Type:     schema.TypeList,
@@ -177,11 +173,6 @@ func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta i
 	}
 	if err := d.Set("names", names); err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), instances); err != nil {
-			return err
-		}
 	}
 	return nil
 }

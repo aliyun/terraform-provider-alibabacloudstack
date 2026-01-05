@@ -19,8 +19,7 @@ description: |-
 # 声明数据源
 data "alibabacloudstack_cr_ee_instances" "my_instances" {
   name_regex  = "my-instances"
-  output_file = "my-instances-json"
-}
+  }
 
 output "output" {
   value = "${data.alibabacloudstack_cr_ee_instances.my_instances.instances}"

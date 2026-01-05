@@ -18,8 +18,7 @@ description: |-
 ```
 data "alibabacloudstack_dns_groups" "groups_ds" {
   name_regex  = "^y[A-Za-z]+"
-  output_file = "groups.txt"
-}
+  }
 
 output "first_group_name" {
   value = "${data.alibabacloudstack_dns_groups.groups_ds.groups.0.group_name}"

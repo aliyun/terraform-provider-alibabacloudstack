@@ -1,8 +1,9 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAscm_RegionsByProduct_DataSource(t *testing.T) {
@@ -27,7 +28,6 @@ func TestAccAlibabacloudStackAscm_RegionsByProduct_DataSource(t *testing.T) {
 const dataSourceAlibabacloudStackAscm_RegionsByProduct = `
 
 data "alibabacloudstack_ascm_regions_by_product" "default" {
-  output_file = "product_regions1"
   product_name = "ecs"
 }
 `

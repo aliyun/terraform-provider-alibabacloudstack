@@ -21,11 +21,7 @@ func dataSourceAlibabacloudStackBastionhostInstances() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -214,8 +210,5 @@ func dataSourceAlibabacloudStackBastionhostInstancesRead(d *schema.ResourceData,
 		return errmsgs.WrapError(err)
 	}
 
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), s)
-	}
 	return nil
 }

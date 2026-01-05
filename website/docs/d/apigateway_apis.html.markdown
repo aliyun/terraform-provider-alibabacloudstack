@@ -19,8 +19,7 @@ data "alibabacloudstack_apigateway_apis" "example" {
   group_id   = "your_group_id"
   api_id     = "your_api_id"
   name_regex = "your_api_name_pattern"
-  output_file = "output_api_list.txt"
-}
+  }
 
 output "first_api_id" {
   value = data.alibabacloudstack_apigateway_apis.example.apis[0].id

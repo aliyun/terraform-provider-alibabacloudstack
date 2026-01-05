@@ -21,11 +21,7 @@ func dataSourceAlibabacloudStackCmsMetricMetalist() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				ForceNew:     true,
 			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
+
 			"resources": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -134,10 +130,5 @@ func dataSourceAlibabacloudStackCmsMetricMetalistRead(d *schema.ResourceData, me
 		return errmsgs.WrapError(err)
 	}
 
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
-	}
 	return nil
 }

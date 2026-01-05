@@ -18,8 +18,7 @@ This data source provides a list of vpngateway customergateways in an alibabaclo
 data "alibabacloudstack_vpngateway_customergateways" "example" {
   name_regex = "example-cgw-*"
   ids        = ["cgw-12345678", "cgw-87654321"]
-  output_file = "./customergateways_output.txt"
-}
+  }
 
 output "customergateway_ids" {
   value = data.alibabacloudstack_vpngateway_customergateways.example.ids

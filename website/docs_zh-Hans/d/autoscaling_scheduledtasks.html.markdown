@@ -59,8 +59,7 @@ resource "alibabacloudstack_ess_scheduled_task" "default" {
 data "alibabacloudstack_ess_scheduled_tasks" "default" {
   ids = ["${alibabacloudstack_ess_scheduled_task.default.id}"]
   name_regex = "tf-testAccDataSourceScheduledtas.*"
-  output_file = "scheduled_tasks_output.txt"
-}
+  }
 
 output "first_scheduled_task_id" {
   value = data.alibabacloudstack_ess_scheduled_tasks.default.tasks.0.id

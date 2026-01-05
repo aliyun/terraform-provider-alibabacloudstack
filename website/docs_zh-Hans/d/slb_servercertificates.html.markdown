@@ -28,8 +28,7 @@ resource "alibabacloudstack_slb_server_certificate" "default" {
 data "alibabacloudstack_slb_server_certificates" "default" {
   name_regex = "${alibabacloudstack_slb_server_certificate.default.name}"
 
-  output_file = "server_certificates_output.txt"
-}
+  }
 
 output "first_certificate_id" {
   value = data.alibabacloudstack_slb_server_certificates.default.certificates.0.id

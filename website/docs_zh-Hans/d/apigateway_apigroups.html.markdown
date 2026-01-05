@@ -33,8 +33,7 @@ resource "alibabacloudstack_api_gateway_group" "default" {
 data "alibabacloudstack_api_gateway_groups" "default" {
   name_regex = alibabacloudstack_api_gateway_group.default.name
   ids        = [alibabacloudstack_api_gateway_group.default.id]
-  output_file = "apigroups_output.txt"
-}
+  }
 
 output "first_group_id" {
   value = data.alibabacloudstack_api_gateway_groups.default.groups.0.id
