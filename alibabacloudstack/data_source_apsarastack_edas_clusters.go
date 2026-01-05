@@ -14,11 +14,6 @@ func dataSourceAlibabacloudStackEdasClusters() *schema.Resource {
 		Read: dataSourceAlibabacloudStackEdasClustersRead,
 
 		Schema: map[string]*schema.Schema{
-			"logical_region_id": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'logical_region_id' field has been deprecated and is scheduled for removal in version 3.19.0. ",
-			},
 
 			"ids": {
 				Type:     schema.TypeList,
@@ -107,9 +102,6 @@ func dataSourceAlibabacloudStackEdasClustersRead(d *schema.ResourceData, meta in
 
 	request := edas.CreateListClusterRequest()
 	client.InitRoaRequest(*request.RoaRequest)
-	if logicalRegionId, ok := d.GetOk("logical_region_id"); ok {
-		request.LogicalRegionId = logicalRegionId.(string)
-	}
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok {
