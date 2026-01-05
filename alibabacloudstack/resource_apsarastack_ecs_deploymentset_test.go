@@ -187,7 +187,7 @@ func TestAccAlibabacloudStackECSDeploymentSet_basic0(t *testing.T) {
 			{
 				ResourceName:      resourceId,
 				ImportState:       true,
-				ImportStateVerify: true, ImportStateVerifyIgnore: []string{"on_unable_to_redeploy_failed_instance"},
+				ImportStateVerify: true, 
 			},
 		},
 	})

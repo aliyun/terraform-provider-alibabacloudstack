@@ -41,18 +41,12 @@ func resourceAlibabacloudStackEcsDeploymentSet() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Host", "Rack", "Switch"}, false),
 			},
-			"on_unable_to_redeploy_failed_instance": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"CancelMembershipAndStart", "KeepStopped"}, false),
-			},
 			"strategy": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Availability", "LooseDispersion"}, false),
 			},
-			"tags": tagsSchema(),
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackEcsDeploymentSetCreate, resourceAlibabacloudStackEcsDeploymentSetRead, resourceAlibabacloudStackEcsDeploymentSetUpdate, resourceAlibabacloudStackEcsDeploymentSetDelete)
@@ -71,10 +65,6 @@ func resourceAlibabacloudStackEcsDeploymentSetCreate(d *schema.ResourceData, met
 	if v, ok := d.GetOk("description"); ok {
 		Description = fmt.Sprint(v.(string))
 	}
-	var OnUnableToRedeployFailedInstance string
-	if v, ok := d.GetOk("on_unable_to_redeploy_failed_instance"); ok {
-		OnUnableToRedeployFailedInstance = fmt.Sprint(v.(string))
-	}
 	var Strategy string
 	if v, ok := d.GetOk("strategy"); ok {
 		Strategy = fmt.Sprint(v.(string))
@@ -87,7 +77,6 @@ func resourceAlibabacloudStackEcsDeploymentSetCreate(d *schema.ResourceData, met
 		"Domain":                           "Default",
 		"Description":                      Description,
 		"Granularity":                      d.Get("granularity").(string),
-		"OnUnableToRedeployFailedInstance": OnUnableToRedeployFailedInstance,
 		"Strategy":                         Strategy,
 		"ClientToken":                      ClientToken,
 	})
@@ -130,20 +119,11 @@ func resourceAlibabacloudStackEcsDeploymentSetRead(d *schema.ResourceData, meta 
 	d.Set("description", object["DeploymentSetDescription"])
 	d.Set("strategy", object["DeploymentStrategy"])
 
-	if object["Tags"] != nil {
-		tags := object["Tags"].(map[string]interface{})["Tag"]
-		d.Set("tags", tagsToMap(tags))
-	}
-
 	return nil
 }
 
 func resourceAlibabacloudStackEcsDeploymentSetUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	err := setTags(client, "deployment_set", d)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 
 	update := false
 	DeploymentSetId := d.Id()

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackEcsDeploymentSetsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackECSDeploymentSetsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackEcsDeploymentSetsDataSourceName(rand, map[string]string{
