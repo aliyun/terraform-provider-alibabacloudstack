@@ -5,3 +5,4 @@
 ## 移除
 
 1. 移除所有data查询能力的output_file的能力
+2. 移除`alibabacloudstack_ascm_password_policy`编排能力
