@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math"
 	"math/rand"
@@ -554,60 +553,6 @@ func GetUserHomeDir() (string, error) {
 		return "", fmt.Errorf("Get current user got an error: %#v.", err)
 	}
 	return usr.HomeDir, nil
-}
-
-// writeToFile function
-func writeToFile(filePath string, data interface{}) error {
-	var out string
-	switch v := data.(type) {
-	case string:
-		out = v
-	case nil:
-		return nil
-	default:
-		bs, err := json.MarshalIndent(data, "", "\t")
-		if err != nil {
-			return fmt.Errorf("MarshalIndent data %#v got an error: %v", data, err)
-		}
-		out = string(bs)
-	}
-
-	// Replace ~ with user home directory
-	if strings.HasPrefix(filePath, "~") {
-		home, err := GetUserHomeDir()
-		if err != nil {
-			return err
-		}
-		if home != "" {
-			filePath = strings.Replace(filePath, "~", home, 1)
-		}
-	}
-
-	// Get current working directory
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("failed to get current working directory: %v", err)
-	}
-
-	// Get user home directory
-	home, err := GetUserHomeDir()
-	if err != nil {
-		return fmt.Errorf("failed to get user home directory: %v", err)
-	}
-
-	// Get absolute path of the file
-	absFilePath, err := filepath.Abs(filePath)
-	if err != nil {
-		return fmt.Errorf("failed to get absolute path for %s: %v", filePath, err)
-	}
-
-	// Ensure file path is relative to current working directory or user home directory
-	if !strings.HasPrefix(absFilePath, currentDir+string(filepath.Separator)) && !strings.HasPrefix(absFilePath, home+string(filepath.Separator)) {
-		return fmt.Errorf("file path %s is not within the allowed directories: current directory %s or home directory %s", absFilePath, currentDir, home)
-	}
-
-	// Write to file
-	return ioutil.WriteFile(absFilePath, []byte(out), 0644)
 }
 
 type Invoker struct {
