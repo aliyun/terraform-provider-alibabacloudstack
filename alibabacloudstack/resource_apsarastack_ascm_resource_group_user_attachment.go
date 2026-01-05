@@ -72,10 +72,6 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentRead(d *schema.Reso
 	ascmService := &AscmService{client: client}
 	response, err := ascmService.DescribeAscmResourceGroupUserAttachment(rgId)
 	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			d.SetId("")
-			return nil
-		}
 		return errmsgs.WrapError(err)
 	}
 	userFound := false
@@ -87,8 +83,7 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentRead(d *schema.Reso
 	}
 
 	if !userFound {
-		d.SetId("")
-		return nil
+		return errmsgs.WrapError(err)
 	}
 	d.Set("rg_id", rgId)
 	d.Set("user_id", userId)
@@ -119,7 +114,7 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentDelete(d *schema.Re
 	}
 
 	if !userFound {
-		return nil
+		return errmsgs.WrapError(err)
 	}
 
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
@@ -136,27 +131,7 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentDelete(d *schema.Re
 		if bresponse.GetHttpStatus() != 200 {
 			return resource.RetryableError(fmt.Errorf("UnbindAscmUserAndResourceGroup failed with status: %d", bresponse.GetHttpStatus()))
 		}
-
-		response, err := ascmService.DescribeAscmResourceGroupUserAttachment(rgId)
-		if err != nil {
-			if !errmsgs.NotFoundError(err) {
-				return resource.RetryableError(err)
-			}
-		} else {
-			userStillExists := false
-			for _, user := range response.Data {
-				if fmt.Sprintf("%d", user.ID) == userId {
-					userStillExists = true
-					break
-				}
-			}
-
-			if !userStillExists {
-				return resource.NonRetryableError(nil)
-			}
-		}
-
-		return resource.RetryableError(fmt.Errorf("User %s still exists in resource group %s", userId, rgId))
+		return nil
 	})
 
 	return err

@@ -5,13 +5,11 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudStackAscmResourceGroupUserAttachmentBasic(t *testing.T) {
-	var v map[string]interface{}
+	var v *ListAscmUsersResponse
 	resourceId := "alibabacloudstack_ascm_resource_group_user_attachment.default"
 	ra := resourceAttrInit(resourceId, testAccCheckAscmResourceGroupUserAttachment)
 	serviceFunc := func() interface{} {
@@ -30,7 +28,6 @@ func TestAccAlibabacloudStackAscmResourceGroupUserAttachmentBasic(t *testing.T) 
 
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		// CheckDestroy:  testAccCheckAscmResourceGroupUserAttachmentDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -51,27 +48,6 @@ func TestAccAlibabacloudStackAscmResourceGroupUserAttachmentBasic(t *testing.T) 
 			},
 		},
 	})
-}
-
-func testAccCheckAscmResourceGroupUserAttachmentDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-	ascmService := AscmService{client}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "alibabacloudstack_ascm_resource_group_user_attachment" {
-			continue
-		}
-		_, err := ascmService.DescribeAscmResourceGroupUserAttachment(rs.Primary.ID)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-		return errmsgs.WrapError(errmsgs.Error("Resource group user attachment still exists"))
-	}
-
-	return nil
 }
 
 func testAccAscmResourceGroupUserAttachmentResource(name string) string {

@@ -294,11 +294,15 @@ type PageInfo struct {
 
 func (s *AscmService) DescribeAscmResourceGroupUserAttachment(rgId string) (*ListAscmUsersResponse, error) {
 	client := s.client
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListAscmUsersInsideResourceGroup", "/ascm/inner/user/listUsersInsideRg")
-
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListAscmUsersInsideResourceGroup", "/ascm/auth/resource_group/list_ascm_users")
+	if strings.Contains(rgId, ":") {
+		parts := strings.Split(rgId, ":")
+		rgId = parts[0]
+	}
 	request.QueryParams["resourceGroupId"] = rgId
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
