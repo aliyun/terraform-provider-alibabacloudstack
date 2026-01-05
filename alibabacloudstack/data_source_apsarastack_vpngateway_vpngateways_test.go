@@ -118,6 +118,7 @@ resource "alibabacloudstack_vpn_gateway" "default" {
 	vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
 	bandwidth = "10"
 	enable_ssl = true
+	ipsec_vpn = true
 	instance_charge_type = "PostPaid"
 	description = "${var.name}"
 	vswitch_id = "${alibabacloudstack_vswitch.default.id}"
