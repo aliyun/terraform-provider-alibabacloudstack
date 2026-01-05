@@ -114,20 +114,15 @@ func resourceAlibabacloudStackNetworkAclEntries() *schema.Resource {
 }
 
 func resourceAlibabacloudStackNetworkAclEntriesCreate(d *schema.ResourceData, meta interface{}) error {
-	d.SetId(d.Get("network_acl_id").(string) + COLON_SEPARATED + resource.UniqueId())
-	return resourceAlibabacloudStackNetworkAclEntriesUpdate(d, meta)
+	d.SetId(d.Get("network_acl_id").(string))
+	return nil
 }
 
 func resourceAlibabacloudStackNetworkAclEntriesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-
-	object, err := vpcService.DescribeNetworkAcl(parts[0])
+	object, err := vpcService.DescribeNetworkAcl(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -141,13 +136,13 @@ func resourceAlibabacloudStackNetworkAclEntriesRead(d *schema.ResourceData, meta
 		for _, ob := range ingressAclEntryList {
 			if v, ok := ob.(map[string]interface{}); ok {
 				mapping := map[string]interface{}{
-					"description":     v["Description"],
-					"source_cidr_ip":  v["SourceCidrIp"],
-					"entry_type":      "custom",
-					"name":            v["NetworkAclEntryName"],
-					"policy":          v["Policy"],
-					"port":            v["Port"],
-					"protocol":        v["Protocol"],
+					"description":    v["Description"],
+					"source_cidr_ip": v["SourceCidrIp"],
+					"entry_type":     "custom",
+					"name":           v["NetworkAclEntryName"],
+					"policy":         v["Policy"],
+					"port":           v["Port"],
+					"protocol":       v["Protocol"],
 				}
 				ingress = append(ingress, mapping)
 			}
@@ -182,27 +177,22 @@ func resourceAlibabacloudStackNetworkAclEntriesRead(d *schema.ResourceData, meta
 func resourceAlibabacloudStackNetworkAclEntriesUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	networkAclId := parts[0]
 
 	request := vpc.CreateUpdateNetworkAclEntriesRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	request.NetworkAclId = networkAclId
+	request.NetworkAclId = d.Id()
 
 	if d.HasChange("ingress") {
 		ingress := []vpc.UpdateNetworkAclEntriesIngressAclEntries{}
 		for _, e := range d.Get("ingress").([]interface{}) {
 			ingress = append(ingress, vpc.UpdateNetworkAclEntriesIngressAclEntries{
-				Protocol:             e.(map[string]interface{})["protocol"].(string),
-				Port:                 e.(map[string]interface{})["port"].(string),
-				SourceCidrIp:         e.(map[string]interface{})["source_cidr_ip"].(string),
-				NetworkAclEntryName:  e.(map[string]interface{})["name"].(string),
-				EntryType:            e.(map[string]interface{})["entry_type"].(string),
-				Policy:               e.(map[string]interface{})["policy"].(string),
-				Description:          e.(map[string]interface{})["description"].(string),
+				Protocol:            e.(map[string]interface{})["protocol"].(string),
+				Port:                e.(map[string]interface{})["port"].(string),
+				SourceCidrIp:        e.(map[string]interface{})["source_cidr_ip"].(string),
+				NetworkAclEntryName: e.(map[string]interface{})["name"].(string),
+				EntryType:           e.(map[string]interface{})["entry_type"].(string),
+				Policy:              e.(map[string]interface{})["policy"].(string),
+				Description:         e.(map[string]interface{})["description"].(string),
 			})
 		}
 		request.IngressAclEntries = &ingress
@@ -213,24 +203,24 @@ func resourceAlibabacloudStackNetworkAclEntriesUpdate(d *schema.ResourceData, me
 		egress := []vpc.UpdateNetworkAclEntriesEgressAclEntries{}
 		for _, e := range d.Get("egress").([]interface{}) {
 			egress = append(egress, vpc.UpdateNetworkAclEntriesEgressAclEntries{
-				Protocol:             e.(map[string]interface{})["protocol"].(string),
-				Port:                 e.(map[string]interface{})["port"].(string),
-				DestinationCidrIp:    e.(map[string]interface{})["destination_cidr_ip"].(string),
-				NetworkAclEntryName:  e.(map[string]interface{})["name"].(string),
-				EntryType:            e.(map[string]interface{})["entry_type"].(string),
-				Policy:               e.(map[string]interface{})["policy"].(string),
-				Description:          e.(map[string]interface{})["description"].(string),
+				Protocol:            e.(map[string]interface{})["protocol"].(string),
+				Port:                e.(map[string]interface{})["port"].(string),
+				DestinationCidrIp:   e.(map[string]interface{})["destination_cidr_ip"].(string),
+				NetworkAclEntryName: e.(map[string]interface{})["name"].(string),
+				EntryType:           e.(map[string]interface{})["entry_type"].(string),
+				Policy:              e.(map[string]interface{})["policy"].(string),
+				Description:         e.(map[string]interface{})["description"].(string),
 			})
 		}
 		request.EgressAclEntries = &egress
 		request.UpdateEgressAclEntries = requests.NewBoolean(true)
 	}
 
-	if err := vpcService.WaitForNetworkAcl(networkAclId, Available, DefaultTimeout); err != nil {
+	if err := vpcService.WaitForNetworkAcl(d.Id(), Available, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.UpdateNetworkAclEntries(request)
 		})
@@ -253,21 +243,15 @@ func resourceAlibabacloudStackNetworkAclEntriesUpdate(d *schema.ResourceData, me
 		return err
 	}
 
-	return vpcService.WaitForNetworkAcl(networkAclId, Available, DefaultTimeout)
+	return vpcService.WaitForNetworkAcl(d.Id(), Available, DefaultTimeout)
 }
 
 func resourceAlibabacloudStackNetworkAclEntriesDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	networkAclId := parts[0]
-
 	request := vpc.CreateUpdateNetworkAclEntriesRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	request.NetworkAclId = networkAclId
+	request.NetworkAclId = d.Id()
 
 	ingress := []vpc.UpdateNetworkAclEntriesIngressAclEntries{}
 	egress := []vpc.UpdateNetworkAclEntriesEgressAclEntries{}
@@ -276,11 +260,11 @@ func resourceAlibabacloudStackNetworkAclEntriesDelete(d *schema.ResourceData, me
 	request.UpdateIngressAclEntries = requests.NewBoolean(true)
 	request.UpdateEgressAclEntries = requests.NewBoolean(true)
 
-	if err := vpcService.WaitForNetworkAcl(networkAclId, Available, DefaultTimeout); err != nil {
+	if err := vpcService.WaitForNetworkAcl(d.Id(), Available, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.UpdateNetworkAclEntries(request)
 		})
@@ -303,5 +287,5 @@ func resourceAlibabacloudStackNetworkAclEntriesDelete(d *schema.ResourceData, me
 		return err
 	}
 
-	return vpcService.WaitForNetworkAcl(networkAclId, Available, DefaultTimeout)
+	return vpcService.WaitForNetworkAcl(d.Id(), Available, DefaultTimeout)
 }

@@ -52,7 +52,13 @@ func TestAccAlibabacloudStackVpnGateway0(t *testing.T) {
 
 					"enable_ssl": "true",
 
+					"ipsec_vpn": "true",
+
 					"instance_charge_type": "PostPaid",
+					"tags": map[string]string{
+						"Created": "TF-create",
+						"For":     "Test-create",
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -69,14 +75,20 @@ func TestAccAlibabacloudStackVpnGateway0(t *testing.T) {
 
 						"enable_ssl": "true",
 
+						"ipsec_vpn": "true",
+
 						"instance_charge_type": "PostPaid",
+
+						"tags.%":       "2",
+						"tags.Created": "TF-create",
+						"tags.For":     "Test-create",
 					}),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -91,6 +103,21 @@ func TestAccAlibabacloudStackVpnGateway0(t *testing.T) {
 						"description": "tes_vpn_new",
 
 						"vpn_gateway_name": "tes_vpn_new",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF-update",
+						"For":     "Test-update",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF-update",
+						"tags.For":     "Test-update",
 					}),
 				),
 			},

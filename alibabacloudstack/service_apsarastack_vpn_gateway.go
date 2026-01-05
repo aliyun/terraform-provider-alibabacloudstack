@@ -496,7 +496,7 @@ func (s *VpnGatewayService) VpnGatewayStateRefreshFunc(id string, failStates []s
 		return object, object.Status, nil
 	}
 }
-	
+
 type VpcDescribesslvpnserversResponse struct {
 	SslVpnServers struct {
 		SslVpnServer []struct {

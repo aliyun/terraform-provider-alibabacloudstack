@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -94,7 +93,7 @@ func resourceAlibabacloudStackVpnGateway() *schema.Resource {
 			"ssl_connections": {
 				Type:             schema.TypeInt,
 				Optional:         true,
-				Computed:         true,
+				Default:          5,
 				DiffSuppressFunc: vpnSslConnectionsDiffSuppressFunc,
 				Deprecated:       "Field 'ssl_connections' is deprecated and will be removed in a future release. Please use new field 'ssl_max_connections' instead.",
 				ConflictsWith:    []string{"ssl_max_connections"},
@@ -102,7 +101,7 @@ func resourceAlibabacloudStackVpnGateway() *schema.Resource {
 			"ssl_max_connections": {
 				Type:             schema.TypeInt,
 				Optional:         true,
-				Computed:         true,
+				Default:          5,
 				DiffSuppressFunc: vpnSslConnectionsDiffSuppressFunc,
 				ConflictsWith:    []string{"ssl_connections"},
 			},
@@ -158,40 +157,35 @@ func resourceAlibabacloudStackVpnGatewayCreate(d *schema.ResourceData, meta inte
 		request.VSwitchId = d.Get("vswitch_id").(string)
 	}
 
-	if v, ok := d.GetOk("instance_charge_type"); ok && v.(string) != "" {
-		if v.(string) == string(PostPaid) {
-			request.InstanceChargeType = string("POSTPAY")
-		} else {
-			request.InstanceChargeType = string("PREPAY")
-		}
-	}
+	// if v, ok := d.GetOk("instance_charge_type"); ok && v.(string) != "" {
+	// 	if v.(string) == string(PostPaid) {
+	// 		request.InstanceChargeType = string("POSTPAY")
+	// 	} else {
+	// 		request.InstanceChargeType = string("PREPAY")
+	// 	}
+	// }
 
-	if v, ok := d.GetOk("period"); ok && v.(int) != 0 && request.InstanceChargeType == string("PREPAY") {
-		request.Period = requests.NewInteger(v.(int))
-	}
+	// if v, ok := d.GetOk("period"); ok && v.(int) != 0 && request.InstanceChargeType == string("PREPAY") {
+	// 	request.Period = requests.NewInteger(v.(int))
+	// }
 
 	request.Bandwidth = requests.NewInteger(d.Get("bandwidth").(int))
 
-	if v, ok := connectivity.GetResourceDataOk(d, "ipsec_vpn", "enable_ipsec"); ok {
-		request.EnableIpsec = requests.NewBoolean(v.(bool))
-	} else {
-		//Default must be nil if computed
-		request.EnableIpsec = requests.NewBoolean(true)
-	}
-
-	if v, ok := connectivity.GetResourceDataOk(d, "ssl_vpn", "enable_ssl"); ok {
-		request.EnableSsl = requests.NewBoolean(v.(bool))
-	} else {
-		//Default must be nil if computed
-		request.EnableSsl = requests.NewBoolean(false)
-	}
-
-	if v, ok := connectivity.GetResourceDataOk(d, "ssl_max_connections", "ssl_connections"); ok {
-		request.SslConnections = requests.NewInteger(v.(int))
-	} else {
-		//Default must be nil if computed
-		request.SslConnections = requests.NewInteger(5)
-	}
+	// if v, ok := connectivity.GetResourceDataOk(d, "ipsec_vpn", "enable_ipsec"); ok {
+	// 	request.EnableIpsec = requests.NewBoolean(v.(bool))
+	// } else {
+	// 	//Default must be nil if computed
+	// 	request.EnableIpsec = requests.NewBoolean(true)
+	// }
+	request.EnableIpsec = requests.NewBoolean(connectivity.GetResourceData(d, "ipsec_vpn", "enable_ipsec").(bool))
+	request.EnableSsl = requests.NewBoolean(connectivity.GetResourceData(d, "ssl_vpn", "enable_ssl").(bool))
+	request.SslConnections = requests.NewInteger(connectivity.GetResourceData(d, "ssl_max_connections", "ssl_connections").(int))
+	// if v, ok := connectivity.GetResourceDataOk(d, "ssl_max_connections", "ssl_connections"); ok {
+	// 	request.SslConnections = requests.NewInteger(v.(int))
+	// } else {
+	// 	//Default must be nil if computed
+	// 	request.SslConnections = requests.NewInteger(5)
+	// }
 
 	raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 		return vpcClient.CreateVpnGateway(request)
@@ -210,7 +204,7 @@ func resourceAlibabacloudStackVpnGatewayCreate(d *schema.ResourceData, meta inte
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ := raw.(*vpc.CreateVpnGatewayResponse)
 	d.SetId(response.VpnGatewayId)
-	stateConf := BuildStateConf([]string{"provisioning"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 2*time.Second, vpnGatewayService.VpnGatewayStateRefreshFunc(d.Id(), []string{"failed"}))
+	stateConf := BuildStateConf([]string{"provisioning", "init"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 2*time.Second, vpnGatewayService.VpnGatewayStateRefreshFunc(d.Id(), []string{"failed"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -374,5 +368,5 @@ func resourceAlibabacloudStackVpnGatewayDelete(d *schema.ResourceData, meta inte
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	return errmsgs.WrapError(vpnGatewayService.WaitForVpnGateway(d.Id(), Deleted, DefaultTimeoutMedium))
+	return errmsgs.WrapError(vpnGatewayService.WaitForVpnGateway(d.Id(), Deleted, 1800))
 }
