@@ -1,15 +1,28 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 
-	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
+
+type HpcCluster struct {
+	Description  string `json:"Description"`
+	HpcClusterId string `json:"HpcClusterId"`
+	Name         string `json:"Name"`
+}
+
+type EcsDescribeEcsHpcClusterResult struct {
+	HpcClusters struct {
+		HpcCluster []HpcCluster `json:"HpcCluster"`
+	} `json:"HpcClusters"`
+}
 
 func dataSourceAlibabacloudStackEcsHpcClusters() *schema.Resource {
 	return &schema.Resource{
@@ -68,12 +81,7 @@ func dataSourceAlibabacloudStackEcsHpcClusters() *schema.Resource {
 
 func dataSourceAlibabacloudStackEcsHpcClustersRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
-	action := "DescribeHpcClusters"
-	request := make(map[string]interface{})
-	request["PageSize"] = PageSizeLarge
-	request["PageNumber"] = 1
-	var objects []map[string]interface{}
+	var objects []HpcCluster
 	var nameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
@@ -93,50 +101,62 @@ func dataSourceAlibabacloudStackEcsHpcClustersRead(d *schema.ResourceData, meta 
 		}
 	}
 
+	pageNumber := 1
 	for {
-		request["ClientToken"] = buildClientToken("DescribeHpcClusters")
-		response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, nil, request)
-		if err != nil {
-			return err
-		}
-		addDebug(action, response, request)
+		resp := &EcsDescribeEcsHpcClusterResult{}
+		action := "DescribeHpcClusters"
+		ClientToken := buildClientToken("DescribeHpcClusters")
+		request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
+		request.QueryParams["ClientToken"] = ClientToken
+		request.QueryParams["PageNumber"] = fmt.Sprintf("%d", pageNumber)
+		request.QueryParams["PageSize"] = fmt.Sprintf("%d", PageSizeLarge)
 
-		resp, err := jsonpath.Get("$.HpcClusters.HpcCluster", response)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.HpcClusters.HpcCluster", response)
+			return errmsgs.WrapError(err)
 		}
-		result, _ := resp.([]interface{})
+
+		log.Printf(" response of raw DescribeHpcClusters : %s", bresponse)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+
+		result := resp.HpcClusters.HpcCluster
 		for _, v := range result {
-			item := v.(map[string]interface{})
 			if nameRegex != nil {
-				if !nameRegex.MatchString(fmt.Sprint(item["Name"])) {
+				if !nameRegex.MatchString(v.Name) {
 					continue
 				}
 			}
 			if len(idsMap) > 0 {
-				if _, ok := idsMap[fmt.Sprint(item["HpcClusterId"])]; !ok {
+				if _, ok := idsMap[v.HpcClusterId]; !ok {
 					continue
 				}
 			}
-			objects = append(objects, item)
+			objects = append(objects, v)
 		}
+
 		if len(result) < PageSizeLarge {
 			break
 		}
-		request["PageNumber"] = request["PageNumber"].(int) + 1
+		pageNumber++
 	}
+
 	ids := make([]string, 0)
 	names := make([]interface{}, 0)
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
 		mapping := map[string]interface{}{
-			"description":    object["Description"],
-			"id":             fmt.Sprint(object["HpcClusterId"]),
-			"hpc_cluster_id": fmt.Sprint(object["HpcClusterId"]),
-			"name":           object["Name"],
+			"description":    object.Description,
+			"id":             object.HpcClusterId,
+			"hpc_cluster_id": object.HpcClusterId,
+			"name":           object.Name,
 		}
-		ids = append(ids, fmt.Sprint(object["HpcClusterId"]))
-		names = append(names, object["Name"])
+		ids = append(ids, object.HpcClusterId)
+		names = append(names, object.Name)
 		s = append(s, mapping)
 	}
 
