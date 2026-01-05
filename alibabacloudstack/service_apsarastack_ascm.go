@@ -716,6 +716,7 @@ func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err err
 		targetType = ""
 	}
 	request := s.client.NewCommonRequest("GET", "POST", "2019-05-10", "GetQuota", "/ascm/manage/quota/query")
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	mergeMaps(request.QueryParams, map[string]string{
 		"productName": did[0],
 		"quotaType":   did[1],
