@@ -115,6 +115,7 @@ func resourceAlibabacloudStackNetworkAclEntries() *schema.Resource {
 
 func resourceAlibabacloudStackNetworkAclEntriesCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(d.Get("network_acl_id").(string))
+	resourceAlibabacloudStackNetworkAclEntriesDelete(d, meta)
 	return nil
 }
 
