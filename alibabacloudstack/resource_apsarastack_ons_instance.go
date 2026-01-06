@@ -48,7 +48,7 @@ func resourceAlibabacloudStackOnsInstance() *schema.Resource {
 			"remark": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(0, 128),
+				ValidateFunc: validation.StringLenBetween(2, 128),
 			},
 
 			// Computed Values
@@ -151,95 +151,31 @@ func resourceAlibabacloudStackOnsInstanceUpdate(d *schema.ResourceData, meta int
 	onsService := OnsService{client}
 	independentname := d.Get("independent_naming").(string)
 	cluster := d.Get("cluster").(string)
-	attributeUpdate := false
-	check, err := onsService.DescribeOnsInstance(d.Id())
+	_, err := onsService.DescribeOnsInstance(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsInstanceExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	var name, remark string
 
-	if d.HasChange("name") {
-		if v, ok := d.GetOk("name"); ok {
-			name = v.(string)
-		}
-		check.Data.InstanceName = name
-		attributeUpdate = true
-	} else {
-		if v, ok := d.GetOk("name"); ok {
-			name = v.(string)
-		}
-		check.Data.InstanceName = name
-	}
-	var maxrtps, maxstps, topic int
+	if d.HasChanges("name", "tps_receive_max", "tps_send_max", "topic_capacity", "remark") {
+		name := d.Get("name").(string)
+		remark := d.Get("remark").(string)
+		topiccap := strconv.Itoa(d.Get("topic_capacity").(int))
+		Maxrtps := strconv.Itoa(d.Get("tps_receive_max").(int))
+		Maxstps := strconv.Itoa(d.Get("tps_send_max").(int))
+		request := client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleInstanceUpdate", "")
+		mergeMaps(request.QueryParams, map[string]string{
+			"Remark":            remark,
+			"InstanceName":      name,
+			"OnsRegionId":       client.RegionId,
+			"PreventCache":      "",
+			"MaxReceiveTps":     Maxrtps,
+			"MaxSendTps":        Maxstps,
+			"Cluster":           cluster,
+			"IndependentNaming": independentname,
+			"InstanceId":        d.Id(),
+			"TopicCapacity":     topiccap,
+		})
 
-	if d.HasChange("tps_receive_max") {
-		if v, ok := d.GetOk("tps_receive_max"); ok {
-			maxrtps = v.(int)
-		}
-		check.Data.TpsReceiveMax = maxrtps
-		attributeUpdate = true
-	} else {
-		if v, ok := d.GetOk("tps_receive_max"); ok {
-			maxrtps = v.(int)
-		}
-		check.Data.TpsReceiveMax = maxrtps
-	}
-	if d.HasChange("tps_send_max") {
-		if v, ok := d.GetOk("tps_send_max"); ok {
-			maxstps = v.(int)
-		}
-		check.Data.TpsSendMax = maxstps
-		attributeUpdate = true
-	} else {
-		if v, ok := d.GetOk("tps_send_max"); ok {
-			maxstps = v.(int)
-		}
-		check.Data.TpsSendMax = maxstps
-	}
-	if d.HasChange("topic_capacity") {
-		if v, ok := d.GetOk("topic_capacity"); ok {
-			topic = v.(int)
-		}
-		check.Data.TopicCapacity = topic
-		attributeUpdate = true
-	} else {
-		if v, ok := d.GetOk("topic_capacity"); ok {
-			topic = v.(int)
-		}
-		check.Data.TopicCapacity = topic
-	}
-
-	if d.HasChange("remark") {
-		if v, ok := d.GetOk("remark"); ok {
-			remark = v.(string)
-		}
-		check.Data.Remark = remark
-		attributeUpdate = true
-	} else {
-		if v, ok := d.GetOk("remark"); ok {
-			remark = v.(string)
-		}
-		check.Data.Remark = remark
-	}
-	topiccap := strconv.Itoa(topic)
-	Maxrtps := strconv.Itoa(maxrtps)
-	Maxstps := strconv.Itoa(maxstps)
-	request := client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleInstanceUpdate", "")
-	mergeMaps(request.QueryParams, map[string]string{
-		"Remark":            remark,
-		"InstanceName":      name,
-		"OnsRegionId":       client.RegionId,
-		"PreventCache":      "",
-		"MaxReceiveTps":     Maxrtps,
-		"MaxSendTps":        Maxstps,
-		"Cluster":           cluster,
-		"IndependentNaming": independentname,
-		"InstanceId":        d.Id(),
-		"TopicCapacity":     topiccap,
-	})
-	check.Data.InstanceID = d.Id()
-
-	if attributeUpdate {
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		log.Printf(" response of raw DescribeProjectMeta : %s", bresponse)
@@ -250,7 +186,7 @@ func resourceAlibabacloudStackOnsInstanceUpdate(d *schema.ResourceData, meta int
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		log.Printf("total QueryParams and topic %v %v", request.GetQueryParams(), topic)
+		log.Printf("total QueryParams and topic %v %v", request.GetQueryParams(), name)
 
 	}
 
