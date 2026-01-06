@@ -14,6 +14,7 @@ import (
 
 func resourceAlibabacloudStackNetworkAclEntries() *schema.Resource {
 	resource := &schema.Resource{
+		DeprecationMessage: "network_acl already includes corresponding functions, and is scheduled for removal in version 3.21.0",
 		Schema: map[string]*schema.Schema{
 
 			"network_acl_id": {

@@ -13,7 +13,7 @@ import (
 
 func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
 	resource := &schema.Resource{
-		DeprecationMessage: "oss_bucket already includes corresponding functions",
+		DeprecationMessage: "oss_bucket already includes corresponding functions, and is scheduled for removal in version 3.21.0",
 		Schema: map[string]*schema.Schema{
 			"bucket": {
 				Type:     schema.TypeString,
