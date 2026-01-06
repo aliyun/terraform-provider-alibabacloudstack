@@ -3,10 +3,10 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -25,19 +25,12 @@ func (s *OnsService) DescribeOnsInstance(instanceid string) (response *OnsInstan
 	request.QueryParams["InstanceId"] = instanceid
 
 	var resp = &OnsInstance{}
-	raw, err := s.client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
-		return onsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw ConsoleInstanceBaseInfo : %s", bresponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorInstanceNotFound"}) {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceid, "ConsoleInstanceBaseInfo", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ConsoleInstanceBaseInfo", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("ConsoleInstanceBaseInfo", response, requestInfo, request)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
@@ -61,7 +54,6 @@ type TopicStruct struct {
 }
 
 func (s *OnsService) DescribeOnsTopic(id string) (response *Topic, err error) {
-	var requestInfo *ons.Client
 	did, err := ParseResourceId(id, 2)
 	if err != nil {
 		return response, errmsgs.WrapError(err)
@@ -76,21 +68,13 @@ func (s *OnsService) DescribeOnsTopic(id string) (response *Topic, err error) {
 	request.QueryParams["InstanceId"] = InstanceId
 
 	var resp = &Topic{}
-	raw, err := s.client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
-		return onsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw DescribeProjectMeta : %s", bresponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorTopicNotFound"}) {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "ConsoleTopicList", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ConsoleTopicList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ConsoleTopicList", response, requestInfo, request)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
 		return resp, errmsgs.WrapError(err)
@@ -104,7 +88,6 @@ func (s *OnsService) DescribeOnsTopic(id string) (response *Topic, err error) {
 }
 
 func (s *OnsService) DescribeOnsGroup(id string) (response *OnsGroup, err error) {
-	var requestInfo *ons.Client
 	did, err := ParseResourceId(id, 2)
 	if err != nil {
 		return response, errmsgs.WrapError(err)
@@ -119,21 +102,13 @@ func (s *OnsService) DescribeOnsGroup(id string) (response *OnsGroup, err error)
 	request.QueryParams["InstanceId"] = InstanceId
 
 	var resp = &OnsGroup{}
-	raw, err := s.client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
-		return onsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw ConsoleGroupList : %s", bresponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorGroupNotFound"}) {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "ConsoleGroupList", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ConsoleGroupList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ConsoleGroupList", response, requestInfo, request)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
 		return resp, errmsgs.WrapError(err)

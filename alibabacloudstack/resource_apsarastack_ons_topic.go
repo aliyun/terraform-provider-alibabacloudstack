@@ -3,10 +3,10 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"strconv"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -66,24 +66,15 @@ func resourceAlibabacloudStackOnsTopicCreate(d *schema.ResourceData, meta interf
 
 	response := TopicStruct{}
 
-	raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
-		return onsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw ConsoleTopicCreate : %s", bresponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ons_topic", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	if !bresponse.IsSuccess() {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(errors.New(bresponse.GetHttpContentString()), errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ons_topic", "ConsoleTopicCreate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if !response.Success {
@@ -145,15 +136,11 @@ func resourceAlibabacloudStackOnsTopicDelete(d *schema.ResourceData, meta interf
 		request.ServiceCode = "Ons-inner"
 		request.Domain = client.Domain
 
-		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
-			return onsClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		log.Printf(" response of raw ConsoleTopicDelete : %s", bresponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ons_topic", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		check, err = onsService.DescribeOnsTopic(d.Id())

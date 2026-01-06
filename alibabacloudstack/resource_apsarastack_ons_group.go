@@ -6,7 +6,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -45,7 +44,6 @@ func resourceAlibabacloudStackOnsGroup() *schema.Resource {
 
 func resourceAlibabacloudStackOnsGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ons.Client
 
 	instanceId := d.Get("instance_id").(string)
 	groupId := d.Get("group_id").(string)
@@ -62,25 +60,15 @@ func resourceAlibabacloudStackOnsGroupCreate(d *schema.ResourceData, meta interf
 	})
 	grp_resp := OGroup{}
 
-	raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
-		return onsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw ConsoleGroupCreate : %s", bresponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_group", "ConsoleGroupCreate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug("ConsoleGroupCreate", raw, requestInfo, request)
-
-	if !bresponse.IsSuccess() {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_group", "ConsoleGroupCreate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_group", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &grp_resp)
@@ -145,16 +133,11 @@ func resourceAlibabacloudStackOnsGroupDelete(d *schema.ResourceData, meta interf
 			"OnsRegionId":  client.RegionId,
 			"InstanceId":   parts[1],
 		})
-
-		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
-			return onsClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		log.Printf(" response of raw ConsoleGroupDelete : %s", bresponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_group", "ConsoleGroupDelete", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		check, err = onsService.DescribeOnsGroup(d.Id())

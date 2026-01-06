@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -95,17 +94,15 @@ func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta int
 		"IndependentNaming": independentname,
 	})
 
-	raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
-		return onsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
-	addDebug("ConsoleInstanceCreate", raw, request, request.QueryParams)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw ConsoleInstanceCreate : %s", bresponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", "ConsoleInstanceCreate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &ins_resp)
 	if ins_resp.Success != true {
@@ -243,20 +240,16 @@ func resourceAlibabacloudStackOnsInstanceUpdate(d *schema.ResourceData, meta int
 	check.Data.InstanceID = d.Id()
 
 	if attributeUpdate {
-		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
-			return onsClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
-		log.Printf(" response of raw ConsoleInstanceUpdate : %s", raw)
-
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		log.Printf(" response of raw DescribeProjectMeta : %s", bresponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", "ConsoleInstanceUpdate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request)
 		log.Printf("total QueryParams and topic %v %v", request.GetQueryParams(), topic)
 
 	}
@@ -279,15 +272,11 @@ func resourceAlibabacloudStackOnsInstanceDelete(d *schema.ResourceData, meta int
 		request.QueryParams["InstanceId"] = d.Id()
 		request.QueryParams["PreventCache"] = ""
 
-		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
-			return onsClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		log.Printf(" response of raw ConsoleInstanceDelete : %s", bresponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", "ConsoleInstanceDelete", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		check, err = onsService.DescribeOnsInstance(d.Id())
