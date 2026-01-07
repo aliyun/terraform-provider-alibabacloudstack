@@ -374,6 +374,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_gpdb_accounts":                                    dataSourceAlibabacloudStackGpdbAccounts(),
 		"alibabacloudstack_gpdb_instances":                                   dataSourceAlibabacloudStackGpdbInstances(),
 		"alibabacloudstack_gpdb_dbinstances":                                 dataSourceAlibabacloudStackGpdbInstances(),
+		"alibabacloudstack_gpdb_instance_types":                              dataSourceAlibabacloudStackGpdbInstanceTypes(),
 		"alibabacloudstack_hbase_instances":                                  dataSourceAlibabacloudStackHBaseInstances(),
 		"alibabacloudstack_hbase_clusters":                                   dataSourceAlibabacloudStackHBaseInstances(),
 		"alibabacloudstack_instances":                                        dataSourceAlibabacloudStackInstances(),

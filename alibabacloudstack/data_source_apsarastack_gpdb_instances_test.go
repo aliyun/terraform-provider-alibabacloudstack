@@ -37,6 +37,8 @@ const testAccCheckAlibabacloudStackGpdbInstancesDataSource = `
 		}
 		data "alibabacloudstack_gpdb_instances" "default"{
 		}
+		data "alibabacloudstack_gpdb_instance_types" "default" {
+		}
 		resource "alibabacloudstack_vswitch" "default" {
  			vpc_id = alibabacloudstack_vpc.default.id
 			cidr_block        = "10.1.0.0/16"
@@ -46,9 +48,12 @@ const testAccCheckAlibabacloudStackGpdbInstancesDataSource = `
        resource "alibabacloudstack_gpdb_instance" "default" {
            vswitch_id           = alibabacloudstack_vswitch.default.id
            engine               = "gpdb"
-           engine_version       = "4.3"
-           instance_class       = "gpdb.group.segsdx2"
-           instance_group_count = "2"
+           engine_version       = data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.engine_version
+           instance_class       = data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.id
+		   db_instance_storage_type         = "local_ssd"
+		   db_instance_mode         = "StorageReserver"
            description          = "testing_01"
+		   seg_node_num = "2"
+		   network_type = "VPC"
        }
 `
