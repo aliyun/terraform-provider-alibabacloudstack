@@ -252,21 +252,18 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		log.Print("Encryption key condition passed")
 		req := client.NewCommonRequest("POST", "Rds", "2014-08-15", "CheckCloudResourceAuthorized", "")
 		req.QueryParams["TargetRegionId"] = client.RegionId
-		ram, err := client.WithRdsClient(func(RdsClient *rds.Client) (interface{}, error) {
-			return RdsClient.ProcessCommonRequest(req)
-		})
-		resparn, ok := ram.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(req)
+		addDebug(req.GetActionName(), bresponse, req, req.QueryParams)
+		log.Printf(" response of raw CheckCloudResourceAuthorized : %s", bresponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(resparn.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_db_instance", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_dbinstance", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		var arnresp RoleARN
-		addDebug(req.GetActionName(), ram, req)
-		log.Printf("raw response %v", resparn)
-		err = json.Unmarshal(resparn.GetHttpContentBytes(), &arnresp)
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &arnresp)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "CheckCloudResourceAuthorized", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
@@ -355,15 +352,14 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 	})
 
 	log.Printf("request245 %v", request.QueryParams)
-	raw, err := client.WithRdsClient(func(RdsClient *rds.Client) (interface{}, error) {
-		return RdsClient.ProcessCommonRequest(request)
-	})
-	response, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw CreateDBInstance : %s", bresponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_db_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	if arnrole != "" {
@@ -372,12 +368,10 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		log.Print("arnrole has not been added")
 	}
 	var resp CreateDBInstanceResponse
-	addDebug(request.GetActionName(), raw, request)
-	err = json.Unmarshal(response.GetHttpContentBytes(), &resp)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_db_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	log.Printf("response25 %v", response)
 	d.SetId(resp.DBInstanceId)
 	d.Set("connection_string", resp.ConnectionString)
 
@@ -793,19 +787,26 @@ func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interf
 	if instance.PayType == string(Prepaid) {
 		request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "DescribeInstanceAutoRenewalAttribute", "")
 		request.QueryParams["DBInstanceId"] = d.Id()
-		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
-			return rdsClient.ProcessCommonRequest(request)
-		})
-		response, ok := raw.(*rds.DescribeInstanceAutoRenewalAttributeResponse)
+
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		log.Printf(" response of raw DescribeInstanceAutoRenewalAttribute : %s", bresponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_dbinstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
-		if response != nil && len(response.Items.Item) > 0 {
+
+		var response rds.DescribeInstanceAutoRenewalAttributeResponse
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+				"alibabacloudstack_rds_dbinstance", "DescribeInstanceAutoRenewalAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+
+		if len(response.Items.Item) > 0 {
 			renew := response.Items.Item[0]
 			d.Set("auto_renew", renew.AutoRenew == "True")
 			d.Set("auto_renew_period", renew.Duration)
@@ -839,24 +840,14 @@ func resourceAlibabacloudStackDBInstanceDelete(d *schema.ResourceData, meta inte
 	request.QueryParams["DBInstanceId"] = d.Id()
 
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
-			return rdsClient.ProcessCommonRequest(request)
-		})
-
-		if err != nil && !errmsgs.NotFoundError(err) {
-			if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus", "OperationDenied.ReadDBInstanceStatus"}) {
-				return resource.RetryableError(err)
-			}
-			errmsg := ""
-			response, ok := raw.(*responses.CommonResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		log.Printf(" response of raw DeleteDBInstance : %s", bresponse)
+		if err != nil {
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-
-			return resource.NonRetryableError(err)
+			return resource.RetryableError(err)
 		}
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
 
 		return nil
 	})
