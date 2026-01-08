@@ -10,7 +10,7 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -185,13 +185,23 @@ func TestAccAlibabacloudStackLogTail_plugin(t *testing.T) {
 					"input_type":   "plugin",
 					"name":         name,
 					"output_type":  "LogService",
-					"input_detail": `{\"plugin\":{\"inputs\":[{\"detail\":{\"ExcludeEnv\":null,\"ExcludeLabel\":null,\"IncludeEnv\":null,\"IncludeLabel\":null,\"Stderr\":true,\"Stdout\":true},\"type\":\"service_docker_stdout\"}]}}`,
+					"input_detail": `{\"LocalStorage\":true,\"filterRegex\":[],\"filterKey\":[],\"topicFormat\":\"none\",\"discardUnmatch\":false,\"plugin\":{\"inputs\":[{\"type\":\"service_mysql\",\"detail\":{\"Address\":\"************.mysql.rds.aliyuncs.com\",\"User\":\"****\",\"Password\":\"*******\",\"DataBase\":\"****\",\"Limit\":true,\"PageSize\":100,\"StateMent\":\"select * from db.VersionOs where time > ?\",\"CheckPoint\":true,\"CheckPointColumn\":\"time\",\"CheckPointStart\":\"2018-01-01 00:00:00\",\"CheckPointSavePerPage\":true,\"CheckPointColumnType\":\"time\",\"IntervalMs\":60000}}]}}`,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":         name,
 						"input_type":   "plugin",
-						"input_detail": "{\"plugin\":{\"inputs\":[{\"detail\":{\"ExcludeEnv\":null,\"ExcludeLabel\":null,\"IncludeEnv\":null,\"IncludeLabel\":null,\"Stderr\":true,\"Stdout\":true},\"type\":\"service_docker_stdout\"}]}}",
+						"input_detail": CHECKSET,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"input_detail": `{\"LocalStorage\":true,\"filterRegex\":[],\"filterKey\":[],\"topicFormat\":\"none\",\"discardUnmatch\":false,\"plugin\":{\"inputs\":[{\"type\":\"service_mysql\",\"detail\":{\"Address\":\"************.mysql.rds.aliyuncs.com\",\"User\":\"****\",\"Password\":\"*******\",\"DataBase\":\"****\",\"Limit\":true,\"PageSize\":10,\"StateMent\":\"select * from db.VersionOs where time > ?\",\"CheckPoint\":true,\"CheckPointColumn\":\"time\",\"CheckPointStart\":\"2018-01-01 00:00:00\",\"CheckPointSavePerPage\":true,\"CheckPointColumnType\":\"time\",\"IntervalMs\":60000}}]}}`,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"input_detail": CHECKSET,
 					}),
 				),
 			},

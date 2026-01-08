@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -52,6 +53,13 @@ func resourceAlibabacloudStackLogtailConfig() *schema.Resource {
 					return yaml
 				},
 				ValidateFunc: validation.StringIsJSON,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					ok, err := compareJsonTemplateAreEquivalent(old, new)
+					if err != nil {
+						return old == new
+					}
+					return ok
+				},
 			},
 		},
 	}
@@ -87,15 +95,13 @@ func resourceAlibabacloudStackLogtailConfigCreate(d *schema.ResourceData, meta i
 		logconfig.InputDetail = covertInput
 		return nil, slsClient.CreateConfig(d.Get("project").(string), logconfig)
 	})
+	addDebug("CreateConfig", raw, requestInfo, map[string]interface{}{
+		"project": d.Get("project").(string),
+		"config":  logconfig,
+	})
 	if err != nil {
 		errmsg := ""
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_logtail_config", "CreateConfig", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
-	}
-	if debugOn() {
-		addDebug("CreateConfig", raw, requestInfo, map[string]interface{}{
-			"project": d.Get("project").(string),
-			"config":  logconfig,
-		})
 	}
 	d.SetId(fmt.Sprintf("%s%s%s%s%s", d.Get("project").(string), COLON_SEPARATED, d.Get("logstore").(string), COLON_SEPARATED, d.Get("name").(string)))
 	return nil
@@ -113,24 +119,49 @@ func resourceAlibabacloudStackLogtailConfigRead(d *schema.ResourceData, meta int
 		}
 		return errmsgs.WrapError(err)
 	}
-
-	// Because the server will return redundant parameters, we filter here
+	var normalizedJson string
 	inputDetail := d.Get("input_detail").(string)
-	var oMap map[string]interface{}
-	json.Unmarshal([]byte(inputDetail), &oMap)
-	nMap := config.InputDetail.(map[string]interface{})
 	if inputDetail != "" {
-		for nk := range nMap {
-			if _, ok := oMap[nk]; !ok {
-				delete(nMap, nk)
+		originalMap := make(map[string]interface{})
+		resultMap := make(map[string]interface{})
+
+		err = json.Unmarshal([]byte(inputDetail), &originalMap)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+
+		serverInputDetail, ok := config.InputDetail.(map[string]interface{})
+		if !ok {
+			return errmsgs.WrapError(fmt.Errorf("failed to parse server input detail"))
+		}
+
+		for k := range originalMap {
+			if v2, ok := serverInputDetail[k]; ok {
+				resultMap[k] = v2
+			} else {
+				resultMap[k] = originalMap[k]
 			}
 		}
+		inputDetailByte, err := json.Marshal(resultMap)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		normalizedJson, _ = normalizeJsonString(string(inputDetailByte))
+		// normalizedJson = string(inputDetailByte)
+	} else {
+		serverInputDetail, ok := config.InputDetail.(map[string]interface{})
+		if !ok {
+			return errmsgs.WrapError(fmt.Errorf("failed to parse server input detail"))
+		}
+		serverInputDetailByte, err := json.Marshal(serverInputDetail)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		normalizedJson = string(serverInputDetailByte)
+		// normalizedJson, _ = normalizeJsonString(string(serverInputDetailByte))
 	}
-	nMapJson, err := json.Marshal(nMap)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	d.Set("input_detail", string(nMapJson))
+	log.Printf("=====================================================%s", normalizedJson)
+	d.Set("input_detail", normalizedJson)
 	d.Set("project", split[0])
 	d.Set("name", config.Name)
 	d.Set("logstore", split[1])
@@ -144,7 +175,9 @@ func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta 
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-
+	if d.IsNewResource() {
+		return nil
+	}
 	update := false
 	if d.HasChange("input_detail") {
 		update = true
@@ -153,32 +186,31 @@ func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta 
 		update = true
 	}
 	if update {
-		logconfig := &sls.LogConfig{}
+		// logconfig := &sls.LogConfig{}
 		inputConfigInputDetail := make(map[string]interface{})
 		data := d.Get("input_detail").(string)
 		conver_err := json.Unmarshal([]byte(data), &inputConfigInputDetail)
 		if conver_err != nil {
 			return errmsgs.WrapError(conver_err)
 		}
-		sls.AddNecessaryInputConfigField(inputConfigInputDetail)
-		covertInput, covertErr := assertInputDetailType(inputConfigInputDetail, logconfig)
-		if covertErr != nil {
-			return errmsgs.WrapError(covertErr)
-		}
-		logconfig.InputDetail = covertInput
 
 		client := meta.(*connectivity.AlibabacloudStackClient)
 		var requestInfo *sls.Client
 		params := &sls.LogConfig{
-			Name:        parts[2],
-			InputType:   d.Get("input_type").(string),
-			OutputType:  d.Get("output_type").(string),
-			InputDetail: logconfig.InputDetail,
+			Name:       parts[2],
+			InputType:  d.Get("input_type").(string),
+			OutputType: d.Get("output_type").(string),
 			OutputDetail: sls.OutputDetail{
 				ProjectName:  d.Get("project").(string),
 				LogStoreName: d.Get("logstore").(string),
 			},
 		}
+		sls.AddNecessaryInputConfigField(inputConfigInputDetail)
+		covertInput, covertErr := assertInputDetailType(inputConfigInputDetail, params)
+		if covertErr != nil {
+			return covertErr
+		}
+		params.InputDetail = covertInput
 		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.UpdateConfig(parts[0], params)
@@ -237,6 +269,7 @@ func resourceAlibabacloudStackLogtailConfigDelete(d *schema.ResourceData, meta i
 
 // This function is used to assert and convert the type to sls.LogConfig
 func assertInputDetailType(inputConfigInputDetail map[string]interface{}, logconfig *sls.LogConfig) (sls.InputDetailInterface, error) {
+	log.Printf("inputConfigInputDetail ============================================================ %#v", inputConfigInputDetail)
 	if inputConfigInputDetail["logType"] == "json_log" {
 		JSONConfigInputDetail, ok := sls.ConvertToJSONConfigInputDetail(inputConfigInputDetail)
 		if !ok {
@@ -272,6 +305,7 @@ func assertInputDetailType(inputConfigInputDetail map[string]interface{}, logcon
 			return nil, errmsgs.WrapError(errmsgs.Error("covert to JSONConfigInputDetail false "))
 		}
 		logconfig.InputDetail = PluginLogConfigInputDetail
+		log.Printf("PluginLogConfigInputDetail type: %T, value: %+v", PluginLogConfigInputDetail, PluginLogConfigInputDetail)
 	}
 	return logconfig.InputDetail, nil
 }
