@@ -472,8 +472,13 @@ func (c *CrService) DescribeCrEeNamespace(id string) (map[string]interface{}, er
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	if !response["asapiSuccess"].(bool) {
-		errMesg := strings.ToLower(response["errorMessage"].(string))
+	success, ok := response["asapiSuccess"].(bool)
+	if !ok || !success {
+		errMsg, ok := response["errorMessage"].(string)
+		if !ok {
+			return nil, fmt.Errorf("read ee namespace failed, unknown error")
+		}
+		errMesg := strings.ToLower(errMsg)
 		if strings.Contains(errMesg, "namespace is not exist") || strings.Contains(errMesg, "namespace does not exist") {
 			return nil, errmsgs.GetNotFoundErrorFromString(response["errorMessage"].(string))
 		}
