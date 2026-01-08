@@ -158,21 +158,6 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterCreate(d *schema.
 		request.QueryParams["Name"] = v.(string)
 	}
 	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
-		// raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
-		// 	return vpcClient.ProcessCommonRequest(request)
-		// })
-		// if err != nil {
-		// 	return resource.NonRetryableError(err)
-		// }
-		// addDebug(request.GetActionName(), raw, request, request.QueryParams)
-		// bresponse, ok := raw.(*responses.CommonResponse)
-		// if bresponse.GetHttpStatus() != 200 {
-		// 	errmsg := ""
-		// 	if ok {
-		// 		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		// 	}
-		// 	return resource.RetryableError(fmt.Errorf("CreateVirtualBorderRouter Failed!!! %s", errmsg))
-		// }
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		log.Printf(" response of raw CreateVirtualBorderRouter : %s", bresponse)
