@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"os"
 	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
@@ -40,10 +41,12 @@ type LogProject struct {
 func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 	var err error
 	request := s.client.NewCommonRequest("POST", "SLS", "2020-03-31", "GetProject", "")
+	request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
 	request.QueryParams["projectName"] = id
 
 	var logProject *LogProject
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist"}) {
 			return logProject, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)

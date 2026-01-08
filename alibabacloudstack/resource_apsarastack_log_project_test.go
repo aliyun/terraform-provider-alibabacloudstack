@@ -1,15 +1,14 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"strings"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -34,17 +33,15 @@ func testSweepLogProjects(region string) error {
 		"tf-test-",
 	}
 	request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "ListProject", "")
-
-	raw, err := client.WithEcsClient(func(slsClient *ecs.Client) (interface{}, error) {
-		return slsClient.ProcessCommonRequest(request)
-	})
+	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
+	var logProject *LogProject
+	bresponse, _ := client.ProcessCommonRequest(request)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &logProject)
 	if err != nil {
-		log.Printf("[ERROR] Error retrieving Log Projects: %s", errmsgs.WrapError(err))
+		return fmt.Errorf("error unmarshaling LogProject: %s", err)
 	}
-	names, _ := raw.([]string)
-
-	for _, v := range names {
-		name := v
+	for _, v := range logProject.Projects {
+		name := v.ProjectName
 		skip := true
 		for _, prefix := range prefixes {
 			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
@@ -58,10 +55,9 @@ func testSweepLogProjects(region string) error {
 		}
 		log.Printf("[INFO] Deleting Log Project: %s", name)
 		request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "DeleteProject", "")
+		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 		request.QueryParams["ProjectName"] = name
-		_, err := client.WithEcsClient(func(slsClient *ecs.Client) (interface{}, error) {
-			return slsClient.ProcessCommonRequest(request)
-		})
+		_, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			log.Printf("[ERROR] Failed to delete Log Project (%s): %s", name, err)
 		}

@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"os"
 	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
@@ -25,7 +26,7 @@ func resourceAlibabacloudStackLogProject() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackLogProjectCreate, 
+	setResourceFunc(resource, resourceAlibabacloudStackLogProjectCreate,
 		resourceAlibabacloudStackLogProjectRead, resourceAlibabacloudStackLogProjectUpdate, resourceAlibabacloudStackLogProjectDelete)
 	return resource
 }
@@ -35,10 +36,12 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	logService := LogService{client}
 	name := d.Get("name").(string)
 	request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "CreateProject", "")
+	request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
 	request.QueryParams["projectName"] = name
 	request.QueryParams["Description"] = d.Get("description").(string)
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -46,7 +49,6 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("LogProject", bresponse)
 
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 		object, err := logService.DescribeLogProject(name)
@@ -86,10 +88,12 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 	name := d.Id()
 	if d.HasChange("description") {
 		request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "UpdateProject", "")
+		request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
 		request.QueryParams["ProjectName"] = name
 		request.QueryParams["description"] = d.Get("description").(string)
 
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -108,9 +112,11 @@ func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta inte
 	var requestInfo *sls.Client
 	name := d.Get("name").(string)
 	request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "DeleteProject", "")
+	request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
 	request.QueryParams["ProjectName"] = name
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist"}) {
 			return nil
