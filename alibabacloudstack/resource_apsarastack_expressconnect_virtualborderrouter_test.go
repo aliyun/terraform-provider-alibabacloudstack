@@ -149,7 +149,7 @@ func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					//"physical_connection_id":     "${data.alibabacloudstack_express_connect_physical_connections.default.ids.0}",
-					"physical_connection_id":     "pc-9wdbvb1hkf44szgqvgnor",
+					"physical_connection_id":     getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"),
 					"vlan_id":                    fmt.Sprint(rand),
 					"local_gateway_ip":           "10.0.0.1",
 					"peer_gateway_ip":            "10.0.0.2",
