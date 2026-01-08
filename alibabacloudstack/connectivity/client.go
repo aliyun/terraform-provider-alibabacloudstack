@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/PaesslerAG/jsonpath"
+	"github.com/google/uuid"
 
 	roaCS "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
@@ -1102,7 +1103,7 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 }
 
 func buildClientToken(popcode, version, action string) string {
-	token := strings.TrimSpace(fmt.Sprintf("TF_%s_%s_%s_%d", popcode, version, action, time.Now().Unix()))
+	token := strings.TrimSpace(fmt.Sprintf("TF_%s_%s_%s_%s", popcode, version, action, uuid.Must(uuid.NewV7()).String()))
 	if len(token) > 64 {
 		token = token[0:64]
 	}
