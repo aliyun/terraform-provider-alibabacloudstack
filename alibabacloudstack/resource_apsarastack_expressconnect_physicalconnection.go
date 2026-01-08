@@ -45,7 +45,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnection() *schema.Resourc
 			},
 			"device_name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"physical_connection_name": {
 				Type:     schema.TypeString,
@@ -64,7 +64,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnection() *schema.Resourc
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Canceled", "Enabled", "Terminated"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Canceled", "Enabled", "Terminated", "Confirmed"}, false),
 			},
 			"type": {
 				Type:     schema.TypeString,
@@ -123,7 +123,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionCreate(d *schema.R
 
 	d.SetId(fmt.Sprint(response["PhysicalConnectionId"]))
 	vpcService := VpcService{client}
-	stateConf := BuildStateConf([]string{}, []string{"Allocated", "Confirmed"}, d.Timeout(schema.TimeoutCreate), 1*time.Second, vpcService.ExpressConnectPhysicalConnectionStateRefreshFunc(d.Id(), []string{"Allocation Failed"}))
+	stateConf := BuildStateConf([]string{"Allocating"}, []string{"Allocated", "Confirmed"}, d.Timeout(schema.TimeoutCreate), 1*time.Second, vpcService.ExpressConnectPhysicalConnectionStateRefreshFunc(d.Id(), []string{"Allocation Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -162,7 +162,6 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionRead(d *schema.Res
 func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-	d.Partial(true)
 
 	update := false
 	request := map[string]interface{}{
@@ -256,10 +255,13 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 				if err != nil {
 					return err
 				}
+				stateConf := BuildStateConf([]string{"Terminating"}, []string{"Terminated"}, d.Timeout(schema.TimeoutCreate), 1*time.Second, vpcService.ExpressConnectPhysicalConnectionStateRefreshFunc(d.Id(), []string{"Allocation Failed"}))
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
 			}
 		}
 	}
-	d.Partial(false)
 	return nil
 }
 
@@ -268,7 +270,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete(d *schema.R
 	vpcService := VpcService{client}
 	// Only Canceled status can be deleted
 	object, err := vpcService.DescribeExpressConnectPhysicalConnection(d.Id())
-	if object["Status"].(string) != "Canceled" {
+	if object["Status"].(string) == "Confirmed" {
 		request := map[string]interface{}{
 			"PhysicalConnectionId": d.Id(),
 		}
@@ -276,6 +278,19 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete(d *schema.R
 		_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 		if err != nil {
 			return err
+		}
+	} else if object["Status"].(string) == "Enabled" {
+		request := map[string]interface{}{
+			"PhysicalConnectionId": d.Id(),
+		}
+		action := "TerminatePhysicalConnection"
+		_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
+		if err != nil {
+			return err
+		}
+		stateConf := BuildStateConf([]string{"Terminating"}, []string{"Terminated"}, d.Timeout(schema.TimeoutCreate), 1*time.Second, vpcService.ExpressConnectPhysicalConnectionStateRefreshFunc(d.Id(), []string{"Allocation Failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
 

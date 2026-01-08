@@ -1051,11 +1051,7 @@ func (s *VpcService) DoVpcDescribenetworkaclattributesRequest(id string) (object
 }
 func (s *VpcService) DescribeNetworkAcl(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	if err != nil {
-		return nil, errmsgs.WrapError(err)
-	}
 	request := map[string]interface{}{
-
 		"NetworkAclId": id,
 	}
 	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeNetworkAclAttributes", "", nil, nil, request)
@@ -1173,7 +1169,7 @@ func (s *VpcService) DescribeTags(resourceId string, resourceTags map[string]int
 
 	request.ResourceType = string(resourceType)
 	request.ResourceId = &[]string{resourceId}
-	if resourceTags != nil && len(resourceTags) > 0 {
+	if len(resourceTags) > 0 {
 		var reqTags []vpc.ListTagResourcesTag
 		for key, value := range resourceTags {
 			reqTags = append(reqTags, vpc.ListTagResourcesTag{
@@ -1672,7 +1668,7 @@ func (s *VpcService) SetIpv6CidrBlocks(d *schema.ResourceData) error {
 				// Pre-allocate ipv6_cidr_block
 				err := s.AllocateVpcIpv6Cidr(ivp6["ipv6_cidr_block"].(string), ivp6["ipv6_isp"].(string))
 				if err != nil {
-					log.Println(fmt.Sprintf("Warning: %s: %s allocate err: %v", ivp6["ipv6_cidr_block"], ivp6["ipv6_isp"], err))
+					log.Printf("Warning: %s: %s allocate err: %v", ivp6["ipv6_cidr_block"], ivp6["ipv6_isp"], err)
 					return err
 				}
 				request["Ipv6Isp"] = ivp6["ipv6_isp"]
@@ -1804,7 +1800,7 @@ func (s *VpcService) DescribeExpressConnectPhysicalConnection(id string) (object
 		"Value": []string{id},
 	})
 	request["Filter"] = filterMapList
-	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, nil, request)
+	response, err = s.client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackExpressconnectPhysicalConnectionsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackExpressconnectPhysicalconnectionsDataSource(t *testing.T) {
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
