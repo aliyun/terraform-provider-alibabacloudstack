@@ -32,20 +32,6 @@ func dataSourceAlibabacloudStackAscmLogonPolicies() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"ip_ranges": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-			"rule": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,

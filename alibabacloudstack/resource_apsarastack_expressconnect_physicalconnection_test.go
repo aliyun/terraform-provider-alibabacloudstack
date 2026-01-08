@@ -30,11 +30,13 @@ func TestAccAlibabacloudStackExpressconnectPhysicalconnection0(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy: rac.checkResourceDestroy(),
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"physical_connection_name": name,
+					"bandwidth":                100,
+					"circuit_code":             "longtel002",
 					"description":              "abcabc",
 					"line_operator":            "CO",
 					"type":                     "VPC",
@@ -45,6 +47,8 @@ func TestAccAlibabacloudStackExpressconnectPhysicalconnection0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"physical_connection_name": name,
+						"bandwidth":                "100",
+						"circuit_code":             "longtel002",
 						"description":              "abcabc",
 						"line_operator":            "CO",
 						"type":                     "VPC",
@@ -59,15 +63,17 @@ func TestAccAlibabacloudStackExpressconnectPhysicalconnection0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"peer_location": "sssssss",
-					"circuit_code":  "longtel002",
-					"description":   "eeeeee",
+					"physical_connection_name": name + "_update",
+					"peer_location":            "sssssss",
+					"circuit_code":             "longtel002",
+					"description":              "eeeeee",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"peer_location": "sssssss",
-						"circuit_code":  "longtel002",
-						"description":   "eeeeee",
+						"physical_connection_name": name + "_update",
+						"peer_location":            "sssssss",
+						"circuit_code":             "longtel002",
+						"description":              "eeeeee",
 					}),
 				),
 			},
@@ -86,6 +92,18 @@ func TestAccAlibabacloudStackExpressconnectPhysicalconnection0(t *testing.T) {
 					testAccCheck(map[string]string{
 						"description":   "dddd",
 						"line_operator": "CT",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"bandwidth":    200,
+					"circuit_code": "longtel003",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"bandwidth":    "200",
+						"circuit_code": "longtel003",
 					}),
 				),
 			},
@@ -127,24 +145,25 @@ func TestAccAlibabacloudStackExpressconnectPhysicalconnection1(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%sexpress_connectphysical_connection%d", defaultRegionToTest, rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccExpressconnectPhysicalconnectionBasicdependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccExpressconnectPhysicalconnectionRedundantdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy: rac.checkResourceDestroy(),
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"physical_connection_name": name,
-					"description":              "abcabc",
-					"line_operator":            "CO",
-					"type":                     "VPC",
-					"peer_location":            "XX Street",
-					"access_point_id":          "${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.access_point_id}",
-					"port_type":                "${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.port_type}",
+					"physical_connection_name":         name,
+					"description":                      "abcabc",
+					"line_operator":                    "CO",
+					"type":                             "VPC",
+					"peer_location":                    "XX Street",
+					"access_point_id":                  "${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.access_point_id}",
+					"port_type":                        "${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.port_type}",
+					"redundant_physical_connection_id": "${alibabacloudstack_expressconnect_physicalconnection.back1.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -170,7 +189,6 @@ func TestAccAlibabacloudStackExpressconnectPhysicalconnection1(t *testing.T) {
 	})
 }
 
-
 var AlibabacloudTestAccExpressconnectPhysicalconnectionCheckmap = map[string]string{
 	"peer_location":            CHECKSET,
 	"status":                   CHECKSET,
@@ -192,6 +210,34 @@ variable "name" {
 data "alibabacloudstack_expressconnect_physical_connections" "anyone" {
 }
 
-
 `, name)
+}
+
+func AlibabacloudTestAccExpressconnectPhysicalconnectionRedundantdependence(name string) string {
+	return fmt.Sprintf(`
+%s
+resource "alibabacloudstack_expressconnect_physicalconnection" "back1" {
+	physical_connection_name= "${var.name}_back1"
+	bandwidth=                100
+	circuit_code=             "longtel002"
+	description=              "back1"
+	line_operator=            "CO"
+	type=                     "VPC"
+	peer_location=            "XX Street"
+	access_point_id=          data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.access_point_id
+	port_type=                data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.port_type
+	status = "Enabled"
+	}
+	resource "alibabacloudstack_expressconnect_physicalconnection" "back2" {
+		physical_connection_name= "${var.name}_back2"
+		bandwidth=                100
+		circuit_code=             "longtel002"
+		description=              "back2"
+		line_operator=            "CO"
+		type=                     "VPC"
+		peer_location=            "XX Street"
+		access_point_id=          data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.access_point_id
+		port_type=                data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.port_type
+		}
+`, AlibabacloudTestAccExpressconnectPhysicalconnectionBasicdependence(name))
 }

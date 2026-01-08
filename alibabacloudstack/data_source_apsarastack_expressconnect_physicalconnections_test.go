@@ -19,24 +19,24 @@ func TestAccAlibabacloudStackExpressconnectPhysicalconnectionsDataSource(t *test
 
 	nameConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
-			"name_regex": `"${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}"`,
+			"name_regex": `"^${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}$"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
-			"name_regex": `"${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}_fake"`,
+			"name_regex": `"^tf_fake_fake$"`,
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
-			"name_regex": `"${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}"`,
+			"name_regex": `"^${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}$"`,
 			"ids": `["${data.alibabacloudstack_expressconnect_physical_connections.anyone.ids.0}"]`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
-			"name_regex": `"${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}_fake"`,
+			"name_regex": `"^${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}_fake$"`,
 			"ids": `["${data.alibabacloudstack_expressconnect_physical_connections.anyone.ids.0}_fake"]`,
 		}),
 	}
-
+	AlibabacloudstackExpressconnectPhysicalConnectionsCheckInfo.dataSourceTestCheck(t, 0, nameConf)
 	AlibabacloudstackExpressconnectPhysicalConnectionsCheckInfo.dataSourceTestCheck(t, 0, idsConf, nameConf, allConf)
 }
 
@@ -67,6 +67,8 @@ func testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(
 	config := fmt.Sprintf(`
 
 data "alibabacloudstack_expressconnect_physical_connections" "anyone" {
+	name_regex = ".+"
+	include_reservation_data = false
 }
 
 data "alibabacloudstack_expressconnect_physical_connections" "default" {

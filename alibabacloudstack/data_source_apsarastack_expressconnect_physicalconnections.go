@@ -209,7 +209,7 @@ func dataSourceAlibabacloudStackExpressConnectPhysicalConnectionsRead(d *schema.
 		result, _ := resp.([]interface{})
 		for _, v := range result {
 			item := v.(map[string]interface{})
-			if physicalConnectionNameRegex != nil && !physicalConnectionNameRegex.MatchString(fmt.Sprint(item["Name"])) {
+			if name, existed:=item["Name"];  physicalConnectionNameRegex != nil && (!existed || !physicalConnectionNameRegex.MatchString(name.(string))) {
 				continue
 			}
 			if len(idsMap) > 0 {

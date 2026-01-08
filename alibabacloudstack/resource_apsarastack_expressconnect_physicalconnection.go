@@ -23,7 +23,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnection() *schema.Resourc
 				ForceNew: true,
 			},
 			"bandwidth": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 			},
@@ -53,7 +53,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnection() *schema.Resourc
 			},
 			"port_type": {
 				Type:         schema.TypeString,
-				Optional:     true,
+				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"1000Base-LX", "1000Base-T", "100Base-T", "10GBase-LR", "10GBase-T", "40GBase-LR", "100GBase-LR"}, false),
 			},
 			"redundant_physical_connection_id": {
@@ -144,7 +144,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionRead(d *schema.Res
 		return errmsgs.WrapError(err)
 	}
 	d.Set("access_point_id", object["AccessPointId"])
-	d.Set("bandwidth", fmt.Sprint(formatInt(object["Bandwidth"])))
+	d.Set("bandwidth", formatInt(object["Bandwidth"]))
 	d.Set("circuit_code", object["CircuitCode"])
 	d.Set("description", object["Description"])
 	d.Set("line_operator", object["LineOperator"])
@@ -160,65 +160,10 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionRead(d *schema.Res
 }
 
 func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdatesAllowedCheck(d, []string{"port_type", "redundant_physical_connection_id"})
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
-	update := false
-	request := map[string]interface{}{
-		"PhysicalConnectionId": d.Id(),
-	}
-
-	if !d.IsNewResource() && d.HasChange("bandwidth") {
-		update = true
-		if v, ok := d.GetOk("bandwidth"); ok {
-			request["bandwidth"] = v
-		}
-	}
-	if !d.IsNewResource() && d.HasChange("circuit_code") {
-		update = true
-		if v, ok := d.GetOk("circuit_code"); ok {
-			request["CircuitCode"] = v
-		}
-	}
-	if !d.IsNewResource() && d.HasChange("description") {
-		update = true
-		if v, ok := d.GetOk("description"); ok {
-			request["Description"] = v
-		}
-	}
-	if !d.IsNewResource() && d.HasChange("line_operator") {
-		update = true
-		request["LineOperator"] = d.Get("line_operator")
-	}
-	if !d.IsNewResource() && d.HasChange("peer_location") {
-		update = true
-		request["PeerLocation"] = d.Get("peer_location")
-	}
-	if !d.IsNewResource() && d.HasChange("physical_connection_name") {
-		update = true
-		if v, ok := d.GetOk("physical_connection_name"); ok {
-			request["Name"] = v
-		}
-	}
-	if !d.IsNewResource() && d.HasChange("port_type") {
-		update = true
-		if v, ok := d.GetOk("port_type"); ok {
-			request["PortType"] = v
-		}
-	}
-	if !d.IsNewResource() && d.HasChange("redundant_physical_connection_id") {
-		update = true
-		if v, ok := d.GetOk("redundant_physical_connection_id"); ok {
-			request["RedundantPhysicalConnectionId"] = v
-		}
-	}
-	if update {
-		action := "ModifyPhysicalConnectionAttribute"
-		_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
-		if err != nil {
-			return err
-		}
-	}
 	if d.HasChange("status") {
 		object, err := vpcService.DescribeExpressConnectPhysicalConnection(d.Id())
 		if err != nil {
@@ -262,6 +207,65 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 			}
 		}
 	}
+	if d.IsNewResource() {
+		return nil
+	}
+	update := false
+	request := map[string]interface{}{
+		"PhysicalConnectionId": d.Id(),
+	}
+	if d.HasChange("bandwidth") {
+		update = true
+		if v, ok := d.GetOk("bandwidth"); ok {
+			request["bandwidth"] = v
+		}
+	}
+	if d.HasChange("circuit_code") {
+		update = true
+		if v, ok := d.GetOk("circuit_code"); ok {
+			request["CircuitCode"] = v
+		}
+	}
+	if d.HasChange("description") {
+		update = true
+		if v, ok := d.GetOk("description"); ok {
+			request["Description"] = v
+		}
+	}
+	if d.HasChange("line_operator") {
+		update = true
+		request["LineOperator"] = d.Get("line_operator")
+	}
+	if d.HasChange("peer_location") {
+		update = true
+		request["PeerLocation"] = d.Get("peer_location")
+	}
+	if d.HasChange("physical_connection_name") {
+		update = true
+		if v, ok := d.GetOk("physical_connection_name"); ok {
+			request["Name"] = v
+		}
+	}
+	//	if d.HasChange("port_type") {
+	//		update = true
+	//		if v, ok := d.GetOk("port_type"); ok {
+	//			request["PortType"] = v
+	//		}
+	//	}
+	//	if d.HasChange("redundant_physical_connection_id") {
+	//		update = true
+	//		if v, ok := d.GetOk("redundant_physical_connection_id"); ok {
+	//			request["RedundantPhysicalConnectionId"] = v
+	//		}
+	//	}
+	if update {
+		action := "ModifyPhysicalConnectionAttribute"
+		_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
