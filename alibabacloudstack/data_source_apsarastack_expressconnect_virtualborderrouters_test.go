@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackExpressConnectVirtualBorderRoutersDataSource(t *testing.T) {
+func TestAccAlicloudExpressConnectVirtualBorderRoutersDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_express_connect_virtual_border_routers.default"
 	rand := getAccTestRandInt(1, 2999)
 	name := fmt.Sprintf("tf-testAccExpressConnectVirtualBorderRoutersTest%d", rand)
@@ -147,16 +147,15 @@ func dataSourceExpressConnectVirtualBorderRoutersDependence(name string) string 
 variable "name" {
 	default = "%s"
 }
+
 data "alibabacloudstack_express_connect_physical_connections" "nameRegex" {
-  name_regex = "^preserved-NODELETING"
 }
 
 resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
   local_gateway_ip           = "10.0.0.1"
   peer_gateway_ip            = "10.0.0.2"
   peering_subnet_mask        = "255.255.255.252"
-  //physical_connection_id     = data.alibabacloudstack_express_connect_physical_connections.nameRegex.connections.0.id
-  physical_connection_id     = "pc-9wdbvb1hkf44szgqvgnor"
+  physical_connection_id     = data.alibabacloudstack_express_connect_physical_connections.nameRegex.connections.0.id
   virtual_border_router_name = var.name
   vlan_id                    = %d
   min_rx_interval            = 1000

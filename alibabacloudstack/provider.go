@@ -489,7 +489,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_oos_executions":                                   dataSourceAlibabacloudStackOosExecutions(),
 		"alibabacloudstack_oos_templates":                                    dataSourceAlibabacloudStackOosTemplates(),
 		"alibabacloudstack_express_connect_physical_connections":             dataSourceAlibabacloudStackExpressConnectPhysicalConnections(),
-		"alibabacloudstack_expressconnect_physicalconnections":               dataSourceAlibabacloudStackExpressConnectPhysicalConnections(),
+		"alibabacloudstack_expressconnect_physical_connections":               dataSourceAlibabacloudStackExpressConnectPhysicalConnections(),
 		"alibabacloudstack_express_connect_access_points":                    dataSourceAlibabacloudStackExpressConnectAccessPoints(),
 		"alibabacloudstack_expressconnect_accesspoints":                      dataSourceAlibabacloudStackExpressConnectAccessPoints(),
 		"alibabacloudstack_expressconnect_vbr_pconn_associations":            dataSourceAlibabacloudStackExpressconnectVbrPconnAssociations(),

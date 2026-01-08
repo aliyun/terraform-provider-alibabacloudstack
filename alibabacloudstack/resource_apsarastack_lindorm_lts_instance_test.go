@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackLindormLtsInstance_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-lindorm-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, LindormLtsInstanceCommonTestCase)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
