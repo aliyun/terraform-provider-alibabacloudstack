@@ -837,7 +837,7 @@ func compareJsonTemplateAreEquivalent(tem1, tem2 string) (bool, error) {
 
 	canonicalJson2, _ := json.Marshal(obj2)
 
-	equal := bytes.Compare(canonicalJson1, canonicalJson2) == 0
+	equal := bytes.Equal(canonicalJson1, canonicalJson2)
 	if !equal {
 		log.Printf("[DEBUG] Canonical template are not equal.\nFirst: %s\nSecond: %s\n",
 			canonicalJson1, canonicalJson2)
@@ -1019,7 +1019,7 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 			return diag.FromErr(err)
 		}
 
-		waitSecondsIfWithTest(1)
+		waitSecondsIfWithTest(3)
 
 		if updateFunc != nil {
 			err = updateFunc(d, meta)
@@ -1032,7 +1032,7 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 			return diag.FromErr(err)
 		}
 
-		waitSecondsIfWithTest(1)
+		waitSecondsIfWithTest(3)
 		retry := 5
 		for retry > 0 {
 			// When triggered in large batches, there will be a certain delay in resource synchronization on the asapi side. Retry if it fails

@@ -473,8 +473,9 @@ func (c *CrService) DescribeCrEeNamespace(id string) (map[string]interface{}, er
 		return nil, errmsgs.WrapError(err)
 	}
 	if !response["asapiSuccess"].(bool) {
-		if response["errorMessage"].(string) == "Namespace is not exist." {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		errMesg := strings.ToLower(response["errorMessage"].(string))
+		if strings.Contains(errMesg, "namespace is not exist") || strings.Contains(errMesg, "namespace does not exist") {
+			return nil, errmsgs.GetNotFoundErrorFromString(response["errorMessage"].(string))
 		}
 		return nil, fmt.Errorf("read ee namespace failed, %s", response["errorMessage"].(string))
 	}

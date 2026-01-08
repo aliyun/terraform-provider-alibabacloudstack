@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackCrEeReposDataSource(t *testing.T) {
+func TestAccAlibabacloudStackCREEReposDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	repoName := fmt.Sprintf("tf-testacc-cr-ee-repo-%d", rand)
 	namespaceName := fmt.Sprintf("tf-testacc-cr-ee-ns-%d", rand)

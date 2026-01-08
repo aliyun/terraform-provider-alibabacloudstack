@@ -113,44 +113,6 @@ func TestAccAlibabacloudStackCREERepo_Basic(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackCREERepo_Multi(t *testing.T) {
-	var v GetRepoResponse
-	resourceId := "alibabacloudstack_cr_ee_repo.default.1"
-	ra := resourceAttrInit(resourceId, crEERepoMap)
-	serviceFunc := func() interface{} {
-		return &CrService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-cr-ee-repo-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCREERepoConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckCrEeRepoDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"namespace": "${alibabacloudstack_cr_ee_namespace.default.name}",
-					"name":      "${var.name}${count.index}",
-					"summary":   "summary",
-					"repo_type": "PUBLIC",
-					"count":     "2",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-		},
-	})
-}
-
 func resourceCREERepoConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {

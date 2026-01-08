@@ -100,6 +100,7 @@ func resourceAlibabacloudStackCrEeRepoCreate(d *schema.ResourceData, meta interf
 	}
 
 	d.SetId(crService.GenResourceId(instanceId, namespace, repoName))
+	d.Set("repo_id", response["RepoId"].(string))
 
 	return nil
 }
