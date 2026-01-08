@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/gpdb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -20,6 +21,81 @@ import (
 
 type GpdbService struct {
 	client *connectivity.AlibabacloudStackClient
+}
+
+type DBInstanceAttribute struct {
+	VpcId                     string                                 `json:"VpcId" xml:"VpcId"`
+	CreationTime              string                                 `json:"CreationTime" xml:"CreationTime"`
+	DBInstanceCpuCores        int                                    `json:"DBInstanceCpuCores" xml:"DBInstanceCpuCores"`
+	SegmentCounts             int                                    `json:"SegmentCounts" xml:"SegmentCounts"`
+	StoragePerNode            int                                    `json:"StoragePerNode" xml:"StoragePerNode"`
+	DBInstanceMemory          int64                                  `json:"DBInstanceMemory" xml:"DBInstanceMemory"`
+	HostType                  string                                 `json:"HostType" xml:"HostType"`
+	PayType                   string                                 `json:"PayType" xml:"PayType"`
+	StorageType               string                                 `json:"StorageType" xml:"StorageType"`
+	AvailabilityValue         string                                 `json:"AvailabilityValue" xml:"AvailabilityValue"`
+	ReadDelayTime             string                                 `json:"ReadDelayTime" xml:"ReadDelayTime"`
+	CpuCoresPerNode           int                                    `json:"CpuCoresPerNode" xml:"CpuCoresPerNode"`
+	Port                      string                                 `json:"Port" xml:"Port"`
+	ConnectionMode            string                                 `json:"ConnectionMode" xml:"ConnectionMode"`
+	LockMode                  string                                 `json:"LockMode" xml:"LockMode"`
+	EngineVersion             string                                 `json:"EngineVersion" xml:"EngineVersion"`
+	StorageUnit               string                                 `json:"StorageUnit" xml:"StorageUnit"`
+	MemoryPerNode             int                                    `json:"MemoryPerNode" xml:"MemoryPerNode"`
+	ConnectionString          string                                 `json:"ConnectionString" xml:"ConnectionString"`
+	InstanceNetworkType       string                                 `json:"InstanceNetworkType" xml:"InstanceNetworkType"`
+	SecurityIPList            string                                 `json:"SecurityIPList" xml:"SecurityIPList"`
+	MemoryUnit                string                                 `json:"MemoryUnit" xml:"MemoryUnit"`
+	DBInstanceClassType       string                                 `json:"DBInstanceClassType" xml:"DBInstanceClassType"`
+	DBInstanceDescription     string                                 `json:"DBInstanceDescription" xml:"DBInstanceDescription"`
+	InstanceSpec              string                                 `json:"InstanceSpec" xml:"InstanceSpec"`
+	DBInstanceGroupCount      string                                 `json:"DBInstanceGroupCount" xml:"DBInstanceGroupCount"`
+	ExpireTime                string                                 `json:"ExpireTime" xml:"ExpireTime"`
+	DBInstanceNetType         string                                 `json:"DBInstanceNetType" xml:"DBInstanceNetType"`
+	MaintainStartTime         string                                 `json:"MaintainStartTime" xml:"MaintainStartTime"`
+	MaintainEndTime           string                                 `json:"MaintainEndTime" xml:"MaintainEndTime"`
+	LockReason                string                                 `json:"LockReason" xml:"LockReason"`
+	DBInstanceStatus          string                                 `json:"DBInstanceStatus" xml:"DBInstanceStatus"`
+	RegionId                  string                                 `json:"RegionId" xml:"RegionId"`
+	DBInstanceDiskMBPS        int64                                  `json:"DBInstanceDiskMBPS" xml:"DBInstanceDiskMBPS"`
+	DBInstanceStorage         int64                                  `json:"DBInstanceStorage" xml:"DBInstanceStorage"`
+	ZoneId                    string                                 `json:"ZoneId" xml:"ZoneId"`
+	MaxConnections            int                                    `json:"MaxConnections" xml:"MaxConnections"`
+	DBInstanceId              string                                 `json:"DBInstanceId" xml:"DBInstanceId"`
+	DBInstanceClass           string                                 `json:"DBInstanceClass" xml:"DBInstanceClass"`
+	Engine                    string                                 `json:"Engine" xml:"Engine"`
+	DBInstanceCategory        string                                 `json:"DBInstanceCategory" xml:"DBInstanceCategory"`
+	CpuCores                  int                                    `json:"CpuCores" xml:"CpuCores"`
+	MemorySize                int64                                  `json:"MemorySize" xml:"MemorySize"`
+	StorageSize               int64                                  `json:"StorageSize" xml:"StorageSize"`
+	SegNodeNum                int                                    `json:"SegNodeNum" xml:"SegNodeNum"`
+	MasterNodeNum             int                                    `json:"MasterNodeNum" xml:"MasterNodeNum"`
+	DBInstanceMode            string                                 `json:"DBInstanceMode" xml:"DBInstanceMode"`
+	MinorVersion              string                                 `json:"MinorVersion" xml:"MinorVersion"`
+	SupportRestore            bool                                   `json:"SupportRestore" xml:"SupportRestore"`
+	VSwitchId                 string                                 `json:"VSwitchId" xml:"VSwitchId"`
+	EncryptionKey             string                                 `json:"EncryptionKey" xml:"EncryptionKey"`
+	EncryptionType            string                                 `json:"EncryptionType" xml:"EncryptionType"`
+	CoreVersion               string                                 `json:"CoreVersion" xml:"CoreVersion"`
+	RunningTime               string                                 `json:"RunningTime" xml:"RunningTime"`
+	StartTime                 string                                 `json:"StartTime" xml:"StartTime"`
+	ResourceGroupId           string                                 `json:"ResourceGroupId" xml:"ResourceGroupId"`
+	ServerlessResource        int                                    `json:"ServerlessResource" xml:"ServerlessResource"`
+	IdleTime                  int                                    `json:"IdleTime" xml:"IdleTime"`
+	ServerlessMode            string                                 `json:"ServerlessMode" xml:"ServerlessMode"`
+	SegDiskPerformanceLevel   string                                 `json:"SegDiskPerformanceLevel" xml:"SegDiskPerformanceLevel"`
+	VectorConfigurationStatus string                                 `json:"VectorConfigurationStatus" xml:"VectorConfigurationStatus"`
+	Tags                      gpdb.TagsInDescribeDBInstanceAttribute `json:"Tags" xml:"Tags"`
+}
+
+type ItemsInDescribeDBInstanceAttribute struct {
+	DBInstanceAttribute []DBInstanceAttribute `json:"DBInstanceAttribute" xml:"DBInstanceAttribute"`
+}
+
+type DescribeDBInstanceAttributeResponse struct {
+	*responses.BaseResponse
+	RequestId string                             `json:"RequestId" xml:"RequestId"`
+	Items     ItemsInDescribeDBInstanceAttribute `json:"Items" xml:"Items"`
 }
 
 func (s *GpdbService) GpdbAccountStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
@@ -59,7 +135,7 @@ func (s *GpdbService) DescribeGpdbAccount(id string) (object map[string]interfac
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GPDB:Account", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
-		return object, err	
+		return object, err
 	}
 	v, err := jsonpath.Get("$.Accounts.DBInstanceAccount", response)
 	if err != nil {
@@ -76,7 +152,7 @@ func (s *GpdbService) DescribeGpdbAccount(id string) (object map[string]interfac
 	return object, nil
 }
 
-func (s *GpdbService) DescribeGpdbInstance(id string) (instanceAttribute gpdb.DBInstanceAttribute, err error) {
+func (s *GpdbService) DescribeGpdbInstance(id string) (instanceAttribute DBInstanceAttribute, err error) {
 	request := gpdb.CreateDescribeDBInstanceAttributeRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
@@ -84,7 +160,7 @@ func (s *GpdbService) DescribeGpdbInstance(id string) (instanceAttribute gpdb.DB
 		return client.DescribeDBInstanceAttribute(request)
 	})
 
-	response, ok := raw.(*gpdb.DescribeDBInstanceAttributeResponse)
+	response, ok := raw.(*DescribeDBInstanceAttributeResponse)
 	if err != nil {
 		errmsg := ""
 		if ok {
