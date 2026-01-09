@@ -32,12 +32,12 @@ func TestAccAlibabacloudStackOssBucketKms_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"bucket":              "${alibabacloudstack_oss_bucket.default.bucket}",
-					"sse_algorithm":       "KMS",
-					"kms_data_encryption": "SM4",
+					"sse_algorithm":       "AES256",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bucket": name,
+						"sse_algorithm":       "AES256",
 					}),
 				),
 			},
@@ -45,11 +45,12 @@ func TestAccAlibabacloudStackOssBucketKms_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"bucket":              "${alibabacloudstack_oss_bucket.default.bucket}",
 					"sse_algorithm":       "KMS",
-					"kms_data_encryption": "SM4",
+					"kms_master_key_id": "${alibabacloudstack_kms_key.key.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bucket": name,
+						"sse_algorithm":       "KMS",
 					}),
 				),
 			},
@@ -67,17 +68,20 @@ func resourceOssBucketKmsConfigDependence(name string) string {
 	return fmt.Sprintf(`
 resource "alibabacloudstack_oss_bucket" "default" {
 	bucket = "%s"
+	lifecycle {
+	    ignore_changes = [
+	      sse_algorithm,
+		  kms_key_id
+	    ]
+	}
 }
-data "alibabacloudstack_kms_keys" "enabled" {
-	status = "%s"
-}
-`, name, string(EnabledStatus))
+
+%s
+`, name, KeyCommonTestCase)
 }
 
 var ossBucketKmsBasicMap = map[string]string{
 	"bucket":              CHECKSET,
-	"sse_algorithm":       "KMS",
-	"kms_data_encryption": "SM4",
 }
 
 func testAccCheckAlicloudOssBucketKmsDestroy(s *terraform.State) error {

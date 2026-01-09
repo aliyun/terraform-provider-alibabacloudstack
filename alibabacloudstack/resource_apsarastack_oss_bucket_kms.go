@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -23,12 +24,6 @@ func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
 			"sse_algorithm": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
-			},
-
-			"kms_data_encryption": {
-				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: true,
 			},
 			"kms_master_key_id": {
@@ -65,49 +60,46 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 	ossService := OssService{client}
 	var requestInfo *oss.Client
 	bucketName := d.Get("bucket").(string)
-	det, err := ossService.DescribeOssBucket(bucketName)
+	_, err := ossService.DescribeOssBucket(bucketName)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 	sseAlgorithm := d.Get("sse_algorithm").(string)
-	kmsDateEncryption := ""
 	kmsMasterKeyID := ""
 	if sseAlgorithm == "KMS" {
-		kmsDateEncryption = d.Get("kms_data_encryption").(string)
 		kmsMasterKeyID = d.Get("kms_master_key_id").(string)
 	}
 
-	if det.BucketInfo.Name == bucketName {
-		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		mergeMaps(request.QueryParams, map[string]string{
-			"OpenApiAction": "PutBucketEncryption",
-			"ProductName":   "oss",
-			"Params":        fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName),
-			"Content":       fmt.Sprintf("%s%s%s%s%s%s%s", "<ServerSideEncryptionRule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>", sseAlgorithm, "</SSEAlgorithm><KMSDataEncryption>", kmsDateEncryption, "</KMSDataEncryption><KMSMasterKeyID>", kmsMasterKeyID, "</KMSMasterKeyID></ApplyServerSideEncryptionByDefault></ServerSideEncryptionRule>"),
-		})
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			if ossNotFoundError(err) {
-				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
-		}
-		addDebug("PutBucketEncryption", bresponse, requestInfo, request)
-
-		if bresponse.GetHttpStatus() != 200 {
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", "PutBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
-		}
-		log.Printf("Enter for logging")
+	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"OpenApiAction": "PutBucketEncryption",
+		"ProductName":   "oss",
+		"Params":        fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName),
+	})
+	if sseAlgorithm == "KMS" {
+		request.QueryParams["Content"] = fmt.Sprintf("<ServerSideEncryptionRule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>KMS</SSEAlgorithm><KMSMasterKeyID>%s</KMSMasterKeyID></ApplyServerSideEncryptionByDefault></ServerSideEncryptionRule>", kmsMasterKeyID)
+	} else {
+		request.QueryParams["Content"] = fmt.Sprintf("<ServerSideEncryptionRule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>%s</SSEAlgorithm></ApplyServerSideEncryptionByDefault></ServerSideEncryptionRule>", sseAlgorithm)
 	}
+
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackLogGoSdkERROR)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		if ossNotFoundError(err) {
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
+	addDebug("PutBucketEncryption", bresponse, requestInfo, request)
+
+	if bresponse.GetHttpStatus() != 200 {
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", "PutBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+	}
+	log.Printf("Enter for logging")
 	d.SetId(bucketName)
 
 	return nil
@@ -117,53 +109,51 @@ func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	var requestInfo *oss.Client
-	bucketName := d.Get("bucket").(string)
-	det, err := ossService.DescribeOssBucket(bucketName)
+	bucketName := d.Id()
+	_, err := ossService.DescribeOssBucket(bucketName)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-	if det.BucketInfo.Name == bucketName {
-		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		mergeMaps(request.QueryParams, map[string]string{
-			"AccountInfo":      "123456",
-			"SignatureVersion": "1.0",
-			"OpenApiAction":    "GetBucketEncryption",
-			"ProductName":      "oss",
-			"Params":           fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName),
-		})
+	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"AccountInfo":      "123456",
+		"SignatureVersion": "1.0",
+		"OpenApiAction":    "GetBucketEncryption",
+		"ProductName":      "oss",
+		"Params":           fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName),
+	})
 
-		bresponse, err := client.ProcessCommonRequest(request)
-		log.Printf("Response of GetBucketEncryption: %s", bresponse)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			if ossNotFoundError(err) {
-				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "GetBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+	bresponse, err := client.ProcessCommonRequest(request)
+	log.Printf("Response of GetBucketEncryption: %s", bresponse)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		addDebug("BucketEncryption", bresponse, requestInfo, request)
-		log.Printf("Bresponse ossbucket check")
-		log.Printf("Bresponse ossbucket %s", bresponse)
-
-		if bresponse.GetHttpStatus() != 200 {
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", "GetBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+		if ossNotFoundError(err) {
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
-		log.Printf("Enter for logging")
-		encryption_data, err := jsonpath.Get("$.Data.ServerSideEncryptionRule.ApplyServerSideEncryptionByDefault", bresponse)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackLogGoSdkERROR)
-		}
-		encryption := encryption_data.(map[string]interface{})
-		d.Set("sse_algorithm", encryption["SSEAlgorithm"].(string))
-		d.Set("kms_data_encryption", encryption["KMSDataEncryption"].(string))
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "GetBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
+	addDebug("BucketEncryption", bresponse, requestInfo, request)
+	log.Printf("Bresponse ossbucket check")
+	log.Printf("Bresponse ossbucket %s", bresponse)
+
+	if bresponse.GetHttpStatus() != 200 {
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", "GetBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+	}
+	log.Printf("Enter for logging")
+	resp := make(map[string]interface{})
+	json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
+	encryption_data, err := jsonpath.Get("$.Data.ServerSideEncryptionRule.ApplyServerSideEncryptionByDefault", resp)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
+	encryption := encryption_data.(map[string]interface{})
+	d.Set("bucket", bucketName)
+	d.Set("sse_algorithm", encryption["SSEAlgorithm"].(string))
+	d.Set("kms_master_key_id", encryption["KMSMasterKeyID"])
 
 	return nil
 }

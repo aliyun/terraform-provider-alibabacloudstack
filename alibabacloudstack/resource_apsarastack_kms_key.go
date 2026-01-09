@@ -184,53 +184,6 @@ func resourceAlibabacloudStackKmsKeyRead(d *schema.ResourceData, meta interface{
 func resourceAlibabacloudStackKmsKeyUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kmsService := KmsService{client}
-	d.Partial(true)
-
-	if d.HasChange("description") {
-		request := kms.CreateUpdateKeyDescriptionRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.KeyId = d.Id()
-		request.Description = d.Get("description").(string)
-		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
-			return kmsClient.UpdateKeyDescription(request)
-		})
-		bresponse, ok := raw.(*kms.UpdateKeyDescriptionResponse)
-		addDebug(request.GetActionName(), raw)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-	}
-
-	update := false
-	request := kms.CreateUpdateRotationPolicyRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.KeyId = d.Id()
-	if d.HasChange("automatic_rotation") {
-		update = true
-	}
-	request.EnableAutomaticRotation = requests.NewBoolean(convertAutomaticRotationRequest(d.Get("automatic_rotation").(string)))
-	if d.HasChange("rotation_interval") {
-		update = true
-		request.RotationInterval = d.Get("rotation_interval").(string)
-	}
-	if update {
-		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
-			return kmsClient.UpdateRotationPolicy(request)
-		})
-		bresponse, ok := raw.(*kms.UpdateRotationPolicyResponse)
-		addDebug(request.GetActionName(), raw)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-	}
 
 	if d.HasChanges("key_state", "is_enabled") {
 		object, err := kmsService.DescribeKmsKey(d.Id())
@@ -287,7 +240,57 @@ func resourceAlibabacloudStackKmsKeyUpdate(d *schema.ResourceData, meta interfac
 			}
 		}
 	}
-	d.Partial(false)
+	
+	if d.IsNewResource(){
+		return nil
+	}
+
+	if d.HasChange("description") {
+		request := kms.CreateUpdateKeyDescriptionRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.KeyId = d.Id()
+		request.Description = d.Get("description").(string)
+		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
+			return kmsClient.UpdateKeyDescription(request)
+		})
+		bresponse, ok := raw.(*kms.UpdateKeyDescriptionResponse)
+		addDebug(request.GetActionName(), raw)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+	}
+
+	update := false
+	request := kms.CreateUpdateRotationPolicyRequest()
+	client.InitRpcRequest(*request.RpcRequest)
+	request.KeyId = d.Id()
+	if d.HasChange("automatic_rotation") {
+		update = true
+	}
+	request.EnableAutomaticRotation = requests.NewBoolean(convertAutomaticRotationRequest(d.Get("automatic_rotation").(string)))
+	if d.HasChange("rotation_interval") {
+		update = true
+		request.RotationInterval = d.Get("rotation_interval").(string)
+	}
+	if update {
+		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
+			return kmsClient.UpdateRotationPolicy(request)
+		})
+		bresponse, ok := raw.(*kms.UpdateRotationPolicyResponse)
+		addDebug(request.GetActionName(), raw)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+	}
+
 	return nil
 }
 
