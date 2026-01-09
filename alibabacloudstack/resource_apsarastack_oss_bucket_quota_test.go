@@ -58,6 +58,11 @@ func testAccOssBucketQuotaConfig(name string) string {
 	return fmt.Sprintf(`
 resource "alibabacloudstack_oss_bucket" "default" {
   bucket = "%s"
+  lifecycle {
+      ignore_changes = [
+        storage_capacity
+      ]
+  }
 }
 `, name)
 }

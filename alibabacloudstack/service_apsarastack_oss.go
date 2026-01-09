@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -448,7 +447,6 @@ func (s *OssService) DeleteBucket(bucketName string) error {
 
 func (s *OssService) GetOssEndpointList() ([]interface{}, error) {
 	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
-	request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
 	request.QueryParams["AppAction"] = "GetOssEndpointList"
 	request.QueryParams["AppName"] = "one-console-app-oss"
 	request.QueryParams["Params"] = fmt.Sprintf("{\"params\":{\"region\":\"%s\"}}", s.client.RegionId)
