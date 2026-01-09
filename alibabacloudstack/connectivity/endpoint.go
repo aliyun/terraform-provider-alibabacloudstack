@@ -90,7 +90,7 @@ const (
 	DTSCode                   = ServiceCode("DTS")
 	SLSCode                   = ServiceCode("SLS")
 	RosCode                   = ServiceCode("ROS")
-	QuickbiCode               = ServiceCode("QUICKBI")
+	QuickbiCode               = ServiceCode("QUICKBI_PUBLIC")
 	DataworkspublicCode       = ServiceCode("DATAWORKS_PUBLIC")
 	OneRouterCode             = ServiceCode("ONEROUTER")
 	BastionHostCode           = ServiceCode("BASTIONHOSTPRIVATE")
@@ -349,8 +349,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"prometheus2-biz.pop.{{.domain}}",
 		"prometheus2-biz.pop.{{.region}}.{{.domain}}",
 	},
-	CDNCode:     PopEndpoint{"", ""},
-	QuickbiCode: PopEndpoint{"", ""},
+	CDNCode: PopEndpoint{"", ""},
+	QuickbiCode: PopEndpoint{
+		"quickbi-public.{{.domain}}",
+		"quickbi-public.{{.domain}}",
+	},
 	BssDataCode: PopEndpoint{"", ""},
 	BastionHostCode: PopEndpoint{
 		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
