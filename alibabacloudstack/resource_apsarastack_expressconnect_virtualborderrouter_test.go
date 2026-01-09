@@ -2,128 +2,11 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"log"
-	"strings"
 	"testing"
-	"time"
-
-	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
-
-func init() {
-	resource.AddTestSweepers("alibabacloudstack_express_connect_virtual_border_router", &resource.Sweeper{
-		Name: "alibabacloudstack_express_connect_virtual_border_router",
-		F:    testSweepExpressConnectVirtualBorderRouters,
-		Dependencies: []string{
-			"alibabacloudstack_cen_instance",
-		},
-	})
-}
-
-func testSweepExpressConnectVirtualBorderRouters(region string) error {
-	rawClient, err := sharedClientForRegion(region)
-	if err != nil {
-		return fmt.Errorf("error getting Alicloud client: %s", err)
-	}
-	client := rawClient.(*connectivity.AlibabacloudStackClient)
-
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
-
-	request := map[string]interface{}{
-		"RegionId":       client.RegionId,
-		"Product":        "Vpc",
-		"OrganizationId": client.Department,
-	}
-	request["PageSize"] = PageSizeLarge
-	request["PageNumber"] = 1
-	conn, err := client.NewVpcClient()
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	var response interface{}
-	for {
-		action := "DescribeVirtualBorderRouters"
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
-			if err != nil {
-				if errmsgs.NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		if err != nil {
-			log.Printf("[ERROR] %s got an error: %v", action, err)
-			break
-		}
-		resp, err := jsonpath.Get("$.VirtualBorderRouterSet.VirtualBorderRouterType", response)
-		if err != nil {
-			log.Printf("[ERROR] parsing %s response got an error: %s", action, err)
-			break
-		}
-		result, _ := resp.([]interface{})
-		for _, v := range result {
-			item := v.(map[string]interface{})
-			vbrName := fmt.Sprint(item["Name"])
-			vbrId := fmt.Sprint(item["VbrId"])
-			skip := true
-			for _, prefix := range prefixes {
-				if strings.HasPrefix(strings.ToLower(vbrName), strings.ToLower(prefix)) {
-					skip = false
-					break
-				}
-			}
-			if skip {
-				log.Printf("[INFO] Skipping VirtualBorderRouter: %s (%s)", vbrName, vbrId)
-				continue
-			}
-			action = "DeleteVirtualBorderRouter"
-			request := map[string]interface{}{
-				"VbrId":          vbrId,
-				"RegionId":       client.RegionId,
-				"Product":        "Vpc",
-				"OrganizationId": client.Department,
-			}
-			runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-			runtime.SetAutoretry(true)
-			wait := incrementalWait(3*time.Second, 3*time.Second)
-			err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-				_, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
-				if err != nil {
-					if errmsgs.NeedRetry(err) || errmsgs.IsExpectedErrors(err, []string{"DependencyViolation.BgpGroup"}) {
-						wait()
-						return resource.RetryableError(err)
-					}
-					return resource.NonRetryableError(err)
-				}
-				return nil
-			})
-			if err != nil {
-				log.Printf("[ERROR] %s got an error: %v", action, err)
-			}
-		}
-		if len(result) < PageSizeLarge {
-			break
-		}
-		request["PageNumber"] = request["PageNumber"].(int) + 1
-	}
-	return nil
-}
 
 func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 	//	checkoutSupportedRegions(t, true, connectivity.VbrSupportRegions)
@@ -136,11 +19,12 @@ func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1, 2999)
-	name := fmt.Sprintf("tf-testacc%sexpressconnectvirtualborderrouter%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc-ecvbr%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlicloudExpressConnectVirtualBorderRouterBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckPhysicalConnection(t)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -148,19 +32,18 @@ func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					//"physical_connection_id":     "${data.alibabacloudstack_express_connect_physical_connections.default.ids.0}",
-					"physical_connection_id":     getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"),
+					"physical_connection_id":     "${alibabacloudstack_expressconnect_physicalconnection.default.id}",
 					"vlan_id":                    fmt.Sprint(rand),
 					"local_gateway_ip":           "10.0.0.1",
 					"peer_gateway_ip":            "10.0.0.2",
 					"peering_subnet_mask":        "255.255.255.252",
-					"virtual_border_router_name": "tf-testAcc-PrT1AqAjKvGgLQpbygetjH6f",
-					"description":                "tf-testAcc-llZJhorzazsS81mf2PVyFEAA",
+					"virtual_border_router_name": name,
+					"description":                name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"virtual_border_router_name": "tf-testAcc-PrT1AqAjKvGgLQpbygetjH6f",
-						"description":                "tf-testAcc-llZJhorzazsS81mf2PVyFEAA",
+						"virtual_border_router_name": name,
+						"description":                name,
 						"physical_connection_id":     CHECKSET,
 						"vlan_id":                    fmt.Sprint(rand),
 						"local_gateway_ip":           "10.0.0.1",
@@ -176,31 +59,31 @@ func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"virtual_border_router_name": "tf-testAcc-1n8AGD0BcJcReSrQUAxTqaXC",
+					"virtual_border_router_name": name + "-update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"virtual_border_router_name": "tf-testAcc-1n8AGD0BcJcReSrQUAxTqaXC",
+						"virtual_border_router_name": name + "-update",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"circuit_code": "tf-testAcc-m6VI39qqUEn76tiS06q862Jk",
+					"circuit_code": name + "-update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"circuit_code": "tf-testAcc-m6VI39qqUEn76tiS06q862Jk",
+						"circuit_code": name + "-update",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description": "tf-testAcc-ZwDPyqNDkTOoXueyCaUAL6Kj",
+					"description": name + "-update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": "tf-testAcc-ZwDPyqNDkTOoXueyCaUAL6Kj",
+						"description": name + "-update",
 					}),
 				),
 			},
@@ -349,10 +232,10 @@ func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"virtual_border_router_name": "tf-testAcc-MImKNETo3qwDBwnHVW3UUB8Y",
+					"virtual_border_router_name": name + "-update1",
 					"status":                     "active",
-					"circuit_code":               "tf-testAcc-hM7XVPPmgiQkbPNgaQtqqGzX",
-					"description":                "tf-testAcc-aoMEQnZ9PgEgzHjEV69O21rp",
+					"circuit_code":               name + "-update1",
+					"description":                name + "-update1",
 					"detect_multiplier":          "10",
 					"enable_ipv6":                "false",
 					"min_rx_interval":            "300",
@@ -364,10 +247,10 @@ func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"virtual_border_router_name": "tf-testAcc-MImKNETo3qwDBwnHVW3UUB8Y",
+						"virtual_border_router_name": name + "-update1",
 						"status":                     "active",
-						"circuit_code":               "tf-testAcc-hM7XVPPmgiQkbPNgaQtqqGzX",
-						"description":                "tf-testAcc-aoMEQnZ9PgEgzHjEV69O21rp",
+						"circuit_code":               name + "-update1",
+						"description":                name + "-update1",
 						"detect_multiplier":          "10",
 						"enable_ipv6":                "false",
 						"min_rx_interval":            "300",
@@ -382,7 +265,8 @@ func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 			{
 				ResourceName:      resourceId,
 				ImportState:       true,
-				ImportStateVerify: true, ImportStateVerifyIgnore: []string{"vbr_owner_id", "bandwidth"},
+				ImportStateVerify: true,
+				//				ImportStateVerifyIgnore: []string{"vbr_owner_id", "bandwidth"},
 			},
 		},
 	})
@@ -400,5 +284,6 @@ func AlicloudExpressConnectVirtualBorderRouterBasicDependence0(name string) stri
 variable "name" {
   default = "%s"
 }
-`, name)
+%s
+`, name, ExpressconnectPhysicalConnectionsCommonTestCase)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
 	//	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -353,6 +354,32 @@ func testAccPreCheckWithCrEe(t *testing.T) {
 	instances := resp["Instances"].([]interface{})
 	if len(instances) == 0 {
 		t.Skipf("Skipping cr ee test case without default instances")
+	}
+}
+
+func testAccPreCheckPhysicalConnection(t *testing.T) {
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	rawClient, err := sharedClientForRegion(region)
+	if err != nil {
+		t.Skipf("Skipping cr ee test case with err: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	action := "DescribePhysicalConnections"
+	request := map[string]interface{}{
+	"PageSize" : 100,
+	"PageNumber" : 1,
+	}
+	response, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
+	if err != nil {
+		t.Skipf("Skipping test case for PhysicalConnection because an error: %s", err)
+	}
+	resp, err := jsonpath.Get("$.PhysicalConnectionSet.PhysicalConnectionType", response)
+	if err != nil {
+		t.Skipf("Skipping test case for PhysicalConnection because an error: %s", err)
+	}
+	result, _ := resp.([]interface{})
+	if len(result) == 0 {
+		t.Skipf("Skipping test case for PhysicalConnection because Lacks example instances.")
 	}
 }
 

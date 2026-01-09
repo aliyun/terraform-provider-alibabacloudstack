@@ -138,6 +138,10 @@ func TestAccAlicloudExpressConnectVirtualBorderRoutersDataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existExpressConnectVirtualBorderRoutersMapFunc,
 		fakeMapFunc:  fakeExpressConnectVirtualBorderRoutersMapFunc,
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckPhysicalConnection(t)
+		},
 	}
 	ExpressConnectVirtualBorderRoutersInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, statusConf, filterConf, allConf)
 }
@@ -148,18 +152,17 @@ variable "name" {
 	default = "%s"
 }
 
-data "alibabacloudstack_express_connect_physical_connections" "nameRegex" {
-}
+%s
 
 resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
   local_gateway_ip           = "10.0.0.1"
   peer_gateway_ip            = "10.0.0.2"
   peering_subnet_mask        = "255.255.255.252"
-  physical_connection_id     = data.alibabacloudstack_express_connect_physical_connections.nameRegex.connections.0.id
+  physical_connection_id     = alibabacloudstack_expressconnect_physicalconnection.default.id
   virtual_border_router_name = var.name
   vlan_id                    = %d
   min_rx_interval            = 1000
   min_tx_interval            = 1000
   detect_multiplier          = 10
-}`, name, getAccTestRandInt(1, 2999))
+}`, name, ExpressconnectPhysicalConnectionsCommonTestCase, getAccTestRandInt(1, 2999))
 }

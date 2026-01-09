@@ -1619,6 +1619,21 @@ locals {
 `
 }
 
+const ExpressconnectPhysicalConnectionsCommonTestCase = `
+data "alibabacloudstack_expressconnect_physical_connections" "anyone" {
+}
+
+resource "alibabacloudstack_expressconnect_physicalconnection" "default" {
+	physical_connection_name= "${var.name}"
+	bandwidth=                100
+	line_operator=            "CO"
+	type=                     "VPC"
+	peer_location=            "XX Street"
+	access_point_id=          data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.access_point_id
+	port_type=                data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.port_type
+	status = "Enabled"
+	}
+`
 const VrtCommonTestCase = `
 
 data "alibabacloudstack_express_connect_physical_connections" "nameRegex" {
