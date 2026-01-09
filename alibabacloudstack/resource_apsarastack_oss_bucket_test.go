@@ -90,7 +90,7 @@ func testSweepOSSBuckets(region string) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
+func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 	var v oss.GetBucketInfoResult
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
@@ -237,7 +237,7 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
+func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
 	var v oss.GetBucketInfoResult
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
@@ -297,7 +297,7 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackOssBucketVpc(t *testing.T) {
+func TestAccAlibabacloudStackOssBucket_Vpc(t *testing.T) {
 	var v oss.GetBucketInfoResult
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
