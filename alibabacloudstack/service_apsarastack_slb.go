@@ -181,25 +181,17 @@ func (s *SlbService) DescribeSlbListener(id string) (listener map[string]interfa
 	port, _ := strconv.Atoi(parts[2])
 	request.QueryParams["ListenerPort"] = string(requests.NewInteger(port))
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-			return slbClient.ProcessCommonRequest(request)
-		})
-
-		response, ok := raw.(*responses.CommonResponse)
+		bresponse, err := s.client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		log.Printf(" response of raw DescribeProjectMeta : %s", bresponse)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{"The specified resource does not exist"}) {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR))
 			} else if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy) {
 				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 			}
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
-		if err = json.Unmarshal(response.GetHttpContentBytes(), &listener); err != nil {
+		if err = json.Unmarshal(bresponse.GetHttpContentBytes(), &listener); err != nil {
 			return resource.NonRetryableError(errmsgs.WrapError(err))
 		}
 		if port, ok := listener["ListenerPort"]; ok && port.(float64) > 0 {
