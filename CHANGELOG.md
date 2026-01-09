@@ -1,3 +1,11 @@
+# 3.16.22
+
+## Fixes
+
+1. Fixed `alibabacloudstack_logtail_config` where `plugin`  with invalid 
+
+---
+
 # 3.16.21
 
 ## Changes
