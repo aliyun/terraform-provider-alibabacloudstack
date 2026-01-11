@@ -40,7 +40,7 @@ func testSweepOSSBuckets(region string) error {
 		"test-acc-alibabacloudstack-",
 	}
 
-	buckets ,err := ossService.ListOssBucket()
+	buckets, err := ossService.ListOssBucket()
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func testSweepOSSBuckets(region string) error {
 
 	for _, v := range buckets {
 		name := v.Name
-		
+
 		bucket, err := ossService.GetBucketClient(name)
 		if err != nil {
 			return fmt.Errorf("Error getting bucket (%s): %#v", name, err)
@@ -79,7 +79,7 @@ func testSweepOSSBuckets(region string) error {
 
 		log.Printf("[INFO] Deleting OSS bucket: %s", name)
 
-		err =ossService.DeleteBucket(name)
+		err = ossService.DeleteBucket(name)
 		if err != nil {
 			log.Printf("[ERROR] Failed to delete OSS bucket (%s): %s", name, err)
 		}
@@ -138,6 +138,27 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"logging": []map[string]interface{}{{
+						"target_bucket": "${var.name}",
+						"target_prefix": "oss-accesslog/",
+					}},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"logging": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+					}),
+				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -220,6 +241,17 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":   REMOVEKEY,
+						"tags.For": REMOVEKEY,
+					}),
+				),
+			},
 			// In version v3.16.2, OSS does not temporarily support the delete method for tags, so tags cannot be deleted completely
 			// {
 			// 	Config: testAccConfig(map[string]interface{}{
@@ -270,7 +302,7 @@ func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"bucket":      name,
+						"bucket": name,
 					}),
 				),
 			},
@@ -297,7 +329,7 @@ func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackOssBucket_Vpc(t *testing.T) {
+func TestUatAlibabacloudStackOssBucket_Vpc(t *testing.T) {
 	var v oss.GetBucketInfoResult
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
@@ -383,16 +415,21 @@ func testAccCheckOssBucketDestroy(s *terraform.State) error { // destroy functio
 
 func resourceOssBucketConfigDependence(name string) string {
 	return fmt.Sprintf(`
+
+variable "name" {
+	default = "%s"
+}
+	
 resource "alibabacloudstack_vpc" "vpc" {
-	name = "%s-v"
+	name = "${var.name}-v"
 	cidr_block = "192.168.0.0/24"
 }
 resource "alibabacloudstack_vpc" "vpc2" {
-	name = "%s-v2"
+	name = "${var.name}-v2"
 	cidr_block = "192.168.0.0/24"
 }
 %s
-`, name, name, KeyCommonTestCase)
+`, name, KeyCommonTestCase)
 }
 
 func resourceOssBucketDualDependence(name string) string {

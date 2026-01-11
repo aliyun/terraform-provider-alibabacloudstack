@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -12,7 +11,6 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -97,6 +95,7 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				Deprecated: "`Vpclist` is not available in the latest versions, and is scheduled for removal in version 3.21.0",
 			},
 			"bucket_sync": {
 				Type:     schema.TypeBool,
@@ -691,33 +690,6 @@ func checkVpcListChange(oldlist []interface{}, newlist []interface{}, d *schema.
 		}
 	}
 	return nil
-}
-
-func expirationHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	if v, ok := m["date"]; ok {
-		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
-	}
-	if v, ok := m["days"]; ok {
-		buf.WriteString(fmt.Sprintf("%d-", v.(int)))
-	}
-	return hashcode.String(buf.String())
-}
-
-func transitionsHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	if v, ok := m["created_before_date"]; ok {
-		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
-	}
-	if v, ok := m["storage_class"]; ok {
-		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
-	}
-	if v, ok := m["days"]; ok {
-		buf.WriteString(fmt.Sprintf("%d-", v.(int)))
-	}
-	return hashcode.String(buf.String())
 }
 
 func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) error {
