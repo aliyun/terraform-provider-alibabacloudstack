@@ -11,11 +11,12 @@ import (
 func dataSourceAlibabacloudStackRegionsByProduct() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackRegionsByProductRead,
+		DeprecationMessage: "This resource does not use the new version of apsarastack and scheduled for removal in version 3.21.0",
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 				ForceNew: true,
 				MinItems: 1,
@@ -23,10 +24,6 @@ func dataSourceAlibabacloudStackRegionsByProduct() *schema.Resource {
 			"product_name": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-			"organization": {
-				Type:     schema.TypeString,
-				Optional: true,
 			},
 			"output_file": {
 				Type:       schema.TypeString,
@@ -56,6 +53,15 @@ func dataSourceAlibabacloudStackRegionsByProduct() *schema.Resource {
 func dataSourceAlibabacloudStackRegionsByProductRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetRegionsByProduct", "/ascm/basic/cmdb/region/product")
+	content := map[string]string{
+		"identifier":   d.Get("product_name").(string),
+		"organization": client.Department,
+	}
+	jsonBytes, err := json.Marshal(content)
+	if err != nil {
+		panic(err)
+	}
+	request.Content = jsonBytes
 	response := RegionsByProduct{}
 
 	for {
@@ -79,9 +85,24 @@ func dataSourceAlibabacloudStackRegionsByProductRead(d *schema.ResourceData, met
 
 	}
 
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			if vv == nil {
+				continue
+			}
+			idsMap[vv.(string)] = vv.(string)
+		}
+	}
+
 	var ids []string
 	var s []map[string]interface{}
 	for _, rg := range response.Body.RegionList {
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[rg.RegionID]; !ok {
+				continue
+			}
+		}
 		mapping := map[string]interface{}{
 			"region_id":   rg.RegionID,
 			"region_type": rg.RegionType,
@@ -92,6 +113,10 @@ func dataSourceAlibabacloudStackRegionsByProductRead(d *schema.ResourceData, met
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("region_list", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
