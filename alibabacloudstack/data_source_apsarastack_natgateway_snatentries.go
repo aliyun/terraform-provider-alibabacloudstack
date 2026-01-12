@@ -126,9 +126,16 @@ func dataSourceAlibabacloudStackSnatEntriesRead(d *schema.ResourceData, meta int
 }
 
 func SnatEntriesDecriptionAttributes(d *schema.ResourceData, entries []vpc.SnatTableEntry, meta interface{}) error {
+	var sourceCidr string
+	if v, ok := d.GetOk("source_cidr"); ok {
+		sourceCidr = v.(string)
+	}
 	var ids []string
 	var s []map[string]interface{}
 	for _, entry := range entries {
+		if sourceCidr != "" && sourceCidr != entry.SourceCIDR {
+			continue
+		}
 		mapping := map[string]interface{}{
 			"id":          entry.SnatEntryId,
 			"snat_ip":     entry.SnatIp,
