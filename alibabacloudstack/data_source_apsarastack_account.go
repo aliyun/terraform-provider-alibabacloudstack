@@ -17,12 +17,17 @@ func dataSourceAlibabacloudStackAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"organization_id" : {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func dataSourceAlibabacloudStackAccountRead(d *schema.ResourceData, meta interface{}) error {
-	accountId, err := meta.(*connectivity.AlibabacloudStackClient).AccountId()
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	accountId, err := client.AccountId()
 
 	if err != nil {
 		return err
@@ -31,6 +36,7 @@ func dataSourceAlibabacloudStackAccountRead(d *schema.ResourceData, meta interfa
 	log.Printf("[DEBUG] alibabacloudstack_account - account ID found: %#v", accountId)
 
 	d.SetId(accountId)
+	d.Set("organization_id", client.Department)
 
 	return nil
 }

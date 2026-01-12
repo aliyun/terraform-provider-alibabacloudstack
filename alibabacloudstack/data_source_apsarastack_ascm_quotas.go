@@ -17,9 +17,7 @@ func dataSourceAlibabacloudStackQuotas() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeInt},
-				Computed: true,
 				ForceNew: true,
-				MinItems: 1,
 			},
 			"product_name": {
 				Type:     schema.TypeString,
@@ -185,7 +183,8 @@ func dataSourceAlibabacloudStackQuotasRead(d *schema.ResourceData, meta interfac
 		}
 	}
 
-	var ids []string
+	var idsString []string
+	var ids []int
 	var s []map[string]interface{}
 	mapping := map[string]interface{}{
 		"id":                          response.Data.ID,
@@ -214,11 +213,15 @@ func dataSourceAlibabacloudStackQuotasRead(d *schema.ResourceData, meta interfac
 		"total_disk_cloud_efficiency": response.Data.TotalDiskCloudEfficiency,
 	}
 
-	ids = append(ids, fmt.Sprint(response.Data.ID))
+	ids = append(ids, response.Data.ID)
+	idsString = append(idsString, fmt.Sprint(response.Data.ID))
 	s = append(s, mapping)
 
-	d.SetId(dataResourceIdHash(ids))
+	d.SetId(dataResourceIdHash(idsString))
 	if err := d.Set("quotas", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
