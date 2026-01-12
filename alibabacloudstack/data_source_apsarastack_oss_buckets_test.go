@@ -3,57 +3,81 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackOssBucketsDataSource_basic(t *testing.T) {
+func TestAccAlibabacloudStackOssBucketsDataSource(t *testing.T) {
+	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_oss_buckets.default"
+	name := fmt.Sprintf("tf-testacc-ossbucketsdatasource-basic%d", rand)
 
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: dataSourceOssBucketsConfigDependence_basic(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_oss_buckets.default"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_oss_buckets.default", "buckets.#", "1"),
-					//resource.TestCheckResourceAttr("data.alibabacloudstack_oss_buckets.default", "buckets.0.acl", "public-read"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_oss_buckets.fake", "buckets.#", "0"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_oss_buckets.fake", "buckets.0.name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_oss_buckets.fake", "buckets.0.acl"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_oss_buckets.fake", "buckets.0.extranet_endpoint"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_oss_buckets.fake", "buckets.0.intranet_endpoint"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_oss_buckets.fake", "buckets.0.location"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_oss_buckets.fake", "buckets.0.owner"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_oss_buckets.fake", "buckets.0.storage_class"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_oss_buckets.fake", "buckets.0.creation_date"),
-				),
-				//ExpectNonEmptyPlan: true,
-			},
-		},
-	})
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOssBucketsConfigDependence)
+
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}_fake",
+		}),
+	}
+
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_oss_bucket.demo.id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake-bucket-id-12345"},
+		}),
+	}
+
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_oss_bucket.demo.id}"},
+			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"fake-bucket-id-12345"},
+			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}_fake",
+		}),
+	}
+
+	var existOssBucketsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":      "1",
+			"names.#":    "1",
+			"buckets.#":  "1",
+			"buckets.0.name":                name,
+			// Other bucket attributes are computed but we don't know exact values
+			// so we only validate the fields that are guaranteed to be present and known
+		}
+	}
+
+	var fakeOssBucketsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":     "0",
+			"names.#":   "0",
+			"buckets.#": "0",
+		}
+	}
+
+	var ossBucketsCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existOssBucketsMapFunc,
+		fakeMapFunc:  fakeOssBucketsMapFunc,
+	}
+	ossBucketsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func dataSourceOssBucketsConfigDependence_basic() string {
+func dataSourceOssBucketsConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testacc-ossbucketsdatasource-basic%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_oss_bucket" "demo" {
-  bucket = "${var.name}"
+  bucket = var.name
   acl    = "public-read"
 }
 
-data "alibabacloudstack_oss_buckets" "default" {
-  name_regex = "${alibabacloudstack_oss_bucket.demo.bucket}"
-}
-
-data "alibabacloudstack_oss_buckets" "fake" {
-  name_regex = "${alibabacloudstack_oss_bucket.demo.bucket}_fake"
-}
-`, getAccTestRandInt(10000, 99999))
+`, name)
 }

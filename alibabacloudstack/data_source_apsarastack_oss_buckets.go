@@ -54,10 +54,6 @@ func dataSourceAlibabacloudStackOssBuckets() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"acl": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"extranet_endpoint": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -94,45 +90,42 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 	var requestInfo *oss.Client
 	var allBuckets []BucketProperties
 	nextMarker := ""
-	for {
-		var options []oss.Option
-		if nextMarker != "" {
-			options = append(options, oss.Marker(nextMarker))
-		}
+	var options []oss.Option
+	if nextMarker != "" {
+		options = append(options, oss.Marker(nextMarker))
+	}
 
-		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["OpenApiAction"] = "GetService"
-		request.QueryParams["ProductName"] = "oss"
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			if ossNotFoundError(err) {
-				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetBucketInfo", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	request.QueryParams["OpenApiAction"] = "GetService"
+	request.QueryParams["ProductName"] = "oss"
+	bresponse, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		addDebug("GetBucketInfo", bresponse, requestInfo, request)
+		if ossNotFoundError(err) {
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetBucketInfo", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+	}
+	addDebug("GetBucketInfo", bresponse, requestInfo, request)
 
-		buckets, err := getBucketListResponseBuckets(bresponse)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
+	buckets, err := getBucketListResponseBuckets(bresponse)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
 
-		for _, k := range buckets {
-			allBuckets = append(allBuckets, BucketProperties{
-				// 				XMLName:          xml.Name{},
-				Name:             k.Name,
-				Location:         k.Location,
-				StorageClass:     k.StorageClass,
-				CreationDate:     k.CreationDate,
-				Extranetendpoint: k.ExtranetEndpoint,
-				Intranetendpoint: k.IntranetEndpoint,
-			})
-		}
-		break
+	for _, k := range buckets {
+		allBuckets = append(allBuckets, BucketProperties{
+			// 				XMLName:          xml.Name{},
+			Name:             k.Name,
+			Location:         k.Location,
+			StorageClass:     k.StorageClass,
+			CreationDate:     k.CreationDate,
+			Extranetendpoint: k.ExtranetEndpoint,
+			Intranetendpoint: k.IntranetEndpoint,
+		})
 	}
 
 	var filteredBucketsTemp []BucketProperties
@@ -158,7 +151,18 @@ func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []BucketProper
 	var ids []string
 	var s []map[string]interface{}
 	var names []string
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			idsMap[Trim(vv.(string))] = Trim(vv.(string))
+		}
+	}
 	for _, bucket := range buckets {
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[bucket.Name]; !ok {
+				continue
+			}
+		}
 		mapping := map[string]interface{}{
 			"id":                bucket.Name,
 			"name":              bucket.Name,
@@ -178,6 +182,9 @@ func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []BucketProper
 		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
