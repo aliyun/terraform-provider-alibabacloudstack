@@ -11,7 +11,6 @@ func TestAccAlibabacloudStackTsdbZonesDataSource(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackTsdbZonesSourceConfig(rand, map[string]string{}),
-		fakeConfig:  "",
 	}
 
 	var existTsdbZonesMapFunc = func(rand int) map[string]string {
