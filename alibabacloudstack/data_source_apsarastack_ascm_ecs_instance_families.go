@@ -11,6 +11,7 @@ import (
 func dataSourceAlibabacloudStackEcsInstanceFamilies() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackEcsInstanceFamiliesRead,
+		DeprecationMessage: "The 'alibabacloudstack_ascm_ecs_instance_families' field has been deprecated and is scheduled for removal in version 3.21.0. use the 'alibabacloudstack_instance_type_families' instead.",
 		Schema: map[string]*schema.Schema{
 
 			"ids": {
@@ -20,10 +21,6 @@ func dataSourceAlibabacloudStackEcsInstanceFamilies() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 				MinItems: 1,
-			},
-			"status": {
-				Type:     schema.TypeString,
-				Required: true,
 			},
 			"output_file": {
 				Type:       schema.TypeString,
@@ -62,7 +59,7 @@ func dataSourceAlibabacloudStackEcsInstanceFamiliesRead(d *schema.ResourceData, 
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-  return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ecs_instance_families", "DescribeInstanceTypeFamilies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ecs_instance_families", "DescribeInstanceTypeFamilies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
@@ -70,9 +67,23 @@ func dataSourceAlibabacloudStackEcsInstanceFamiliesRead(d *schema.ResourceData, 
 		return errmsgs.WrapError(err)
 	}
 
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			if vv == nil {
+				continue
+			}
+			idsMap[vv.(string)] = vv.(string)
+		}
+	}
 	var ids []string
 	var s []map[string]interface{}
 	for _, rg := range response.Data.InstanceTypeFamilies {
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[rg.InstanceTypeFamilyID]; !ok {
+				continue
+			}
+		}
 		mapping := map[string]interface{}{
 			"instance_type_family_id": rg.InstanceTypeFamilyID,
 			"generation":              rg.Generation,
@@ -83,6 +94,9 @@ func dataSourceAlibabacloudStackEcsInstanceFamiliesRead(d *schema.ResourceData, 
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("families", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
