@@ -13,14 +13,6 @@ func dataSourceAlibabacloudStackSpecificFields() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackSpecificFieldsRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
-				Computed: true,
-				ForceNew: true,
-				MinItems: 1,
-			},
 			"group_filed": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -77,14 +69,13 @@ func dataSourceAlibabacloudStackSpecificFieldsRead(d *schema.ResourceData, meta 
 		}
 
 	}
-	var ids []string
 	var s []map[string]interface{}
 
-	d.SetId(dataResourceIdHash(ids))
+	d.SetId(dataResourceIdHash(response.Data))
 	if err := d.Set("specific_fields", response.Data); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
+	
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		if err := writeToFile(output.(string), s); err != nil {
 			return err
