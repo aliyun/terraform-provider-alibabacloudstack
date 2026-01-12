@@ -141,6 +141,15 @@ func dataSourceAlibabacloudStackOnsInstancesRead(d *schema.ResourceData, meta in
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
 		r = regexp.MustCompile(nameRegex.(string))
 	}
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			if vv == nil {
+				continue
+			}
+			idsMap[vv.(string)] = vv.(string)
+		}
+	}
 	var ids []string
 	var names []string
 	var s []map[string]interface{}
@@ -148,6 +157,11 @@ func dataSourceAlibabacloudStackOnsInstancesRead(d *schema.ResourceData, meta in
 	for _, item := range response.Data {
 		if r != nil && !r.MatchString(item.InstanceName) {
 			continue
+		}
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[fmt.Sprint(item.InstanceID)]; !ok {
+				continue
+			}
 		}
 		mapping := map[string]interface{}{
 			"id":                 item.InstanceID,

@@ -2,52 +2,86 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
 )
 
 func TestAccAlibabacloudStackOnsInstancesDataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: dataSourceOnsInstancesConfigDependence(),
-				Check: resource.ComposeTestCheckFunc(
+	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_ons_instances.default"
+	name := fmt.Sprintf("Tf-OnsInstanceDataSource%d", rand)
 
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ons_instances.default"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ons_instances.default", "instances.instance_name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ons_instances.default", "instances.topic_capacity"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ons_instances.default", "instances.tps_receive_max"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ons_instances.default", "instances.tps_send_max"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ons_instances.default", "instances.cluster"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ons_instances.default", "instances.instance_status"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_ons_instances.default", "ids.#"),
-				),
-			},
-		},
-	})
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOnsInstancesConfigDependence)
+
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^${alibabacloudstack_ons_instance.default.name}$",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "fake-nonexistent-name",
+		}),
+	}
+
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ons_instance.default.id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake-id-12345"},
+		}),
+	}
+
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_ons_instance.default.id}"},
+			"name_regex": "^" + name + "$",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"fake-id-12345"},
+			"name_regex": "another-fake-name",
+		}),
+	}
+
+	var existOnsInstancesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":       "1",
+			"instances.#": "1",
+			"instances.0.id":   CHECKSET,
+			"instances.0.instance_name": name,
+		}
+	}
+
+	var fakeOnsInstancesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":       "0",
+			"instances.#": "0",
+		}
+	}
+
+	var onsInstancesCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existOnsInstancesMapFunc,
+		fakeMapFunc:  fakeOnsInstancesMapFunc,
+	}
+	onsInstancesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func dataSourceOnsInstancesConfigDependence() string {
-	return fmt.Sprintf(`variable "name" {
-  default = "Tf-OnsInstanceDataSource%d"
+func dataSourceOnsInstancesConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
 }
+
+%s
 
 resource "alibabacloudstack_ons_instance" "default" {
-  name = "${var.name}"
-  remark = "default-remark"
-  tps_receive_max = 500
-  tps_send_max = 500
-  topic_capacity = 50
-  cluster = "cluster1"
-  independent_naming = "true"
+  name                = var.name
+  remark              = "default-remark"
+  tps_receive_max     = 500
+  tps_send_max        = 500
+  topic_capacity      = 50
+  cluster             = "cluster1"
+  independent_naming  = "true"
 }
-data "alibabacloudstack_ons_instances" "default" {
-  ids = [alibabacloudstack_ons_instance.default.id]
 
-}
-`, getAccTestRandInt(10000, 20000))
+`, name, DataZoneCommonTestCase)
 }
