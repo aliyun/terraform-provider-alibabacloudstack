@@ -562,3 +562,23 @@ func (s OssService) GetBucketClient(bucketName string) (*oss.Bucket, error) {
 	}
 
 }
+func (s *OssService) DescribeOssSingleTunnel(id string) (map[string]interface{}, error) {
+	request := map[string]interface{}{}
+
+	response, err := s.client.DoTeaRequest("GET", "oss", "2019-09-01", "ListVpcip", "", nil, request, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if vpcipList, ok := response["ListVpcipResult"].(map[string]interface{})["Vpcip"].([]interface{}); ok {
+		for _, item := range vpcipList {
+			vpcip := item.(map[string]interface{})
+
+			if vip, exists := vpcip["Vip"]; exists && vip == id {
+				return vpcip, nil
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("OSS Single Tunnel not found with id: %s", id))
+}
