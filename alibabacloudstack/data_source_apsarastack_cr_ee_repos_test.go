@@ -14,16 +14,29 @@ func TestAccAlibabacloudStackCREEReposDataSource(t *testing.T) {
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, fmt.Sprint(rand),
 		dataSourceCrEeReposConfigDependence)
 
-	nameRegexConf := dataSourceTestAccConfig{
+	namespaceConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"instance_id": "${data.alibabacloudstack_cr_ee_instances.default.ids.0}",
-			"namespace":   "${alibabacloudstack_cr_ee_namespace.default.name}",
-			"name_regex":  "${alibabacloudstack_cr_ee_repo.default.name}",
+			"instance_id":    "${data.alibabacloudstack_cr_ee_instances.default.ids.0}",
+			"namespace":      "${alibabacloudstack_cr_ee_namespace.default.name}",
+			"enable_details": "true",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"instance_id": "${data.alibabacloudstack_cr_ee_instances.default.ids.0}",
-			"namespace":   "${alibabacloudstack_cr_ee_namespace.default.name}",
-			"name_regex":  "${alibabacloudstack_cr_ee_repo.default.name}-fake",
+			"instance_id":    "${data.alibabacloudstack_cr_ee_instances.default.ids.0}",
+			"namespace":      "${alibabacloudstack_cr_ee_namespace.default.name}_fake",
+			"enable_details": "true",
+		}),
+	}
+
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id":    "${data.alibabacloudstack_cr_ee_instances.default.ids.0}",
+			"name_regex":     "${alibabacloudstack_cr_ee_repo.default.name}",
+			"enable_details": "true",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id":    "${data.alibabacloudstack_cr_ee_instances.default.ids.0}",
+			"name_regex":     "${alibabacloudstack_cr_ee_repo.default.name}-fake",
+			"enable_details": "true",
 		}),
 	}
 
@@ -87,7 +100,7 @@ func TestAccAlibabacloudStackCREEReposDataSource(t *testing.T) {
 			testAccPreCheckWithCrEe(t)
 		},
 	}
-	crEEReposCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
+	crEEReposCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, namespaceConf, idsConf, allConf)
 }
 
 func dataSourceCrEeReposConfigDependence(name string) string {
