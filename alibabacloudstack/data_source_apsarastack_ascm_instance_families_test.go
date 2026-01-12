@@ -11,11 +11,11 @@ func TestAccAlibabacloudStackAscmInstanceFamiliesDataSource(t *testing.T) {
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"${data.alibabacloudstack_ascm_instance_families.anyone.ids.0}"},
+			"ids":           []string{"${data.alibabacloudstack_ascm_instance_families.anyone.ids.0}"},
 			"resource_type": "DRDS",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"fake-id-12345"},
+			"ids":           []string{"fake-id-12345"},
 			"resource_type": "DRDS",
 		}),
 	}
@@ -34,9 +34,10 @@ func TestAccAlibabacloudStackAscmInstanceFamiliesDataSource(t *testing.T) {
 
 	var existAscmInstanceFamiliesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":        CHECKSET, // Should be set with at least one ID
-			"families.#":   CHECKSET, // Should contain at least one family
+			"ids.#":         CHECKSET, // Should be set with at least one ID
+			"families.#":    CHECKSET, // Should contain at least one family
 			"resource_type": "DRDS",
+			"families.0.id": CHECKSET,
 			// Individual family attributes are computed but we don't know exact values
 			// so we only verify the list structure exists
 		}

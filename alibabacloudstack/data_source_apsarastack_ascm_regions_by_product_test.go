@@ -33,6 +33,7 @@ func TestAccAlibabacloudStackAscmRegionsByProductDataSource(t *testing.T) {
 			"ids.#":            CHECKSET, // Should be set with at least one ID
 			"region_list.#":    CHECKSET, // Should contain at least one region
 			"product_name":     "ecs",
+			"region_list.0.region_id": CHECKSET,
 			// region_list attributes are computed but we don't know exact values
 			// so we only verify the list structure exists
 		}

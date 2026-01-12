@@ -23,6 +23,7 @@ func TestAccAlibabacloudStackAscmEcsInstanceFamiliesDataSource(t *testing.T) {
 		return map[string]string{
 			"ids.#":      CHECKSET, // Should be set with at least one ID
 			"families.#": CHECKSET, // Should contain at least one family
+			"families.0.instance_type_family_id": CHECKSET,
 			// Individual family attributes are computed but we don't know exact values
 			// so we only verify the list structure exists
 		}

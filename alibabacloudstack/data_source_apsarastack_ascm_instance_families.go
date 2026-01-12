@@ -123,7 +123,7 @@ func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, met
 	var ids []string
 	var s []map[string]interface{}
 	for _, rg := range response.Data {
-		if r != nil && !r.MatchString(rg.SeriesName) {
+		if r != nil && !r.MatchString(rg.SeriesNameLabel) {
 			continue
 		}
 		if len(idsMap) > 0 {
