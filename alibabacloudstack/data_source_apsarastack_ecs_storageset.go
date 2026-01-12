@@ -2,9 +2,8 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"strconv"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
@@ -16,11 +15,6 @@ func dataSourceAlibabacloudStackEcsEbsStorageSets() *schema.Resource {
 		Read: dataSourceAlibabacloudStackEcsEbsStorageSetsRead,
 		Schema: map[string]*schema.Schema{
 			"storage_set_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"maxpartition_number": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -68,6 +62,10 @@ func dataSourceAlibabacloudStackEcsEbsStorageSets() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"zone_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -81,41 +79,85 @@ func dataSourceAlibabacloudStackEcsEbsStorageSetsRead(d *schema.ResourceData, me
 	action := "DescribeStorageSets"
 
 	request := client.NewCommonRequest("GET", "Ecs", "2014-05-26", action, "")
-	request.QueryParams["PageNumber"] = "1"
-	request.QueryParams["PageSize"] = "20"
-
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	bresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			idsMap[Trim(vv.(string))] = Trim(vv.(string))
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &addDomains)
-	if err != nil {
-		return errmsgs.WrapError(err)
+	var storageSetName string
+	if v, ok := d.GetOk("storage_set_name"); ok {
+		storageSetName = v.(string)
 	}
-
+	var storageSetId string
+	if v, ok := d.GetOk("storage_set_id"); ok {
+		storageSetId = v.(string)
+	}
+	var zoneId string
+	if v, ok := d.GetOk("zone_id"); ok {
+		zoneId = v.(string)
+	}
+	pageNumber := 1
 	ids := make([]string, 0)
 	names := make([]interface{}, 0)
 	s := make([]map[string]interface{}, 0)
-	for _, object := range addDomains.StorageSets.StorageSet {
-		mapping := map[string]interface{}{
-			"storage_set_id":               object.StorageSetId,
-			"storage_set_partition_number": object.StorageSetPartitionNumber,
-			"storage_set_name":             object.StorageSetName,
+	for {
+		request.QueryParams["PageNumber"] = strconv.Itoa(pageNumber)
+		request.QueryParams["PageSize"] = "20"
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		ids = append(ids, object.StorageSetId)
-		names = append(names, object.StorageSetName)
-		s = append(s, mapping)
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &addDomains)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		if len(addDomains.StorageSets.StorageSet) == 0 {
+			break
+		}
+
+		for _, object := range addDomains.StorageSets.StorageSet {
+			if len(idsMap) > 0 {
+				if _, ok := idsMap[object.StorageSetId]; !ok {
+					continue
+				}
+			}
+			if storageSetName != "" && storageSetName != object.StorageSetName {
+				continue
+			}
+			if storageSetId != "" && storageSetId != object.StorageSetId {
+				continue
+			}
+			if zoneId != "" && zoneId != object.ZoneId {
+				continue
+			}
+			mapping := map[string]interface{}{
+				"storage_set_id":               object.StorageSetId,
+				"storage_set_partition_number": object.StorageSetPartitionNumber,
+				"storage_set_name":             object.StorageSetName,
+				"zone_id": object.ZoneId,
+			}
+			ids = append(ids, object.StorageSetId)
+			names = append(names, object.StorageSetName)
+			s = append(s, mapping)
+		}
+		pageNumber += 1
 	}
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("storages", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("ids", ids); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("names", names); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
