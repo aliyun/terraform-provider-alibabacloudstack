@@ -13,6 +13,7 @@ import (
 func dataSourceAlibabacloudStackInstanceFamilies() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackInstanceFamiliesRead,
+		DeprecationMessage: "The 'alibabacloudstack_ascm_instance_families' field has been deprecated and is scheduled for removal in version 3.21.0. use the 'alibabacloudstack_drds_instance_series' instead.",
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeList,
@@ -30,10 +31,6 @@ func dataSourceAlibabacloudStackInstanceFamilies() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ValidateFunc: validation.StringInSlice([]string{"DRDS"}, false),
-			},
-			"status": {
-				Type:     schema.TypeString,
-				Optional: true,
 			},
 			"output_file": {
 				Type:       schema.TypeString,
@@ -114,11 +111,25 @@ func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, met
 	if rt, ok := d.GetOk("name_regex"); ok && rt.(string) != "" {
 		r = regexp.MustCompile(rt.(string))
 	}
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			if vv == nil {
+				continue
+			}
+			idsMap[vv.(string)] = vv.(string)
+		}
+	}
 	var ids []string
 	var s []map[string]interface{}
 	for _, rg := range response.Data {
 		if r != nil && !r.MatchString(rg.SeriesName) {
 			continue
+		}
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[rg.SeriesID]; !ok {
+				continue
+			}
 		}
 		mapping := map[string]interface{}{
 			"id":                rg.SeriesID,
@@ -135,6 +146,10 @@ func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, met
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("families", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
