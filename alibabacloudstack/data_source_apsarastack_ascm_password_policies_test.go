@@ -1,40 +1,50 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
 )
 
-func TestAccAlibabacloudStackAscm_PasswordPolicies_DataSource(t *testing.T) { //not completed
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: dataSourceAlibabacloudStackAscm_PasswordPolicies,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ascm_password_policies.default"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_password_policies.default", "policies.hard_expiry"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_password_policies.default", "policies.require_numbers"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_password_policies.default", "policies.require_numbers"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_password_policies.default", "policies.require_symbols"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_password_policies.default", "policies.require_lowercase_characters"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_password_policies.default", "policies.require_uppercase_characters"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_password_policies.default", "policies.max_login_attempts"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_password_policies.default", "policies.max_password_age"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_password_policies.default", "policies.minimum_password_length"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_password_policies.default", "policies.password_reuse_prevention"),
-				),
-			},
-		},
-	})
+func TestAccAlibabacloudStackAscmPasswordPoliciesDataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_ascm_password_policies.default"
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", dataSourceAscmPasswordPoliciesConfigDependence)
+
+	// Test basic configuration (no filters)
+	basicConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{}),
+		// No fake config since this data source returns system password policies
+		// and doesn't support filtering that results in empty lists
+	}
+
+	var existAscmPasswordPoliciesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":      CHECKSET, // Should be set with at least one ID
+			"policies.#": CHECKSET, // Should contain at least one policy
+			"policies.0.require_numbers": CHECKSET, // Should contain at least one policy
+			// Individual policy attributes are computed but we don't know exact values
+			// so we only verify the list structure exists
+		}
+	}
+
+	// Since this data source queries system-wide password policies and doesn't support
+	// filtering that results in empty lists (it always returns the current policy),
+	// we provide a minimal fake function for framework compatibility
+	var fakeAscmPasswordPoliciesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":     "0",
+			"policies.#": "0",
+		}
+	}
+
+	var ascmPasswordPoliciesCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existAscmPasswordPoliciesMapFunc,
+		fakeMapFunc:  fakeAscmPasswordPoliciesMapFunc,
+	}
+	ascmPasswordPoliciesCheckInfo.dataSourceTestCheck(t, 0, basicConf)
 }
 
-const dataSourceAlibabacloudStackAscm_PasswordPolicies = `
-
-data "alibabacloudstack_ascm_password_policies" "default" {
-
-}
+func dataSourceAscmPasswordPoliciesConfigDependence(name string) string {
+	return `
 `
+}

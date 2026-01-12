@@ -19,50 +19,6 @@ func dataSourceAlibabacloudStackAscmPasswordPolicies() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeInt},
 				Computed: true,
 			},
-			"hard_expiry": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
-			"require_numbers": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
-			"require_symbols": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
-			"require_lowercase_characters": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
-			"require_uppercase_characters": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
-			"max_login_attempts": {
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
-			"max_password_age": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-			},
-			"minimum_password_length": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-			},
-			"password_reuse_prevention": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -141,7 +97,8 @@ func dataSourceAlibabacloudStackAscmPasswordPoliciesRead(d *schema.ResourceData,
 			break
 		}
 	}
-	var ids []string
+	var idsString []string
+	var ids []int
 	var s []map[string]interface{}
 	mapping := map[string]interface{}{
 		"hard_expiry":                  response.Data.HardExpiry,
@@ -155,11 +112,15 @@ func dataSourceAlibabacloudStackAscmPasswordPoliciesRead(d *schema.ResourceData,
 		"password_reuse_prevention":    response.Data.PasswordReusePrevention,
 	}
 	s = append(s, mapping)
-	ids = append(ids, fmt.Sprint(response.Data.ID))
+	idsString = append(idsString, fmt.Sprint(response.Data.ID))
+	ids = append(ids, response.Data.ID)
 
-	d.SetId(dataResourceIdHash(ids))
+	d.SetId(dataResourceIdHash(idsString))
 
 	if err := d.Set("policies", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
