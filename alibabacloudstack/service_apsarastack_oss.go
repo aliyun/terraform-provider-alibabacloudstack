@@ -563,21 +563,37 @@ func (s OssService) GetBucketClient(bucketName string) (*oss.Bucket, error) {
 
 }
 func (s *OssService) DescribeOssSingleTunnel(id string) (map[string]interface{}, error) {
-	request := map[string]interface{}{}
-
-	response, err := s.client.DoTeaRequest("GET", "oss", "2019-09-01", "ListVpcip", "", nil, request, nil)
+	parts := strings.Split(id, ":")
+	// request := map[string]interface{}{}
+	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	request.QueryParams["OpenApiAction"] = "ListVpcip"
+	request.QueryParams["ProductName"] = "oss"
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("ListVpcip", bresponse, request, request.QueryParams)
 	if err != nil {
 		return nil, err
 	}
-
-	if vpcipList, ok := response["ListVpcipResult"].(map[string]interface{})["Vpcip"].([]interface{}); ok {
-		for _, item := range vpcipList {
-			vpcip := item.(map[string]interface{})
-
-			if vip, exists := vpcip["Vip"]; exists && vip == id {
-				return vpcip, nil
-			}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, err
+	}
+	vpcipList, err := jsonpath.Get("$.Data.ListVpcipResult.Vpcip", response)
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range vpcipList.([]interface{}) {
+		data := item.(map[string]interface{})
+		if c, exists := data["Cluster"]; exists && c.(string) != parts[0] {
+			continue
 		}
+		if v, exists := data["VpcId"]; exists && v.(string) != parts[1] {
+			continue
+		}
+		if v, exists := data["Vip"]; exists && v.(string) != parts[2] {
+			continue
+		}
+		return data, nil
 	}
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("OSS Single Tunnel not found with id: %s", id))

@@ -489,7 +489,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_oos_executions":                                   dataSourceAlibabacloudStackOosExecutions(),
 		"alibabacloudstack_oos_templates":                                    dataSourceAlibabacloudStackOosTemplates(),
 		"alibabacloudstack_express_connect_physical_connections":             dataSourceAlibabacloudStackExpressConnectPhysicalConnections(),
-		"alibabacloudstack_expressconnect_physical_connections":               dataSourceAlibabacloudStackExpressConnectPhysicalConnections(),
+		"alibabacloudstack_expressconnect_physical_connections":              dataSourceAlibabacloudStackExpressConnectPhysicalConnections(),
 		"alibabacloudstack_express_connect_access_points":                    dataSourceAlibabacloudStackExpressConnectAccessPoints(),
 		"alibabacloudstack_expressconnect_accesspoints":                      dataSourceAlibabacloudStackExpressConnectAccessPoints(),
 		"alibabacloudstack_expressconnect_vbr_pconn_associations":            dataSourceAlibabacloudStackExpressconnectVbrPconnAssociations(),
@@ -611,6 +611,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cr_ee_attestor_lifecycle_rules":                   dataSourceAlibabacloudStackCrEEAttestorLifecycleRules(),
 		"alibabacloudstack_cloudfw_address_books":                            dataSourceAlibabacloudStackCloudfwAddressBooks(),
 		"alibabacloudstack_cloudfw_vpc_control_policies":                     dataSourceAlibabacloudStackCloudfwVpcControlPolicies(),
+		"alibabacloudstack_oss_single_tunnels":                               dataSourceAlibabacloudStackOssSingleTunnels(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
@@ -1070,6 +1071,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cr_ee_attestor_lifecycle_rule":                   resourceAlibabacloudStackCrEEArtifactLifecycleRule(),
 		"alibabacloudstack_cloudfw_address_book":                            resourceAlibabacloudStackCloudfwAddressBook(),
 		"alibabacloudstack_cloudfw_vpc_control_policy":                      resourceAlibabacloudStackCloudfwVpcControlPolicy(),
+		"alibabacloudstack_oss_single_tunnel":                               resourceAlibabacloudStackOssSingleTunnel(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
