@@ -109,11 +109,26 @@ func dataSourceAlibabacloudStackAscmRamPoliciesRead(d *schema.ResourceData, meta
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
 		r = regexp.MustCompile(nameRegex.(string))
 	}
-	var ids []string
+	idsMap := make(map[int]int)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			if vv == nil {
+				continue
+			}
+			idsMap[vv.(int)] = vv.(int)
+		}
+	}
+	var ids []int
+	var idsString []string
 	var s []map[string]interface{}
 	for _, rp := range response.Data {
 		if r != nil && !r.MatchString(rp.PolicyName) {
 			continue
+		}
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[rp.ID]; !ok {
+				continue
+			}
 		}
 		mapping := map[string]interface{}{
 			"id":              rp.ID,
@@ -124,11 +139,16 @@ func dataSourceAlibabacloudStackAscmRamPoliciesRead(d *schema.ResourceData, meta
 			"ctime":           time.Unix(rp.Ctime/1000, 0).Format("2006-01-02 03:04:05"),
 			"policy_document": rp.PolicyDocument,
 		}
-		ids = append(ids, string(rune(rp.ID)))
+		ids = append(ids, rp.ID)
+		idsString = append(idsString, fmt.Sprintf("%d", rp.ID))
 		s = append(s, mapping)
 	}
-	d.SetId(dataResourceIdHash(ids))
+	d.SetId(dataResourceIdHash(idsString))
 	if err := d.Set("policies", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 

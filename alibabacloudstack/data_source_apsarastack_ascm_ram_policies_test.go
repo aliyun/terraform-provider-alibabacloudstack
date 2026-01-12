@@ -3,44 +3,89 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAscmRamPoliciesDataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: datasourcealibabacloudstackascmRamPolicies(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ascm_ram_policies.default"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_policies.default", "policies.id"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_policies.default", "policies.name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_policies.default", "policies.description"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_policies.default", "policies.ctime"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_policies.default", "policies.policy_document"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_policies.default", "policies.region"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_policies.default", "policies.cuser_id"),
-				),
-			},
-		},
-	})
+	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_ascm_ram_policies.default"
+	name := fmt.Sprintf("TestingRamPolicy%d", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceAscmRamPoliciesConfigDependence)
+
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_ascm_ram_policy.default.name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "fake-nonexistent-policy",
+		}),
+	}
+
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ascm_ram_policy.default.ram_id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"-1"}, // fake ID that doesn't exist
+		}),
+	}
+
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_ascm_ram_policy.default.ram_id}"},
+			"name_regex": "${alibabacloudstack_ascm_ram_policy.default.name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"999999999"},
+			"name_regex": "another-fake-policy",
+		}),
+	}
+
+	var existAscmRamPoliciesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":       "1",
+			"policies.#":  "1",
+			"policies.0.name": name,
+			// Note: The original test expected these attributes to be unset,
+			// but according to the schema they should be computed.
+			// However, if the actual API doesn't return them in list mode,
+			// they will be empty. We'll verify what's actually returned.
+			// For now, we only validate the fields that are guaranteed to be present.
+		}
+	}
+
+	var fakeAscmRamPoliciesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":      "0",
+			"policies.#": "0",
+		}
+	}
+
+	var ascmRamPoliciesCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existAscmRamPoliciesMapFunc,
+		fakeMapFunc:  fakeAscmRamPoliciesMapFunc,
+	}
+	ascmRamPoliciesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func datasourcealibabacloudstackascmRamPolicies() string {
+func dataSourceAscmRamPoliciesConfigDependence(name string) string {
 	return fmt.Sprintf(`
-resource "alibabacloudstack_ascm_ram_policy" "default" {
-  name = "TestingRamPolicy%d"
-  description = "Testing Policy"
-  policy_document = "{\"Statement\":[{\"Action\":\"ecs:*\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"1\"}"
+variable "name" {
+  default = "%s"
 }
 
-data "alibabacloudstack_ascm_ram_policies" "default" {
-  name_regex = alibabacloudstack_ascm_ram_policy.default.name
+resource "alibabacloudstack_ascm_ram_policy" "default" {
+  name = var.name
+  description = "Testing Policy"
+  policy_document = jsonencode({
+    "Statement": [{
+      "Action": "ecs:*",
+      "Effect": "Allow",
+      "Resource": "*"
+    }],
+    "Version": "1"
+  })
 }
-`, getAccTestRandInt(10000, 20000))
+`, name)
 }
