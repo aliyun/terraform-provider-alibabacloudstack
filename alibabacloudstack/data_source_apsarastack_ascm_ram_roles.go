@@ -18,6 +18,14 @@ func dataSourceAlibabacloudStackAscmRoles() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
+				Deprecated: "In future versions, searching by `id` is not supported, Please use `ids` instead. and is scheduled for removal in version 3.21.0",
+			},
+			"ids": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+				Optional: true,
+				ForceNew: true,
 			},
 			"name_regex": {
 				Type:     schema.TypeString,
@@ -135,6 +143,15 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
 		r = regexp.MustCompile(nameRegex.(string))
 	}
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			if vv == nil {
+				continue
+			}
+			idsMap[vv.(string)] = vv.(string)
+		}
+	}
 	var ids []string
 	var s []map[string]interface{}
 
@@ -144,6 +161,11 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 		}
 		if id != 0 && rg.ID != id {
 			continue
+		}
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[fmt.Sprint(rg.ID)]; !ok {
+				continue
+			}
 		}
 		if roleType != "" && rg.RoleType != roleType {
 			continue
@@ -169,6 +191,10 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 	}
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("roles", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 

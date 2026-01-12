@@ -3,45 +3,91 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAscmRamRoles_DataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: dataSourceAlibabacloudStackAscm_Roles(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ascm_roles.default"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.#", "1"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.id"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.role_level"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.role_type"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_roles.default", "roles.user_count"),
-				),
-			},
-		},
-	})
+func TestAccAlibabacloudStackAscmRamRolesDataSource(t *testing.T) {
+	rand := getAccTestRandInt(1000000, 9999999)
+	resourceId := "data.alibabacloudstack_ascm_roles.default"
+	name := fmt.Sprintf("tftestrole%d", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceAscmRamRolesConfigDependence)
+
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_ascm_ram_role.default.role_name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "fake-nonexistent-role",
+		}),
+	}
+
+	idConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"id": "${alibabacloudstack_ascm_ram_role.default.role_id}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"id": "-1",
+		}),
+	}	
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ascm_ram_role.default.role_id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake-id-12345"},
+		}),
+	}
+
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_ascm_ram_role.default.role_id}"},
+			"name_regex": "${alibabacloudstack_ascm_ram_role.default.role_name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"fake-id-12345"},
+			"name_regex": "another-fake-role",
+		}),
+	}
+
+	var existAscmRamRolesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":       "1",
+			"roles.#":     "1",
+			"roles.0.id":  CHECKSET,
+			"roles.0.name": name,
+			// Note: The original test expected these attributes to be unset,
+			// but according to the schema they should be computed.
+			// However, if the actual API doesn't return them, they will be empty.
+			// We'll verify what's actually returned by the data source.
+		}
+	}
+
+	var fakeAscmRamRolesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"roles.#": "0",
+		}
+	}
+
+	var ascmRamRolesCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existAscmRamRolesMapFunc,
+		fakeMapFunc:  fakeAscmRamRolesMapFunc,
+	}
+	ascmRamRolesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idConf, idsConf, allConf)
 }
 
-func dataSourceAlibabacloudStackAscm_Roles() string {
+func dataSourceAscmRamRolesConfigDependence(name string) string {
 	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
+}
+
 resource "alibabacloudstack_ascm_ram_role" "default" {
-  role_name = "tftestrole%d"
+  role_name = var.name
   description = "TestingRam"
   organization_visibility = "global"
   role_range = "roleRange.userGroup"
 }
-
-data "alibabacloudstack_ascm_roles" "default" {
-  name_regex = alibabacloudstack_ascm_ram_role.default.role_name
-}
-
-`, getAccTestRandInt(1000000, 9999999))
+`, name)
 }
