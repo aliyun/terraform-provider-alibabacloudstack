@@ -153,6 +153,18 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"logging": []map[string]interface{}{{
+						"target_bucket": "${var.name}",
+						"target_prefix": "oss-accesslog-update/",
+					}},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"logging": REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
