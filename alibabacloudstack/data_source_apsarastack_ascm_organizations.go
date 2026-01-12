@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -79,15 +80,15 @@ func dataSourceAlibabacloudStackAscmOrganizations() *schema.Resource {
 func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	var parentId string
+	var parentId int
 	if v, ok := d.GetOk("parent_id"); ok {
-		parentId = fmt.Sprint(v.(int))
+		parentId = v.(int)
 	} else {
-		parentId = client.Department
+		parentId, _ = strconv.Atoi(client.Department)
 	}
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetOrganizationList", "/ascm/auth/organization/queryList")
-	request.QueryParams["id"] = parentId
+	request.QueryParams["id"] = fmt.Sprintf("%d", parentId)
 
 	response := OrganizationListResponse{}
 
@@ -114,12 +115,28 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
 		r = regexp.MustCompile(nameRegex.(string))
 	}
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			if vv == nil {
+				continue
+			}
+			idsMap[vv.(string)] = vv.(string)
+		}
+	}
 
-	//parent_id
 	var ids []string
 	var s []map[string]interface{}
 	for _, rg := range response.Data {
 		if r != nil && !r.MatchString(rg.Name) {
+			continue
+		}
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[fmt.Sprint(rg.ID)]; !ok {
+				continue
+			}
+		}
+		if parentId != 0 && parentId != rg.ParentID {
 			continue
 		}
 		mapping := map[string]interface{}{
@@ -139,14 +156,14 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 	if err := d.Set("organizations", s); err != nil {
 		return errmsgs.WrapError(err)
 	}
+	if err := d.Set("ids", ids); err != nil {
+		return errmsgs.WrapError(err)
+	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		if err := writeToFile(output.(string), s); err != nil {
 			return err
 		}
-	}
-	if s == nil {
-		d.SetId(parentId)
 	}
 	return nil
 }
