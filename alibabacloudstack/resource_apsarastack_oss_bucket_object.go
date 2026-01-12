@@ -75,6 +75,7 @@ func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
 			"content_md5": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"expires": {
@@ -86,7 +87,6 @@ func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{string(ServerSideEncryptionKMS), string(ServerSideEncryptionAes256)}, false),
-				Default:      ServerSideEncryptionAes256,
 			},
 
 			"kms_key_id": {
@@ -95,6 +95,7 @@ func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return ServerSideEncryptionKMS != d.Get("server_side_encryption").(string)
 				},
+				Computed: true,
 			},
 
 			"version_id": {
@@ -149,10 +150,11 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 
 	if v, ok := d.GetOk("server_side_encryption"); ok {
 		options = append(options, oss.ServerSideEncryption(v.(string)))
-	}
-
-	if v, ok := d.GetOk("kms_key_id"); ok {
-		options = append(options, oss.ServerSideEncryptionKeyID(v.(string)))
+		if v.(string) == ServerSideEncryptionKMS {
+			if v, ok := d.GetOk("kms_key_id"); ok {
+				options = append(options, oss.ServerSideEncryptionKeyID(v.(string)))
+			}
+		}
 	}
 
 	if err != nil {
@@ -218,8 +220,12 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 	d.Set("bucket", bucketName)
 	d.Set("key", key)
 	d.Set("content_type", object.Get("Content-Type"))
+	d.Set("content_md5", object.Get("Content-MD5"))
 	//d.Set("cache_control", object.Get("Cache-Control"))
 	d.Set("server_side_encryption", object.Get("X-Oss-Server-Side-Encryption"))
+	if object.Get("X-Oss-Server-Side-Encryption") == ServerSideEncryptionKMS{
+		d.Set("kms_key_id", object.Get("x-oss-server-side-encryption-key-id"))
+	}
 	d.Set("content_disposition", object.Get("Content-Disposition"))
 	d.Set("content_encoding", object.Get("Content-Encoding"))
 	d.Set("expires", object.Get("Expires"))
@@ -272,9 +278,9 @@ func buildObjectHeaderOptions(d *schema.ResourceData) (options []oss.Option, err
 		options = append(options, oss.ContentEncoding(v.(string)))
 	}
 
-	if v, ok := d.GetOk("content_md5"); ok {
-		options = append(options, oss.ContentMD5(v.(string)))
-	}
+		if v, ok := d.GetOk("content_md5"); ok {
+			options = append(options, oss.ContentMD5(v.(string)))
+		}
 
 	if v, ok := d.GetOk("expires"); ok {
 		expires := v.(string)
@@ -285,7 +291,7 @@ func buildObjectHeaderOptions(d *schema.ResourceData) (options []oss.Option, err
 		options = append(options, oss.Expires(expiresTime))
 	}
 
-	if options == nil || len(options) == 0 {
+	if len(options) == 0 {
 		log.Printf("[WARN] Object header options is nil.")
 	}
 	return options, nil

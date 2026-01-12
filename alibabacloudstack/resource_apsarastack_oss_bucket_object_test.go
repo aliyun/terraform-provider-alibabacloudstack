@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 	ra := resourceAttrInit(resourceId, ossBucketObjectBasicMap)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-object-%d", rand)
+	name := fmt.Sprintf("tf-testacc-bucket-object-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketObjectConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -54,6 +54,7 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 					"source":       strings.Replace(tmpFile.Name(), "\\", "\\\\", -1),
 					"content_type": "binary/octet-stream",
 					"acl":          "public-read-write",
+					"content_md5":  "ewBv9NcPaMxlBhrPL4Aubw==",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAlicloudOssBucketObjectExists(
@@ -71,6 +72,28 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 				// source is a local attribute, cannot be loaded from remote
 				// acl requires special permissions, currently cannot be adjusted during testing
 				ImportStateVerifyIgnore: []string{"source", "acl"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"server_side_encryption": "AES256",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"server_side_encryption": "AES256",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"server_side_encryption": "KMS",
+					"kms_key_id":             "${alibabacloudstack_kms_key.key.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"server_side_encryption": "KMS",
+						"kms_key_id":             CHECKSET,
+					}),
+				),
 			},
 			/*
 				{
@@ -147,7 +170,8 @@ resource "alibabacloudstack_oss_bucket" "default" {
 data "alibabacloudstack_kms_keys" "enabled" {
 	status = "%s"
 }
-`, name, string(EnabledStatus))
+%s
+`, name, string(EnabledStatus), KeyCommonTestCase)
 }
 
 var ossBucketObjectBasicMap = map[string]string{
