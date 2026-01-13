@@ -24,6 +24,9 @@ func TestAccAlibabacloudStackKVStoreRedisBackupPolicy_classic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-kvback%d", rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccKVStoreBackupPolicyDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -33,12 +36,20 @@ func TestAccAlibabacloudStackKVStoreRedisBackupPolicy_classic(t *testing.T) {
 		IDRefreshName: resourceId,
 
 		Providers:    testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 		CheckDestroy: testAccCheckKVStoreBackupPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKVStoreBackupPolicy_classic(rand, string(KVStoreRedis), string(KVStore4Dot0)),
+				Config: testAccConfig(map[string]interface{}{
+					"instance_id":   "${local.kv_instance_id}",
+					"backup_period": []string{"Tuesday", "Wednesday"},
+					"backup_time":   "10:00Z-11:00Z",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"backup_period.#": "2",
+						"backup_time":     "10:00Z-11:00Z",
+					}),
 				),
 			},
 			{
@@ -47,7 +58,9 @@ func TestAccAlibabacloudStackKVStoreRedisBackupPolicy_classic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccKVStoreBackupPolicy_classicUpdatePeriod(rand, string(KVStoreRedis), string(KVStore4Dot0)),
+				Config: testAccConfig(map[string]interface{}{
+					"backup_period": []string{"Tuesday", "Wednesday", "Sunday"},
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"backup_period.#": "3",
@@ -55,7 +68,9 @@ func TestAccAlibabacloudStackKVStoreRedisBackupPolicy_classic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKVStoreBackupPolicy_classicUpdateTime(rand, string(KVStoreRedis), string(KVStore4Dot0)),
+				Config: testAccConfig(map[string]interface{}{
+					"backup_time": "12:00Z-13:00Z",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"backup_time": "12:00Z-13:00Z",
@@ -63,7 +78,10 @@ func TestAccAlibabacloudStackKVStoreRedisBackupPolicy_classic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccKVStoreBackupPolicy_classicUpdateAll(rand, string(KVStoreRedis), string(KVStore4Dot0)),
+				Config: testAccConfig(map[string]interface{}{
+					"backup_time":   "13:00Z-14:00Z",
+					"backup_period": []string{"Sunday"},
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"backup_time":     "13:00Z-14:00Z",
@@ -76,193 +94,6 @@ func TestAccAlibabacloudStackKVStoreRedisBackupPolicy_classic(t *testing.T) {
 
 }
 
-/*func TestAccAlibabacloudStackKVStoreMemcacheBackupPolicy_classic(t *testing.T) {
-	var policy *r_kvstore.DescribeBackupPolicyResponse
-
-	resourceId := "alibabacloudstack_kvstore_backup_policy.default"
-	ra := resourceAttrInit(resourceId, kvStoreMap)
-	serviceFunc := func() interface{} {
-		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &policy, serviceFunc, "DescribeKVstoreBackupPolicy")
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckKVStoreBackupPolicyDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccKVStoreBackupPolicy_classic(string(KVStoreMemcache), memcacheInstanceClassForTest, string(KVStore2Dot8)),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			//{
-			//	Config: testAccKVStoreBackupPolicy_classicUpdatePeriod(string(KVStoreMemcache), memcacheInstanceClassForTest, string(KVStore4Dot0)),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"backup_period.#": "3",
-			//		}),
-			//	),
-			//},
-			//{
-			//	Config: testAccKVStoreBackupPolicy_classicUpdateTime(string(KVStoreMemcache), memcacheInstanceClassForTest, string(KVStore4Dot0)),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"backup_time": "12:00Z-13:00Z",
-			//		}),
-			//	),
-			//},
-			//{
-			//	Config: testAccKVStoreBackupPolicy_classicUpdateAll(string(KVStoreMemcache), memcacheInstanceClassForTest, string(KVStore4Dot0)),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"backup_time":     "13:00Z-14:00Z",
-			//			"backup_period.#": "1",
-			//		}),
-			//	),
-			//},
-		},
-	})
-
-}*/
-
-func TestAccAlibabacloudStackKVStoreRedisBackupPolicy_vpc(t *testing.T) {
-	var policy *r_kvstore.DescribeBackupPolicyResponse
-
-	resourceId := "alibabacloudstack_kvstore_backup_policy.default"
-	ra := resourceAttrInit(resourceId, kvStoreMap)
-	serviceFunc := func() interface{} {
-		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &policy, serviceFunc, "DescribeKVstoreBackupPolicy")
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000, 99999)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckKVStoreBackupPolicyDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccKVStoreBackupPolicy_vpc(rand, string(KVStoreRedis), string(KVStore2Dot8)),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccKVStoreBackupPolicy_vpcUpdatePeriod(rand, string(KVStoreRedis), string(KVStore2Dot8)),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"backup_period.#": "3",
-					}),
-				),
-			},
-			{
-				Config: testAccKVStoreBackupPolicy_vpcUpdateTime(rand, string(KVStoreRedis), string(KVStore2Dot8)),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"backup_time": "11:00Z-12:00Z",
-					}),
-				),
-			},
-			{
-				Config: testAccKVStoreBackupPolicy_vpcUpdateAll(rand, string(KVStoreRedis), string(KVStore2Dot8)),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"backup_time":     "12:00Z-13:00Z",
-						"backup_period.#": "1",
-					}),
-				),
-			},
-		},
-	})
-
-}
-
-//	func TestAccAlibabacloudStackKVStoreMemcacheBackupPolicy_vpc(t *testing.T) {
-//		var policy *r_kvstore.DescribeBackupPolicyResponse
-//		resourceId := "alibabacloudstack_kvstore_backup_policy.default"
-//		ra := resourceAttrInit(resourceId, kvStoreMap)
-//		serviceFunc := func() interface{} {
-//			return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-//		}
-//		rc := resourceCheckInitWithDescribeMethod(resourceId, &policy, serviceFunc, "DescribeKVstoreBackupPolicy")
-//		rac := resourceAttrCheckInit(rc, ra)
-//		testAccCheck := rac.resourceAttrMapUpdateSet()
-//		ResourceTest(t, resource.TestCase{
-//			PreCheck: func() {
-//				testAccPreCheck(t)
-//			},
-//			// module name
-//			IDRefreshName: resourceId,
-//			Providers:     testAccProviders,
-//			CheckDestroy:  testAccCheckKVStoreBackupPolicyDestroy,
-//			Steps: []resource.TestStep{
-//				{
-//				     Config: testAccKVStoreBackupPolicy_vpc(VSwitchCommonTestCase, string(KVStoreMemcache), memcacheInstanceClassForTest, string(KVStore2Dot8)),
-//				     Check: resource.ComposeTestCheckFunc(
-//				        testAccCheck(nil),
-//				     ),
-//				  },
-//				  {
-//				     ResourceName:      resourceId,
-//				     ImportState:       true,
-//				     ImportStateVerify: true,
-//				  },
-//				  {
-//				     Config: testAccKVStoreBackupPolicy_vpcUpdatePeriod(VSwitchCommonTestCase, string(KVStoreMemcache), memcacheInstanceClassForTest, string(KVStore2Dot8)),
-//				     Check: resource.ComposeTestCheckFunc(
-//				        testAccCheck(map[string]string{
-//				           "backup_period.#": "3",
-//				        }),
-//				     ),
-//				  },
-//				  {
-//				     Config: testAccKVStoreBackupPolicy_vpcUpdateTime(VSwitchCommonTestCase, string(KVStoreMemcache), memcacheInstanceClassForTest, string(KVStore2Dot8)),
-//				     Check: resource.ComposeTestCheckFunc(
-//				        testAccCheck(map[string]string{
-//				           "backup_time": "11:00Z-12:00Z",
-//				        }),
-//				     ),
-//				  },
-//				{
-//					Config: testAccKVStoreBackupPolicy_vpcUpdateAll(VSwitchCommonTestCase, string(KVStoreMemcache), memcacheInstanceClassForTest, string(KVStore2Dot8)),
-//					Check: resource.ComposeTestCheckFunc(
-//						testAccCheck(map[string]string{
-//							"backup_time":     "12:00Z-13:00Z",
-//							"backup_period.#": "1",
-//						}),
-//					),
-//				},
-//			},
-//		})
-//	}
 func testAccCheckKVStoreBackupPolicyDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
 	kvstoreService := KvstoreService{client}
@@ -286,280 +117,17 @@ func testAccCheckKVStoreBackupPolicyDestroy(s *terraform.State) error {
 
 var kvStoreMap = map[string]string{
 	"instance_id":     CHECKSET,
-	"backup_time":     "10:00Z-11:00Z",
-	"backup_period.#": "2",
+	"backup_time":     CHECKSET,
+	"backup_period.#": CHECKSET,
 }
 
-func testAccKVStoreBackupPolicy_classic(rand int, instanceType, engineVersion string) string {
+func testAccKVStoreBackupPolicyDependence(name string) string {
 	return fmt.Sprintf(`
 
-	data "alibabacloudstack_zones" "default" {
-	}
 	variable "name" {
-		default = "tf-testAccKVStoreBackupPolicy_classic%d"
+		default = "%s"
 }
 
-variable "kv_edition" {
-    default = "enterprise"
-}
-
-variable "kv_engine" {
-    default = "%s"
-}
-
-%s 
-
-resource "alibabacloudstack_kvstore_instance" "default" {
-	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-	instance_name  = var.name
-	instance_type  = var.kv_engine
-	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
-	engine_version = "%s"
-	node_type = "double"
-	architecture_type = "standard"
-	password       = "%s"
-}
-	resource "alibabacloudstack_kvstore_backup_policy" "default" {
-		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
-		backup_period = ["Tuesday", "Wednesday"]
-		backup_time = "10:00Z-11:00Z"
-	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, getAccTestPassword(12))
-}
-
-func testAccKVStoreBackupPolicy_classicUpdatePeriod(rand int, instanceType, engineVersion string) string {
-	return fmt.Sprintf(`
-
-	data "alibabacloudstack_zones" "default" {
-	}
-	variable "name" {
-		default = "tf-testAccKVStoreBackupPolicy_classic%d"
-}
-
-variable "kv_edition" {
-    default = "enterprise"
-}
-
-variable "kv_engine" {
-    default = "%s"
-}
-
-%s 
-
-resource "alibabacloudstack_kvstore_instance" "default" {
-	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-	instance_name  = var.name
-	instance_type  = var.kv_engine
-	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
-	engine_version = "%s"
-	node_type = "double"
-	architecture_type = "standard"
-	password       = "%s"
-}
-	resource "alibabacloudstack_kvstore_backup_policy" "default" {
-		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
-		backup_period = ["Tuesday", "Wednesday", "Sunday"]
-		backup_time = "10:00Z-11:00Z"
-	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, getAccTestPassword(12))
-}
-
-func testAccKVStoreBackupPolicy_classicUpdateTime(rand int, instanceType, engineVersion string) string {
-	return fmt.Sprintf(`
-
-	data "alibabacloudstack_zones" "default" {
-	}
-	variable "name" {
-		default = "tf-testAccKVStoreBackupPolicy_classic%d"
-}
-
-variable "kv_edition" {
-    default = "enterprise"
-}
-
-variable "kv_engine" {
-    default = "%s"
-}
-
-%s 
-
-resource "alibabacloudstack_kvstore_instance" "default" {
-	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-	instance_name  = var.name
-	instance_type  = var.kv_engine
-	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
-	engine_version = "%s"
-	node_type = "double"
-	architecture_type = "standard"
-	password       = "%s"
-}
-	resource "alibabacloudstack_kvstore_backup_policy" "default" {
-		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
-		backup_period = ["Tuesday", "Wednesday", "Sunday"]
-		backup_time = "12:00Z-13:00Z"
-	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, getAccTestPassword(12))
-}
-
-func testAccKVStoreBackupPolicy_classicUpdateAll(rand int, instanceType, engineVersion string) string {
-	return fmt.Sprintf(`
-
-	data "alibabacloudstack_zones" "default" {
-	}
-	variable "name" {
-		default = "tf-testAccKVStoreBackupPolicy_classic%d"
-}
-
-variable "kv_edition" {
-    default = "enterprise"
-}
-
-variable "kv_engine" {
-    default = "%s"
-}
-
-%s 
-
-resource "alibabacloudstack_kvstore_instance" "default" {
-	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-	instance_name  = var.name
-	instance_type  = var.kv_engine
-	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
-	engine_version = "%s"
-	node_type = "double"
-	architecture_type = "standard"
-	password       = "%s"
-}
-	resource "alibabacloudstack_kvstore_backup_policy" "default" {
-		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
-		backup_period = ["Sunday"]
-		backup_time = "13:00Z-14:00Z"
-	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, getAccTestPassword(12))
-}
-
-func testAccKVStoreBackupPolicy_vpc(rand int, instanceType, engineVersion string) string {
-	return fmt.Sprintf(`
-	variable "name" {
-		default = "tf-testAccKVStoreBackupPolicy_vpc%d"
-	}
-	variable "kv_edition" {
-    default = "enterprise"
-	}
-	
-	variable "kv_engine" {
-    default = "%s"
-	}
-
-	%s 
-
-	resource "alibabacloudstack_kvstore_instance" "default" {
-		zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
-		instance_name  = "${var.name}"
-		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
-		security_ips = ["10.0.0.1"]
-		instance_type = var.kv_engine
-		engine_version = "%s"
-	}
-	resource "alibabacloudstack_kvstore_backup_policy" "default" {
-		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
-		backup_period = ["Tuesday", "Wednesday"]
-		backup_time = "10:00Z-11:00Z"
-	}
-	`, rand, instanceType, VSwitchCommonTestCase+KVRInstanceClassCommonTestCase, engineVersion)
-}
-
-func testAccKVStoreBackupPolicy_vpcUpdatePeriod(rand int, instanceType, engineVersion string) string {
-	return fmt.Sprintf(`
-	variable "name" {
-		default = "tf-testAccKVStoreBackupPolicy_vpc%d"
-	}
-	variable "kv_edition" {
-    default = "enterprise"
-	}
-	
-	variable "kv_engine" {
-    default = "%s"
-	}
-
-	%s 
-
-	resource "alibabacloudstack_kvstore_instance" "default" {
-		zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
-		instance_name  = "${var.name}"
-		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
-		security_ips = ["10.0.0.1"]
-		instance_type = var.kv_engine
-		engine_version = "%s"
-	}
-	resource "alibabacloudstack_kvstore_backup_policy" "default" {
-		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
-		backup_period = ["Tuesday", "Wednesday", "Sunday"]
-		backup_time = "10:00Z-11:00Z"
-	}
-	`, rand, instanceType, VSwitchCommonTestCase+KVRInstanceClassCommonTestCase, engineVersion)
-}
-func testAccKVStoreBackupPolicy_vpcUpdateTime(rand int, instanceType, engineVersion string) string {
-	return fmt.Sprintf(`
-	variable "name" {
-		default = "tf-testAccKVStoreBackupPolicy_vpc%d"
-	}
-	variable "kv_edition" {
-    default = "enterprise"
-	}
-	
-	variable "kv_engine" {
-    default = "%s"
-	}
-
-	%s 
-
-	resource "alibabacloudstack_kvstore_instance" "default" {
-		zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
-		instance_name  = "${var.name}"
-		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
-		security_ips = ["10.0.0.1"]
-		instance_type = var.kv_engine
-		engine_version = "%s"
-	}
-	resource "alibabacloudstack_kvstore_backup_policy" "default" {
-		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
-		backup_period = ["Tuesday", "Wednesday", "Sunday"]
-		backup_time = "11:00Z-12:00Z"
-	}
-	`, rand, instanceType, VSwitchCommonTestCase+KVRInstanceClassCommonTestCase, engineVersion)
-}
-func testAccKVStoreBackupPolicy_vpcUpdateAll(rand int, instanceType, engineVersion string) string {
-	return fmt.Sprintf(`
-	variable "name" {
-		default = "tf-testAccKVStoreBackupPolicy_vpc%d"
-	}
-	variable "kv_edition" {
-    default = "enterprise"
-	}
-	
-	variable "kv_engine" {
-    default = "%s"
-	}
-
-	%s 
-
-	resource "alibabacloudstack_kvstore_instance" "default" {
-		zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
-		instance_name  = "${var.name}"
-		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
-		security_ips = ["10.0.0.1"]
-		instance_type = var.kv_engine
-		engine_version = "%s"
-	}
-	resource "alibabacloudstack_kvstore_backup_policy" "default" {
-		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
-		backup_period = ["Tuesday"]
-		backup_time = "12:00Z-13:00Z"
-	}
-	`, rand, instanceType, VSwitchCommonTestCase+KVRInstanceClassCommonTestCase, engineVersion)
+%s
+	`, name, KVRInstanceCommonTestCase("enterprise", string(KVStoreRedis)))
 }

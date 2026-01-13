@@ -20,33 +20,33 @@ func resourceAlibabacloudStackKVStoreBackupPolicy() *schema.Resource {
 				ForceNew: true,
 			},
 			"backup_time": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
-				Optional:     true,
-				Computed:true,
-				Deprecated:   "Field 'backup_time' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_time' instead.",
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice(BACKUP_TIME, false),
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'backup_time' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_time' instead.",
 				ConflictsWith: []string{"preferred_backup_time"},
 			},
 			"preferred_backup_time": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
-				Optional:     true,
-				Computed:true,
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice(BACKUP_TIME, false),
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"backup_time"},
 			},
 			"backup_period": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-				Computed: true,
-				Deprecated: "Field 'backup_period' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_period' instead.",
+				Type:          schema.TypeSet,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'backup_period' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_period' instead.",
 				ConflictsWith: []string{"preferred_backup_period"},
 			},
 			"preferred_backup_period": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeSet,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"backup_period"},
 			},
 		},
@@ -95,7 +95,7 @@ func resourceAlibabacloudStackKVStoreBackupPolicyUpdate(d *schema.ResourceData, 
 			//Default must be nil if computed
 			request.PreferredBackupTime = "02:00Z-03:00Z"
 		}
-		periodList :=  expandStringList(connectivity.GetResourceData(d, "preferred_backup_period", "backup_period").(*schema.Set).List())
+		periodList := expandStringList(connectivity.GetResourceData(d, "preferred_backup_period", "backup_period").(*schema.Set).List())
 		request.PreferredBackupPeriod = strings.Join(periodList, COMMA_SEPARATED)
 
 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
