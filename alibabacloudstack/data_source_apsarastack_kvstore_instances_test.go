@@ -2,61 +2,104 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
 )
 
 func TestAccAlibabacloudStackKVStoreInstancesDataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: dataSourceKVStoreInstancesConfigDependence(),
-				Check: resource.ComposeTestCheckFunc(
+	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_kvstore_instances.default"
+	name := fmt.Sprintf("tf-kvins%d", rand)
 
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_kvstore_instances.default"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.charge_type"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.region_id"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.create_time"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.vpc_id"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.instance_class"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.status"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.availability_zone"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.bandwidth"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.user_name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.connections"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.vswitch_id"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_kvstore_instances.default", "instances.connection_domain"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_kvstore_instances.default", "ids.#"),
-				),
-			},
-		},
-	})
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceKVStoreInstancesConfigDependence)
+
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${local.kv_instance_name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "fake-nonexistent-instance",
+		}),
+	}
+
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${local.kv_instance_id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake-instance-id-12345"},
+		}),
+	}
+
+	instanceTypeConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_type": "Redis",
+			"name_regex":    "${local.kv_instance_name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_type": "Memcache",
+			"name_regex":    "${local.kv_instance_name}",
+		}),
+	}
+
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":           []string{"${local.kv_instance_id}"},
+			"name_regex":    "${local.kv_instance_name}",
+			"instance_type": "Redis",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":           []string{"fake-instance-id-12345"},
+			"name_regex":    "another-fake-instance",
+			"instance_type": "Memcache",
+		}),
+	}
+
+	var existKVStoreInstancesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":      "1",
+			"names.#":    "1",
+			"instances.#": "1",
+			"instances.0.name":                CHECKSET,
+			"instances.0.id":                  CHECKSET,
+			"instances.0.instance_type":       CHECKSET,
+			"instances.0.status":              CHECKSET,
+			"instances.0.instance_class":      CHECKSET,
+			"instances.0.availability_zone":   CHECKSET,
+			"instances.0.region_id":           CHECKSET,
+			"instances.0.create_time":         CHECKSET,
+			"instances.0.connection_domain":    CHECKSET,
+			// Numeric fields should be set but exact values may vary
+			"instances.0.bandwidth":     CHECKSET,
+			"instances.0.connections":   CHECKSET,
+			"instances.0.capacity":      CHECKSET,
+			"instances.0.port":          CHECKSET,
+		}
+	}
+
+	var fakeKVStoreInstancesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":      "0",
+			"names.#":    "0",
+			"instances.#": "0",
+		}
+	}
+
+	var kvStoreInstancesCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existKVStoreInstancesMapFunc,
+		fakeMapFunc:  fakeKVStoreInstancesMapFunc,
+		ExternalProviders: testAccExternalProviders,
+	}
+	kvStoreInstancesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, instanceTypeConf, allConf)
 }
 
-func dataSourceKVStoreInstancesConfigDependence() string {
+func dataSourceKVStoreInstancesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-    default = "tf-testAccCheckAlibabacloudStackRKVInstancesDataSource%d"
+  default = "%s"
 }
 
 %s
 
-resource "alibabacloudstack_kvstore_instance" "default" {
-zone_id = data.alibabacloudstack_zones.default.zones[0].id
-instance_class = "redis.master.small.default"
-instance_name  = var.name
-vswitch_id     = alibabacloudstack_vpc_vswitch.default.id
-security_ips   = ["10.0.0.1"]
-instance_type  = "Redis"
-engine_version = "4.0"
-}
-data "alibabacloudstack_kvstore_instances" "default" {
-  name_regex = alibabacloudstack_kvstore_instance.default.instance_name
-}
-`, getAccTestRandInt(10000, 99999), VSwitchCommonTestCase)
+`, name, KVRInstanceCommonTestCase("enterprise", string(KVStoreRedis), ))
 }

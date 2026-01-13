@@ -1724,12 +1724,12 @@ data "alibabacloudstack_zones" "default" {
 	available_resource_creation = "VSwitch"
 }
 
-data "alibabacloudstack_kvstore_instances" "default" {
+data "alibabacloudstack_kvstore_instances" "existed" {
 	ids = [%s]
 }
 
 resource "alibabacloudstack_kvstore_instance" "default" {
-	count = length(data.alibabacloudstack_kvstore_instances.default.ids) > 0 ? 0 : 1
+	count = length(data.alibabacloudstack_kvstore_instances.existed.ids) > 0 ? 0 : 1
 	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
 	instance_name  = var.name
 	instance_type  = var.kv_engine
@@ -1740,7 +1740,8 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 }
 
 locals {
-	kv_instance_id = length(data.alibabacloudstack_kvstore_instances.default.ids) > 0 ? data.alibabacloudstack_kvstore_instances.default.ids.0 : alibabacloudstack_kvstore_instance.default.0.id
+	kv_instance_id = length(data.alibabacloudstack_kvstore_instances.existed.instances) > 0 ? data.alibabacloudstack_kvstore_instances.existed.instances.0.id : alibabacloudstack_kvstore_instance.default.0.id
+	kv_instance_name = length(data.alibabacloudstack_kvstore_instances.existed.instances) > 0 ? data.alibabacloudstack_kvstore_instances.existed.instances.0.name : alibabacloudstack_kvstore_instance.default.0.instance_name
 }
 
 `, kvEdition, kvEngine, KVRInstanceClassCommonTestCase, RandomPasswordTestCase(12, 2), instanceId)
