@@ -40,7 +40,7 @@ func resourceAlibabacloudStackLogStore() *schema.Resource {
 					if old == "" {
 						return false
 					}
-					return true
+					return old == new
 				},
 			},
 			"shards": {
@@ -215,31 +215,8 @@ func resourceAlibabacloudStackLogStoreUpdate(d *schema.ResourceData, meta interf
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	d.Partial(true)
 
-	update := false
-	if d.HasChange("retention_period") {
-		update = true
-		//d.SetPartial("retention_period")
-	}
-	if d.HasChange("max_split_shard_count") {
-		update = true
-		//d.SetPartial("max_split_shard_count")
-	}
-	if d.HasChange("enable_web_tracking") {
-		update = true
-		//d.SetPartial("enable_web_tracking")
-	}
-	if d.HasChange("append_meta") {
-		update = true
-		//d.SetPartial("append_meta")
-	}
-	if d.HasChange("auto_split") {
-		update = true
-		//d.SetPartial("auto_split")
-	}
-
-	if update {
+	if d.HasChanges("retention_period", "max_split_shard_count", "enable_web_tracking", "append_meta", "auto_split") {
 		store, err := logService.DescribeLogStore(d.Id())
 		if err != nil {
 			return errmsgs.WrapError(err)
@@ -265,7 +242,6 @@ func resourceAlibabacloudStackLogStoreUpdate(d *schema.ResourceData, meta interf
 			})
 		}
 	}
-	d.Partial(false)
 
 	return nil
 }
