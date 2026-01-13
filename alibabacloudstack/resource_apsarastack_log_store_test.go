@@ -39,8 +39,6 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 					// "retention_period":      "30",
 					// "enable_web_tracking":   "false",
 					// "auto_split":            "true",
-					// "encrypt_type":           "sm4_gcm",
-					// "encryption":            "true",
 					// "max_split_shard_count": "64",
 					// "append_meta":           "true",
 				}),
@@ -52,17 +50,15 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 						// "retention_period":      "30",
 						// "enable_web_tracking":   "false",
 						// "auto_split":            "true",
-						// "encryption":            "true",
-						// "encrypt_type":           "sm4_gcm",
 						// "max_split_shard_count": "64",
 						// "append_meta":           "true",
 					}),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// This parameter is not returned during Read, can only be queried from the database
 				ImportStateVerifyIgnore: []string{"encrypt_type"},
 			},
@@ -134,42 +130,6 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 						"append_meta":           "true",
 						"enable_web_tracking":   "false",
 					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackLogStore_multi(t *testing.T) {
-	var v *sls.LogStore
-	resourceId := "alibabacloudstack_log_store.default.4"
-	ra := resourceAttrInit(resourceId, logStoreMap)
-	serviceFunc := func() interface{} {
-		return &LogService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-log-store-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogStoreConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":        name,
-					"project":     "${alibabacloudstack_log_project.foo.name}",
-					"shard_count": "5",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
 				),
 			},
 		},

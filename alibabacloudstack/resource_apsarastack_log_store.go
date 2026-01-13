@@ -78,10 +78,6 @@ func resourceAlibabacloudStackLogStore() *schema.Resource {
 				Default:      0,
 				ValidateFunc: validation.IntBetween(1, 64),
 			},
-			"encryption": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
 			"append_meta": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -92,21 +88,25 @@ func resourceAlibabacloudStackLogStore() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"cmk_key_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"arn": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"encrypt_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "sm4_gcm",
-				ValidateFunc: validation.StringInSlice([]string{"sm4_gcm", "aes_gcm"}, false),
-			},
+//			"encryption": {
+//				Type:     schema.TypeBool,
+//				Optional: true,
+//			},
+//			"cmk_key_id": {
+//				Type:     schema.TypeString,
+//				Optional: true,
+//			},
+//			"arn": {
+//				Type:     schema.TypeString,
+//				Optional: true,
+//			},
+//			"encrypt_type": {
+//				Type:         schema.TypeString,
+//				Optional:     true,
+//				ForceNew:     true,
+//				Default:      "sm4_gcm",
+//				ValidateFunc: validation.StringInSlice([]string{"sm4_gcm", "aes_gcm"}, false),
+//			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackLogStoreCreate, resourceAlibabacloudStackLogStoreRead, resourceAlibabacloudStackLogStoreUpdate, resourceAlibabacloudStackLogStoreDelete)
@@ -115,40 +115,14 @@ func resourceAlibabacloudStackLogStore() *schema.Resource {
 
 func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	update := false
-	if v, ok := d.GetOk("encryption"); ok {
-		update = v.(bool)
-	}
-	var logstore *sls.LogStore
-	if update {
-		logstore = &sls.LogStore{
-			Name:          d.Get("name").(string),
-			TTL:           d.Get("retention_period").(int),
-			ShardCount:    d.Get("shard_count").(int),
-			WebTracking:   d.Get("enable_web_tracking").(bool),
-			AutoSplit:     d.Get("auto_split").(bool),
-			MaxSplitShard: d.Get("max_split_shard_count").(int),
-			AppendMeta:    d.Get("append_meta").(bool),
-			EncryptConf:   &sls.EncryptConf{
-				Enable:       true,
-				EncryptType: d.Get("encrypt_type").(string),
-				UserCmkInfo: &sls.EncryptUserCmkConf{
-					CmkKeyId: d.Get("cmk_key_id").(string),
-					Arn:      d.Get("arn").(string),
-					RegionId: client.RegionId,
-				},
-			},
-		}
-	} else {
-		logstore = &sls.LogStore{
-			Name:          d.Get("name").(string),
-			TTL:           d.Get("retention_period").(int),
-			ShardCount:    d.Get("shard_count").(int),
-			WebTracking:   d.Get("enable_web_tracking").(bool),
-			AutoSplit:     d.Get("auto_split").(bool),
-			MaxSplitShard: d.Get("max_split_shard_count").(int),
-			AppendMeta:    d.Get("append_meta").(bool),
-		}
+	logstore := &sls.LogStore{
+		Name:          d.Get("name").(string),
+		TTL:           d.Get("retention_period").(int),
+		ShardCount:    d.Get("shard_count").(int),
+		WebTracking:   d.Get("enable_web_tracking").(bool),
+		AutoSplit:     d.Get("auto_split").(bool),
+		MaxSplitShard: d.Get("max_split_shard_count").(int),
+		AppendMeta:    d.Get("append_meta").(bool),
 	}
 	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
