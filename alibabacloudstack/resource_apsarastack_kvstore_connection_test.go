@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackRedisConnection0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":              "${local.kv_instance_id}",
 					"connection_string_prefix": name,
-					"port": "6379",
+					"port":                     "6379",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -53,14 +53,25 @@ func TestAccAlibabacloudStackRedisConnection0(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"connection_string_prefix": name+"-new",
+					"port":                     "6380",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"port": "6380",
+					}),
+				),
+			},
 		},
 	})
 }
 
 var AlibabacloudTestAccRedisConnectionCheckmap = map[string]string{
 
-	"instance_id": CHECKSET,
-	"port": CHECKSET,
+	"instance_id":       CHECKSET,
+	"port":              CHECKSET,
 	"connection_string": CHECKSET,
 }
 
@@ -72,5 +83,5 @@ func AlibabacloudTestAccRedisConnectionBasicdependence(name string) string {
 
 	%s
 
-	`, name, KVRInstanceCommonTestCase("enterprise", string(KVStoreRedis), ))
+	`, name, KVRInstanceCommonTestCase("enterprise", string(KVStoreRedis)))
 }
