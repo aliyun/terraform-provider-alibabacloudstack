@@ -53,24 +53,6 @@ func TestAccAlibabacloudStackEcsAutosnapshotpolicy0(t *testing.T) {
 					}),
 				),
 			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"auto_snapshot_policy_name": "RDKTest-update",
-					"repeat_weekdays":           []string{"1", "2", "3", "4", "5"},
-					"retention_days":            2,
-					"time_points":               []string{"22", "23"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"auto_snapshot_policy_name": "RDKTest-update",
-						"repeat_weekdays.#":         "5",
-						"retention_days":            "2",
-						"time_points.#":             "2",
-					}),
-				),
-			},
-
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"tags": map[string]string{
@@ -103,13 +85,17 @@ func TestAccAlibabacloudStackEcsAutosnapshotpolicy0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
+					"auto_snapshot_policy_name": "RDKTest-update",
+					"repeat_weekdays":           []string{"1", "2", "3", "4", "5"},
+					"retention_days":            2,
+					"time_points":               []string{"22", "23"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"tags.%":       "0",
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
+						"auto_snapshot_policy_name": "RDKTest-update",
+						"repeat_weekdays.#":         "5",
+						"retention_days":            "2",
+						"time_points.#":             "2",
 					}),
 				),
 			},

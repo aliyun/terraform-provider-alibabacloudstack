@@ -1788,15 +1788,20 @@ func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType str
 			action := "TagResources"
 			request := map[string]interface{}{
 				"ResourceType": resourceType,
-				"ResourceId.1": d.Id(),
+				"ResourceId":   []string{d.Id()},
 			}
-			count := 1
+			// count := 1
+			tagmap := make([]map[string]interface{}, 0)
 			for key, value := range added {
-				request[fmt.Sprintf("Tag.%d.Key", count)] = key
-				request[fmt.Sprintf("Tag.%d.Value", count)] = value
-				count++
+				tagmap = append(tagmap, map[string]interface{}{
+					"Key":   key,
+					"Value": value,
+				})
+				// request[fmt.Sprintf("Tag.%d.Key", count)] = key
+				// request[fmt.Sprintf("Tag.%d.Value", count)] = value
+				// count++
 			}
-
+			request["Tag"] = tagmap
 			_, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "/ascm/manage/tag_manage/tagResources", nil, nil, request)
 			if err != nil {
 				return err
