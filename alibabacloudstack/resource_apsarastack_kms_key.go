@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
@@ -49,6 +50,7 @@ func resourceAlibabacloudStackKmsKey() *schema.Resource {
 			"is_enabled": {
 				Type:       schema.TypeBool,
 				Optional:   true,
+				Computed:   true,
 				Deprecated: "Field 'is_enabled' has been deprecated from provider version 1.85.0. New field 'key_state' instead.",
 			},
 			"key_usage": {
@@ -101,8 +103,27 @@ func resourceAlibabacloudStackKmsKey() *schema.Resource {
 				Default:      "SOFTWARE",
 			},
 			"rotation_interval": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(\d+)\s*([dhms])$`), "Illegal time format"),
+				Optional:     true,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					if d.Get("automatic_rotation").(string) != "Enabled" {
+						return true
+					}
+					if oldValue == newValue {
+						return true
+					}
+
+					oldDur, oldErr := ParseTimeValue(oldValue)
+					newDur, newErr := ParseTimeValue(newValue)
+
+					if oldErr != nil || newErr != nil {
+						return oldValue == newValue
+					}
+
+					return oldDur == newDur
+				},
+				DiffSuppressOnRefresh: true,
 			},
 		},
 	}
@@ -118,6 +139,11 @@ func resourceAlibabacloudStackKmsKeyCreate(d *schema.ResourceData, meta interfac
 	client.InitRpcRequest(*request.RpcRequest)
 	if v, ok := d.GetOk("automatic_rotation"); ok {
 		request.EnableAutomaticRotation = requests.NewBoolean(convertAutomaticRotationRequest(v.(string)))
+		if v.(string) == "Enabled" {
+			if v, ok := d.GetOk("rotation_interval"); ok {
+				request.RotationInterval = v.(string)
+			}
+		}
 	}
 	if v, ok := d.GetOk("description"); ok {
 		request.Description = v.(string)
@@ -131,9 +157,7 @@ func resourceAlibabacloudStackKmsKeyCreate(d *schema.ResourceData, meta interfac
 	if v, ok := d.GetOk("protection_level"); ok {
 		request.ProtectionLevel = v.(string)
 	}
-	if v, ok := d.GetOk("rotation_interval"); ok {
-		request.RotationInterval = v.(string)
-	}
+
 	raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.CreateKey(request)
 	})
@@ -170,6 +194,7 @@ func resourceAlibabacloudStackKmsKeyRead(d *schema.ResourceData, meta interface{
 	d.Set("delete_date", object.DeleteDate)
 	d.Set("description", object.Description)
 	d.Set("key_state", object.KeyState)
+	d.Set("is_enabled", object.KeyState == "Enabled")
 	d.Set("key_usage", object.KeyUsage)
 	d.Set("last_rotation_date", object.LastRotationDate)
 	d.Set("material_expire_time", object.MaterialExpireTime)
@@ -240,8 +265,8 @@ func resourceAlibabacloudStackKmsKeyUpdate(d *schema.ResourceData, meta interfac
 			}
 		}
 	}
-	
-	if d.IsNewResource(){
+
+	if d.IsNewResource() {
 		return nil
 	}
 
@@ -299,12 +324,8 @@ func resourceAlibabacloudStackKmsKeyDelete(d *schema.ResourceData, meta interfac
 	request := kms.CreateScheduleKeyDeletionRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.KeyId = d.Id()
-	if v, ok := d.GetOk("pending_window_in_days"); ok {
+	if v, ok := connectivity.GetResourceDataOk(d, "pending_window_in_days", "deletion_window_in_days"); ok {
 		request.PendingWindowInDays = requests.NewInteger(v.(int))
-	} else {
-		if v, ok := d.GetOk("deletion_window_in_days"); ok {
-			request.PendingWindowInDays = requests.NewInteger(v.(int))
-		}
 	}
 	raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.ScheduleKeyDeletion(request)

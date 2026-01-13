@@ -88,7 +88,7 @@ func testSweepKmsKey(region string) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackKMSKey_basic(t *testing.T) {
+func TestAccAlibabacloudStackKmsKey_basic(t *testing.T) {
 	var v kms.KeyMetadata
 	resourceId := "alibabacloudstack_kms_key.default"
 	ra := resourceAttrInit(resourceId, KmsKeyMap)
@@ -115,6 +115,8 @@ func TestAccAlibabacloudStackKMSKey_basic(t *testing.T) {
 					//	"key_spec":               "Aliyun_SM4",
 					"protection_level":       "SOFTWARE",
 					"pending_window_in_days": "7",
+					"automatic_rotation": "Enabled",
+					"rotation_interval":  "7d",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -122,6 +124,7 @@ func TestAccAlibabacloudStackKMSKey_basic(t *testing.T) {
 						//		"key_spec":               "Aliyun_SM4",
 						"protection_level":       "SOFTWARE",
 						"pending_window_in_days": "7",
+						"automatic_rotation": "Enabled",
 					}),
 				),
 			},
@@ -130,6 +133,16 @@ func TestAccAlibabacloudStackKMSKey_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"pending_window_in_days", "deletion_window_in_days", "is_enabled"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"automatic_rotation": "Disabled",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"automatic_rotation": "Disabled",
+					}),
+				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

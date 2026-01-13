@@ -14,6 +14,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
@@ -865,6 +866,38 @@ func convertMapFloat64ToJsonString(m map[string]interface{}) (string, error) {
 		return "", err
 	} else {
 		return string(result), nil
+	}
+}
+
+func ParseTimeValue(s string) (time.Duration, error) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return 0, fmt.Errorf("empty string")
+	}
+
+	// Match number + unit (case-insensitive)
+	re := regexp.MustCompile(`^(\d+)([dhms])$`)
+	matches := re.FindStringSubmatch(strings.ToLower(s))
+	if matches == nil {
+		return 0, fmt.Errorf("invalid format: %q", s)
+	}
+
+	num, err := strconv.Atoi(matches[1])
+	if err != nil {
+		return 0, fmt.Errorf("invalid number: %w", err)
+	}
+
+	switch matches[2] {
+	case "d":
+		return time.Duration(num) * 24 * time.Hour, nil
+	case "h":
+		return time.Duration(num) * time.Hour, nil
+	case "m":
+		return time.Duration(num) * time.Minute, nil
+	case "s":
+		return time.Duration(num) * time.Second, nil
+	default:
+		return 0, fmt.Errorf("unsupported unit: %q", matches[2])
 	}
 }
 

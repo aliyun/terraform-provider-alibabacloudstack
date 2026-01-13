@@ -5,7 +5,7 @@ import (
 )
 
 func TestAccAlibabacloudStackKmsCiphertextDataSource(t *testing.T) {
-	resourceId := "data.alibabacloudstack_kms_ciphertext.default"
+	resourceId := "data.alibabacloudstack_kms_ciphertexts.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", dataSourceKmsCiphertextDependence)
 
