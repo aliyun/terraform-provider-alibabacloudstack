@@ -1779,7 +1779,7 @@ func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType str
 			for i, key := range removedTagKeys {
 				request[fmt.Sprintf("TagKey.%d", i+1)] = key
 			}
-			_, err := s.client.DoTeaRequest("POST", "Ecs", "2019-05-10", action, "", nil, nil, request)
+			_, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "/ascm/manage/tag_manage/unTagResources", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -1797,7 +1797,7 @@ func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType str
 				count++
 			}
 
-			_, err := s.client.DoTeaRequest("POST", "Ecs", "2019-05-10", action, "", nil, nil, request)
+			_, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "/ascm/manage/tag_manage/tagResources", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -2132,7 +2132,6 @@ func (s *EcsService) SnapshotGroupsStatusRefreshFunc(id string, failStates []str
 	}
 }
 
-
 type EcsDescribededicatedhostclustersResponse struct {
 	DedicatedHostClusters struct {
 		DedicatedHostCluster []struct {
@@ -2200,7 +2199,6 @@ func (s *EcsService) DoEcsDescribededicatedhostclustersRequest(id string) (*EcsD
 
 	return EcsDescribededicatedhostclustersResponse, nil
 }
-
 
 type EcsDescribeinvocationresultsResponse struct {
 	RequestId string `json:"RequestId"`

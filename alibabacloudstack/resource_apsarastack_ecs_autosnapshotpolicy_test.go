@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackEcsAutosnapshotpolicy0(t *testing.T) {
-	var v map[string]interface{}
-
+	var v *ecs.AutoSnapshotPolicy
 	resourceId := "alibabacloudstack_ecs_autosnapshotpolicy.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccEcsAutosnapshotpolicyCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
@@ -31,8 +31,7 @@ func TestAccAlibabacloudStackEcsAutosnapshotpolicy0(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-
-		CheckDestroy: rac.checkResourceDestroy(),
+		CheckDestroy:  rac.checkResourceDestroy(),
 
 		Steps: []resource.TestStep{
 
@@ -40,19 +39,35 @@ func TestAccAlibabacloudStackEcsAutosnapshotpolicy0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 
 					"auto_snapshot_policy_name": "RDKTest",
+					"repeat_weekdays":           []string{"1", "2", "3"},
+					"retention_days":            -1,
+					"time_points":               []string{"1", "22", "23"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"auto_snapshot_policy_name": "RDKTest",
+						"repeat_weekdays.#":         "3",
+						"retention_days":            "-1",
+						"time_points.#":             "3",
 					}),
 				),
 			},
 
 			{
-				Config: testAccConfig(map[string]interface{}{}),
+				Config: testAccConfig(map[string]interface{}{
+					"auto_snapshot_policy_name": "RDKTest-update",
+					"repeat_weekdays":           []string{"1", "2", "3", "4", "5"},
+					"retention_days":            2,
+					"time_points":               []string{"22", "23"},
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
+					testAccCheck(map[string]string{
+						"auto_snapshot_policy_name": "RDKTest-update",
+						"repeat_weekdays.#":         "5",
+						"retention_days":            "2",
+						"time_points.#":             "2",
+					}),
 				),
 			},
 
@@ -109,35 +124,13 @@ func TestAccAlibabacloudStackEcsAutosnapshotpolicy0(t *testing.T) {
 
 var AlibabacloudTestAccEcsAutosnapshotpolicyCheckmap = map[string]string{
 
-	"status": CHECKSET,
+	"auto_snapshot_policy_name": CHECKSET,
 
-	"time_points": CHECKSET,
-
-	"volume_nums": CHECKSET,
-
-	"resource_group_id": CHECKSET,
-
-	"create_time": CHECKSET,
-
-	"auto_snapshot_policy_id": CHECKSET,
+	"time_points.#": CHECKSET,
 
 	"retention_days": CHECKSET,
 
-	"repeat_weekdays": CHECKSET,
-
-	"disk_nums": CHECKSET,
-
-	"copied_snapshots_retention_days": CHECKSET,
-
-	"target_copy_regions": CHECKSET,
-
-	"enable_cross_region_copy": CHECKSET,
-
-	"region_id": CHECKSET,
-
-	"auto_snapshot_policy_name": CHECKSET,
-
-	"tags": CHECKSET,
+	"repeat_weekdays.#": CHECKSET,
 }
 
 func AlibabacloudTestAccEcsAutosnapshotpolicyBasicdependence(name string) string {

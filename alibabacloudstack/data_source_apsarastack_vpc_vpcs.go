@@ -162,29 +162,9 @@ func dataSourceAlibabacloudStackVpcs() *schema.Resource {
 					},
 				},
 			},
-			"dhcp_options_set_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"dry_run": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-			},
-			"resource_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"tags": tagsSchema(),
 			"vpc_name": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"vpc_owner_id": {
-				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 			},
@@ -205,20 +185,8 @@ func dataSourceAlibabacloudStackVpcsRead(d *schema.ResourceData, meta interface{
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(1)
 
-	if v, ok := d.GetOk("dhcp_options_set_id"); ok {
-		request.DhcpOptionsSetId = v.(string)
-	}
-
-	if v, ok := d.GetOkExists("dry_run"); ok {
-		request.DryRun = requests.NewBoolean(v.(bool))
-	}
-
 	if v, ok := d.GetOkExists("is_default"); ok {
 		request.IsDefault = requests.NewBoolean(v.(bool))
-	}
-
-	if v, ok := d.GetOk("resource_group_id"); ok {
-		request.ResourceGroupId = v.(string)
 	}
 
 	if v, ok := d.GetOk("tags"); ok {

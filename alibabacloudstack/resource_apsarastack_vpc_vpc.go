@@ -25,10 +25,10 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"cidr_block": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Default:       "172.16.0.0/12",
-				ValidateFunc:  validateCIDRNetworkAddress,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "172.16.0.0/12",
+				ValidateFunc: validateCIDRNetworkAddress,
 			},
 			"name": {
 				Type:          schema.TypeString,
@@ -51,11 +51,6 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"dry_run": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-			},
 			"enable_ipv6": {
 				Type:          schema.TypeBool,
 				Optional:      true,
@@ -64,12 +59,6 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"resource_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Deprecated: "Field 'resource_group_id' is deprecated and will be removed in a future release.",
 			},
 			"router_table_id": {
 				Type:       schema.TypeString,
@@ -201,7 +190,7 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 	}
 	d.Set("ipv6_cidr_blocks", ipv6_cidr_blocks)
 	d.Set("status", object.Status)
-	d.Set("resource_group_id", object.ResourceGroupId)
+	// d.Set("resource_group_id", object.ResourceGroupId)
 	if tag := object.Tags.Tag; tag != nil {
 		d.Set("tags", vpcService.tagToMap(tag))
 	}
@@ -281,30 +270,31 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 		return nil
 	}
 
-	groupRequestUpdate := false
-	groupRequest := vpc.CreateMoveResourceGroupRequest()
-	client.InitRpcRequest(*groupRequest.RpcRequest)
-	groupRequest.ResourceId = d.Id()
-	groupRequest.NewResourceGroupId = d.Get("resource_group_id").(string)
-	groupRequest.ResourceType = "vpc"
-	if !d.IsNewResource() && d.HasChange("resource_group_id") {
-		groupRequestUpdate = true
-	}
-	if groupRequestUpdate {
-		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
-			return vpcClient.MoveResourceGroup(groupRequest)
-		})
-		if err != nil {
-			errmsg := ""
-			bresponse, ok := raw.(*vpc.MoveResourceGroupResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), groupRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(groupRequest.GetActionName(), raw, groupRequest.RpcRequest, groupRequest)
-	}
-
+	// groupRequestUpdate := false
+	// groupRequest := vpc.CreateMoveResourceGroupRequest()
+	// client.InitRpcRequest(*groupRequest.RpcRequest)
+	// groupRequest.ResourceId = d.Id()
+	// // groupRequest.NewResourceGroupId = d.Get("resource_group_id").(string)
+	// groupRequest.ResourceType = "vpc"
+	// if !d.IsNewResource() && d.HasChange("resource_group_id") {
+	// 	groupRequestUpdate = true
+	// }
+	// if groupRequestUpdate {
+	// 	c
+	// 	raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
+	// 		return vpcClient.MoveResourceGroup(groupRequest)
+	// 	})
+	// 	if err != nil {
+	// 		errmsg := ""
+	// 		bresponse, ok := raw.(*vpc.MoveResourceGroupResponse)
+	// 		if ok {
+	// 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	// 		}
+	// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), groupRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	// 	}
+	// 	addDebug(groupRequest.GetActionName(), raw, groupRequest.RpcRequest, groupRequest)
+	// }
+	//
 	attributeUpdate := false
 	request := vpc.CreateModifyVpcAttributeRequest()
 	client.InitRpcRequest(*request.RpcRequest)
@@ -368,7 +358,7 @@ func resourceAlibabacloudStackVpcDelete(d *schema.ResourceData, meta interface{}
 			}
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		content:=map[string]interface{}{}
+		content := map[string]interface{}{}
 		bresponse, _ := raw.(*vpc.DeleteVpcResponse)
 		json.Unmarshal(bresponse.GetHttpContentBytes(), &content)
 		if v, exist := content["Code"]; exist && v.(string) == "InnerError" {
@@ -401,16 +391,7 @@ func buildAlibabacloudStackVpcArgs(d *schema.ResourceData, meta interface{}) *vp
 		request.Description = v
 	}
 
-	if v, ok := d.GetOkExists("dry_run"); ok {
-		request.DryRun = requests.NewBoolean(v.(bool))
-	}
-
 	request.EnableIpv6 = requests.NewBoolean(d.Get("enable_ipv6").(bool))
-
-	if v, ok := d.GetOk("resource_group_id"); ok {
-		request.ResourceGroupId = v.(string)
-	}
-
 	if v, ok := d.GetOk("user_cidrs"); ok && v != nil {
 		request.UserCidr = convertListToCommaSeparate(v.([]interface{}))
 	}

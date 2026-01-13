@@ -41,27 +41,30 @@ func TestAccAlibabacloudStackVpcVpc_basic(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"description": "RDK update",
+					"name":        "${var.name}",
+					"description": "${var.name}",
 					"cidr_block":  "192.168.0.0/16",
+					"user_cidrs":  []string{"189.168.0.0/16"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"description": "RDK update",
-						"cidr_block":  "192.168.0.0/16",
+						"name":         name,
+						"description":  name,
+						"cidr_block":   "192.168.0.0/16",
+						"user_cidrs.#": "1",
+						"user_cidrs.0": "189.168.0.0/16",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"description": "RDK update1",
+					"name":        "${var.name}_updated",
+					"description": "${var.name}_updated",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"description": "RDK update1",
+						"name":        name + "_updated",
+						"description": name + "_updated",
 					}),
 				),
 			},
