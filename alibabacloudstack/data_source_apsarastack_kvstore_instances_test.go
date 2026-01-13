@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackKVStoreInstancesDataSource(t *testing.T) {
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${local.kv_instance_name}",
+			"name_regex": "^${alibabacloudstack_kvstore_instance.default.instance_name}$",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "fake-nonexistent-instance",
@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackKVStoreInstancesDataSource(t *testing.T) {
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${local.kv_instance_id}"},
+			"ids": []string{"${alibabacloudstack_kvstore_instance.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"fake-instance-id-12345"},
@@ -33,18 +33,18 @@ func TestAccAlibabacloudStackKVStoreInstancesDataSource(t *testing.T) {
 	instanceTypeConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"instance_type": "Redis",
-			"name_regex":    "${local.kv_instance_name}",
+			"ids": []string{"${alibabacloudstack_kvstore_instance.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"instance_type": "Memcache",
-			"name_regex":    "${local.kv_instance_name}",
+			"ids": []string{"${alibabacloudstack_kvstore_instance.default.id}"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":           []string{"${local.kv_instance_id}"},
-			"name_regex":    "${local.kv_instance_name}",
+			"ids":           []string{"${alibabacloudstack_kvstore_instance.default.id}"},
+			"name_regex":    "^${alibabacloudstack_kvstore_instance.default.instance_name}$",
 			"instance_type": "Redis",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
@@ -99,7 +99,31 @@ variable "name" {
   default = "%s"
 }
 
+variable "kv_edition" {
+    default = "%s"
+}
+
+variable "kv_engine" {
+    default = "%s"
+}
+
 %s
 
-`, name, KVRInstanceCommonTestCase("enterprise", string(KVStoreRedis), ))
+%s
+
+data "alibabacloudstack_zones" "default" {
+	available_resource_creation = "VSwitch"
+}
+
+resource "alibabacloudstack_kvstore_instance" "default" {
+	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
+	instance_name  = var.name
+	instance_type  = var.kv_engine
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
+	engine_version = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.engine_version
+	node_type      = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.node_type
+	password       = random_password.password.0.result
+}
+
+`, name, "enterprise", string(KVStoreRedis), KVRInstanceClassCommonTestCase, RandomPasswordTestCase(12, 2))
 }

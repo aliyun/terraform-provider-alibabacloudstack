@@ -1703,9 +1703,6 @@ data alibabacloudstack_kvstore_instance_classes "default" {
 
 func KVRInstanceCommonTestCase(kvEdition string, kvEngine string) string {
 	instanceId := os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_KVINSTANCE_ID")
-	if instanceId != "" {
-		instanceId = fmt.Sprintf(`"%s"`, instanceId)
-	}
 	return fmt.Sprintf(`
 
 variable "kv_edition" {
@@ -1725,7 +1722,7 @@ data "alibabacloudstack_zones" "default" {
 }
 
 data "alibabacloudstack_kvstore_instances" "existed" {
-	ids = [%s]
+	ids = ["%s"]
 }
 
 resource "alibabacloudstack_kvstore_instance" "default" {

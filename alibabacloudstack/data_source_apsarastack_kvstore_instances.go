@@ -157,7 +157,11 @@ func dataSourceAlibabacloudStackKVStoreInstancesRead(d *schema.ResourceData, met
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok {
 		for _, vv := range v.([]interface{}) {
-			idsMap[vv.(string)] = vv.(string)
+			if vv == nil {
+				idsMap[""] = ""
+			} else {
+				idsMap[vv.(string)] = vv.(string)
+			}
 		}
 	}
 	if v, ok := d.GetOk("tags"); ok {
@@ -211,11 +215,6 @@ func dataSourceAlibabacloudStackKVStoreInstancesRead(d *schema.ResourceData, met
 			request.PageNumber = page
 		}
 	}
-
-	return kvstoreInstancesDescription(d, dbi)
-}
-
-func kvstoreInstancesDescription(d *schema.ResourceData, dbi []r_kvstore.KVStoreInstanceInDescribeInstances) error {
 
 	var ids []string
 	var names []string
