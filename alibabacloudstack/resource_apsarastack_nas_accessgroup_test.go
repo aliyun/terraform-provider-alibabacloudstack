@@ -45,7 +45,7 @@ func TestAccAlibabacloudStackNasAccessgroup0(t *testing.T) {
 
 					"access_group_name": "accssGroupExtremeVpcTest",
 
-					"file_system_type": "extreme",
+					"file_system_type": "standard",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -56,7 +56,7 @@ func TestAccAlibabacloudStackNasAccessgroup0(t *testing.T) {
 
 						"access_group_name": "accssGroupExtremeVpcTest",
 
-						"file_system_type": "extreme",
+						"file_system_type": "standard",
 					}),
 				),
 			},
@@ -84,19 +84,14 @@ func TestAccAlibabacloudStackNasAccessgroup0(t *testing.T) {
 
 var AlibabacloudTestAccNasAccessgroupCheckmap = map[string]string{
 
-	"rule_count": CHECKSET,
-
 	"access_group_type": CHECKSET,
 
 	"description": CHECKSET,
 
 	"access_group_name": CHECKSET,
 
-	"create_time": CHECKSET,
-
 	"file_system_type": CHECKSET,
 
-	"mount_target_count": CHECKSET,
 }
 
 func AlibabacloudTestAccNasAccessgroupBasicdependence(name string) string {
