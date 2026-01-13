@@ -27,7 +27,7 @@ func resourceAlibabacloudStackRamRoleAttachment() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, 
+	setResourceFunc(resource,
 		resourceAlibabacloudStackInstanceRoleAttachmentCreate,
 		resourceAlibabacloudStackInstanceRoleAttachmentRead,
 		nil,
@@ -58,6 +58,7 @@ func resourceAlibabacloudStackInstanceRoleAttachmentCreate(d *schema.ResourceDat
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.AttachInstanceRamRole(request)
 		})
+		addDebug("AttachInstanceRamRole", raw, request, request.QueryParams)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{"unexpected end of JSON input"}) {
 				return resource.RetryableError(errmsgs.WrapError(errmsgs.Error("Please trying again.")))

@@ -94,6 +94,7 @@ func dataSourceAlibabacloudStackAscmRamServiceRolesRead(d *schema.ResourceData, 
 
 	for {
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("ListRAMServiceRoles", bresponse, request, request.QueryParams)
 		if err != nil {
 			errmsg := ""
 			if bresponse != nil {

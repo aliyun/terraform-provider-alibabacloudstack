@@ -1,6 +1,8 @@
 package alibabacloudstack
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -15,12 +17,16 @@ func TestAccAlibabacloudStackRamRoleAttachment_basic(t *testing.T) {
 	var v *ecs.DescribeInstanceRamRoleResponse
 	resourceId := "alibabacloudstack_ram_role_attachment.default"
 	ra := resourceAttrInit(resourceId, ramRoleAttachmentMap)
-	serviceFunc := func() interface{} {
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &RamService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	}, "DescribeRamRoleAttachment")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%secsRamRole%d", defaultRegionToTest, rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccEcsRamRoleAttachmentdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -33,7 +39,10 @@ func TestAccAlibabacloudStackRamRoleAttachment_basic(t *testing.T) {
 		CheckDestroy: testAccCheckRamRoleAttachmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAscm_RamRoleAttachment,
+				Config: testAccConfig(map[string]interface{}{
+					"role_name":    "${local.local_role_name}",
+					"instance_ids": []string{"${alibabacloudstack_ecs_instance.default.id}"},
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -71,44 +80,38 @@ func testAccCheckRamRoleAttachmentDestroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccCheckAscm_RamRoleAttachment = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + `
+func AlibabacloudTestAccEcsRamRoleAttachmentdependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "Test_ram_role_attachment"
+    default = "%s"
 }
 
-resource "alibabacloudstack_vpc" "default" {
-  name = var.name
-  cidr_block = "192.168.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = alibabacloudstack_vpc.default.id
-  cidr_block = "192.168.0.0/16"
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  name = var.name
-}
-resource "alibabacloudstack_security_group" "default" {
-  name = var.name
-  vpc_id = alibabacloudstack_vpc.default.id
-}
-resource "alibabacloudstack_instance" "default" {
-  image_id = data.alibabacloudstack_images.default.images.0.id
-  instance_type = local.default_instance_type_id
-  instance_name = var.name
-  security_groups = [alibabacloudstack_security_group.default.id]
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  system_disk_category = "cloud_pperf"
-  system_disk_size = 100
-  vswitch_id = alibabacloudstack_vswitch.default.id
-}
+%s
 
 data "alibabacloudstack_ascm_ram_service_roles" "role" {
-  product = "ecs"
+   product = "ECS"
 }
-resource "alibabacloudstack_ram_role_attachment" "default" {
-   role_name    = data.alibabacloudstack_ascm_ram_service_roles.role.roles.0.name
-   instance_ids = [alibabacloudstack_instance.default.id]
+
+locals {
+	create_count = length(data.alibabacloudstack_ascm_ram_service_roles.role.roles) > 0 ? 0 : 1
 }
-`
+
+data "alibabacloudstack_ascm_resource_groups" "group" { 
+    name_regex = "%s"
+}
+
+resource "alibabacloudstack_ascm_ram_service_role" "default" {
+  count = local.create_count
+  organization_id = "${data.alibabacloudstack_ascm_resource_groups.group.groups.0.organization_id}"
+  product_name = "ECS"
+}
+
+locals {
+	local_role_name = length(data.alibabacloudstack_ascm_ram_service_roles.role.roles) > 0 ? data.alibabacloudstack_ascm_ram_service_roles.role.roles.0.name : alibabacloudstack_ascm_ram_service_role.default[0].ram_roles.0.role_name
+}
+
+`, name, ECSInstanceCommonTestCase, os.Getenv("ALIBABACLOUDSTACK_RESOURCE_GROUP_SET"))
+}
 
 var ramRoleAttachmentMap = map[string]string{
 	"role_name": CHECKSET,
