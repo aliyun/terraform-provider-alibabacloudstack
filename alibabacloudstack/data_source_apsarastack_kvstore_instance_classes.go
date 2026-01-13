@@ -119,20 +119,6 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 	}
 }
 
-func removeRepByMap(slc []string) []string {
-	result := []string{}         // Store the returned non-duplicate slice
-	tempMap := map[string]byte{} // Store non-duplicate keys
-	for _, e := range slc {
-		l := len(tempMap)
-		tempMap[e] = 0 // When e exists in tempMap, it cannot be added again because keys are not allowed to be duplicated
-		// If the above line is successfully added, the length changes and the element is definitely not duplicated
-		if len(tempMap) != l { // After adding to the map, if the map length changes, the element is not duplicated
-			result = append(result, e) // When the element is not duplicated, add the element to the result slice
-		}
-	}
-	return result
-}
-
 func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
