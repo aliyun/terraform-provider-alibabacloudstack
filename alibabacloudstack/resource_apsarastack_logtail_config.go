@@ -178,14 +178,7 @@ func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta 
 	if d.IsNewResource() {
 		return nil
 	}
-	update := false
-	if d.HasChange("input_detail") {
-		update = true
-	}
-	if d.HasChange("input_type") {
-		update = true
-	}
-	if update {
+	if d.HasChanges("input_detail", "input_type") {
 		// logconfig := &sls.LogConfig{}
 		inputConfigInputDetail := make(map[string]interface{})
 		data := d.Get("input_detail").(string)
@@ -277,14 +270,6 @@ func assertInputDetailType(inputConfigInputDetail map[string]interface{}, logcon
 		}
 		logconfig.InputDetail = JSONConfigInputDetail
 	}
-	if inputConfigInputDetail["logType"] == "apsara_log" {
-		ApsaraLogConfigInputDetail, ok := sls.ConvertToApsaraLogConfigInputDetail(inputConfigInputDetail)
-		if !ok {
-			return nil, errmsgs.WrapError(errmsgs.Error("covert to JSONConfigInputDetail false "))
-		}
-		logconfig.InputDetail = ApsaraLogConfigInputDetail
-	}
-
 	if inputConfigInputDetail["logType"] == "common_reg_log" {
 		RegexConfigInputDetail, ok := sls.ConvertToRegexConfigInputDetail(inputConfigInputDetail)
 		if !ok {

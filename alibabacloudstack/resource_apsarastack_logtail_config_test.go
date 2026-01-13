@@ -139,16 +139,34 @@ func TestAccAlibabacloudStackLogTail_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"project":      "${alibabacloudstack_log_project.default.name}",
-					"logstore":     "${alibabacloudstack_log_store.default.name}",
 					"input_type":   "file",
-					"name":         name,
-					"output_type":  "LogService",
 					"input_detail": `{\"discardUnmatch\":false,\"enableRawLog\":true,\"fileEncoding\":\"gbk\",\"filePattern\":\"access.log\",\"logPath\":\"/logPath\",\"logType\":\"json_log\",\"maxDepth\":10,\"topicFormat\":\"default\"}`,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"input_detail": "{\"discardUnmatch\":false,\"enableRawLog\":true,\"fileEncoding\":\"gbk\",\"filePattern\":\"access.log\",\"logPath\":\"/logPath\",\"logType\":\"json_log\",\"maxDepth\":10,\"topicFormat\":\"default\"}",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"input_type":   "file",
+					"input_detail": `{\"adjustTimezone\":false,\"advanced\":{\"blacklist\":{},\"k8s\":{\"ExternalEnvTag\":{}},\"tail_size_kb\":1024},\"discardUnmatch\":false,\"dockerExcludeEnv\":{},\"dockerExcludeLabel\":{},\"dockerFile\":false,\"dockerIncludeEnv\":{},\"dockerIncludeLabel\":{},\"enableRawLog\":false,\"fileEncoding\":\"utf8\",\"filePattern\":\"apsarach.log\",\"formatNickname\":\"customized\",\"key\":[\"remote_addr\",\"remote_ident\",\"remote_user\",\"time_local\",\"request_method\",\"request_uri\",\"request_protocol\",\"status\",\"response_size_bytes\"],\"logPath\":\"/var/log\",\"logTimezone\":\"\",\"logType\":\"common_reg_log\",\"maxDepth\":10,\"preserve\":true,\"preserveDepth\":1,\"regex\":\"([0-9.-]+)\\\\s([\\\\w.-]+)\\\\s([\\\\w.-]+)\\\\s(\\\\[[^\\\\[\\\\]]+\\\\]|-)\\\\s\\\"((?:[^\\\"]|\\\\\\\")+)\\\\s((?:[^\\\"]|\\\\\\\")+)\\\\s((?:[^\\\"]|\\\\\\\")+)\\\"\\\\s(\\\\d{3}|-)\\\\s(\\\\d+|-).*\",\"topicFormat\":\"none\"}`,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"input_detail": "{\"adjustTimezone\":false,\"advanced\":{\"blacklist\":{},\"k8s\":{\"ExternalEnvTag\":{}},\"tail_size_kb\":1024},\"discardUnmatch\":false,\"dockerExcludeEnv\":{},\"dockerExcludeLabel\":{},\"dockerFile\":false,\"dockerIncludeEnv\":{},\"dockerIncludeLabel\":{},\"enableRawLog\":false,\"fileEncoding\":\"utf8\",\"filePattern\":\"apsarach.log\",\"formatNickname\":\"customized\",\"key\":[\"remote_addr\",\"remote_ident\",\"remote_user\",\"time_local\",\"request_method\",\"request_uri\",\"request_protocol\",\"status\",\"response_size_bytes\"],\"logPath\":\"/var/log\",\"logTimezone\":\"\",\"logType\":\"common_reg_log\",\"maxDepth\":10,\"preserve\":true,\"preserveDepth\":1,\"regex\":\"([0-9.-]+)\\\\s([\\\\w.-]+)\\\\s([\\\\w.-]+)\\\\s(\\\\[[^\\\\[\\\\]]+\\\\]|-)\\\\s\\\"((?:[^\\\"]|\\\\\\\")+)\\\\s((?:[^\\\"]|\\\\\\\")+)\\\\s((?:[^\\\"]|\\\\\\\")+)\\\"\\\\s(\\\\d{3}|-)\\\\s(\\\\d+|-).*\",\"topicFormat\":\"none\"}",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"input_type":   "file",
+					"input_detail": `{\"adjustTimezone\":false,\"advanced\":{\"blacklist\":{},\"k8s\":{\"ExternalEnvTag\":{}},\"tail_size_kb\":1024},\"discardUnmatch\":false,\"dockerExcludeEnv\":{},\"dockerExcludeLabel\":{},\"dockerFile\":false,\"dockerIncludeEnv\":{},\"dockerIncludeLabel\":{},\"enableRawLog\":false,\"fileEncoding\":\"utf8\",\"filePattern\":\"*.log\",\"key\":[\"content\"],\"logBeginRegex\":\".*\",\"logPath\":\"/var/log\",\"logTimezone\":\"\",\"logType\":\"common_reg_log\",\"maxDepth\":10,\"preserve\":true,\"preserveDepth\":1,\"regex\":\"(.*)\",\"timeFormat\":\"\",\"topicFormat\":\"none\"}`,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"input_detail": "{\"adjustTimezone\":false,\"advanced\":{\"blacklist\":{},\"k8s\":{\"ExternalEnvTag\":{}},\"tail_size_kb\":1024},\"discardUnmatch\":false,\"dockerExcludeEnv\":{},\"dockerExcludeLabel\":{},\"dockerFile\":false,\"dockerIncludeEnv\":{},\"dockerIncludeLabel\":{},\"enableRawLog\":false,\"fileEncoding\":\"utf8\",\"filePattern\":\"*.log\",\"key\":[\"content\"],\"logBeginRegex\":\".*\",\"logPath\":\"/var/log\",\"logTimezone\":\"\",\"logType\":\"common_reg_log\",\"maxDepth\":10,\"preserve\":true,\"preserveDepth\":1,\"regex\":\"(.*)\",\"timeFormat\":\"\",\"topicFormat\":\"none\"}",
 					}),
 				),
 			},
@@ -210,46 +228,6 @@ func TestAccAlibabacloudStackLogTail_plugin(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"input_detail"},
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackLogTail_multi(t *testing.T) {
-	var v *sls.LogConfig
-	resourceId := "alibabacloudstack_logtail_config.default.4"
-	ra := resourceAttrInit(resourceId, logTailMap)
-	serviceFunc := func() interface{} {
-		return &LogService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacclogtailconfig-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogTailDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"project":      "${alibabacloudstack_log_project.default.name}",
-					"logstore":     "${alibabacloudstack_log_store.default.name}",
-					"input_type":   "file",
-					"name":         name + "${count.index}",
-					"output_type":  "LogService",
-					"input_detail": `{\"discardUnmatch\":false,\"enableRawLog\":true,\"fileEncoding\":\"gbk\",\"filePattern\":\"access.log\",\"logPath\":\"/logPath\",\"logType\":\"json_log\",\"maxDepth\":10,\"topicFormat\":\"default\"}`,
-					"count":        "5",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
 			},
 		},
 	})

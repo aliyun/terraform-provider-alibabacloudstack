@@ -76,6 +76,10 @@ func TestAccAlibabacloudStackLogAlert_basic(t *testing.T) {
 								"Foo": "Bar",
 							},
 						},
+						{
+							"type":        "MessageCenter",
+							"content":     content,
+						},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
