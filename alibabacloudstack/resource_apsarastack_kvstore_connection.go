@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
@@ -87,36 +88,31 @@ func resourceAlibabacloudStackKvstoreConnectionRead(d *schema.ResourceData, meta
 	}
 
 	d.Set("instance_id", d.Id())
-	for _, instanceNetInfo := range object {
-		if instanceNetInfo.DBInstanceNetType == "0" {
-			d.Set("connection_string", instanceNetInfo.ConnectionString)
-			d.Set("port", instanceNetInfo.Port)
-		}
+	d.Set("connection_string", object.ConnectionString)
+	if idx := strings.Index(object.ConnectionString, "."); idx != -1 {
+		d.Set("connection_string_prefix", object.ConnectionString[:idx])
 	}
+	d.Set("port", object.Port)
 	return nil
 }
 
 func resourceAlibabacloudStackKvstoreConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	r_kvstoreService := KvstoreService{client}
-	update := false
 	request := r_kvstore.CreateModifyDBInstanceConnectionStringRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
 	request.CurrentConnectionString = d.Get("connection_string").(string)
 
-	if !d.IsNewResource() && d.HasChange("connection_string_prefix") {
-		update = true
+	if d.IsNewResource() {
+		return nil
 	}
-	request.NewConnectionString = d.Get("connection_string_prefix").(string)
-	request.IPType = "Public"
 
-	if !d.IsNewResource() && d.HasChange("port") {
-		update = true
+	if d.HasChanges("connection_string_prefix", "port") {
+		request.NewConnectionString = d.Get("connection_string_prefix").(string)
+		request.IPType = "Public"
+
 		request.Port = d.Get("port").(string)
-	}
-
-	if update {
 		raw, err := client.WithRkvClient(func(r_kvstoreClient *r_kvstore.Client) (interface{}, error) {
 			return r_kvstoreClient.ModifyDBInstanceConnectionString(request)
 		})

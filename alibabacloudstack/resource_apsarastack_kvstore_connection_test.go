@@ -4,50 +4,46 @@ import (
 	"fmt"
 	"testing"
 
+	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackRedisConnection0(t *testing.T) {
-	var v map[string]interface{}
+	var v r_kvstore.InstanceNetInfo
 
 	resourceId := "alibabacloudstack_redis_connection.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccRedisConnectionCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoR_KvstoreDescribedbinstancenetinfoRequest")
+	}, "DescribeKvstoreConnection")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sredisconnection%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-kvcon%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRedisConnectionBasicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-
-		CheckDestroy: rac.checkResourceDestroy(),
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
 
 		Steps: []resource.TestStep{
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"instance_id": "r-8vb6ces3yk5huhxoek",
-
+					"instance_id":              "${local.kv_instance_id}",
+					"connection_string_prefix": name,
 					"port": "6379",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"instance_id": "r-8vb6ces3yk5huhxoek",
-
 						"port": "6379",
 					}),
 				),
@@ -63,34 +59,18 @@ func TestAccAlibabacloudStackRedisConnection0(t *testing.T) {
 
 var AlibabacloudTestAccRedisConnectionCheckmap = map[string]string{
 
-	"status": CHECKSET,
-
 	"instance_id": CHECKSET,
-
-	"create_time": CHECKSET,
-
 	"port": CHECKSET,
-
-	"vswitch_id": CHECKSET,
-
-	"vpc_id": CHECKSET,
-
-	"expired_time": CHECKSET,
-
-	"db_instance_net_type": CHECKSET,
-
-	"ip_address": CHECKSET,
-
 	"connection_string": CHECKSET,
 }
 
 func AlibabacloudTestAccRedisConnectionBasicdependence(name string) string {
 	return fmt.Sprintf(`
-variable "name" {
-    default = "%s"
-}
+	variable "name" {
+	    default = "%s"
+	}
 
+	%s
 
-
-`, name)
+	`, name, KVRInstanceCommonTestCase("enterprise", string(KVStoreRedis), ))
 }

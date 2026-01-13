@@ -429,10 +429,7 @@ func (s *KvstoreService) DescribeDBInstanceNetInfo(id string) (*r_kvstore.NetInf
 	return &bresponse.NetInfoItems, nil
 }
 
-func (s *KvstoreService) DoR_KvstoreDescribedbinstancenetinfoRequest(id string) (object []r_kvstore.InstanceNetInfo, err error) {
-	return s.DescribeKvstoreConnection(id)
-}
-func (s *KvstoreService) DescribeKvstoreConnection(id string) (object []r_kvstore.InstanceNetInfo, err error) {
+func (s *KvstoreService) DescribeKvstoreConnection(id string) (object r_kvstore.InstanceNetInfo, err error) {
 	request := r_kvstore.CreateDescribeDBInstanceNetInfoRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
@@ -453,12 +450,12 @@ func (s *KvstoreService) DescribeKvstoreConnection(id string) (object []r_kvstor
 		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	if len(bresponse.NetInfoItems.InstanceNetInfo) < 1 {
-		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KvstoreConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, bresponse.RequestId)
-		return
+	for _, netInfo := range bresponse.NetInfoItems.InstanceNetInfo {
+		if netInfo.DBInstanceNetType == "0" {
+			return netInfo, nil
+		}
 	}
-	return bresponse.NetInfoItems.InstanceNetInfo, nil
+	return object, errmsgs.GetNotFoundErrorFromString("KvstoreConnection Not Found")
 }
 
 func (s *KvstoreService) InstanceSslStateRefreshFunc(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, failStates []string) resource.StateRefreshFunc {

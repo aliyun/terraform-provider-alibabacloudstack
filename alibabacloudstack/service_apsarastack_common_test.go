@@ -277,11 +277,9 @@ func (ra *resourceAttr) updateCheckMapPair(changeMap map[string]string) {
 		newCheckMap[k] = v
 	}
 	ra.checkMap = newCheckMap
-	if changeMap != nil && len(changeMap) > 0 {
+	if len(changeMap) > 0 {
 		for rk, rv := range changeMap {
-			if _, ok := ra.checkMap[rk]; ok {
-				delete(ra.checkMap, rk)
-			}
+			delete(ra.checkMap, rk)
 			if rv != REMOVEKEY {
 				ra.checkMap[rk] = rv
 			}
@@ -300,7 +298,7 @@ func (ra *resourceAttr) resourceAttrMapCheck() resource.TestCheckFunc {
 			return errmsgs.WrapError(fmt.Errorf("resource ID is not set"))
 		}
 
-		if ra.checkMap == nil || len(ra.checkMap) == 0 {
+		if len(ra.checkMap) == 0 {
 			return errmsgs.WrapError(fmt.Errorf("the parameter \"checkMap\" is nil or empty"))
 		}
 
@@ -397,7 +395,7 @@ func (b *resourceConfig) configUpdate(changeMap map[string]interface{}) {
 		newMap[k] = v
 	}
 	b.attributeMap = newMap
-	if changeMap != nil && len(changeMap) > 0 {
+	if len(changeMap) > 0 {
 		for rk, rv := range changeMap {
 			_, ok := b.attributeMap[rk]
 			if strValue, isCost := rv.(string); ok && isCost && strValue == REMOVEKEY {
@@ -959,9 +957,7 @@ locals {
 
 func removeEOFMarkers(input string) string {
 	startMarker := "<<EOF\n"
-	if strings.HasPrefix(input, startMarker) {
-		input = input[len(startMarker):]
-	}
+	input = strings.TrimPrefix(input, startMarker)
 
 	endMarker := "EOF"
 	if idx := strings.LastIndex(input, endMarker); idx != -1 {
@@ -1704,6 +1700,51 @@ data alibabacloudstack_kvstore_instance_classes "default" {
   architecture = "cluster"
 }
 `
+
+func KVRInstanceCommonTestCase(kvEdition string, kvEngine string) string {
+	instanceId := os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_KVINSTANCE_ID")
+	if instanceId != "" {
+		instanceId = fmt.Sprintf(`"%s"`, instanceId)
+	}
+	return fmt.Sprintf(`
+
+variable "kv_edition" {
+    default = "%s"
+}
+
+variable "kv_engine" {
+    default = "%s"
+}
+
+%s
+
+%s
+
+data "alibabacloudstack_zones" "default" {
+	available_resource_creation = "VSwitch"
+}
+
+data "alibabacloudstack_kvstore_instances" "default" {
+	ids = [%s]
+}
+
+resource "alibabacloudstack_kvstore_instance" "default" {
+	count = length(data.alibabacloudstack_kvstore_instances.default.ids) > 0 ? 0 : 1
+	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
+	instance_name  = var.name
+	instance_type  = var.kv_engine
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
+	engine_version = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.engine_version
+	node_type      = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.node_type
+	password       = random_password.password.0.result
+}
+
+locals {
+	kv_instance_id = length(data.alibabacloudstack_kvstore_instances.default.ids) > 0 ? data.alibabacloudstack_kvstore_instances.default.ids.0 : alibabacloudstack_kvstore_instance.default.0.id
+}
+
+`, kvEdition, kvEngine, KVRInstanceClassCommonTestCase, RandomPasswordTestCase(12, 2), instanceId)
+}
 
 const SlbCommonTestCase = VSwitchCommonTestCase + `
 
