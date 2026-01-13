@@ -1,12 +1,11 @@
 package alibabacloudstack
 
 import (
-	"slices"
-
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackNasZones() *schema.Resource {
@@ -22,8 +21,10 @@ func dataSourceAlibabacloudStackNasZones() *schema.Resource {
 				Optional: true,
 			},
 			"file_system_type": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"standard", "extreme", "cpfs"}, false),
+				Default: "standard",
 			},
 			"output_file": {
 				Type:       schema.TypeString,
@@ -122,10 +123,18 @@ func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interf
 		var protocols []string
 		if v, ok := object["Performance"]; ok {
 			for _, v := range v.(map[string]interface{})["Protocol"].([]interface{}) {
+				if protocol != "" && protocol != v.(string) {
+					continue
+				}
 				protocols = append(protocols, v.(string))
 			}
-			if protocol != "" && !slices.Contains(protocols, protocol) {
-				continue
+		}
+		if v, ok := object["Capacity"]; len(protocols) == 0 && ok {
+			for _, v := range v.(map[string]interface{})["Protocol"].([]interface{}) {
+				if protocol != "" && protocol != v.(string) {
+					continue
+				}
+				protocols = append(protocols, v.(string))
 			}
 		}
 		zoneIds = append(zoneIds, zoneId)
@@ -149,6 +158,9 @@ func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interf
 					"storage_type": instanceType["StorageType"],
 				}
 				if v, ok := instanceType["ProtocolType"]; ok {
+					if protocol != "" && v != protocol {
+						continue
+					}
 					itype["protocol_type"] = v
 				}
 				instanceTypes = append(instanceTypes, itype)

@@ -8,14 +8,27 @@ import (
 
 func TestAccAlicloudNasZonesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(100, 999)
-	regionIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlicloudNasZonesDataSourceName(map[string]string{}),
-		fakeConfig:  "",
+	zoneIdConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlicloudNasZonesDataSourceName(map[string]string{
+			"zone_id": `"${data.alibabacloudstack_nas_zones.anyone.zones.0.zone_id}"`,
+		}),
+		fakeConfig: testAccCheckAlicloudNasZonesDataSourceName(map[string]string{
+			"zone_id": `"fake_zone_id"`,
+		}),
+	}
+	protocolConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlicloudNasZonesDataSourceName(map[string]string{
+			"protocol": `"${data.alibabacloudstack_nas_zones.anyone.zones.0.protocols.0}"`,
+		}),
+		fakeConfig: testAccCheckAlicloudNasZonesDataSourceName(map[string]string{
+			"protocol": `"fake_protocol"`,
+		}),
 	}
 
 	var existAlicloudNasZoneDataSourceNameMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"zones.#":                       CHECKSET,
+			"zones.#":         CHECKSET,
+			"zones.0.zone_id": CHECKSET,
 		}
 	}
 	var fakeNasZonesMapFunc = func(rand int) map[string]string {
@@ -29,7 +42,7 @@ func TestAccAlicloudNasZonesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeNasZonesMapFunc,
 	}
 
-	alicloudNasZonesAccountBusesCheckInfo.dataSourceTestCheck(t, rand, regionIdConf)
+	alicloudNasZonesAccountBusesCheckInfo.dataSourceTestCheck(t, rand, zoneIdConf, protocolConf)
 }
 
 func testAccCheckAlicloudNasZonesDataSourceName(attrMap map[string]string) string {
@@ -40,6 +53,8 @@ func testAccCheckAlicloudNasZonesDataSourceName(attrMap map[string]string) strin
 
 	config := fmt.Sprintf(`
 %s
+data "alibabacloudstack_nas_zones" "anyone" {  
+}
 data "alibabacloudstack_nas_zones" "default" {  
    %s
 }

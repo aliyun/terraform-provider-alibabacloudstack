@@ -537,6 +537,7 @@ func (client *AlibabacloudStackClient) GetCallerInfo() (map[string]interface{}, 
 	}
 	return resp.(map[string]interface{}), nil
 }
+
 func (client *AlibabacloudStackClient) GetCallerIdentity() (string, error) {
 
 	resp, err := client.GetCallerInfo()
