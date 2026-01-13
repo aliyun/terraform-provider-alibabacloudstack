@@ -41,7 +41,7 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description": "rdk_test_description",
-					"instance_id": "${alibabacloudstack_kvstore_instance.default.id}",
+					"instance_id": "${local.kv_instance_id}",
 					"account_name": "rdk_test_name_01",
 					"account_password": "${random_password.password.0.result}",
 				}),
@@ -94,15 +94,10 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 }
 
 var AlibabacloudTestAccRedisAccountCheckmap = map[string]string{
-
 	"description": CHECKSET,
-
 	"account_privilege": CHECKSET,
-
 	"instance_id": CHECKSET,
-
 	"account_type": CHECKSET,
-
 	"account_name": CHECKSET,
 }
 
@@ -112,33 +107,7 @@ variable "name" {
     default = "%s"
 }
 
-variable "kv_edition" {
-    default = "enterprise"
-}
-
-variable "kv_engine" {
-    default = "%s"
-}
-
 %s
 
-%s
-
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation = "VSwitch"
-  }
-
-resource "alibabacloudstack_kvstore_instance" "default" {
-	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-	instance_name  = var.name
-	instance_type  = var.kv_engine
-	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
-	engine_version = "%s"
-	node_type      = "double"
-	password       = random_password.password.0.result
-}
-
-
-
-`, name, string(KVStoreRedis), KVRInstanceClassCommonTestCase, RandomPasswordTestCase(12, 2), string(KVStore4Dot0))
+`, name,  KVRInstanceCommonTestCase("enterprise", string(KVStoreRedis)))
 }

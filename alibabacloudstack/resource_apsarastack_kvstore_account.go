@@ -170,7 +170,6 @@ func resourceAlibabacloudStackKVStoreAccountRead(d *schema.ResourceData, meta in
 func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kvstoreService := KvstoreService{client}
-	d.Partial(true)
 	parts := strings.Split(d.Id(), COLON_SEPARATED)
 	instanceId := parts[0]
 	accountName := parts[1]
@@ -254,24 +253,31 @@ func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta 
 			request.AccountPassword = decryptResp.Plaintext
 		}
 
-		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
-			return rkvClient.ResetAccountPassword(request)
+		err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+			raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
+				return rkvClient.ResetAccountPassword(request)
+			})
+			if err != nil {
+				if errmsgs.IsExpectedErrors(err, []string{"TaskExists"}) {
+					return resource.RetryableError(err)
+				}
+				errmsg := ""
+				if raw != nil {
+					response, ok := raw.(*r_kvstore.ResetAccountPasswordResponse)
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+					}
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			}
+			return nil
 		})
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*r_kvstore.ResetAccountPasswordResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return err
 		}
 
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	d.Partial(false)
 	return nil
 }
 
