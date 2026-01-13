@@ -64,7 +64,7 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory"}, true),
 			},
 			"output_file": {
 				Type:       schema.TypeString,
@@ -219,10 +219,10 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 	sortedBy := d.Get("sorted_by").(string)
 	if sortedBy != "" {
 		sort.SliceStable(Datas, func(i, j int) bool {
-			switch sortedBy {
+			switch strings.ToUpper(sortedBy) {
 			case "CPU":
 				return Datas[i].Cpu < Datas[j].Cpu
-			case "Memory":
+			case "MEMORY":
 				return Datas[i].Memory.(float64) < Datas[j].Memory.(float64)
 			}
 			return false
