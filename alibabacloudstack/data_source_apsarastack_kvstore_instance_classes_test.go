@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -13,12 +12,8 @@ func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
 
 	EngineVersionConfRedis := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"engine":         "Redis",
-			"engine_version": "5.0",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"engine":         "Redis",
-			"engine_version": "4.9",
+			"engine":         "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.engine}",
+			"engine_version": "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.engine_version}",
 		}),
 	}
 
@@ -52,35 +47,32 @@ func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
 	//		"classes.0.price":          CHECKSET,
 	//	},
 	//}
-	EngineVersionConfMemcache := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id": "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"engine":  "Memcache",
+	NotExisted := dataSourceTestAccConfig{
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"memory": "0.01",
 		}),
 	}
 
 	editionTypeCommunity := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id":      "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"edition_type": "Community",
+			"edition_type": "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.edition_type}",
 		}),
 	}
-	shardNumber8 := dataSourceTestAccConfig{
+	cpu2 := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id": "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"cup":     "8",
+			"cpu":       "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.cpu}",
+			"sorted_by": "Memory",
+		}),
+	}
+	memory2 := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"memory":    "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.memory}",
+			"sorted_by": "CPU",
 		}),
 	}
 	ArchitectureStandard := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id":      "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"architecture": "standard",
-		}),
-	}
-	ArchitectureCluster := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id":      "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"architecture": "cluster",
+			"architecture": "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.architecture}",
 		}),
 	}
 	// Not all of zone support rwsplit
@@ -92,47 +84,30 @@ func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
 	//}
 	NodeType := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id":   "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"node_type": "double",
+			"node_type": "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.node_type}",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id":              "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"instance_charge_type": "PostPaid",
-			"engine":               "Redis",
-			"engine_version":       "5.0",
-			"architecture":         "standard",
-			"series_type":          "enhanced_performance_type",
-			"edition_type":         "Community",
-			"node_type":            "double",
-			"shard_number":         "1",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"zone_id":              "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"instance_charge_type": "PostPaid",
-			"engine":               "Redis",
-			"engine_version":       "5.6",
-			"architecture":         "standard",
-			"series_type":          "enhanced_performance_type",
-			"edition_type":         "Community",
-			"node_type":            "double",
-			"shard_number":         "1",
+			"engine":         "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.engine}",
+			"engine_version": "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.engine_version}",
+			"architecture":   "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.architecture}",
+			"edition_type":   "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.edition_type}",
+			"node_type":      "${data.alibabacloudstack_kvstore_instance_classes.anyone.instance_classes.0.node_type}",
 		}),
 	}
 
 	var existKVStoreInstanceMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"instance_classes.#": CHECKSET,
-			"instance_classes.0": CHECKSET,
+			"instance_classes.#":    CHECKSET,
+			"instance_classes.0.id": CHECKSET,
 		}
 	}
 
 	var fakeKVStoreInstanceMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"instance_classes.#": "38",
-			"classes.#":          "0",
+			"instance_classes.#": "0",
 		}
 	}
 
@@ -151,14 +126,12 @@ func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
 	KVStoreInstanceCheckInfo.dataSourceTestCheck(t, rand, EngineVersionConfRedis,
 		//prePaidSortedByConfRedis, postPaidSortedByConfRedis
 		editionTypeCommunity,
-		shardNumber8, ArchitectureStandard, ArchitectureCluster,
-		NodeType, allConf, EngineVersionConfMemcache)
+		cpu2, memory2, ArchitectureStandard,
+		NodeType, allConf, NotExisted)
 }
 
 func kvstoreConfigHeader(name string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "resources" {
-	available_resource_creation= "%s"
-}
-`, name)
+	return `
+	data "alibabacloudstack_kvstore_instance_classes" "anyone" {
+	}`
 }

@@ -24,6 +24,7 @@ type KVStoreInstanceType string
 const (
 	KVStoreRedis    = KVStoreInstanceType("Redis")
 	KVStoreMemcache = KVStoreInstanceType("Memcache")
+	KVStoreKVStore = KVStoreInstanceType("r-kvstore")
 )
 
 type KVStoreEngineVersion string
@@ -33,4 +34,5 @@ const (
 	KVStore4Dot0 = KVStoreEngineVersion("4.0")
 	KVStore5Dot0 = KVStoreEngineVersion("5.0")
 	KVStore6Dot0 = KVStoreEngineVersion("6.0")
+	KVStore7Dot0 = KVStoreEngineVersion("7.0")
 )

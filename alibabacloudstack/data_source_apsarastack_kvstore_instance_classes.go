@@ -2,8 +2,10 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -20,14 +22,14 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{string(KVStoreMemcache), string(KVStoreRedis)}, false),
+				ValidateFunc: validation.StringInSlice([]string{string(KVStoreMemcache), string(KVStoreRedis), string(KVStoreKVStore)}, false),
 				Default:      string(KVStoreRedis),
 			},
 			"engine_version": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{string(KVStore4Dot0), string(KVStore5Dot0), string(KVStore6Dot0)}, false),
+				ValidateFunc: validation.StringInSlice([]string{string(KVStore4Dot0), string(KVStore5Dot0), string(KVStore6Dot0), string(KVStore7Dot0)}, false),
 			},
 			"architecture": {
 				Type:         schema.TypeString,
@@ -54,16 +56,15 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 				ValidateFunc: validation.IntInSlice([]int{1, 2, 4, 8, 16, 32, 64, 128, 256}),
 			},
 			"memory": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntInSlice([]int{1, 2, 4, 8, 16, 32, 64, 128, 256}),
+				Type:     schema.TypeFloat,
+				Optional: true,
+				ForceNew: true,
 			},
 			"sorted_by": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"cpu", "memory"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory"}, false),
 			},
 			"output_file": {
 				Type:       schema.TypeString,
@@ -104,7 +105,7 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 							Computed: true,
 						},
 						"memory": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeFloat,
 							Computed: true,
 						},
 						"status": {
@@ -180,17 +181,50 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 		return errmsgs.WrapError(err)
 	}
 
+	var datas []KVInstanceClass
+	if string(response.Data) == "{}" {
+		datas = []KVInstanceClass{}
+	} else {
+		if err := json.Unmarshal(response.Data, &datas); err != nil {
+			// Optional: try to parse as single object? (not needed here)
+			return fmt.Errorf("failed to unmarshal data as array: %w", err)
+		}
+	}
 	var Datas []KVInstanceClass
-	var cpu, momroy int
+	var cpu int
+	var memory float64
 	if v, ok := d.GetOk("cpu"); ok {
 		cpu = v.(int)
 	}
 	if v, ok := d.GetOk("memory"); ok {
-		momroy = v.(int)
+		memory = v.(float64)
 	}
 
-	for _, data := range response.Data {
-		if cpu != 0 && momroy != 0 && (data.Cpu != cpu || data.Memory != momroy) {
+	for _, data := range datas {
+		// Convert raw.Memory to float32
+		switch v := data.Memory.(type) {
+		case float64:
+			data.Memory = v
+		case string:
+			if f, err := strconv.ParseFloat(v, 64); err == nil {
+				data.Memory = float64(f)
+			} else {
+				return fmt.Errorf("cannot parse memory string %q as float32", v)
+			}
+		case int:
+			data.Memory = float64(v)
+		case float32:
+			data.Memory = float64(v)
+		default:
+			return fmt.Errorf("unsupported type for memory: %T (value: %v)", v, v)
+		}
+		if data.Cpu == 0 && data.CpuCore != 0 {
+			data.Cpu = data.CpuCore
+		}
+		if cpu != 0 && data.Cpu != cpu {
+			continue
+		}
+		if memory != 0 && data.Memory != memory {
 			continue
 		}
 		Datas = append(Datas, data)
@@ -203,7 +237,7 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 			case "CPU":
 				return Datas[i].Cpu < Datas[j].Cpu
 			case "Memory":
-				return Datas[i].Memory < Datas[j].Memory
+				return Datas[i].Memory.(float64) < Datas[j].Memory.(float64)
 			}
 			return false
 		})

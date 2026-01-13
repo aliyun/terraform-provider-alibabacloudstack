@@ -539,24 +539,24 @@ func (s *KvstoreService) DescribeInstanceTDEStatus(id string) (map[string]interf
 
 type GetKVInstanceClassResponse struct {
 	*responses.BaseResponse
-	Code      any               `json:"Code"`
-	Message   string            `json:"Message"`
-	RequestId string            `json:"RequestId"`
-	Success   bool              `json:"Success"`
-	Data      []KVInstanceClass `json:"data"`
+	Code      any             `json:"Code"`
+	Message   string          `json:"Message"`
+	RequestId string          `json:"RequestId"`
+	Success   bool            `json:"Success"`
+	Data      json.RawMessage `json:"data"`
 }
 
 type KVInstanceClass struct {
-	Architecture   string `json:"architecture"`
-	Cpu            int    `json:"cpu"`
-	EngineVersion  string `json:"engineVersion"`
-	InstanceClass  string `json:"instanceClass"`
-	MaxBandWidth   int    `json:"maxBandWidth"`
-	MaxConnections int    `json:"maxConnections"`
-	Memory         int    `json:"memory"`
-	NodeType       string `json:"nodeType"`
-	Product        string `json:"product"`
-	Series         string `json:"series"`
-	Status         string `json:"status"`
+	Architecture   string      `json:"architecture"`
+	Cpu            int         `json:"cpu"`
+	CpuCore        int         `json:"cpuCore"`
+	EngineVersion  string      `json:"engineVersion"`
+	InstanceClass  string      `json:"instanceClass"`
+	MaxBandWidth   int         `json:"maxBandWidth"`
+	MaxConnections int         `json:"maxConnections"`
+	Memory         interface{} `json:"memory"`
+	NodeType       string      `json:"nodeType"`
+	Product        string      `json:"product"`
+	Series         string      `json:"series"`
+	Status         string      `json:"status"`
 }
-
