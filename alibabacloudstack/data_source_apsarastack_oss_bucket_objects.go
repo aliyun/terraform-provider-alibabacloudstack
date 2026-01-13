@@ -139,7 +139,7 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 		// }
 		// var response *oss.ListObjectsResult
 		// err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if response.Objects == nil || len(response.Objects) < 1 {
+		if len(response.Objects) < 1 {
 			break
 		}
 

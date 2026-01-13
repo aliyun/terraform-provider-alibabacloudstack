@@ -30,11 +30,6 @@ func dataSourceAlibabacloudStackOssClusters() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				ForceNew:     true,
 			},
-			"region_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"clusters": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -113,9 +108,6 @@ func dataSourceAlibabacloudStackOssClustersRead(d *schema.ResourceData, meta int
 	request.QueryParams["AppAction"] = "GetOssEndpointList"
 	request.QueryParams["AppName"] = "one-console-app-oss"
 	region := client.RegionId
-	if v, ok := d.GetOk("region_id"); ok {
-		region = v.(string)
-	}
 	request.QueryParams["Params"] = fmt.Sprintf("{\"region\":\"%s\", \"params\":{\"region\":\"%s\"}}", region, region)
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug("GetOssEndpointList", bresponse, request, request.QueryParams)
