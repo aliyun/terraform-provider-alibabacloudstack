@@ -106,7 +106,7 @@ func testSweepKVStoreInstances(region string) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackKVStoreRedisInstanceclassictest(t *testing.T) {
+func TestAccAlibabacloudStackKVStoreInstance_classictest(t *testing.T) {
 	var instance *r_kvstore.DBInstanceAttribute
 	resourceId := "alibabacloudstack_kvstore_instance.default"
 	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
@@ -145,7 +145,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstanceclassictest(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
+func TestAccAlibabacloudStackKVStoreInstance_vpctest(t *testing.T) {
 	var instance *r_kvstore.DBInstanceAttribute
 	resourceId := "alibabacloudstack_kvstore_instance.default"
 	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
@@ -246,7 +246,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 // 	})
 // }
 
-func TestAccAlibabacloudStackKVStoreRedisInstance_Tde(t *testing.T) {
+func TestAccAlibabacloudStackKVStoreInstance_Tde(t *testing.T) {
 	var instance *r_kvstore.DBInstanceAttribute
 	resourceId := "alibabacloudstack_kvstore_instance.default"
 	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
