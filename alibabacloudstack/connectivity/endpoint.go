@@ -329,8 +329,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"cs-intranet.{{.region}}.{{.domain}}",
 	},
 	HBASECode: PopEndpoint{
-		"hbase.{{.domain}}",
-		"hbase.{{.region}}.{{.domain}}",
+		"hbase-inc.{{.domain}}",
+		"hbase-inc.{{.region}}.{{.domain}}",
 	},
 	ONSCode: PopEndpoint{
 		"ons-biz.{{.region}}.{{.domain}}",

@@ -1,329 +1,408 @@
 package alibabacloudstack
 
 import (
-	"fmt"
-	"strconv"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudStackZonesDataSource_basic(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackZonesDataSourceBasicConfig,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_zones.foo"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.local_name"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_instance_types.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_resource_creation.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_disk_categories.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "ids.#"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.foo", "zones.0.slb_slave_zone_ids.#", "0"),
-				),
-			},
-		},
-	})
+	resourceId := "data.alibabacloudstack_zones.default"
+	name := "basic"
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceZonesConfigDependence)
+
+	basicConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"enable_details": true,
+		}),
+	}
+
+	var existZonesBasicMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":                                 CHECKSET,
+			"zones.#":                               CHECKSET,
+			"zones.0.id":                            CHECKSET,
+			"zones.0.local_name":                    CHECKSET,
+			"zones.0.available_instance_types.#":    CHECKSET,
+			"zones.0.available_resource_creation.#": CHECKSET,
+			"zones.0.available_disk_categories.#":   CHECKSET,
+			"zones.0.slb_slave_zone_ids.#":          "0",
+		}
+	}
+
+	var fakeZonesBasicMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"zones.#": "0",
+		}
+	}
+
+	var zonesBasicCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existZonesBasicMapFunc,
+		fakeMapFunc:  fakeZonesBasicMapFunc,
+	}
+	zonesBasicCheckInfo.dataSourceTestCheck(t, 0, basicConf)
 }
 
 func TestAccAlibabacloudStackZonesDataSource_filter(t *testing.T) {
+	resourceId := "data.alibabacloudstack_zones.default"
+	name := "filter"
 
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackZonesDataSourceFilter,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_zones.foo"),
-					testCheckZoneLength("data.alibabacloudstack_zones.foo"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.local_name"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_instance_types.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_resource_creation.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_disk_categories.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "ids.#"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.foo", "zones.0.slb_slave_zone_ids.#", "0"),
-				),
-			},
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceZonesConfigDependence)
 
-			{
-				Config: testAccCheckAlibabacloudStackZonesDataSourceFilterIoOptimized,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_zones.foo"),
-					testCheckZoneLength("data.alibabacloudstack_zones.foo"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.local_name"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_instance_types.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_resource_creation.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_disk_categories.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "ids.#"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.foo", "zones.0.slb_slave_zone_ids.#", "0"),
-				),
-			},
-		},
-	})
+	vswitchConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"available_resource_creation": "VSwitch",
+			"enable_details":              true,
+		}),
+	}
+	kvStoreConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"available_resource_creation": "KVStore",
+			"enable_details":              true,
+		}),
+	}
+	mongodbConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"available_resource_creation": "MongoDB",
+			"enable_details":              true,
+		}),
+	}
+//	hbaseConf := dataSourceTestAccConfig{
+//		existConfig: testAccConfig(map[string]interface{}{
+//			"available_resource_creation": "HBase",
+//			"enable_details":              true,
+//		}),
+//	}
+	adbConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"available_resource_creation": "ADB",
+			"enable_details":              true,
+		}),
+	}
+	gpdbConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"available_resource_creation": "Gpdb",
+			"enable_details":              true,
+		}),
+	}
+//	esConf := dataSourceTestAccConfig{
+//		existConfig: testAccConfig(map[string]interface{}{
+//			"available_resource_creation": "Elasticsearch",
+//			"enable_details":              true,
+//		}),
+//	}
+
+	var existZonesFilterMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":                                 CHECKSET,
+			"zones.#":                               CHECKSET,
+			"zones.0.id":                            CHECKSET,
+			"zones.0.local_name":                    CHECKSET,
+			"zones.0.available_instance_types.#":    CHECKSET,
+			"zones.0.available_resource_creation.#": CHECKSET,
+			"zones.0.available_disk_categories.#":   CHECKSET,
+			"zones.0.slb_slave_zone_ids.#":          "0",
+		}
+	}
+
+	var fakeZonesFilterMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"zones.#": "0",
+		}
+	}
+
+	var zonesFilterCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existZonesFilterMapFunc,
+		fakeMapFunc:  fakeZonesFilterMapFunc,
+		// FIXME: Need to increase deployment detection
+		
+	}
+	zonesFilterCheckInfo.dataSourceTestCheck(t, 0, vswitchConf, kvStoreConf, mongodbConf, adbConf, gpdbConf)
+}
+
+func TestAccAlibabacloudStackZonesDataSource_filterIoOptimized(t *testing.T) {
+	resourceId := "data.alibabacloudstack_zones.default"
+	name := "io_optimized"
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceZonesConfigDependence)
+
+	ioOptimizedConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"available_resource_creation": "IoOptimized",
+			"available_disk_category":     "${data.alibabacloudstack_zones.anyone.zones.0.available_disk_categories.0}",
+			"enable_details":              true,
+		}),
+	}
+
+	var existZonesIoOptimizedMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":                                 CHECKSET,
+			"zones.#":                               CHECKSET,
+			"zones.0.id":                            CHECKSET,
+			"zones.0.local_name":                    CHECKSET,
+			"zones.0.available_instance_types.#":    CHECKSET,
+			"zones.0.available_resource_creation.#": CHECKSET,
+			"zones.0.available_disk_categories.#":   CHECKSET,
+			"zones.0.slb_slave_zone_ids.#":          "0",
+		}
+	}
+
+	var fakeZonesIoOptimizedMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"zones.#": "0",
+		}
+	}
+
+	var zonesIoOptimizedCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existZonesIoOptimizedMapFunc,
+		fakeMapFunc:  fakeZonesIoOptimizedMapFunc,
+	}
+	zonesIoOptimizedCheckInfo.dataSourceTestCheck(t, 0, ioOptimizedConf)
 }
 
 func TestAccAlibabacloudStackZonesDataSource_unitRegion(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackZonesDataSourceUnitRegion,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_zones.foo"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.local_name"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_instance_types.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_resource_creation.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.available_disk_categories.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "ids.#"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.foo", "zones.0.slb_slave_zone_ids.#", "0"),
-				),
-			},
-		},
-	})
+	resourceId := "data.alibabacloudstack_zones.default"
+	name := "unit_region"
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceZonesConfigDependence)
+
+	unitRegionConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"available_resource_creation": "VSwitch",
+			"enable_details":              true,
+		}),
+	}
+
+	var existZonesUnitRegionMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":                                 CHECKSET,
+			"zones.#":                               CHECKSET,
+			"zones.0.id":                            CHECKSET,
+			"zones.0.local_name":                    CHECKSET,
+			"zones.0.available_instance_types.#":    CHECKSET,
+			"zones.0.available_resource_creation.#": CHECKSET,
+			"zones.0.available_disk_categories.#":   CHECKSET,
+			"zones.0.slb_slave_zone_ids.#":          "0",
+		}
+	}
+
+	var fakeZonesUnitRegionMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"zones.#": "0",
+		}
+	}
+
+	var zonesUnitRegionCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existZonesUnitRegionMapFunc,
+		fakeMapFunc:  fakeZonesUnitRegionMapFunc,
+	}
+	zonesUnitRegionCheckInfo.dataSourceTestCheck(t, 0, unitRegionConf)
 }
 
 func TestAccAlibabacloudStackZonesDataSource_multiZone(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackZonesDataSourceMultiZone,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_zones.default"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.id"),
-					//resource.TestMatchResourceAttr("data.alibabacloudstack_zones.default", "zones.0.id", regexp.MustCompile(fmt.Sprintf(".%s.", MULTI_IZ_SYMBOL))),
-					//resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.0.local_name", "a"),
-					//resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.0.available_instance_types.#", "0"),
-					//resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.0.available_resource_creation.#", "0"),
-					//resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.0.available_disk_categories.#", "0"),
+	resourceId := "data.alibabacloudstack_zones.default"
+	name := "multi_zone"
 
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.local_name"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.available_instance_types.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.available_resource_creation.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.available_disk_categories.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.multi_zone_ids.#"),
-					//resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.multi_zone_ids.0"),
-					//resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.multi_zone_ids.1"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "ids.#"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.0.slb_slave_zone_ids.#", "0"),
-				),
-			},
-		},
-	})
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceZonesConfigDependence)
+
+	multiZoneConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"available_resource_creation": "Rds",
+			"multi":                       true,
+			"enable_details":              true,
+		}),
+	}
+
+	var existZonesMultiZoneMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":                    CHECKSET,
+			"zones.#":                  CHECKSET,
+			"zones.0.id":               CHECKSET,
+			"zones.0.local_name":       CHECKSET,
+			"zones.0.multi_zone_ids.#": CHECKSET,
+		}
+	}
+
+	var fakeZonesMultiZoneMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"zones.#": "0",
+		}
+	}
+
+	var zonesMultiZoneCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existZonesMultiZoneMapFunc,
+		fakeMapFunc:  fakeZonesMultiZoneMapFunc,
+	}
+	zonesMultiZoneCheckInfo.dataSourceTestCheck(t, 0, multiZoneConf)
 }
 
 func TestAccAlibabacloudStackZonesDataSource_chargeType(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackZonesDataSourceChargeType,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_zones.default"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.local_name"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.available_instance_types.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.available_resource_creation.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.available_disk_categories.#"),
-					//resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.0.local_name", ""),
-					//resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.0.available_instance_types.#", "0"),
-					//resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.0.available_resource_creation.#", "0"),
-					//resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.0.available_disk_categories.#", "0"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "ids.#"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.0.slb_slave_zone_ids.#", "0"),
-				),
-			},
-		},
-	})
+	resourceId := "data.alibabacloudstack_zones.default"
+	name := "charge_type"
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceZonesConfigDependence)
+
+	chargeTypeConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_charge_type":        "PrePaid",
+			"available_resource_creation": "Rds",
+			"multi":                       true,
+			"enable_details":              true,
+		}),
+	}
+
+	var existZonesChargeTypeMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":                    CHECKSET,
+			"zones.#":                  CHECKSET,
+			"zones.0.id":               CHECKSET,
+			"zones.0.local_name":       CHECKSET,
+			"zones.0.multi_zone_ids.#": CHECKSET,
+		}
+	}
+
+	var fakeZonesChargeTypeMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"zones.#": "0",
+		}
+	}
+
+	var zonesChargeTypeCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existZonesChargeTypeMapFunc,
+		fakeMapFunc:  fakeZonesChargeTypeMapFunc,
+	}
+	zonesChargeTypeCheckInfo.dataSourceTestCheck(t, 0, chargeTypeConf)
 }
 
 func TestAccAlibabacloudStackZonesDataSource_slb(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackZonesDataSource_slb,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_zones.default"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.local_name"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.available_instance_types.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.available_resource_creation.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.available_disk_categories.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "ids.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "zones.0.slb_slave_zone_ids.#"),
-				),
-			},
-		},
-	})
-}
+	resourceId := "data.alibabacloudstack_zones.default"
+	name := "slb"
 
-func TestAccAlibabacloudStackZonesDataSource_enable_details(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackZonesDataSourceEnableDetails,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_zones.foo"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "zones.0.id"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.foo", "zones.0.local_name", ""),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.foo", "zones.0.available_instance_types.#", "0"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.foo", "zones.0.available_resource_creation.#", "0"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.foo", "zones.0.available_disk_categories.#", "0"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.foo", "ids.#"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.foo", "zones.0.slb_slave_zone_ids.#", "0"),
-				),
-			},
-		},
-	})
-}
-func TestAccAlibabacloudStackZonesDataSource_empty(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackZonesDataSourceEmpty,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_zones.default"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_zones.default", "zones.#", "0"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_zones.default", "zones.id"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_zones.default", "zones.local_name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_zones.default", "zones.available_instance_types"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_zones.default", "zones.available_resource_creation"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_zones.default", "zones.available_disk_categories"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_zones.default", "ids.#"),
-				),
-			},
-		},
-	})
-}
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceZonesConfigDependence)
 
-// the zone length changed occasionally
-// check by range to avoid test case failure
-func testCheckZoneLength(name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		ms := s.RootModule()
-		rs, ok := ms.Resources[name]
-		if !ok {
-			return fmt.Errorf("Not found: %s", name)
-		}
-
-		is := rs.Primary
-		if is == nil {
-			return fmt.Errorf("No primary instance: %s", name)
-		}
-
-		i, err := strconv.Atoi(is.Attributes["zones.#"])
-
-		if err != nil {
-			return fmt.Errorf("convert zone length err: %#v", err)
-		}
-
-		if i <= 0 {
-			return fmt.Errorf("zone length expected greater than 0 got err: %d", i)
-		}
-
-		return nil
+	slbConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"available_resource_creation":      "Slb",
+			"enable_details":                   true,
+			"available_slb_address_ip_version": "ipv4",
+			"available_slb_address_type":       "Vpc",
+		}),
 	}
+
+	var existZonesSlbMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":                                 CHECKSET,
+			"zones.#":                               CHECKSET,
+			"zones.0.id":                            CHECKSET,
+			"zones.0.local_name":                    CHECKSET,
+			"zones.0.available_instance_types.#":    CHECKSET,
+			"zones.0.available_resource_creation.#": CHECKSET,
+			"zones.0.available_disk_categories.#":   CHECKSET,
+			"zones.0.slb_slave_zone_ids.#":          CHECKSET,
+		}
+	}
+
+	var fakeZonesSlbMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"zones.#": "0",
+		}
+	}
+
+	var zonesSlbCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existZonesSlbMapFunc,
+		fakeMapFunc:  fakeZonesSlbMapFunc,
+	}
+	zonesSlbCheckInfo.dataSourceTestCheck(t, 0, slbConf)
 }
 
-const testAccCheckAlibabacloudStackZonesDataSourceBasicConfig = `
-data "alibabacloudstack_zones" "foo" {
-	enable_details = true
+func TestAccAlibabacloudStackZonesDataSource_enableDetails(t *testing.T) {
+	resourceId := "data.alibabacloudstack_zones.default"
+	name := "enable_details"
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceZonesConfigDependence)
+
+	enableDetailsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{}),
+	}
+
+	var existZonesEnableDetailsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":                                 CHECKSET,
+			"zones.#":                               CHECKSET,
+			"zones.0.id":                            CHECKSET,
+			"zones.0.local_name":                    "",
+			"zones.0.available_instance_types.#":    "0",
+			"zones.0.available_resource_creation.#": "0",
+			"zones.0.available_disk_categories.#":   "0",
+			"zones.0.slb_slave_zone_ids.#":          "0",
+		}
+	}
+
+	var fakeZonesEnableDetailsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"zones.#": "0",
+		}
+	}
+
+	var zonesEnableDetailsCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existZonesEnableDetailsMapFunc,
+		fakeMapFunc:  fakeZonesEnableDetailsMapFunc,
+	}
+	zonesEnableDetailsCheckInfo.dataSourceTestCheck(t, 0, enableDetailsConf)
 }
-`
 
-const testAccCheckAlibabacloudStackZonesDataSourceFilter = `
-data "alibabacloudstack_zones" "foo" {
-	available_resource_creation= "VSwitch"
-	available_disk_category= "cloud_efficiency"
-	enable_details = true
+func TestAccAlibabacloudStackZonesDataSource_empty(t *testing.T) {
+	resourceId := "data.alibabacloudstack_zones.default"
+	name := "empty"
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceZonesConfigDependence)
+
+	emptyConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"available_instance_type": "ecs.n1.fake",
+		}),
+	}
+
+	var existZonesEmptyMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"zones.#": "0",
+		}
+	}
+
+	var fakeZonesEmptyMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":   "0",
+			"zones.#": "0",
+		}
+	}
+
+	var zonesEmptyCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existZonesEmptyMapFunc,
+		fakeMapFunc:  fakeZonesEmptyMapFunc,
+	}
+	zonesEmptyCheckInfo.dataSourceTestCheck(t, 0, emptyConf)
 }
-`
 
-const testAccCheckAlibabacloudStackZonesDataSourceFilterIoOptimized = `
-data "alibabacloudstack_zones" "foo" {
-	available_resource_creation= "IoOptimized"
-	available_disk_category= "cloud_efficiency"
-	enable_details = true
+func dataSourceZonesConfigDependence(name string) string {
+	return `
+	data "alibabacloudstack_zones" "anyone" {
+		enable_details = true
+	}`
 }
-`
-
-const testAccCheckAlibabacloudStackZonesDataSourceUnitRegion = `
-data "alibabacloudstack_zones" "foo" {
-	available_resource_creation= "VSwitch"
-	enable_details = true
-}
-`
-
-const testAccCheckAlibabacloudStackZonesDataSourceMultiZone = `
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation= "Rds"
-  multi = true
-  enable_details = true
-}`
-
-const testAccCheckAlibabacloudStackZonesDataSourceChargeType = `
-data "alibabacloudstack_zones" "default" {
-  instance_charge_type = "PrePaid"
-  available_resource_creation= "Rds"
-  multi = true
-  enable_details = true
-}`
-
-const testAccCheckAlibabacloudStackZonesDataSource_slb = `
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation= "Slb"
-  enable_details = true
-  available_slb_address_ip_version= "ipv4"
-  available_slb_address_type="Vpc"
-}`
-
-const testAccCheckAlibabacloudStackZonesDataSourceEnableDetails = `
-data "alibabacloudstack_zones" "foo" {}
-`
-const testAccCheckAlibabacloudStackZonesDataSourceEmpty = `
-data "alibabacloudstack_zones" "default" {
-  available_instance_type = "ecs.n1.fake"
-}
-`

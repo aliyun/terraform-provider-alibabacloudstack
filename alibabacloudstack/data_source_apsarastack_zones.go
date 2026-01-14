@@ -200,7 +200,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	elasticsearchZones := make(map[string]string)
 	instanceChargeType := d.Get("instance_charge_type").(string)
 
-	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeRds)) {
+	if strings.EqualFold(resType, string(ResourceTypeRds)) {
 		request := rds.CreateDescribeRegionsRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		var raw interface{}
@@ -239,7 +239,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 			rdsZones[r.ZoneId] = r.RegionId
 		}
 	}
-	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeRkv)) {
+	if strings.EqualFold(resType, string(ResourceTypeRkv)) {
 		request := r_kvstore.CreateDescribeRegionsRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
@@ -276,7 +276,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 			}
 		}
 	}
-	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeMongoDB)) {
+	if strings.EqualFold(resType, string(ResourceTypeMongoDB)) {
 		request := dds.CreateDescribeRegionsRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
@@ -304,7 +304,8 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 			}
 		}
 	}
-	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeHBase)) {
+	// FIXME
+	if strings.EqualFold(resType, string(ResourceTypeHBase)) {
 		request := hbase.CreateDescribeRegionsRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithHbaseClient(func(hbaseClient *hbase.Client) (interface{}, error) {
@@ -332,7 +333,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 			}
 		}
 	}
-	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeAdb)) {
+	if strings.EqualFold(resType, string(ResourceTypeAdb)) {
 		request := adb.CreateDescribeRegionsRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
@@ -360,7 +361,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 			}
 		}
 	}
-	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeGpdb)) {
+	if strings.EqualFold(resType, string(ResourceTypeGpdb)) {
 		request := gpdb.CreateDescribeRegionsRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithGpdbClient(func(gpdbClient *gpdb.Client) (interface{}, error) {
@@ -389,7 +390,8 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 		}
 	}
 
-	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeElasticsearch)) {
+	// FIXME
+	if strings.EqualFold(resType, string(ResourceTypeElasticsearch)) {
 		request := elasticsearch.CreateGetRegionConfigurationRequest()
 		client.InitRoaRequest(*request.RoaRequest)
 		raw, err := client.WithElasticsearchClient(func(elasticsearchClient *elasticsearch.Client) (interface{}, error) {
