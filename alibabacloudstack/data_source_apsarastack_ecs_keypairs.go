@@ -83,12 +83,7 @@ func dataSourceAlibabacloudStackKeyPairsRead(d *schema.ResourceData, meta interf
 		regex = regexp.MustCompile(name.(string))
 	}
 	// ids
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	request := ecs.CreateDescribeKeyPairsRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	if fingerPrint, ok := d.GetOk("finger_print"); ok {

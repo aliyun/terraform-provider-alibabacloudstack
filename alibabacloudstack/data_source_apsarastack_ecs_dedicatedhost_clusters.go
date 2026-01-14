@@ -154,12 +154,7 @@ func dataSourceAlibabacloudStackEcsDedicatedHostClustersRead(d *schema.ResourceD
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_ecs_dedicated_host_cluster", "DescribeDedicatedHostClusters", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var ids []string
 	datas := make([]interface{}, 0)

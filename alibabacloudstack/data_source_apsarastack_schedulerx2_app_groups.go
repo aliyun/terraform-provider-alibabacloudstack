@@ -208,15 +208,7 @@ func dataSourceAlibabacloudStackSchedulerx2AppGroupsRead(d *schema.ResourceData,
 	}
 
 	// Filter by ids
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	// Filter by name_regex
 	var nameRegex *regexp.Regexp

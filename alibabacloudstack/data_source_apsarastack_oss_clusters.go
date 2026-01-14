@@ -124,15 +124,7 @@ func dataSourceAlibabacloudStackOssClustersRead(d *schema.ResourceData, meta int
 	if !ok || len(data.([]interface{})) == 0 {
 		return errmsgs.Error(fmt.Sprintf("GetOssEndpointList Failed! region: %s \n %#v", client.RegionId, bresponse.GetHttpContentString()))
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	ids := make([]string, 0)
 	clusters := make([]map[string]interface{}, 0)
 	for _, v := range data.([]interface{}) {

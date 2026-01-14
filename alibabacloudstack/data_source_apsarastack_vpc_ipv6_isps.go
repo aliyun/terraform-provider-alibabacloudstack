@@ -107,12 +107,7 @@ func dataSourceAlibabacloudStackVpcIpv6IspsRead(d *schema.ResourceData, meta int
 	service_provider := d.Get("service_provider").(string)
 	lock_status := d.Get("lock_status").(string)
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var ids []string
 	datas := make([]interface{}, 0)

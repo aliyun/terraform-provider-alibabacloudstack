@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
@@ -115,15 +114,7 @@ func dataSourceAlibabacloudStackVpnCgwsRead(d *schema.ResourceData, meta interfa
 
 	var filteredCgws []vpc.CustomerGateway
 	var reg *regexp.Regexp
-	var ids []string
-	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
-		for _, item := range v.([]interface{}) {
-			if item == nil {
-				continue
-			}
-			ids = append(ids, strings.Trim(item.(string), " "))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
 		if r, err := regexp.Compile(nameRegex.(string)); err == nil {
@@ -140,15 +131,12 @@ func dataSourceAlibabacloudStackVpnCgwsRead(d *schema.ResourceData, meta interfa
 			}
 		}
 
-		if ids != nil && len(ids) != 0 {
-			for _, id := range ids {
-				if cgw.CustomerGatewayId == id {
-					filteredCgws = append(filteredCgws, cgw)
-				}
+		if len(idsMap) > 0 {
+			if _, existed := idsMap[cgw.CustomerGatewayId]; !existed {
+				continue
 			}
-		} else {
-			filteredCgws = append(filteredCgws, cgw)
 		}
+		filteredCgws = append(filteredCgws, cgw)
 	}
 
 	return vpnCgwsDecriptionAttributes(d, filteredCgws, meta)

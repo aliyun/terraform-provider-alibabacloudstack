@@ -119,15 +119,7 @@ func dataSourceAlibabacloudStackDRDSInstancesRead(d *schema.ResourceData, meta i
 		regexString = r
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	instanceType := d.Get("instance_type").(string)
 	

@@ -100,15 +100,7 @@ func dataSourceAlibabacloudStackCmsMetricRuleTemplatesRead(d *schema.ResourceDat
 		templateNameRegex = r
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	request := client.NewCommonRequest("GET", "Cms", "2019-01-01", "DescribeMetricRuleTemplateList", "")
 	request.QueryParams["pageSize"] = "10"

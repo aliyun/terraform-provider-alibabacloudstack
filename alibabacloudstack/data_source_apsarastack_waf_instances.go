@@ -92,15 +92,7 @@ func dataSourceAlibabacloudStackWafInstancesRead(d *schema.ResourceData, meta in
 	request := make(map[string]interface{})
 	var objects []map[string]interface{}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	var response map[string]interface{}
 	var err error
 	response, err = client.DoTeaRequest("GET", "waf-onecs", "2020-07-01", action, "", nil, nil, request)

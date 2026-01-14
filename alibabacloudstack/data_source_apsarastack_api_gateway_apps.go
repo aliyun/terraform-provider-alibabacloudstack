@@ -127,15 +127,7 @@ func dataSourceAlibabacloudStackApigatewayAppsRead(d *schema.ResourceData, meta 
 	}
 
 	// ids
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	for _, app := range apps {
 		if gatewayAppNameRegex != nil && !gatewayAppNameRegex.MatchString(app.AppName) {

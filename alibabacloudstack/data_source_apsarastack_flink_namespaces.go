@@ -80,12 +80,7 @@ func dataSourceAlibabacloudStackFlinkNamespacesRead(d *schema.ResourceData, meta
 	var names []string
 	var s []map[string]interface{}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	for _, o := range ns.([]interface{}) {
 		object := o.(map[string]interface{})

@@ -6,7 +6,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"slices"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -109,7 +108,7 @@ func dataSourceAlibabacloudStackNasLifecyclePoliciesRead(d *schema.ResourceData,
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if sdkErr, ok := err.(*errors.ServerError); !ok || (sdkErr.ErrorCode() != "InvalidFileSystem.NotFound" && sdkErr.ErrorCode() != "InvalidParameter.FileSystemId"){
+		if sdkErr, ok := err.(*errors.ServerError); !ok || (sdkErr.ErrorCode() != "InvalidFileSystem.NotFound" && sdkErr.ErrorCode() != "InvalidParameter.FileSystemId") {
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_nas_lifecycle_policy", "DescribeLifecyclePolicies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
@@ -122,21 +121,14 @@ func dataSourceAlibabacloudStackNasLifecyclePoliciesRead(d *schema.ResourceData,
 		}
 	}
 
-	var filteredIds, ids []string
-	if ids, ok := d.GetOk("ids"); ok {
-		for _, id := range ids.([]interface{}) {
-			if id.(string) == "" {
-				continue
-			}
-			filteredIds = append(filteredIds, id.(string))
-		}
-	}
+	var ids []string
+	filteredIds := getIdsStringFilter(d)
 	datas := make([]interface{}, 0)
 	for _, data := range NasDescribelifecyclepoliciesResponseObj.LifecyclePolicies {
 		fileSystemId := data.FileSystemId
 		lifecyclePolicyName := data.LifecyclePolicyName
 		id := fmt.Sprintf("%s:%s", fileSystemId, lifecyclePolicyName)
-		if len(filteredIds) > 0 && !slices.Contains(filteredIds, id) {
+		if _, existed := filteredIds[id]; len(filteredIds) > 0 && !existed {
 			continue
 		}
 		i := map[string]interface{}{

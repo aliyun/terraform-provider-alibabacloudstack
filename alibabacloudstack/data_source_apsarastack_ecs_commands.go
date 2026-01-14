@@ -148,15 +148,7 @@ func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta int
 		nameRegex = r
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	for {
 		response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", "DescribeCommands", "", nil, nil, request)

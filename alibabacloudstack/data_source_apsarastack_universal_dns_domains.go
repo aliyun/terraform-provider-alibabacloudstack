@@ -79,15 +79,7 @@ func dataSourceAlibabacloudStackUniversalDnsDomainsRead(d *schema.ResourceData, 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// Build ids filter map
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	// Compile name regex if provided
 	var nameRegex *regexp.Regexp
@@ -128,8 +120,7 @@ func dataSourceAlibabacloudStackUniversalDnsDomainsRead(d *schema.ResourceData, 
 
 			// Apply id filtering
 			if len(idsMap) > 0 {
-				id, ok := domain["Id"].(string)
-				if !ok || idsMap[id] == "" {
+				if _, existed := domain["Id"].(string); !existed {
 					continue
 				}
 			}

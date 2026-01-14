@@ -95,12 +95,7 @@ func dataSourceAlibabacloudStackLindormInstanceTypesRead(d *schema.ResourceData,
 			"alibabacloudstack_lindorm_instance_types", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	lindorm_specs, err := jsonpath.Get("$.Data.LindormSpecs", response)
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	ids := []string{}
 	types := []map[string]interface{}{}

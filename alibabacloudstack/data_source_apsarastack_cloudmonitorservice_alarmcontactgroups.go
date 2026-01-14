@@ -88,15 +88,7 @@ func dataSourceAlibabacloudStackCmsAlarmContactGroupsRead(d *schema.ResourceData
 		alarmContactGroupNameRegex = r
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	for {
 		raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
 			return cmsClient.DescribeContactGroupList(request)

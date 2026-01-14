@@ -197,15 +197,7 @@ func dataSourceAlibabacloudStackCenCenInstancesRead(d *schema.ResourceData, meta
 
 	var ids []string
 	datas := make([]interface{}, 0)
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	var nameRegex, transitRouterNameRegex, transitRouterDescriptionRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {
 		nameRegex = regexp.MustCompile(v.(string))

@@ -156,15 +156,7 @@ func dataSourceAlibabacloudStackMqttInstancesRead(d *schema.ResourceData, meta i
 	}
 
 	// Filter by IDs if provided
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	// Compile name regex if provided
 	var nameRegex *regexp.Regexp

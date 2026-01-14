@@ -93,12 +93,7 @@ func dataSourceAlibabacloudStackNatGatewaysRead(d *schema.ResourceData, meta int
 	request := vpc.CreateDescribeNatGatewaysRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VpcId = d.Get("vpc_id").(string)
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var allNatGateways []vpc.NatGateway
 	var nameRegex *regexp.Regexp

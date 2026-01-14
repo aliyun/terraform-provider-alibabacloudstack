@@ -153,12 +153,7 @@ func dataSourceAlibabacloudStackVpngatewaySslVpnServersRead(d *schema.ResourceDa
 			"alibabacloudstack_vpn_gateway_ssl_vpn_server", "DescribeSslVpnServers", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var ids []string
 	datas := make([]interface{}, 0)

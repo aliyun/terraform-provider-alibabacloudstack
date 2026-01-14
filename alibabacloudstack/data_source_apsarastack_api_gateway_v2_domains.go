@@ -116,12 +116,7 @@ func dataSourceAlibabacloudStackAPIGatewayV2DomainsRead(d *schema.ResourceData, 
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	var ids []string
 	var domains []map[string]interface{}
 	for _, v := range records.([]interface{}) {

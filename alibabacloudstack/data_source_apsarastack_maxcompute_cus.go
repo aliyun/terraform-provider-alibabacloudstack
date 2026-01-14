@@ -86,12 +86,7 @@ func dataSourceAlibabacloudStackMaxcomputeCusRead(d *schema.ResourceData, meta i
 		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "maxcompute_cu", "$.Data.data", response)
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var t []map[string]interface{}
 	var ids []string
@@ -102,6 +97,9 @@ func dataSourceAlibabacloudStackMaxcomputeCusRead(d *schema.ResourceData, meta i
 			if !r.MatchString(cu_raw["quota_name"].(string)) {
 				continue
 			}
+		}
+		if _, existed := idsMap[cu_raw["id"].(string)]; len(idsMap)>0 && !existed {
+			continue
 		}
 		var cu_num int
 		switch v := cu_raw["max_cu"].(type) {

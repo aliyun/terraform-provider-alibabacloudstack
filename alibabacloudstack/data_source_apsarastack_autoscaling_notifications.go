@@ -86,11 +86,8 @@ func dataSourceAlibabacloudStackEssNotificationsRead(d *schema.ResourceData, met
 		}
 	}
 	var filteredNotifications = make([]ess.NotificationConfigurationModel, 0)
-	idsMap := make(map[string]string)
-	if ids, okIds := d.GetOk("ids"); okIds {
-		for _, i := range ids.([]interface{}) {
-			idsMap[i.(string)] = i.(string)
-		}
+	idsMap := getIdsStringFilter(d)
+	if len(idsMap) > 0 {
 		for _, n := range allNotifications {
 			if _, ok := idsMap[n.NotificationArn]; !ok {
 				continue

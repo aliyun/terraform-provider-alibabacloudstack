@@ -133,15 +133,7 @@ func dataSourceAlibabacloudStackApigatewayApisRead(d *schema.ResourceData, meta 
 	var filteredApisTemp []cloudapi.ApiSummary
 
 	// ids
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	for _, api := range allapis {
 		if v, ok := d.GetOk("name_regex"); ok && v.(string) != "" {
 			r := regexp.MustCompile(v.(string))

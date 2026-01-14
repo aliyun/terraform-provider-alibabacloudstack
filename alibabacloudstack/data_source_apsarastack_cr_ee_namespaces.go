@@ -100,13 +100,7 @@ func dataSourceAlibabacloudStackCrEeNamespacesRead(d *schema.ResourceData, meta 
 		nameRegex = regexp.MustCompile(v.(string))
 	}
 
-	var idsMap map[string]string
-	if v, ok := d.GetOk("ids"); ok {
-		idsMap = make(map[string]string)
-		for _, vv := range v.([]interface{}) {
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var targetNamespaces []map[string]interface{}
 	for _, namespaceItem := range namespaces {
@@ -116,8 +110,10 @@ func dataSourceAlibabacloudStackCrEeNamespacesRead(d *schema.ResourceData, meta 
 		}
 
 		namespaceId := crService.GenResourceId(namespace["InstanceId"].(string), namespace["NamespaceName"].(string))
-		if idsMap != nil && idsMap[namespaceId] == "" {
-			continue
+		if len(idsMap) > 0 {
+			if _, existed := idsMap[namespaceId]; !existed {
+				continue
+			}
 		}
 
 		targetNamespaces = append(targetNamespaces, namespace)

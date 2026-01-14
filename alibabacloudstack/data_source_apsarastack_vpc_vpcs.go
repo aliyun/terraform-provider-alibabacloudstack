@@ -254,12 +254,7 @@ func dataSourceAlibabacloudStackVpcsRead(d *schema.ResourceData, meta interface{
 	}
 
 	// ids
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	for _, v := range allVpcs {
 		if r != nil && !r.MatchString(v.VpcName) {

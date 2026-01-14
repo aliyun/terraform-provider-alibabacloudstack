@@ -127,15 +127,8 @@ func dataSourceAlibabacloudStackEssLifecycleHooksRead(d *schema.ResourceData, me
 	var filteredLifecycleHooks = make([]ess.LifecycleHook, 0)
 
 	nameRegex, okNameRegex := d.GetOk("name_regex")
-	idsMap := make(map[string]string)
-	ids, okIds := d.GetOk("ids")
-	if okIds {
-		for _, i := range ids.([]interface{}) {
-			idsMap[i.(string)] = i.(string)
-		}
-	}
-
-	if okNameRegex || okIds {
+	idsMap := getIdsStringFilter(d)
+	if okNameRegex || len(idsMap) > 0 {
 		for _, hook := range allLifecycleHooks {
 			if okNameRegex && nameRegex != "" {
 				var r = regexp.MustCompile(nameRegex.(string))
@@ -143,7 +136,7 @@ func dataSourceAlibabacloudStackEssLifecycleHooksRead(d *schema.ResourceData, me
 					continue
 				}
 			}
-			if okIds && len(idsMap) > 0 {
+			if len(idsMap) > 0 {
 				if _, ok := idsMap[hook.LifecycleHookId]; !ok {
 					continue
 				}

@@ -115,15 +115,7 @@ func dataSourceAlibabacloudStackEdasClustersRead(d *schema.ResourceData, meta in
 		request.LogicalRegionId = logicalRegionId.(string)
 	}
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, id := range v.([]interface{}) {
-			if id == nil {
-				continue
-			}
-			idsMap[Trim(id.(string))] = Trim(id.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.ListCluster(request)

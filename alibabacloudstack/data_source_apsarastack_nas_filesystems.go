@@ -121,15 +121,7 @@ func dataSourceAlibabacloudStackFileSystemsRead(d *schema.ResourceData, meta int
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
 	var objects []map[string]interface{}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	var filesystemDescriptionRegex *regexp.Regexp
 	if v, ok := d.GetOk("description_regex"); ok {
 		r, err := regexp.Compile(v.(string))

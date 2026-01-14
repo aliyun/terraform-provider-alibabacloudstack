@@ -71,15 +71,7 @@ func dataSourceAlibabacloudStackDatahubKafkaGroupsRead(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	projectName := d.Get("project_name").(string)
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var nameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {

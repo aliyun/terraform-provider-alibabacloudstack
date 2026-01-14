@@ -122,13 +122,7 @@ func dataSourceAlibabacloudStackCrEeInstancesRead(d *schema.ResourceData, meta i
 		nameRegex = regexp.MustCompile(v.(string))
 	}
 
-	var idsMap map[string]string
-	if v, ok := d.GetOk("ids"); ok {
-		idsMap = make(map[string]string)
-		for _, vv := range v.([]interface{}) {
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var targetInstances []map[string]interface{}
 	for _, respInstance := range instances {
@@ -137,8 +131,10 @@ func dataSourceAlibabacloudStackCrEeInstancesRead(d *schema.ResourceData, meta i
 			continue
 		}
 
-		if idsMap != nil && idsMap[instance["InstanceId"].(string)] == "" {
-			continue
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[instance["InstanceId"].(string)]; !ok {
+				continue
+			}
 		}
 
 		targetInstances = append(targetInstances, instance)

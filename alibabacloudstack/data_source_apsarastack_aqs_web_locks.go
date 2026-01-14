@@ -153,16 +153,8 @@ func dataSourceAlibabacloudStackAqsWebLocks() *schema.Resource {
 
 func dataSourceAlibabacloudStackAqsWebLocksRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	idsMap := make(map[string]string)
 	var filterUuid string
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	aqsService := AqsService{client}
 	if v, ok := d.GetOk("instanceid"); ok && v.(string) != "" {
 		instances, err := aqsService.DescribeCloudCenterInstances()

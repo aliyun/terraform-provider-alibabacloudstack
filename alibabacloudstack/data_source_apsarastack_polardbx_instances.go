@@ -206,12 +206,7 @@ func dataSourceAlibabacloudStackPolardbxInstancesRead(d *schema.ResourceData, me
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_polardbx_instance", "DescribeDBInstances", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	var ids []string
 	datas := make([]interface{}, 0)
 	for _, data := range PolardbxDescribedbinstancesResponseObj.DBInstances {

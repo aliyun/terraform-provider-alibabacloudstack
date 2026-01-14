@@ -81,12 +81,7 @@ func dataSourceAlibabacloudStackMaxcomputeUsersRead(d *schema.ResourceData, meta
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	users := make([]map[string]interface{}, 0)
 	ids := make([]string, 0)
 	datas, err := jsonpath.Get("$.data", response)

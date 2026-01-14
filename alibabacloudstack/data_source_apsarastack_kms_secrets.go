@@ -89,12 +89,7 @@ func dataSourceAlibabacloudStackKmsSecretsRead(d *schema.ResourceData, meta inte
 		}
 		nameRegex = r
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	if v, ok := d.GetOk("fetch_tags"); ok {
 		request.FetchTags = fmt.Sprintf("%v", v.(bool))
 	}

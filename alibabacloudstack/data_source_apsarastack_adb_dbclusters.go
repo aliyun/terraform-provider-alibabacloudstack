@@ -260,15 +260,7 @@ func dataSourceAlibabacloudStackAdbDbClustersRead(d *schema.ResourceData, meta i
 		descriptionRegex = r
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	for {
 		response, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, nil, request)

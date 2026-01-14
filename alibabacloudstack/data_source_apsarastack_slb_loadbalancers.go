@@ -171,12 +171,7 @@ func dataSourceAlibabacloudStackSlbsRead(d *schema.ResourceData, meta interface{
 		request.Tags = toSlbTagsString(tags)
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var allLoadBalancers []slb.LoadBalancer
 	request.PageSize = requests.NewInteger(PageSizeLarge)

@@ -154,13 +154,7 @@ func dataSourceAlibabacloudStackCrEeSyncRulesRead(d *schema.ResourceData, meta i
 		nameRegex = regexp.MustCompile(v.(string))
 	}
 
-	var idsMap map[string]string
-	if v, ok := d.GetOk("ids"); ok {
-		idsMap = make(map[string]string)
-		for _, vv := range v.([]interface{}) {
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	pageNo, pageSize := 1, 50
 	var syncRules []cr_ee.SyncRulesItem
@@ -203,8 +197,10 @@ func dataSourceAlibabacloudStackCrEeSyncRulesRead(d *schema.ResourceData, meta i
 			if nameRegex != nil && !nameRegex.MatchString(rule.SyncRuleName) {
 				continue
 			}
-			if idsMap != nil && idsMap[rule.SyncRuleId] == "" {
-				continue
+			if len(idsMap) > 0 {
+				if _, existed := idsMap[rule.SyncRuleId]; !existed {
+					continue
+				}
 			}
 			syncRules = append(syncRules, rule)
 		}

@@ -143,15 +143,9 @@ func dataSourceAlibabacloudStackEssScalingRulesRead(d *schema.ResourceData, meta
 	var filteredScalingRulesTemp = make([]ess.ScalingRule, 0)
 
 	nameRegex, okNameRegex := d.GetOk("name_regex")
-	idsMap := make(map[string]string)
-	ids, okIds := d.GetOk("ids")
-	if okIds {
-		for _, i := range ids.([]interface{}) {
-			idsMap[i.(string)] = i.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
-	if okNameRegex || okIds {
+	if okNameRegex || len(idsMap) >0  {
 		for _, rule := range allScalingRules {
 			if okNameRegex && nameRegex != "" {
 				var r = regexp.MustCompile(nameRegex.(string))
@@ -159,7 +153,7 @@ func dataSourceAlibabacloudStackEssScalingRulesRead(d *schema.ResourceData, meta
 					continue
 				}
 			}
-			if okIds && len(idsMap) > 0 {
+			if  len(idsMap) > 0 {
 				if _, ok := idsMap[rule.ScalingRuleId]; !ok {
 					continue
 				}

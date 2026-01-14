@@ -142,15 +142,7 @@ func dataSourceAlibabacloudStackDmsEnterpriseUsersRead(d *schema.ResourceData, m
 		userNameRegex = r
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	for {
 		response, err := client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)

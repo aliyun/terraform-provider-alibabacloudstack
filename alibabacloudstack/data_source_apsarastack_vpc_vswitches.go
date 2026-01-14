@@ -141,12 +141,7 @@ func dataSourceAlibabacloudStackVSwitchesRead(d *schema.ResourceData, meta inter
 	}
 
 	// ids
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	invoker := NewInvoker()
 	for {

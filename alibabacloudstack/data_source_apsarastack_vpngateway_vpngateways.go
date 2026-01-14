@@ -189,15 +189,7 @@ func dataSourceAlibabacloudStackVpnsRead(d *schema.ResourceData, meta interface{
 
 	var filteredVpns []vpc.VpnGateway
 	var reg *regexp.Regexp
-	var ids []string
-	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
-		for _, item := range v.([]interface{}) {
-			if item == nil {
-				continue
-			}
-			ids = append(ids, strings.Trim(item.(string), " "))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
 		if r, err := regexp.Compile(nameRegex.(string)); err == nil {
 			reg = r
@@ -212,15 +204,12 @@ func dataSourceAlibabacloudStackVpnsRead(d *schema.ResourceData, meta interface{
 				continue
 			}
 		}
-		if ids != nil && len(ids) != 0 {
-			for _, id := range ids {
-				if vpn.VpnGatewayId == id {
-					filteredVpns = append(filteredVpns, vpn)
-				}
+		if len(idsMap) != 0 {
+			if _, existed := idsMap[vpn.VpnGatewayId]; !existed {
+				continue
 			}
-		} else {
-			filteredVpns = append(filteredVpns, vpn)
 		}
+		filteredVpns = append(filteredVpns, vpn)
 
 	}
 

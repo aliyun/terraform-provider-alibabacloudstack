@@ -78,12 +78,7 @@ func dataSourceApsarStackKmsAliasesRead(d *schema.ResourceData, meta interface{}
 		}
 		nameRegex = r
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	for {
 		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 			return kmsClient.ListAliases(request)

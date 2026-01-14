@@ -160,13 +160,7 @@ func dataSourceAlibabacloudStackCrEeReposRead(d *schema.ResourceData, meta inter
 		nameRegex = regexp.MustCompile(v.(string))
 	}
 
-	var idsMap map[string]string
-	if v, ok := d.GetOk("ids"); ok {
-		idsMap = make(map[string]string)
-		for _, vv := range v.([]interface{}) {
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var enableDetails bool
 	if v, ok := d.GetOk("enable_details"); ok {
@@ -187,8 +181,10 @@ func dataSourceAlibabacloudStackCrEeReposRead(d *schema.ResourceData, meta inter
 				if nameRegex != nil && !nameRegex.MatchString(repository["RepoName"].(string)) {
 					continue
 				}
-				if idsMap != nil && idsMap[repository["RepoId"].(string)] == "" {
-					continue
+				if len(idsMap) > 0 {
+					if _, existed := idsMap[repository["RepoId"].(string)]; !existed {
+						continue
+					}
 				}
 
 				repos = append(repos, repository)

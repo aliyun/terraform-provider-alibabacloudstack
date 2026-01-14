@@ -85,13 +85,8 @@ func dataSourceAlibabacloudStackEipsRead(d *schema.ResourceData, meta interface{
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(1)
 
-	idsMap := make(map[string]string)
+	idsMap := getIdsStringFilter(d)
 	ipsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
 	if v, ok := d.GetOk("ip_addresses"); ok && len(v.([]interface{})) > 0 {
 		for _, vv := range v.([]interface{}) {
 			if vv == nil {

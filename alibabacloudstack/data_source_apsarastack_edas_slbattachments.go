@@ -85,15 +85,7 @@ func dataSourceAlibabacloudStackEdasApplicationsRead(d *schema.ResourceData, met
 	request := edas.CreateListApplicationRequest()
 	client.InitRoaRequest(*request.RoaRequest)
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, id := range v.([]interface{}) {
-			if id == nil {
-				continue
-			}
-			idsMap[Trim(id.(string))] = Trim(id.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.ListApplication(request)

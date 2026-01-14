@@ -119,12 +119,7 @@ func dataSourceAlibabacloudStackPolardbInstanceTypes() *schema.Resource {
 func dataSourceAlibabacloudStackPolardbInstanceTypesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	filterIds := map[string]string{}
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			filterIds[vv.(string)] = ""
-		}
-	}
+	filterIds := getIdsStringFilter(d)
 
 	existedId := map[string]string{}
 	ids := []string{}

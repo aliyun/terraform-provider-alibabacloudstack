@@ -145,15 +145,7 @@ func dataSourceAlibabacloudStackRosTemplatesRead(d *schema.ResourceData, meta in
 		templateNameRegex = r
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	for {
 		response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, nil, request)

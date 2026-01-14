@@ -111,15 +111,7 @@ func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, met
 	if rt, ok := d.GetOk("name_regex"); ok && rt.(string) != "" {
 		r = regexp.MustCompile(rt.(string))
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	var ids []string
 	var s []map[string]interface{}
 	for _, rg := range response.Data {

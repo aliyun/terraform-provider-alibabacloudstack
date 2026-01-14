@@ -80,15 +80,7 @@ func dataSourceAlibabacloudStackCspprivateHsmGroupsRead(d *schema.ResourceData, 
 	}
 
 	// Initialize filters
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var finalObjects []interface{}
 	pageNumber := 1

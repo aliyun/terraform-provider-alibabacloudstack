@@ -276,17 +276,11 @@ func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData,
 		r = regexp.MustCompile(nameRegex.(string))
 	}
 
-	var clusterids map[string]string
-	if v, ok := d.GetOk("ids"); ok {
-		clusterids = make(map[string]string)
-		for _, vv := range v.([]interface{}) {
-			clusterids[vv.(string)] = vv.(string)
-		}
-	}
+	clusterids := getIdsStringFilter(d)
 
 	log.Printf("Entering kubeconfig %v 52", clusterids)
 	for _, cresp := range Clusterresponse.Clusters {
-		if clusterids != nil && clusterids[cresp.ClusterID] == "" {
+		if _, existed := clusterids[cresp.ClusterID]; len(getIdsStringFilter(d)) > 0 && !existed {
 			continue
 		}
 		if r != nil && !r.MatchString(cresp.Name) {
@@ -333,10 +327,10 @@ func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData,
 	if file, ok := d.GetOk("kube_config"); ok && file.(string) != "" {
 		log.Printf("Entered kubeconfig")
 
-		for i, k := range clusterids {
+		for i, _ := range clusterids {
 			log.Printf("IDS %v", clusterids)
 			request := client.NewCommonRequest("POST", "Cs", "2015-12-15", "DescribeClusterUserKubeconfig", "")
-			request.QueryParams["ClusterId"] = k
+			request.QueryParams["ClusterId"] = i
 			request.QueryParams["PrivateIpAddress"] = "false"
 
 			raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {

@@ -160,15 +160,7 @@ func dataSourceAlibabacloudStackNatgatewayBandwidthPackagesRead(d *schema.Resour
 			"alibabacloudstack_nat_gateway_bandwidth_package", "DescribeBandwidthPackages", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var ids []string
 	datas := make([]interface{}, 0)

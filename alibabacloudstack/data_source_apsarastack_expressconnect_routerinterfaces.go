@@ -182,12 +182,7 @@ func dataSourceAlibabacloudStackRouterInterfacesRead(d *schema.ResourceData, met
 
 	request.Filter = &filters
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var allRouterInterfaces []vpc.RouterInterfaceType
 	invoker := NewInvoker()

@@ -97,12 +97,7 @@ func dataSourceAlibabacloudStackKmsKeysRead(d *schema.ResourceData, meta interfa
 	request := kms.CreateListKeysRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
-		for _, i := range v.([]interface{}) {
-			idsMap[i.(string)] = i.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var s []map[string]interface{}
 	var ids []string

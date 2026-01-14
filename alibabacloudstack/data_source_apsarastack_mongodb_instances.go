@@ -242,12 +242,7 @@ func dataSourceAlibabacloudStackMongoDBInstancesRead(d *schema.ResourceData, met
 	}
 
 	var dbi []dds.DBInstance
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	for {
 		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
 			return ddsClient.DescribeDBInstances(request)

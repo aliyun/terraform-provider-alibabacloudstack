@@ -120,15 +120,7 @@ func dataSourceAlibabacloudStackCenTransitRouterConnectPeersRead(d *schema.Resou
 		return nil
 	}
 	// Process filtering
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	// Prepare result
 	var ids []string
 	var result []map[string]interface{}

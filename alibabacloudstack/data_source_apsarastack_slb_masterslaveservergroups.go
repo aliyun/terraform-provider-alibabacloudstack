@@ -95,12 +95,7 @@ func dataSourceAlibabacloudStackSlbMasterSlaveServerGroupsRead(d *schema.Resourc
 	client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeMasterSlaveServerGroups(request)

@@ -108,15 +108,7 @@ func dataSourceAlibabacloudStackOtsInstancesRead(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ots_instances", "ListOtsInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	idsMap := make(map[string]bool)
-	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
-		for _, x := range v.([]interface{}) {
-			if x == nil {
-				continue
-			}
-			idsMap[x.(string)] = true
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var nameReg *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok && v.(string) != "" {

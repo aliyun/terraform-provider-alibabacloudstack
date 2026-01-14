@@ -111,18 +111,7 @@ func dataSourceAlibabacloudStackBastionhostInstancesRead(d *schema.ResourceData,
 		descriptionRegex = r
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		var idsStr []string
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-			idsStr = append(idsStr, vv.(string))
-		}
-		request["InstanceId"] = idsStr
-	}
+	idsMap := getIdsStringFilter(d)
 
 	if v, ok := d.GetOk("tags"); ok {
 		tags := make([]map[string]interface{}, 0)

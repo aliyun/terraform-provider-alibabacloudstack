@@ -99,15 +99,7 @@ func dataSourceAlibabacloudStackQuickBiUsersRead(d *schema.ResourceData, meta in
 	request["PageNum"] = 1
 	var objects []map[string]interface{}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	for {
 		response, err := client.DoTeaRequest("GET", "QuickBI", "2022-03-01", action, "", nil, nil, request)
 		if err != nil {

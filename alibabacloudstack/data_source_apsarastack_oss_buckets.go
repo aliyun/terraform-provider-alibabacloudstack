@@ -151,12 +151,7 @@ func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []BucketProper
 	var ids []string
 	var s []map[string]interface{}
 	var names []string
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	for _, bucket := range buckets {
 		if len(idsMap) > 0 {
 			if _, ok := idsMap[bucket.Name]; !ok {

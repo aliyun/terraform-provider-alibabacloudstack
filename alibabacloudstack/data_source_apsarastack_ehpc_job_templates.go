@@ -123,15 +123,7 @@ func dataSourceAlibabacloudStackEhpcJobTemplatesRead(d *schema.ResourceData, met
 	request["PageNumber"] = 1
 	var objects []map[string]interface{}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	for {
 		response, err := client.DoTeaRequest("GET", "ECS", "2018-04-12", action, "", nil, nil, request)
 		if err != nil {

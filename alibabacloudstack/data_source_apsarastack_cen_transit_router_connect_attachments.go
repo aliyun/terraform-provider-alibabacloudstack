@@ -109,15 +109,7 @@ func dataSourceAlibabacloudStackCenTransitRouterConnectAttachmentsRead(d *schema
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	var ids []string
 	datas := make([]interface{}, 0)
 	attachments := response["TransitRouterAttachments"].([]interface{})

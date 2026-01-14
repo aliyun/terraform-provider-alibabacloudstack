@@ -124,12 +124,7 @@ func dataSourceAlibabacloudStackSlbAclsRead(d *schema.ResourceData, meta interfa
 		}
 		request.Tag = &KeyPairsTags
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeAccessControlLists(request)
 	})

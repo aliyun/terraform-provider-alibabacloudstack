@@ -115,12 +115,7 @@ func dataSourceAlibabacloudStackCommonBandwidthPackagesRead(d *schema.ResourceDa
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(1)
 	request.ResourceGroupId = d.Get("resource_group_id").(string)
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var allCommonBandwidthPackages []vpc.CommonBandwidthPackage
 	var nameRegex *regexp.Regexp

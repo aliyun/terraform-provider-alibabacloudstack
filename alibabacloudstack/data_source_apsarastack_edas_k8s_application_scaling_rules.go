@@ -223,15 +223,7 @@ func dataSourceAlibabacloudStackEdasScalingRulesRead(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "alibabacloudstack_edas_k8s_application_scaling_rules", "$.Data.result", resp)
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	ids := make([]string, 0)
 	scaling_rules := make([]map[string]interface{}, 0)
 	for _, data := range result.([]interface{}) {

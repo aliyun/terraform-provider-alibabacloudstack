@@ -77,15 +77,7 @@ func dataSourceAlibabacloudStackCenTransitRouterMulticastDomainsRead(d *schema.R
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_transit_router_multicast_domains", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	var ids []string
 	datas := make([]interface{}, 0)
 	for _, data := range response.TransitRouterMulticastDomains {

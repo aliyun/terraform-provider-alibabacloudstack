@@ -219,12 +219,7 @@ func dataSourceAlibabacloudStackDBInstancesRead(d *schema.ResourceData, meta int
 	}
 
 	// ids
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	for {
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {

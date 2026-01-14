@@ -183,16 +183,7 @@ func dataSourceAlibabacloudStackMongodbBackupsRead(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_mongo_db_backup", "DescribeBackups", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
-	log.Printf("[DEBUG] alibabacloudstack_mongo_db_backup DescribeBackups idsMap %#v", idsMap)
+	idsMap := getIdsStringFilter(d)
 
 	var ids []string
 	datas := make([]interface{}, 0)

@@ -79,12 +79,7 @@ func dataSourceAlibabacloudStackExpressconnectBgpNetworksRead(d *schema.Resource
 	// Call request_params_handler
 
 	request.QueryParams["RouterId"] = d.Get("router_id").(string)
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug("DescribeBgpNetworks", bresponse, request, request.QueryParams)

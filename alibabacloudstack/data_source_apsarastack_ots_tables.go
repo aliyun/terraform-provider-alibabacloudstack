@@ -115,15 +115,7 @@ func dataSourceAlibabacloudStackOtsTablesRead(d *schema.ResourceData, meta inter
 		return errmsgs.WrapError(err)
 	}
 
-	idsMap := make(map[string]bool)
-	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
-		for _, x := range v.([]interface{}) {
-			if x == nil {
-				continue
-			}
-			idsMap[x.(string)] = true
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var nameReg *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok && v.(string) != "" {

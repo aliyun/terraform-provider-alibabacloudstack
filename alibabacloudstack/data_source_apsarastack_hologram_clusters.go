@@ -98,15 +98,7 @@ func dataSourceAlibabacloudStackHologramClustersRead(d *schema.ResourceData, met
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_clusters", "ListClusters", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var ids []string
 	var s []map[string]interface{}

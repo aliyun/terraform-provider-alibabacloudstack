@@ -97,15 +97,7 @@ func dataSourceAlibabacloudStackGpdbAccountsRead(d *schema.ResourceData, meta in
 		accountNameRegex = r
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	status, statusOk := d.GetOk("status")
 
 	response, err := client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, nil, request)

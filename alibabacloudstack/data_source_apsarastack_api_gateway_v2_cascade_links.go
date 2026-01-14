@@ -108,15 +108,7 @@ func dataSourceAlibabacloudStackApiGatewayV2CascadeLinksRead(d *schema.ResourceD
 		return err
 	}
 
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			if vv == nil {
-				continue
-			}
-			idsMap[vv.(string)] = vv.(string)
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var nameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {
@@ -136,7 +128,7 @@ func dataSourceAlibabacloudStackApiGatewayV2CascadeLinksRead(d *schema.ResourceD
 		}
 
 		if len(idsMap) > 0 {
-			if linkId, ok := item["linkId"].(string); !ok || idsMap[linkId] == "" {
+			if _, existed := item["linkId"].(string); !existed {
 				continue
 			}
 		}

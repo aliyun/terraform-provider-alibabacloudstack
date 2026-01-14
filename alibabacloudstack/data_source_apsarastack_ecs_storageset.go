@@ -79,12 +79,7 @@ func dataSourceAlibabacloudStackEcsEbsStorageSetsRead(d *schema.ResourceData, me
 	action := "DescribeStorageSets"
 
 	request := client.NewCommonRequest("GET", "Ecs", "2014-05-26", action, "")
-	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			idsMap[Trim(vv.(string))] = Trim(vv.(string))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 
 	var storageSetName string
 	if v, ok := d.GetOk("storage_set_name"); ok {

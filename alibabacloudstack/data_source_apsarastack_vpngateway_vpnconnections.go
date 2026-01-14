@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
@@ -228,15 +227,7 @@ func dataSourceAlibabacloudStackVpnConnectionsRead(d *schema.ResourceData, meta 
 
 	var filteredVpnConns []vpc.VpnConnection
 	var reg *regexp.Regexp
-	var ids []string
-	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
-		for _, item := range v.([]interface{}) {
-			if item == nil {
-				continue
-			}
-			ids = append(ids, strings.Trim(item.(string), " "))
-		}
-	}
+	idsMap := getIdsStringFilter(d)
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
 		if r, err := regexp.Compile(nameRegex.(string)); err == nil {
 			reg = r
@@ -251,15 +242,12 @@ func dataSourceAlibabacloudStackVpnConnectionsRead(d *schema.ResourceData, meta 
 				continue
 			}
 		}
-		if ids != nil && len(ids) != 0 {
-			for _, id := range ids {
-				if vpnConn.VpnConnectionId == id {
-					filteredVpnConns = append(filteredVpnConns, vpnConn)
-				}
+		if len(idsMap) != 0 {
+			if _, existed := idsMap[vpnConn.VpnConnectionId]; !existed {
+				continue
 			}
-		} else {
-			filteredVpnConns = append(filteredVpnConns, vpnConn)
 		}
+		filteredVpnConns = append(filteredVpnConns, vpnConn)
 	}
 
 	return vpnConnectionsDecriptionAttributes(d, filteredVpnConns, meta)
