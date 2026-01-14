@@ -142,7 +142,7 @@ func testAccDiskAttachmentConfig() string {
 	  size = "20"
 	  name = "${var.name}"
 	  category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-
+	  delete_auto_snapshot = true
 	  tags = {
 	    Name = "TerraformTest-disk"
 	  }
