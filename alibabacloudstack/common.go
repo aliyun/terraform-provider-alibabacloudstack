@@ -1060,26 +1060,27 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 	}
 
 	resource.CreateContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+		waitSecondsIfWithTest(3)
 		var err error
 		err = createFunc(d, meta)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
-		waitSecondsIfWithTest(3)
+		time.Sleep(time.Duration(1) * time.Second)
 
 		if updateFunc != nil {
 			err = updateFunc(d, meta)
 		}
 
 		if err != nil {
-			waitSecondsIfWithTest(3)
+			time.Sleep(time.Duration(1) * time.Second)
 			// If creation succeeds but reading fails, tf will not reach final state. To avoid residual resources, trigger deletion
 			resource.DeleteContext(ctx, d, meta)
 			return diag.FromErr(err)
 		}
 
-		waitSecondsIfWithTest(3)
+		time.Sleep(time.Duration(1) * time.Second)
 		retry := 5
 		for retry > 0 {
 			// When triggered in large batches, there will be a certain delay in resource synchronization on the asapi side. Retry if it fails
@@ -1093,23 +1094,24 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 		}
 		if err != nil {
 			// If creation succeeds but reading fails, tf will not reach final state. To avoid residual resources, trigger deletion
-			waitSecondsIfWithTest(3)
+			time.Sleep(time.Duration(1) * time.Second)
 			resource.DeleteContext(ctx, d, meta)
 			return diag.FromErr(err)
 		}
-
 		return nil
 	}
 
 	resource.ReadContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+		waitSecondsIfWithTest(3)
 		err := readFunc(d, meta)
 		return diag.FromErr(err)
 	}
 
 	if updateFunc != nil {
 		resource.UpdateContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+			waitSecondsIfWithTest(3)
 			update_err := updateFunc(d, meta)
-			waitSecondsIfWithTest(1)
+			time.Sleep(time.Duration(1) * time.Second)
 			read_err := readFunc(d, meta)
 			if update_err != nil {
 				return diag.FromErr(update_err)
@@ -1122,6 +1124,7 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 		deleteFunc = schema.Noop
 	}
 	resource.DeleteContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+		waitSecondsIfWithTest(3)
 		err := deleteFunc(d, meta)
 		return diag.FromErr(err)
 	}
