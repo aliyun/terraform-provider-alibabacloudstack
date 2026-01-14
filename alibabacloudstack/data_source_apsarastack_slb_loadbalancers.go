@@ -2,14 +2,15 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"log"
+	"regexp"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"regexp"
 )
 
 func dataSourceAlibabacloudStackSlbs() *schema.Resource {
@@ -118,12 +119,32 @@ func dataSourceAlibabacloudStackSlbs() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"creation_time": {
+						"tags": {
+							Type:     schema.TypeMap,
+							Computed: true,
+						},
+						"address_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"tags": {
-							Type:     schema.TypeMap,
+						"master_zone_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"delete_protection": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"internet_charge_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"create_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"load_balancer_spec": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 					},
@@ -253,8 +274,12 @@ func slbsDescriptionAttributes(d *schema.ResourceData, loadBalancers []slb.LoadB
 			"vpc_id":                   loadBalancer.VpcId,
 			"vswitch_id":               loadBalancer.VSwitchId,
 			"address":                  loadBalancer.Address,
-			"creation_time":            loadBalancer.CreateTime,
 			"tags":                     slbService.tagsToMap(tags),
+			"address_type":             loadBalancer.AddressType,
+			"delete_protection":        loadBalancer.DeleteProtection,
+			"internet_charge_type":     loadBalancer.InternetChargeType,
+			"create_time":              loadBalancer.CreateTime,
+			"load_balancer_spec":       loadBalancer.LoadBalancerSpec,
 		}
 
 		ids = append(ids, loadBalancer.LoadBalancerId)
