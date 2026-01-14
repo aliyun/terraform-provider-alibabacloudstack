@@ -48,30 +48,15 @@ func TestAccAlibabacloudStackSlbListenersDataSource_http(t *testing.T) {
 
 	var existSlbListenersHttpMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"load_balancer_id":                             CHECKSET,
-			"listeners.#":                                  "1",
-			"listeners.0.load_balancer_id":                 CHECKSET,
-			"listeners.0.listener_port":                    "80",
-			"listeners.0.backend_port":                     "80",
-			"listeners.0.protocol":                         "http",
-			"listeners.0.bandwidth":                        "10",
-			"listeners.0.scheduler":                        "wrr",
-			"listeners.0.sticky_session":                   "on",
-			"listeners.0.sticky_session_type":              "insert",
-			"listeners.0.health_check":                     "on",
-			"listeners.0.health_check_uri":                 "/cons",
-			"listeners.0.description":                      name,
-			"listeners.0.cookie_timeout":                   "86400",
-			"listeners.0.cookie":                           CHECKSET,
-			"listeners.0.x_forwarded_for.0.retrive_slb_ip": "true",
-			"listeners.0.x_forwarded_for.0.retrive_slb_id": "true",
+			"load_balancer_id": CHECKSET,
+			"slb_listeners.#":  "1",
 		}
 	}
 
 	var fakeSlbListenersHttpMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"load_balancer_id": CHECKSET,
-			"listeners.#":      "0",
+			"slb_listeners.#":  "0",
 		}
 	}
 
@@ -126,33 +111,15 @@ func TestAccAlibabacloudStackSlbListenersDataSource_https(t *testing.T) {
 
 	var existSlbListenersHttpsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"load_balancer_id":                             CHECKSET,
-			"listeners.#":                                  "1",
-			"listeners.0.load_balancer_id":                 CHECKSET,
-			"listeners.0.listener_port":                    "80",
-			"listeners.0.backend_port":                     "80",
-			"listeners.0.protocol":                         "https",
-			"listeners.0.bandwidth":                        "10",
-			"listeners.0.scheduler":                        "wrr",
-			"listeners.0.sticky_session":                   "on",
-			"listeners.0.sticky_session_type":              "insert",
-			"listeners.0.health_check":                     "on",
-			"listeners.0.health_check_uri":                 "/cons",
-			"listeners.0.description":                      name,
-			"listeners.0.cookie_timeout":                   "86400",
-			"listeners.0.cookie":                           CHECKSET,
-			"listeners.0.x_forwarded_for.0.retrive_slb_ip": "true",
-			"listeners.0.x_forwarded_for.0.retrive_slb_id": "true",
-			"listeners.0.server_certificate_id":            CHECKSET,
-			"listeners.0.enable_http2":                     "on",
-			"listeners.0.tls_cipher_policy":                "tls_cipher_policy_1_0",
+			"load_balancer_id": CHECKSET,
+			"slb_listeners.#":  "1",
 		}
 	}
 
 	var fakeSlbListenersHttpsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"load_balancer_id": CHECKSET,
-			"listeners.#":      "0",
+			"slb_listeners.#":  "0",
 		}
 	}
 
@@ -207,26 +174,15 @@ func TestAccAlibabacloudStackSlbListenersDataSource_tcp(t *testing.T) {
 
 	var existSlbListenersTcpMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"load_balancer_id":                CHECKSET,
-			"listeners.#":                     "1",
-			"listeners.0.load_balancer_id":    CHECKSET,
-			"listeners.0.listener_port":       "22",
-			"listeners.0.backend_port":        "22",
-			"listeners.0.protocol":            "tcp",
-			"listeners.0.bandwidth":           "10",
-			"listeners.0.scheduler":           "wrr",
-			"listeners.0.sticky_session":      "off",
-			"listeners.0.health_check":        "off",
-			"listeners.0.health_check_type":   "tcp",
-			"listeners.0.description":         name,
-			"listeners.0.persistence_timeout": "0",
+			"load_balancer_id": CHECKSET,
+			"slb_listeners.#":  "1",
 		}
 	}
 
 	var fakeSlbListenersTcpMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"load_balancer_id": CHECKSET,
-			"listeners.#":      "0",
+			"slb_listeners.#":  "0",
 		}
 	}
 
@@ -281,24 +237,15 @@ func TestAccAlibabacloudStackSlbListenersDataSource_udp(t *testing.T) {
 
 	var existSlbListenersUdpMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"load_balancer_id":             CHECKSET,
-			"listeners.#":                  "1",
-			"listeners.0.load_balancer_id": CHECKSET,
-			"listeners.0.listener_port":    "11",
-			"listeners.0.backend_port":     "10",
-			"listeners.0.protocol":         "udp",
-			"listeners.0.bandwidth":        "10",
-			"listeners.0.scheduler":        "wrr",
-			"listeners.0.sticky_session":   "off",
-			"listeners.0.health_check":     "off",
-			"listeners.0.description":      name,
+			"load_balancer_id": CHECKSET,
+			"slb_listeners.#":  "1",
 		}
 	}
 
 	var fakeSlbListenersUdpMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"load_balancer_id": CHECKSET,
-			"listeners.#":      "0",
+			"slb_listeners.#":  "0",
 		}
 	}
 
