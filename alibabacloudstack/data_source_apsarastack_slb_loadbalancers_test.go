@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackSlbsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackSlbLoadbalancersDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_slbs.default"
 	name := fmt.Sprintf("tf-testacc-slbs%v", rand)
