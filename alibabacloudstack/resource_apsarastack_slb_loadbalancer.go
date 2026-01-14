@@ -82,7 +82,7 @@ func resourceAlibabacloudStackSlbCreate(d *schema.ResourceData, meta interface{}
 	request.QueryParams["AddressIPVersion"] = d.Get("ip_version").(string)
 
 	if v, ok := d.GetOk("network_type"); ok {
-		network_type:=v.(string)
+		network_type := v.(string)
 		request.QueryParams["NetworkType"] = network_type
 		if network_type == "vpc" {
 			if v, ok := d.GetOk("vswitch_id"); ok && v.(string) != "" {

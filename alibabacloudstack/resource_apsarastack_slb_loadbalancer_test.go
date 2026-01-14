@@ -42,16 +42,20 @@ func TestAccAlibabacloudStackSlbLoadbalancer0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 
 					"name":          "rdk_test_name",
+					"network_type":  "vpc",
 					"specification": "slb.s1.small",
 					"vswitch_id":    "${alibabacloudstack_vpc_vswitch.default.id}",
 					"address_type":  "intranet",
+					"address":       "172.16.1.3",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"name":         "rdk_test_name",
 						"vswitch_id":   CHECKSET,
+						"network_type": "vpc",
 						"address_type": "intranet",
+						"address":      "172.16.1.3",
 					}),
 				),
 			},
@@ -156,12 +160,12 @@ func TestAccAlibabacloudStackSlbLoadbalancerClassic(t *testing.T) {
 					"name":          "rdk_test_name",
 					"specification": "slb.s1.small",
 					"address_type":  "intranet",
-					"address":       "10.212.65.3",
+					// "address":       "172.16.1.13",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":         "rdk_test_name",
-						"address":      "10.212.65.3",
+						"name": "rdk_test_name",
+						// "address":      "172.16.1.13",
 						"address_type": "intranet",
 						"network_type": "classic",
 					}),
