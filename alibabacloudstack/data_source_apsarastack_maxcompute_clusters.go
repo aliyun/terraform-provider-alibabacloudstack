@@ -72,11 +72,15 @@ func dataSourceAlibabacloudStackMaxcomputeClustersRead(d *schema.ResourceData, m
 	if rt, ok := d.GetOk("name_regex"); ok && rt.(string) != "" {
 		r = regexp.MustCompile(rt.(string))
 	}
+	idsMap := getIdsStringFilter(d)
 	var t []map[string]interface{}
 	var ids []string
 	for _, object := range objects {
 		cluster_raw := object.(map[string]interface{})
 		if r != nil && !r.MatchString(cluster_raw["cluster"].(string)) {
+			continue
+		}
+		if _,existed := idsMap[cluster_raw["cluster"].(string)] ; len(idsMap) > 0 && !existed {
 			continue
 		}
 		cluster := map[string]interface{}{
