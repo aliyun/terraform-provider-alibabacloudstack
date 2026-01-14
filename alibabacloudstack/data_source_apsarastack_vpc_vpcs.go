@@ -39,6 +39,7 @@ func dataSourceAlibabacloudStackVpcs() *schema.Resource {
 			"is_default": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 				ForceNew: true,
 			},
 			"vswitch_id": {
@@ -168,11 +169,6 @@ func dataSourceAlibabacloudStackVpcs() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"enable_details": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
 		},
 	}
 }
@@ -204,11 +200,6 @@ func dataSourceAlibabacloudStackVpcsRead(d *schema.ResourceData, meta interface{
 	if v, ok := d.GetOk("vpc_name"); ok {
 		request.VpcName = v.(string)
 	}
-
-	if v, ok := d.GetOk("vpc_owner_id"); ok {
-		request.VpcOwnerId = requests.NewInteger(v.(int))
-	}
-
 	var allVpcs []vpc.Vpc
 	invoker := NewInvoker()
 	for {
@@ -368,13 +359,6 @@ func vpcsDecriptionAttributes(d *schema.ResourceData, vpcSetTypes []vpc.Vpc, rou
 			"user_cidrs":            vpc.UserCidrs.UserCidr,
 			"vpc_id":                fmt.Sprint(vpc.VpcId),
 			"tags":                  vpcService.tagToMap(vpc.Tags.Tag),
-		}
-
-		if detailedEnabled := d.Get("enable_details"); !detailedEnabled.(bool) {
-			ids = append(ids, fmt.Sprint(vpc.VpcId))
-			names = append(names, vpc.VpcName)
-			s = append(s, mapping)
-			continue
 		}
 
 		ids = append(ids, vpc.VpcId)

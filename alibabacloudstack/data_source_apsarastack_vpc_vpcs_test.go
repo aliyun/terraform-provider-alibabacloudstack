@@ -37,6 +37,16 @@ func TestAccAlibabacloudStackVpcVpcsDataSource(t *testing.T) {
 			"vpc_name": `"${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"`,
 		}),
 	}
+	name_regexConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
+			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}"]`,
+			"name_regex": `"${alibabacloudstack_vpc_vpc.default.vpc_name}"`,
+		}),
+		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
+			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
+			"name_regex": `"${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"`,
+		}),
+	}
 
 	statusConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
@@ -52,11 +62,11 @@ func TestAccAlibabacloudStackVpcVpcsDataSource(t *testing.T) {
 	isDefaultConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
 			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}"]`,
-			"is_default": `true`,
+			"is_default": `false`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
 			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
-			"is_default": `false`,
+			"is_default": `true`,
 		}),
 	}
 
@@ -71,14 +81,12 @@ func TestAccAlibabacloudStackVpcVpcsDataSource(t *testing.T) {
 		}),
 	}
 
-	enable_details := dataSourceTestAccConfig{
+	tagsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":            `["${alibabacloudstack_vpc_vpc.default.id}"]`,
-			"enable_details": `"true"`,
+			"tags": `{"common_test": "terraform"}`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":            `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
-			"enable_details": `"false"`,
+			"tags": `{"common_test": "terraform_fake"}`,
 		}),
 	}
 
@@ -93,7 +101,7 @@ func TestAccAlibabacloudStackVpcVpcsDataSource(t *testing.T) {
 			"vpc_name":   `"${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"`}),
 	}
 
-	AlibabacloudstackVpcVpcsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, vswtich_idConf, vpc_nameConf, statusConf, isDefaultConf, cidr_blockConf, enable_details, allConf)
+	AlibabacloudstackVpcVpcsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, vswtich_idConf, vpc_nameConf, name_regexConf, statusConf, isDefaultConf, cidr_blockConf, tagsConf, allConf)
 }
 
 var existAlibabacloudstackVpcVpcsDataMapFunc = func(rand int) map[string]string {

@@ -1358,6 +1358,9 @@ const VpcCommonTestCase = `
 resource "alibabacloudstack_vpc_vpc" "default" {
   vpc_name = "${var.name}_vpc"
   cidr_block = "172.16.0.0/16"
+  tags = {
+    common_test = "terraform"
+  }
   lifecycle {
       ignore_changes = [
 		secondary_cidr_blocks,
