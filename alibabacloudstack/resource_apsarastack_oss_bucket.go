@@ -706,7 +706,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 			logrequest := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 			logrequest.QueryParams["OpenApiAction"] = "PutBucketLogging"
 			logrequest.QueryParams["ProductName"] = "oss"
-			logrequest.QueryParams["Content"] = fmt.Sprint("<BucketLoggingStatus></BucketLoggingStatus>")
+			logrequest.QueryParams["Content"] = "<BucketLoggingStatus></BucketLoggingStatus>"
 			logrequest.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", d.Id())
 
 			bresponse, err := client.ProcessCommonRequest(logrequest)

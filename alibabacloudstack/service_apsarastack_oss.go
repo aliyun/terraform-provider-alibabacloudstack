@@ -439,7 +439,7 @@ func (s *OssService) DeleteBucket(bucketName string) error {
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk))
 		}
 		if det.BucketInfo.Name != "" {
-			return resource.RetryableError(errmsgs.Error("Trying to delete OSS bucket %#v successfully.", bucketName))
+			return resource.RetryableError(errmsgs.Error("Trying to delete OSS bucket %#v failed.", bucketName))
 		}
 		return nil
 	})

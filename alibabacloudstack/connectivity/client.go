@@ -1340,6 +1340,12 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			wait()
 			return resource.RetryableError(err)
 		}
+		resp:= make(map[string]interface{})
+		if err := json.Unmarshal(response.GetHttpContentBytes(), &resp); err != nil {
+			if _, existed := resp["errorMessage"]; existed {
+				return resource.NonRetryableError(fmt.Errorf("%v",resp["errorMessage"]))
+			}
+		}
 		return resource.NonRetryableError(err)
 
 	})
