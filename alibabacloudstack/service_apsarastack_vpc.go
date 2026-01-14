@@ -1595,6 +1595,7 @@ func (s *VpcService) SetInstanceSecondaryCidrBlocks(d *schema.ResourceData) erro
 				}
 			}
 		}
+		time.Sleep(time.Duration(3) * time.Second) // Waiting for data refresh
 	}
 	return nil
 }
