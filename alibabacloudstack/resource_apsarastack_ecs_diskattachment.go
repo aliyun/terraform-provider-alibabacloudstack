@@ -4,8 +4,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -46,16 +44,12 @@ func resourceAlibabacloudStackDiskAttachmentCreate(d *schema.ResourceData, meta 
 
 	diskID := d.Get("disk_id").(string)
 	instanceID := d.Get("instance_id").(string)
-	oldDisk, err := ecsService.DescribeDisk(diskID)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 	request := ecs.CreateAttachDiskRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceID
 	request.DiskId = diskID
 
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.AttachDisk(request)
 		})
@@ -83,30 +77,6 @@ func resourceAlibabacloudStackDiskAttachmentCreate(d *schema.ResourceData, meta 
 
 	if err := ecsService.WaitForDiskAttachment(d.Id(), DiskInUse, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
-	}
-	newDisk, err := ecsService.DescribeDisk(diskID)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	if newDisk.DeleteAutoSnapshot != oldDisk.DeleteAutoSnapshot {
-		request := ecs.CreateModifyDiskAttributeRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.DiskId = diskID
-		request.DeleteAutoSnapshot = requests.NewBoolean(oldDisk.DeleteAutoSnapshot)
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ModifyDiskAttribute(request)
-		})
-		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*ecs.ModifyDiskAttributeResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 	return nil
 }
