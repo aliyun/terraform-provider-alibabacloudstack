@@ -26,14 +26,13 @@ func dataSourceAlibabacloudStackSnapshots() *schema.Resource {
 				ForceNew: true,
 			},
 			"ids": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Computed: true,
-				MaxItems: 1,
+				MinItems: 1,
 			},
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -77,7 +76,6 @@ func dataSourceAlibabacloudStackSnapshots() *schema.Resource {
 				Optional:   true,
 				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
-			"tags": tagsSchema(),
 			"snapshots": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -151,11 +149,7 @@ func dataSourceAlibabacloudStackSnapshotsRead(d *schema.ResourceData, meta inter
 		request.QueryParams["SourceDiskId"] = diskId.(string)
 	}
 	if ids, ok := d.GetOk("ids"); ok {
-		request.SnapshotIds = convertListToJsonString(ids.(*schema.Set).List())
-		request.QueryParams["SnapshotId"] = ids.(*schema.Set).List()[0].(string)
-	}
-	if status, ok := d.GetOk("status"); ok {
-		request.Status = status.(string)
+		request.SnapshotIds = convertListToJsonString(ids.([]interface{}))
 	}
 	if typ, ok := d.GetOk("type"); ok {
 		request.SnapshotType = typ.(string)
@@ -166,18 +160,6 @@ func dataSourceAlibabacloudStackSnapshotsRead(d *schema.ResourceData, meta inter
 	}
 	if usage, ok := d.GetOk("usage"); ok {
 		request.Usage = usage.(string)
-	}
-
-	if v, ok := d.GetOk("tags"); ok {
-		var tags []ecs.DescribeSnapshotsTag
-
-		for key, value := range v.(map[string]interface{}) {
-			tags = append(tags, ecs.DescribeSnapshotsTag{
-				Key:   key,
-				Value: value.(string),
-			})
-		}
-		request.Tag = &tags
 	}
 
 	request.PageSize = requests.NewInteger(PageSizeLarge)
@@ -208,23 +190,25 @@ func dataSourceAlibabacloudStackSnapshotsRead(d *schema.ResourceData, meta inter
 			request.PageNumber = page
 		}
 	}
-
+	idsMap := getIdsStringFilter(d)
 	var filteredSnapshots []ecs.Snapshot
-	nameRegex, ok := d.GetOk("name_regex")
-	if ok && nameRegex.(string) != "" {
-		var r *regexp.Regexp
-		if nameRegex != "" {
-			r = regexp.MustCompile(nameRegex.(string))
-		}
-		for _, snapshot := range allSnapshots {
-			if r != nil && !r.MatchString(snapshot.SnapshotName) {
+	for _, snapshot := range allSnapshots {
+		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
+			r := regexp.MustCompile(description_regex.(string))
+			if !r.MatchString(snapshot.SnapshotName) {
 				continue
 			}
-
-			filteredSnapshots = append(filteredSnapshots, snapshot)
 		}
-	} else {
-		filteredSnapshots = allSnapshots
+		if len(idsMap) > 0 {
+			if _, exist := idsMap[snapshot.SnapshotId]; !exist {
+				continue
+			}
+		}
+		if status, ok := d.GetOk("status"); ok && status.(string) != snapshot.Status {
+			continue
+		}
+
+		filteredSnapshots = append(filteredSnapshots, snapshot)
 	}
 
 	return snapshotsDescriptionAttributes(d, filteredSnapshots)
@@ -232,7 +216,7 @@ func dataSourceAlibabacloudStackSnapshotsRead(d *schema.ResourceData, meta inter
 
 func snapshotsDescriptionAttributes(d *schema.ResourceData, snapshots []ecs.Snapshot) error {
 	var s []map[string]interface{}
-	var ids []string
+	var snapshotsids []string
 	var names []string
 	for _, snapshot := range snapshots {
 		mapping := map[string]interface{}{
@@ -250,15 +234,15 @@ func snapshotsDescriptionAttributes(d *schema.ResourceData, snapshots []ecs.Snap
 			"usage":            snapshot.Usage,
 		}
 		s = append(s, mapping)
-		ids = append(ids, snapshot.SnapshotId)
+		snapshotsids = append(snapshotsids, snapshot.SnapshotId)
 		names = append(names, snapshot.SnapshotName)
 	}
 
-	d.SetId(dataResourceIdHash(ids))
+	d.SetId(dataResourceIdHash(snapshotsids))
 	if err := d.Set("snapshots", s); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if err := d.Set("ids", ids); err != nil {
+	if err := d.Set("ids", snapshotsids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {

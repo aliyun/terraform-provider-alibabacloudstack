@@ -1465,7 +1465,8 @@ resource "alibabacloudstack_ecs_instance" "default" {
   is_outdated          = false
   lifecycle {
     ignore_changes = [
-      instance_type
+      instance_type,
+	  system_disk_category
     ]
   }
 }
