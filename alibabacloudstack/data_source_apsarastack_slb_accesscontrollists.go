@@ -113,7 +113,7 @@ func dataSourceAlibabacloudStackSlbAclsRead(d *schema.ResourceData, meta interfa
 	request := slb.CreateDescribeAccessControlListsRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	tags := d.Get("tags").(map[string]interface{})
-	if tags != nil && len(tags) > 0 {
+	if len(tags) > 0 {
 		KeyPairsTags := make([]slb.DescribeAccessControlListsTag, 0, len(tags))
 		for k, v := range tags {
 			keyPairsTag := slb.DescribeAccessControlListsTag{

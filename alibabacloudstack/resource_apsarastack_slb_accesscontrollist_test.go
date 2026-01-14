@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackSlbAccesscontrollist0(t *testing.T) {
+func TestAccAlibabacloudStackSlbAcl0(t *testing.T) {
 	var v *slb.DescribeAccessControlListAttributeResponse
 
 	resourceId := "alibabacloudstack_slb_accesscontrollist.default"
