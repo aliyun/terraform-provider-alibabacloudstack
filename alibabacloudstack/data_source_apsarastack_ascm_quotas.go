@@ -151,7 +151,6 @@ func dataSourceAlibabacloudStackQuotas() *schema.Resource {
 func dataSourceAlibabacloudStackQuotasRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetQuota", "/ascm/manage/quota/query")
-	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 	productName := d.Get("product_name").(string)
 	quotaType := d.Get("quota_type").(string)
 	quotaTypeId := d.Get("quota_type_id").(string)

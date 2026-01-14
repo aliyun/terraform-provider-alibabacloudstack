@@ -123,8 +123,7 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// TODO: This interface is an asapi interface and is not open to pop
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "")
-	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select")
 	mergeMaps(request.QueryParams, map[string]string{
 		"PageSize":  "500",
 		"saleType":  "new",

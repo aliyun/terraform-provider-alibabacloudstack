@@ -161,7 +161,6 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 	}
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateQuota", "/ascm/manage/quota/add")
-	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 	request.QueryParams["regionName"] = client.RegionId
 	request.QueryParams["quotaType"] = quotaType
 	request.QueryParams["quotaTypeId"] = quotaTypeId
@@ -390,7 +389,6 @@ func resourceAlibabacloudStackAscmQuotaUpdate(d *schema.ResourceData, meta inter
 
 	if attributeUpdate {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateQuota", "/ascm/manage/quota/update")
-		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 		request.QueryParams["regionName"] = client.RegionId
 		request.QueryParams["quotaType"] = did[1]
 		request.QueryParams["quotaTypeId"] = did[2]
@@ -463,7 +461,6 @@ func resourceAlibabacloudStackAscmQuotaDelete(d *schema.ResourceData, meta inter
 	addDebug("IsQuotaExist", check, requestInfo, map[string]string{"productName": did[0]})
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DeleteQuota", "/ascm/manage/quota/delete")
-		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 		request.QueryParams["productName"] = did[0]
 		request.QueryParams["quotaType"] = did[1]
 		request.QueryParams["quotaTypeId"] = did[2]
