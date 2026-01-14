@@ -59,20 +59,15 @@ func dataSourceAlibabacloudStackMaxcomputeClusterQutaosRead(d *schema.ResourceDa
 	}
 
 	request := map[string]interface{}{
-		"Product":       "ascm",
 		"CurrentRoleId": roleId,
 		"Cluster":       cluster,
 	}
 
-	response, err = client.DoTeaRequest("POST", "ASCM", "2019-05-10", "GetOdpsQuota", "/ascm/manage/resource_mgmt/getOdpsQuota", nil, nil, request)
+	response, err = client.DoTeaRequest("GET", "dataworks-private-cloud", "2019-01-17", "GetOdpsQuotaForAscm", "", nil, request, nil)
 	if err != nil {
 		if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Maxcompute Cluster", cluster)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		}
-		return err
-	}
-	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		err = errmsgs.Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
 		return err
 	}
 	v, err := jsonpath.Get("$", response)
@@ -84,7 +79,7 @@ func dataSourceAlibabacloudStackMaxcomputeClusterQutaosRead(d *schema.ResourceDa
 		err = errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, cluster, "$", response, errmsg)
 		return err
 	}
-	object := v.(map[string]interface{})["data"].(map[string]interface{})
+	object := v.(map[string]interface{})["Data"].(map[string]interface{})
 
 	d.Set("cu_total", object["cuTotal"].(string))
 	d.Set("disk_available", object["diskAvailable"].(string))

@@ -2,36 +2,55 @@ package alibabacloudstack
 
 import (
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAscmMaxcomputeClusterQuotasDataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: datasourceAlibabacloudstackMaxcomputeClusterQutaos,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_maxcompute_clusters.default"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_maxcompute_clusters.default", "clusters.cluster"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_maxcompute_clusters.default", "clusters.core_arch"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_maxcompute_clusters.default", "clusters.project"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_maxcompute_clusters.default", "clusters.region"),
-				),
-			},
-		},
-	})
+	resourceId := "data.alibabacloudstack_maxcompute_cluster_quotas.default"
+	name := "maxcompute_quotas"
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceMaxcomputeClusterQuotasConfigDependence)
+
+	// Basic configuration that depends on maxcompute clusters data source
+	basicConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"cluster" :  "${data.alibabacloudstack_maxcompute_clusters.default.clusters.0.cluster}",
+		}),
+		// No fake config since this depends on real cluster data
+	}
+
+	var existMaxcomputeClusterQuotasMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"cluster":        CHECKSET,
+			"cu_total":       CHECKSET,
+			"disk_available": CHECKSET,
+			"cu_available":   CHECKSET,
+			"disk_total":     CHECKSET,
+		}
+	}
+
+	// Since this data source requires a valid cluster, fake scenarios aren't applicable
+	// But we provide a minimal fake function for framework compatibility
+	var fakeMaxcomputeClusterQuotasMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"cluster":        "",
+			"cu_total":       "",
+			"disk_available": "",
+			"cu_available":   "",
+			"disk_total":     "",
+		}
+	}
+
+	var maxcomputeClusterQuotasCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existMaxcomputeClusterQuotasMapFunc,
+		fakeMapFunc:  fakeMaxcomputeClusterQuotasMapFunc,
+	}
+	maxcomputeClusterQuotasCheckInfo.dataSourceTestCheck(t, 0, basicConf)
 }
 
-const datasourceAlibabacloudstackMaxcomputeClusterQutaos = `
-data "alibabacloudstack_maxcompute_clusters" "default"{
-}
-
-data "alibabacloudstack_maxcompute_cluster_qutaos" "default"{
-    cluster = data.alibabacloudstack_maxcompute_clusters.default.clusters.0.cluster
+func dataSourceMaxcomputeClusterQuotasConfigDependence(name string) string {
+	return `
+data "alibabacloudstack_maxcompute_clusters" "default" {
 }
 `
+}
