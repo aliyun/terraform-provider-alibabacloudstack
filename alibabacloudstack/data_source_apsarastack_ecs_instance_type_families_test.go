@@ -17,25 +17,14 @@ func TestAccAlibabacloudStackInstanceTypeFamiliesDataSource(t *testing.T) {
 		existConfig: testAccConfig(map[string]interface{}{
 			"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
 		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
-		}),
 	}
 
 	generationConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"generation": "ecs-3",
-		}),
-	}
-
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id":    "${data.alibabacloudstack_zones.default.zones.0.id}",
-			"generation": "ecs-3",
+			"generation":    "${data.alibabacloudstack_instance_type_families.anyone.families.0.generation}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"zone_id":    "${data.alibabacloudstack_zones.default.zones.0.id}",
-			"generation": "ecs-3",
+			"generation":    "fake-generation",
 		}),
 	}
 
@@ -64,13 +53,15 @@ func TestAccAlibabacloudStackInstanceTypeFamiliesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeInstanceTypeFamiliesMapFunc,
 	}
 
-	instanceTypeFamiliesCheckInfo.dataSourceTestCheck(t, rand, zoneIdConf, generationConf, allConf)
+	instanceTypeFamiliesCheckInfo.dataSourceTestCheck(t, rand, zoneIdConf, generationConf,)
 }
 
 func dataSourceInstanceTypeFamiliesConfigDependence(name string) string {
-	return fmt.Sprintf(`
+	return `
 	data "alibabacloudstack_zones" "default" {
 	  available_resource_creation = "Instance"
 	}
-`)
+	data "alibabacloudstack_instance_type_families" "anyone" {
+	}
+`
 }
