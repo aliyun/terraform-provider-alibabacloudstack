@@ -143,28 +143,22 @@ func resourceAlibabacloudStackSlbAclUpdate(d *schema.ResourceData, meta interfac
 	d.Partial(true)
 
 	if !d.IsNewResource() && d.HasChanges("name", "acl_name") {
-		request := slb.CreateSetAccessControlListAttributeRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.AclId = d.Id()
-		request.AclName = connectivity.GetResourceData(d, "acl_name", "name").(string)
-		if err := errmsgs.CheckEmpty(request.AclName, schema.TypeString, "acl_name", "name"); err != nil {
+		client := meta.(*connectivity.AlibabacloudStackClient)
+		request := client.NewCommonRequest("POST", "Slb", "2014-05-15", "SetAccessControlListAttribute", "")
+		request.QueryParams["AclId"] = d.Id()
+		request.QueryParams["AclName"] = connectivity.GetResourceData(d, "acl_name", "name").(string)
+		if err := errmsgs.CheckEmpty(request.QueryParams["AclName"], schema.TypeString, "acl_name", "name"); err != nil {
 			return errmsgs.WrapError(err)
 		}
-
-		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-			return slbClient.SetAccessControlListAttribute(request)
-		})
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*slb.SetAccessControlListAttributeResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_acl", "SetAccessControlListAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
 	if d.HasChange("entry_list") {

@@ -28,6 +28,12 @@ func TestAccAlibabacloudStackSlbAccesscontrollist0(t *testing.T) {
 		"entry":   "192.168.1.0/24",
 		"comment": "test_entry",
 	})
+	entry_ipv6 := make([]map[string]string, 0)
+	entry_ipv6 = append(entry_ipv6, map[string]string{
+		"entry":   "2001:db8::/32",
+		"comment": "test_entry_ipv6",
+	})
+
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbAccesscontrollistBasicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -64,28 +70,41 @@ func TestAccAlibabacloudStackSlbAccesscontrollist0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
+					"entry_list": entry,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"entry_list.#": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+
 					"address_ip_version": "ipv6",
+					"entry_list":         entry_ipv6,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"address_ip_version": "ipv6",
+						"entry_list.#":       "1",
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
+					"acl_name": "Rdk_test_name02",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
 
-			// 		"entry_list": entry,
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-
-			// 			"entry_list.%": "1",
-			// 		}),
-			// 	),
-			// },
+						"acl_name": "Rdk_test_name02",
+					}),
+				),
+			},
 
 			// 	{
 			// 		Config: testAccConfig(map[string]interface{}{
