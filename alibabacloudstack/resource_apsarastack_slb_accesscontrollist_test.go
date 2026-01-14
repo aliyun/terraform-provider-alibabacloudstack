@@ -23,11 +23,6 @@ func TestAccAlibabacloudStackSlbAcl0(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%sslbaccess_control_list%d", defaultRegionToTest, rand)
-	entry := make([]map[string]string, 0)
-	entry = append(entry, map[string]string{
-		"entry":   "192.168.1.0/24",
-		"comment": "test_entry",
-	})
 	entry_ipv6 := make([]map[string]string, 0)
 	entry_ipv6 = append(entry_ipv6, map[string]string{
 		"entry":   "2001:db8::/32",
@@ -49,16 +44,23 @@ func TestAccAlibabacloudStackSlbAcl0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"acl_name": "Rdk_test_name01",
-
+					"acl_name":           name,
 					"address_ip_version": "ipv4",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"address_ip_version": "ipv4",
-
-						"acl_name": "Rdk_test_name01",
+						"acl_name":           name,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"acl_name": name + "_update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"acl_name": name + "_update",
 					}),
 				),
 			},
@@ -69,86 +71,45 @@ func TestAccAlibabacloudStackSlbAcl0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"entry_list": entry,
+					"entry_list": []map[string]string{{
+						"entry":   "192.168.1.0/24",
+						"comment": "test_entry1",
+					},{
+						"entry":   "192.168.2.0/24",
+						"comment": "test_entry2",
+					}},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
+						"entry_list.#": "2",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"entry_list": []map[string]string{{
+						"entry":   "192.168.1.0/24",
+						"comment": "test_entry1",
+					}},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
 						"entry_list.#": "1",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"address_ip_version": "ipv6",
 					"entry_list":         entry_ipv6,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"address_ip_version": "ipv6",
 						"entry_list.#":       "1",
 					}),
 				),
 			},
-			//name modify faild
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-
-			// 		"acl_name": "Rdk_test_name02",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-
-			// 			"acl_name": "Rdk_test_name02",
-			// 		}),
-			// 	),
-			// },
-
-			// 	{
-			// 		Config: testAccConfig(map[string]interface{}{
-			// 			"tags": map[string]string{
-			// 				"Created": "TF1",
-			// 				"For":     "Test1",
-			// 			},
-			// 		}),
-			// 		Check: resource.ComposeTestCheckFunc(
-			// 			testAccCheck(map[string]string{
-			// 				"tags.%":       "2",
-			// 				"tags.Created": "TF1",
-			// 				"tags.For":     "Test1",
-			// 			}),
-			// 		),
-			// 	},
-			// 	{
-			// 		Config: testAccConfig(map[string]interface{}{
-			// 			"tags": map[string]string{
-			// 				"Created": "TF-update",
-			// 				"For":     "Test-update",
-			// 			},
-			// 		}),
-			// 		Check: resource.ComposeTestCheckFunc(
-			// 			testAccCheck(map[string]string{
-			// 				"tags.%":       "2",
-			// 				"tags.Created": "TF-update",
-			// 				"tags.For":     "Test-update",
-			// 			}),
-			// 		),
-			// 	},
-			// 	{
-			// 		Config: testAccConfig(map[string]interface{}{
-			// 			"tags": REMOVEKEY,
-			// 		}),
-			// 		Check: resource.ComposeTestCheckFunc(
-			// 			testAccCheck(map[string]string{
-			// 				"tags.%":       "0",
-			// 				"tags.Created": REMOVEKEY,
-			// 				"tags.For":     REMOVEKEY,
-			// 			}),
-			// 		),
-			// 	},
 		},
 	})
 }
