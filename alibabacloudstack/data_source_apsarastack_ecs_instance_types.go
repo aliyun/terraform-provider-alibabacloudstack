@@ -61,12 +61,12 @@ func dataSourceAlibabacloudStackInstanceTypes() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"kubernetes_node_role": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{string(KubernetesNodeMaster), string(KubernetesNodeWorker)}, false),
-			},
+//			"kubernetes_node_role": {
+//				Type:         schema.TypeString,
+//				Optional:     true,
+//				ForceNew:     true,
+//				ValidateFunc: validation.StringInSlice([]string{string(KubernetesNodeMaster), string(KubernetesNodeWorker)}, false),
+//			},
 			"sorted_by": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -242,7 +242,7 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 
 	if resp != nil {
 		eniAmount := d.Get("eni_amount").(int)
-		k8sNode := strings.TrimSpace(d.Get("kubernetes_node_role").(string))
+//		k8sNode := strings.TrimSpace(d.Get("kubernetes_node_role").(string))
 		for _, types := range resp.InstanceTypes.InstanceType {
 			if _, ok := mapInstanceTypes[types.InstanceTypeId]; !ok {
 				continue
@@ -269,17 +269,17 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 
 			// Kubernetes node does not support instance types which family is "ecs.t5" and spec less that c2g4
 			// Kubernetes master node does not support gpu instance types which family prefixes with "ecs.gn"
-			if k8sNode != "" {
-				if types.InstanceTypeFamily == "ecs.t5" {
-					continue
-				}
-				if types.CpuCoreCount < 2 || types.MemorySize < 4 {
-					continue
-				}
-				if k8sNode == string(KubernetesNodeMaster) && strings.HasPrefix(types.InstanceTypeFamily, "ecs.gn") {
-					continue
-				}
-			}
+//			if k8sNode != "" {
+//				if types.InstanceTypeFamily == "ecs.t5" {
+//					continue
+//				}
+//				if types.CpuCoreCount < 2 || types.MemorySize < 4 {
+//					continue
+//				}
+//				if k8sNode == string(KubernetesNodeMaster) && strings.HasPrefix(types.InstanceTypeFamily, "ecs.gn") {
+//					continue
+//				}
+//			}
 
 			instanceTypes = append(instanceTypes, instanceTypeWithOriginalPrice{
 				InstanceType: types,

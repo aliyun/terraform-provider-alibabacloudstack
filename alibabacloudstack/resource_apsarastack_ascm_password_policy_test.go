@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAscm_PasswordPolicy(t *testing.T) {
+func TestAccAlibabacloudStackAscmPasswordPolicy_baisc(t *testing.T) {
 	var v *PasswordPolicy
 	resourceId := "alibabacloudstack_ascm_password_policy.default"
 	ra := resourceAttrInit(resourceId, ascmPassword)

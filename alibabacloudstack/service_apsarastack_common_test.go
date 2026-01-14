@@ -440,6 +440,10 @@ func valueConvert(indentation int, val reflect.Value) string {
 		return fmt.Sprintf("\"%s\"", val.String())
 	case reflect.Int:
 		return fmt.Sprintf("%d", val.Int())
+	case reflect.Float32:
+		return fmt.Sprintf("%f", val.Float())
+	case reflect.Float64:
+		return fmt.Sprintf("%f", val.Float())
 	case reflect.Bool:
 		return fmt.Sprintf("%v", val.Bool())
 	case reflect.Slice:
