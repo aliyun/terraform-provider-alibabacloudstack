@@ -29,27 +29,12 @@ func dataSourceAlibabacloudStackEcsCommands() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			//			"content_encoding": {
-			//				Type:     schema.TypeString,
-			//				Optional: true,
-			//				ForceNew: true,
-			//			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"names": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"command_provider": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -125,14 +110,8 @@ func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta int
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
 
-	if v, ok := d.GetOk("description"); ok {
-		request["Description"] = v
-	}
 	if v, ok := d.GetOk("name"); ok {
 		request["Name"] = v
-	}
-	if v, ok := d.GetOk("command_provider"); ok {
-		request["Provider"] = v
 	}
 	if v, ok := d.GetOk("type"); ok {
 		request["Type"] = v

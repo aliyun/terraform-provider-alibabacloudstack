@@ -21,12 +21,28 @@ func TestAccAlibabacloudStackEcsCommandsDataSource(t *testing.T) {
 	}
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": name,
-			"ids":        []string{"${alibabacloudstack_ecs_command.default.id}"},
+			"name_regex": "^${alibabacloudstack_ecs_command.default.name}$",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": name,
-			"ids":        []string{"${alibabacloudstack_ecs_command.default.id}-fake"},
+			"name_regex": "fake-name",
+		}),
+	}
+	nameConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"name": "${alibabacloudstack_ecs_command.default.name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name": "fake-name",
+		}),
+	}
+	typeConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ecs_command.default.id}"},
+			"type"              : "RunShellScript",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ecs_command.default.id}"},
+			"type":"RunBatScript",
 		}),
 	}
 	var existEcsCommandsMapFunc = func(rand int) map[string]string {
@@ -39,7 +55,7 @@ func TestAccAlibabacloudStackEcsCommandsDataSource(t *testing.T) {
 			"commands.0.id":               CHECKSET,
 			"commands.0.command_content":  "bHMK",
 			"commands.0.command_id":       CHECKSET,
-			"commands.0.description":      "For Terraform Test",
+			"commands.0.description":      name,
 			"commands.0.enable_parameter": "false",
 			"commands.0.name":             name,
 			"commands.0.type":             "RunShellScript",
@@ -61,15 +77,18 @@ func TestAccAlibabacloudStackEcsCommandsDataSource(t *testing.T) {
 		fakeMapFunc:  fakeEcsCommandsMapFunc,
 	}
 
-	EcsCommandsInfo.dataSourceTestCheck(t, 0, idsConf, nameRegexConf)
+	EcsCommandsInfo.dataSourceTestCheck(t, 0, idsConf, nameRegexConf, nameConf, typeConf)
 }
 
 func dataSourceEcsCommandsDependence(name string) string {
 	return fmt.Sprintf(`
+	variable "name" {
+		default = "%s"
+	}
 	resource "alibabacloudstack_ecs_command" "default" {
-		name              = "%s"
+		name              = var.name
 		command_content   = "bHMK"
-		description       = "For Terraform Test"
+		description       = var.name
 		type              = "RunShellScript"
 		working_dir       = "/root"
 	}`, name)
