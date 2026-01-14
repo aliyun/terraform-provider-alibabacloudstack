@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackEcsKeypair0(t *testing.T) {
+func TTestAccAlibabacloudStackEcsKeyPair0(t *testing.T) {
 	var v map[string]interface{}
 
 	resourceId := "alibabacloudstack_ecs_keypair.default"
@@ -39,12 +39,12 @@ func TestAccAlibabacloudStackEcsKeypair0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"key_pair_name": "testKeyPairName${{ref(function, random(0,100000))}}",
+					"key_pair_name": name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"key_pair_name": "testKeyPairName${{ref(function, random(0,100000))}}",
+						"key_pair_name": name,
 					}),
 				),
 			},

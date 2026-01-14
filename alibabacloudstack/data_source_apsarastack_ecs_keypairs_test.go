@@ -2,69 +2,65 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEcsKeyPairsDataSource(t *testing.T) {
 
+	resourceId := AlibabacloudstackEcsKeyPairsCheckInfo.resourceId
 	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testAccEcsKeyPair%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig)
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_key_pairs.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ecs_keypair.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_key_pairs.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ecs_keypair.default.id}_fake"},
 		}),
 	}
 
 	finger_printConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_ecs_key_pairs.default.id}"]`,
-			"finger_print": `"${alibabacloudstack_ecs_key_pairs.default.FingerPrint}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ecs_keypair.default.id}"},
+			"finger_print": `"${alibabacloudstack_ecs_keypair.default.FingerPrint}"`,
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_ecs_key_pairs.default.id}_fake"]`,
-			"finger_print": `"${alibabacloudstack_ecs_key_pairs.default.FingerPrint}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ecs_keypair.default.id}"},
+			"finger_print": `"${alibabacloudstack_ecs_keypair.default.FingerPrint}_fake"`,
 		}),
 	}
 
 	key_pair_nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand, map[string]string{
-			"ids":           `["${alibabacloudstack_ecs_key_pairs.default.id}"]`,
-			"key_pair_name": `"${alibabacloudstack_ecs_key_pairs.default.KeyPairName}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"key_pair_name": `"${alibabacloudstack_ecs_keypair.default.KeyPairName}"`,
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand, map[string]string{
-			"ids":           `["${alibabacloudstack_ecs_key_pairs.default.id}_fake"]`,
-			"key_pair_name": `"${alibabacloudstack_ecs_key_pairs.default.KeyPairName}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"key_pair_name": `"${alibabacloudstack_ecs_keypair.default.KeyPairName}_fake"`,
 		}),
 	}
 
 	resource_group_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand, map[string]string{
-			"ids":               `["${alibabacloudstack_ecs_key_pairs.default.id}"]`,
-			"resource_group_id": `"${alibabacloudstack_ecs_key_pairs.default.ResourceGroupId}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"resource_group_id": `"${alibabacloudstack_ecs_keypair.default.ResourceGroupId}"`,
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand, map[string]string{
-			"ids":               `["${alibabacloudstack_ecs_key_pairs.default.id}_fake"]`,
-			"resource_group_id": `"${alibabacloudstack_ecs_key_pairs.default.ResourceGroupId}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"resource_group_id": `"${alibabacloudstack_ecs_keypair.default.ResourceGroupId}_fake"`,
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_key_pairs.default.id}"]`,
-
-			"finger_print":      `"${alibabacloudstack_ecs_key_pairs.default.FingerPrint}"`,
-			"key_pair_name":     `"${alibabacloudstack_ecs_key_pairs.default.KeyPairName}"`,
-			"resource_group_id": `"${alibabacloudstack_ecs_key_pairs.default.ResourceGroupId}"`}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_key_pairs.default.id}_fake"]`,
-
-			"finger_print":      `"${alibabacloudstack_ecs_key_pairs.default.FingerPrint}_fake"`,
-			"key_pair_name":     `"${alibabacloudstack_ecs_key_pairs.default.KeyPairName}_fake"`,
-			"resource_group_id": `"${alibabacloudstack_ecs_key_pairs.default.ResourceGroupId}_fake"`}),
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ecs_keypair.default.id}"},
+			"finger_print":      `"${alibabacloudstack_ecs_keypair.default.FingerPrint}"`,
+			"key_pair_name":     `"${alibabacloudstack_ecs_keypair.default.KeyPairName}"`,
+			"resource_group_id": `"${alibabacloudstack_ecs_keypair.default.ResourceGroupId}"`}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ecs_keypair.default.id}_fake"},
+			"finger_print":      `"${alibabacloudstack_ecs_keypair.default.FingerPrint}_fake"`,
+			"key_pair_name":     `"${alibabacloudstack_ecs_keypair.default.KeyPairName}_fake"`,
+			"resource_group_id": `"${alibabacloudstack_ecs_keypair.default.ResourceGroupId}_fake"`}),
 	}
 
 	AlibabacloudstackEcsKeyPairsCheckInfo.dataSourceTestCheck(t, rand, idsConf, finger_printConf, key_pair_nameConf, resource_group_idConf, allConf)
@@ -84,29 +80,21 @@ var fakeAlibabacloudstackEcsKeyPairsMapFunc = func(rand int) map[string]string {
 }
 
 var AlibabacloudstackEcsKeyPairsCheckInfo = dataSourceAttr{
-	resourceId:   "data.alibabacloudstack_ecs_key_pairs.default",
+	resourceId:   "data.alibabacloudstack_ecs_keypairs.default",
 	existMapFunc: existAlibabacloudstackEcsKeyPairsMapFunc,
 	fakeMapFunc:  fakeAlibabacloudstackEcsKeyPairsMapFunc,
 }
 
-func testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudstackEcsKeyPairsSourceConfig(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackEcsKeyPairs%d"
+	default = "%s"
+}
+
+resource "alibabacloudstack_ecs_keypair" "default"{
+	key_pair_name = var.name
 }
 
 
-
-
-
-
-data "alibabacloudstack_ecs_key_pairs" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n   "))
-	return config
+`, name)
 }
