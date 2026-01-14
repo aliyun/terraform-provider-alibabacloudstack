@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -81,9 +82,14 @@ func dataSourceAlibabacloudStackMaxcomputeProjects() *schema.Resource {
 func dataSourceAlibabacloudStackMaxcomputeProjectsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "ListCalcEnginesForAscm", "")
-	if v, ok := d.GetOk("name"); ok && v.(string) != "" {
-		request.QueryParams["ProjectName"] = v.(string)
+	var name, status string
+	if v, ok := d.GetOk("name"); ok {
+		name = v.(string)
 	}
+	if v, ok := d.GetOk("status"); ok {
+		status = v.(string)
+	}
+	
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
@@ -97,16 +103,21 @@ func dataSourceAlibabacloudStackMaxcomputeProjectsRead(d *schema.ResourceData, m
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
+	idsMap := getIdsStringFilter(d)
 	maxcomputeService := MaxcomputeService{client}
 	var t []map[string]interface{}
 	var ids []string
 	for _, object := range response.Data.CalcEngines {
-		if v, ok := d.GetOk("status"); ok {
-			if fmt.Sprint(object.EngineStatus) == v.(string) {
-				continue
-			}
+		if status != "" && status != strconv.Itoa(object.EngineStatus) {
+			continue
 		}
 		id := fmt.Sprint(object.EngineId)
+		if _, existed := idsMap[id]; len(idsMap) > 0 && !existed {
+			continue
+		}
+		if name != "" && name != object.Name {
+			continue
+		}
 		quota, err := maxcomputeService.ListOdpsEngineQuotaForAscm(id, object.Name)
 		if err != nil {
 			return errmsgs.WrapError(err)
