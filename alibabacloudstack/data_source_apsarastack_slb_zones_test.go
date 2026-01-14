@@ -7,7 +7,11 @@ import (
 func TestAccAlibabacloudStackSlbZonesDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_slb_zones.default"
-
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", func(string) string{return ""})
+	baseConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+		}),
+	}
 	var existSlbZonesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                        CHECKSET,
@@ -29,7 +33,7 @@ func TestAccAlibabacloudStackSlbZonesDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeSlbZonesMapFunc,
 	}
 
-	slbZonesCheckInfo.dataSourceTestCheck(t, rand)
+	slbZonesCheckInfo.dataSourceTestCheck(t, rand, baseConf)
 }
 
 func dataSourceslbZonesConfigDependence(name string) string {

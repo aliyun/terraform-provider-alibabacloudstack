@@ -19,11 +19,11 @@ func dataSourceAlibabacloudStackSlbZones() *schema.Resource {
 				Optional:   true,
 				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
-			"enable_details": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
+//			"enable_details": {
+//				Type:     schema.TypeBool,
+//				Optional: true,
+//				Default:  false,
+//			},
 			"ids": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -104,10 +104,10 @@ func dataSourceAlibabacloudStackSlbZonesRead(d *schema.ResourceData, meta interf
 		if len(localName) > 0 {
 			mapping["local_name"] = localName[zoneId]
 		}
-		if !d.Get("enable_details").(bool) {
-			s = append(s, mapping)
-			continue
-		}
+//		if !d.Get("enable_details").(bool) {
+//			s = append(s, mapping)
+//			continue
+//		}
 		s = append(s, mapping)
 	}
 
