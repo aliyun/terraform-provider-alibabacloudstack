@@ -17,16 +17,6 @@ func TestAccAlibabacloudStackSlbAclsDataSource_basic(t *testing.T) {
 			"name_regex": `"${alibabacloudstack_slb_acl.default.name}_fake"`,
 		}),
 	}
-	// tagsConf := dataSourceTestAccConfig{
-	// 	existConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
-	// 		"name_regex": `"${alibabacloudstack_slb_acl.default.name}"`,
-	// 		"tags":       `{Created = "TF"}`,
-	// 	}),
-	// 	fakeConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
-	// 		"name_regex": `"${alibabacloudstack_slb_acl.default.name}"`,
-	// 		"tags":       `{Created = "TF1"}`,
-	// 	}),
-	// }
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{

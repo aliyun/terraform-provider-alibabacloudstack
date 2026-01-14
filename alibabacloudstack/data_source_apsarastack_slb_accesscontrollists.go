@@ -23,7 +23,6 @@ func dataSourceAlibabacloudStackSlbAcls() *schema.Resource {
 				ForceNew: true,
 				MinItems: 1,
 			},
-			"tags": tagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -112,18 +111,6 @@ func dataSourceAlibabacloudStackSlbAclsRead(d *schema.ResourceData, meta interfa
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := slb.CreateDescribeAccessControlListsRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	tags := d.Get("tags").(map[string]interface{})
-	if len(tags) > 0 {
-		KeyPairsTags := make([]slb.DescribeAccessControlListsTag, 0, len(tags))
-		for k, v := range tags {
-			keyPairsTag := slb.DescribeAccessControlListsTag{
-				Key:   k,
-				Value: v.(string),
-			}
-			KeyPairsTags = append(KeyPairsTags, keyPairsTag)
-		}
-		request.Tag = &KeyPairsTags
-	}
 	idsMap := getIdsStringFilter(d)
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeAccessControlLists(request)
@@ -139,26 +126,21 @@ func dataSourceAlibabacloudStackSlbAclsRead(d *schema.ResourceData, meta interfa
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	var filteredAclsTemp []slb.Acl
-	nameRegex, ok := d.GetOk("name_regex")
-	if (ok && nameRegex.(string) != "") || (len(idsMap) > 0) {
-		var r *regexp.Regexp
-		if nameRegex != "" {
-			r = regexp.MustCompile(nameRegex.(string))
+	var nameRegex *regexp.Regexp
+	if v, ok := d.GetOk("name_regex"); ok {
+		nameRegex = regexp.MustCompile(v.(string))
+	}
+	for _, acl := range response.Acls.Acl {
+		if nameRegex != nil && !nameRegex.MatchString(acl.AclName) {
+			continue
 		}
-		for _, acl := range response.Acls.Acl {
-			if r != nil && !r.MatchString(acl.AclName) {
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[acl.AclId]; !ok {
 				continue
 			}
-			if len(idsMap) > 0 {
-				if _, ok := idsMap[acl.AclId]; !ok {
-					continue
-				}
-			}
-
-			filteredAclsTemp = append(filteredAclsTemp, acl)
 		}
-	} else {
-		filteredAclsTemp = response.Acls.Acl
+
+		filteredAclsTemp = append(filteredAclsTemp, acl)
 	}
 
 	return slbAclsDescriptionAttributes(d, filteredAclsTemp, client, meta)
