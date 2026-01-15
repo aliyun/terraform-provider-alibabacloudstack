@@ -29,10 +29,6 @@ func dataSourceAlibabacloudStackNetworkInterfaces() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
 			},
-			"vpc_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -145,9 +141,6 @@ func dataSourceAlibabacloudstackNetworkInterfacesRead(d *schema.ResourceData, me
 		ids := expandStringList(networkInterfaceIds.(*schema.Set).List())
 		request.NetworkInterfaceId = &ids
 	}
-	if vpcId, ok := d.GetOk("vpc_id"); ok {
-		request.VpcId = vpcId.(string)
-	}
 
 	if vswitchId, ok := d.GetOk("vswitch_id"); ok {
 		request.VSwitchId = vswitchId.(string)
@@ -160,15 +153,9 @@ func dataSourceAlibabacloudstackNetworkInterfacesRead(d *schema.ResourceData, me
 	if securityGroupId, ok := d.GetOk("security_group_id"); ok {
 		request.SecurityGroupId = securityGroupId.(string)
 	}
-
-	if typ, ok := d.GetOk("type"); ok {
-		request.Type = typ.(string)
-	}
-
 	if instanceId, ok := d.GetOk("instance_id"); ok {
 		request.InstanceId = instanceId.(string)
 	}
-
 	if v, ok := d.GetOk("tags"); ok {
 		var tags []ecs.DescribeNetworkInterfacesTag
 		for key, value := range v.(map[string]interface{}) {

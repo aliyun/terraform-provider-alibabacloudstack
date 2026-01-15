@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"log"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -73,13 +74,13 @@ func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
 				ConflictsWith: []string{"private_ips"},
 			},
 			"mac": {
-				Type:          schema.TypeString,
-				Computed:      true,
-				Deprecated:    "Field 'mac' is deprecated and will be removed in a future release. Please use new field 'mac_address' instead.",
+				Type:       schema.TypeString,
+				Computed:   true,
+				Deprecated: "Field 'mac' is deprecated and will be removed in a future release. Please use new field 'mac_address' instead.",
 			},
 			"mac_address": {
-				Type:          schema.TypeString,
-				Computed:      true,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -159,7 +160,10 @@ func resourceNetworkInterfaceRead(d *schema.ResourceData, meta interface{}) erro
 			privateIps = append(privateIps, object.PrivateIpSets.PrivateIpSet[i].PrivateIpAddress)
 		}
 	}
+
+	log.Printf("[DEBUG] alibabacloudstack_ecs_networkinterface private_ips %#v", privateIps)
 	d.Set("private_ips", privateIps)
+	log.Printf("[DEBUG] alibabacloudstack_ecs_networkinterface private_ips_count %#v", len(privateIps))
 	d.Set("private_ips_count", len(privateIps))
 	connectivity.SetResourceData(d, object.MacAddress, "mac_address", "mac")
 
@@ -179,7 +183,7 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 
-	d.Partial(true)
+	noUpdatesAllowedCheck(d, []string{"network_interface_name"})
 
 	attributeUpdate := false
 	request := ecs.CreateModifyNetworkInterfaceAttributeRequest()
@@ -251,6 +255,7 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 			if err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), unAssignPrivateIpAddressesRequest.GetActionName(), errmsgs.AlibabacloudStackGoClientFailure)
 			}
+			time.Sleep(time.Duration(unAssignIps.Len()) * time.Second)
 		}
 
 		assignIps := newIpsSet.Difference(oldIpsSet)
@@ -345,6 +350,7 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 				if err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), unAssignPrivateIpAddressesRequest.GetActionName(), errmsgs.AlibabacloudStackGoClientFailure)
 				}
+				time.Sleep(time.Duration(1 * time.Second))
 			}
 
 			err := ecsService.WaitForPrivateIpsCountChanged(d.Id(), newIpsCount.(int))
@@ -357,8 +363,6 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 	if err := setTags(client, TagResourceEni, d); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	d.Partial(false)
 
 	return nil
 }
