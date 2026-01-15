@@ -113,7 +113,7 @@ func resourceAlibabacloudStackImageCreate(d *schema.ResourceData, meta interface
 	}
 	if value, ok := d.GetOk("disk_device_mapping"); ok {
 		diskDeviceMappings := value.([]interface{})
-		if diskDeviceMappings != nil && len(diskDeviceMappings) > 0 {
+		if len(diskDeviceMappings) > 0 {
 			mappings := make([]ecs.CreateImageDiskDeviceMapping, 0, len(diskDeviceMappings))
 			for _, diskDeviceMapping := range diskDeviceMappings {
 				mapping := diskDeviceMapping.(map[string]interface{})
@@ -128,7 +128,7 @@ func resourceAlibabacloudStackImageCreate(d *schema.ResourceData, meta interface
 	}
 
 	tags := d.Get("tags").(map[string]interface{})
-	if tags != nil && len(tags) > 0 {
+	if len(tags) > 0 {
 		imageTags := make([]ecs.CreateImageTag, 0, len(tags))
 		for k, v := range tags {
 			imageTag := ecs.CreateImageTag{
