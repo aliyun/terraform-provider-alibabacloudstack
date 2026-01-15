@@ -452,7 +452,7 @@ func resourceAlibabacloudStackSlbListenerRead(d *schema.ResourceData, meta inter
 	d.Set("protocol", protocol)
 	d.Set("load_balancer_id", lb_id)
 	d.Set("frontend_port", port)
-	logAttr, err := slbService.DescribeAccessLogsDownloadAttribute(lb_id)
+	logAttr, err := slbService.DescribeAccessLogsDownloadAttribute(d.Id())
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}

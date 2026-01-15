@@ -337,9 +337,9 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 
 	request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "CreateDBInstance", "")
 	mergeMaps(request.QueryParams, map[string]string{
-		"EngineVersion":         enginever,
-		"Engine":                engine,
-		"Encryption":            strconv.FormatBool(encryption),
+		"EngineVersion": enginever,
+		"Engine":        engine,
+
 		"DBInstanceStorage":     strconv.Itoa(DBInstanceStorage),
 		"DBInstanceClass":       DBInstanceClass,
 		"DBInstanceNetType":     DBInstanceNetType,
@@ -349,14 +349,27 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		"PayType":               payType,
 		"DBInstanceStorageType": DBInstanceStorageType,
 		"SecurityIPList":        SecurityIPList,
-		"ZoneIdSlave1":          ZoneIdSlave1,
-		"ZoneIdSlave2":          ZoneIdSlave2,
-		"EncryptionKey":         EncryptionKey,
 		"ZoneId":                ZoneId,
 		"VPCId":                 VPCId,
 		"RoleARN":               arnrole,
 		"CpuType":               d.Get("cpu_type").(string),
 	})
+
+	if encryption {
+		mergeMaps(request.QueryParams, map[string]string{
+			"Encryption":    strconv.FormatBool(encryption),
+			"EncryptionKey": EncryptionKey,
+			"RoleARN":       arnrole,
+		})
+	}
+	if ZoneIdSlave1 != "" && ZoneIdSlave2 != "" {
+		mergeMaps(request.QueryParams, map[string]string{
+			"ZoneIdSlave1": ZoneIdSlave1,
+			"ZoneIdSlave2": ZoneIdSlave2,
+		})
+	} else {
+		request.QueryParams["MultiZone"] = "false"
+	}
 
 	log.Printf("request245 %v", request.QueryParams)
 	bresponse, err := client.ProcessCommonRequest(request)

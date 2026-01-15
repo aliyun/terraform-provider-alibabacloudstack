@@ -163,25 +163,21 @@ func dataSourceAlibabacloudStackEssScalingGroupsRead(d *schema.ResourceData, met
 
 	var filteredScalingGroupsTemp = make([]ess.ScalingGroup, 0)
 
-	nameRegex, okNameRegex := d.GetOk("name_regex")
+	var nameRegex *regexp.Regexp
+	if v, ok := d.GetOk("name_regex"); ok {
+		nameRegex = regexp.MustCompile(v.(string))
+	}
 	idsMap := getIdsStringFilter(d)
-	if okNameRegex || len(idsMap) > 0 {
-		for _, group := range allScalingGroups {
-			if okNameRegex && nameRegex != "" {
-				var r = regexp.MustCompile(nameRegex.(string))
-				if r != nil && !r.MatchString(group.ScalingGroupName) {
-					continue
-				}
-			}
-			if len(idsMap) > 0 {
-				if _, ok := idsMap[group.ScalingGroupId]; !ok {
-					continue
-				}
-			}
-			filteredScalingGroupsTemp = append(filteredScalingGroupsTemp, group)
+	for _, group := range allScalingGroups {
+		if nameRegex != nil && !nameRegex.MatchString(group.ScalingGroupName) {
+			continue
 		}
-	} else {
-		filteredScalingGroupsTemp = allScalingGroups
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[group.ScalingGroupId]; !ok {
+				continue
+			}
+		}
+		filteredScalingGroupsTemp = append(filteredScalingGroupsTemp, group)
 	}
 	return scalingGroupsDescriptionAttribute(d, filteredScalingGroupsTemp, meta)
 }

@@ -176,7 +176,6 @@ func resourceAlibabacloudStackEssScalingGroupUpdate(d *schema.ResourceData, meta
 	client.InitRpcRequest(*request.RpcRequest)
 	request.ScalingGroupId = d.Id()
 
-	d.Partial(true)
 	if d.HasChange("scaling_group_name") {
 		request.ScalingGroupName = d.Get("scaling_group_name").(string)
 	}
@@ -222,7 +221,92 @@ func resourceAlibabacloudStackEssScalingGroupUpdate(d *schema.ResourceData, meta
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	d.Partial(false)
+	if d.HasChange("loadbalancer_ids") {
+		o, n := d.GetChange("loadbalancer_ids")
+		oldmap := make(map[string]string)
+		newmap := make(map[string]string)
+		for _, v := range o.(*schema.Set).List() {
+			oldmap[v.(string)] = v.(string)
+		}
+		add :=[]string{}
+		for _, v := range n.(*schema.Set).List() {
+			if _, ok := oldmap[v.(string)]; !ok {
+				add = append(add, v.(string))
+			}
+		}
+		if len(add) >0 {
+			request := map[string]interface{}{
+				"LoadBalancer":   add,
+				"ScalingGroupId": d.Id(),
+			}
+			if _, err := client.DoTeaRequest("POST", "Ess", "2014-08-28", "AttachLoadBalancers", "", nil, request, nil); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "AttachLoadBalancers", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+		}
+
+		remove :=[]string{}
+		for _, v := range n.(*schema.Set).List() {
+			newmap[v.(string)] = v.(string)
+		}
+		for _, v := range o.(*schema.Set).List() {
+			if _, ok := newmap[v.(string)]; !ok {
+				remove = append(remove, v.(string))
+			}
+		}
+		if len(remove) > 0{
+			request := map[string]interface{}{
+				"LoadBalancer": remove,
+				"ScalingGroupId": d.Id(),
+			}
+			if _, err := client.DoTeaRequest("POST", "Ess", "2014-08-28", "DetachLoadBalancers", "", nil, request, nil); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "AttachLoadBalancers", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+		}
+	}
+	
+	if d.HasChange("db_instance_ids") {
+		o, n := d.GetChange("db_instance_ids")
+		oldmap := make(map[string]string)
+		newmap := make(map[string]string)
+		for _, v := range o.(*schema.Set).List() {
+			oldmap[v.(string)] = v.(string)
+		}
+		add :=[]string{}
+		for _, v := range n.(*schema.Set).List() {
+			if _, ok := oldmap[v.(string)]; !ok {
+				add = append(add, v.(string))
+			}
+		}
+		if len(add) >0 {
+			request := map[string]interface{}{
+				"DBInstance":   add,
+				"ScalingGroupId": d.Id(),
+			}
+			if _, err := client.DoTeaRequest("POST", "Ess", "2014-08-28", "AttachDBInstances", "", nil, request, nil); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "AttachDBInstances", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+		}
+
+		remove :=[]string{}
+		for _, v := range n.(*schema.Set).List() {
+			newmap[v.(string)] = v.(string)
+		}
+		for _, v := range o.(*schema.Set).List() {
+			if _, ok := newmap[v.(string)]; !ok {
+				remove = append(remove, v.(string))
+			}
+		}
+		if len(remove) > 0{
+			request := map[string]interface{}{
+				"DBInstance": remove,
+				"ScalingGroupId": d.Id(),
+			}
+			if _, err := client.DoTeaRequest("POST", "Ess", "2014-08-28", "DetachDBInstances", "", nil, request, nil); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DetachDBInstances", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+		}
+	}
+
 	return nil
 }
 
