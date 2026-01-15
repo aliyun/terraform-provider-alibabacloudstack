@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackSnapshotsDataSourceBasic(t *testing.T) {
+func TestAccAlibabacloudStackEcsSnapshotsDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testaccSnapshotDataSourceBasic%d", rand)
 
