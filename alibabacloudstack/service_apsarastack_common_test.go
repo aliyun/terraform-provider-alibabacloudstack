@@ -1360,6 +1360,7 @@ resource "alibabacloudstack_vpc_vpc" "default" {
   cidr_block = "172.16.0.0/16"
   tags = {
     common_test = "terraform"
+	filter = var.name
   }
   lifecycle {
       ignore_changes = [

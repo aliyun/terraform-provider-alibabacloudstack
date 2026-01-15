@@ -2,103 +2,106 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackVpcVpcsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 
+	name := fmt.Sprintf("tf_testvpc_%d", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(AlibabacloudstackVpcVpcsDataCheckInfo.resourceId, name, testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig)
+
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_vpc_vpc.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_vpc_vpc.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_vpc_vpc.default.id}_fake"},
 		}),
 	}
 
 	vswtich_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"vswitch_id": `"${alibabacloudstack_vpc_vswitch.default.id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"vswitch_id": `"${alibabacloudstack_vpc_vswitch.default.id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}_fake",
 		}),
 	}
 
 	vpc_nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":      `["${alibabacloudstack_vpc_vpc.default.id}"]`,
-			"vpc_name": `"${alibabacloudstack_vpc_vpc.default.vpc_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":      []string{"${alibabacloudstack_vpc_vpc.default.id}"},
+			"vpc_name": "${alibabacloudstack_vpc_vpc.default.vpc_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":      `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
-			"vpc_name": `"${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":      []string{"${alibabacloudstack_vpc_vpc.default.id}_fake"},
+			"vpc_name": "${alibabacloudstack_vpc_vpc.default.vpc_name}_fake",
 		}),
 	}
 	name_regexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}"]`,
-			"name_regex": `"${alibabacloudstack_vpc_vpc.default.vpc_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}"},
+			"name_regex": "${alibabacloudstack_vpc_vpc.default.vpc_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
-			"name_regex": `"${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}_fake"},
+			"name_regex": "${alibabacloudstack_vpc_vpc.default.vpc_name}_fake",
 		}),
 	}
 
 	statusConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":    `["${alibabacloudstack_vpc_vpc.default.id}"]`,
-			"status": `"Available"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":    []string{"${alibabacloudstack_vpc_vpc.default.id}"},
+			"status": "Available",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":    `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
-			"status": `"Pending"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":    []string{"${alibabacloudstack_vpc_vpc.default.id}_fake"},
+			"status": "Pending",
 		}),
 	}
 
 	isDefaultConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}"},
 			"is_default": `false`,
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}_fake"},
 			"is_default": `true`,
 		}),
 	}
 
 	cidr_blockConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}"]`,
-			"cidr_block": `"${alibabacloudstack_vpc_vpc.default.cidr_block}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}"},
+			"cidr_block": "${alibabacloudstack_vpc_vpc.default.cidr_block}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
-			"cidr_block": `"198.1.0.0/16"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}_fake"},
+			"cidr_block": "198.1.0.0/16",
 		}),
 	}
 
 	tagsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"tags": `{"common_test": "terraform"}`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"tags": map[string]string{"filter": name},
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"tags": `{"common_test": "terraform_fake"}`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"tags": map[string]string{"filter": name + "_fake"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}"]`,
-			"vswitch_id": `"${alibabacloudstack_vpc_vswitch.default.id}"`,
-			"vpc_name":   `"${alibabacloudstack_vpc_vpc.default.vpc_name}"`}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
-			"vswitch_id": `"${alibabacloudstack_vpc_vswitch.default.id}_fake"`,
-			"vpc_name":   `"${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"`}),
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}"},
+			"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
+			"vpc_name":   "${alibabacloudstack_vpc_vpc.default.vpc_name}"}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}_fake"},
+			"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}_fake",
+			"vpc_name":   "${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"}),
 	}
 
 	AlibabacloudstackVpcVpcsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, vswtich_idConf, vpc_nameConf, name_regexConf, statusConf, isDefaultConf, cidr_blockConf, tagsConf, allConf)
@@ -123,20 +126,12 @@ var AlibabacloudstackVpcVpcsDataCheckInfo = dataSourceAttr{
 	fakeMapFunc:  fakeAlibabacloudstackVpcVpcsDataMapFunc,
 }
 
-func testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackVpcVpcs%d"
+	default = "%s"
 }
 %s
 
-data "alibabacloudstack_vpc_vpcs" "default" {
-%s
-}
-`, rand, VSwitchCommonTestCase, strings.Join(pairs, "\n   "))
-	return config
+`, name, VSwitchCommonTestCase)
 }
