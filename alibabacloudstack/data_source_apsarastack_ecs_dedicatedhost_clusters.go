@@ -25,11 +25,6 @@ func dataSourceAlibabacloudStackEcsDedicatedHostClusters() *schema.Resource {
 				MinItems: 1,
 			},
 
-			"zone_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"dedicated_host_cluster_name_regex": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -95,10 +90,6 @@ func dataSourceAlibabacloudStackEcsDedicatedHostClustersRead(d *schema.ResourceD
 
 	if v, ok := d.GetOk("dedicated_host_cluster_name"); ok {
 		request.QueryParams["DedicatedHostClusterName"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("zone_id"); ok {
-		request.QueryParams["ZoneId"] = v.(string)
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
