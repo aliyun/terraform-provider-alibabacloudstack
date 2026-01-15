@@ -48,7 +48,7 @@ func TestAccAlibabacloudStackSlbLoadbalancersDataSource(t *testing.T) {
 			"network_type": "${alibabacloudstack_slb_loadbalancer.default.network_type}_fake",
 			"vpc_id":       "${alibabacloudstack_vpc_vswitch.default.vpc_id}_fake",
 			"vswitch_id":   "${alibabacloudstack_vpc_vswitch.default.id}_fake",
-			"address":      "${alibabacloudstack_slb_loadbalancer.default.address}_fake",
+			"address":      "172.16.2.100",
 			"tags": map[string]string{
 				"Created": "TF_fake",
 				"For":     "Test_fake",
