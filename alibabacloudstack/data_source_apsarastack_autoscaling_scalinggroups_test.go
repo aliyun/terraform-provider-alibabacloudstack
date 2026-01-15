@@ -2,38 +2,42 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEssScalingGroupsDataSource(t *testing.T) {
-	rand := getAccTestRandInt(5, 1000)
+	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_ess_scaling_groups.default"
+	name := fmt.Sprintf("tf-essgroup%v", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackEssScalinggroupsDataSourceConfig)
+	
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssScalinggroupsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_ess_scaling_group.default.scaling_group_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^${alibabacloudstack_ess_scaling_group.default.scaling_group_name}$",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssScalinggroupsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_ess_scaling_group.default.scaling_group_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_ess_scaling_group.default.scaling_group_name}_fake",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssScalinggroupsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ess_scaling_group.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ess_scaling_group.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssScalinggroupsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ess_scaling_group.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ess_scaling_group.default.id}_fake"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssScalinggroupsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_ess_scaling_group.default.id}"]`,
-			"name_regex": `"${alibabacloudstack_ess_scaling_group.default.scaling_group_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ess_scaling_group.default.id}"},
+			"name_regex": "^${alibabacloudstack_ess_scaling_group.default.scaling_group_name}$",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssScalinggroupsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_ess_scaling_group.default.id}_fake"]`,
-			"name_regex": `"${alibabacloudstack_ess_scaling_group.default.scaling_group_name}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ess_scaling_group.default.id}_fake"},
+			"name_regex": "${alibabacloudstack_ess_scaling_group.default.scaling_group_name}_fake",
 		}),
 	}
 
@@ -43,7 +47,7 @@ func TestAccAlibabacloudStackEssScalingGroupsDataSource(t *testing.T) {
 			"ids.#":                        "1",
 			"names.#":                      "1",
 			"groups.0.id":                  CHECKSET,
-			"groups.0.name":                fmt.Sprintf("tf-test-%d", rand),
+			"groups.0.name":                name,
 			"groups.0.region_id":           CHECKSET,
 			"groups.0.min_size":            "0",
 			"groups.0.max_size":            "2",
@@ -72,7 +76,7 @@ func TestAccAlibabacloudStackEssScalingGroupsDataSource(t *testing.T) {
 	}
 
 	var essScalingGroupsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_ess_scaling_groups.default",
+		resourceId:   resourceId,
 		existMapFunc: existEssScalingGroupsMapFunc,
 		fakeMapFunc:  fakeEssScalingGroupsMapFunc,
 	}
@@ -80,17 +84,12 @@ func TestAccAlibabacloudStackEssScalingGroupsDataSource(t *testing.T) {
 	essScalingGroupsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackEssScalinggroupsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudStackEssScalinggroupsDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 %s
 
 variable "name" {
-	default = "tf-test-%d"
+	default = "%s"
 }
 
 resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -102,9 +101,5 @@ resource "alibabacloudstack_ess_scaling_group" "default" {
 	vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 }
 
-data "alibabacloudstack_ess_scaling_groups" "default" {
-  %s
-}
-`, ECSInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
-	return config
+`, ECSInstanceCommonTestCase, name)
 }

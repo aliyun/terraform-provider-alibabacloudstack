@@ -15,14 +15,6 @@ func dataSourceAlibabacloudStackEssScheduledTasks() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackEssScheduledTasksRead,
 		Schema: map[string]*schema.Schema{
-			"scheduled_task_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"scheduled_action": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
