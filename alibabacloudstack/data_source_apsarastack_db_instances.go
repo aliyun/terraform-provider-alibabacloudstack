@@ -309,9 +309,9 @@ func rdsInstancesDescription(d *schema.ResourceData, meta interface{}, dbi []rds
 			"readonly_instance_ids": readOnlyInstanceIDs,
 			"vpc_id":                item.VpcId,
 			"vswitch_id":            item.VSwitchId,
-			"connection_string":     instance.ConnectionString,
-			"port":                  instance.Port,
-			"instance_storage":      instance.DBInstanceStorage,
+			"connection_string":     instance["ConnectionString"],
+			"port":                  instance["Port"],
+			"instance_storage":      instance["DBInstanceStorage"],
 		}
 
 		ids = append(ids, item.DBInstanceId)

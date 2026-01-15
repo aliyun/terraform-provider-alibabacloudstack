@@ -36,31 +36,20 @@ type RdsService struct {
 // That the business layer only needs to check the error.
 var DBInstanceStatusCatcher = Catcher{"OperationDenied.DBInstanceStatus", 60, 5}
 
-func (s *RdsService) DescribeDBInstance(id string) (*rds.DBInstanceAttribute, error) {
-	instance := &rds.DBInstanceAttribute{}
-	request := rds.CreateDescribeDBInstanceAttributeRequest()
-	s.client.InitRpcRequest(*request.RpcRequest)
-	request.DBInstanceId = id
-	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
-		return rdsClient.DescribeDBInstanceAttribute(request)
-	})
-	response, ok := raw.(*rds.DescribeDBInstanceAttributeResponse)
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return instance, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+func (s *RdsService) DescribeDBInstance(id string) (dbInstance map[string]interface{}, err error) {
+	reqQuery := map[string]interface{}{
+		"DBInstanceId": id,
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	if len(response.Items.DBInstanceAttribute) < 1 {
-		return instance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+	response, err := s.client.DoTeaRequest("POST", "Rds", "2014-08-15", "DescribeDBInstanceAttribute", "", nil, reqQuery, nil)
+	if err != nil {
+		return dbInstance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeDBInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	dBInstances := response["Items"].(map[string]interface{})["DBInstanceAttribute"].([]interface{})
+	if len(dBInstances) < 1 {
+		return dbInstance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 
-	return &response.Items.DBInstanceAttribute[0], nil
+	return dBInstances[0].(map[string]interface{}), nil
 }
 
 func (s *RdsService) DescribeTasks(id string) (task *rds.DescribeTasksResponse, err error) {
@@ -443,11 +432,9 @@ func (s *RdsService) DescribeDBConnection(id string) (*rds.DBInstanceNetInfo, er
 		return info, errmsgs.WrapError(err)
 	}
 
-	if object != nil {
-		for _, o := range object {
-			if strings.HasPrefix(o.ConnectionString, parts[1]) {
-				return &o, nil
-			}
+	for _, o := range object {
+		if strings.HasPrefix(o.ConnectionString, parts[1]) {
+			return &o, nil
 		}
 	}
 
@@ -461,19 +448,17 @@ func (s *RdsService) DescribeDBReadWriteSplittingConnection(id string) (*rds.DBI
 		return ds, err
 	}
 
-	if object != nil {
-		for _, conn := range object {
-			if conn.ConnectionStringType != "ReadWriteSplitting" {
-				continue
-			}
-			if conn.MaxDelayTime == "" {
-				continue
-			}
-			if _, err := strconv.Atoi(conn.MaxDelayTime); err != nil {
-				return ds, err
-			}
-			return &conn, nil
+	for _, conn := range object {
+		if conn.ConnectionStringType != "ReadWriteSplitting" {
+			continue
 		}
+		if conn.MaxDelayTime == "" {
+			continue
+		}
+		if _, err := strconv.Atoi(conn.MaxDelayTime); err != nil {
+			return ds, err
+		}
+		return &conn, nil
 	}
 
 	return ds, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ReadWriteSplittingConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
@@ -672,10 +657,10 @@ func (s *RdsService) ModifyDBBackupPolicy(d *schema.ResourceData, updateForData,
 		request.BackupRetentionPeriod = retentionPeriod
 		request.CompressType = compressType
 		request.BackupPolicyMode = "DataBackupPolicy"
-		if instance.Engine == "SQLServer" && logBackupFrequency == "LogInterval" {
+		if instance["Engine"].(string) == "SQLServer" && logBackupFrequency == "LogInterval" {
 			request.LogBackupFrequency = logBackupFrequency
 		}
-		if instance.Engine == "MySQL" && instance.DBInstanceStorageType == "local_ssd" {
+		if instance["Engine"].(string) == "MySQL" && instance["DBInstanceStorageType"].(string) == "local_ssd" {
 
 			request.ArchiveBackupRetentionPeriod = archiveBackupRetentionPeriod
 			request.ArchiveBackupKeepCount = requests.NewInteger(archiveBackupKeepCount)
@@ -702,7 +687,7 @@ func (s *RdsService) ModifyDBBackupPolicy(d *schema.ResourceData, updateForData,
 	}
 
 	// At present, the sql server database does not support setting logBackupRetentionPeriod
-	if updateForLog && instance.Engine != "SQLServer" {
+	if updateForLog && instance["Engine"].(string) != "SQLServer" {
 		request := rds.CreateModifyBackupPolicyRequest()
 		s.client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
@@ -1048,12 +1033,12 @@ func (s *RdsService) WaitForDBInstance(id string, status Status, timeout int) er
 				return errmsgs.WrapError(err)
 			}
 		}
-		if object != nil && strings.ToLower(object.DBInstanceStatus) == strings.ToLower(string(status)) {
+		if object != nil && strings.EqualFold(object["DBInstanceStatus"].(string), string(status)) {
 			break
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.DBInstanceStatus, status, errmsgs.ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object["DBInstanceStatus"].(string), status, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -1071,11 +1056,11 @@ func (s *RdsService) RdsDBInstanceStateRefreshFunc(id string, failStates []strin
 		}
 
 		for _, failState := range failStates {
-			if object.DBInstanceStatus == failState {
-				return object, object.DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.DBInstanceStatus))
+			if object["DBInstanceStatus"].(string) == failState {
+				return object, object["DBInstanceStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["DBInstanceStatus"].(string)))
 			}
 		}
-		return object, object.DBInstanceStatus, nil
+		return object, object["DBInstanceStatus"].(string), nil
 	}
 }
 

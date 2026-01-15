@@ -333,17 +333,17 @@ func resourceAlibabacloudStackDBReadonlyInstanceRead(d *schema.ResourceData, met
 		return errmsgs.WrapError(err)
 	}
 
-	d.Set("engine", instance.Engine)
-	connectivity.SetResourceData(d, instance.MasterInstanceId, "master_instance_id", "master_db_instance_id")
-	d.Set("engine_version", instance.EngineVersion)
-	connectivity.SetResourceData(d, instance.DBInstanceClass, "db_instance_class", "instance_type")
-	d.Set("port", instance.Port)
-	connectivity.SetResourceData(d, instance.DBInstanceStorage, "db_instance_storage", "instance_storage")
-	d.Set("zone_id", instance.ZoneId)
-	d.Set("vswitch_id", instance.VSwitchId)
-	d.Set("connection_string", instance.ConnectionString)
-	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "instance_name")
-	d.Set("db_instance_storage_type", instance.DBInstanceStorageType)
+	d.Set("engine", instance["Engine"])
+	connectivity.SetResourceData(d, instance["MasterInstanceId"], "master_instance_id", "master_db_instance_id")
+	d.Set("engine_version", instance["EngineVersion"])
+	connectivity.SetResourceData(d, instance["DBInstanceClass"], "db_instance_class", "instance_type")
+	d.Set("port", instance["Port"])
+	connectivity.SetResourceData(d, instance["DBInstanceStorage"], "db_instance_storage", "instance_storage")
+	d.Set("zone_id", instance["ZoneId"])
+	d.Set("vswitch_id", instance["VSwitchId"])
+	d.Set("connection_string", instance["ConnectionString"])
+	connectivity.SetResourceData(d, instance["DBInstanceDescription"], "db_instance_description", "instance_name")
+	d.Set("db_instance_storage_type", instance["DBInstanceStorageType"])
 
 	if err = rdsService.RefreshParameters(d, "parameters"); err != nil {
 		return err
@@ -371,7 +371,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceDelete(d *schema.ResourceData, m
 		}
 		return errmsgs.WrapError(err)
 	}
-	if PayType(instance.PayType) == Prepaid {
+		if v, existed:= instance["PayType"]; existed && PayType(v.(string)) == Prepaid {
 		return errmsgs.WrapError(errmsgs.Error("At present, 'Prepaid' instance cannot be deleted and must wait it to be expired and release it automatically."))
 	}
 

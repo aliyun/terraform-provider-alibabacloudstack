@@ -162,7 +162,7 @@ func resourceAlibabacloudStackDBBackupPolicyRead(d *schema.ResourceData, meta in
 		}
 		return errmsgs.WrapError(err)
 	}
-	if instance.Engine == "SQLServer" {
+	if instance["Engine"].(string) == "SQLServer" {
 		d.Set("high_space_usage_protection", "Enable")
 	} else {
 		d.Set("high_space_usage_protection", object.HighSpaceUsageProtection)
@@ -237,10 +237,10 @@ func resourceAlibabacloudStackDBBackupPolicyDelete(d *schema.ResourceData, meta 
 		}
 		return errmsgs.WrapError(err)
 	}
-	if instance.Engine != "SQLServer" {
+	if instance["Engine"].(string) != "SQLServer" {
 		request.LogBackupRetentionPeriod = "7"
 	}
-	if instance.Engine == "MySQL" && instance.DBInstanceStorageType == "local_ssd" {
+	if instance["Engine"].(string) == "MySQL" && instance["DBInstanceStorageType"].(string) == "local_ssd" {
 		request.ArchiveBackupRetentionPeriod = "0"
 		request.ArchiveBackupKeepCount = "1"
 		request.ArchiveBackupKeepPolicy = "ByMonth"

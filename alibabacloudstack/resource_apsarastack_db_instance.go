@@ -351,9 +351,11 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		"SecurityIPList":        SecurityIPList,
 		"ZoneId":                ZoneId,
 		"VPCId":                 VPCId,
-		"RoleARN":               arnrole,
-		"CpuType":               d.Get("cpu_type").(string),
 	})
+
+	if v, ok := d.GetOk("cpu_type"); ok && v.(string) != "" {
+		request.QueryParams["CpuType"] = v.(string)
+	}
 
 	if encryption {
 		mergeMaps(request.QueryParams, map[string]string{
@@ -782,60 +784,59 @@ func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interf
 
 	d.Set("monitoring_period", monitoringPeriod)
 	d.Set("security_ips", ips)
-	d.Set("security_ip_mode", instance.SecurityIPMode)
-	d.Set("engine", instance.Engine)
-	d.Set("engine_version", instance.EngineVersion)
-	connectivity.SetResourceData(d, instance.DBInstanceClass, "db_instance_class", "instance_type")
-	d.Set("port", instance.Port)
-	connectivity.SetResourceData(d, instance.DBInstanceStorage, "db_instance_storage", "instance_storage")
-	d.Set("zone_id", instance.ZoneId)
-	if instance.PayType != "" {
-		// In private cloud scenarios, the pay type will not be returned.
-		connectivity.SetResourceData(d, instance.PayType, "payment_type", "instance_charge_type")
-	}
+	d.Set("security_ip_mode", instance["SecurityIPMode"])
+	d.Set("engine", instance["Engine"])
+	d.Set("engine_version", instance["EngineVersion"])
+	connectivity.SetResourceData(d, instance["DBInstanceClass"], "db_instance_class", "instance_type")
+	d.Set("port", instance["Port"])
+	connectivity.SetResourceData(d, instance["DBInstanceStorage"], "db_instance_storage", "instance_storage")
+	d.Set("zone_id", instance["ZoneId"])
 	d.Set("period", d.Get("period"))
-	d.Set("vswitch_id", instance.VSwitchId)
-	d.Set("connection_string", instance.ConnectionString)
-	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "instance_name")
-	d.Set("maintain_time", instance.MaintainTime)
-	connectivity.SetResourceData(d, instance.DBInstanceStorageType, "db_instance_storage_type", "storage_type")
+	d.Set("vswitch_id", instance["VSwitchId"])
+	d.Set("connection_string", instance["ConnectionString"])
+	connectivity.SetResourceData(d, instance["DBInstanceDescription"], "db_instance_description", "instance_name")
+	d.Set("maintain_time", instance["MaintainTime"])
+	d.Set("cpu_type", instance["CpuType"])
+	connectivity.SetResourceData(d, instance["DBInstanceStorageType"], "db_instance_storage_type", "storage_type")
 
 	if err = rdsService.RefreshParameters(d, "parameters"); err != nil {
 		return errmsgs.WrapError(err)
 	}
+	if v, existed := instance["PayType"]; existed {
+		connectivity.SetResourceData(d, v, "payment_type", "instance_charge_type")
+		if v.(string) == string(Prepaid) {
+			request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "DescribeInstanceAutoRenewalAttribute", "")
+			request.QueryParams["DBInstanceId"] = d.Id()
 
-	if instance.PayType == string(Prepaid) {
-		request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "DescribeInstanceAutoRenewalAttribute", "")
-		request.QueryParams["DBInstanceId"] = d.Id()
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		log.Printf(" response of raw DescribeInstanceAutoRenewalAttribute : %s", bresponse)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			bresponse, err := client.ProcessCommonRequest(request)
+			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+			log.Printf(" response of raw DescribeInstanceAutoRenewalAttribute : %s", bresponse)
+			if err != nil {
+				if bresponse == nil {
+					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+				}
+				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_dbinstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_dbinstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
 
-		var response rds.DescribeInstanceAutoRenewalAttributeResponse
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_rds_dbinstance", "DescribeInstanceAutoRenewalAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
+			var response rds.DescribeInstanceAutoRenewalAttributeResponse
+			err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+					"alibabacloudstack_rds_dbinstance", "DescribeInstanceAutoRenewalAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
 
-		if len(response.Items.Item) > 0 {
-			renew := response.Items.Item[0]
-			d.Set("auto_renew", renew.AutoRenew == "True")
-			d.Set("auto_renew_period", renew.Duration)
+			if len(response.Items.Item) > 0 {
+				renew := response.Items.Item[0]
+				d.Set("auto_renew", renew.AutoRenew == "True")
+				d.Set("auto_renew_period", renew.Duration)
+			}
+			period, err := computePeriodByUnit(instance["CreationTime"], instance["ExpireTime"], d.Get("period").(int), "Month")
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			d.Set("period", period)
 		}
-		period, err := computePeriodByUnit(instance.CreationTime, instance.ExpireTime, d.Get("period").(int), "Month")
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		d.Set("period", period)
 	}
 
 	return nil
@@ -852,7 +853,7 @@ func resourceAlibabacloudStackDBInstanceDelete(d *schema.ResourceData, meta inte
 		}
 		return errmsgs.WrapError(err)
 	}
-	if PayType(instance.PayType) == Prepaid {
+	if v, existed:= instance["PayType"]; existed && PayType(v.(string)) == Prepaid {
 		return errmsgs.WrapError(errmsgs.Error("At present, 'Prepaid' instance cannot be deleted and must wait it to be expired and release it automatically."))
 	}
 
