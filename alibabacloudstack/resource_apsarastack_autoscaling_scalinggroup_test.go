@@ -477,6 +477,7 @@ resource "alibabacloudstack_db_instance" "default" {
   vswitch_id           = "${alibabacloudstack_vpc_vswitch.default.id}"
   monitoring_period    = "60"
   storage_type         = data.alibabacloudstack_rds_instance_types.default.instance_types.0.storage_type
+  cpu_type             = data.alibabacloudstack_rds_instance_types.default.instance_types.0.cpu_type
 }
 `, testAccEssScalingGroup(name))
 }

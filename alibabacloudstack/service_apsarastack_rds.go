@@ -1033,8 +1033,10 @@ func (s *RdsService) WaitForDBInstance(id string, status Status, timeout int) er
 				return errmsgs.WrapError(err)
 			}
 		}
-		if object != nil && strings.EqualFold(object["DBInstanceStatus"].(string), string(status)) {
-			break
+		if object != nil {
+			if v, existed := object["DBInstanceStatus"]; existed && strings.EqualFold(v.(string), string(status)) {
+				break
+			}
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 		if time.Now().After(deadline) {
