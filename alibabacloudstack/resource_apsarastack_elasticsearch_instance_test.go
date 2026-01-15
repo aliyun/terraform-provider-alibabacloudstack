@@ -152,7 +152,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testAccES-basic%d", rand)
 	if len(name) > 30 {
 		name = name[:30]
 	}
@@ -384,7 +384,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testAccES-vpc%d", rand)
 	if len(name) > 30 {
 		name = name[:30]
 	}
@@ -395,9 +395,10 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -572,7 +573,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testAccES-config%d", rand)
 	if len(name) > 30 {
 		name = name[:30]
 	}
@@ -583,9 +584,10 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 			testAccPreCheck(t)
 		},
 		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
