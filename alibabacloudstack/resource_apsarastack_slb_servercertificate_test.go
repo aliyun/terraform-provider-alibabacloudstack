@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackSlbServercertificate0(t *testing.T) {
+func TestAccAlibabacloudStackSlbServerCertificate0(t *testing.T) {
 	var v *slb.ServerCertificate
 
 	resourceId := "alibabacloudstack_slb_servercertificate.default"
