@@ -36,7 +36,8 @@ func TestAccAlibabacloudStackSlbBackendServers_vpc(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
+					"load_balancer_id":             "${alibabacloudstack_slb.default.id}",
+					"delete_protection_validation": true,
 					"backend_servers": []map[string]interface{}{
 						{
 							"server_id": "${alibabacloudstack_ecs_instance.default.id}",
@@ -51,9 +52,9 @@ func TestAccAlibabacloudStackSlbBackendServers_vpc(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// delete_protection_validation is a local attribute and cannot be loaded from the remote
 				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
 			},
@@ -159,9 +160,9 @@ func TestAccAlibabacloudStackSlbBackendServers_classic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// delete_protection_validation is a local attribute and cannot be loaded from the remote
 				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
 			},

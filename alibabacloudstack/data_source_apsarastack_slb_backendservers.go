@@ -55,9 +55,7 @@ func dataSourceAlibabacloudStackSlbBackendServersRead(d *schema.ResourceData, me
 	request := slb.CreateDescribeLoadBalancerAttributeRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
-
 	idsMap := getIdsStringFilter(d)
-
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeLoadBalancerAttribute(request)
 	})
@@ -72,18 +70,14 @@ func dataSourceAlibabacloudStackSlbBackendServersRead(d *schema.ResourceData, me
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	var filteredBackendServersTemp []slb.BackendServerInDescribeLoadBalancerAttribute
-	if len(idsMap) > 0 {
-		for _, backendServer := range response.BackendServers.BackendServer {
-			if len(idsMap) > 0 {
-				if _, ok := idsMap[backendServer.ServerId]; !ok {
-					continue
-				}
+	for _, backendServer := range response.BackendServers.BackendServer {
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[backendServer.ServerId]; !ok {
+				continue
 			}
-
-			filteredBackendServersTemp = append(filteredBackendServersTemp, backendServer)
 		}
-	} else {
-		filteredBackendServersTemp = response.BackendServers.BackendServer
+
+		filteredBackendServersTemp = append(filteredBackendServersTemp, backendServer)
 	}
 
 	return slbBackendServersDescriptionAttributes(d, filteredBackendServersTemp)
