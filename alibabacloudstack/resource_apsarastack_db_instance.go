@@ -878,7 +878,7 @@ func resourceAlibabacloudStackDBInstanceDelete(d *schema.ResourceData, meta inte
 	}
 
 	// wait instance status change from Creating to running
-	stateConf := BuildStateConf([]string{"Running", "Deleting"}, []string{""}, d.Timeout(schema.TimeoutCreate), 10*time.Second, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"Running", "Deleting"}, []string{}, d.Timeout(schema.TimeoutCreate), 10*time.Second, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

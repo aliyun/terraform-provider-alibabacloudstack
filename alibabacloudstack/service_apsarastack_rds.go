@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -46,7 +47,7 @@ func (s *RdsService) DescribeDBInstance(id string) (dbInstance map[string]interf
 	}
 	dBInstances := response["Items"].(map[string]interface{})["DBInstanceAttribute"].([]interface{})
 	if len(dBInstances) < 1 {
-		return dbInstance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+		return dbInstance, errmsgs.GetNotFoundErrorFromString(errmsgs.GetNotFoundMessage("DBInstance", id))
 	}
 
 	return dBInstances[0].(map[string]interface{}), nil
@@ -1021,27 +1022,9 @@ func (s *RdsService) DescribeSQLCollectorRetention(id string) (collectorRetentio
 
 // WaitForInstance waits for instance to given status
 func (s *RdsService) WaitForDBInstance(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeDBInstance(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object != nil {
-			if v, existed := object["DBInstanceStatus"]; existed && strings.EqualFold(v.(string), string(status)) {
-				break
-			}
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object["DBInstanceStatus"].(string), status, errmsgs.ProviderERROR)
-		}
+	stateConf := BuildStateConf([]string{}, []string{string(status)}, time.Duration(timeout)*time.Second, 10*time.Second, s.RdsDBInstanceStateRefreshFunc(id, []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, id)
 	}
 	return nil
 }
@@ -1057,10 +1040,12 @@ func (s *RdsService) RdsDBInstanceStateRefreshFunc(id string, failStates []strin
 			return nil, "", errmsgs.WrapError(err)
 		}
 
-		for _, failState := range failStates {
-			if object["DBInstanceStatus"].(string) == failState {
-				return object, object["DBInstanceStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["DBInstanceStatus"].(string)))
-			}
+		if _, existed := object["DBInstanceStatus"]; !existed {
+			return nil, "", nil
+		}
+
+		if slices.Contains(failStates, object["DBInstanceStatus"].(string)) {
+			return object, object["DBInstanceStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["DBInstanceStatus"].(string)))
 		}
 		return object, object["DBInstanceStatus"].(string), nil
 	}

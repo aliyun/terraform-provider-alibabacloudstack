@@ -141,7 +141,7 @@ func testSweepDBInstances(region string) error {
 }
 
 func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
-	var instance *rds.DBInstanceAttribute
+	var instance map[string]interface {}
 	var ips []map[string]interface{}
 
 	resourceId := "alibabacloudstack_db_instance.default"
@@ -308,7 +308,7 @@ resource "alibabacloudstack_security_group" "default" {
 }
 
 func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
-	var instance = &rds.DBInstanceAttribute{}
+	var instance map[string]interface {}
 	resourceId := "alibabacloudstack_db_instance.default"
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
 		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
