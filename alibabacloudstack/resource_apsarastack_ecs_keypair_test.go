@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TTestAccAlibabacloudStackEcsKeyPair0(t *testing.T) {
-	var v map[string]interface{}
+func TestAccAlibabacloudStackEcsKeyPair0(t *testing.T) {
+	var v ecs.KeyPair
 
 	resourceId := "alibabacloudstack_ecs_keypair.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccEcsKeypairCheckmap)
@@ -40,19 +41,13 @@ func TTestAccAlibabacloudStackEcsKeyPair0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 
 					"key_pair_name": name,
+					"key_file":      "./test-key.txt",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"key_pair_name": name,
 					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
 				),
 			},
 
@@ -99,9 +94,62 @@ func TTestAccAlibabacloudStackEcsKeyPair0(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"key_file"},
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackEcsKeyPair_PublicKey(t *testing.T) {
+	var v ecs.KeyPair
+
+	resourceId := "alibabacloudstack_ecs_keypair.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccEcsKeypairCheckmap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DoEcsDescribekeypairsRequest")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%secskey_pair%d", defaultRegionToTest, rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccEcsKeypairBasicdependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+
+		CheckDestroy: rac.checkResourceDestroy(),
+
+		Steps: []resource.TestStep{
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"key_pair_name": name,
+					"public_key":    "${var.public_key}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"key_pair_name": name,
+						"public_key":    CHECKSET,
+						"finger_print":  CHECKSET,
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"public_key", "key_file"},
 			},
 		},
 	})
@@ -111,13 +159,7 @@ var AlibabacloudTestAccEcsKeypairCheckmap = map[string]string{
 
 	"key_pair_name": CHECKSET,
 
-	"resource_group_id": CHECKSET,
-
-	"create_time": CHECKSET,
-
 	"finger_print": CHECKSET,
-
-	"tags": CHECKSET,
 }
 
 func AlibabacloudTestAccEcsKeypairBasicdependence(name string) string {
@@ -126,7 +168,10 @@ variable "name" {
     default = "%s"
 }
 
+variable "public_key" {
+    default = %s
+}
 
 
-`, name)
+`, name, ServerCertificateTestCase())
 }

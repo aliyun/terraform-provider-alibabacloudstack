@@ -28,9 +28,8 @@ func dataSourceAlibabacloudStackKeyPairs() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			"tags": tagsSchema(),
 			"finger_print": {
-				Type:     schema.TypeBool,
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
@@ -88,19 +87,6 @@ func dataSourceAlibabacloudStackKeyPairsRead(d *schema.ResourceData, meta interf
 	client.InitRpcRequest(*request.RpcRequest)
 	if fingerPrint, ok := d.GetOk("finger_print"); ok {
 		request.KeyPairFingerPrint = fingerPrint.(string)
-	}
-
-	tags := d.Get("tags").(map[string]interface{})
-	if len(tags) > 0 {
-		KeyPairsTags := make([]ecs.DescribeKeyPairsTag, 0, len(tags))
-		for k, v := range tags {
-			imageTag := ecs.DescribeKeyPairsTag{
-				Key:   k,
-				Value: v.(string),
-			}
-			KeyPairsTags = append(KeyPairsTags, imageTag)
-		}
-		request.Tag = &KeyPairsTags
 	}
 	request.PageNumber = requests.NewInteger(1)
 	request.PageSize = requests.NewInteger(PageSizeLarge)
