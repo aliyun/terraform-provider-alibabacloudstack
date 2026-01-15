@@ -218,48 +218,6 @@ func resourceAlibabacloudStackSlbUpdate(d *schema.ResourceData, meta interface{}
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
-
-	update := false
-	modifyLoadBalancerInternetSpecRequest := slb.CreateModifyLoadBalancerInternetSpecRequest()
-	client.InitRpcRequest(*modifyLoadBalancerInternetSpecRequest.RpcRequest)
-	modifyLoadBalancerInternetSpecRequest.LoadBalancerId = d.Id()
-	if update {
-		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-			return slbClient.ModifyLoadBalancerInternetSpec(modifyLoadBalancerInternetSpecRequest)
-		})
-		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*slb.ModifyLoadBalancerInternetSpecResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), modifyLoadBalancerInternetSpecRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(modifyLoadBalancerInternetSpecRequest.GetActionName(), raw, modifyLoadBalancerInternetSpecRequest.RpcRequest, modifyLoadBalancerInternetSpecRequest)
-	}
-
-	update = false
-	modifyLoadBalancerPayTypeRequest := slb.CreateModifyLoadBalancerPayTypeRequest()
-	client.InitRpcRequest(*modifyLoadBalancerPayTypeRequest.RpcRequest)
-	modifyLoadBalancerPayTypeRequest.LoadBalancerId = d.Id()
-	if update {
-		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-			return slbClient.ModifyLoadBalancerPayType(modifyLoadBalancerPayTypeRequest)
-		})
-		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*slb.ModifyLoadBalancerPayTypeResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), modifyLoadBalancerPayTypeRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(modifyLoadBalancerPayTypeRequest.GetActionName(), raw, modifyLoadBalancerPayTypeRequest.RpcRequest, modifyLoadBalancerPayTypeRequest)
-	}
 	d.Partial(false)
 
 	return nil

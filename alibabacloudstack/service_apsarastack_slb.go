@@ -28,6 +28,60 @@ type SlbTag struct {
 	TagValue string
 }
 
+type DescribeLoadBalancersNewResponse struct {
+	*responses.BaseResponse
+	RequestId     string           `json:"RequestId" xml:"RequestId"`
+	PageNumber    int              `json:"PageNumber" xml:"PageNumber"`
+	PageSize      int              `json:"PageSize" xml:"PageSize"`
+	TotalCount    int              `json:"TotalCount" xml:"TotalCount"`
+	LoadBalancers LoadBalancersNew `json:"LoadBalancers" xml:"LoadBalancers"`
+}
+
+type LoadBalancersNew struct {
+	LoadBalancer []LoadBalancerNew `json:"LoadBalancer" xml:"LoadBalancer"`
+}
+
+type LoadBalancerTag struct {
+	InstanceCount int    `json:"InstanceCount"`
+	TagKey        string `json:"TagKey"`
+	TagValue      string `json:"TagValue"`
+}
+
+type LoadBalancerNew struct {
+	VpcId                        string                   `json:"VpcId" xml:"VpcId"`
+	CreateTimeStamp              int64                    `json:"CreateTimeStamp" xml:"CreateTimeStamp"`
+	LoadBalancerId               string                   `json:"LoadBalancerId" xml:"LoadBalancerId"`
+	CreateTime                   string                   `json:"CreateTime" xml:"CreateTime"`
+	PayType                      string                   `json:"PayType" xml:"PayType"`
+	AddressType                  string                   `json:"AddressType" xml:"AddressType"`
+	NetworkType                  string                   `json:"NetworkType" xml:"NetworkType"`
+	ServiceManagedMode           string                   `json:"ServiceManagedMode" xml:"ServiceManagedMode"`
+	SpecBpsFlag                  bool                     `json:"SpecBpsFlag" xml:"SpecBpsFlag"`
+	AddressIPVersion             string                   `json:"AddressIPVersion" xml:"AddressIPVersion"`
+	LoadBalancerName             string                   `json:"LoadBalancerName" xml:"LoadBalancerName"`
+	Bandwidth                    int                      `json:"Bandwidth" xml:"Bandwidth"`
+	Address                      string                   `json:"Address" xml:"Address"`
+	SlaveZoneId                  string                   `json:"SlaveZoneId" xml:"SlaveZoneId"`
+	MasterZoneId                 string                   `json:"MasterZoneId" xml:"MasterZoneId"`
+	InternetChargeTypeAlias      string                   `json:"InternetChargeTypeAlias" xml:"InternetChargeTypeAlias"`
+	LoadBalancerSpec             string                   `json:"LoadBalancerSpec" xml:"LoadBalancerSpec"`
+	SpecType                     string                   `json:"SpecType" xml:"SpecType"`
+	RegionId                     string                   `json:"RegionId" xml:"RegionId"`
+	ModificationProtectionReason string                   `json:"ModificationProtectionReason" xml:"ModificationProtectionReason"`
+	ModificationProtectionStatus string                   `json:"ModificationProtectionStatus" xml:"ModificationProtectionStatus"`
+	VSwitchId                    string                   `json:"VSwitchId" xml:"VSwitchId"`
+	LoadBalancerStatus           string                   `json:"LoadBalancerStatus" xml:"LoadBalancerStatus"`
+	ResourceGroupId              string                   `json:"ResourceGroupId" xml:"ResourceGroupId"`
+	InternetChargeType           string                   `json:"InternetChargeType" xml:"InternetChargeType"`
+	BusinessStatus               string                   `json:"BusinessStatus" xml:"BusinessStatus"`
+	DeleteProtection             string                   `json:"DeleteProtection" xml:"DeleteProtection"`
+	RegionIdAlias                string                   `json:"RegionIdAlias" xml:"RegionIdAlias"`
+	InstanceChargeType           string                   `json:"InstanceChargeType" xml:"InstanceChargeType"`
+	ServiceManagedReason         string                   `json:"ServiceManagedReason" xml:"ServiceManagedReason"`
+	IneffectiveOrderList         slb.IneffectiveOrderList `json:"IneffectiveOrderList" xml:"IneffectiveOrderList"`
+	Tags                         []LoadBalancerTag        `json:"Tags" xml:"Tags"` // 改为数组格式以匹配API返回
+}
+
 const max_num_per_time = 50
 const tags_max_num_per_time = 5
 const tags_max_page_size = 50

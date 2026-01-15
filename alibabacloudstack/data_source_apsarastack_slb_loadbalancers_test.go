@@ -15,10 +15,12 @@ func TestAccAlibabacloudStackSlbLoadbalancersDataSource(t *testing.T) {
 	// Test with IDs filter
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_slb_loadbalancer.default.id}"},
+			"ids":                      []string{"${alibabacloudstack_slb_loadbalancer.default.id}"},
+			"master_availability_zone": "${alibabacloudstack_vpc_vswitch.default.zone_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_slb_loadbalancer.default.id}_fake"},
+			"ids":                     []string{"${alibabacloudstack_slb_loadbalancer.default.id}_fake"},
+			"slave_availability_zone": "${alibabacloudstack_vpc_vswitch.default.zone_id}_fake",
 		}),
 	}
 
@@ -29,6 +31,28 @@ func TestAccAlibabacloudStackSlbLoadbalancersDataSource(t *testing.T) {
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "fake_*",
+		}),
+	}
+	otherconfig := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"network_type": "${alibabacloudstack_slb_loadbalancer.default.network_type}",
+			"vpc_id":       "${alibabacloudstack_vpc_vswitch.default.vpc_id}",
+			"vswitch_id":   "${alibabacloudstack_vpc_vswitch.default.id}",
+			"address":      "${alibabacloudstack_slb_loadbalancer.default.address}",
+			"tags": map[string]string{
+				"Created": "TF",
+				"For":     "Test",
+			},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"network_type": "${alibabacloudstack_slb_loadbalancer.default.network_type}_fake",
+			"vpc_id":       "${alibabacloudstack_vpc_vswitch.default.vpc_id}_fake",
+			"vswitch_id":   "${alibabacloudstack_vpc_vswitch.default.id}_fake",
+			"address":      "${alibabacloudstack_slb_loadbalancer.default.address}_fake",
+			"tags": map[string]string{
+				"Created": "TF_fake",
+				"For":     "Test_fake",
+			},
 		}),
 	}
 
@@ -74,7 +98,7 @@ func TestAccAlibabacloudStackSlbLoadbalancersDataSource(t *testing.T) {
 		existMapFunc: existSlbsMapFunc,
 		fakeMapFunc:  fakeSlbsMapFunc,
 	}
-	slbsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
+	slbsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, otherconfig, allConf)
 }
 
 func dataSourceSlbsConfigDependence(name string) string {
@@ -89,8 +113,13 @@ func dataSourceSlbsConfigDependence(name string) string {
 		name = "${var.name}"
 		network_type = "vpc"
 		specification = "slb.s1.small"
+		address = "172.16.1.3"
 		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 		address_type = "intranet"
+		tags = {
+			Created = "TF"
+			For = "Test"
+		}
 	}
 	`, name, VSwitchCommonTestCase)
 }

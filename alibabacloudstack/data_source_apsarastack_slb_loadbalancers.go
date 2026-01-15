@@ -2,11 +2,10 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"regexp"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -157,27 +156,25 @@ func dataSourceAlibabacloudStackSlbs() *schema.Resource {
 func dataSourceAlibabacloudStackSlbsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := &SlbService{client}
-
-	request := slb.CreateDescribeLoadBalancersRequest()
-	client.InitRpcRequest(*request.RpcRequest)
+	request := client.NewCommonRequest("POST", "Slb", "2014-05-15", "DescribeLoadBalancers", "")
 
 	if v, ok := d.GetOk("master_availability_zone"); ok && v.(string) != "" {
-		request.MasterZoneId = v.(string)
+		request.QueryParams["MasterZoneId"] = v.(string)
 	}
 	if v, ok := d.GetOk("slave_availability_zone"); ok && v.(string) != "" {
-		request.SlaveZoneId = v.(string)
+		request.QueryParams["SlaveZoneId"] = v.(string)
 	}
 	if v, ok := d.GetOk("network_type"); ok && v.(string) != "" {
-		request.NetworkType = v.(string)
+		request.QueryParams["NetworkType"] = v.(string)
 	}
 	if v, ok := d.GetOk("vpc_id"); ok && v.(string) != "" {
-		request.VpcId = v.(string)
+		request.QueryParams["VpcId"] = v.(string)
 	}
 	if v, ok := d.GetOk("vswitch_id"); ok && v.(string) != "" {
-		request.VSwitchId = v.(string)
+		request.QueryParams["VSwitchId"] = v.(string)
 	}
 	if v, ok := d.GetOk("address"); ok && v.(string) != "" {
-		request.Address = v.(string)
+		request.QueryParams["Address"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("tags"); ok {
@@ -189,49 +186,48 @@ func dataSourceAlibabacloudStackSlbsRead(d *schema.ResourceData, meta interface{
 				Value: value.(string),
 			})
 		}
-		request.Tags = toSlbTagsString(tags)
+		request.QueryParams["Tags"] = toSlbTagsString(tags)
 	}
 
 	idsMap := getIdsStringFilter(d)
 
-	var allLoadBalancers []slb.LoadBalancer
-	request.PageSize = requests.NewInteger(PageSizeLarge)
-	request.PageNumber = requests.NewInteger(1)
+	var allLoadBalancers []LoadBalancerNew
+	request.QueryParams["PageSize"] = fmt.Sprintf("%d", PageSizeLarge)
+	request.QueryParams["PageNumber"] = fmt.Sprintf("%d", 1)
+
 	for {
-		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-			return slbClient.DescribeLoadBalancers(request)
-		})
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		bresponse, ok := raw.(*slb.DescribeLoadBalancersResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb", request.GetActionName(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		if len(bresponse.LoadBalancers.LoadBalancer) < 1 {
+		responseobj := DescribeLoadBalancersNewResponse{}
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &responseobj)
+		if len(responseobj.LoadBalancers.LoadBalancer) < 1 {
 			break
 		}
-		log.Printf("sss %s", raw)
 		err = json.Unmarshal(bresponse.BaseResponse.GetHttpContentBytes(), bresponse)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		allLoadBalancers = append(allLoadBalancers, bresponse.LoadBalancers.LoadBalancer...)
+		allLoadBalancers = append(allLoadBalancers, responseobj.LoadBalancers.LoadBalancer...)
 
-		if len(bresponse.LoadBalancers.LoadBalancer) < PageSizeLarge {
+		if len(responseobj.LoadBalancers.LoadBalancer) < PageSizeLarge {
 			break
 		}
 
-		page, err := getNextpageNumber(request.PageNumber)
+		page, err := getNextpageNumber(requests.Integer(request.QueryParams["PageNumber"]))
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		request.PageNumber = page
+		request.QueryParams["PageNumber"] = string(page)
 	}
 
-	var filteredLoadBalancersTemp []slb.LoadBalancer
+	var filteredLoadBalancersTemp []LoadBalancerNew
 
 	nameRegex, ok := d.GetOk("name_regex")
 	if (ok && nameRegex.(string) != "") || (len(idsMap) > 0) {
@@ -258,7 +254,7 @@ func dataSourceAlibabacloudStackSlbsRead(d *schema.ResourceData, meta interface{
 	return slbsDescriptionAttributes(d, filteredLoadBalancersTemp, slbService)
 }
 
-func slbsDescriptionAttributes(d *schema.ResourceData, loadBalancers []slb.LoadBalancer, slbService *SlbService) error {
+func slbsDescriptionAttributes(d *schema.ResourceData, loadBalancers []LoadBalancerNew, slbService *SlbService) error {
 	var ids []string
 	var names []string
 	var s []map[string]interface{}
