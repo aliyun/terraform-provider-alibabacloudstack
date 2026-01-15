@@ -93,26 +93,21 @@ func dataSourceAlibabacloudStackSlbServerCertificatesRead(d *schema.ResourceData
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ := raw.(*slb.DescribeServerCertificatesResponse)
 	var filteredTemp []slb.ServerCertificate
-	nameRegex, ok := d.GetOk("name_regex")
-	if (ok && nameRegex.(string) != "") || (len(idsMap) > 0) {
-		var r *regexp.Regexp
-		if nameRegex != "" {
-			r = regexp.MustCompile(nameRegex.(string))
+	var nameRegex *regexp.Regexp
+	if v, ok := d.GetOk("name_regex"); ok {
+		nameRegex = regexp.MustCompile(v.(string))
+	}
+	for _, certificate := range response.ServerCertificates.ServerCertificate {
+		if nameRegex != nil && !nameRegex.MatchString(certificate.ServerCertificateName) {
+			continue
 		}
-		for _, certificate := range response.ServerCertificates.ServerCertificate {
-			if r != nil && !r.MatchString(certificate.ServerCertificateName) {
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[certificate.ServerCertificateId]; !ok {
 				continue
 			}
-			if len(idsMap) > 0 {
-				if _, ok := idsMap[certificate.ServerCertificateId]; !ok {
-					continue
-				}
-			}
-
-			filteredTemp = append(filteredTemp, certificate)
 		}
-	} else {
-		filteredTemp = response.ServerCertificates.ServerCertificate
+
+		filteredTemp = append(filteredTemp, certificate)
 	}
 
 	return slbServerCertificatesDescriptionAttributes(d, filteredTemp, meta)

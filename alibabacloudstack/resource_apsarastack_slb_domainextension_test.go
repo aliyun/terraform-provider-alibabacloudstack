@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackSlbDomainextension0(t *testing.T) {
+func TestAccAlibabacloudStackSlbDomainExtension0(t *testing.T) {
 	var v map[string]interface{}
 
 	resourceId := "alibabacloudstack_slb_domainextension.default"

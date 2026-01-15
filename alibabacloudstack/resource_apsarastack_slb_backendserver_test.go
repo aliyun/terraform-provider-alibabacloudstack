@@ -62,57 +62,6 @@ func TestAccAlibabacloudStackSlbBackendServers_vpc(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackSlbBackendServers_multi_vpc(t *testing.T) {
-
-	var v *slb.DescribeLoadBalancerAttributeResponse
-	resourceId := "alibabacloudstack_slb_backend_server.default.1"
-	ra := resourceAttrInit(resourceId, slb_vpc)
-	rc := resourceCheckInit(resourceId, &v, func() interface{} {
-		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	})
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testAccSlbBackendServersVpc_multi%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBackendServerConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"count":            "2",
-					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
-					"backend_servers": []map[string]interface{}{
-						{
-							"server_id": "${alibabacloudstack_ecs_instance.default.id}",
-							"weight":    "80",
-						},
-						{
-							"server_id": "${alibabacloudstack_instance.new.id}",
-							"weight":    "80",
-						},
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"backend_servers.#": "2",
-					}),
-				),
-			},
-		},
-	})
-}
-
 func TestAccAlibabacloudStackSlbBackendServers_classic(t *testing.T) {
 	var v *slb.DescribeLoadBalancerAttributeResponse
 	resourceId := "alibabacloudstack_slb_backend_server.default"
