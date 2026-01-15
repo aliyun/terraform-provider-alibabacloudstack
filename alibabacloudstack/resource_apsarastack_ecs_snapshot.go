@@ -116,7 +116,7 @@ func resourceAlibabacloudStackSnapshotRead(d *schema.ResourceData, meta interfac
 		return errmsgs.WrapError(err)
 	}
 	if len(tags) > 0 {
-		d.Set("tags", tagsToMap(tags))
+		d.Set("tags", ecsTagsToMap(tags))
 	}
 
 	return nil
