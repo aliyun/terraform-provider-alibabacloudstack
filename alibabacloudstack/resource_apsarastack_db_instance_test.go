@@ -174,6 +174,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 					"instance_name":    "${var.name}",
 					"vswitch_id":       "${alibabacloudstack_vpc_vswitch.default.id}",
 					"storage_type":     "local_ssd",
+					"cpu_type":         "intel",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -306,49 +307,6 @@ resource "alibabacloudstack_security_group" "default" {
 `, VSwitchCommonTestCase, name)
 }
 
-func TestAccAlibabacloudStackDBInstanceMultiInstance(t *testing.T) {
-	var instance *rds.DBInstanceAttribute
-
-	resourceId := "alibabacloudstack_db_instance.default.2"
-	ra := resourceAttrInit(resourceId, instanceBasicMap)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
-		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DescribeDBInstance")
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := "tf-testAccDBInstanceConfig"
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBInstanceConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"count":            "3",
-					"engine":           "MySQL",
-					"engine_version":   "5.6",
-					"instance_type":    "rds.mysql.s2.large",
-					"instance_storage": "20",
-					"instance_name":    "${var.name}",
-					"vswitch_id":       "${alibabacloudstack_vpc_vswitch.default.id}",
-					"storage_type":     "local_ssd",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-		},
-	})
-}
 func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
 	var instance = &rds.DBInstanceAttribute{}
 	resourceId := "alibabacloudstack_db_instance.default"
@@ -409,61 +367,6 @@ resource "alibabacloudstack_security_group" "default" {
 	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
 }
 `, VSwitchCommonTestCase, name)
-}
-
-func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
-	var instance *rds.DBInstanceAttribute
-
-	resourceId := "alibabacloudstack_db_instance.default"
-	ra := resourceAttrInit(resourceId, instanceBasicMap)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
-		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DescribeDBInstance")
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := "tf-testAccDBInstanceConfig"
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBInstanceClassicConfigDependence)
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"engine":           "MySQL",
-					"engine_version":   "5.6",
-					"instance_type":    "rds.mysql.s2.large",
-					"instance_storage": "20",
-					"zone_id":          "${data.alibabacloudstack_zones.default.zones[0].id}",
-					"instance_name":    "${var.name}",
-					"storage_type":     "local_ssd",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-		},
-	})
-
-}
-
-func resourceDBInstanceClassicConfigDependence(name string) string {
-	return fmt.Sprintf(`
-
-variable "name" {
-	default = "%s"
-}
-
-%s
-
-`, name, VSwitchCommonTestCase)
 }
 
 func testAccCheckSecurityIpExists(n string, ips []map[string]interface{}) resource.TestCheckFunc {

@@ -70,6 +70,12 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Computed:      true,
 				ConflictsWith: []string{"storage_type"},
 			},
+			"cpu_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"phytium", "intel", "kunpeng", "hygon", "x86", "ARM", "yitian"}, true),
+			},
 			"encryption_key": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -349,6 +355,7 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		"ZoneId":                ZoneId,
 		"VPCId":                 VPCId,
 		"RoleARN":               arnrole,
+		"CpuType":               d.Get("cpu_type").(string),
 	})
 
 	log.Printf("request245 %v", request.QueryParams)
