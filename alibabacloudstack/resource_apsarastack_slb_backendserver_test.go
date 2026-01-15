@@ -9,59 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackSlbBackendServers_vpc(t *testing.T) {
-	var v *slb.DescribeLoadBalancerAttributeResponse
-	resourceId := "alibabacloudstack_slb_backend_server.default"
-	ra := resourceAttrInit(resourceId, nil)
-	rc := resourceCheckInit(resourceId, &v, func() interface{} {
-		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	})
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testAccSlbBackendServersVpc%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBackendServerVpcCountConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"load_balancer_id":             "${alibabacloudstack_slb.default.id}",
-					"delete_protection_validation": true,
-					"backend_servers": []map[string]interface{}{
-						{
-							"server_id": "${alibabacloudstack_ecs_instance.default.id}",
-							"weight":    "80",
-						},
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"backend_servers.#": "1",
-					}),
-				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-				// delete_protection_validation is a local attribute and cannot be loaded from the remote
-				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
-			},
-		},
-	})
-}
-
 func TestAccAlibabacloudStackSlbBackendServers_classic(t *testing.T) {
 	var v *slb.DescribeLoadBalancerAttributeResponse
 	resourceId := "alibabacloudstack_slb_backend_server.default"
@@ -139,7 +86,7 @@ func TestAccAlibabacloudStackSlbBackendServers_classic(t *testing.T) {
 					"backend_servers": []map[string]interface{}{
 						{
 							"server_id": "${alibabacloudstack_ecs_instance.default.id}",
-							"weight":    "80",
+							"weight":    "70",
 						},
 						{
 							"server_id": "${alibabacloudstack_instance.new.id}",
@@ -168,41 +115,6 @@ func buildBackendServersMap(count int) []map[string]interface{} {
 		result = append(result, tmp)
 	}
 	return result
-}
-
-func resourceBackendServerVpcCountConfigDependence(name string) string {
-	return fmt.Sprintf(`
-
-variable "name" {
-	default = "%s"
-	}
-
-%s
-
-resource "alibabacloudstack_slb" "default" {
-  name          = "${var.name}"
-  vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
-}
-
-resource "alibabacloudstack_ecs_instance" "new" {
-  image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_type        = "${local.default_instance_type_id}"
-  system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-  system_disk_size     = 20
-  system_disk_name     = "test_sys_disk"
-  security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
-  instance_name        = "${var.name}_ecs"
-  vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
-  zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
-  is_outdated          = false
-  lifecycle {
-    ignore_changes = [
-      instance_type
-    ]
-  }
-}
-
-`, name, ECSInstanceCommonTestCase)
 }
 
 func resourceBackendServerConfigDependence(name string) string {

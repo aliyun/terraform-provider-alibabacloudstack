@@ -112,7 +112,6 @@ func resourceAlibabacloudStackSlbBackendServersRead(d *schema.ResourceData, meta
 func resourceAlibabacloudStackSlbBackendServersUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	d.Partial(true)
 	step := 20
 	var removeSet, addSet, updateSet *schema.Set
 
@@ -246,7 +245,6 @@ func resourceAlibabacloudStackSlbBackendServersUpdate(d *schema.ResourceData, me
 			}
 		}
 	}
-	d.Partial(false)
 
 	return nil
 }
