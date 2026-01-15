@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -150,6 +151,7 @@ func dataSourceAlibabacloudStackSnapshotsRead(d *schema.ResourceData, meta inter
 	}
 	if ids, ok := d.GetOk("ids"); ok {
 		request.SnapshotIds = convertListToJsonString(ids.([]interface{}))
+		// request.QueryParams["SnapshotId"] = ids.(*schema.Set).List()[0].(string)
 	}
 	if typ, ok := d.GetOk("type"); ok {
 		request.SnapshotType = typ.(string)
@@ -204,10 +206,15 @@ func dataSourceAlibabacloudStackSnapshotsRead(d *schema.ResourceData, meta inter
 				continue
 			}
 		}
-		if status, ok := d.GetOk("status"); ok && status.(string) != snapshot.Status {
+		if status, ok := d.GetOk("status"); ok && !strings.EqualFold(status.(string), "all") && !strings.EqualFold(status.(string), snapshot.Status) {
 			continue
 		}
-
+		if usage, ok := d.GetOk("usage"); ok && !strings.EqualFold(usage.(string), snapshot.Usage) {
+			continue
+		}
+		if source_disk_type, ok := d.GetOk("source_disk_type"); ok && !strings.EqualFold(source_disk_type.(string), snapshot.SourceDiskType) {
+			continue
+		}
 		filteredSnapshots = append(filteredSnapshots, snapshot)
 	}
 

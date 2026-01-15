@@ -94,8 +94,8 @@ func TestAccAlibabacloudStackSnapshotsDataSourceBasic(t *testing.T) {
 	allConfig := dataSourceTestAccConfig{
 		existConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
 			"ids":              `["${alibabacloudstack_snapshot.default.id}"]`,
-			"instance_id":      `"${alibabacloudstack_instance.default.id}"`,
-			"disk_id":          `"${alibabacloudstack_disk_attachment.default.disk_id}"`,
+			"instance_id":      `"${alibabacloudstack_ecs_instance.default.id}"`,
+			"disk_id":          `"${alibabacloudstack_snapshot.default.disk_id}"`,
 			"name_regex":       `"${alibabacloudstack_snapshot.default.snapshot_name}"`,
 			"status":           `"accomplished"`,
 			"type":             `"user"`,
@@ -104,8 +104,8 @@ func TestAccAlibabacloudStackSnapshotsDataSourceBasic(t *testing.T) {
 		}),
 		fakeConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
 			"ids":              `["${alibabacloudstack_snapshot.default.id}_fake"]`,
-			"instance_id":      `"${alibabacloudstack_instance.default.id}_fake"`,
-			"disk_id":          `"${alibabacloudstack_disk_attachment.default.disk_id}_fake"`,
+			"instance_id":      `"${alibabacloudstack_ecs_instance.default.id}_fake"`,
+			"disk_id":          `"${alibabacloudstack_snapshot.default.disk_id}_fake"`,
 			"name_regex":       `"${alibabacloudstack_snapshot.default.snapshot_name}_fake"`,
 			"status":           `"failed"`,
 			"type":             `"auto"`,
@@ -148,7 +148,7 @@ func TestAccAlibabacloudStackSnapshotsDataSourceBasic(t *testing.T) {
 		fakeMapFunc:  fakeSnapshotsMapFunc,
 	}
 
-	snapshotsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConfig, statusConfig, typeConfig, sourceDiskTypeConfig, usageConfig, allConfig, idsConfig, instanceIdConfig, diskIdConfig)
+	snapshotsCheckInfo.dataSourceTestCheck(t, rand, allConfig, sourceDiskTypeConfig, nameRegexConfig, statusConfig, typeConfig, usageConfig, idsConfig, instanceIdConfig, diskIdConfig)
 }
 
 func testAccAlibabacloudStackSnapshotsDataSourceConfig(name string, attrMap map[string]string) string {
