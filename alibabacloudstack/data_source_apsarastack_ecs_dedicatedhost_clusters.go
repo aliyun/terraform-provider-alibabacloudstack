@@ -72,29 +72,6 @@ func dataSourceAlibabacloudStackEcsDedicatedHostClusters() *schema.Resource {
 							Computed: true,
 						},
 
-//						"tags": {
-//							// TypeList
-//							Type:     schema.TypeList,
-//							Computed: true,
-//
-//							Elem: &schema.Resource{
-//								Schema: map[string]*schema.Schema{
-//
-//									"key": {
-//										// TypeString
-//										Type:     schema.TypeString,
-//										Computed: true,
-//									},
-//
-//									"tag_value": {
-//										// TypeString
-//										Type:     schema.TypeString,
-//										Computed: true,
-//									},
-//								},
-//							},
-//						},
-
 						"zone_id": {
 							// TypeString
 							Type:     schema.TypeString,
@@ -119,21 +96,6 @@ func dataSourceAlibabacloudStackEcsDedicatedHostClustersRead(d *schema.ResourceD
 	if v, ok := d.GetOk("dedicated_host_cluster_name"); ok {
 		request.QueryParams["DedicatedHostClusterName"] = v.(string)
 	}
-
-//	tags := d.Get("tags").(map[string]interface{})
-//	if tags != nil && len(tags) > 0 {
-//		Tags := make([]map[string]string, 0, len(tags))
-//		for k, v := range tags {
-//			Tag := map[string]string{
-//				"Key":   k,
-//				"Value": v.(string),
-//			}
-//			Tags = append(Tags, Tag)
-//		}
-//		request_byte, _ := json.Marshal(Tags)
-//		requeststring := string(request_byte)
-//		request.QueryParams["Tags"] = requeststring
-//	}
 
 	if v, ok := d.GetOk("zone_id"); ok {
 		request.QueryParams["ZoneId"] = v.(string)
