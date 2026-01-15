@@ -91,7 +91,7 @@ func dataSourceAlibabacloudStackKeyPairsRead(d *schema.ResourceData, meta interf
 	}
 
 	tags := d.Get("tags").(map[string]interface{})
-	if tags != nil && len(tags) > 0 {
+	if len(tags) > 0 {
 		KeyPairsTags := make([]ecs.DescribeKeyPairsTag, 0, len(tags))
 		for k, v := range tags {
 			imageTag := ecs.DescribeKeyPairsTag{
