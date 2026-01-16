@@ -45,7 +45,101 @@ func TestAccAlibabacloudStackSlbVservergroup0(t *testing.T) {
 					"vserver_group_name": "vserver_group_name",
 					"servers": []map[string]interface{}{
 						{
-							"server_ids": []string{"${alibabacloudstack_ecs_instance.default.id}", "${alibabacloudstack_ecs_instance.default1.id}"},
+							"server_ids": []string{"${alibabacloudstack_ecs_instance.default.id}"},
+							"port":       "80",
+							"weight":     "100",
+							"type":       "ecs",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vserver_group_name":     "vserver_group_name",
+						"servers.#":              "1",
+						"servers.0.server_ids.#": "1",
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"servers": []map[string]interface{}{
+						{
+							"server_ids": []string{"${alibabacloudstack_ecs_instance.default.id}"},
+							"port":       "80",
+							"weight":     "100",
+							"type":       "ecs",
+						},
+						{
+							"server_ids": []string{"${alibabacloudstack_ecs_instance.default1.id}"},
+							"port":       "100",
+							"weight":     "80",
+							"type":       "ecs",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"servers.#":              "2",
+						"servers.0.server_ids.#": "1",
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"load_balancer_id":   "${alibabacloudstack_slb.default.id}",
+					"vserver_group_name": "vserver_group_name",
+					"servers": []map[string]interface{}{
+						{
+							"server_ids": []string{"${alibabacloudstack_ecs_instance.default.id}"},
+							"port":       "80",
+							"weight":     "100",
+							"type":       "ecs",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vserver_group_name":     "vserver_group_name",
+						"servers.#":              "1",
+						"servers.0.server_ids.#": "1",
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"load_balancer_id":   "${alibabacloudstack_slb.default.id}",
+					"vserver_group_name": "vserver_group_name",
+					"servers": []map[string]interface{}{
+						{
+							"server_ids": []string{"${alibabacloudstack_ecs_instance.default1.id}"},
+							"port":       "80",
+							"weight":     "100",
+							"type":       "ecs",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vserver_group_name":     "vserver_group_name",
+						"servers.#":              "1",
+						"servers.0.server_ids.#": "1",
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"load_balancer_id":   "${alibabacloudstack_slb.default.id}",
+					"vserver_group_name": "vserver_group_name",
+					"servers": []map[string]interface{}{
+						{
+							"server_ids": []string{"${alibabacloudstack_ecs_instance.default1.id}", "${alibabacloudstack_ecs_instance.default.id}"},
 							"port":       "80",
 							"weight":     "100",
 							"type":       "ecs",
@@ -57,6 +151,54 @@ func TestAccAlibabacloudStackSlbVservergroup0(t *testing.T) {
 						"vserver_group_name":     "vserver_group_name",
 						"servers.#":              "1",
 						"servers.0.server_ids.#": "2",
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"load_balancer_id":   "${alibabacloudstack_slb.default.id}",
+					"vserver_group_name": "vserver_group_name",
+					"servers": []map[string]interface{}{
+						{
+							"server_ids": []string{"${alibabacloudstack_ecs_instance.default1.id}"},
+							"port":       "80",
+							"weight":     "100",
+							"type":       "ecs",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vserver_group_name":     "vserver_group_name",
+						"servers.#":              "1",
+						"servers.0.server_ids.#": "1",
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"load_balancer_id":   "${alibabacloudstack_slb.default.id}",
+					"vserver_group_name": "vserver_group_name",
+					"servers": []map[string]interface{}{
+						{
+							"server_ids": []string{"${alibabacloudstack_ecs_instance.default1.id}"},
+							"port":       "81",
+							"weight":     "80",
+							"type":       "ecs",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vserver_group_name":     "vserver_group_name",
+						"servers.#":              "1",
+						"servers.0.server_ids.#": "1",
+						"servers.0.port":         "81",
+						"servers.0.weight":       "80",
 					}),
 				),
 			},
