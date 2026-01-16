@@ -106,11 +106,13 @@ func resourceAlibabacloudStackEssAlarm() *schema.Resource {
 			"cloud_monitor_group_id": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Deprecated: "The 'cloud_monitor_group_id' field has been deprecated and is scheduled for removal in version 3.21.0.",
 			},
 			"dimensions": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Computed: true,
+				Deprecated: "The 'dimensions' field has been deprecated and is scheduled for removal in version 3.21.0.",
 			},
 			"state": {
 				Type:       schema.TypeString,
