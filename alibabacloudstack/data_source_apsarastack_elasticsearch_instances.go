@@ -217,6 +217,7 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 			}
 
 			if object["haveKibana"].(bool) {
+				// The ListInstance API may incorrectly omit Kibana data in its response.
 				mapping["kibana_node_spec"] = object["kibanaConfiguration"].(map[string]interface{})["spec"]
 				mapping["kibana_slb_address"] = object["kibanaSlbAddress"]
 				mapping["kibana_domain"] = object["kibanaDomain"]

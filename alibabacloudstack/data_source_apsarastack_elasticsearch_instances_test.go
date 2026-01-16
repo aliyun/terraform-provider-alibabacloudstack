@@ -127,6 +127,10 @@ resource "alibabacloudstack_elasticsearch_instance" "default" {
   data_node_disk_size = "500"
   kibana_node_spec=      "1C 2Gi"
   kibana_password=       "${random_password.password.0.result}"
+  master_node_amount=    3
+  master_node_spec=      "1C 2Gi"
+  master_node_disk_size= "100"
+  master_node_disk_type= "yoda-lvm"
   client_node_amount=    2
   client_node_spec=      "1C 2Gi"
 }
