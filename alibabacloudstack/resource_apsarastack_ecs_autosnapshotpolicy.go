@@ -119,9 +119,9 @@ func resourceAlibabacloudStackSnapshotPolicyRead(d *schema.ResourceData, meta in
 func resourceAlibabacloudStackSnapshotPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	ecsService := EcsService{client}
+	ascmService := AscmService{client}
 	if d.HasChange("tags") {
-		if err := ecsService.SetResourceTagsNew(d, "auto_snapshot_policy"); err != nil {
+		if err := ascmService.SetResourceTags(d, "auto_snapshot_policy"); err != nil {
 			return errmsgs.WrapError(err)
 		}
 	}

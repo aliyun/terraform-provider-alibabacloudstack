@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -394,17 +393,7 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("system_disk_auto_snapshot_policy_id") {
 		request.SystemDiskAutoSnapshotPolicyId = d.Get("system_disk_auto_snapshot_policy_id").(string)
 	}
-	if d.HasChange("tags") {
-		if v, ok := d.GetOk("tags"); ok {
-			if t, err := json.Marshal(v.(map[string]interface{})); err != nil {
-				return err
-			} else {
-				request.Tags = string(t)
-			}
-		} else {
-			request.Tags = "{}"
-		}
-	}
+	
 	if d.HasChange("host_name") {
 		request.HostName = d.Get("host_name").(string)
 	}
@@ -521,6 +510,13 @@ func enableEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 	}
+	
+	if d.IsNewResource(){
+		return nil
+	}
+	
+	ascmService := AscmService{client}
+	ascmService.SetResourceTags(d, "scaling_group")
 
 	return nil
 }

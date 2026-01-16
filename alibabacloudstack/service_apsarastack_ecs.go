@@ -1760,61 +1760,6 @@ func (s *EcsService) SetResourceTags(d *schema.ResourceData, resourceType string
 	return nil
 }
 
-func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType string) error {
-
-	if d.HasChange("tags") {
-		added, removed := parsingTags(d)
-
-		removedTagKeys := make([]string, 0)
-		for _, v := range removed {
-			if !ignoredTags(v, "") {
-				removedTagKeys = append(removedTagKeys, v)
-			}
-		}
-		if len(removedTagKeys) > 0 {
-			action := "UnTagResources"
-			request := map[string]interface{}{
-				"ResourceType": resourceType,
-				"ResourceId.1": d.Id(),
-			}
-			for i, key := range removedTagKeys {
-				request[fmt.Sprintf("TagKey.%d", i+1)] = key
-			}
-			_, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "/ascm/manage/tag_manage/unTagResources", nil, nil, request)
-			if err != nil {
-				return err
-			}
-		}
-		if len(added) > 0 {
-			action := "TagResources"
-			request := map[string]interface{}{
-				"ResourceType":     resourceType,
-				"ResourceId.1":     d.Id(),
-				"RegionId":         s.client.RegionId,
-				"Department":       s.client.Department,
-				"AscmPlatformCode": "default",
-			}
-			count := 1
-			// tagmap := make([]map[string]interface{}, 0)
-			for key, value := range added {
-				// tagmap = append(tagmap, map[string]interface{}{
-				// 	"Key":   key,
-				// 	"Value": value,
-				// })
-				request[fmt.Sprintf("Tag.%d.Key", count)] = key
-				request[fmt.Sprintf("Tag.%d.Value", count)] = value
-				count++
-			}
-			// request["Tag"] = tagmap
-			_, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "/ascm/manage/tag_manage/tagResources", nil, nil, request)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 func (s *EcsService) DoEcsDescribededicatedhostautorenewRequest(id string) (object ecs.DedicatedHost, err error) {
 	return s.DescribeEcsDedicatedHost(id)
 }
