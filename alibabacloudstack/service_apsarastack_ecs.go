@@ -475,13 +475,14 @@ func (s *EcsService) InstanceTypeValidation(targetType, zoneId string, validZone
 	return errmsgs.WrapError(errmsgs.Error("The instance type %s is solded out or is not supported in the region %s. Expected instance types: %s", targetType, s.client.RegionId, strings.Join(expectedInstanceTypes, ", ")))
 }
 
-func (s *EcsService) QueryInstancesWithKeyPair(instanceIdsStr, keyPair string) (instanceIds []string, instances []ecs.Instance, err error) {
+func (s *EcsService) DescribeInstanceIdsWithKeyPair(id string) (instanceIds []string, instances []ecs.Instance, err error) {
 	request := ecs.CreateDescribeInstancesRequest()
+	parst := strings.Split(id, ":")
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(1)
-	request.InstanceIds = instanceIdsStr
-	request.KeyPairName = keyPair
+	request.InstanceIds = ""
+	request.KeyPairName = parst[0]
 	for {
 		raw, e := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.DescribeInstances(request)
@@ -492,7 +493,7 @@ func (s *EcsService) QueryInstancesWithKeyPair(instanceIdsStr, keyPair string) (
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(object.BaseResponse)
 			}
-			err = errmsgs.WrapErrorf(e, errmsgs.RequestV1ErrorMsg, keyPair, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			err = errmsgs.WrapErrorf(e, errmsgs.RequestV1ErrorMsg, parst[0], request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			return
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
@@ -511,7 +512,7 @@ func (s *EcsService) QueryInstancesWithKeyPair(instanceIdsStr, keyPair string) (
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(raw.(*responses.BaseResponse))
 			}
-			err = errmsgs.WrapErrorf(e, errmsgs.RequestV1ErrorMsg, keyPair, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			err = errmsgs.WrapErrorf(e, errmsgs.RequestV1ErrorMsg, parst[0], request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			return
 		} else {
 			request.PageNumber = page

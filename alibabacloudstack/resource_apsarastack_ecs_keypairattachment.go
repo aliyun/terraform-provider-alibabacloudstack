@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -50,7 +49,7 @@ func resourceAlibabacloudStackKeyPairAttachmentCreate(d *schema.ResourceData, me
 	idsMap := make(map[string]string)
 	var newIds []string
 	if force {
-		ids, _, err := ecsService.QueryInstancesWithKeyPair("", keyName)
+		ids, _, err := ecsService.DescribeInstanceIdsWithKeyPair(keyName + ":")
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -103,26 +102,17 @@ func resourceAlibabacloudStackKeyPairAttachmentRead(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	keyName := strings.Split(d.Id(), ":")[0]
-	object, err := ecsService.DescribeKeyPairAttachment(d.Id())
 
+	d.Set("key_name", keyName)
+	ids, _, err := ecsService.DescribeInstanceIdsWithKeyPair(d.Id())
+	if len(ids) == 0 {
+		d.SetId("")
+		return nil
+	}
 	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			d.SetId("")
-			return nil
-		}
 		return errmsgs.WrapError(err)
 	}
-
-	d.Set("key_name", object.KeyPairName)
-	if ids, ok := d.GetOk("instance_ids"); ok {
-		d.Set("instance_ids", ids)
-	} else {
-		ids, _, err := ecsService.QueryInstancesWithKeyPair("", keyName)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		d.Set("instance_ids", ids)
-	}
+	d.Set("instance_ids", ids)
 	return nil
 }
 
@@ -130,17 +120,26 @@ func resourceAlibabacloudStackKeyPairAttachmentDelete(d *schema.ResourceData, me
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	keyName := strings.Split(d.Id(), ":")[0]
-	instanceIds := strings.Split(d.Id(), ":")[1]
 
 	request := ecs.CreateDetachKeyPairRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.KeyPairName = keyName
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
+		ids, _, err := ecsService.DescribeInstanceIdsWithKeyPair(d.Id())
+		if err != nil {
+			return resource.NonRetryableError(errmsgs.WrapError(err))
+		}
+		instance_ids := make([]interface{}, len(ids))
+		for i, id := range ids {
+			instance_ids[i] = id
+		}
+		instanceIds := convertListToJsonString(instance_ids)
 		request.InstanceIds = instanceIds
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.DetachKeyPair(request)
 		})
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		if err != nil {
 			errmsg := ""
 			if bresponse, ok := raw.(*ecs.DetachKeyPairResponse); ok {
@@ -148,20 +147,6 @@ func resourceAlibabacloudStackKeyPairAttachmentDelete(d *schema.ResourceData, me
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		instance_ids, _, err := ecsService.QueryInstancesWithKeyPair(instanceIds, keyName)
-		if err != nil {
-			return resource.NonRetryableError(errmsgs.WrapError(err))
-		}
-		if len(instance_ids) > 0 {
-			var ids []interface{}
-			for _, id := range instance_ids {
-				ids = append(ids, id)
-			}
-			instanceIds = convertListToJsonString(ids)
-			return resource.RetryableError(errmsgs.WrapError(fmt.Errorf("detach Key Pair timeout and the instances including %s has not yet been detached. ", instanceIds)))
-		}
-
 		return nil
 	})
 }
