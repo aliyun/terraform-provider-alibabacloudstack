@@ -36,8 +36,9 @@ func TestAccAlibabacloudStackSlbMasterSlaveServerGroup_vpc(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
-					"name":             "${var.name}",
+					"load_balancer_id":             "${alibabacloudstack_slb.default.id}",
+					"delete_protection_validation": true,
+					"name":                         "${var.name}",
 					"servers": []map[string]interface{}{
 						{
 							"server_id":   "${alibabacloudstack_ecs_instance.default.id}",
@@ -61,9 +62,9 @@ func TestAccAlibabacloudStackSlbMasterSlaveServerGroup_vpc(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// delete_protection_validation is a local attribute and cannot be loaded from remote
 				// load_balancer_id cannot be read back on the proprietary cloud side temporarily
 				ImportStateVerifyIgnore: []string{"delete_protection_validation", "load_balancer_id"},
