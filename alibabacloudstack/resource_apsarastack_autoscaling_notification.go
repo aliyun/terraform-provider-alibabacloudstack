@@ -15,7 +15,8 @@ func resourceAlibabacloudStackEssNotification() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"notification_arn": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"notification_types": {
@@ -42,7 +43,15 @@ func resourceAlibabacloudStackEssNotificationCreate(d *schema.ResourceData, meta
 	request := ess.CreateCreateNotificationConfigurationRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.ScalingGroupId = d.Get("scaling_group_id").(string)
-	request.NotificationArn = d.Get("notification_arn").(string)
+	if v, ok := d.GetOk("notification_arn"); ok && v.(string) != "" {
+		request.NotificationArn = v.(string)
+	} else {
+		if uid, err := client.AccountId(); err != nil {
+			return err
+		} else {
+			request.NotificationArn = fmt.Sprintf("acs:ess:%s:%s:cloudmonitor", client.RegionId, uid)
+		}
+	}
 	if v, ok := d.GetOk("notification_types"); ok {
 		notificationTypes := make([]string, 0)
 		notificationTypeList := v.(*schema.Set).List()

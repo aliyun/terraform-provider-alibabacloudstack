@@ -21,6 +21,10 @@ func dataSourceAlibabacloudStackAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"region" : {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -37,6 +41,7 @@ func dataSourceAlibabacloudStackAccountRead(d *schema.ResourceData, meta interfa
 
 	d.SetId(accountId)
 	d.Set("organization_id", client.Department)
+	d.Set("region", client.RegionId)
 
 	return nil
 }

@@ -9,7 +9,7 @@ import (
 func TestAccAlibabacloudStackEssNotificationsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_ess_notifications.default"
-	name := fmt.Sprintf("tf-essgroup%v", rand)
+	name := fmt.Sprintf("tf-essnotifications%v", rand)
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackEssNotificationsDataSourceConfig)
 	scalingGroupIdConf := dataSourceTestAccConfig{
@@ -74,7 +74,6 @@ resource "alibabacloudstack_ess_scaling_group" "default" {
 resource "alibabacloudstack_ess_notification" "default" {
     scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
     notification_types = ["AUTOSCALING:SCALE_OUT_SUCCESS"]
-    notification_arn = "acs:ess"
 }
-`, name, ECSInstanceCommonTestCase)
+`, name, VSwitchCommonTestCase)
 }

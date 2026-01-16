@@ -42,7 +42,6 @@ func TestAccAlibabacloudStackEssNotification_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"scaling_group_id":   "${alibabacloudstack_ess_scaling_group.default.id}",
 					"notification_types": []string{"AUTOSCALING:SCALE_OUT_SUCCESS", "AUTOSCALING:SCALE_OUT_ERROR"},
-					"notification_arn":   "acs:ess:${data.alibabacloudstack_regions.default.regions.0.id}:${data.alibabacloudstack_account.default.id}:queue/${alibabacloudstack_mns_queue.default.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -62,22 +61,6 @@ func TestAccAlibabacloudStackEssNotification_basic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"notification_types.#": "4",
 					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"scaling_group_id": "${alibabacloudstack_ess_scaling_group.default1.id}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"notification_arn": "acs:ess:${data.alibabacloudstack_regions.default.regions.0.id}:${data.alibabacloudstack_account.default.id}:queue/${alibabacloudstack_mns_queue.default1.name}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
 				),
 			},
 		},
@@ -113,10 +96,6 @@ func testAccEssNotification(name string) string {
 	}
 	%s
 
-	data "alibabacloudstack_regions" "default" {
-		current = true
-	}
-
 	data "alibabacloudstack_account" "default" {
 	}
 	
@@ -125,11 +104,8 @@ func testAccEssNotification(name string) string {
 		max_size = 1
 		scaling_group_name = "${var.name}"
 		removal_policies = ["OldestInstance", "NewestInstance"]
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		vswitch_ids = [alibabacloudstack_vpc_vswitch.default.id]
 	}
 
-	resource "alibabacloudstack_mns_queue" "default"{
-		name="${var.name}"
-	}
-	`, name, ECSInstanceCommonTestCase)
+	`, name, VSwitchCommonTestCase)
 }

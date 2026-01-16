@@ -210,3 +210,23 @@ func validateNormalName(v interface{}, k string) (ws []string, errors []error) {
 	}
 	return
 }
+
+
+func validateSetElements(elementValidator schema.SchemaValidateFunc) schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		set, ok := v.(*schema.Set)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected %s to be a *schema.Set, got %T", k, v))
+			return
+		}
+
+		for _, elem := range set.List() {
+			// Each element is passed as a single-value interface{} to the element validator
+			// Note: elementValidator expects the raw value, not a slice or set
+			wsElem, errsElem := elementValidator(elem, fmt.Sprintf("%s[*]", k))
+			ws = append(ws, wsElem...)
+			errors = append(errors, errsElem...)
+		}
+		return
+	}
+}
