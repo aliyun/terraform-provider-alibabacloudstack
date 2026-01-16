@@ -2,7 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	
+
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
@@ -28,6 +28,8 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 		return &EssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	})
 	rac := resourceAttrCheckInit(rc, ra)
+	name := fmt.Sprintf("tf-testAccEssLifecycleHook-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEssAlarmConfigDependence)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
@@ -41,7 +43,12 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckEssLifecycleHookDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEssLifecycleHook(ECSInstanceCommonTestCase, rand),
+				Config: testAccConfig(map[string]interface{}{
+					"scaling_group_id":      "${alibabacloudstack_ess_scaling_group.default.id}",
+					"name":                  name,
+					"lifecycle_transition":  "SCALE_OUT",
+					"notification_metadata": "helloworld",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -52,7 +59,9 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccEssLifecycleHookUpdateLifecycleTransition(ECSInstanceCommonTestCase, rand),
+				Config: testAccConfig(map[string]interface{}{
+					"lifecycle_transition": "SCALE_IN",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"lifecycle_transition": "SCALE_IN",
@@ -60,7 +69,9 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssLifecycleHookUpdateHeartbeatTimeout(ECSInstanceCommonTestCase, rand),
+				Config: testAccConfig(map[string]interface{}{
+					"heartbeat_timeout": "400",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"heartbeat_timeout": "400",
@@ -68,7 +79,10 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssLifecycleHookUpdateNotificationMetadata(ECSInstanceCommonTestCase, rand),
+
+				Config: testAccConfig(map[string]interface{}{
+					"notification_metadata": "helloterraform",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"notification_metadata": "helloterraform",
@@ -76,17 +90,13 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssLifecycleHookUpdateDefaultResult(ECSInstanceCommonTestCase, rand),
+				Config: testAccConfig(map[string]interface{}{
+					"default_result": "ABANDON",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"default_result": "ABANDON",
 					}),
-				),
-			},
-			{
-				Config: testAccEssLifecycleHook(ECSInstanceCommonTestCase, rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(basicMap),
 				),
 			},
 		},
@@ -112,12 +122,13 @@ func testAccCheckEssLifecycleHookDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccEssLifecycleHook(common string, rand int) string {
+func testAccEssLifecycleHook(name string) string {
 	return fmt.Sprintf(`
-	%s
 	variable "name" {
-		default = "tf-testAccEssLifecycleHook-%d"
+		default = "%s"
 	}
+	
+	%s
 	
 	resource "alibabacloudstack_vswitch" "default2" {
 		  vpc_id = "${alibabacloudstack_vpc.default.id}"
@@ -134,177 +145,5 @@ func testAccEssLifecycleHook(common string, rand int) string {
 		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}","${alibabacloudstack_vswitch.default2.id}"]
 	}
 	
-	resource "alibabacloudstack_ess_lifecycle_hook" "default"{
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		name = "${var.name}"
-		lifecycle_transition = "SCALE_OUT"
-		notification_metadata = "helloworld"
-	}
-	`, common, rand)
-}
-func testAccEssLifecycleHookUpdateLifecycleTransition(common string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	
-	variable "name" {
-		default = "tf-testAccEssLifecycleHook-%d"
-	}
-	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}","${alibabacloudstack_vswitch.default2.id}"]
-	}
-	
-	resource "alibabacloudstack_ess_lifecycle_hook" "default"{
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		name = "${var.name}"
-		lifecycle_transition = "SCALE_IN"
-		notification_metadata = "helloworld"
-	}
-	`, common, rand)
-}
-func testAccEssLifecycleHookUpdateHeartbeatTimeout(common string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	
-	variable "name" {
-		default = "tf-testAccEssLifecycleHook-%d"
-	}
-	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}","${alibabacloudstack_vswitch.default2.id}"]
-	}
-	
-	resource "alibabacloudstack_ess_lifecycle_hook" "default"{
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		name = "${var.name}"
-		lifecycle_transition = "SCALE_IN"
-		heartbeat_timeout = 400
-		notification_metadata = "helloworld"
-	}
-	`, common, rand)
-}
-func testAccEssLifecycleHookUpdateNotificationMetadata(common string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	
-	variable "name" {
-		default = "tf-testAccEssLifecycleHook-%d"
-	}
-	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}","${alibabacloudstack_vswitch.default2.id}"]
-	}
-	
-	resource "alibabacloudstack_ess_lifecycle_hook" "default"{
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		name = "${var.name}"
-		lifecycle_transition = "SCALE_IN"
-		heartbeat_timeout = 400
-		notification_metadata = "helloterraform"
-	}
-	`, common, rand)
-}
-func testAccEssLifecycleHookUpdateDefaultResult(common string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	
-	variable "name" {
-		default = "tf-testAccEssLifecycleHook-%d"
-	}
-	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}","${alibabacloudstack_vswitch.default2.id}"]
-	}
-	
-	resource "alibabacloudstack_ess_lifecycle_hook" "default"{
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		name = "${var.name}"
-		lifecycle_transition = "SCALE_IN"
-		heartbeat_timeout = 400
-		notification_metadata = "helloterraform"
-		default_result = "ABANDON"
-	}
-	`, common, rand)
-}
-func testAccEssLifecycleHookUpdateNotificationArn(common string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	
-	variable "name" {
-		default = "tf-testAccEssLifecycleHook-%d"
-	}
-	
-	data "alibabacloudstack_zones" "default2" {
-	
-	}
-
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default2.zones.0.id}"
-		  name = "${var.name}"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}","${alibabacloudstack_vswitch.default2.id}"]
-	}
-	
-	resource "alibabacloudstack_ess_lifecycle_hook" "default"{
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		name = "${var.name}"
-		lifecycle_transition = "SCALE_IN"
-		heartbeat_timeout = 400
-		notification_metadata = "helloterraform"
-		default_result = "ABANDON"
-		
-	}
-	`, common, rand)
+	`, name, ECSInstanceCommonTestCase)
 }

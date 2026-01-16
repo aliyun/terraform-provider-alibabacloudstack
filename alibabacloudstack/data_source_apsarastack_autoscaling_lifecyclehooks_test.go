@@ -3,44 +3,46 @@ package alibabacloudstack
 import (
 	"fmt"
 
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEssLifecycleHooksDataSource(t *testing.T) {
-	rand := getAccTestRandInt(10, 1000)
+	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_ess_lifecycle_hooks.default"
+	name := fmt.Sprintf("tf-testacc-esslifehookk%v", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackEssLifecycleHooksDataSourceConfig)
+	
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssLifecycleHooksDataSourceConfig(rand, map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}"`,
-			"name_regex":       `"${alibabacloudstack_ess_lifecycle_hook.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}",
+			"name_regex":       "${alibabacloudstack_ess_lifecycle_hook.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssLifecycleHooksDataSourceConfig(rand, map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}"`,
-			"name_regex":       `"${alibabacloudstack_ess_lifecycle_hook.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}",
+			"name_regex":       "${alibabacloudstack_ess_lifecycle_hook.default.name}_fake",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssLifecycleHooksDataSourceConfig(rand, map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}"`,
-			"ids":              `["${alibabacloudstack_ess_lifecycle_hook.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_ess_lifecycle_hook.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssLifecycleHooksDataSourceConfig(rand, map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}"`,
-			"ids":              `["${alibabacloudstack_ess_lifecycle_hook.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_ess_lifecycle_hook.default.id}_fake"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssLifecycleHooksDataSourceConfig(rand, map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}"`,
-			"ids":              `["${alibabacloudstack_ess_lifecycle_hook.default.id}"]`,
-			"name_regex":       `"${alibabacloudstack_ess_lifecycle_hook.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}",
+			"ids":              []string{"${alibabacloudstack_ess_lifecycle_hook.default.id}"},
+			"name_regex":       "${alibabacloudstack_ess_lifecycle_hook.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssLifecycleHooksDataSourceConfig(rand, map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}"`,
-			"ids":              `["${alibabacloudstack_ess_lifecycle_hook.default.id}_fake"]`,
-			"name_regex":       `"${alibabacloudstack_ess_lifecycle_hook.default.name}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}",
+			"ids":              []string{"${alibabacloudstack_ess_lifecycle_hook.default.id}_fake"},
+			"name_regex":       "${alibabacloudstack_ess_lifecycle_hook.default.name}",
 		}),
 	}
 
@@ -66,7 +68,7 @@ func TestAccAlibabacloudStackEssLifecycleHooksDataSource(t *testing.T) {
 	}
 
 	var essLifecyclehooksCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_ess_lifecycle_hooks.default",
+		resourceId:   resourceId,
 		existMapFunc: existEsslifecyclehooksMapFunc,
 		fakeMapFunc:  fakeEsslifecyclehooksMapFunc,
 	}
@@ -74,17 +76,12 @@ func TestAccAlibabacloudStackEssLifecycleHooksDataSource(t *testing.T) {
 	essLifecyclehooksCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackEssLifecycleHooksDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudStackEssLifecycleHooksDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 %s
 
 variable "name" {
-	default = "tf-testAccDataSourceLcHooks-%d"
+	default = "%s"
 }
 
 resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -93,7 +90,7 @@ resource "alibabacloudstack_ess_scaling_group" "default" {
 	default_cooldown = 20
 	removal_policies = ["OldestInstance", "NewestInstance"]
 	scaling_group_name = "${var.name}"
-	vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+	vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 }
 resource "alibabacloudstack_ess_lifecycle_hook" "default" {
   scaling_group_id      = "${alibabacloudstack_ess_scaling_group.default.id}"
@@ -103,9 +100,5 @@ resource "alibabacloudstack_ess_lifecycle_hook" "default" {
   notification_metadata = "helloworld"
 }
 
-data "alibabacloudstack_ess_lifecycle_hooks" "default"{
-  %s
-}
-`, ECSInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
-	return config
+`, ECSInstanceCommonTestCase, name)
 }
