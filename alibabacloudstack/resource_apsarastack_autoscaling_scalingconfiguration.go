@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -196,10 +197,7 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"tags": {
-				Type:     schema.TypeMap,
-				Optional: true,
-			},
+			"tags": tagsSchema(),
 			"instance_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -333,11 +331,11 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 	if hasChangeInstanceType || hasChangeInstanceTypes || d.Get("override").(bool) {
 		instanceType := d.Get("instance_type").(string)
 		instanceTypes := d.Get("instance_types").([]interface{})
-		if instanceType == "" && (instanceTypes == nil || len(instanceTypes) == 0) {
+		if instanceType == "" && len(instanceTypes) == 0 {
 			return fmt.Errorf("instance_type must be assigned")
 		}
 		types := make([]string, 0, int(MaxScalingConfigurationInstanceTypes))
-		if instanceTypes != nil && len(instanceTypes) > 0 {
+		if len(instanceTypes) > 0 {
 			types = expandStringList(instanceTypes)
 		}
 		if instanceType != "" {
@@ -398,11 +396,13 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 	}
 	if d.HasChange("tags") {
 		if v, ok := d.GetOk("tags"); ok {
-			tags := "{"
-			for key, value := range v.(map[string]interface{}) {
-				tags += "\"" + key + "\"" + ":" + "\"" + value.(string) + "\"" + ","
+			if t, err := json.Marshal(v.(map[string]interface{})); err != nil {
+				return err
+			} else {
+				request.Tags = string(t)
 			}
-			request.Tags = strings.TrimSuffix(tags, ",") + "}"
+		} else {
+			request.Tags = "{}"
 		}
 	}
 	if d.HasChange("host_name") {
@@ -706,11 +706,11 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 	types := make([]string, 0, int(MaxScalingConfigurationInstanceTypes))
 	instanceType := d.Get("instance_type").(string)
 	instanceTypes := d.Get("instance_types").([]interface{})
-	if instanceType == "" && (instanceTypes == nil || len(instanceTypes) == 0) {
+	if instanceType == "" && len(instanceTypes) == 0 {
 		return nil, errmsgs.WrapError(errmsgs.Error("instance_type or instance_types must be assigned"))
 	}
 
-	if instanceTypes != nil && len(instanceTypes) > 0 {
+	if len(instanceTypes) > 0 {
 		types = expandStringList(instanceTypes)
 	}
 

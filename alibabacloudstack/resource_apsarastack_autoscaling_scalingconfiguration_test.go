@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
+func TestAccAlibabacloudStackEssScalingConfiguration_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 999999)
 	var v ess.ScalingConfigurationInDescribeScalingConfigurations
 	resourceId := "alibabacloudstack_ess_scaling_configuration.default"
@@ -41,12 +41,13 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"scaling_group_id":   "${alibabacloudstack_ess_scaling_group.default.id}",
-					"image_id":           "${data.alibabacloudstack_images.default.images.0.id}",
-					"instance_type":      "ecs.n4.large",
-					"security_group_ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
-					"deployment_set_id":  "${alibabacloudstack_ecs_deployment_set.default.id}",
-					"force_delete":       "true",
+					"scaling_group_id":     "${alibabacloudstack_ess_scaling_group.default.id}",
+					"image_id":             "${data.alibabacloudstack_images.default.images.0.id}",
+					"instance_type":        "${local.default_instance_type_id}",
+					"security_group_ids":   []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
+					"deployment_set_id":    "${alibabacloudstack_ecs_deployment_set.default.id}",
+					"force_delete":         "true",
+					"system_disk_category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{}),
@@ -72,22 +73,20 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"scaling_configuration_name": fmt.Sprintf("tf-testAccEssScCon-%d", rand),
+					"scaling_configuration_name": name + "_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"scaling_configuration_name": fmt.Sprintf("tf-testAccEssScCon-%d", rand),
+						"scaling_configuration_name": name + "_update",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"system_disk_category": "cloud_ssd",
+					"system_disk_category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.1}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"system_disk_category": "cloud_ssd",
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
@@ -104,7 +103,7 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"data_disk": []map[string]string{{
 						"size":                 "20",
-						"category":             "cloud_ssd",
+						"category":             "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 						"delete_with_instance": "false",
 						"encrypted":            "true",
 					},
@@ -114,7 +113,7 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 					testAccCheck(map[string]string{
 						"data_disk.#":                      "1",
 						"data_disk.0.size":                 "20",
-						"data_disk.0.category":             "cloud_ssd",
+						"data_disk.0.category":             CHECKSET,
 						"data_disk.0.delete_with_instance": "false",
 					}),
 				),
@@ -144,12 +143,42 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"tags": map[string]string{
-						"name": "tf-test",
+						"Created": "TF",
+						"For":     "Test",
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"tags.name": "tf-test",
+						"tags.%":       "2",
+						"tags.Created": "TF",
+						"tags.For":     "Test",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF-update",
+						"For":     "Test-update",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF-update",
+						"tags.For":     "Test-update",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "0",
+						"tags.Created": REMOVEKEY,
+						"tags.For":     REMOVEKEY,
 					}),
 				),
 			},
@@ -161,61 +190,6 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 					testAccCheck(map[string]string{
 						"instance_name": name,
 					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackEssScalingConfigurationMulti(t *testing.T) {
-	rand := getAccTestRandInt(1000, 999999)
-	var v ess.ScalingConfiguration
-	resourceId := "alibabacloudstack_ess_scaling_configuration.default.0"
-	basicMap := map[string]string{
-		"scaling_group_id":     CHECKSET,
-		"instance_type":        CHECKSET,
-		"security_group_ids.#": "1",
-		"image_id":             CHECKSET,
-		"override":             "false",
-	}
-	ra := resourceAttrInit(resourceId, basicMap)
-	rc := resourceCheckInit(resourceId, &v, func() interface{} {
-		return &EssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	})
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testAccEssScCon-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEssScalingConfigurationConfigDependence)
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"count":              "1",
-					"scaling_group_id":   "${alibabacloudstack_ess_scaling_group.default.id}",
-					"image_id":           "${data.alibabacloudstack_images.default.images.0.id}",
-					"instance_type":      "ecs.n4.large",
-					"security_group_ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
-					"deployment_set_id":  "${alibabacloudstack_ecs_deployment_set.default.id}",
-					"force_delete":       "true",
-					"data_disk": []map[string]string{{
-						"size":                 "20",
-						"category":             "cloud_ssd",
-						"delete_with_instance": "false",
-						"encrypted":            "true",
-						"kms_key_id":           "149ca9b2-564d-42f7-ab60-abfd15a91503",
-					},
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
 				),
 			},
 		},
