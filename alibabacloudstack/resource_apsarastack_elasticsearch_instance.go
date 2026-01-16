@@ -505,9 +505,7 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 
 	esConfig := object["esConfig"].(map[string]interface{})
 	for _, key := range []string{"cluster.routing.allocation.awareness.attributes", "cluster.routing.allocation.awareness.force.node_name.values", "opendistro_security.unsupported.restore.securityindex.enabled:", "node.attr.node_name"} {
-		if _, exists := esConfig[key]; exists {
-			delete(esConfig, key)
-		}
+		delete(esConfig, key)
 	}
 	if esConfig != nil {
 		d.Set("setting_config", esConfig)
