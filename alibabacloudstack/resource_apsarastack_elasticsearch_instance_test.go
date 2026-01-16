@@ -170,15 +170,64 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"zone_id":               "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"cpu_type":              "Intel",
-					"version":               EsVersion,
-					"description":           name,
-					"scene":                 "normal",
-					"data_node_amount":      DataNodeAmount,
-					"data_node_spec":        DataNodeSpec,
-					"data_node_disk_size":   DataNodeDisk,
-					"data_node_disk_type":   EsDiskType,
+					"zone_id":             "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"cpu_type":            "Intel",
+					"version":             EsVersion,
+					"description":         name,
+					"scene":               "normal",
+					"data_node_amount":    DataNodeAmount,
+					"data_node_spec":      DataNodeSpec,
+					"data_node_disk_size": DataNodeDisk,
+					"data_node_disk_type": EsDiskType,
+					"vswitch_id":          "${alibabacloudstack_vpc_vswitch.default.id}",
+					"password":            "${random_password.password.0.result}",
+					"monitor_password":    "${random_password.password.1.result}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"version":     EsVersion,
+						"description": name,
+						"scene":       "normal",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"setting_config": map[string]string{
+						"\"action.auto_create_index\"":                      "+.*,-*",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"setting_config.action.auto_create_index":                      "+.*,-*",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"setting_config": map[string]string{
+						"\"action.destructive_requires_name\"": "true",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"setting_config.action.auto_create_index":                      REMOVEKEY,
+						"setting_config.action.destructive_requires_name":              "true",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"setting_config": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"setting_config.action.destructive_requires_name": REMOVEKEY,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"kibana_node_spec":      KibanaNodeSpec,
 					"kibana_password":       "${random_password.password.0.result}",
 					"master_node_amount":    MasterNodeAmount,
@@ -187,9 +236,6 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 					"master_node_disk_type": EsDiskType,
 					"client_node_amount":    ClientNodeAmount,
 					"client_node_spec":      ClientNodeSpec,
-					"vswitch_id":            "${alibabacloudstack_vpc_vswitch.default.id}",
-					"password":              "${random_password.password.1.result}",
-					"monitor_password":      "${random_password.password.2.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -429,24 +475,6 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password", "monitor_password", "kibana_password", "scene"},
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"setting_config": map[string]string{
-						"\"action.auto_create_index\"":                      "+.*,-*",
-						"\"action.destructive_requires_name\"":              "false",
-						"\"cluster.routing.allocation.disk.watermark.low\"": "90%",
-						"\"thread_pool.search.queue_size\"":                 "500",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"setting_config.action.auto_create_index":         "+.*,-*",
-						"setting_config.action.destructive_requires_name": "false",
-						"cluster.routing.allocation.disk.watermark.low":   "90%",
-						"thread_pool.search.queue_size":                   "500",
-					}),
-				),
-			},
 		},
 	})
 }
@@ -466,16 +494,6 @@ var elasticsearchMap = map[string]string{
 	"id":                         CHECKSET,
 	"domain":                     CHECKSET,
 	"port":                       CHECKSET,
-}
-
-var AlibabacloudStackElasticsearchMap = map[string]string{
-	"id":            CHECKSET,
-	"domain":        CHECKSET,
-	"port":          CHECKSET,
-	"kibana_domain": CHECKSET,
-	"kibana_port":   CHECKSET,
-	"vswitch_id":    CHECKSET,
-	"description":   CHECKSET,
 }
 
 func resourceElasticsearchInstanceConfigDependence(name string) string {

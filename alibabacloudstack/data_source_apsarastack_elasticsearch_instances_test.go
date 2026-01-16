@@ -67,9 +67,10 @@ func TestAccAlibabacloudStackElasticsearchInstancesDataSource(t *testing.T) {
 	}
 
 	var elasticsearchCheckInfo = dataSourceAttr{
-		resourceId:   resourceId,
-		existMapFunc: existElasticsearchMapFunc,
-		fakeMapFunc:  fakeElasticsearchMapFunc,
+		resourceId:        resourceId,
+		existMapFunc:      existElasticsearchMapFunc,
+		fakeMapFunc:       fakeElasticsearchMapFunc,
+		ExternalProviders: testAccExternalProviders,
 	}
 	elasticsearchCheckInfo.dataSourceTestCheck(t, rand, descriptionRegexConf, idsConf, versionConf, vpcConf, allConf)
 }
@@ -107,17 +108,15 @@ variable "name" {
   default = "%s"
 }
 
-variable "password" {
-  default = "%s"
-}
+%s
 
 %s
 
 resource "alibabacloudstack_elasticsearch_instance" "default" {
   data_node_disk_type = "yoda-lvm"
   data_node_spec = "1C 2Gi"
-  password = "${var.password}"
-  monitor_password = "${var.password}"
+  password = "${random_password.password.0.result}"
+  monitor_password = "${random_password.password.0.result}"
   data_node_amount = "3"
   cpu_type = "Intel"
   scene = "normal"
@@ -126,6 +125,10 @@ resource "alibabacloudstack_elasticsearch_instance" "default" {
   vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
   version = "7.10.0_ali1.6.0"
   data_node_disk_size = "500"
+  kibana_node_spec=      "1C 2Gi"
+  kibana_password=       "${random_password.password.0.result}"
+  client_node_amount=    2
+  client_node_spec=      "1C 2Gi"
 }
-`, name, esTestPassword, VSwitchCommonTestCase)
+`, name, RandomPasswordTestCase(12, 1), VSwitchCommonTestCase)
 }

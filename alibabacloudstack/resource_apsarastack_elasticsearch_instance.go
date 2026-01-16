@@ -336,6 +336,40 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					m, ok := v.(map[string]interface{})
+					if !ok {
+						errors = append(errors, fmt.Errorf("expected %q to be a map", k))
+						return
+					}
+
+					forbiddenSettingConfigKeys := []string{"cluster.routing.allocation.awareness.attributes",
+						"cluster.routing.allocation.awareness.force.node_name.values",
+						"opendistro_security.unsupported.restore.securityindex.enabled",
+						"node.attr.node_name"}
+						
+					forbidden := make(map[string]struct{})
+					for _, key := range forbiddenSettingConfigKeys {
+						forbidden[key] = struct{}{}
+					}
+
+					for key := range m {
+						if _, existed := forbidden[key]; existed {
+							errors = append(errors, fmt.Errorf(
+								"key %q is not allowed in %s. Forbidden keys: %s",
+								key, k, strings.Join(forbiddenSettingConfigKeys, ", "),
+							))
+						}
+					}
+					return
+				},
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool{
+					if newValue == "" {
+						return true
+					}
+					return oldValue == newValue
+				},
+				DiffSuppressOnRefresh: true,
 			},
 		},
 	}
@@ -679,11 +713,6 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		content := map[string]interface{}{}
 		config := d.Get("setting_config").(map[string]interface{})
 		content["esConfig"] = config
-		// Non-modifiable items
-		config["cluster.routing.allocation.awareness.attributes"] = "node_name,zone"
-		config["cluster.routing.allocation.awareness.force.node_name.values"] = "abcd"
-		config["opendistro_security.unsupported.restore.securityindex.enabled"] = "true"
-		config["node.attr.node_name"] = "${K8S_NODE_NAME}"
 
 		_, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", action, fmt.Sprintf("/openapi/instances/%s/instance-settings", d.Id()), nil, nil, content)
 
