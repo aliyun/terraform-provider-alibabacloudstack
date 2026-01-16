@@ -21,6 +21,10 @@ func dataSourceAlibabacloudStackCmsProjectMeta() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				ForceNew:     true,
 			},
+			"namespace": {
+				Type:         schema.TypeString,
+				Optional:     true,
+			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -97,10 +101,17 @@ func dataSourceAlibabacloudStackCmsProjectMetaRead(d *schema.ResourceData, meta 
 	if rt, ok := d.GetOk("name_regex"); ok && rt.(string) != "" {
 		r = regexp.MustCompile(rt.(string))
 	}
+	var namespace string
+	if v, ok := d.GetOk("namespace"); ok {
+		namespace = v.(string)
+	}
 	var ids []string
 	var s []map[string]interface{}
 	for _, rg := range response.Resources.Resource {
 		if r != nil && !r.MatchString(rg.Description) {
+			continue
+		}
+		if namespace != "" && namespace != rg.Namespace {
 			continue
 		}
 		mapping := map[string]interface{}{
