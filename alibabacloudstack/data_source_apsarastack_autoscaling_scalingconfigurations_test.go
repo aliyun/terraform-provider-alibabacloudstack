@@ -72,10 +72,9 @@ func TestAccAlibabacloudStackEssScalingConfigurationsDataSource(t *testing.T) {
 
 	var fakeEssScalingconfigurationsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"test": NOSET,
-			// "configurations.#": "0",
-			// "ids.#":            "0",
-			// "names.#":          "0",
+			 "configurations.#": "0",
+			 "ids.#":            "0",
+			 "names.#":          "0",
 		}
 	}
 

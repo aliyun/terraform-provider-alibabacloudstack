@@ -2,130 +2,160 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackNasMountTargetDataSource(t *testing.T) {
-	rand := getAccTestRandInt(100000, 999999)
+	rand := getAccTestRandInt(1000000, 9999999)
+	resourceId := "data.alibabacloudstack_nas_mount_targets.default"
+	name := fmt.Sprintf("tf-testnasfs%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackMountTargetDataSourceConfig)
+
 	fileSystemIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id":    "${alibabacloudstack_nas_mount_target.default.file_system_id}_fake",
 		}),
 	}
 	accessGroupNameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id":    `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id":    "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id":    `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id":    "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}_fake",
 		}),
 	}
 	typeConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"type":           `"${alibabacloudstack_nas_access_group.default.access_group_type}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"type":           "${alibabacloudstack_nas_access_group.default.access_group_type}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"type":           `"${alibabacloudstack_nas_access_group.default.access_group_type}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"type":           "${alibabacloudstack_nas_access_group.default.access_group_type}_fake",
 		}),
 	}
 	netWorkTypeConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"network_type":   `"${alibabacloudstack_nas_access_group.default.access_group_type}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"network_type":   "${alibabacloudstack_nas_access_group.default.access_group_type}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"network_type":   `"${alibabacloudstack_nas_access_group.default.access_group_type}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"network_type":   "${alibabacloudstack_nas_access_group.default.access_group_type}_fake",
 		}),
 	}
 	mountTargetDomainConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id":      `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"mount_target_domain": `split(":",alibabacloudstack_nas_mount_target.default.id)[1]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id":      "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"mount_target_domain": "${alibabacloudstack_nas_mount_target.default.mount_target_domain}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id":      `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"mount_target_domain": `"fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id":      "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"mount_target_domain": "fake",
 		}),
 	}
 	vpcIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"vpc_id":         `"${alibabacloudstack_vpc_vpc.default.id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"vpc_id":         "${alibabacloudstack_vpc_vpc.default.id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"vpc_id":         `"${alibabacloudstack_vpc_vpc.default.id}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"vpc_id":         "${alibabacloudstack_vpc_vpc.default.id}_fake",
 		}),
 	}
 	vswitchIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"vswitch_id":     `"${alibabacloudstack_nas_mount_target.default.vswitch_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"vswitch_id":     "${alibabacloudstack_nas_mount_target.default.vswitch_id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"vswitch_id":     `"fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"vswitch_id":     "fake",
 		}),
 	}
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"ids":            `[split(":",alibabacloudstack_nas_mount_target.default.id)[1]]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"ids":            []string{"${alibabacloudstack_nas_mount_target.default.mount_target_domain}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"ids":            `["fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"ids":            []string{"fake"},
 		}),
 	}
 	statusConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"status":         `"Active"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"status":         "Active",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"status":         `"Inactive"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"status":         "Inactive",
 		}),
 	}
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id":      `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"access_group_name":   `"${alibabacloudstack_nas_mount_target.default.access_group_name}"`,
-			"vswitch_id":          `"${alibabacloudstack_nas_mount_target.default.vswitch_id}"`,
-			"type":                `"${alibabacloudstack_nas_access_group.default.access_group_type}"`,
-			"network_type":        `"${alibabacloudstack_nas_access_group.default.access_group_type}"`,
-			"vpc_id":              `"${alibabacloudstack_vpc_vpc.default.id}"`,
-			"mount_target_domain": `split(":",alibabacloudstack_nas_mount_target.default.id)[1]`,
-			"status":              `"Active"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id":      "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"access_group_name":   "${alibabacloudstack_nas_mount_target.default.access_group_name}",
+			"vswitch_id":          "${alibabacloudstack_nas_mount_target.default.vswitch_id}",
+			"type":                "${alibabacloudstack_nas_access_group.default.access_group_type}",
+			"network_type":        "${alibabacloudstack_nas_access_group.default.access_group_type}",
+			"vpc_id":              "${alibabacloudstack_vpc_vpc.default.id}",
+			"mount_target_domain": "${alibabacloudstack_nas_mount_target.default.mount_target_domain}",
+			"status":              "Active",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
-			"file_system_id":      `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,
-			"access_group_name":   `"${alibabacloudstack_nas_mount_target.default.access_group_name}"`,
-			"vswitch_id":          `"${alibabacloudstack_nas_mount_target.default.vswitch_id}_fake"`,
-			"type":                `"${alibabacloudstack_nas_access_group.default.access_group_type}_fake"`,
-			"network_type":        `"${alibabacloudstack_nas_access_group.default.access_group_type}_fake}"`,
-			"vpc_id":              `"${alibabacloudstack_vpc_vpc.default.id}"`,
-			"mount_target_domain": `"fake"`,
-			"status":              `"Inactive"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id":      "${alibabacloudstack_nas_mount_target.default.file_system_id}",
+			"access_group_name":   "${alibabacloudstack_nas_mount_target.default.access_group_name}",
+			"vswitch_id":          "${alibabacloudstack_nas_mount_target.default.vswitch_id}_fake",
+			"type":                "${alibabacloudstack_nas_access_group.default.access_group_type}_fake",
+			"network_type":        "${alibabacloudstack_nas_access_group.default.access_group_type}_fake}",
+			"vpc_id":              "${alibabacloudstack_vpc_vpc.default.id}",
+			"mount_target_domain": "fake",
+			"status":              "Inactive",
 		}),
 	}
+
+	var existMountTargetMapCheck = func(rand int) map[string]string {
+		return map[string]string{
+			"targets.0.type":                "Vpc",
+			"targets.0.network_type":        "Vpc",
+			"targets.0.status":              "Active",
+			"targets.0.vpc_id":              CHECKSET,
+			"targets.0.mount_target_domain": CHECKSET,
+			"targets.0.vswitch_id":          CHECKSET,
+			"targets.0.access_group_name":   name,
+			"ids.#":                         "1",
+			"ids.0":                         CHECKSET,
+		}
+	}
+
+	var fakeMountTargetMapCheck = func(rand int) map[string]string {
+		return map[string]string{
+			"targets.#": "0",
+			"ids.#":     "0",
+		}
+	}
+
+	var mountTargetCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existMountTargetMapCheck,
+		fakeMapFunc:  fakeMountTargetMapCheck,
+	}
+
 	mountTargetCheckInfo.dataSourceTestCheck(t, rand, fileSystemIdConf, accessGroupNameConf, typeConf, netWorkTypeConf, mountTargetDomainConf, vpcIdConf, vswitchIdConf, idsConf, statusConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudStackMountTargetDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-			default = "tf-testAccCheck-nasmount%d"
+			default = "%s"
 }
 
 
@@ -144,37 +174,5 @@ resource "alibabacloudstack_nas_mount_target" "default" {
 			access_group_name = "${alibabacloudstack_nas_access_group.default.access_group_name}"
 			vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 }
-data "alibabacloudstack_nas_mount_targets" "default" {
-		%s
-}`, rand, VSwitchCommonTestCase, NasCommonTestCase, strings.Join(pairs, "\n  "))
-	return config
-}
-
-var existMountTargetMapCheck = func(rand int) map[string]string {
-	return map[string]string{
-		"test": NOSET,
-		// "targets.0.type":                "Vpc",
-		// "targets.0.network_type":        "Vpc",
-		// "targets.0.status":              "Active",
-		// "targets.0.vpc_id":              CHECKSET,
-		// "targets.0.mount_target_domain": CHECKSET,
-		// "targets.0.vswitch_id":          CHECKSET,
-		// "targets.0.access_group_name":   fmt.Sprintf("tf-testAccNasConfig-%d", rand),
-		// "ids.#":                         "1",
-		// "ids.0":                         CHECKSET,
-	}
-}
-
-var fakeMountTargetMapCheck = func(rand int) map[string]string {
-	return map[string]string{
-		"test": NOSET,
-		// "targets.#": "0",
-		// "ids.#":     "0",
-	}
-}
-
-var mountTargetCheckInfo = dataSourceAttr{
-	resourceId:   "data.alibabacloudstack_nas_mount_targets.default",
-	existMapFunc: existMountTargetMapCheck,
-	fakeMapFunc:  fakeMountTargetMapCheck,
+`, name, VSwitchCommonTestCase, NasCommonTestCase)
 }

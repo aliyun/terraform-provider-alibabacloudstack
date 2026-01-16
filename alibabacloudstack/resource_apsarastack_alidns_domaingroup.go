@@ -1,10 +1,8 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"time"
-
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -32,19 +30,18 @@ func resourceAlibabacloudStackDnsGroupCreate(d *schema.ResourceData, meta interf
 	GroupName := d.Get("name").(string)
 	request := client.NewCommonRequest("POST", "GenesisDns", "2018-07-20", "AddDomainGroup", "")
 	request.QueryParams["GroupName"] = GroupName
-	raw, err := client.WithEcsClient(func(dnsClient *ecs.Client) (interface{}, error) {
-		return dnsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dns_group", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_regions_by_product", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request)
-	response, _ := raw.(*alidns.AddDomainGroupResponse)
+	
+	var response alidns.AddDomainGroupResponse
+	json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	d.SetId(response.GroupId)
 	return nil
 }

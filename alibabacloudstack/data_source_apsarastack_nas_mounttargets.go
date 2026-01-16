@@ -130,6 +130,9 @@ func dataSourceAlibabacloudStackNasMountTargetsRead(d *schema.ResourceData, meta
 	for {
 		response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 		if err != nil {
+			if errmsgs.IsExpectedErrors(err, []string{"InvalidParameter.FileSystemId"}) {
+				break
+			}
 			return err
 		}
 

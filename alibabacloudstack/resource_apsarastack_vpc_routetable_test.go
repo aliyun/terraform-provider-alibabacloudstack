@@ -58,9 +58,9 @@ func TestAccAlibabacloudStackVpcRoutetable0(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 
 			{
@@ -110,31 +110,19 @@ func TestAccAlibabacloudStackVpcRoutetable0(t *testing.T) {
 }
 
 var AlibabacloudTestAccVpcRoutetableCheckmap = map[string]string{
-	"test": NOSET,
 
-	// "status": CHECKSET,
-
-	// "description": CHECKSET,
-
-	// "route_table_id": CHECKSET,
-
-	// "resource_group_id": CHECKSET,
-
-	// "vswitch_ids": CHECKSET,
-
-	// "create_time": CHECKSET,
-
-	// "router_id": CHECKSET,
-
-	// "route_table_type": CHECKSET,
-
-	// "vpc_id": CHECKSET,
-
-	// "router_type": CHECKSET,
-
-	// "route_table_name": CHECKSET,
-
-	// "tags": CHECKSET,
+	"tatus":            CHECKSET,
+	"escription":       CHECKSET,
+	"oute_table_id":    CHECKSET,
+	"esource_group_id": CHECKSET,
+	"switch_ids":       CHECKSET,
+	"reate_time":       CHECKSET,
+	"outer_id":         CHECKSET,
+	"oute_table_type":  CHECKSET,
+	"pc_id":            CHECKSET,
+	"outer_type":       CHECKSET,
+	"oute_table_name":  CHECKSET,
+	"ags":              CHECKSET,
 }
 
 func AlibabacloudTestAccVpcRoutetableBasicdependence(name string) string {

@@ -43,6 +43,10 @@ func resourceAlibabacloudStackNasMountTarget() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"mount_target_domain": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackNasMountTargetCreate, resourceAlibabacloudStackNasMountTargetRead, resourceAlibabacloudStackNasMountTargetUpdate, resourceAlibabacloudStackNasMountTargetDelete)
@@ -110,6 +114,7 @@ func resourceAlibabacloudStackNasMountTargetRead(d *schema.ResourceData, meta in
 		return errmsgs.WrapError(err)
 	}
 	d.Set("file_system_id", parts[0])
+	d.Set("mount_target_domain", parts[1])
 	d.Set("access_group_name", object["AccessGroup"])
 	d.Set("status", object["Status"])
 	d.Set("vswitch_id", object["VswId"])

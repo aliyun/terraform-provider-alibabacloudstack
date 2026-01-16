@@ -41,6 +41,8 @@ const (
 	ForceSleep = "force_sleep"
 )
 
+type TfRawString string
+
 const (
 	// indentation symbol
 	INDENTATIONSYMBOL = " "
@@ -433,6 +435,9 @@ func (b *resourceConfig) configBuild(overwrite bool) ResourceTestAccConfigFunc {
 
 // deal with the parameter common method
 func valueConvert(indentation int, val reflect.Value) string {
+	if val.Type() == reflect.TypeOf(TfRawString("")) {
+		return fmt.Sprintf("%s", val.String())
+	}
 	switch val.Kind() {
 	case reflect.Interface:
 		return valueConvert(indentation, reflect.ValueOf(val.Interface()))

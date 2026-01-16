@@ -2,103 +2,96 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackNasFileSystem_DataSource(t *testing.T) {
-	rand := getAccTestRandInt(100000, 999999)
+	rand := getAccTestRandInt(1000000, 9999999)
+	resourceId := "data.alibabacloudstack_nas_file_systems.default"
+	name := fmt.Sprintf("tf-testnasfs%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackFileSystemDataSourceConfig)
+
 	storageTypeConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand, map[string]string{
-			"storage_type":      `"${alibabacloudstack_nas_file_system.default.storage_type}"`,
-			"description_regex": `"^${alibabacloudstack_nas_file_system.default.description}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"storage_type":      "${alibabacloudstack_nas_file_system.default.storage_type}",
+			"description_regex": "^${alibabacloudstack_nas_file_system.default.description}",
 		}),
 	}
 	protocolTypeConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand, map[string]string{
-			"protocol_type":     `"${alibabacloudstack_nas_file_system.default.protocol_type}"`,
-			"description_regex": `"^${alibabacloudstack_nas_file_system.default.description}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"protocol_type":     "${alibabacloudstack_nas_file_system.default.protocol_type}",
+			"description_regex": "^${alibabacloudstack_nas_file_system.default.description}",
 		}),
 	}
 	descriptionConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand, map[string]string{
-			"description_regex": `"^${alibabacloudstack_nas_file_system.default.description}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "^${alibabacloudstack_nas_file_system.default.description}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand, map[string]string{
-			"description_regex": `"^${alibabacloudstack_nas_file_system.default.description}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "^${alibabacloudstack_nas_file_system.default.description}_fake",
 		}),
 	}
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_nas_file_system.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_file_system.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_nas_file_system.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_file_system.default.id}_fake"},
 		}),
 	}
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand, map[string]string{
-			"storage_type":      `"${alibabacloudstack_nas_file_system.default.storage_type}"`,
-			"protocol_type":     `"${alibabacloudstack_nas_file_system.default.protocol_type}"`,
-			"description_regex": `"^${alibabacloudstack_nas_file_system.default.description}"`,
-			"ids":               `["${alibabacloudstack_nas_file_system.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"storage_type":      "${alibabacloudstack_nas_file_system.default.storage_type}",
+			"protocol_type":     "${alibabacloudstack_nas_file_system.default.protocol_type}",
+			"description_regex": "^${alibabacloudstack_nas_file_system.default.description}",
+			"ids":               []string{"${alibabacloudstack_nas_file_system.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand, map[string]string{
-			"description_regex": `"^${alibabacloudstack_nas_file_system.default.description}_fake"`,
-			"ids":               `["${alibabacloudstack_nas_file_system.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "^${alibabacloudstack_nas_file_system.default.description}_fake",
+			"ids":               []string{"${alibabacloudstack_nas_file_system.default.id}_fake"},
 		}),
+	}
+	var existFileSystemMapCheck = func(rand int) map[string]string {
+		return map[string]string{
+			"systems.0.id":            CHECKSET,
+			"systems.0.region_id":     CHECKSET,
+			"systems.0.description":   name,
+			"systems.0.protocol_type": CHECKSET,
+			"systems.0.storage_type":  "Capacity",
+			"systems.0.metered_size":  CHECKSET,
+			"systems.0.create_time":   CHECKSET,
+			"ids.#":                   "1",
+			"ids.0":                   CHECKSET,
+			"descriptions.#":          "1",
+			"descriptions.0":          CHECKSET,
+		}
+	}
+
+	var fakeFileSystemMapCheck = func(rand int) map[string]string {
+		return map[string]string{
+			"systems.#":      "0",
+			"ids.#":          "0",
+			"descriptions.#": "0",
+		}
+	}
+
+	var fileSystemCheckInfo = dataSourceAttr{
+		resourceId:   "data.alibabacloudstack_nas_file_systems.default",
+		existMapFunc: existFileSystemMapCheck,
+		fakeMapFunc:  fakeFileSystemMapCheck,
 	}
 
 	fileSystemCheckInfo.dataSourceTestCheck(t, rand, storageTypeConf, protocolTypeConf,
 		descriptionConf, idsConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudStackFileSystemDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAcc-nas_fs_DataSource%d"
+  default = "%s"
 }
 
 %s
 
-data "alibabacloudstack_nas_file_systems" "default" {
-	%s
-}`, rand, NasCommonTestCase,strings.Join(pairs, "\n  "))
-	return config
-}
-
-var existFileSystemMapCheck = func(rand int) map[string]string {
-	return map[string]string{
-		"test": NOSET,
-		// "systems.0.id":            CHECKSET,
-		// "systems.0.region_id":     CHECKSET,
-		// "systems.0.description":   "tf-testAccCheckAlibabacloudStackFileSystemsDataSource",
-		// "systems.0.protocol_type": CHECKSET,
-		// "systems.0.storage_type":  "Capacity",
-		// "systems.0.metered_size":  CHECKSET,
-		// "systems.0.create_time":   CHECKSET,
-		// "ids.#":                   "1",
-		// "ids.0":                   CHECKSET,
-		// "descriptions.#":          "1",
-		// "descriptions.0":          "tf-testAccCheckAlibabacloudStackFileSystemsDataSource",
-	}
-}
-
-var fakeFileSystemMapCheck = func(rand int) map[string]string {
-	return map[string]string{
-		"systems.#":      "0",
-		"ids.#":          "0",
-		"descriptions.#": "0",
-	}
-}
-
-var fileSystemCheckInfo = dataSourceAttr{
-	resourceId:   "data.alibabacloudstack_nas_file_systems.default",
-	existMapFunc: existFileSystemMapCheck,
-	fakeMapFunc:  fakeFileSystemMapCheck,
+`, name, NasCommonTestCase)
 }
