@@ -107,26 +107,21 @@ func dataSourceAlibabacloudStackSlbServerGroupsRead(d *schema.ResourceData, meta
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	var filteredServerGroupsTemp []slb.VServerGroup
-	nameRegex, ok := d.GetOk("name_regex")
-	if (ok && nameRegex.(string) != "") || (len(idsMap) > 0) {
-		var r *regexp.Regexp
-		if nameRegex != "" {
-			r = regexp.MustCompile(nameRegex.(string))
+	var nameRegex *regexp.Regexp
+	if v, ok := d.GetOk("name_regex"); ok {
+		nameRegex = regexp.MustCompile(v.(string))
+	}
+	for _, serverGroup := range bresponse.VServerGroups.VServerGroup {
+		if nameRegex != nil && !nameRegex.MatchString(serverGroup.VServerGroupName) {
+			continue
 		}
-		for _, serverGroup := range bresponse.VServerGroups.VServerGroup {
-			if r != nil && !r.MatchString(serverGroup.VServerGroupName) {
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[serverGroup.VServerGroupId]; !ok {
 				continue
 			}
-			if len(idsMap) > 0 {
-				if _, ok := idsMap[serverGroup.VServerGroupId]; !ok {
-					continue
-				}
-			}
-
-			filteredServerGroupsTemp = append(filteredServerGroupsTemp, serverGroup)
 		}
-	} else {
-		filteredServerGroupsTemp = bresponse.VServerGroups.VServerGroup
+
+		filteredServerGroupsTemp = append(filteredServerGroupsTemp, serverGroup)
 	}
 
 	return slbServerGroupsDescriptionAttributes(d, filteredServerGroupsTemp, meta)
