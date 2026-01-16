@@ -118,9 +118,6 @@ func dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntriesRead(d *schema.Resou
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeVpnPbrRouteEntries", "")
 	VpcDescribevpnpbrrouteentriesResponseObj := VpcDescribevpnpbrrouteentriesResponse{}
 	request.QueryParams["VpnGatewayId"] = d.Get("vpn_gateway_id").(string)
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {

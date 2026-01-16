@@ -3,69 +3,70 @@ package alibabacloudstack
 import (
 	"fmt"
 
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEssScalingConfigurationsDataSource(t *testing.T) {
-	rand := getAccTestRandInt(0, 500)
-	// scalingGroupIdConf := dataSourceTestAccConfig{
-	// 	existConfig: testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand, map[string]string{
-	// 		"scaling_group_id": `"${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}"`,
-	// 	}),
-	// 	fakeConfig: testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand, map[string]string{
-	// 		"scaling_group_id": `"${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}_fake"`,
-	// 	}),
-	// }
+	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_ess_scaling_configurations.default"
+	name := fmt.Sprintf("tf-essnotifications%v", rand)
 
-	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}"`,
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig)
+	scalingGroupIdConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}_fake",
 		}),
 	}
 
-	//idsConf := dataSourceTestAccConfig{
-	//	existConfig: testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand, map[string]string{
-	//		"ids": `["${alibabacloudstack_ess_scaling_configuration.default.id}"]`,
-	//	}),
-	//	fakeConfig: testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand, map[string]string{
-	//		"ids": `["${alibabacloudstack_ess_scaling_configuration.default.id}_fake"]`,
-	//	}),
-	// }`"${alibabacloudstack_apigateway_api_groups.default.ApiGroupName}"`
-	// `["${alibabacloudstack_ess_scaling_configuration.default.id}_fake}"]`
-	// allConf := dataSourceTestAccConfig{
-	// 	existConfig: testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand, map[string]string{
-	// 		// "scaling_group_id": `"${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}"`,
-	// 		// "ids":              `["${alibabacloudstack_ess_scaling_configuration.default.id}"]`,
-	// 		"name_regex": `"${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}"`,
-	// 	}),
-	// 	fakeConfig: testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand, map[string]string{
-	// 		// "scaling_group_id": "${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}",
-	// 		// "ids":              `["${alibabacloudstack_ess_scaling_configuration.default.id}_fake}"]`,
-	// 		"name_regex": `"${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}"`,
-	// 	}),
-	// }
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}$",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}_fake",
+		}),
+	}
+
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ess_scaling_configuration.default.id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ess_scaling_configuration.default.id}_fake"},
+		}),
+	}
+
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}",
+			"ids": []string{"${alibabacloudstack_ess_scaling_configuration.default.id}"},
+			"name_regex": "${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}_fake",
+			"ids": []string{"${alibabacloudstack_ess_scaling_configuration.default.id}_fake"},
+			"name_regex": "${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}",
+		}),
+	}
 
 	var existEssScalingconfigurationsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"test": NOSET,
-			// "ids.#":                                       "1",
-			// "names.#":                                     "1",
-			// "configurations.#":                            "1",
-			// "configurations.0.name":                       fmt.Sprintf("tf-testAccDataSourceEssScalingRules-%d", rand),
-			// "configurations.0.scaling_group_id":           CHECKSET,
-			// "configurations.0.image_id":                   CHECKSET,
-			// "configurations.0.instance_type":              CHECKSET,
-			// "configurations.0.security_group_id":          CHECKSET,
-			// "configurations.0.creation_time":              CHECKSET,
-			// "configurations.0.system_disk_category":       CHECKSET,
-			// "configurations.0.system_disk_size":           CHECKSET,
-			// "configurations.0.internet_max_bandwidth_in":  CHECKSET,
-			// "configurations.0.internet_max_bandwidth_out": CHECKSET,
-			// "configurations.0.data_disks.#":               "0",
+			 "ids.#":                                       "1",
+			 "names.#":                                     "1",
+			 "configurations.#":                            "1",
+			 "configurations.0.name":                       name,
+			 "configurations.0.scaling_group_id":           CHECKSET,
+			 "configurations.0.image_id":                   CHECKSET,
+			 "configurations.0.instance_type":              CHECKSET,
+			 "configurations.0.security_group_id":          CHECKSET,
+			 "configurations.0.creation_time":              CHECKSET,
+			 "configurations.0.system_disk_category":       CHECKSET,
+			 "configurations.0.system_disk_size":           CHECKSET,
+			 "configurations.0.internet_max_bandwidth_in":  CHECKSET,
+			 "configurations.0.internet_max_bandwidth_out": CHECKSET,
 		}
 	}
 
@@ -79,25 +80,20 @@ func TestAccAlibabacloudStackEssScalingConfigurationsDataSource(t *testing.T) {
 	}
 
 	var essScalingconfigurationsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_ess_scaling_configurations.default",
+		resourceId:   resourceId,
 		existMapFunc: existEssScalingconfigurationsMapFunc,
 		fakeMapFunc:  fakeEssScalingconfigurationsMapFunc,
 	}
 
-	essScalingconfigurationsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf)
+	essScalingconfigurationsCheckInfo.dataSourceTestCheck(t, rand, scalingGroupIdConf, nameRegexConf, idsConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
-%s
+func testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testscalconf-%d"
+	default = "%s"
 }
+%s
 resource "alibabacloudstack_ess_scaling_group" "default" {
 	min_size = 0
 	max_size = 2
@@ -116,6 +112,7 @@ resource "alibabacloudstack_ecs_deployment_set" "default" {
 }
 
 resource "alibabacloudstack_ess_scaling_configuration" "default" {
+	scaling_configuration_name = var.name
 	scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 	image_id = "${data.alibabacloudstack_images.default.images.0.id}"
 	instance_type = "${local.default_instance_type_id}"
@@ -127,17 +124,5 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 	system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 }
 
-data "alibabacloudstack_ess_scaling_configurations" "default"{
-  %s
+`, name, ECSInstanceCommonTestCase)
 }
-`, ECSInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
-	return config
-}
-
-// "scaling_group_id":   "${alibabacloudstack_ess_scaling_group.default.id}",
-// "image_id":           "${data.alibabacloudstack_images.default.images.0.id}",
-// "instance_type":      "ecs.n4.large",
-// "security_group_ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
-// "zone_id":            "${data.alibabacloudstack_zones.default.zones.0.id}",
-// "deployment_set_id":  "${alibabacloudstack_ecs_deployment_set.default.id}",
-// "force_delete":       "true",
