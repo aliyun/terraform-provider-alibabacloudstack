@@ -3,25 +3,28 @@ package alibabacloudstack
 import (
 	"fmt"
 
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEssNotificationsDataSource(t *testing.T) {
-	rand := getAccTestRandInt(0, 500)
+	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_ess_notifications.default"
+	name := fmt.Sprintf("tf-essgroup%v", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackEssNotificationsDataSourceConfig)
 	scalingGroupIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssNotificationsDataSourceConfig(rand, map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_notification.default.scaling_group_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_notification.default.scaling_group_id}",
 		}),
 	}
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssNotificationsDataSourceConfig(rand, map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_notification.default.scaling_group_id}"`,
-			"ids":              `["${alibabacloudstack_ess_notification.default.notification_arn}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_notification.default.scaling_group_id}",
+			"ids":              []string{"${alibabacloudstack_ess_notification.default.notification_arn}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssNotificationsDataSourceConfig(rand, map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_notification.default.scaling_group_id}"`,
-			"ids":              `["${alibabacloudstack_ess_notification.default.notification_arn}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_notification.default.scaling_group_id}",
+			"ids":              []string{"${alibabacloudstack_ess_notification.default.notification_arn}_fake"},
 		}),
 	}
 
@@ -42,7 +45,7 @@ func TestAccAlibabacloudStackEssNotificationsDataSource(t *testing.T) {
 	}
 
 	var essNotificationsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_ess_notifications.default",
+		resourceId:   resourceId,
 		existMapFunc: existEssnotificationsMapFunc,
 		fakeMapFunc:  fakeEssnotificationsMapFunc,
 	}
@@ -50,25 +53,21 @@ func TestAccAlibabacloudStackEssNotificationsDataSource(t *testing.T) {
 	essNotificationsCheckInfo.dataSourceTestCheck(t, rand, scalingGroupIdConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackEssNotificationsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
-%s
+func testAccCheckAlibabacloudStackEssNotificationsDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 
 variable "name" {
-	default = "tf-testAccDataSourceEssNs-%d"
+	default = "%s"
 }
+
+%s
 
 resource "alibabacloudstack_ess_scaling_group" "default" {
     min_size = 1
     max_size = 1
     scaling_group_name = "${var.name}"
     removal_policies = ["OldestInstance", "NewestInstance"]
-    vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+    vswitch_ids = [alibabacloudstack_vpc_vswitch.default.id,]
 }
 
 
@@ -77,10 +76,5 @@ resource "alibabacloudstack_ess_notification" "default" {
     notification_types = ["AUTOSCALING:SCALE_OUT_SUCCESS"]
     notification_arn = "acs:ess"
 }
-
-data "alibabacloudstack_ess_notifications" "default"{
-  %s
-}
-`, ECSInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name, ECSInstanceCommonTestCase)
 }
