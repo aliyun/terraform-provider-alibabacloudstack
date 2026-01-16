@@ -128,7 +128,7 @@ func testAccCheckSecurityGroupDestroy(s *terraform.State) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackSecurityGroupBasic(t *testing.T) {
+func TestAccAlibabacloudStackEcsSecurityGroupBasic(t *testing.T) {
 	var v ecs.DescribeSecurityGroupAttributeResponse
 	resourceId := "alibabacloudstack_security_group.default"
 	ra := resourceAttrInit(resourceId, testAccCheckSecurityBasicMap)
@@ -139,6 +139,10 @@ func TestAccAlibabacloudStackSecurityGroupBasic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc_sg%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCheckSecurityGroupConfigBasic)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -147,9 +151,17 @@ func TestAccAlibabacloudStackSecurityGroupBasic(t *testing.T) {
 		CheckDestroy: testAccCheckSecurityGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckSecurityGroupConfigBasic(),
+				Config: testAccConfig(map[string]interface{}{
+					"vpc_id":      "${alibabacloudstack_vpc_vpc.default.id}",
+					"name":        name,
+					"description": name + "_describe",
+					"type":        "normal",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"name":        name,
+						"description": name + "_describe",
+					}),
 				),
 			},
 			{
@@ -158,7 +170,9 @@ func TestAccAlibabacloudStackSecurityGroupBasic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccCheckSecurityGroupConfigInnerAccess(),
+				Config: testAccConfig(map[string]interface{}{
+					"inner_access_policy": "Accept",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"inner_access_policy": "Accept",
@@ -166,203 +180,88 @@ func TestAccAlibabacloudStackSecurityGroupBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckSecurityGroupConfigName(),
+
+				Config: testAccConfig(map[string]interface{}{
+					"name":                name + "_change",
+					"inner_access_policy": "Drop",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": "tf-testAccCheckSecurityGroupName_change",
+						"name":                name + "_change",
+						"inner_access_policy": "Drop",
 					}),
 				),
 			},
 
 			{
-				Config: testAccCheckSecurityGroupConfigDescribe(),
+				Config: testAccConfig(map[string]interface{}{
+					"description": name + "_describe_change",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": "tf-testAccCheckSecurityGroupName_describe_change",
+						"description": name + "_describe_change",
 					}),
 				),
 			},
-			//{
-			//	Config: testAccCheckSecurityGroupConfigTags(),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"tags.%":    "1",
-			//			"tags.Test": REMOVEKEY,
-			//		}),
-			//	),
-			//},
-
 			{
-				Config: testAccCheckSecurityGroupConfigAll(),
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "Test",
+					},
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(testAccCheckSecurityBasicMap),
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF",
+						"tags.For":     "Test",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF-update",
+						"For":     "Test-update",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF-update",
+						"tags.For":     "Test-update",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "0",
+						"tags.Created": REMOVEKEY,
+						"tags.For":     REMOVEKEY,
+					}),
 				),
 			},
 		},
 	})
 }
 
-func TestAccAlibabacloudStackSecurityGroupMulti(t *testing.T) {
-	var v ecs.DescribeSecurityGroupAttributeResponse
-	resourceId := "alibabacloudstack_security_group.default.2"
-	ra := resourceAttrInit(resourceId, testAccCheckSecurityBasicMap)
-	serviceFunc := func() interface{} {
-		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSecurityGroupDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckSecurityGroupConfigMulti(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-		},
-	})
-}
-
-func testAccCheckSecurityGroupConfigBasic() string {
+func testAccCheckSecurityGroupConfigBasic(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccCheckSecurityGroupName"
+  default = "%s"
 }
 
 %s
-
-resource "alibabacloudstack_security_group" "default" {
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  name = "${var.name}"
-  description = "${var.name}_describe"
-  type = "normal"
-  
-}
-`, VpcCommonTestCase)
-}
-
-func testAccCheckSecurityGroupConfigInnerAccess() string {
-	return fmt.Sprintf(`
-variable "name" {
-  default = "tf-testAccCheckSecurityGroupName"
-}
-
-
-%s
-
-resource "alibabacloudstack_security_group" "default" {
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  inner_access_policy = "Accept"
-  name = "${var.name}"
-  description = "${var.name}_describe"
-  type = "normal"
-  
-}`, VpcCommonTestCase)
-}
-
-func testAccCheckSecurityGroupConfigName() string {
-	return fmt.Sprintf(`
-
-variable "name" {
-  default = "tf-testAccCheckSecurityGroupName"
-}
-
-
-%s
-
-resource "alibabacloudstack_security_group" "default" {
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  name = "${var.name}_change"
-  description = "${var.name}_describe"
-  type = "normal"
-  inner_access_policy = "Drop"
-  
-}`, VpcCommonTestCase)
-}
-
-func testAccCheckSecurityGroupConfigDescribe() string {
-	return fmt.Sprintf(`
-
-variable "name" {
-  default = "tf-testAccCheckSecurityGroupName"
-}
-
-%s
-
-resource "alibabacloudstack_security_group" "default" {
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  name = "${var.name}_change"
-  description = "${var.name}_describe_change"
-  type = "normal"
-}`, VpcCommonTestCase)
-}
-func testAccCheckSecurityGroupConfigTags() string {
-	return fmt.Sprintf(`
-
-variable "name" {
-  default = "tf-testAccCheckSecurityGroupName"
-}
-
-
-%s
-
-resource "alibabacloudstack_security_group" "default" {
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  name = "${var.name}_change"
-  description = "${var.name}_describe_change"
-  type = "normal"
-
-}`, VpcCommonTestCase)
-}
-
-func testAccCheckSecurityGroupConfigAll() string {
-	return fmt.Sprintf(`
-variable "name" {
-  default = "tf-testAccCheckSecurityGroupName"
-}
-
-%s
-
-resource "alibabacloudstack_security_group" "default" {
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  inner_access_policy = "Accept"
-  name = "${var.name}"
-  description = "${var.name}_describe"
-  type = "normal"
-}`, VpcCommonTestCase)
-}
-
-func testAccCheckSecurityGroupConfigMulti() string {
-	return fmt.Sprintf(`
-
-variable "name" {
-  default = "tf-testAccCheckSecurityGroupName"
-}
-
-
-%s
-
-resource "alibabacloudstack_security_group" "default" {
-  count = 3
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  name = "${var.name}"
-  description = "${var.name}_describe"
-  type = "normal"
-}`, VpcCommonTestCase)
+`, name, VpcCommonTestCase)
 }
 
 var testAccCheckSecurityBasicMap = map[string]string{
 	"vpc_id":              CHECKSET,
 	"inner_access_policy": "Accept",
-	"name":                "tf-testAccCheckSecurityGroupName",
-	"description":         "tf-testAccCheckSecurityGroupName_describe",
 	"type":                "normal",
 	//"tags.%":              "2",
 	//"tags.foo":            "foo",

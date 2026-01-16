@@ -272,21 +272,3 @@ func testAccCheckSecurityGroupRuleDestroy(s *terraform.State) error {
 
 	return nil
 }
-
-func testAccSecurityGroupEgressRule(name string) string {
-	return fmt.Sprintf(`
-variable "name" {
-  default = "%s"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "192.168.0.0/16"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  name = "${var.name}"
-}
-`, name)
-}
