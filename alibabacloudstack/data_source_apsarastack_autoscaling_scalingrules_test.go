@@ -2,93 +2,94 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
-func TestAccAlibabacloudStackEssScalingrulesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackEssScalingRulesDataSource(t *testing.T) {
+	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_ess_scaling_rules.default"
+	name := fmt.Sprintf("tf-testacc-essrule%v", rand)
 
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig)
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(map[string]string{
-			"ids": `["${alibabacloudstack_ess_scaling_rule.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ess_scaling_rule.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(map[string]string{
-			"ids": `["${alibabacloudstack_ess_scaling_rule.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ess_scaling_rule.default.id}_fake"},
 		}),
 	}
 
 	scalingGroupIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}_fake",
 		}),
 	}
 
 	typeConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}"`,
-			"type":             `"SimpleScalingRule"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}",
+			"type":             "SimpleScalingRule",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(map[string]string{
-			"scaling_group_id": `"${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}_fake"`,
-			"type":             `"TargetTrackingScalingRule"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"scaling_group_id": "${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}_fake",
+			"type":             "TargetTrackingScalingRule",
 		}),
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(map[string]string{
-			"name_regex": `"${alibabacloudstack_ess_scaling_rule.default.scaling_rule_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_ess_scaling_rule.default.scaling_rule_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(map[string]string{
-			"name_regex": `"${alibabacloudstack_ess_scaling_rule.default.scaling_rule_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_ess_scaling_rule.default.scaling_rule_name}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(map[string]string{
-			"ids":              `["${alibabacloudstack_ess_scaling_rule.default.id}"]`,
-			"scaling_group_id": `"${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}"`,
-			"type":             `"SimpleScalingRule"`,
-			"name_regex":       `"${alibabacloudstack_ess_scaling_rule.default.scaling_rule_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_ess_scaling_rule.default.id}"},
+			"scaling_group_id": "${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}",
+			"type":             "SimpleScalingRule",
+			"name_regex":       "${alibabacloudstack_ess_scaling_rule.default.scaling_rule_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(map[string]string{
-			"ids":              `["${alibabacloudstack_ess_scaling_rule.default.id}"]`,
-			"scaling_group_id": `"${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}_fake"`,
-			"type":             `"SimpleScalingRule"`,
-			"name_regex":       `"${alibabacloudstack_ess_scaling_rule.default.scaling_rule_name}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_ess_scaling_rule.default.id}"},
+			"scaling_group_id": "${alibabacloudstack_ess_scaling_rule.default.scaling_group_id}_fake",
+			"type":             "SimpleScalingRule",
+			"name_regex":       "${alibabacloudstack_ess_scaling_rule.default.scaling_rule_name}",
 		}),
 	}
 
 	var existEssRecordsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"test": NOSET,
-			// "rules.#":                  "1",
-			// "ids.#":                    "1",
-			// "names.#":                  "1",
-			// "rules.0.id":               CHECKSET,
-			// "rules.0.scaling_group_id": CHECKSET,
-			// "rules.0.name":             CHECKSET,
-			// "rules.0.type":             CHECKSET,
-			// "rules.0.cooldown":         CHECKSET,
-			// "rules.0.adjustment_type":  "QuantityChangeInCapacity",
-			// "rules.0.adjustment_value": "1",
-			// "rules.0.scaling_rule_ari": CHECKSET,
+			 "rules.#":                  "1",
+			 "ids.#":                    "1",
+			 "names.#":                  "1",
+			 "rules.0.id":               CHECKSET,
+			 "rules.0.scaling_group_id": CHECKSET,
+			 "rules.0.name":             CHECKSET,
+			 "rules.0.type":             CHECKSET,
+			 "rules.0.cooldown":         CHECKSET,
+			 "rules.0.adjustment_type":  "TotalCapacity",
+			 "rules.0.adjustment_value": "1",
+			 "rules.0.scaling_rule_ari": CHECKSET,
 		}
 	}
 
 	var fakeEssRecordsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"test": NOSET,
-			// "rules.#": "0",
-			// "ids.#":   "0",
-			// "names.#": "0",
+			 "rules.#": "0",
+			 "ids.#":   "0",
+			 "names.#": "0",
 		}
 	}
 
 	var EssScalingrulesRecordsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_ess_scaling_rules.default",
+		resourceId:   resourceId,
 		existMapFunc: existEssRecordsMapFunc,
 		fakeMapFunc:  fakeEssRecordsMapFunc,
 	}
@@ -96,15 +97,10 @@ func TestAccAlibabacloudStackEssScalingrulesDataSource(t *testing.T) {
 	EssScalingrulesRecordsCheckInfo.dataSourceTestCheck(t, -1, idsConf, scalingGroupIdConf, typeConf, nameRegexConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudStackEssScalingrulesDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccDataSourceEssScalingRules"
+	default = "%s"
 }
 
 %s
@@ -128,12 +124,13 @@ resource "alibabacloudstack_ecs_deployment_set" "default" {
 resource "alibabacloudstack_ess_scaling_configuration" "default" {
 	scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 	image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-	instance_type = "ecs.e4.small"
+	instance_type = "${local.default_instance_type_id}"
 	security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 	force_delete = true
 	active = true
 	enable = true
 	deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
+	system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 }
 resource "alibabacloudstack_ess_scaling_rule" "default" {
 	scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
@@ -141,10 +138,5 @@ resource "alibabacloudstack_ess_scaling_rule" "default" {
 	adjustment_value = "1"
 	cooldown = 0
 }
-
-data "alibabacloudstack_ess_scaling_rules" "default" {
-  %s
-}
-`, ECSInstanceCommonTestCase, strings.Join(pairs, "\n  "))
-	return config
+`, name, ECSInstanceCommonTestCase)
 }
