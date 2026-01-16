@@ -259,7 +259,7 @@ func resourceAlibabacloudStackEssScalingGroupUpdate(d *schema.ResourceData, meta
 				"ScalingGroupId": d.Id(),
 			}
 			if _, err := client.DoTeaRequest("POST", "Ess", "2014-08-28", "DetachLoadBalancers", "", nil, request, nil); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "AttachLoadBalancers", errmsgs.AlibabacloudStackSdkGoERROR)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DetachLoadBalancers", errmsgs.AlibabacloudStackSdkGoERROR)
 			}
 		}
 	}
