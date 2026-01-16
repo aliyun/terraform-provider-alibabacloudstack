@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackEssScalingconfigurationsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackEssScalingConfigurationsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(0, 500)
 	// scalingGroupIdConf := dataSourceTestAccConfig{
 	// 	existConfig: testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand, map[string]string{
@@ -118,12 +118,13 @@ resource "alibabacloudstack_ecs_deployment_set" "default" {
 resource "alibabacloudstack_ess_scaling_configuration" "default" {
 	scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 	image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-	instance_type = "ecs.e4.small"
+	instance_type = "${local.default_instance_type_id}"
 	security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 	force_delete = true
 	active = true
 	enable = true
 	deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
+	system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 }
 
 data "alibabacloudstack_ess_scaling_configurations" "default"{

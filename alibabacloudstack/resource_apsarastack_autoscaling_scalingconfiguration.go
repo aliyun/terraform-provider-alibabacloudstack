@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"regexp"
@@ -213,6 +214,15 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Optional: true,
 			},
 		},
+		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+			if d.HasChange("tags") {
+				o, n := d.GetChange("tags")
+				if len(o.(map[string]interface{})) > 0 && len(n.(map[string]interface{})) == 0 {
+					return fmt.Errorf("Clearing tags is not allowed.")
+				}
+			}
+			return nil
+		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackEssScalingConfigurationCreate,
 		resourceAlibabacloudStackEssScalingConfigurationRead, resourceAlibabacloudStackEssScalingConfigurationUpdate, resourceAlibabacloudStackEssScalingConfigurationDelete)
@@ -261,7 +271,6 @@ func resourceAlibabacloudStackEssScalingConfigurationCreate(d *schema.ResourceDa
 func resourceAlibabacloudStackEssScalingConfigurationUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}
-	d.Partial(true)
 	if strings.Contains(d.Id(), COLON_SEPARATED) {
 		d.SetId(strings.Split(d.Id(), COLON_SEPARATED)[1])
 	}
@@ -300,8 +309,6 @@ func resourceAlibabacloudStackEssScalingConfigurationUpdate(d *schema.ResourceDa
 	if err := modifyEssScalingConfiguration(d, meta); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	d.Partial(false)
 
 	return nil
 }
@@ -393,7 +400,15 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("system_disk_auto_snapshot_policy_id") {
 		request.SystemDiskAutoSnapshotPolicyId = d.Get("system_disk_auto_snapshot_policy_id").(string)
 	}
-	
+	if d.HasChange("tags") {
+		if v, ok := d.GetOk("tags"); ok {
+			tags := "{"
+			for key, value := range v.(map[string]interface{}) {
+				tags += "\"" + key + "\"" + ":" + "\"" + value.(string) + "\"" + ","
+			}
+			request.Tags = strings.TrimSuffix(tags, ",") + "}"
+		}
+	}
 	if d.HasChange("host_name") {
 		request.HostName = d.Get("host_name").(string)
 	}
@@ -510,13 +525,6 @@ func enableEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 			}
 		}
 	}
-	
-	if d.IsNewResource(){
-		return nil
-	}
-	
-	ascmService := AscmService{client}
-	ascmService.SetResourceTags(d, "scaling_group")
 
 	return nil
 }

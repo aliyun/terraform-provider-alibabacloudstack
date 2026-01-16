@@ -15,6 +15,7 @@ import (
 
 func resourceAlibabacloudStackEssLifecycleHook() *schema.Resource {
 	resource := &schema.Resource{
+		DeprecationMessage: "The alibabacloudstack_ess_lifecycle_hook resource is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 		Schema: map[string]*schema.Schema{
 			"scaling_group_id": {
 				Type:     schema.TypeString,
