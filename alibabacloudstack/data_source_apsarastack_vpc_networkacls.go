@@ -38,16 +38,6 @@ func dataSourceAlibabacloudStackNetworkAcls() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"resource_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"resource_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"status": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -191,12 +181,6 @@ func dataSourceAlibabacloudStackNetworkAclsRead(d *schema.ResourceData, meta int
 	request := make(map[string]interface{})
 	if v, ok := d.GetOk("network_acl_name"); ok {
 		request["NetworkAclName"] = v
-	}
-	if v, ok := d.GetOk("resource_id"); ok {
-		request["ResourceId"] = v
-	}
-	if v, ok := d.GetOk("resource_type"); ok {
-		request["ResourceType"] = v
 	}
 	if v, ok := d.GetOk("vpc_id"); ok {
 		request["VpcId"] = v
