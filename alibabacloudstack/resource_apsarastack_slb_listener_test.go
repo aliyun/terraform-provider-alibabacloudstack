@@ -122,6 +122,11 @@ resource "alibabacloudstack_slb_server_certificate" "default" {
 	private_key = %s
   }
 
+resource "alibabacloudstack_slb_ca_certificate" "default" {
+  name = "${var.name}"
+  ca_certificate = "-----BEGIN CERTIFICATE-----\nMIIDRjCCAq+gAwIBAgIJAJn3ox4K13PoMA0GCSqGSIb3DQEBBQUAMHYxCzAJBgNV\nBAYTAkNOMQswCQYDVQQIEwJCSjELMAkGA1UEBxMCQkoxDDAKBgNVBAoTA0FMSTEP\nMA0GA1UECxMGQUxJWVVOMQ0wCwYDVQQDEwR0ZXN0MR8wHQYJKoZIhvcNAQkBFhB0\nZXN0QGhvdG1haWwuY29tMB4XDTE0MTEyNDA2MDQyNVoXDTI0MTEyMTA2MDQyNVow\ndjELMAkGA1UEBhMCQ04xCzAJBgNVBAgTAkJKMQswCQYDVQQHEwJCSjEMMAoGA1UE\nChMDQUxJMQ8wDQYDVQQLEwZBTElZVU4xDTALBgNVBAMTBHRlc3QxHzAdBgkqhkiG\n9w0BCQEWEHRlc3RAaG90bWFpbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJ\nAoGBAM7SS3e9+Nj0HKAsRuIDNSsS3UK6b+62YQb2uuhKrp1HMrOx61WSDR2qkAnB\ncoG00Uz38EE+9DLYNUVQBK7aSgLP5M1Ak4wr4GqGyCgjejzzh3DshUzLCCy2rook\nKOyRTlPX+Q5l7rE1fcSNzgepcae5i2sE1XXXzLRIDIvQxcspAgMBAAGjgdswgdgw\nHQYDVR0OBBYEFBdy+OuMsvbkV7R14f0OyoLoh2z4MIGoBgNVHSMEgaAwgZ2AFBdy\n+OuMsvbkV7R14f0OyoLoh2z4oXqkeDB2MQswCQYDVQQGEwJDTjELMAkGA1UECBMC\nQkoxCzAJBgNVBAcTAkJKMQwwCgYDVQQKEwNBTEkxDzANBgNVBAsTBkFMSVlVTjEN\nMAsGA1UEAxMEdGVzdDEfMB0GCSqGSIb3DQEJARYQdGVzdEBob3RtYWlsLmNvbYIJ\nAJn3ox4K13PoMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAY7KOsnyT\ncQzfhiiG7ASjiPakw5wXoycHt5GCvLG5htp2TKVzgv9QTliA3gtfv6oV4zRZx7X1\nOfi6hVgErtHaXJheuPVeW6eAW8mHBoEfvDAfU3y9waYrtUevSl07643bzKL6v+Qd\nDUBTxOAvSYfXTtI90EAxEG/bJJyOm5LqoiA=\n-----END CERTIFICATE-----"
+}
+
 resource "alibabacloudstack_slb_acl" "default" {
 	name = "${var.name}"
 	ip_version = "ipv4"
@@ -166,6 +171,11 @@ resource "alibabacloudstack_slb_server_certificate" "default" {
 	server_certificate = %s
 	private_key = %s
   }
+
+resource "alibabacloudstack_slb_ca_certificate" "default" {
+  name = "${var.name}"
+  ca_certificate = "-----BEGIN CERTIFICATE-----\nMIIDRjCCAq+gAwIBAgIJAJn3ox4K13PoMA0GCSqGSIb3DQEBBQUAMHYxCzAJBgNV\nBAYTAkNOMQswCQYDVQQIEwJCSjELMAkGA1UEBxMCQkoxDDAKBgNVBAoTA0FMSTEP\nMA0GA1UECxMGQUxJWVVOMQ0wCwYDVQQDEwR0ZXN0MR8wHQYJKoZIhvcNAQkBFhB0\nZXN0QGhvdG1haWwuY29tMB4XDTE0MTEyNDA2MDQyNVoXDTI0MTEyMTA2MDQyNVow\ndjELMAkGA1UEBhMCQ04xCzAJBgNVBAgTAkJKMQswCQYDVQQHEwJCSjEMMAoGA1UE\nChMDQUxJMQ8wDQYDVQQLEwZBTElZVU4xDTALBgNVBAMTBHRlc3QxHzAdBgkqhkiG\n9w0BCQEWEHRlc3RAaG90bWFpbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJ\nAoGBAM7SS3e9+Nj0HKAsRuIDNSsS3UK6b+62YQb2uuhKrp1HMrOx61WSDR2qkAnB\ncoG00Uz38EE+9DLYNUVQBK7aSgLP5M1Ak4wr4GqGyCgjejzzh3DshUzLCCy2rook\nKOyRTlPX+Q5l7rE1fcSNzgepcae5i2sE1XXXzLRIDIvQxcspAgMBAAGjgdswgdgw\nHQYDVR0OBBYEFBdy+OuMsvbkV7R14f0OyoLoh2z4MIGoBgNVHSMEgaAwgZ2AFBdy\n+OuMsvbkV7R14f0OyoLoh2z4oXqkeDB2MQswCQYDVQQGEwJDTjELMAkGA1UECBMC\nQkoxCzAJBgNVBAcTAkJKMQwwCgYDVQQKEwNBTEkxDzANBgNVBAsTBkFMSVlVTjEN\nMAsGA1UEAxMEdGVzdDEfMB0GCSqGSIb3DQEJARYQdGVzdEBob3RtYWlsLmNvbYIJ\nAJn3ox4K13PoMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAY7KOsnyT\ncQzfhiiG7ASjiPakw5wXoycHt5GCvLG5htp2TKVzgv9QTliA3gtfv6oV4zRZx7X1\nOfi6hVgErtHaXJheuPVeW6eAW8mHBoEfvDAfU3y9waYrtUevSl07643bzKL6v+Qd\nDUBTxOAvSYfXTtI90EAxEG/bJJyOm5LqoiA=\n-----END CERTIFICATE-----"
+}
 
 resource "alibabacloudstack_slb_acl" "default" {
 	name = "${var.name}"
@@ -224,6 +234,68 @@ resource "alibabacloudstack_slb_server_group" "default" {
     }
 }
 
+resource "alibabacloudstack_slb_listener" "new" {
+  load_balancer_id        = "${alibabacloudstack_slb_loadbalancer.default.id}"
+  bandwidth               = "10"
+  frontend_port           = "443"
+  backend_port            = "80"
+  sticky_session          = "off"
+  health_check            = "off"
+  protocol                = "https"
+  server_certificate_id   = "${alibabacloudstack_slb_server_certificate.default.id}"
+}
+
+`, name, ECSInstanceCommonTestCase, ServerCertificateTestCase(), RsaPrivateKeyTestCase())
+}
+
+func AlibabacloudTestAccSlbListenerBasicdependence3(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+    default = "%s"
+}
+
+%s
+
+resource "alibabacloudstack_slb_server_certificate" "default" {
+	name = "${var.name}"
+	server_certificate = %s
+	private_key = %s
+  }
+
+resource "alibabacloudstack_slb_acl" "default" {
+	name = "${var.name}"
+	ip_version = "ipv4"
+  }
+
+resource "alibabacloudstack_slb_loadbalancer" "default" {
+	name = "${var.name}"
+	// vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	//address_type       = "internet"
+  	specification        = "slb.s2.small"
+  }
+
+
+resource "alibabacloudstack_slb_server_group" "default" {
+  vserver_group_name = "${var.name}"
+  load_balancer_id = "${alibabacloudstack_slb_loadbalancer.default.id}"
+  servers {
+      server_ids = ["${alibabacloudstack_ecs_instance.default.id}"]
+      port = 80
+      weight = 100
+    }
+}
+
+resource "alibabacloudstack_slb_listener" "new" {
+  load_balancer_id        = "${alibabacloudstack_slb_loadbalancer.default.id}"
+  bandwidth               = "10"
+  frontend_port           = "443"
+  backend_port            = "80"
+  sticky_session          = "off"
+  health_check            = "off"
+  protocol                = "https"
+  server_certificate_id   = "${alibabacloudstack_slb_server_certificate.default.id}"
+}
+
 `, name, ECSInstanceCommonTestCase, ServerCertificateTestCase(), RsaPrivateKeyTestCase())
 }
 func TestAccAlibabacloudStackSlbListener1(t *testing.T) {
@@ -266,6 +338,7 @@ func TestAccAlibabacloudStackSlbListener1(t *testing.T) {
 					"health_check":          "off",
 					"protocol":              "https",
 					"server_certificate_id": "${alibabacloudstack_slb_server_certificate.default.id}",
+					"ca_certificate_id":     "${alibabacloudstack_slb_ca_certificate.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -593,6 +666,173 @@ func TestAccAlibabacloudStackSlbListener5(t *testing.T) {
 						"acl_status": "off",
 					}),
 				),
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackSlbListener6(t *testing.T) {
+
+	var v map[string]interface{}
+
+	resourceId := "alibabacloudstack_slb_listener.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbListenerCheckmap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeSlbListener")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc-slblistener%d", rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerBasicdependence3)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+
+		// CheckDestroy: rac.checkResourceDestroy(),
+
+		Steps: []resource.TestStep{
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"load_balancer_id":             "${alibabacloudstack_slb_listener.new.load_balancer_id}",
+					"bandwidth":                    "10",
+					"frontend_port":                "80",
+					"backend_port":                 "80",
+					"delete_protection_validation": "true",
+					"protocol":                     "http",
+					"listener_forward":             "on",
+					"forward_port":                 "443",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"load_balancer_id": CHECKSET,
+						"bandwidth":        "10",
+						"frontend_port":    "80",
+						"backend_port":     "80",
+						"listener_forward": "on",
+						"forward_port":     "443",
+						"protocol":         "http",
+					}),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackSlbListener7(t *testing.T) {
+
+	var v map[string]interface{}
+
+	resourceId := "alibabacloudstack_slb_listener.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbListenerCheckmap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeSlbListener")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc-slblistener%d", rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerBasicdependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+
+		// CheckDestroy: rac.checkResourceDestroy(),
+
+		Steps: []resource.TestStep{
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"load_balancer_id":             "${alibabacloudstack_slb_loadbalancer.default.id}",
+					"bandwidth":                    "10",
+					"frontend_port":                "80",
+					"backend_port":                 "80",
+					"sticky_session":               "off",
+					"delete_protection_validation": "true",
+					"cookie_timeout":               "86400",
+					"cookie":                       "ALB",
+					// "sticky_session_type": "",
+					"health_check": "off",
+					"protocol":     "http",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"load_balancer_id": CHECKSET,
+						"bandwidth":        "10",
+						"frontend_port":    "80",
+						"backend_port":     "80",
+						// "forward_port":     "8080",
+						"sticky_session": "off",
+						"health_check":   "off",
+						"protocol":       "http",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"server_group_id": "${alibabacloudstack_slb_server_group.default.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"server_group_id": CHECKSET,
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"sticky_session":      "on",
+					"sticky_session_type": "insert",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sticky_session":      "on",
+						"sticky_session_type": "insert",
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"sticky_session_type": "server",
+					"cookie":              "cookie-test",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sticky_session_type": "server",
+						"cookie":              "cookie-test",
+						"cookie_timeout":      NOSET,
+					}),
+				),
+			},
+
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// delete_protection_validation is a local attribute and cannot be loaded from remote
+				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
 			},
 		},
 	})

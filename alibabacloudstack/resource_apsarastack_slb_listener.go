@@ -97,7 +97,7 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 			"sticky_session": {
 				Type:             schema.TypeString,
 				ValidateFunc:     validation.StringInSlice([]string{"on", "off"}, false),
-				Required:         true,
+				Optional:         true,
 				DiffSuppressFunc: httpHttpsDiffSuppressFunc,
 			},
 			"sticky_session_type": {
@@ -128,7 +128,7 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 			"health_check": {
 				Type:             schema.TypeString,
 				ValidateFunc:     validation.StringInSlice([]string{"on", "off"}, false),
-				Required:         true,
+				Optional:         true,
 				DiffSuppressFunc: httpHttpsDiffSuppressFunc,
 			},
 			"health_check_method": {
@@ -148,6 +148,7 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Type:             schema.TypeString,
 				ValidateFunc:     validation.StringDoesNotMatch(regexp.MustCompile(`^\$_ip$`), "value '$_ip' has been deprecated, and empty string will replace it"),
 				Optional:         true,
+				Computed:         true,
 				DiffSuppressFunc: httpHttpsTcpDiffSuppressFunc,
 			},
 			"health_check_uri": {
