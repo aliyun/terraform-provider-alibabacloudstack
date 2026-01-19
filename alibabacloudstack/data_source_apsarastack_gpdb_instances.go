@@ -111,9 +111,17 @@ func dataSourceAlibabacloudStackGpdbInstances() *schema.Resource {
 func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "gpdb", "2016-05-03", "DescribeDBInstances", "")
-	response := GpdbInstance{}
 
+	var r *regexp.Regexp
+	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
+		r = regexp.MustCompile(nameRegex.(string))
+	}
+	idMaps := getIdsStringFilter(d)
+	var ids []string
+	var names []string
+	var instances []map[string]interface{}
 	for {
+		response := GpdbInstance{}
 		bresponse, err := client.ProcessCommonRequest(request)
 		log.Printf(" response of raw DescribeDBInstances : %s", bresponse)
 		if err != nil {
@@ -129,37 +137,33 @@ func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta i
 			return errmsgs.WrapError(err)
 		}
 		log.Printf("unmarshalled response %v", response)
-		if bresponse.IsSuccess() == true {
+		if bresponse.IsSuccess() == false {
 			break
 		}
-	}
 
-	var r *regexp.Regexp
-	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
-		r = regexp.MustCompile(nameRegex.(string))
-	}
-	var ids []string
-	var names []string
-	var instances []map[string]interface{}
-	for _, item := range response.Items.DBInstance {
-		if r != nil && !r.MatchString(item.DBInstanceID) {
-			continue
+		for _, item := range response.Items.DBInstance {
+			if r != nil && !r.MatchString(item.DBInstanceDescription) {
+				continue
+			}
+			if _,existed:= idMaps[item.DBInstanceID];  len(idMaps) > 0 && !existed {
+				continue
+			}
+			mapping := map[string]interface{}{
+				"id":                    item.DBInstanceID,
+				"description":           item.DBInstanceDescription,
+				"region_id":             item.RegionID,
+				"availability_zone":     item.ZoneID,
+				"creation_time":         item.CreateTime,
+				"status":                item.DBInstanceStatus,
+				"engine":                item.Engine,
+				"engine_version":        item.EngineVersion,
+				"charge_type":           item.PayType,
+				"instance_network_type": item.InstanceNetworkType,
+			}
+			ids = append(ids, item.DBInstanceID)
+			names = append(names, item.DBInstanceDescription)
+			instances = append(instances, mapping)
 		}
-		mapping := map[string]interface{}{
-			"id":                    item.DBInstanceID,
-			"description":           item.DBInstanceDescription,
-			"region_id":             item.RegionID,
-			"availability_zone":     item.ZoneID,
-			"creation_time":         item.CreateTime,
-			"status":                item.DBInstanceStatus,
-			"engine":                item.Engine,
-			"engine_version":        item.EngineVersion,
-			"charge_type":           item.PayType,
-			"instance_network_type": item.InstanceNetworkType,
-		}
-		ids = append(ids, item.DBInstanceID)
-		names = append(names, item.DBInstanceDescription)
-		instances = append(instances, mapping)
 	}
 
 	d.SetId(dataResourceIdHash(ids))

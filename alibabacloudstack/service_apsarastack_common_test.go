@@ -868,6 +868,41 @@ resource "alibabacloudstack_db_instance" "default" {
 `, os.Getenv("ALIBABACLOUDSTACK_TEST_RDS_INSTNCE_TYPE"))
 }
 
+func GpdbCommonTestCase() string {
+	return fmt.Sprintf(`
+data "alibabacloudstack_zones" "gpdb" {
+  available_resource_creation = "Gpdb"
+}
+
+data "alibabacloudstack_gpdb_instance_types" "default" {
+  engine_version = "6.0"
+}
+
+data "alibabacloudstack_gpdb_instances" "default" {
+	ids = ["%s"]
+}
+
+resource "alibabacloudstack_gpdb_instance" "default" {
+  count                       = length(data.alibabacloudstack_gpdb_instances.default.ids) > 0 ? 0 : 1
+  engine                      = "gpdb"
+  engine_version              = data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.engine_version
+  instance_class              = data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.id
+  db_instance_mode            = data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.db_instance_mode
+  db_instance_storage_type    = "local_ssd"
+  availability_zone           = "${data.alibabacloudstack_zones.gpdb.zones.0.id}"
+  description                 = var.name
+  seg_node_num                = "2"
+  network_type                = "VPC"
+  cpu_type                    = "Intel"
+}
+
+locals {
+  gpdb_instance_id = length(data.alibabacloudstack_gpdb_instances.default.ids) > 0 ? data.alibabacloudstack_gpdb_instances.default.ids.0 : alibabacloudstack_gpdb_instance.default.0.id
+}
+
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_GPDB_ID"))
+}
+
 func PolarDBMysqlCommonTestCase(enableVpc bool) string {
 	var vswtichId string
 	if enableVpc {
