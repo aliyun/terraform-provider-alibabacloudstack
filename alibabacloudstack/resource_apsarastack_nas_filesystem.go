@@ -34,6 +34,7 @@ func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 			},
 			"encrypt_type": {
 				Type:         schema.TypeInt,
+				Deprecated: "The `encrypt_type` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.IntInSlice([]int{0, 1, 2}),
@@ -63,6 +64,7 @@ func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 			},
 			"kms_key_id": {
 				Type:     schema.TypeString,
+				Deprecated: "The `kms_key_id` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 				Optional: true,
 				Computed: true,
 			},
