@@ -2,44 +2,55 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEcsSecurityGroupsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testAccEcsSg%d", rand)
-	testAccConfig := dataSourceTestAccConfigFunc(AlibabacloudstackEcsSecurityGroupsDataCheckInfo.resourceId, name, testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig)
-	
+
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
+		existConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
+			"ids": `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
 		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}_fake"},
-		}),
-	}
-	
-	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "^${alibabacloudstack_ecs_securitygroup.default.name}$",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "fake_name",
+		fakeConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
+			"ids": `["${alibabacloudstack_ecs_securitygroup.default.id}_fake"]`,
 		}),
 	}
 
 	vpc_idConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
-			"vpc_id": "${alibabacloudstack_ecs_securitygroup.default.vpc_id}",
+		existConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
+			"ids":    `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
+			"vpc_id": `"${alibabacloudstack_ecs_securitygroup.default.vpc_id}"`,
 		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}_fake"},
-			"vpc_id": "${alibabacloudstack_ecs_securitygroup.default.vpc_id}_fake",
+		fakeConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
+			"ids":    `["${alibabacloudstack_ecs_securitygroup.default.id}_fake"]`,
+			"vpc_id": `"${alibabacloudstack_ecs_securitygroup.default.vpc_id}_fake"`,
+		}),
+	}
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
+			"ids":        `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
+			"name_regex": `"${alibabacloudstack_ecs_securitygroup.default.name}"`,
+		}),
+		fakeConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
+			"ids":        `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
+			"name_regex": `"${alibabacloudstack_ecs_securitygroup.default.name}_fake"`,
 		}),
 	}
 
-	AlibabacloudstackEcsSecurityGroupsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf,nameRegexConf, vpc_idConf)
+	tagsConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
+			"ids":  `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
+			"tags": `{"Test": "Terraform"}`,
+		}),
+		fakeConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
+			"ids":  `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
+			"tags": `{"Test": "Terraform_fake"}`,
+		}),
+	}
+
+	AlibabacloudstackEcsSecurityGroupsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, vpc_idConf, nameRegexConf, tagsConf)
 }
 
 var existAlibabacloudstackEcsSecurityGroupsDataMapFunc = func(rand int) map[string]string {
@@ -61,13 +72,29 @@ var AlibabacloudstackEcsSecurityGroupsDataCheckInfo = dataSourceAttr{
 	fakeMapFunc:  fakeAlibabacloudstackEcsSecurityGroupsDataMapFunc,
 }
 
-func testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(name string) string {
-	return fmt.Sprintf(`
+func testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand int, attrMap map[string]string) string {
+	var pairs []string
+	for k, v := range attrMap {
+		pairs = append(pairs, k+" = "+v)
+	}
+	config := fmt.Sprintf(`
 variable "name" {
-	default = "%s"
+	default = "tf-testAlibabacloudstackEcsSecurityGroups%d"
 }
 
 %s
 
-`, name, SecurityGroupCommonTestCase)
+resource "alibabacloudstack_ecs_securitygroup" "default" {
+  name   = "${var.name}_sg"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  tags = {
+    Test = "Terraform"
+  }
+}
+
+data "alibabacloudstack_ecs_securitygroups" "default" {
+%s
+}
+`, rand, VSwitchCommonTestCase, strings.Join(pairs, "\n   "))
+	return config
 }

@@ -138,11 +138,8 @@ func TestAccAlibabacloudStackEcsSecurityGroupBasic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc_sg%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCheckSecurityGroupConfigBasic)
-
+	name := fmt.Sprintf("tf-testacc_sg_%d", rand)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -151,17 +148,9 @@ func TestAccAlibabacloudStackEcsSecurityGroupBasic(t *testing.T) {
 		CheckDestroy: testAccCheckSecurityGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccConfig(map[string]interface{}{
-					"vpc_id":      "${alibabacloudstack_vpc_vpc.default.id}",
-					"name":        name,
-					"description": name + "_describe",
-					"type":        "normal",
-				}),
+				Config: testAccCheckSecurityGroupConfigBasic(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":        name,
-						"description": name + "_describe",
-					}),
+					testAccCheck(nil),
 				),
 			},
 			{
@@ -170,46 +159,24 @@ func TestAccAlibabacloudStackEcsSecurityGroupBasic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccConfig(map[string]interface{}{
-					"inner_access_policy": "Accept",
-				}),
+				Config: testAccCheckSecurityGroupConfigName(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"inner_access_policy": "Accept",
-					}),
-				),
-			},
-			{
-
-				Config: testAccConfig(map[string]interface{}{
-					"name":                name + "_change",
-					"inner_access_policy": "Drop",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":                name + "_change",
+						"name":                fmt.Sprintf("%s_change", name),
 						"inner_access_policy": "Drop",
+						"description":         fmt.Sprintf("%s_change", name),
 					}),
 				),
 			},
 
 			{
-				Config: testAccConfig(map[string]interface{}{
-					"description": name + "_describe_change",
-				}),
+				Config: testAccCheckSecurityGroupConfigAll(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description": name + "_describe_change",
-					}),
+					testAccCheck(testAccCheckSecurityBasicMap),
 				),
 			},
 			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "Test",
-					},
-				}),
+				Config: testAccCheckSecurityGroupConfigTags(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"tags.%":       "2",
@@ -219,12 +186,7 @@ func TestAccAlibabacloudStackEcsSecurityGroupBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "Test-update",
-					},
-				}),
+				Config: testAccCheckSecurityGroupConfigTagsUpdate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"tags.%":       "2",
@@ -234,15 +196,42 @@ func TestAccAlibabacloudStackEcsSecurityGroupBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
+				Config: testAccCheckSecurityGroupConfigAll(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"tags.%":       "0",
 						"tags.Created": REMOVEKEY,
 						"tags.For":     REMOVEKEY,
 					}),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackEcsSecurityGroupMulti(t *testing.T) {
+	var v ecs.DescribeSecurityGroupAttributeResponse
+	resourceId := "alibabacloudstack_security_group.default.2"
+	ra := resourceAttrInit(resourceId, testAccCheckSecurityBasicMap)
+	serviceFunc := func() interface{} {
+		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc_sg_%d", rand)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSecurityGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckSecurityGroupConfigMulti(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(nil),
 				),
 			},
 		},
@@ -256,12 +245,122 @@ variable "name" {
 }
 
 %s
+
+resource "alibabacloudstack_security_group" "default" {
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  name = "${var.name}"
+  description = "${var.name}_describe"
+  type = "normal"
+  
+}
 `, name, VpcCommonTestCase)
+}
+
+func testAccCheckSecurityGroupConfigName(name string) string {
+	return fmt.Sprintf(`
+
+variable "name" {
+  default = "%s"
+}
+
+
+%s
+
+resource "alibabacloudstack_security_group" "default" {
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  name = "${var.name}_change"
+  description = "${var.name}_change"
+  type = "normal"
+  inner_access_policy = "Drop"
+  
+}`, name, VpcCommonTestCase)
+}
+
+func testAccCheckSecurityGroupConfigAll(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
+}
+
+%s
+
+resource "alibabacloudstack_security_group" "default" {
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  inner_access_policy = "Drop"
+  name = "${var.name}"
+  description = "${var.name}_describe"
+  type = "normal"
+}`, name, VpcCommonTestCase)
+}
+
+func testAccCheckSecurityGroupConfigMulti(name string) string {
+	return fmt.Sprintf(`
+
+variable "name" {
+  default = "%s"
+}
+
+
+%s
+
+resource "alibabacloudstack_security_group" "default" {
+  count = 3
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  name = "${var.name}"
+  description = "${var.name}_describe"
+  type = "normal"
+}`, name, VpcCommonTestCase)
+}
+
+func testAccCheckSecurityGroupConfigTags(name string) string {
+	return fmt.Sprintf(`
+
+variable "name" {
+  default = "%s"
+}
+
+%s
+
+resource "alibabacloudstack_security_group" "default" {
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  inner_access_policy = "Drop"
+  name = "${var.name}"
+  description = "${var.name}_describe"
+  type = "normal"
+  tags = {
+    "Created" = "TF"
+    "For" = "Test"
+  }
+}`, name, VpcCommonTestCase)
+}
+
+func testAccCheckSecurityGroupConfigTagsUpdate(name string) string {
+	return fmt.Sprintf(`
+
+variable "name" {
+  default = "%s"
+}
+
+%s
+
+resource "alibabacloudstack_security_group" "default" {
+   vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  inner_access_policy = "Drop"
+  name = "${var.name}"
+  description = "${var.name}_describe"
+  type = "normal"
+  tags = {
+    "Created" = "TF-update"
+    "For" = "Test-update"
+  }
+}`, name, VpcCommonTestCase)
 }
 
 var testAccCheckSecurityBasicMap = map[string]string{
 	"vpc_id":              CHECKSET,
-	"inner_access_policy": "Accept",
+	"inner_access_policy": CHECKSET,
+	"name":                CHECKSET,
+	"description":         CHECKSET,
 	"type":                "normal",
 	//"tags.%":              "2",
 	//"tags.foo":            "foo",

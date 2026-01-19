@@ -125,7 +125,7 @@ func resourceAlibabacloudStackSecurityGroupRead(d *schema.ResourceData, meta int
 		return errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SecurityGroup", d.Id())), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	d.Set("tags", ecsService.tagsToMap(response.SecurityGroups.SecurityGroup[0].Tags.Tag))
-	d.Set("type",response.SecurityGroups.SecurityGroup[0].SecurityGroupType)
+	d.Set("type", response.SecurityGroups.SecurityGroup[0].SecurityGroupType)
 
 	return nil
 }
@@ -137,8 +137,6 @@ func resourceAlibabacloudStackSecurityGroupUpdate(d *schema.ResourceData, meta i
 
 	if err := setTags(client, TagResourceSecurityGroup, d); err != nil {
 		return errmsgs.WrapError(err)
-	} else {
-		//d.SetPartial("tags")
 	}
 
 	if d.HasChange("inner_access_policy") {
