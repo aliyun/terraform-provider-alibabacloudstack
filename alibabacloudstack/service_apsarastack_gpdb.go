@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
@@ -24,6 +25,7 @@ type GpdbService struct {
 }
 
 type DBInstanceAttribute struct {
+	CpuType                   string                                 `json:"CpuType" xml:"CpuType"`
 	VpcId                     string                                 `json:"VpcId" xml:"VpcId"`
 	CreationTime              string                                 `json:"CreationTime" xml:"CreationTime"`
 	DBInstanceCpuCores        int                                    `json:"DBInstanceCpuCores" xml:"DBInstanceCpuCores"`
@@ -153,28 +155,18 @@ func (s *GpdbService) DescribeGpdbAccount(id string) (object map[string]interfac
 }
 
 func (s *GpdbService) DescribeGpdbInstance(id string) (instanceAttribute DBInstanceAttribute, err error) {
-	request := gpdb.CreateDescribeDBInstanceAttributeRequest()
-	s.client.InitRpcRequest(*request.RpcRequest)
-	request.DBInstanceId = id
-	raw, err := s.client.WithGpdbClient(func(client *gpdb.Client) (interface{}, error) {
-		return client.DescribeDBInstanceAttribute(request)
-	})
-
-	response, ok := raw.(*DescribeDBInstanceAttributeResponse)
+	request := s.client.NewCommonRequest("GET", "gpdb", "2016-05-03", "DescribeDBInstanceAttribute", "")
+	request.QueryParams["DBInstanceId"] = id
+	breponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			err = errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		} else {
-			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		return
+		return instanceAttribute, err
 	}
 
-	addDebug(request.GetActionName(), response, request.RpcRequest, request)
+	var response DescribeDBInstanceAttributeResponse
+	if err = json.Unmarshal(breponse.GetHttpContentBytes(), &response); err != nil {
+		return instanceAttribute, err
+	}
+
 	if len(response.Items.DBInstanceAttribute) == 0 {
 		return instanceAttribute, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Gpdb Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}

@@ -26,6 +26,11 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+			"cpu_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"instance_class": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -42,7 +47,7 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				ConflictsWith: []string{"instance_class"},
 			},
 			"seg_node_num": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 			},
 			"instance_id": {
@@ -63,9 +68,10 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				Computed: true,
 			},
 			"network_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "Classic",
+				Type:       schema.TypeString,
+				Optional:   true,
+				Computed:   true,
+				Deprecated: "The field `network_type` no longer requires manual input; it will be automatically populated based on whether the `vswitch_id` field is configured. This field will be deprecated in version 3.21.0.",
 			},
 			"instance_group_count": {
 				Type:     schema.TypeString,
@@ -162,9 +168,10 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				ForceNew: true,
 			},
 			"db_instance_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Classic", "StorageReserver"}, false),
 			},
 			"instance_pay_type": {
 				Type:     schema.TypeString,
@@ -192,6 +199,7 @@ func resourceAlibabacloudStackGpdbInstanceRead(d *schema.ResourceData, meta inte
 	}
 
 	connectivity.SetResourceData(d, instance.DBInstanceId, "db_instance_id", "instance_id")
+	d.Set("cpu_type", instance.CpuType)
 	d.Set("region_id", instance.RegionId)
 	d.Set("availability_zone", instance.ZoneId)
 	d.Set("engine", instance.Engine)
@@ -210,6 +218,7 @@ func resourceAlibabacloudStackGpdbInstanceRead(d *schema.ResourceData, meta inte
 	if instance.DBInstanceClass != "" {
 		d.Set("instance_class", instance.DBInstanceClass)
 	}
+	d.Set("seg_node_num", instance.SegNodeNum)
 
 	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "description")
 	if instance.InstanceSpec != "" {
@@ -240,18 +249,14 @@ func resourceAlibabacloudStackGpdbInstanceCreate(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	gpdbService := GpdbService{client}
 
-	request, err := buildGpdbCreateRequest(d, meta)
+	reqQuery, err := buildGpdbCreateRequest(d, meta)
 	if err != nil {
-		return errmsgs.WrapError(err)
+		return err
 	}
-	client.InitRpcRequest(*request.RpcRequest)
 
-	var raw interface{}
+	response := map[string]interface{}{}
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		raw, err = client.WithGpdbClient(func(client *gpdb.Client) (interface{}, error) {
-			return client.CreateDBInstance(request)
-		})
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		response, err = client.DoTeaRequest("POST", "gpdb", "2016-05-03", "CreateDBInstance", "", nil, reqQuery, nil)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{"SYSTEM.CONCURRENT_OPERATE"}) {
 				return resource.RetryableError(err)
@@ -262,27 +267,12 @@ func resourceAlibabacloudStackGpdbInstanceCreate(d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		if raw == nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_gpdb_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, "API response is nil")
-		}
-
-		response, ok := raw.(*gpdb.CreateDBInstanceResponse)
-		if !ok || response == nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_gpdb_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, "Failed to cast API response")
-		}
-
-		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_gpdb_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_gpdb_instance", "CreateDBInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	response, ok := raw.(*gpdb.CreateDBInstanceResponse)
-	if !ok || response == nil {
-		return errmsgs.Error("Failed to cast CreateDBInstance response")
-	}
+	d.SetId(response["DBInstanceId"].(string))
 
-	d.SetId(response.DBInstanceId)
-
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Minute, gpdbService.GpdbInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, gpdbService.GpdbInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -380,86 +370,94 @@ func resourceAlibabacloudStackGpdbInstanceDelete(d *schema.ResourceData, meta in
 	return nil
 }
 
-func buildGpdbCreateRequest(d *schema.ResourceData, meta interface{}) (*gpdb.CreateDBInstanceRequest, error) {
+func buildGpdbCreateRequest(d *schema.ResourceData, meta interface{}) (map[string]interface{}, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := gpdb.CreateCreateDBInstanceRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.ZoneId = Trim(d.Get("availability_zone").(string))
-	request.PayType = connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string)
-	request.VSwitchId = Trim(d.Get("vswitch_id").(string))
-	request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "description").(string)
 
-	dbInstanceMode := Trim(d.Get("db_instance_mode").(string))
-	if dbInstanceMode != "" {
-		request.DBInstanceMode = dbInstanceMode
+	reqQuery := map[string]interface{}{}
+	if v, ok := d.GetOk("availability_zone"); ok {
+		reqQuery["ZoneId"] = v
 	}
-	request.InstanceNetworkType = Trim(d.Get("network_type").(string))
-
-	if request.DBInstanceMode == "StorageReserver" {
-		storageType := Trim(d.Get("db_instance_storage_type").(string))
-		if storageType == "" {
-			return nil, errmsgs.WrapError(errmsgs.Error("storage_type is required when db_instance_mode is StorageReserver"))
-		}
-		request.StorageType = storageType
-
-		segNodeNum := Trim(d.Get("seg_node_num").(string))
-		if segNodeNum == "" {
-			return nil, errmsgs.WrapError(errmsgs.Error("seg_node_num is required when db_instance_mode is StorageReserver"))
-		}
-		request.SegNodeNum = segNodeNum
-
-		if dbInstanceClass := Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_class").(string)); dbInstanceClass != "" {
-			request.InstanceSpec = dbInstanceClass
-		} else {
-			return nil, errmsgs.WrapError(errmsgs.Error("db_instance_class is required for StorageReserver mode"))
-		}
-	} else {
-		dbInstanceClass := Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_class").(string))
-		if dbInstanceClass == "" {
-			return nil, errmsgs.WrapError(errmsgs.Error("db_instance_class is required when db_instance_mode is not StorageReserver"))
-		}
-		request.InstanceSpec = dbInstanceClass
-		request.DBInstanceClass = dbInstanceClass
+	if v, ok := d.GetOk("cpu_type"); ok {
+		reqQuery["CpuType"] = v
+	}
+	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
+		reqQuery["PayType"] = v
 	}
 
-	if d.Get("instance_group_count").(string) != "" {
-		request.DBInstanceGroupCount = Trim(d.Get("instance_group_count").(string))
-	}
-	request.Engine = Trim(d.Get("engine").(string))
-	request.EngineVersion = Trim(d.Get("engine_version").(string))
+	if v, ok := d.GetOk("vswitch_id"); ok {
+		reqQuery["VSwitchId"] = v
 
-	// Instance NetWorkType
-	// request.InstanceNetworkType = string(Classic)
-	if request.VSwitchId != "" {
 		vpcService := VpcService{client}
-		object, err := vpcService.DescribeVSwitch(request.VSwitchId)
+		object, err := vpcService.DescribeVSwitch(v.(string))
 		if err != nil {
-			return nil, errmsgs.WrapError(err)
+			return reqQuery, errmsgs.WrapError(err)
 		}
 
-		if request.ZoneId == "" {
-			request.ZoneId = object.ZoneId
-		} else if strings.Contains(request.ZoneId, MULTI_IZ_SYMBOL) {
-			zoneStr := strings.Split(strings.SplitAfter(request.ZoneId, "(")[1], ")")[0]
+		if zoneId, existed := reqQuery["ZoneId"]; !existed || zoneId.(string) == "" {
+			reqQuery["ZoneId"] = object.ZoneId
+		} else if strings.Contains(zoneId.(string), MULTI_IZ_SYMBOL) {
+			zoneStr := strings.Split(strings.SplitAfter(zoneId.(string), "(")[1], ")")[0]
 			if !strings.Contains(zoneStr, string([]byte(object.ZoneId)[len(object.ZoneId)-1])) {
-				return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the multi zone %s.", object.VSwitchId, request.ZoneId))
+				return reqQuery, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the multi zone %s.", object.VSwitchId, zoneId))
 			}
-		} else if request.ZoneId != object.ZoneId {
-			return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the zone %s.", object.VSwitchId, request.ZoneId))
+		} else if zoneId.(string) != object.ZoneId {
+			return reqQuery, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the zone %s.", object.VSwitchId, zoneId))
 		}
 
-		request.VPCId = object.VpcId
-		request.InstanceNetworkType = strings.ToUpper(string(Vpc))
+		reqQuery["VPCId"] = object.VpcId
+		reqQuery["InstanceNetworkType"] = "VPC"
+	} else {
+		reqQuery["InstanceNetworkType"] = "Classic"
 	}
 
-	// Security Ips
-	request.SecurityIPList = LOCAL_HOST_IP
-	if len(d.Get("security_ip_list").(*schema.Set).List()) > 0 {
-		request.SecurityIPList = strings.Join(expandStringList(d.Get("security_ip_list").(*schema.Set).List())[:], COMMA_SEPARATED)
+	if v, ok := connectivity.GetResourceDataOk(d, "db_instance_description", "description"); ok {
+		reqQuery["DBInstanceDescription"] = v
 	}
 
-	// ClientToken
-	request.ClientToken = buildClientToken(request.GetActionName())
+	var dbMode string
+	if v, ok := d.GetOk("db_instance_mode"); ok {
+		reqQuery["DBInstanceMode"] = v
+		dbMode = v.(string)
+	}
 
-	return request, nil
+	if dbMode == "StorageReserver" {
+		if v, ok := d.GetOk("db_instance_storage_type"); ok && Trim(v.(string)) != "" {
+			reqQuery["StorageType"] = Trim(v.(string))
+		} else {
+
+			return reqQuery, errmsgs.WrapError(errmsgs.Error("storage_type is required when db_instance_mode is StorageReserver"))
+		}
+		if v, ok := d.GetOk("seg_node_num"); ok && v.(int) > 0 {
+			reqQuery["SegNodeNum"] = v.(int)
+		} else {
+
+			return reqQuery, errmsgs.WrapError(errmsgs.Error("seg_node_num is required when db_instance_mode is StorageReserver"))
+		}
+	}
+
+	if v, ok := connectivity.GetResourceDataOk(d, "db_instance_class", "instance_class"); ok && Trim(v.(string)) != "" {
+		reqQuery["InstanceSpec"] = Trim(v.(string))
+		reqQuery["DBInstanceClass"] = Trim(v.(string))
+	} else {
+		return reqQuery, errmsgs.WrapError(errmsgs.Error("db_instance_class or instance_class is necessory"))
+	}
+
+	if v, ok := d.GetOk("instance_group_count"); ok {
+		reqQuery["DBInstanceGroupCount"] = v
+	}
+	if v, ok := d.GetOk("engine"); ok {
+		reqQuery["Engine"] = v
+	}
+	if v, ok := d.GetOk("engine_version"); ok {
+		reqQuery["EngineVersion"] = v
+	}
+
+	if v, ok := d.GetOk("security_ip_list"); ok && len(v.(*schema.Set).List()) > 0 {
+
+		reqQuery["SecurityIPList"] = strings.Join(expandStringList(d.Get("security_ip_list").(*schema.Set).List())[:], COMMA_SEPARATED)
+	} else {
+		reqQuery["SecurityIPList"] = LOCAL_HOST_IP
+	}
+
+	return reqQuery, nil
 }

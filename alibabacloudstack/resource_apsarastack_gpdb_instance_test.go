@@ -111,7 +111,7 @@ func testSweepGpdbInstances(region string) error {
 }
 
 func TestAccAlibabacloudStackGpdbInstance_classic(t *testing.T) {
-	var v gpdb.DBInstanceAttribute
+	var v DBInstanceAttribute
 	resourceId := "alibabacloudstack_gpdb_instance.default"
 	serverFunc := func() interface{} {
 		return &GpdbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -120,7 +120,9 @@ func TestAccAlibabacloudStackGpdbInstance_classic(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	testAccConfig := resourceTestAccConfigFunc(resourceId, "", resourceGpdbClassicConfigDependence)
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc-gpdb-storage%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceGpdbClassicConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 
@@ -130,85 +132,19 @@ func TestAccAlibabacloudStackGpdbInstance_classic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"engine":               "gpdb",
-					"engine_version":       "${data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.engine_version}",
-					"instance_class":       "gpdb.group.segsdx2",
-					"instance_group_count": "2",
-					"description":          "tf-testAccGpdbInstance_new",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description":    fmt.Sprintf("tf-testAccGpdbInstance_new"),
-						"engine_version": CHECKSET,
-						"engine":         "gpdb",
-						"instance_class": "gpdb.group.segsdx2",
-					}),
-				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// change description
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"description": "tf-testAccGpdbInstance_test",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description": "tf-testAccGpdbInstance_test",
-					}),
-				),
-			},
-			// change security ips
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"security_ip_list": []string{"10.168.1.12"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"security_ip_list.#": "1",
-						"security_ip_list.0": "10.168.1.12",
-					}),
-				),
-			},
-		}})
-}
-
-func TestAccAlibabacloudStackGpdbInstance_storagereserver_classic(t *testing.T) {
-	var v gpdb.DBInstanceAttribute
-	resourceId := "alibabacloudstack_gpdb_instance.default"
-	serverFunc := func() interface{} {
-		return &GpdbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeGpdbInstance")
-	ra := resourceAttrInit(resourceId, nil)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	testAccConfig := resourceTestAccConfigFunc(resourceId, "", resourceGpdbClassicConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  nil,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"availability_zone":        "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"availability_zone":        "${data.alibabacloudstack_zones.gpdb.zones.0.id}",
 					"engine":                   "gpdb",
 					"engine_version":           "${data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.engine_version}",
 					"instance_class":           "${data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.id}",
-					"description":              "tf-testAccGpdbInstance_new",
-					"db_instance_mode":         "StorageReserver",
+					"description":              name,
+					"db_instance_mode":         "${data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.db_instance_mode}",
 					"db_instance_storage_type": "local_ssd",
 					"seg_node_num":             "2",
+					"cpu_type":                 "Intel",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description":              fmt.Sprintf("tf-testAccGpdbInstance_new"),
+						"description":              name,
 						"db_instance_storage_type": "local_ssd",
 						"seg_node_num":             "2",
 						"engine_version":           CHECKSET,
@@ -225,11 +161,11 @@ func TestAccAlibabacloudStackGpdbInstance_storagereserver_classic(t *testing.T) 
 			// change description
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description": "tf-testAccGpdbInstance_test",
+					"description": name + "_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": "tf-testAccGpdbInstance_test",
+						"description": name + "_update",
 					}),
 				),
 			},
@@ -249,7 +185,7 @@ func TestAccAlibabacloudStackGpdbInstance_storagereserver_classic(t *testing.T) 
 }
 
 func TestAccAlibabacloudStackGpdbInstance_vpc(t *testing.T) {
-	var v gpdb.DBInstanceAttribute
+	var v DBInstanceAttribute
 	resourceId := "alibabacloudstack_gpdb_instance.default"
 	serverFunc := func() interface{} {
 		return &GpdbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -258,7 +194,9 @@ func TestAccAlibabacloudStackGpdbInstance_vpc(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	testAccConfig := resourceTestAccConfigFunc(resourceId, "", resourceGpdbVpcConfigDependence)
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc-gpdb-vpc%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceGpdbVpcConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -270,29 +208,32 @@ func TestAccAlibabacloudStackGpdbInstance_vpc(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"engine":               "gpdb",
-					"engine_version":       "4.3",
-					"instance_class":       "gpdb.group.segsdx2",
-					"instance_group_count": "2",
-					"description":          "tf-testAccGpdbInstance_new",
-					"network_type":         "VPC",
+					"availability_zone":        "${data.alibabacloudstack_zones.gpdb.zones.0.id}",
+					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
+					"engine":                   "gpdb",
+					"engine_version":           "${data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.engine_version}",
+					"db_instance_mode":         "${data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.db_instance_mode}",
+					"instance_class":           "${data.alibabacloudstack_gpdb_instance_types.default.instance_types.0.id}",
+					"db_instance_storage_type": "local_ssd",
+					"instance_group_count":     "2",
+					"seg_node_num":             "2",
+					"description":              name,
+					"cpu_type":                 "Intel",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": fmt.Sprintf("tf-testAccGpdbInstance_new"),
+						"description": name,
 					}),
 				),
 			},
 			// change description
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description": "tf-testAccGpdbInstance_test",
+					"description": name + "_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": "tf-testAccGpdbInstance_test",
+						"description": name + "_update",
 					}),
 				),
 			},
@@ -311,36 +252,22 @@ func TestAccAlibabacloudStackGpdbInstance_vpc(t *testing.T) {
 		}})
 }
 
-func resourceGpdbClassicConfigDependence(s string) string {
+func resourceGpdbClassicConfigDependence(name string) string {
 	return fmt.Sprintf(`
-        data "alibabacloudstack_zones" "default" {
+	variable "name" {
+		default = "%s"
+	}
+        data "alibabacloudstack_zones" "gpdb" {
             available_resource_creation = "Gpdb"
         }
 		data "alibabacloudstack_gpdb_instance_types" "default" {
 		  engine_version = "6.0"
-		}`)
+		}`, name)
 }
 
-func resourceGpdbVpcConfigDependence(s string) string {
+func resourceGpdbVpcConfigDependence(name string) string {
 	return fmt.Sprintf(`
-        data "alibabacloudstack_zones" "default" {
-            available_resource_creation = "Gpdb"
-        }
-        variable "name" {
-            default= "tf-testAccGpdbInstance_vpc"
-        }
-		resource "alibabacloudstack_vpc" "default" {
-  			name = "testing"
-  			cidr_block = "10.0.0.0/8"
-		}
-		resource "alibabacloudstack_vswitch" "default" {
-  			vpc_id = alibabacloudstack_vpc.default.id
-			cidr_block        = "10.1.0.0/16"
-  			name = "apsara_vswitch"
-  			availability_zone = data.alibabacloudstack_zones.default.zones.0.id
-		}
-		data "alibabacloudstack_gpdb_instance_types" "default" {
-		}
-	}
-		`)
+%s
+%s
+		`, resourceGpdbClassicConfigDependence(name), VSwitchCommonTestCase)
 }
