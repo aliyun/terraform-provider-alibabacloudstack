@@ -105,6 +105,11 @@ resource "alibabacloudstack_slb_listener" "default" {
     health_check_interval       = "2"
     health_check_http_code      = "http_2xx,http_3xx"
     description                 = "testslblistener"
+	lifecycle {
+	    ignore_changes = [
+		logs_download_attributes
+	    ]
+	}
 }
 
 resource "alibabacloudstack_log_project" "default" {
@@ -120,6 +125,7 @@ resource "alibabacloudstack_log_store" "default" {
 	auto_split            = true
 	max_split_shard_count = "64"
 	append_meta           = true
+	
 }
 
 `, name, ECSInstanceCommonTestCase, ServerCertificateTestCase(), RsaPrivateKeyTestCase())

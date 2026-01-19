@@ -46,8 +46,9 @@ func TestAccAlibabacloudStackSlbListener0(t *testing.T) {
 					"backend_port":     "80",
 					"sticky_session":   "off",
 					// "sticky_session_type": "",
-					"health_check": "off",
-					"protocol":     "http",
+					"health_check":                 "off",
+					"protocol":                     "http",
+					"master_slave_server_group_id": "${alibabacloudstack_slb_master_slave_server_group.default.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -65,15 +66,68 @@ func TestAccAlibabacloudStackSlbListener0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"master_slave_server_group_id": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"master_slave_server_group_id": REMOVEKEY,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"x_forwarded_for": []map[string]interface{}{{
+						"retrive_slb_ip":    false,
+						"retrive_slb_id":    false,
+						"retrive_slb_proto": false,
+					}},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"x_forwarded_for.0.retrive_slb_ip":    "false",
+						"x_forwarded_for.0.retrive_slb_id":    "false",
+						"x_forwarded_for.0.retrive_slb_proto": "false",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"x_forwarded_for": []map[string]interface{}{{
+						"retrive_slb_ip":    true,
+						"retrive_slb_id":    true,
+						"retrive_slb_proto": true,
+					}},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"x_forwarded_for.0.retrive_slb_ip":    "true",
+						"x_forwarded_for.0.retrive_slb_id":    "true",
+						"x_forwarded_for.0.retrive_slb_proto": "true",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"x_forwarded_for": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"x_forwarded_for.0.retrive_slb_ip":    REMOVEKEY,
+						"x_forwarded_for.0.retrive_slb_id":    REMOVEKEY,
+						"x_forwarded_for.0.retrive_slb_proto": REMOVEKEY,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 
 					"health_check":                 "on",
 					"health_check_domain":          `example.com`,
 					"health_check_method":          "get",
-					"master_slave_server_group_id": "${alibabacloudstack_slb_master_slave_server_group.default.id}",
+					"master_slave_server_group_id": "${alibabacloudstack_slb_master_slave_server_group.default.1.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"health_check":        "on",
 						"health_check_domain": `example.com`,
 						"health_check_method": "get",
@@ -144,18 +198,7 @@ resource "alibabacloudstack_slb_loadbalancer" "default" {
   	specification        = "slb.s2.small"
   }
 
-resource "alibabacloudstack_slb_listener" "new" {
-  load_balancer_id        = "${alibabacloudstack_slb_loadbalancer.default.id}"
-  bandwidth               = "10"
-  frontend_port           = "443"
-  backend_port            = "80"
-  sticky_session          = "off"
-  health_check            = "off"
-  protocol                = "https"
-  server_certificate_id   = "${alibabacloudstack_slb_server_certificate.default.id}"
-}
-
-`, name, ServerCertificateTestCase(), RsaPrivateKeyTestCase(),  ServerCertificateTestCase())
+`, name, ServerCertificateTestCase(), RsaPrivateKeyTestCase(), ServerCertificateTestCase())
 }
 
 func AlibabacloudTestAccSlbListenerBasicdependence(name string) string {
@@ -208,6 +251,7 @@ resource "alibabacloudstack_ecs_instance" "new" {
 }
 
 resource "alibabacloudstack_slb_master_slave_server_group" "default" {
+  count = 2
   load_balancer_id = "${alibabacloudstack_slb_loadbalancer.default.id}"
   name = "${var.name}"
   servers {
@@ -245,7 +289,7 @@ resource "alibabacloudstack_slb_listener" "new" {
   server_certificate_id   = "${alibabacloudstack_slb_server_certificate.default.id}"
 }
 
-`, name, ECSInstanceCommonTestCase, ServerCertificateTestCase(), RsaPrivateKeyTestCase(),  ServerCertificateTestCase())
+`, name, ECSInstanceCommonTestCase, ServerCertificateTestCase(), RsaPrivateKeyTestCase(), ServerCertificateTestCase())
 }
 
 func AlibabacloudTestAccSlbListenerBasicdependence3(name string) string {
@@ -442,18 +486,19 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"load_balancer_id": "${alibabacloudstack_slb_loadbalancer.default.id}",
-					"protocol":         "http",
-					"bandwidth":        "10",
-					"frontend_port":    "80",
-					"backend_port":     "80",
-					"acl_status":       "on",
-					"sticky_session":   "off",
-					"health_check":     "off",
-					"acl_type":         "white",
-					"description":      "testcreate",
-					"scheduler":        "wrr",
-					"acl_id":           "${alibabacloudstack_slb_acl.default.id}",
+					"load_balancer_id":      "${alibabacloudstack_slb_loadbalancer.default.id}",
+					"protocol":              "https",
+					"server_certificate_id": "${alibabacloudstack_slb_server_certificate.default.id}",
+					"bandwidth":             "10",
+					"frontend_port":         "80",
+					"backend_port":          "80",
+					"acl_status":            "on",
+					"sticky_session":        "off",
+					"health_check":          "off",
+					"acl_type":              "white",
+					"description":           "testcreate",
+					"scheduler":             "wrr",
+					"acl_id":                "${alibabacloudstack_slb_acl.default.id}",
 					"logs_download_attributes": []map[string]string{
 						{
 							"log_store":   "${alibabacloudstack_log_store.default.name}",
@@ -465,7 +510,7 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 					testAccCheck(map[string]string{
 
 						"load_balancer_id":                     CHECKSET,
-						"protocol":                             "http",
+						"protocol":                             "https",
 						"bandwidth":                            "10",
 						"frontend_port":                        "80",
 						"backend_port":                         "80",
@@ -481,9 +526,6 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"protocol":              "https",
-					"server_certificate_id": "${alibabacloudstack_slb_server_certificate.default.id}",
 					"logs_download_attributes": []map[string]string{
 						{
 							"log_store":   "${alibabacloudstack_log_store.new.name}",
@@ -493,10 +535,20 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"protocol":                             "https",
 						"logs_download_attributes.#":           "1",
 						"logs_download_attributes.0.log_store": name + "-new",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"logs_download_attributes": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"logs_download_attributes.#":           REMOVEKEY,
+						"logs_download_attributes.0.log_store": REMOVEKEY,
 					}),
 				),
 			},
@@ -787,13 +839,21 @@ func TestAccAlibabacloudStackSlbListener7(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"server_group_id": "${alibabacloudstack_slb_server_group.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"server_group_id": CHECKSET,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"server_group_id": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"server_group_id": REMOVEKEY,
 					}),
 				),
 			},

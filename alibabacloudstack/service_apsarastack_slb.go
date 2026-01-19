@@ -272,16 +272,14 @@ func (s *SlbService) DescribeSlbAcl(id string) (*slb.DescribeAccessControlListAt
 	})
 	bresponse, ok := raw.(*slb.DescribeAccessControlListAttributeResponse)
 	if err != nil {
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"AclNotExist"}) {
-				return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_acl", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		if errmsgs.IsExpectedErrors(err, []string{"AclNotExist"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_acl", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	return bresponse, nil
@@ -323,7 +321,7 @@ func (s *SlbService) WaitForSlb(id string, status Status, timeout int) error {
 			} else {
 				return errmsgs.WrapError(err)
 			}
-		} else if strings.ToLower(object.LoadBalancerStatus) == strings.ToLower(string(status)) {
+		} else if strings.EqualFold(object.LoadBalancerStatus, string(status)) {
 			//TODO
 			break
 		}
@@ -913,7 +911,7 @@ func (s *SlbService) DescribeTags(resourceId string, resourceTags map[string]int
 	request := slb.CreateDescribeTagsRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = resourceId
-	if resourceTags != nil && len(resourceTags) > 0 {
+	if len(resourceTags) > 0 {
 		var reqTags []slb.TagSet
 		for key, value := range resourceTags {
 			reqTags = append(reqTags, slb.TagSet{
@@ -960,9 +958,6 @@ func (s *SlbService) SetAccessLogsDownloadAttribute(logs_attr_str string, load_b
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_access_log", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
@@ -982,16 +977,13 @@ func (s *SlbService) DeleteAccessLogsDownloadAttribute(id string) error {
 	}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_slb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_access_log", "DeleteAccessLogsDownloadAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	return nil
 }
 
@@ -1015,11 +1007,10 @@ type SlbDescribeaccesslogsdownloadattributeResponse struct {
 	Count      int    `json:"Count"`
 }
 
-func (s *SlbService) DescribeAccessLogsDownloadAttribute(id string) (logsattr *Slblogsdownloadattribute, err error) {
+func (s *SlbService) DescribeAccessLogsDownloadAttributes(id string) (logsattr []Slblogsdownloadattribute, err error) {
 	request := s.client.NewCommonRequest("POST", "Slb", "2014-05-15", "DescribeAccessLogsDownloadAttribute", "")
-	parts := strings.Split(id, ":")
 	request.QueryParams = map[string]string{
-		"loadBalancerId": parts[0],
+		"LoadBalancerId": id,
 		"LogType":        "layer7",
 	}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -1036,8 +1027,23 @@ func (s *SlbService) DescribeAccessLogsDownloadAttribute(id string) (logsattr *S
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	if len(slblogs.LogsDownloadAttributes.LogsDownloadAttribute) > 0 {
-		for _, log := range slblogs.LogsDownloadAttributes.LogsDownloadAttribute {
+	logsattr = []Slblogsdownloadattribute{}
+	for _, logattr  :=  range slblogs.LogsDownloadAttributes.LogsDownloadAttribute {
+		if logattr.LoadBalancerId == id {
+			logsattr = append(logsattr, logattr)
+		}
+	}
+	return logsattr, nil
+}
+
+func (s *SlbService) DescribeAccessLogsDownloadAttribute(id string) (logsattr *Slblogsdownloadattribute, err error) {
+	parts := strings.Split(id, ":")
+	logsDownloadAttributes, err := s.DescribeAccessLogsDownloadAttributes(parts[0])
+	if err != nil {
+		return logsattr, nil
+	}
+	if len(logsDownloadAttributes) > 0 {
+		for _, log := range logsDownloadAttributes {
 			if log.LogProject == parts[1] && log.LogStore == parts[2] {
 				logsattr = &log
 			}

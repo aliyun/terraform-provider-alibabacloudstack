@@ -20,14 +20,7 @@ import (
 )
 
 func resourceAlibabacloudStackSlbListener() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbListenerCreate,
-		Read:   resourceAlibabacloudStackSlbListenerRead,
-		Update: resourceAlibabacloudStackSlbListenerUpdate,
-		Delete: resourceAlibabacloudStackSlbListenerDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": {
@@ -339,9 +332,8 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 			return nil
 		},
 	}
-	// XXX: Special logic, not recommended to merge
-	//setResourceFunc(resource, resourceAlibabacloudStackSlbListenerCreate, resourceAlibabacloudStackSlbListenerRead, resourceAlibabacloudStackSlbListenerUpdate, resourceAlibabacloudStackSlbListenerDelete)
-	//return resource
+	setResourceFunc(resource, resourceAlibabacloudStackSlbListenerCreate, resourceAlibabacloudStackSlbListenerRead, resourceAlibabacloudStackSlbListenerUpdate, resourceAlibabacloudStackSlbListenerDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta interface{}) error {
@@ -431,10 +423,7 @@ func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta int
 	if err = slbService.WaitForSlbListener(d.Id(), Running, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if httpForward {
-		return resourceAlibabacloudStackSlbListenerRead(d, meta)
-	}
-	return resourceAlibabacloudStackSlbListenerUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbListenerRead(d *schema.ResourceData, meta interface{}) error {
@@ -453,17 +442,23 @@ func resourceAlibabacloudStackSlbListenerRead(d *schema.ResourceData, meta inter
 	d.Set("protocol", protocol)
 	d.Set("load_balancer_id", lb_id)
 	d.Set("frontend_port", port)
-	logAttr, err := slbService.DescribeAccessLogsDownloadAttribute(d.Id())
+	logsDownloadAttributes, err := slbService.DescribeAccessLogsDownloadAttributes(lb_id)
 	if err != nil {
-		return errmsgs.WrapError(err)
+		return err
 	}
-	if logAttr != nil {
-		logattr := map[string]interface{}{
-			"log_store":   logAttr.LogStore,
-			"log_project": logAttr.LogProject,
+
+	logsDownloadAttribute := []interface{}{}
+	for _, item := range logsDownloadAttributes {
+		if item.LoadBalancerId != lb_id {
+			continue
 		}
-		d.Set("logs_download_attributes", []interface{}{logattr})
+		logattr := map[string]interface{}{
+			"log_store":   item.LogStore,
+			"log_project": item.LogProject,
+		}
+		logsDownloadAttribute = append(logsDownloadAttribute, logattr)
 	}
+	d.Set("logs_download_attributes", logsDownloadAttribute)
 	d.SetId(lb_id + ":" + protocol + ":" + strconv.Itoa(port))
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		object, err := slbService.DescribeSlbListener(d.Id())
@@ -488,6 +483,10 @@ func resourceAlibabacloudStackSlbListenerRead(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta interface{}) error {
+	if listenerForward, ok := d.GetOk("listener_forward"); d.IsNewResource() && ok && listenerForward.(string) == string(OnFlag) {
+		return nil
+	}
+
 	proto := d.Get("protocol").(string)
 	lb_id := d.Get("load_balancer_id").(string)
 	frontend := d.Get("frontend_port").(int)
@@ -720,13 +719,26 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
-	if protocol == Https && d.HasChange("logs_download_attributes") {
+	if (protocol == Https || protocol == Http) && d.HasChange("logs_download_attributes") {
 		slbService := SlbService{client}
 		old, new := d.GetChange("logs_download_attributes")
 		if len(old.([]interface{})) > 0 {
 			err = slbService.DeleteAccessLogsDownloadAttribute(d.Get("load_balancer_id").(string))
 			if err != nil {
 				return errmsgs.WrapError(err)
+			}
+			err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+				logsDownloadAttributes, err := slbService.DescribeAccessLogsDownloadAttributes(lb_id)
+				if err != nil {
+					return resource.NonRetryableError(err)
+				}
+				if len(logsDownloadAttributes) > 0 {
+					return resource.RetryableError(fmt.Errorf("wait log attributes removed"))
+				}
+				return nil
+			})
+			if err != nil {
+				return err
 			}
 		}
 		if len(new.([]interface{})) > 0 {
@@ -738,12 +750,23 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}
+			err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+				logsDownloadAttributes, err := slbService.DescribeAccessLogsDownloadAttributes(lb_id)
+				if err != nil {
+					return resource.NonRetryableError(err)
+				}
+				if len(logsDownloadAttributes) < 1 {
+					return resource.RetryableError(fmt.Errorf("wait log attributes set"))
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
 		}
 	}
 
-	d.Partial(false)
-
-	return resourceAlibabacloudStackSlbListenerRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbListenerDelete(d *schema.ResourceData, meta interface{}) error {
@@ -980,8 +1003,10 @@ func readListener(d *schema.ResourceData, listener map[string]interface{}) {
 	if val, ok := listener["Scheduler"]; ok {
 		d.Set("scheduler", val.(string))
 	}
-	if val, ok := listener["VServerGroupId"]; ok {
+	if val, ok := listener["VServerGroupId"]; ok && val.(string) != "" {
 		d.Set("server_group_id", val.(string))
+	} else {
+		d.Set("server_group_id", nil)
 	}
 	if val, ok := listener["MasterSlaveServerGroupId"]; ok {
 		d.Set("master_slave_server_group_id", val.(string))
@@ -1005,7 +1030,7 @@ func readListener(d *schema.ResourceData, listener map[string]interface{}) {
 		d.Set("sticky_session_type", val.(string))
 		if val.(string) == string(InsertStickySessionType) {
 			d.Set("cookie", nil)
-		} else if val.(string ) == string(ServerStickySessionType) {
+		} else if val.(string) == string(ServerStickySessionType) {
 			d.Set("cookie_timeout", nil)
 		}
 	}

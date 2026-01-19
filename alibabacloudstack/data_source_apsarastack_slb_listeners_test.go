@@ -22,6 +22,17 @@ func TestAccAlibabacloudStackSlbListenersDataSource_http(t *testing.T) {
 		}),
 	}
 
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"load_balancer_id":  "${alibabacloudstack_slb_listener.default.load_balancer_id}",
+			"description_regex": "^${alibabacloudstack_slb_listener.default.description}$",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"load_balancer_id":  "${alibabacloudstack_slb_listener.default.load_balancer_id}",
+			"description_regex": "fake_description",
+		}),
+	}
+
 	// Test with protocol filter
 	protocolConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -31,6 +42,18 @@ func TestAccAlibabacloudStackSlbListenersDataSource_http(t *testing.T) {
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"load_balancer_id": "${alibabacloudstack_slb_listener.default.load_balancer_id}",
 			"protocol":         "fake_protocol",
+		}),
+	}
+
+	// Test with protocol filter
+	portConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"load_balancer_id": "${alibabacloudstack_slb_listener.default.load_balancer_id}",
+			"frontend_port":    80,
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"load_balancer_id": "${alibabacloudstack_slb_listener.default.load_balancer_id}",
+			"frontend_port":    81,
 		}),
 	}
 
@@ -65,7 +88,7 @@ func TestAccAlibabacloudStackSlbListenersDataSource_http(t *testing.T) {
 		existMapFunc: existSlbListenersHttpMapFunc,
 		fakeMapFunc:  fakeSlbListenersHttpMapFunc,
 	}
-	slbListenersCheckInfo.dataSourceTestCheck(t, rand, lbIdConf, protocolConf, bothFiltersConf)
+	slbListenersCheckInfo.dataSourceTestCheck(t, rand, lbIdConf, protocolConf, nameRegexConf, portConf, bothFiltersConf)
 }
 
 func TestAccAlibabacloudStackSlbListenersDataSource_https(t *testing.T) {

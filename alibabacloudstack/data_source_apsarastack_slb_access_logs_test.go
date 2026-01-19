@@ -119,6 +119,11 @@ resource "alibabacloudstack_slb_listener" "default" {
     health_check_interval       = "2"
     health_check_http_code      = "http_2xx,http_3xx"
     description                 = "testslblistener"
+	lifecycle {
+	    ignore_changes = [
+		logs_download_attributes
+	    ]
+	}
 }
 
 resource "alibabacloudstack_log_project" "default" {
