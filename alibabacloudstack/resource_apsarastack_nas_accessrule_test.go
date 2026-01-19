@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackNasAccessrule0(t *testing.T) {
+func TestAccAlibabacloudStackNasAccessRule0(t *testing.T) {
 	var v map[string]interface{}
 
 	resourceId := "alibabacloudstack_nas_accessrule.default"
@@ -38,50 +38,36 @@ func TestAccAlibabacloudStackNasAccessrule0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"user_access": "no_squash",
-
-					"file_system_type": "standard",
-
-					"source_cidr_ip": "1.1.1.1/0",
-
-					"access_group_name": "${{ref(resource, NAS::AccessGroup::2.0.0.5.pre::defaultCWVMZb.AccessGroupName)}}",
-
-					"rw_access": "RDONLY",
+					"user_access_type":  "no_squash",
+					"source_cidr_ip":    "1.1.1.1/0",
+					"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+					"rw_access_type":    "RDONLY",
+					"priority":          2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"user_access": "no_squash",
-
-						"file_system_type": "standard",
-
-						"source_cidr_ip": "1.1.1.1/0",
-
-						"access_group_name": "${{ref(resource, NAS::AccessGroup::2.0.0.5.pre::defaultCWVMZb.AccessGroupName)}}",
-
-						"rw_access": "RDONLY",
+						"user_access_type":  "no_squash",
+						"source_cidr_ip":    "1.1.1.1/0",
+						"access_group_name": CHECKSET,
+						"rw_access_type":         "RDONLY",
+						"priority":          "2",
 					}),
 				),
 			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"user_access": "root_squash",
-
-					"rw_access": "RDWR",
-
-					"source_cidr_ip": "1.1.1.2/0",
+					"user_access_type": "root_squash",
+					"rw_access_type":   "RDWR",
+					"source_cidr_ip":   "1.1.1.2/0",
+					"priority":         4,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"user_access": "root_squash",
-
-						"rw_access": "RDWR",
-
-						"source_cidr_ip": "1.1.1.2/0",
+						"user_access_type": "root_squash",
+						"rw_access_type":   "RDWR",
+						"source_cidr_ip":   "1.1.1.2/0",
+						"priority":         "4",
 					}),
 				),
 			},
@@ -95,20 +81,12 @@ func TestAccAlibabacloudStackNasAccessrule0(t *testing.T) {
 }
 
 var AlibabacloudTestAccNasAccessruleCheckmap = map[string]string{
-
-	"user_access": CHECKSET,
-
+	"user_access_type": CHECKSET,
 	"priority": CHECKSET,
-
 	"access_group_name": CHECKSET,
-
-	"file_system_type": CHECKSET,
-
 	"source_cidr_ip": CHECKSET,
-
-	"rw_access": CHECKSET,
-
 	"access_rule_id": CHECKSET,
+	"rw_access_type": CHECKSET,
 }
 
 func AlibabacloudTestAccNasAccessruleBasicdependence(name string) string {
@@ -117,7 +95,11 @@ variable "name" {
     default = "%s"
 }
 
-
+resource "alibabacloudstack_nas_access_group" "default" {
+	access_group_name = "${var.name}"
+	access_group_type = "Vpc"
+	description = "tf-testAccNasConfig"
+}
 
 `, name)
 }

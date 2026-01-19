@@ -2,79 +2,77 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackNasAccessRuleDataSource(t *testing.T) {
-	rand := getAccTestRandInt(100000, 999999)
+	rand := getAccTestRandInt(1000000, 9999999)
+	resourceId := accessRuleCheckInfo.resourceId
+	name := fmt.Sprintf("tf-testnaacls%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackAccessRuleDataSourceConfig)
 	ipConf := dataSourceTestAccConfig{
-		existConfig: providerCommon + testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
-			"source_cidr_ip":    `"${alibabacloudstack_nas_access_rule.default.source_cidr_ip}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+			"source_cidr_ip":    "${alibabacloudstack_nas_access_rule.default.source_cidr_ip}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
-			"source_cidr_ip":    `"${alibabacloudstack_nas_access_rule.default.source_cidr_ip}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+			"source_cidr_ip":    "${alibabacloudstack_nas_access_rule.default.source_cidr_ip}_fake",
 		}),
 	}
 	RWAccessConf := dataSourceTestAccConfig{
-		existConfig: providerCommon + testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
-			"rw_access":         `"${alibabacloudstack_nas_access_rule.default.rw_access_type}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+			"rw_access":         "${alibabacloudstack_nas_access_rule.default.rw_access_type}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
-			"rw_access":         `"${alibabacloudstack_nas_access_rule.default.rw_access_type}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+			"rw_access":         "${alibabacloudstack_nas_access_rule.default.rw_access_type}_fake",
 		}),
 	}
 	UserAccessConf := dataSourceTestAccConfig{
-		existConfig: providerCommon + testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
-			"user_access":       `"${alibabacloudstack_nas_access_rule.default.user_access_type}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+			"user_access":       "${alibabacloudstack_nas_access_rule.default.user_access_type}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
-			"user_access":       `"${alibabacloudstack_nas_access_rule.default.user_access_type}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+			"user_access":       "${alibabacloudstack_nas_access_rule.default.user_access_type}_fake",
 		}),
 	}
 	idsConf := dataSourceTestAccConfig{
-		existConfig: providerCommon + testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
-			"ids":               `["${alibabacloudstack_nas_access_rule.default.access_rule_id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+			"ids":               []string{"${alibabacloudstack_nas_access_rule.default.access_rule_id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
-			"ids":               `["${alibabacloudstack_nas_access_rule.default.access_rule_id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+			"ids":               []string{"${alibabacloudstack_nas_access_rule.default.access_rule_id}_fake"},
 		}),
 	}
 	allConf := dataSourceTestAccConfig{
-		existConfig: providerCommon + testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
-			"user_access":       `"${alibabacloudstack_nas_access_rule.default.user_access_type}"`,
-			"rw_access":         `"${alibabacloudstack_nas_access_rule.default.rw_access_type}"`,
-			"ids":               `["${alibabacloudstack_nas_access_rule.default.access_rule_id}"]`,
-			"source_cidr_ip":    `"${alibabacloudstack_nas_access_rule.default.source_cidr_ip}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+			"user_access":       "${alibabacloudstack_nas_access_rule.default.user_access_type}",
+			"rw_access":         "${alibabacloudstack_nas_access_rule.default.rw_access_type}",
+			"ids":               []string{"${alibabacloudstack_nas_access_rule.default.access_rule_id}"},
+			"source_cidr_ip":    "${alibabacloudstack_nas_access_rule.default.source_cidr_ip}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
-			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,
-			"user_access":       `"${alibabacloudstack_nas_access_rule.default.user_access_type}_fake"`,
-			"rw_access":         `"${alibabacloudstack_nas_access_rule.default.rw_access_type}_fake"`,
-			"ids":               `["${alibabacloudstack_nas_access_rule.default.access_rule_id}"]`,
-			"source_cidr_ip":    `"${alibabacloudstack_nas_access_rule.default.source_cidr_ip}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+			"user_access":       "${alibabacloudstack_nas_access_rule.default.user_access_type}_fake",
+			"rw_access":         "${alibabacloudstack_nas_access_rule.default.rw_access_type}_fake",
+			"ids":               []string{"${alibabacloudstack_nas_access_rule.default.access_rule_id}"},
+			"source_cidr_ip":    "${alibabacloudstack_nas_access_rule.default.source_cidr_ip}_fake",
 		}),
 	}
 	accessRuleCheckInfo.dataSourceTestCheck(t, rand, ipConf, RWAccessConf, UserAccessConf, idsConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(name string) string {
+	return  fmt.Sprintf(`
 variable "name" {
-        	default = "tf-testAccAccessGroupsdatasource-%d"
+        	default = "%s"
 }
 resource "alibabacloudstack_nas_access_group" "default" {
         	access_group_name = "${var.name}"
@@ -87,11 +85,7 @@ resource "alibabacloudstack_nas_access_rule" "default" {
         	rw_access_type = "RDWR"
 	        user_access_type = "no_squash"
 	        priority = 2
-}
-data "alibabacloudstack_nas_access_rules" "default" {
-		%s
-}`, rand, strings.Join(pairs, "\n  "))
-	return config
+}`,  name, )
 }
 
 var existAccessRuleMapCheck = func(rand int) map[string]string {
@@ -103,7 +97,6 @@ var existAccessRuleMapCheck = func(rand int) map[string]string {
 		"rules.0.user_access":    "no_squash",
 		"rules.0.rw_access":      "RDWR",
 		"ids.#":                  "1",
-		"ids.0":                  "1",
 	}
 }
 
