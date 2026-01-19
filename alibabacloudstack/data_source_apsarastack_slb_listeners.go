@@ -197,8 +197,9 @@ func dataSourceAlibabacloudStackSlbListenersRead(d *schema.ResourceData, meta in
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeLoadBalancerAttribute(request)
 	})
+	var filteredListenersTemp []slb.ListenerPortAndProtocol
 	response, ok := raw.(*slb.DescribeLoadBalancerAttributeResponse)
-	if err != nil {
+	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
 		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
@@ -206,7 +207,7 @@ func dataSourceAlibabacloudStackSlbListenersRead(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	var filteredListenersTemp []slb.ListenerPortAndProtocol
+
 	port := -1
 	if v, ok := d.GetOk("frontend_port"); ok && v.(int) != 0 {
 		port = v.(int)
@@ -219,22 +220,18 @@ func dataSourceAlibabacloudStackSlbListenersRead(d *schema.ResourceData, meta in
 	if despRegex, ok := d.GetOk("description_regex"); ok && despRegex.(string) != "" {
 		r = regexp.MustCompile(despRegex.(string))
 	}
-	if port != -1 || protocol != "" || r != nil {
-		for _, listener := range response.ListenerPortsAndProtocol.ListenerPortAndProtocol {
-			if port != -1 && listener.ListenerPort != port {
-				continue
-			}
-			if protocol != "" && listener.ListenerProtocol != protocol {
-				continue
-			}
-			if r != nil && !r.MatchString(listener.Description) {
-				continue
-			}
-
-			filteredListenersTemp = append(filteredListenersTemp, listener)
+	for _, listener := range response.ListenerPortsAndProtocol.ListenerPortAndProtocol {
+		if port != -1 && listener.ListenerPort != port {
+			continue
 		}
-	} else {
-		filteredListenersTemp = response.ListenerPortsAndProtocol.ListenerPortAndProtocol
+		if protocol != "" && listener.ListenerProtocol != protocol {
+			continue
+		}
+		if r != nil && !r.MatchString(listener.Description) {
+			continue
+		}
+
+		filteredListenersTemp = append(filteredListenersTemp, listener)
 	}
 
 	return slbListenersDescriptionAttributes(d, filteredListenersTemp, meta)
