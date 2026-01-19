@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackNasMounttarget0(t *testing.T) {
+func TestAccAlibabacloudStackNasMountTarget0(t *testing.T) {
 	var v map[string]interface{}
 
 	resourceId := "alibabacloudstack_nas_mounttarget.default"
@@ -40,17 +40,14 @@ func TestAccAlibabacloudStackNasMounttarget0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 
 					"vswitch_id":        "${alibabacloudstack_vpc_vswitch.default.id}",
-					"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+					"access_group_name": "${alibabacloudstack_nas_access_group.default.0.access_group_name}",
 					"file_system_id":    "${alibabacloudstack_nas_file_system.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"vswitch_id": CHECKSET,
-
+						"vswitch_id":        CHECKSET,
 						"access_group_name": CHECKSET,
-
-						"file_system_id": CHECKSET,
+						"file_system_id":    CHECKSET,
 					}),
 				),
 			},
@@ -59,31 +56,33 @@ func TestAccAlibabacloudStackNasMounttarget0(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-
-			// 		"status": "Inactive",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-
-			// 			"status": "Inactive",
-			// 		}),
-			// 	),
-			// },
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"access_group_name": "${alibabacloudstack_nas_access_group.default.1.access_group_name}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"status": "Inactive",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"status": "Inactive",
+					}),
+				),
+			},
 		},
 	})
 }
 
 var AlibabacloudTestAccNasMounttargetCheckmap = map[string]string{
-
 	"status": CHECKSET,
-
 	"access_group_name": CHECKSET,
-
 	"vswitch_id": CHECKSET,
-
 	"file_system_id": CHECKSET,
 }
 
@@ -98,9 +97,10 @@ variable "name" {
 %s
 
 resource "alibabacloudstack_nas_access_group" "default" {
-			access_group_name = var.name
-			access_group_type = "Vpc"
-			description = "tf-testAccNasConfig"
+	count = 2
+	access_group_name = "${var.name}_${count.index}"
+	access_group_type = "Vpc"
+	description = "tf-testAccNasConfig"
 }
 
 `, name, VSwitchCommonTestCase, NasCommonTestCase)

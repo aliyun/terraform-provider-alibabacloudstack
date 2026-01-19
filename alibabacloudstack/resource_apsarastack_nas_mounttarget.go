@@ -8,6 +8,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -28,9 +29,10 @@ func resourceAlibabacloudStackNasMountTarget() *schema.Resource {
 				ForceNew: true,
 			},
 			"security_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:       schema.TypeString,
+				Deprecated: "The `security_group_id` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
+				Optional:   true,
+				ForceNew:   true,
 			},
 			"status": {
 				Type:         schema.TypeString,
@@ -150,6 +152,23 @@ func resourceAlibabacloudStackNasMountTargetUpdate(d *schema.ResourceData, meta 
 			return err
 		}
 	}
+
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		nasService := NasService{client}
+		object, err := nasService.DescribeNasMountTarget(d.Id())
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+		if object["Status"] != d.Get("status") {
+			return resource.RetryableError(fmt.Errorf("nas mount taget %s update status not finished", d.Id()))
+		}
+
+		if object["AccessGroup"] != d.Get("access_group_name") {
+			return resource.RetryableError(fmt.Errorf("nas mount taget %s update access_group_name not finished", d.Id()))
+		}
+		return nil
+	})
+
 	return nil
 }
 
@@ -176,7 +195,7 @@ func resourceAlibabacloudStackNasMountTargetDelete(d *schema.ResourceData, meta 
 		}
 		return err
 	}
-	stateConf := BuildStateConf([]string{"Active"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, nasService.NasMountTargetStateRefreshFunc(d.Id(), []string{"delete_failed"}))
+	stateConf := BuildStateConf([]string{"Active", "Inactive", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, nasService.NasMountTargetStateRefreshFunc(d.Id(), []string{"delete_failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
