@@ -2,51 +2,50 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEcsSecurityGroupsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testAccEcsSg%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(AlibabacloudstackEcsSecurityGroupsDataCheckInfo.resourceId, name, testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig)
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_securitygroup.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}_fake"},
 		}),
 	}
 
 	vpc_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
-			"ids":    `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
-			"vpc_id": `"${alibabacloudstack_ecs_securitygroup.default.vpc_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":    []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
+			"vpc_id": "${alibabacloudstack_ecs_securitygroup.default.vpc_id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
-			"ids":    `["${alibabacloudstack_ecs_securitygroup.default.id}_fake"]`,
-			"vpc_id": `"${alibabacloudstack_ecs_securitygroup.default.vpc_id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":    []string{"${alibabacloudstack_ecs_securitygroup.default.id}_fake"},
+			"vpc_id": "${alibabacloudstack_ecs_securitygroup.default.vpc_id}_fake",
 		}),
 	}
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
-			"name_regex": `"${alibabacloudstack_ecs_securitygroup.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^${alibabacloudstack_ecs_securitygroup.default.name}$",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
-			"name_regex": `"${alibabacloudstack_ecs_securitygroup.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "fake_name",
 		}),
 	}
 
 	tagsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
-			"ids":  `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
-			"tags": `{"Test": "Terraform"}`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":  []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
+			"tags": map[string]string{"Test": "Terraform"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{
-			"ids":  `["${alibabacloudstack_ecs_securitygroup.default.id}"]`,
-			"tags": `{"Test": "Terraform_fake"}`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":  []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
+			"tags": map[string]string{"Test": "Terraform_fake"},
 		}),
 	}
 
@@ -72,14 +71,10 @@ var AlibabacloudstackEcsSecurityGroupsDataCheckInfo = dataSourceAttr{
 	fakeMapFunc:  fakeAlibabacloudstackEcsSecurityGroupsDataMapFunc,
 }
 
-func testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackEcsSecurityGroups%d"
+	default = "%s"
 }
 
 %s
@@ -91,10 +86,5 @@ resource "alibabacloudstack_ecs_securitygroup" "default" {
     Test = "Terraform"
   }
 }
-
-data "alibabacloudstack_ecs_securitygroups" "default" {
-%s
-}
-`, rand, VSwitchCommonTestCase, strings.Join(pairs, "\n   "))
-	return config
+`, name, VSwitchCommonTestCase)
 }
