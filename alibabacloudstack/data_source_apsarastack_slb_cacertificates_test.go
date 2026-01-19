@@ -3,47 +3,49 @@ package alibabacloudstack
 import (
 	"fmt"
 
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackSlbCACertificatesDataSource_basic(t *testing.T) {
+	resourceId:=   "data.alibabacloudstack_slb_ca_certificates.default"
 	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-testAccSlbCADataSource-%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig)
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_slb_ca_certificate.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_slb_ca_certificate.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_slb_ca_certificate.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_slb_ca_certificate.default.name}_fake",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_slb_ca_certificate.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_slb_ca_certificate.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_slb_ca_certificate.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_slb_ca_certificate.default.id}_fake"},
 		}),
 	}
 
 	resourceGroupIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_slb_ca_certificate.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_slb_ca_certificate.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_slb_ca_certificate.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_slb_ca_certificate.default.id}_fake"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_slb_ca_certificate.default.id}"]`,
-			"name_regex": `"${alibabacloudstack_slb_ca_certificate.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_slb_ca_certificate.default.id}"},
+			"name_regex": "${alibabacloudstack_slb_ca_certificate.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_slb_ca_certificate.default.id}_fake"]`,
-			"name_regex": `"${alibabacloudstack_slb_ca_certificate.default.name}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_slb_ca_certificate.default.id}_fake"},
+			"name_regex": "${alibabacloudstack_slb_ca_certificate.default.name}",
 		}),
 	}
 
@@ -53,7 +55,7 @@ func TestAccAlibabacloudStackSlbCACertificatesDataSource_basic(t *testing.T) {
 			"ids.#":                            "1",
 			"names.#":                          "1",
 			"certificates.0.id":                CHECKSET,
-			"certificates.0.name":              fmt.Sprintf("tf-testAccSlbCACertificatesDataSourceBasic-%d", rand),
+			"certificates.0.name":              name,
 			"certificates.0.fingerprint":       CHECKSET,
 			"certificates.0.created_timestamp": CHECKSET,
 			"certificates.0.region_id":         defaultRegionToTest,
@@ -69,7 +71,7 @@ func TestAccAlibabacloudStackSlbCACertificatesDataSource_basic(t *testing.T) {
 	}
 
 	var slbCaCertificatesCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_slb_ca_certificates.default",
+		resourceId:   resourceId,
 		existMapFunc: existDnsRecordsMapFunc,
 		fakeMapFunc:  fakeDnsRecordsMapFunc,
 	}
@@ -78,26 +80,18 @@ func TestAccAlibabacloudStackSlbCACertificatesDataSource_basic(t *testing.T) {
 
 }
 
-func testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccSlbCACertificatesDataSourceBasic-%d"
+	default = "%s"
 }
 
 
 resource "alibabacloudstack_slb_ca_certificate" "default" {
   name = "${var.name}"
-  ca_certificate = "-----BEGIN CERTIFICATE-----\nMIIDRjCCAq+gAwIBAgIJAJn3ox4K13PoMA0GCSqGSIb3DQEBBQUAMHYxCzAJBgNV\nBAYTAkNOMQswCQYDVQQIEwJCSjELMAkGA1UEBxMCQkoxDDAKBgNVBAoTA0FMSTEP\nMA0GA1UECxMGQUxJWVVOMQ0wCwYDVQQDEwR0ZXN0MR8wHQYJKoZIhvcNAQkBFhB0\nZXN0QGhvdG1haWwuY29tMB4XDTE0MTEyNDA2MDQyNVoXDTI0MTEyMTA2MDQyNVow\ndjELMAkGA1UEBhMCQ04xCzAJBgNVBAgTAkJKMQswCQYDVQQHEwJCSjEMMAoGA1UE\nChMDQUxJMQ8wDQYDVQQLEwZBTElZVU4xDTALBgNVBAMTBHRlc3QxHzAdBgkqhkiG\n9w0BCQEWEHRlc3RAaG90bWFpbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJ\nAoGBAM7SS3e9+Nj0HKAsRuIDNSsS3UK6b+62YQb2uuhKrp1HMrOx61WSDR2qkAnB\ncoG00Uz38EE+9DLYNUVQBK7aSgLP5M1Ak4wr4GqGyCgjejzzh3DshUzLCCy2rook\nKOyRTlPX+Q5l7rE1fcSNzgepcae5i2sE1XXXzLRIDIvQxcspAgMBAAGjgdswgdgw\nHQYDVR0OBBYEFBdy+OuMsvbkV7R14f0OyoLoh2z4MIGoBgNVHSMEgaAwgZ2AFBdy\n+OuMsvbkV7R14f0OyoLoh2z4oXqkeDB2MQswCQYDVQQGEwJDTjELMAkGA1UECBMC\nQkoxCzAJBgNVBAcTAkJKMQwwCgYDVQQKEwNBTEkxDzANBgNVBAsTBkFMSVlVTjEN\nMAsGA1UEAxMEdGVzdDEfMB0GCSqGSIb3DQEJARYQdGVzdEBob3RtYWlsLmNvbYIJ\nAJn3ox4K13PoMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAY7KOsnyT\ncQzfhiiG7ASjiPakw5wXoycHt5GCvLG5htp2TKVzgv9QTliA3gtfv6oV4zRZx7X1\nOfi6hVgErtHaXJheuPVeW6eAW8mHBoEfvDAfU3y9waYrtUevSl07643bzKL6v+Qd\nDUBTxOAvSYfXTtI90EAxEG/bJJyOm5LqoiA=\n-----END CERTIFICATE-----"
+  ca_certificate = %s
 }
 
-data "alibabacloudstack_slb_ca_certificates" "default" {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
-	return config
+
+`, name, ServerCertificateTestCase())
 }

@@ -557,19 +557,7 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 		return errmsgs.WrapError(err)
 	}
 	// http https
-	if d.HasChange("sticky_session") {
-		update = true
-	}
-	if d.HasChange("sticky_session_type") {
-		update = true
-	}
-	if d.HasChange("cookie_timeout") {
-		update = true
-	}
-	if d.HasChange("cookie") {
-		update = true
-	}
-	if d.HasChange("health_check") {
+	if d.HasChanges("sticky_session", "sticky_session_type", "cookie_timeout", "cookie", "health_check") {
 		update = true
 	}
 
@@ -600,11 +588,7 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 		}
 	}
 
-	if d.HasChanges("gzip", "x_forwarded_for") {
-		update = true
-	}
-
-	if d.HasChange("health_check_method") {
+	if d.HasChanges("gzip", "x_forwarded_for", "health_check_method") {
 		update = true
 	}
 
