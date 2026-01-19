@@ -1003,6 +1003,11 @@ func readListener(d *schema.ResourceData, listener map[string]interface{}) {
 	}
 	if val, ok := listener["StickySessionType"]; ok {
 		d.Set("sticky_session_type", val.(string))
+		if val.(string) == string(InsertStickySessionType) {
+			d.Set("cookie", nil)
+		} else if val.(string ) == string(ServerStickySessionType) {
+			d.Set("cookie_timeout", nil)
+		}
 	}
 	if val, ok := listener["CookieTimeout"]; ok {
 		d.Set("cookie_timeout", val.(float64))
@@ -1083,5 +1088,4 @@ func readListener(d *schema.ResourceData, listener map[string]interface{}) {
 		d.Set("description", val.(string))
 	}
 
-	return
 }

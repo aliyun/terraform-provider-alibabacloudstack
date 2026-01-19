@@ -84,20 +84,11 @@ func esVersionDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool 
 }
 func slbAclDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if status, ok := d.GetOk("acl_status"); ok && status.(string) == string(OnFlag) {
-		return false
+		return old == new
 	}
 	return true
 }
-func dnsValueDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	switch d.Get("type") {
-	case "NS", "MX", "CNAME", "SRV":
-		new = strings.TrimSuffix(strings.TrimSpace(new), ".")
-	}
-	return old == new
-}
-func dnsPriorityDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("type").(string) != "MX"
-}
+
 func slbRuleStickySessionTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	listenerSync := slbRuleListenerSyncDiffSuppressFunc(k, old, new, d)
 	if session, ok := d.GetOk("sticky_session"); !listenerSync && ok && session.(string) == string(OnFlag) {
@@ -105,12 +96,14 @@ func slbRuleStickySessionTypeDiffSuppressFunc(k, old, new string, d *schema.Reso
 	}
 	return true
 }
+
 func slbRuleListenerSyncDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if listenerSync, ok := d.GetOk("listener_sync"); ok && listenerSync.(string) == string(OffFlag) {
 		return false
 	}
 	return true
 }
+
 func slbRuleCookieDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	stickSessionTypeDiff := slbRuleStickySessionTypeDiffSuppressFunc(k, old, new, d)
 	if session_type, ok := d.GetOk("sticky_session_type"); !stickSessionTypeDiff && ok && session_type.(string) == string(ServerStickySessionType) {
@@ -138,20 +131,20 @@ func httpHttpsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool 
 		return true
 	}
 	if protocol, ok := d.GetOk("protocol"); ok && (Protocol(protocol.(string)) == Http || Protocol(protocol.(string)) == Https) {
-		return false
+		return old == new
 	}
 	return true
 }
 func httpsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if protocol, ok := d.GetOk("protocol"); ok && Protocol(protocol.(string)) == Https {
-		return false
+		return old == new 
 	}
 	return true
 }
 func stickySessionTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	httpDiff := httpHttpsDiffSuppressFunc(k, old, new, d)
 	if session, ok := d.GetOk("sticky_session"); !httpDiff && ok && session.(string) == string(OnFlag) {
-		return false
+		return old == new
 	}
 	return true
 }
@@ -159,7 +152,7 @@ func stickySessionTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceDat
 func cookieTimeoutDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	stickSessionTypeDiff := stickySessionTypeDiffSuppressFunc(k, old, new, d)
 	if session_type, ok := d.GetOk("sticky_session_type"); !stickSessionTypeDiff && ok && session_type.(string) == string(InsertStickySessionType) {
-		return false
+		return old == new
 	}
 	return true
 }
@@ -167,14 +160,14 @@ func cookieTimeoutDiffSuppressFunc(k, old, new string, d *schema.ResourceData) b
 func cookieDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	stickSessionTypeDiff := stickySessionTypeDiffSuppressFunc(k, old, new, d)
 	if session_type, ok := d.GetOk("sticky_session_type"); !stickSessionTypeDiff && ok && session_type.(string) == string(ServerStickySessionType) {
-		return false
+		return old == new
 	}
 	return true
 }
 
 func tcpUdpDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if protocol, ok := d.GetOk("protocol"); ok && (Protocol(protocol.(string)) == Tcp || Protocol(protocol.(string)) == Udp) {
-		return false
+		return old == new
 	}
 	return true
 }
@@ -182,14 +175,14 @@ func tcpUdpDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 func healthCheckDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	httpDiff := httpHttpsDiffSuppressFunc(k, old, new, d)
 	if health, ok := d.GetOk("health_check"); httpDiff || (ok && health.(string) == string(OnFlag)) {
-		return false
+		return old == new 
 	}
 	return true
 }
 
 func healthCheckTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if protocol, ok := d.GetOk("protocol"); ok && Protocol(protocol.(string)) == Tcp {
-		return false
+		return old == new 
 	}
 	return true
 }
@@ -200,19 +193,19 @@ func httpHttpsTcpDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bo
 	checkType, okType := d.GetOk("health_check_type")
 	if (!httpDiff && okHc && health.(string) == string(OnFlag)) ||
 		(okPro && Protocol(protocol.(string)) == Tcp && okType && checkType.(string) == string(HTTPHealthCheckType)) {
-		return false
+		return old == new 
 	}
 	return true
 }
 func sslCertificateIdDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if protocol, ok := d.GetOk("protocol"); ok && Protocol(protocol.(string)) == Https {
-		return false
+		return old == new 
 	}
 	return true
 }
 func establishedTimeoutDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if protocol, ok := d.GetOk("protocol"); ok && Protocol(protocol.(string)) == Tcp {
-		return false
+		return old == new 
 	}
 	return true
 }
@@ -225,7 +218,7 @@ func httpDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 func forwardPortDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	httpDiff := httpDiffSuppressFunc(k, old, new, d)
 	if listenerForward, ok := d.GetOk("listener_forward"); !httpDiff && ok && listenerForward.(string) == string(OnFlag) {
-		return false
+		return old == new 
 	}
 	return true
 }

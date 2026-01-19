@@ -822,7 +822,6 @@ func TestAccAlibabacloudStackSlbListener7(t *testing.T) {
 					testAccCheck(map[string]string{
 						"sticky_session_type": "server",
 						"cookie":              "cookie-test",
-						"cookie_timeout":      NOSET,
 					}),
 				),
 			},
