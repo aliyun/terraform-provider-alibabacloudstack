@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"regexp"
+	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -89,10 +90,6 @@ func dataSourceAlibabacloudStackGpdbInstances() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"instance_group_count": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"instance_network_type": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -111,6 +108,8 @@ func dataSourceAlibabacloudStackGpdbInstances() *schema.Resource {
 func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "gpdb", "2016-05-03", "DescribeDBInstances", "")
+	request.QueryParams["PageSize"] = "100"
+	pageNumber := 1
 
 	var r *regexp.Regexp
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
@@ -122,6 +121,7 @@ func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta i
 	var instances []map[string]interface{}
 	for {
 		response := GpdbInstance{}
+		request.QueryParams["PageNumber"] = strconv.Itoa(pageNumber)
 		bresponse, err := client.ProcessCommonRequest(request)
 		log.Printf(" response of raw DescribeDBInstances : %s", bresponse)
 		if err != nil {
@@ -141,11 +141,15 @@ func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta i
 			break
 		}
 
+		if len(response.Items.DBInstance) == 0 {
+			break
+		}
+
 		for _, item := range response.Items.DBInstance {
 			if r != nil && !r.MatchString(item.DBInstanceDescription) {
 				continue
 			}
-			if _,existed:= idMaps[item.DBInstanceID];  len(idMaps) > 0 && !existed {
+			if _, existed := idMaps[item.DBInstanceID]; len(idMaps) > 0 && !existed {
 				continue
 			}
 			mapping := map[string]interface{}{
@@ -159,11 +163,13 @@ func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta i
 				"engine_version":        item.EngineVersion,
 				"charge_type":           item.PayType,
 				"instance_network_type": item.InstanceNetworkType,
+				"instance_class":        item.DBInstanceClass,
 			}
 			ids = append(ids, item.DBInstanceID)
 			names = append(names, item.DBInstanceDescription)
 			instances = append(instances, mapping)
 		}
+		pageNumber += 1
 	}
 
 	d.SetId(dataResourceIdHash(ids))

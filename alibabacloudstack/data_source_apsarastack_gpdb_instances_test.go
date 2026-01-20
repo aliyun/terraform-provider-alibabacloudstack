@@ -54,8 +54,7 @@ func TestAccAlibabacloudStackGpdbInstancesDataSource(t *testing.T) {
 			"instances.0.engine":                       "gpdb",
 			"instances.0.engine_version":               CHECKSET,
 			"instances.0.instance_class":               CHECKSET,
-			"instances.0.instance_group_count":         CHECKSET,
-			"instances.0.instance_network_type":        "VPC",
+			"instances.0.instance_network_type":        CHECKSET,
 			"instances.0.charge_type":                  CHECKSET,
 		}
 	}

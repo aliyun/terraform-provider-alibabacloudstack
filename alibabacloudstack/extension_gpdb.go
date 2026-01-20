@@ -12,6 +12,7 @@ type GpdbInstance struct {
 			PayType               string `json:"PayType"`
 			LockMode              string `json:"LockMode"`
 			InstanceNetworkType   string `json:"InstanceNetworkType"`
+			DBInstanceClass       string `json:"DBInstanceClass"`
 			Department            int    `json:"Department"`
 			VpcID                 string `json:"VpcId,omitempty"`
 			DBInstanceID          string `json:"DBInstanceId"`
