@@ -69,9 +69,8 @@ func dataSourceGpdbInstanceTypesConfigDependence(name string) string {
 }
 
 func dataSourceGpdbInstanceTypesPresetDependence(name string) string {
-	return fmt.Sprintf(`
-	
+	return `
 	data "alibabacloudstack_gpdb_instance_types" "preset" {
 	}
-`)
+`
 }

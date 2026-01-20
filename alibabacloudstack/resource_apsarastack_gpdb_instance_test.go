@@ -181,6 +181,16 @@ func TestAccAlibabacloudStackGpdbInstance_classic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"security_ip_list": []string{"10.168.1.12","10.168.1.13"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"security_ip_list.#": "2",
+					}),
+				),
+			},
 		}})
 }
 

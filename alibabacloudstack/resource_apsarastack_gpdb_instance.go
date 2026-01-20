@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -215,15 +216,19 @@ func resourceAlibabacloudStackGpdbInstanceRead(d *schema.ResourceData, meta inte
 	if instance.DBInstanceGroupCount != "" {
 		d.Set("instance_group_count", instance.DBInstanceGroupCount)
 	}
+	var instnaceClass string
 	if instance.DBInstanceClass != "" {
-		d.Set("instance_class", instance.DBInstanceClass)
+		instnaceClass = instance.DBInstanceClass
+	} else if instance.InstanceSpec != "" {
+		instnaceClass = instance.InstanceSpec
+	} else if instance.CpuCores != 0 && instance.MemorySize != 0 {
+		instnaceClass = fmt.Sprintf("%dC%dG", instance.CpuCores, instance.MemorySize)
 	}
+	connectivity.SetResourceData(d, instnaceClass, "db_instance_class", "instance_class")
+
 	d.Set("seg_node_num", instance.SegNodeNum)
 
 	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "description")
-	if instance.InstanceSpec != "" {
-		connectivity.SetResourceData(d, instance.InstanceSpec, "db_instance_class", "instance_class")
-	}
 	connectivity.SetResourceData(d, instance.InstanceNetworkType, "network_type")
 	security_ips, err := gpdbService.DescribeGpdbSecurityIps(d.Id())
 	if err != nil {

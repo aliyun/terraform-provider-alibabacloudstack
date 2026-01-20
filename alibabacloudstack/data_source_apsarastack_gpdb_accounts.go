@@ -136,7 +136,7 @@ func dataSourceAlibabacloudStackGpdbAccountsRead(d *schema.ResourceData, meta in
 			"id":                  fmt.Sprint(object["DBInstanceId"], ":", object["AccountName"]),
 			"account_name":        fmt.Sprint(object["AccountName"]),
 			"db_instance_id":      object["DBInstanceId"],
-			"status":              convertGpdbAccountStatusResponse(object["AccountStatus"]),
+			"status":              object["AccountStatus"],
 		}
 		ids = append(ids, fmt.Sprint(mapping["id"]))
 		names = append(names, object["AccountName"])

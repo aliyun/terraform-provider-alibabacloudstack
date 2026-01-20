@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackGPDBAccount_basic0(t *testing.T) {
+func TestAccAlibabacloudStackGpdbAccount_basic0(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_gpdb_account.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackGPDBAccountMap0)

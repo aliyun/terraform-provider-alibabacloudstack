@@ -96,7 +96,7 @@ func resourceAlibabacloudStackGpdbAccountRead(d *schema.ResourceData, meta inter
 	d.Set("account_name", parts[1])
 	d.Set("db_instance_id", parts[0])
 	d.Set("account_description", object["AccountDescription"])
-	d.Set("status", convertGpdbAccountStatusResponse(object["AccountStatus"]))
+	d.Set("status", object["AccountStatus"])
 	return nil
 }
 
@@ -134,16 +134,4 @@ func resourceAlibabacloudStackGpdbAccountUpdate(d *schema.ResourceData, meta int
 func resourceAlibabacloudStackGpdbAccountDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[WARN] Cannot destroy resourcealibabacloudstackGpdbAccount. Terraform will remove this resource from the state file, however resources may remain.")
 	return nil
-}
-
-func convertGpdbAccountStatusResponse(source interface{}) interface{} {
-	switch source {
-	case "Creating":
-		return "0"
-	case "Active":
-		return "1"
-	case "Deleting":
-		return "3"
-	}
-	return source
 }
