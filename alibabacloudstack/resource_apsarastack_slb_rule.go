@@ -247,23 +247,6 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 func resourceAlibabacloudStackSlbRuleRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
-	request := slb.CreateDescribeRulesRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.LoadBalancerId = d.Get("load_balancer_id").(string)
-	request.ListenerPort = requests.NewInteger(d.Get("frontend_port").(int))
-
-	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-		return slbClient.DescribeRules(request)
-	})
-	response, ok := raw.(*slb.DescribeRulesResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_rules", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	objectv2, err := slbService.DescribeSlbRule(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
@@ -272,60 +255,36 @@ func resourceAlibabacloudStackSlbRuleRead(d *schema.ResourceData, meta interface
 		return errmsgs.WrapError(err)
 	}
 
-	found := false
-	for _, rule := range response.Rules.Rule {
-		if rule.RuleId == d.Id() {
-			connectivity.SetResourceData(d, rule.RuleName, "rule_name", "name")
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		return errmsgs.WrapError(fmt.Errorf("SLB rule %s not found in the response", d.Id()))
-	}
-
-	var targetRule *slb.Rule
-	for _, rule := range response.Rules.Rule {
-		if rule.RuleId == d.Id() {
-			targetRule = &rule
-			break
-		}
-	}
-
-	if targetRule == nil {
-		return errmsgs.WrapError(fmt.Errorf("SLB rule %s not found", d.Id()))
-	}
-
 	d.Set("load_balancer_id", objectv2.LoadBalancerId)
 	if port, err := strconv.Atoi(objectv2.ListenerPort); err != nil {
 		return errmsgs.WrapError(err)
 	} else {
 		d.Set("frontend_port", port)
 	}
-	d.Set("domain", targetRule.Domain)
-	d.Set("url", targetRule.Url)
-	d.Set("server_group_id", targetRule.VServerGroupId)
-	d.Set("sticky_session", targetRule.StickySession)
-	d.Set("sticky_session_type", targetRule.StickySessionType)
-	d.Set("unhealthy_threshold", targetRule.UnhealthyThreshold)
-	d.Set("healthy_threshold", targetRule.HealthyThreshold)
-	d.Set("health_check_timeout", targetRule.HealthCheckTimeout)
-	d.Set("health_check_connect_port", targetRule.HealthCheckConnectPort)
-	d.Set("health_check_uri", targetRule.HealthCheckURI)
-	d.Set("health_check", targetRule.HealthCheck)
-	d.Set("health_check_http_code", targetRule.HealthCheckHttpCode)
-	d.Set("health_check_interval", targetRule.HealthCheckInterval)
-	d.Set("scheduler", targetRule.Scheduler)
-	d.Set("listener_sync", targetRule.ListenerSync)
-	d.Set("cookie_timeout", targetRule.CookieTimeout)
-	d.Set("cookie", targetRule.Cookie)
-	d.Set("health_check_domain", targetRule.HealthCheckDomain)
-	if targetRule.StickySessionType != "" {
-		if targetRule.StickySessionType == string(InsertStickySessionType) {
-			d.Set("cookie", "")
+	d.Set("domain", objectv2.Domain)
+	d.Set("name", objectv2.RuleName)
+	d.Set("url", objectv2.Url)
+	d.Set("server_group_id", objectv2.VServerGroupId)
+	d.Set("sticky_session", objectv2.StickySession)
+	d.Set("sticky_session_type", objectv2.StickySessionType)
+	d.Set("unhealthy_threshold", objectv2.UnhealthyThreshold)
+	d.Set("healthy_threshold", objectv2.HealthyThreshold)
+	d.Set("health_check_timeout", objectv2.HealthCheckTimeout)
+	d.Set("health_check_connect_port", objectv2.HealthCheckConnectPort)
+	d.Set("health_check_uri", objectv2.HealthCheckURI)
+	d.Set("health_check", objectv2.HealthCheck)
+	d.Set("health_check_http_code", objectv2.HealthCheckHttpCode)
+	d.Set("health_check_interval", objectv2.HealthCheckInterval)
+	d.Set("scheduler", objectv2.Scheduler)
+	d.Set("listener_sync", objectv2.ListenerSync)
+	d.Set("cookie_timeout", objectv2.CookieTimeout)
+	d.Set("cookie", objectv2.Cookie)
+	d.Set("health_check_domain", objectv2.HealthCheckDomain)
+	if objectv2.StickySessionType != "" {
+		if objectv2.StickySessionType == string(InsertStickySessionType) {
+			d.Set("cookie", objectv2.Cookie)
 		} else {
-			d.Set("cookie_timeout", 0)
+			d.Set("cookie_timeout", objectv2.CookieTimeout)
 
 		}
 

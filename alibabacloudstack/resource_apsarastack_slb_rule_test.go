@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackSlbRuleCreate(t *testing.T) {
+func TestAccAlibabacloudStackSlbRule_basic(t *testing.T) {
 	var v *slb.DescribeRuleAttributeResponse
 	resourceId := "alibabacloudstack_slb_rule.default"
 	ra := resourceAttrInit(resourceId, ruleMap)
@@ -18,7 +18,8 @@ func TestAccAlibabacloudStackSlbRuleCreate(t *testing.T) {
 	})
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testAccSlbRuleBasic")
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testAccSlbRuleBasic%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceSlbRuleBasicDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -42,7 +43,6 @@ func TestAccAlibabacloudStackSlbRuleCreate(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"name":             name,
 						"load_balancer_id": CHECKSET,
 						"frontend_port":    CHECKSET,
@@ -50,6 +50,16 @@ func TestAccAlibabacloudStackSlbRuleCreate(t *testing.T) {
 						"url":              "/image",
 						"server_group_id":  CHECKSET,
 						"listener_sync":    "on",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name": name + "_update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name": name + "_update",
 					}),
 				),
 			},
@@ -117,16 +127,6 @@ func TestAccAlibabacloudStackSlbRuleCreate(t *testing.T) {
 				// delete_protection_validation is a local attribute and cannot be loaded from the remote
 				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
 			},
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"name": "tf-testAccSlbRuleBasic_change",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"name": "tf-testAccSlbRuleBasic_change",
-			// 		}),
-			// 	),
-			// },
 		},
 	})
 }
