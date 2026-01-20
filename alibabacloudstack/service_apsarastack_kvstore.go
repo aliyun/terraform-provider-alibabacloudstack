@@ -2,11 +2,13 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -556,4 +558,41 @@ type KVInstanceClass struct {
 	Product        string      `json:"product"`
 	Series         string      `json:"series"`
 	Status         string      `json:"status"`
+}
+
+func (s *KvstoreService) DescribeParameterGroup(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{"ParameterGroupId": id}
+
+	response, err := s.client.DoTeaRequest("GET", "R-kvstore", "2015-01-01", "DescribeParameterGroups", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if parameterGroups, ok := response["ParameterGroups"].(map[string]interface{}); ok {
+		if groups, ok := parameterGroups["ParameterGroups"].([]interface{}); ok {
+			for _, group := range groups {
+				parameterGroup := group.(map[string]interface{})
+				if parameterGroup["ParameterGroupId"].(string) == id {
+					return parameterGroup, nil
+				}
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ParameterGroup not found with id: %s", id))
+}
+
+func (s *KvstoreService) ListParameterGroupParms(id string) ([]interface{}, error) {
+	reqQuery := map[string]interface{}{"ParameterGroupId": id}
+
+	response, err := s.client.DoTeaRequest("GET", "R-kvstore", "2015-01-01", "DescribeParameterGroup", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if parameterGroups, err := jsonpath.Get("$.Parameters.Parameters", response); err == nil {
+		return parameterGroups.([]interface{}), nil
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ParameterGroup`s Parameters  not found with id: %s", id))
 }
