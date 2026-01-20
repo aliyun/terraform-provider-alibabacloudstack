@@ -273,6 +273,7 @@ func resourceGpdbClassicConfigDependence(name string) string {
         }
 		data "alibabacloudstack_gpdb_instance_types" "default" {
 		  engine_version = "6.0"
+		  status = "Available"
 		}`, name)
 }
 

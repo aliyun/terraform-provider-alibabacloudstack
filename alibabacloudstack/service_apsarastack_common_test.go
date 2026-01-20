@@ -876,6 +876,7 @@ data "alibabacloudstack_zones" "gpdb" {
 
 data "alibabacloudstack_gpdb_instance_types" "default" {
   engine_version = "6.0"
+  status = "Available"
 }
 
 data "alibabacloudstack_gpdb_instances" "default" {

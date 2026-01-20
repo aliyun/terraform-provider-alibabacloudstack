@@ -83,6 +83,7 @@ variable "name" {
 %s
 
 data "alibabacloudstack_gpdb_instance_types" "default" {
+	status = "Available"
 }
 
 resource "alibabacloudstack_vpc" "default" {

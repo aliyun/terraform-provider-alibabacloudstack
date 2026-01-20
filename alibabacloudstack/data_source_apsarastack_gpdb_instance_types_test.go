@@ -106,6 +106,7 @@ func TestAccAlibabacloudStackGpdbInstanceTypesDataSource(t *testing.T) {
 func dataSourceGpdbInstanceTypesConfigDependence(name string) string {
 	return `
 	data "alibabacloudstack_gpdb_instance_types" "anyone" {
+		status = "Available"
 	}
 `
 }
