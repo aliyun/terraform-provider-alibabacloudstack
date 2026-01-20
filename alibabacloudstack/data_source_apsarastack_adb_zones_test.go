@@ -12,14 +12,16 @@ func TestAccAlibabacloudStackADBZonesDataSource_basic(t *testing.T) {
 
 	multiConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"multi": "true",
+			"multi": "false",
 		}),
 	}
 
 	var existAdbZonesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":   CHECKSET,
-			"zones.#": CHECKSET,
+			"ids.#":      CHECKSET,
+			"zones.#":    CHECKSET,
+			"ids.0":      CHECKSET,
+			"zones.0.id": CHECKSET,
 		}
 	}
 
