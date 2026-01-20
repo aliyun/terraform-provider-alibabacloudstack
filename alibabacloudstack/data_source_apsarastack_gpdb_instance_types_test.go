@@ -22,25 +22,25 @@ func TestAccAlibabacloudStackGpdbInstanceTypesDataSource(t *testing.T) {
 			"engine_version": "fake_engine_version",
 		}),
 	}
-	
+
 	cpuConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"cpu": "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.cpu}",
-		"sorted_by":"Memory",
+			"cpu":       "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.cpu}",
+			"sorted_by": "Memory",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"cpu": "99999",
-			"sorted_by":"Memory",
+			"cpu":       "99999",
+			"sorted_by": "Memory",
 		}),
 	}
 	memoryConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"memory": "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.memory}",
-		"sorted_by":"CPU",
+			"memory":    "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.memory}",
+			"sorted_by": "CPU",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"memory": "9999999",
-			"sorted_by":"CPU",
+			"memory":    "9999999",
+			"sorted_by": "CPU",
 		}),
 	}
 

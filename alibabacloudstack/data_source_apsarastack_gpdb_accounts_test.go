@@ -30,30 +30,16 @@ func TestAccAlibabacloudStackGpdbAccountsDataSource(t *testing.T) {
 			"name_regex": "${alibabacloudstack_gpdb_account.default.account_name}_fake",
 		}),
 	}
-	statusConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${local.gpdb_instance_id}",
-			"ids":    []string{"${alibabacloudstack_gpdb_account.default.id}"},
-			"status": "Active",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${local.gpdb_instance_id}",
-			"ids":    []string{"${alibabacloudstack_gpdb_account.default.id}"},
-			"status": "Creating",
-		}),
-	}
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"db_instance_id": "${local.gpdb_instance_id}",
 			"ids":        []string{"${alibabacloudstack_gpdb_account.default.id}"},
 			"name_regex": "${alibabacloudstack_gpdb_account.default.account_name}",
-			"status":     "Active",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"db_instance_id": "${local.gpdb_instance_id}",
 			"ids":        []string{"${alibabacloudstack_gpdb_account.default.id}_fake"},
 			"name_regex": "${alibabacloudstack_gpdb_account.default.account_name}_fake",
-			"status":     "Creating",
 		}),
 	}
 	var existAlibabacloudStackGpdbAccountsDataSourceNameMapFunc = func(rand int) map[string]string {
@@ -65,7 +51,7 @@ func TestAccAlibabacloudStackGpdbAccountsDataSource(t *testing.T) {
 			"accounts.0.account_name":        name,
 			"accounts.0.account_description": name,
 			"accounts.0.db_instance_id":      CHECKSET,
-			"accounts.0.status":              "Active",
+			"accounts.0.status":              CHECKSET,
 		}
 	}
 	var fakeAlibabacloudStackGpdbAccountsDataSourceNameMapFunc = func(rand int) map[string]string {
@@ -81,7 +67,7 @@ func TestAccAlibabacloudStackGpdbAccountsDataSource(t *testing.T) {
 		ExternalProviders: testAccExternalProviders,
 	}
 
-	alibabacloudstackGpdbAccountsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, statusConf, allConf)
+	alibabacloudstackGpdbAccountsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
 func testAccCheckAlibabacloudStackGpdbAccountsDataSourceName(name string) string {
 	return fmt.Sprintf(`

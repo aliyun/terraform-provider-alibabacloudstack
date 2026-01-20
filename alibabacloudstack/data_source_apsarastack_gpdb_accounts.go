@@ -38,12 +38,6 @@ func dataSourceAlibabacloudStackGpdbAccounts() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"status": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Active", "Creating", "Deleting"}, false),
-			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -98,12 +92,8 @@ func dataSourceAlibabacloudStackGpdbAccountsRead(d *schema.ResourceData, meta in
 	}
 
 	idsMap := getIdsStringFilter(d)
-	status, statusOk := d.GetOk("status")
 
 	response, err := client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, nil, request)
-	if err != nil {
-		return err
-	}
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_gpdb_accounts", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -122,7 +112,7 @@ func dataSourceAlibabacloudStackGpdbAccountsRead(d *schema.ResourceData, meta in
 				continue
 			}
 		}
-		if statusOk && status.(string) != "" && status.(string) != item["AccountStatus"].(string) {
+		if item["AccountStatus"].(string) != "1" {
 			continue
 		}
 		objects = append(objects, item)

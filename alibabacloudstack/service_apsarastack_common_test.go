@@ -892,7 +892,6 @@ resource "alibabacloudstack_gpdb_instance" "default" {
   availability_zone           = "${data.alibabacloudstack_zones.gpdb.zones.0.id}"
   description                 = var.name
   seg_node_num                = "2"
-  network_type                = "VPC"
   cpu_type                    = "Intel"
 }
 
