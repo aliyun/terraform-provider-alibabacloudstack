@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackKVStoreParameterGroupsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackRedisParameterGroupsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_kvstore_parameter_groups.default"
 	name := fmt.Sprintf("tf-kvparamgroup%d", rand)
