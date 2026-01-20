@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackImageBasic(t *testing.T) {
+func TestAccAlibabacloudStackEcsImageBasic(t *testing.T) {
 	var v ecs.Image
 
 	resourceId := "alibabacloudstack_image.default"
@@ -104,7 +104,7 @@ func TestAccAlibabacloudStackImageBasic(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackImageSnapshot(t *testing.T) {
+func TestAccAlibabacloudStackEcsImageSnapshot(t *testing.T) {
 	var v ecs.Image
 
 	resourceId := "alibabacloudstack_image.default"
@@ -198,7 +198,7 @@ func TestAccAlibabacloudStackImageSnapshot(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackImageDeviceMap(t *testing.T) {
+func TestAccAlibabacloudStackEcsImageDeviceMap(t *testing.T) {
 	var v ecs.Image
 
 	resourceId := "alibabacloudstack_image.default"
