@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"fmt"
 	"regexp"
 	"sort"
 	"strconv"
@@ -42,12 +41,6 @@ func dataSourceAlibabacloudStackGpdbInstanceTypes() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory"}, false),
 			},
-			"series": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"dual_ha", "read_only"}, false),
-			},
 			"instance_types": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -62,7 +55,7 @@ func dataSourceAlibabacloudStackGpdbInstanceTypes() *schema.Resource {
 							Computed: true,
 						},
 						"memory": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"engine": {
@@ -70,10 +63,6 @@ func dataSourceAlibabacloudStackGpdbInstanceTypes() *schema.Resource {
 							Computed: true,
 						},
 						"engine_version": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"series": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -177,6 +166,8 @@ func dataSourceAlibabacloudStackGpdbInstanceTypesRead(d *schema.ResourceData, me
 	existedId := map[string]string{}
 	ids := []string{}
 	types := []map[string]interface{}{}
+	filterCpu := d.Get("cpu").(int)
+	filterMemroy := d.Get("memory").(int)
 
 	reqQuery := map[string]interface{}{
 		"pageStart":    1,
@@ -189,117 +180,121 @@ func dataSourceAlibabacloudStackGpdbInstanceTypesRead(d *schema.ResourceData, me
 		reqQuery["engineVersion"] = v
 	}
 
-	if v, ok := d.GetOk("series"); ok {
-		reqQuery["series"] = v
-	}
-	if v, ok := d.GetOk("cpu"); ok {
-		reqQuery["cpu"] = v
-	}
-	if v, ok := d.GetOk("memory"); ok {
-		reqQuery["memory"] = v
-	}
-
 	reqHeader := map[string]string{
 		"x-acs-territory": "US",
 		"x-acs-lang":      "EN",
 	}
-	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", reqHeader, reqQuery, nil)
-	if err != nil {
-		return err
-	}
-
-	for _, d := range response["data"].([]interface{}) {
-		data := d.(map[string]interface{})
-		id := data["specification"].(string)
-		if _, exists := filterIds[id]; len(filterIds) > 0 && !exists {
-			continue
-		}
-		if _, exists := existedId[id]; exists {
-			continue
+	for {
+		response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", reqHeader, reqQuery, nil)
+		if err != nil {
+			return err
 		}
 
-		var cpu int64
-		var memory string
-		var storage string
+		if len(response["data"].([]interface{})) == 0 {
+			break
+		}
 
-		if cpuData, ok := data["cpu"]; ok {
-			if cpuNum, ok := cpuData.(json.Number); ok {
-				cpu, err = cpuNum.Int64()
-				if err != nil {
-					if cpuStr, ok := cpuData.(string); ok {
-						cpu = parseCpuFromSpec(cpuStr)
+		for _, d := range response["data"].([]interface{}) {
+			data := d.(map[string]interface{})
+			id := data["specification"].(string)
+			if _, exists := filterIds[id]; len(filterIds) > 0 && !exists {
+				continue
+			}
+			if _, exists := existedId[id]; exists {
+				continue
+			}
+
+			var cpu, memory int64
+			var storage string
+
+			if cpuData, ok := data["cpu"]; ok {
+				if cpuNum, ok := cpuData.(json.Number); ok {
+					cpu, err = cpuNum.Int64()
+					if err != nil {
+						if cpuStr, ok := cpuData.(string); ok {
+							cpu = parseCpuFromSpec(cpuStr)
+						}
 					}
+				} else if cpuStr, ok := cpuData.(string); ok {
+					cpu = parseCpuFromSpec(cpuStr)
 				}
-			} else if cpuStr, ok := cpuData.(string); ok {
-				cpu = parseCpuFromSpec(cpuStr)
 			}
-		}
 
-		if memoryData, ok := data["memory"]; ok {
-			if memoryNum, ok := memoryData.(json.Number); ok {
-				memoryVal, err := memoryNum.Int64()
-				if err != nil {
-					memory = memoryData.(string)
-				} else {
-					memory = fmt.Sprintf("%d GB", memoryVal)
+			if filterCpu != 0 && filterCpu != int(cpu) {
+				continue
+			}
+
+			if memoryData, ok := data["memory"]; ok {
+				if memoryNum, ok := memoryData.(json.Number); ok {
+					memory, err = memoryNum.Int64()
+					if err != nil {
+						if memoryStr, ok := memoryData.(string); ok {
+							memory = parseMemoryValue(memoryStr)
+						}
+					}
+				} else if memoryStr, ok := memoryData.(string); ok {
+					memory = parseCpuFromSpec(memoryStr)
 				}
-			} else {
-				memory = memoryData.(string)
 			}
-		}
 
-		if storageData, ok := data["storage"]; ok {
-			storage = storageData.(string)
-		}
-
-		var connections int
-		if v, ok := data["connections"].(json.Number); ok {
-			vv, err := v.Int64()
-			if err != nil {
-				return err
+			if filterMemroy != 0 && filterMemroy != int(memory) {
+				continue
 			}
-			connections = int(vv)
-		} else if v, ok := data["connections"].(string); ok {
-			if v == "Unlimited" {
-				connections = -1
-			} else {
-				vv, err := strconv.Atoi(v)
+
+			if storageData, ok := data["storage"]; ok {
+				storage = storageData.(string)
+			}
+
+			var connections int
+			if v, ok := data["connections"].(json.Number); ok {
+				vv, err := v.Int64()
 				if err != nil {
 					return err
 				}
-				connections = vv
+				connections = int(vv)
+			} else if v, ok := data["connections"].(string); ok {
+				if v == "Unlimited" {
+					connections = -1
+				} else {
+					vv, err := strconv.Atoi(v)
+					if err != nil {
+						return err
+					}
+					connections = vv
+				}
 			}
-		}
 
-		typeMap := map[string]interface{}{
-			"id":                     data["specification"],
-			"cpu":                    cpu,
-			"memory":                 memory,
-			"engine_version":         data["engineVersionLabel"],
-			"connections":            connections,
-			"storage_min":            data["storageMin"],
-			"storage_max":            data["storageMax"],
-			"specification":          data["specification"],
-			"specification_label":    data["specificationLabel"],
-			"db_instance_mode":       data["dbInstanceMode"],
-			"db_instance_mode_label": data["dbInstanceModeLabel"],
-			"node":                   data["node"],
-			"region_id":              data["regionId"],
-			"status":                 data["status"],
-			"product":                data["product"],
-			"storage":                storage,
-			"cpu_label":              data["cpuLabel"],
-			"memory_label":           data["memoryLabel"],
-			"storage_label":          data["storageLabel"],
-			"engine_version_label":   data["engineVersionLabel"],
-			"gmt_create":             data["gmtCreate"],
-			"gmt_modify":             data["gmtModify"],
-			"spec_from":              data["specFrom"],
-		}
+			typeMap := map[string]interface{}{
+				"id":                     data["specification"],
+				"cpu":                    cpu,
+				"memory":                 memory,
+				"engine_version":         data["engineVersionLabel"],
+				"connections":            connections,
+				"storage_min":            data["storageMin"],
+				"storage_max":            data["storageMax"],
+				"specification":          data["specification"],
+				"specification_label":    data["specificationLabel"],
+				"db_instance_mode":       data["dbInstanceMode"],
+				"db_instance_mode_label": data["dbInstanceModeLabel"],
+				"node":                   data["node"],
+				"region_id":              data["regionId"],
+				"status":                 data["status"],
+				"product":                data["product"],
+				"storage":                storage,
+				"cpu_label":              data["cpuLabel"],
+				"memory_label":           data["memoryLabel"],
+				"storage_label":          data["storageLabel"],
+				"engine_version_label":   data["engineVersionLabel"],
+				"gmt_create":             data["gmtCreate"],
+				"gmt_modify":             data["gmtModify"],
+				"spec_from":              data["specFrom"],
+			}
 
-		types = append(types, typeMap)
-		existedId[id] = ""
-		ids = append(ids, id)
+			types = append(types, typeMap)
+			existedId[id] = ""
+			ids = append(ids, id)
+		}
+		reqQuery["pageStart"] = reqQuery["pageStart"].(int) + 1
 	}
 
 	sortedBy := d.Get("sorted_by").(string)
@@ -309,9 +304,7 @@ func dataSourceAlibabacloudStackGpdbInstanceTypesRead(d *schema.ResourceData, me
 			case "CPU":
 				return types[i]["cpu"].(int64) < types[j]["cpu"].(int64)
 			case "Memory":
-				memI := parseMemoryValue(types[i]["memory"].(string))
-				memJ := parseMemoryValue(types[j]["memory"].(string))
-				return memI < memJ
+				return types[i]["memory"].(int64) < types[j]["memory"].(int64)
 			}
 			return false
 		})

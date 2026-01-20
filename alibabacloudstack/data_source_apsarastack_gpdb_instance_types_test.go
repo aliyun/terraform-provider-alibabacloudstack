@@ -14,15 +14,35 @@ func TestAccAlibabacloudStackGpdbInstanceTypesDataSource(t *testing.T) {
 		dataSourceGpdbInstanceTypesConfigDependence)
 
 	// Configuration with engine version and sorting
-	engineConf := dataSourceTestAccConfig{
+	engineVersionConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"engine_version": CHECKSET,
+			"engine_version": "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.engine_version}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"engine_version": "fake_engine_version",
 		}),
 	}
-
-	testAccConfig = dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf_testAccGpdbInstanceTypesDataSource_%d", rand),
-		dataSourceGpdbInstanceTypesPresetDependence)
+	
+	cpuConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"cpu": "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.cpu}",
+		"sorted_by":"Memory",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"cpu": "99999",
+			"sorted_by":"Memory",
+		}),
+	}
+	memoryConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"memory": "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.memory}",
+		"sorted_by":"CPU",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"memory": "9999999",
+			"sorted_by":"CPU",
+		}),
+	}
 
 	var existGpdbInstanceTypesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
@@ -61,16 +81,12 @@ func TestAccAlibabacloudStackGpdbInstanceTypesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeGpdbInstanceTypesMapFunc,
 	}
 
-	GpdbInstanceTypesCheckInfo.dataSourceTestCheck(t, rand, engineConf)
+	GpdbInstanceTypesCheckInfo.dataSourceTestCheck(t, rand, engineVersionConf, cpuConf, memoryConf)
 }
 
 func dataSourceGpdbInstanceTypesConfigDependence(name string) string {
-	return ""
-}
-
-func dataSourceGpdbInstanceTypesPresetDependence(name string) string {
 	return `
-	data "alibabacloudstack_gpdb_instance_types" "preset" {
+	data "alibabacloudstack_gpdb_instance_types" "anyone" {
 	}
 `
 }
