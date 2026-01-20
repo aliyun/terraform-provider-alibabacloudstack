@@ -35,6 +35,10 @@ func dataSourceAlibabacloudStackGpdbInstanceTypes() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"sorted_by": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -156,25 +160,20 @@ func dataSourceAlibabacloudStackGpdbInstanceTypes() *schema.Resource {
 func dataSourceAlibabacloudStackGpdbInstanceTypesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	filterIds := map[string]string{}
-	if v, ok := d.GetOk("ids"); ok {
-		for _, vv := range v.([]interface{}) {
-			filterIds[vv.(string)] = ""
-		}
-	}
+	filterIds := getIdsStringFilter(d)
 
 	existedId := map[string]string{}
 	ids := []string{}
 	types := []map[string]interface{}{}
 	filterCpu := d.Get("cpu").(int)
 	filterMemroy := d.Get("memory").(int)
+	filterStatus := d.Get("status").(string)
 
 	reqQuery := map[string]interface{}{
 		"pageStart":    1,
 		"pageSize":     500,
 		"label":        "true",
 		"resourceType": "gpdb",
-		"status":       "Available",
 	}
 	if v, ok := d.GetOk("engine_version"); ok {
 		reqQuery["engineVersion"] = v
@@ -206,6 +205,10 @@ func dataSourceAlibabacloudStackGpdbInstanceTypesRead(d *schema.ResourceData, me
 
 			var cpu, memory int64
 			var storage string
+			
+			if filterStatus != "" && data["status"].(string) != filterStatus {
+				continue
+			}
 
 			if cpuData, ok := data["cpu"]; ok {
 				if cpuNum, ok := cpuData.(json.Number); ok {

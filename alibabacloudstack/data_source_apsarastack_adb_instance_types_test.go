@@ -5,46 +5,37 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackGpdbInstanceTypesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackAdbInstanceTypesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
-	resourceId := "data.alibabacloudstack_gpdb_instance_types.default"
+	resourceId := "data.alibabacloudstack_adb_instance_types.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf_testAccGpdbInstanceTypesDataSource_%d", rand),
-		dataSourceGpdbInstanceTypesConfigDependence)
+		fmt.Sprintf("tf_testAccAdbInstanceTypesDataSource_%d", rand),
+		dataSourceAdbInstanceTypesConfigDependence)
 
 	// Configuration with engine version and sorting
-	
+
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.id}"},
+			"ids": []string{"${data.alibabacloudstack_adb_instance_types.anyone.instance_types.0.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"fake_id"},
 		}),
 	}
-	
-	statusConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"status":       "Available",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"status":       "FakeStatus",
-		}),
-	}
 
-	engineVersionConf := dataSourceTestAccConfig{
+	clusterTypeConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"engine_version": "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.engine_version}",
+			"cluster_type": "${data.alibabacloudstack_adb_instance_types.anyone.instance_types.0.cluster_type}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"engine_version": "fake_engine_version",
+			"cluster_type": "fake_cluster_type",
 		}),
 	}
 
 	cpuConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"cpu":       "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.cpu}",
+			"cpu":       "${data.alibabacloudstack_adb_instance_types.anyone.instance_types.0.cpu}",
 			"sorted_by": "Memory",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
@@ -54,7 +45,7 @@ func TestAccAlibabacloudStackGpdbInstanceTypesDataSource(t *testing.T) {
 	}
 	memoryConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"memory":    "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.memory}",
+			"memory":    "${data.alibabacloudstack_adb_instance_types.anyone.instance_types.0.memory}",
 			"sorted_by": "CPU",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
@@ -71,19 +62,13 @@ func TestAccAlibabacloudStackGpdbInstanceTypesDataSource(t *testing.T) {
 			"instance_types.0.id":               CHECKSET,
 			"instance_types.0.cpu":              CHECKSET,
 			"instance_types.0.memory":           CHECKSET,
-			"instance_types.0.engine_version":   CHECKSET,
-			"instance_types.0.connections":      CHECKSET,
 			"instance_types.0.storage_min":      CHECKSET,
 			"instance_types.0.storage_max":      CHECKSET,
-			"instance_types.0.specification":    CHECKSET,
 			"instance_types.0.db_instance_mode": CHECKSET,
-			"instance_types.0.node":             CHECKSET,
-			"instance_types.0.region_id":        CHECKSET,
+			"instance_types.0.node_min":         CHECKSET,
+			"instance_types.0.node_max":         CHECKSET,
 			"instance_types.0.status":           CHECKSET,
-			"instance_types.0.product":          CHECKSET,
-			"instance_types.0.storage":          CHECKSET,
-			"instance_types.0.cpu_label":        CHECKSET,
-			"instance_types.0.memory_label":     CHECKSET,
+			"instance_types.0.storage_type":     CHECKSET,
 		}
 	}
 
@@ -94,18 +79,18 @@ func TestAccAlibabacloudStackGpdbInstanceTypesDataSource(t *testing.T) {
 		}
 	}
 
-	var GpdbInstanceTypesCheckInfo = dataSourceAttr{
+	var AdbInstanceTypesCheckInfo = dataSourceAttr{
 		resourceId:   resourceId,
 		existMapFunc: existGpdbInstanceTypesMapFunc,
 		fakeMapFunc:  fakeGpdbInstanceTypesMapFunc,
 	}
 
-	GpdbInstanceTypesCheckInfo.dataSourceTestCheck(t, rand, idsConf, engineVersionConf, statusConf, cpuConf, memoryConf)
+	AdbInstanceTypesCheckInfo.dataSourceTestCheck(t, rand, idsConf, clusterTypeConf, cpuConf, memoryConf)
 }
 
-func dataSourceGpdbInstanceTypesConfigDependence(name string) string {
+func dataSourceAdbInstanceTypesConfigDependence(name string) string {
 	return `
-	data "alibabacloudstack_gpdb_instance_types" "anyone" {
+	data "alibabacloudstack_adb_instance_types" "anyone" {
 	}
 `
 }

@@ -268,6 +268,7 @@ func stringToBool(value string) (bool, error) {
 func getDataSourcesMap() map[string]*schema.Resource {
 	maps := map[string]*schema.Resource{
 		"alibabacloudstack_account":                                          dataSourceAlibabacloudStackAccount(),
+		"alibabacloudstack_adb_instance_types":                               dataSourceAlibabacloudStackAdbInstanceTypes(),
 		"alibabacloudstack_adb_clusters":                                     dataSourceAlibabacloudStackAdbDbClusters(),
 		"alibabacloudstack_adb_zones":                                        dataSourceAlibabacloudStackAdbZones(),
 		"alibabacloudstack_adb_db_clusters":                                  dataSourceAlibabacloudStackAdbDbClusters(),
