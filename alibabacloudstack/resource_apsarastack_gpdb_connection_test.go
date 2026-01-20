@@ -7,14 +7,15 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/gpdb"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackGpdbConnectionUpdate(t *testing.T) {
 	var v *gpdb.DBInstanceNetInfo
 
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tftest%d", rand)
 	var basicMap = map[string]string{
 		"instance_id": CHECKSET,
 		"port":        "3306",
@@ -28,7 +29,7 @@ func TestAccAlibabacloudStackGpdbConnectionUpdate(t *testing.T) {
 	ra := resourceAttrInit(resourceId, basicMap)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	testAccConfig := resourceTestAccConfigFunc(resourceId, "", testGpdbConnectionConfigDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testGpdbConnectionConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -40,11 +41,13 @@ func TestAccAlibabacloudStackGpdbConnectionUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id":       "${alibabacloudstack_gpdb_instance.default.id}",
-					"connection_prefix": fmt.Sprintf("tf-testacc%d", rand),
+					"instance_id":       "${local.gpdb_instance_id}",
+					"connection_prefix": name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"connection_prefix": name,
+					}),
 				),
 			},
 			{
@@ -54,13 +57,21 @@ func TestAccAlibabacloudStackGpdbConnectionUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id":       "${alibabacloudstack_gpdb_instance.default.id}",
-					"connection_prefix": fmt.Sprintf("tf-testacc%d", rand),
 					"port":              "3333",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"port": "3333",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"connection_prefix": name + "-update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"connection_prefix": name + "-update",
 					}),
 				),
 			},
@@ -70,28 +81,9 @@ func TestAccAlibabacloudStackGpdbConnectionUpdate(t *testing.T) {
 
 func testGpdbConnectionConfigDependence(name string) string {
 	return fmt.Sprintf(`
-        data "alibabacloudstack_zones" "default" {
-            available_resource_creation = "Gpdb"
-        }
-        variable "name" {
-            default = "tf-testAccGpdbInstance"
-        }
-		resource "alibabacloudstack_vpc" "default" {
-  			name = "testing"
-  			cidr_block = "10.0.0.0/8"
+		variable "name" {
+			default = "%s"
 		}
-		resource "alibabacloudstack_vswitch" "default" {
-  			vpc_id = alibabacloudstack_vpc.default.id
-			cidr_block        = "10.1.0.0/16"
-  			name = "apsara_vswitch"
-  			availability_zone = data.alibabacloudstack_zones.default.zones.0.id
-		}
-        resource "alibabacloudstack_gpdb_instance" "default" {
-            vswitch_id           = alibabacloudstack_vswitch.default.id
-            engine               = "gpdb"
-            engine_version       = "4.3"
-            instance_class       = "gpdb.group.segsdx2"
-            instance_group_count = "2"
-            description          = "${var.name}"
-	}`)
+	%s
+		`, name, GpdbCommonTestCase())
 }

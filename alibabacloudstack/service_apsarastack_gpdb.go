@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -287,10 +288,8 @@ func (s *GpdbService) GpdbInstanceStateRefreshFunc(id string, failStates []strin
 			return nil, "", errmsgs.WrapError(err)
 		}
 
-		for _, failState := range failStates {
-			if object.DBInstanceStatus == failState {
-				return object, object.DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.DBInstanceStatus))
-			}
+		if slices.Contains(failStates, object.DBInstanceStatus) {
+			return object, object.DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.DBInstanceStatus))
 		}
 		return object, object.DBInstanceStatus, nil
 	}

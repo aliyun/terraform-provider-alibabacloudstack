@@ -77,17 +77,14 @@ func resourceAlibabacloudStackGpdbConnectionCreate(d *schema.ResourceData, meta 
 			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
-		}
-		response, ok := raw.(*gpdb.AllocateInstancePublicConnectionResponse)
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		if err != nil {
 			errmsg := ""
+			response, ok := raw.(*gpdb.AllocateInstancePublicConnectionResponse)
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_gpdb_connection", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 	if err != nil {
@@ -128,6 +125,12 @@ func resourceAlibabacloudStackGpdbConnectionRead(d *schema.ResourceData, meta in
 	d.Set("connection_string", object.ConnectionString)
 	d.Set("ip_address", object.IPAddress)
 
+	stateConf := BuildStateConf([]string{"NetAddressCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, gpdbService.GpdbInstanceStateRefreshFunc(parts[0], []string{"Deleting"}))
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+
 	return nil
 }
 
@@ -137,39 +140,35 @@ func resourceAlibabacloudStackGpdbConnectionUpdate(d *schema.ResourceData, meta 
 		return errmsgs.WrapError(err)
 	}
 
-	if d.HasChange("port") {
+	if d.IsNewResource() {
+		return nil
+	}
+
+	if d.HasChanges("connection_prefix", "port") {
+
 		client := meta.(*connectivity.AlibabacloudStackClient)
 		gpdbService := GpdbService{client}
 
-		request := gpdb.CreateModifyDBInstanceConnectionStringRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.DBInstanceId = parts[0]
 		object, err := gpdbService.DescribeGpdbConnection(d.Id())
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		request.CurrentConnectionString = object.ConnectionString
-		request.ConnectionStringPrefix = parts[1]
-		request.Port = d.Get("port").(string)
+		reqQuery := map[string]interface{}{
+			"DBInstanceId":            parts[0],
+			"CurrentConnectionString": object.ConnectionString,
+			"ConnectionStringPrefix":  d.Get("connection_prefix"),
+			"Port":                    d.Get("port"),
+			"DBInstanceNetType":       "public",
+		}
 
 		if err := resource.Retry(8*time.Minute, func() *resource.RetryError {
-			raw, err := client.WithGpdbClient(func(gpdbClient *gpdb.Client) (interface{}, error) {
-				return gpdbClient.ModifyDBInstanceConnectionString(request)
-			})
+			_, err := client.DoTeaRequest("POST", "gpdb", "2016-05-03", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil)
+
 			if err != nil {
 				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
 					return resource.RetryableError(err)
 				}
 				return resource.NonRetryableError(err)
-			}
-			response, ok := raw.(*gpdb.ModifyDBInstanceConnectionStringResponse)
-			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-			if err != nil {
-				errmsg := ""
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			return nil
 		}); err != nil {
@@ -177,11 +176,13 @@ func resourceAlibabacloudStackGpdbConnectionUpdate(d *schema.ResourceData, meta 
 		}
 
 		// wait instance running after modifying
-		stateConf := BuildStateConf([]string{"NET_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 3*time.Minute, gpdbService.GpdbInstanceStateRefreshFunc(request.DBInstanceId, []string{"Deleting"}))
+		stateConf := BuildStateConf([]string{"NET_MODIFYING", "NetAddressCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, gpdbService.GpdbInstanceStateRefreshFunc(parts[0], []string{"Deleting"}))
 
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
+
+		d.SetId(fmt.Sprintf("%s%s%s", reqQuery["DBInstanceId"], COLON_SEPARATED, reqQuery["ConnectionStringPrefix"]))
 	}
 	return nil
 }
@@ -213,12 +214,8 @@ func resourceAlibabacloudStackGpdbConnectionDelete(d *schema.ResourceData, meta 
 			if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus"}) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
-		}
-		response, ok := raw.(*gpdb.ReleaseInstancePublicConnectionResponse)
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		if err != nil {
 			errmsg := ""
+			response, ok := raw.(*gpdb.ReleaseInstancePublicConnectionResponse)
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			}
@@ -232,7 +229,7 @@ func resourceAlibabacloudStackGpdbConnectionDelete(d *schema.ResourceData, meta 
 		}
 		return err
 	}
-	stateConf := BuildStateConf([]string{"NetAddressDeleting"}, []string{"Running"}, d.Timeout(schema.TimeoutDelete), 5*time.Second, gpdbService.GpdbInstanceStateRefreshFunc(request.DBInstanceId, []string{"Deleting"}))
+	stateConf := BuildStateConf([]string{"NetAddressDeleting"}, []string{"Running"}, d.Timeout(schema.TimeoutDelete), 10*time.Second, gpdbService.GpdbInstanceStateRefreshFunc(request.DBInstanceId, []string{"Deleting"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
