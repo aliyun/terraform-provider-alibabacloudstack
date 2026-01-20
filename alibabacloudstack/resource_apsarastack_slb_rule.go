@@ -262,7 +262,7 @@ func resourceAlibabacloudStackSlbRuleRead(d *schema.ResourceData, meta interface
 		d.Set("frontend_port", port)
 	}
 	d.Set("domain", objectv2.Domain)
-	d.Set("name", objectv2.RuleName)
+	connectivity.SetResourceData(d, objectv2.RuleName, "rule_name", "name")
 	d.Set("url", objectv2.Url)
 	d.Set("server_group_id", objectv2.VServerGroupId)
 	d.Set("sticky_session", objectv2.StickySession)

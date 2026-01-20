@@ -84,26 +84,10 @@ func dataSourceSlbRulesConfigDependence(name string) string {
 
 	%s
 
-	resource "alibabacloudstack_vpc" "default" {
-	  name = "${var.name}"
-	  cidr_block = "172.16.0.0/12"
-	}
-
-	resource "alibabacloudstack_vswitch" "default" {
-	  vpc_id = "${alibabacloudstack_vpc.default.id}"
-	  cidr_block = "172.16.0.0/16"
-	  availability_zone = data.alibabacloudstack_zones.default.zones.0.id
-	  name = "${var.name}"
-	}
-
-	resource "alibabacloudstack_security_group" "default" {
-		name = "${var.name}"
-		vpc_id = "${alibabacloudstack_vpc.default.id}"
-	}
 
 	resource "alibabacloudstack_slb" "default" {
 	  name = "${var.name}"
-	  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	}
 
 	resource "alibabacloudstack_slb_listener" "default" {
@@ -126,22 +110,11 @@ func dataSourceSlbRulesConfigDependence(name string) string {
 	  bandwidth = 10
 	}
 
-resource "alibabacloudstack_instance" "default" {
-  image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_type = "${local.default_instance_type_id}"
-  security_groups = "${alibabacloudstack_security_group.default.*.id}"
-  internet_max_bandwidth_out = "10"
-  availability_zone = data.alibabacloudstack_zones.default.zones.0.id
-  system_disk_category = "cloud_sperf"
-  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-  instance_name = "${var.name}"
-}
-
 	resource "alibabacloudstack_slb_server_group" "default" {
 	  load_balancer_id = "${alibabacloudstack_slb.default.id}"
     name = "${var.name}"
 	  servers {
-	      server_ids = ["${alibabacloudstack_instance.default.id}"]
+	      server_ids = ["${alibabacloudstack_ecs_instance.default.id}"]
 	      port = 80
 	      weight = 100
 	    }
@@ -155,5 +128,5 @@ resource "alibabacloudstack_instance" "default" {
 	  url = "/image"
 	  server_group_id = "${alibabacloudstack_slb_server_group.default.id}"
 	}
-	`, name, DataAlibabacloudstackVswitchZones+DataAlibabacloudstackInstanceTypes+DataAlibabacloudstackImages)
+	`, name, ECSInstanceCommonTestCase)
 }
