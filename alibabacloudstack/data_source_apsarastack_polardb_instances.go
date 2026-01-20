@@ -30,11 +30,6 @@ func dataSourceAlibabacloudStackPolardbDbInstances() *schema.Resource {
 				Optional: true,
 			},
 
-			"db_instance_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"vswitch_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -46,16 +41,6 @@ func dataSourceAlibabacloudStackPolardbDbInstances() *schema.Resource {
 			},
 
 			"db_instance_class": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			"payment_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -156,11 +141,6 @@ func dataSourceAlibabacloudStackPolardbDbInstances() *schema.Resource {
 							Computed: true,
 						},
 
-						"db_instance_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
 						"db_instance_class": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -242,11 +222,6 @@ func dataSourceAlibabacloudStackPolardbDbInstances() *schema.Resource {
 						},
 
 						"network_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"payment_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -403,10 +378,6 @@ func dataSourceAlibabacloudStackPolardbDbInstancesRead(d *schema.ResourceData, m
 	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstances", "")
 	PolardbDescribedbinstancesResponse := PolardbDescribedbinstancesResponse{}
 
-	if v, ok := d.GetOk("db_instance_type"); ok {
-		request.QueryParams["DBInstanceType"] = v.(string)
-	}
-
 	if v, ok := d.GetOk("db_instance_class"); ok {
 		request.QueryParams["DBInstanceClass"] = v.(string)
 	}
@@ -427,21 +398,8 @@ func dataSourceAlibabacloudStackPolardbDbInstancesRead(d *schema.ResourceData, m
 		request.QueryParams["InstanceNetworkType"] = v.(string)
 	}
 
-	if v, ok := d.GetOk("page_number"); ok {
-		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("page_size"); ok {
-		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("payment_type"); ok {
-		request.QueryParams["PayType"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("status"); ok {
-		request.QueryParams["DBInstanceStatus"] = v.(string)
-	}
+	request.QueryParams["PageSize"] = "100"
+	pageNumber := 1
 
 	if v, ok := d.GetOk("vswitch_id"); ok {
 		request.QueryParams["VSwitchId"] = v.(string)
@@ -451,76 +409,85 @@ func dataSourceAlibabacloudStackPolardbDbInstancesRead(d *schema.ResourceData, m
 		request.QueryParams["VpcId"] = v.(string)
 	}
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "DescribeDBInstances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbDescribedbinstancesResponse)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_polardb_db_instance", "DescribeDBInstances", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
+	idsMap := getIdsStringFilter(d)
 	var ids []string
 	datas := make([]interface{}, 0)
-	for _, data := range PolardbDescribedbinstancesResponse.Items.DBInstance {
-		i := map[string]interface{}{
-			"category": data.Category,
-
-			"db_instance_description": data.DBInstanceDescription,
-
-			"db_instance_type": data.DBInstanceType,
-
-			"db_instance_class": data.DBInstanceClass,
-
-			"db_instance_id": data.DBInstanceId,
-
-			"db_instance_net_type": data.DBInstanceNetType,
-
-			"db_instance_storage_type": data.DBInstanceStorageType,
-
-			"engine": data.Engine,
-
-			"engine_version": data.EngineVersion,
-
-			"expire_time": data.ExpireTime,
-
-			"guard_db_instance_id": data.GuardDBInstanceId,
-
-			"lock_mode": data.LockMode,
-
-			"lock_reason": data.LockReason,
-
-			"master_instance_id": data.MasterInstanceId,
-
-			"network_type": data.InstanceNetworkType,
-
-			"payment_type": data.PayType,
-
-			"region_id": data.RegionId,
-
-			"resource_group_id": data.ResourceGroupId,
-
-			"status": data.DBInstanceStatus,
-
-			"temp_db_instance_id": data.TempDBInstanceId,
-
-			"vswitch_id": data.VSwitchId,
-
-			"vpc_cloud_instance_id": data.VpcCloudInstanceId,
-
-			"vpc_id": data.VpcId,
+	for {
+		request.QueryParams["PageNumber"] = strconv.Itoa(pageNumber)
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "DescribeDBInstances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		datas = append(datas, i)
 
-		db_instance_id := data.DBInstanceId
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbDescribedbinstancesResponse)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+				"alibabacloudstack_polardb_db_instance", "DescribeDBInstances", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
 
-		ids = append(ids, db_instance_id)
+		if len(PolardbDescribedbinstancesResponse.Items.DBInstance) < 1 {
+			break
+		}
+
+		for _, data := range PolardbDescribedbinstancesResponse.Items.DBInstance {
+			if _, existed := idsMap[data.DBInstanceId]; len(idsMap) > 0 && !existed {
+				continue
+			}
+			i := map[string]interface{}{
+				"id":       data.DBInstanceId,
+				"category": data.Category,
+
+				"db_instance_description": data.DBInstanceDescription,
+
+				"db_instance_class": data.DBInstanceClass,
+
+				"db_instance_id": data.DBInstanceId,
+
+				"db_instance_net_type": data.DBInstanceNetType,
+
+				"db_instance_storage_type": data.DBInstanceStorageType,
+
+				"engine": data.Engine,
+
+				"engine_version": data.EngineVersion,
+
+				"expire_time": data.ExpireTime,
+
+				"guard_db_instance_id": data.GuardDBInstanceId,
+
+				"lock_mode": data.LockMode,
+
+				"lock_reason": data.LockReason,
+
+				"master_instance_id": data.MasterInstanceId,
+
+				"network_type": data.InstanceNetworkType,
+
+				"region_id": data.RegionId,
+
+				"resource_group_id": data.ResourceGroupId,
+
+				"status": data.DBInstanceStatus,
+
+				"temp_db_instance_id": data.TempDBInstanceId,
+
+				"vswitch_id": data.VSwitchId,
+
+				"vpc_cloud_instance_id": data.VpcCloudInstanceId,
+
+				"vpc_id": data.VpcId,
+			}
+			datas = append(datas, i)
+
+			db_instance_id := data.DBInstanceId
+
+			ids = append(ids, db_instance_id)
+		}
+		pageNumber += 1
 	}
 
 	d.SetId(dataResourceIdHash(ids))

@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc-polardb-instance_mysql%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceConfigDependence("MySQL"))
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceVpcDependence("MySQL"))
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -38,16 +38,16 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cpu_type":                 "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.cpu_type}",
-					"engine":                   "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.engine}",
-					"engine_version":           "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.engine_version}",
-					"db_instance_class":        "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.id}",
-					"db_instance_storage":      "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.storage_min}",
+					"cpu_type":                 "${local.polardb_instance_type_0.cpu_type}",
+					"engine":                   "${local.polardb_instance_type_0.engine}",
+					"engine_version":           "${local.polardb_instance_type_0.engine_version}",
+					"db_instance_class":        "${local.polardb_instance_type_0.id}",
+					"db_instance_storage":      "${local.polardb_instance_type_0.storage_min}",
 					"encryption":               "true",
 					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            name,
-					"db_instance_storage_type": "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.storage_type}",
+					"db_instance_storage_type": "${local.polardb_instance_type_0.storage_type}",
 					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
 					"parameters": []map[string]interface{}{{
 						"name":  "show_old_temporals",
@@ -60,7 +60,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 						"instance_name":       name,
 						"db_instance_class":   CHECKSET,
 						"db_instance_storage": CHECKSET,
-						"security_ips.#":"2",
+						"security_ips.#":      "2",
 					}),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						resourceId,     // Resource address
@@ -90,7 +90,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_instance_storage": "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.storage_min}+10",
+					"db_instance_storage": "${local.polardb_instance_type_0.storage_min}+10",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{}),
@@ -98,7 +98,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_instance_class":        "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.1.id}",
+					"db_instance_class": "${local.polardb_instance_type_1.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{}),
@@ -182,23 +182,12 @@ func testPolardbAccCheckSecurityIpExists(n string, ips []map[string]interface{})
 	}
 }
 
-func resourcePolardbInstanceConfigDependence(engine string) func(string) string {
+func resourcePolardbInstanceVpcDependence(engine string) func(string) string {
 	return func(name string) string {
 		return fmt.Sprintf(`
-%s
-
-variable "name" {
-	default = "%s"
-}
-data "alibabacloudstack_polardb_instance_types" "anyone" {
-	engine = "%s"
-	sorted_by = "CPU"
-}
-resource "alibabacloudstack_security_group" "default" {
-	name   = "${var.name}"
-	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-}
-`, VSwitchCommonTestCase, name, engine)
+		%s
+		%s
+`, resourcePolardbInstanceClassicConfigDependence(engine)(name), SecurityGroupCommonTestCase)
 	}
 }
 
@@ -229,16 +218,16 @@ func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cpu_type":                 "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.cpu_type}",
-					"engine":                   "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.engine}",
-					"engine_version":           "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.engine_version}",
-					"db_instance_class":        "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.id}",
-					"db_instance_storage":      "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.storage_min}",
+					"cpu_type":                 "${local.polardb_instance_type_0.cpu_type}",
+					"engine":                   "${local.polardb_instance_type_0.engine}",
+					"engine_version":           "${local.polardb_instance_type_0.engine_version}",
+					"db_instance_class":        "${local.polardb_instance_type_0.id}",
+					"db_instance_storage":      "${local.polardb_instance_type_0.storage_min}",
 					"encryption":               "true",
 					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            name,
-					"db_instance_storage_type": "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.storage_type}",
+					"db_instance_storage_type": "${local.polardb_instance_type_0.storage_type}",
 					"tde_status":               "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -261,15 +250,15 @@ func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 				),
 			},
 			{
-							Config: testAccConfig(map[string]interface{}{
-								"enable_ssl": "false",
-							}),
-							Check: resource.ComposeTestCheckFunc(
-								testAccCheck(map[string]string{
-									"enable_ssl": "false",
-								}),
-							),
-						},
+				Config: testAccConfig(map[string]interface{}{
+					"enable_ssl": "false",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable_ssl": "false",
+					}),
+				),
+			},
 		},
 	})
 }
@@ -299,16 +288,16 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cpu_type":                 "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.cpu_type}",
-					"engine":                   "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.engine}",
-					"engine_version":           "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.engine_version}",
-					"db_instance_class":        "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.id}",
-					"db_instance_storage":      "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.storage_min}",
+					"cpu_type":                 "${local.polardb_instance_type_0.cpu_type}",
+					"engine":                   "${local.polardb_instance_type_0.engine}",
+					"engine_version":           "${local.polardb_instance_type_0.engine_version}",
+					"db_instance_class":        "${local.polardb_instance_type_0.id}",
+					"db_instance_storage":      "${local.polardb_instance_type_0.storage_min}",
 					"encryption":               "true",
 					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            "${var.name}",
-					"db_instance_storage_type": "${data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.storage_type}",
+					"db_instance_storage_type": "${local.polardb_instance_type_0.storage_type}",
 					"enable_ssl":               "true",
 					"acl":                      "require",
 					"tde_status":               "true",
@@ -346,16 +335,26 @@ func resourcePolardbInstanceClassicConfigDependence(engine string) func(string) 
 variable "name" {
 	default = "%s"
 }
-%s
-resource "alibabacloudstack_kms_key" "key" {
-  description             = "Hello KMS"
-  pending_window_in_days  = "7"
+
+data "alibabacloudstack_polardb_instance_types" "intel" {
+	engine = "%s"
+	cpu_type = "intel"
+	sorted_by = "CPU"
 }
+
 data "alibabacloudstack_polardb_instance_types" "anyone" {
 	engine = "%s"
 	sorted_by = "CPU"
 }
-`, name, DataZoneCommonTestCase, engine)
+
+locals {
+	polardb_instance_type_0 = length(data.alibabacloudstack_polardb_instance_types.intel.instance_types) > 1 ? data.alibabacloudstack_polardb_instance_types.intel.instance_types.0 : data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0
+	polardb_instance_type_1 = length(data.alibabacloudstack_polardb_instance_types.intel.instance_types) > 1 ? data.alibabacloudstack_polardb_instance_types.intel.instance_types.1 : data.alibabacloudstack_polardb_instance_types.anyone.instance_types.1
+}
+
+%s
+
+`, name, engine, engine, KeyCommonTestCase)
 	}
 }
 

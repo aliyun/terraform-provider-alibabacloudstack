@@ -21,6 +21,68 @@ func TestAccAlibabacloudStackPolardbInstancesDataSource(t *testing.T) {
 		}),
 	}
 
+	networkTypeConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"network_type":   string(Vpc),
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"network_type":   string(Classic),
+		}),
+	}
+
+	engineConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"engine":         "${alibabacloudstack_polardb_dbinstance.default.engine}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"engine":         "fake_engine_id",
+		}),
+	}
+
+	engineVersionConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"engine_version": "${alibabacloudstack_polardb_dbinstance.default.engine_version}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"engine_version": "fake_engineversion_id",
+		}),
+	}
+
+	instanceClassConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"db_instance_class": "${local.instance_type}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"db_instance_class": "fake_instance_id",
+		}),
+	}
+
+	vswtichIdConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"vswitch_id": "${alibabacloudstack_polardb_dbinstance.default.vswitch_id}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"vswitch_id": "${alibabacloudstack_polardb_dbinstance.default.vswitch_id}",
+		}),
+	}
+
+	vpcIdConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
+		}),
+	}
+
 	dbInstanceClassConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"db_instance_class": "${alibabacloudstack_polardb_dbinstance.default.db_instance_class}",
@@ -47,11 +109,11 @@ func TestAccAlibabacloudStackPolardbInstancesDataSource(t *testing.T) {
 
 	var existPolardbInstancesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":                                           "1",
-			"db_instances.#":                                  "1",
-			"db_instances.0.id":                               CHECKSET,
-			"db_instances.0.db_instance_id":                   CHECKSET,
-			"db_instances.0.db_instance_description":          name,
+			"ids.#":                                  "1",
+			"db_instances.#":                         "1",
+			"db_instances.0.id":                      CHECKSET,
+			"db_instances.0.db_instance_id":          CHECKSET,
+			"db_instances.0.db_instance_description": name,
 		}
 	}
 
@@ -67,7 +129,7 @@ func TestAccAlibabacloudStackPolardbInstancesDataSource(t *testing.T) {
 		existMapFunc: existPolardbInstancesMapFunc,
 		fakeMapFunc:  fakePolardbInstancesMapFunc,
 	}
-	polardbInstancesCheckInfo.dataSourceTestCheck(t, rand, dbInstanceIdConf, dbInstanceClassConf, allConf)
+	polardbInstancesCheckInfo.dataSourceTestCheck(t, rand, dbInstanceIdConf, dbInstanceClassConf, networkTypeConf, engineConf, engineVersionConf, instanceClassConf, vswtichIdConf, vpcIdConf, allConf)
 }
 
 func dataSourcePolardbInstancesConfigDependence(name string) string {
@@ -77,20 +139,29 @@ variable "name" {
 }
 
 %s
+data "alibabacloudstack_polardb_instance_types" "intel" {
+	cpu_type = "intel"
+	sorted_by = "CPU"
+}
+
 data "alibabacloudstack_polardb_instance_types" "anyone" {
 	sorted_by = "CPU"
 }
 
+locals {
+	instance_type = length(data.alibabacloudstack_polardb_instance_types.intel.instance_types) > 0 ? data.alibabacloudstack_polardb_instance_types.intel.instance_types.0 : data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0
+}
+
 resource "alibabacloudstack_polardb_dbinstance" "default" {
-  engine                    = data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.engine
-  engine_version            = data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.engine_version
+  engine                    = local.instance_type.engine
+  engine_version            = local.instance_type.engine_version
   instance_name             = var.name
-  db_instance_storage_type  = data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.storage_type
-  db_instance_storage       = data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.storage_min
-  db_instance_class         = data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.id
+  db_instance_storage_type  = local.instance_type.storage_type
+  db_instance_storage       = local.instance_type.storage_min
+  db_instance_class         = local.instance_type.id
   zone_id                   = data.alibabacloudstack_zones.default.zones.0.id
   vswitch_id                = alibabacloudstack_vpc_vswitch.default.id
-  cpu_type                  = data.alibabacloudstack_polardb_instance_types.anyone.instance_types.0.cpu_type
+  cpu_type                  = local.instance_type.cpu_type
 }
 `, name, VSwitchCommonTestCase)
 }

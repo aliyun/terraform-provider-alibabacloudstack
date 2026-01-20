@@ -294,6 +294,10 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"network_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"tags": caseInsensitiveTagsSchema(),
 		},
 	}
@@ -879,6 +883,7 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 	connectivity.SetResourceData(d, instance.Items.DBInstanceAttribute[0].PayType, "payment_type", "instance_charge_type")
 	d.Set("period", d.Get("period"))
 	d.Set("vswitch_id", instance.Items.DBInstanceAttribute[0].VSwitchId)
+	d.Set("network_type", instance.Items.DBInstanceAttribute[0].InstanceNetworkType)
 	d.Set("connection_string", instance.Items.DBInstanceAttribute[0].ConnectionString)
 	connectivity.SetResourceData(d, instance.Items.DBInstanceAttribute[0].DBInstanceDescription, "db_instance_description", "instance_name")
 	d.Set("maintain_time", instance.Items.DBInstanceAttribute[0].MaintainTime)
