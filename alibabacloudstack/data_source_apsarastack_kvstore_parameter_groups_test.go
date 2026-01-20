@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackRedisParameterGroupsDataSource(t *testing.T) {
 			"ids":            []string{"${alibabacloudstack_kvstore_parameter_group.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"character_type": "${alibabacloudstack_kvstore_parameter_group.default.character_type}_fake",
+			"character_type": "normal",
 			"ids":            []string{"${alibabacloudstack_kvstore_parameter_group.default.id}"},
 		}),
 	}
@@ -47,7 +47,7 @@ func TestAccAlibabacloudStackRedisParameterGroupsDataSource(t *testing.T) {
 			"ids":            []string{"${alibabacloudstack_kvstore_parameter_group.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"engine_version": "${alibabacloudstack_kvstore_parameter_group.default.engine_version}_fake",
+			"engine_version": "4.0",
 			"ids":            []string{"${alibabacloudstack_kvstore_parameter_group.default.id}"},
 		}),
 	}
@@ -62,8 +62,8 @@ func TestAccAlibabacloudStackRedisParameterGroupsDataSource(t *testing.T) {
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":            []string{"${alibabacloudstack_kvstore_parameter_group.default.id}_fake"},
 			"name_regex":     "${alibabacloudstack_kvstore_parameter_group.default.parameter_group_name}_fake",
-			"character_type": "${alibabacloudstack_kvstore_parameter_group.default.character_type}_fake",
-			"engine_version": "${alibabacloudstack_kvstore_parameter_group.default.engine_version}_fake",
+			"character_type": "normal",
+			"engine_version": "4.0",
 		}),
 	}
 

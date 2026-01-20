@@ -29,8 +29,9 @@ func dataSourceAlibabacloudStackKvstoreParameterGroups() *schema.Resource {
 				Optional: true,
 			},
 			"character_type": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"logic", "normal"}, false),
 			},
 			"names": {
 				Type:     schema.TypeList,
