@@ -14,6 +14,16 @@ func TestAccAlibabacloudStackGpdbInstanceTypesDataSource(t *testing.T) {
 		dataSourceGpdbInstanceTypesConfigDependence)
 
 	// Configuration with engine version and sorting
+	
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake_id"},
+		}),
+	}
+
 	engineVersionConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"engine_version": "${data.alibabacloudstack_gpdb_instance_types.anyone.instance_types.0.engine_version}",
@@ -81,7 +91,7 @@ func TestAccAlibabacloudStackGpdbInstanceTypesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeGpdbInstanceTypesMapFunc,
 	}
 
-	GpdbInstanceTypesCheckInfo.dataSourceTestCheck(t, rand, engineVersionConf, cpuConf, memoryConf)
+	GpdbInstanceTypesCheckInfo.dataSourceTestCheck(t, rand, idsConf, engineVersionConf, cpuConf, memoryConf)
 }
 
 func dataSourceGpdbInstanceTypesConfigDependence(name string) string {

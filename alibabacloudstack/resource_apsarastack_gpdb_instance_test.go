@@ -141,6 +141,7 @@ func TestAccAlibabacloudStackGpdbInstance_classic(t *testing.T) {
 					"db_instance_storage_type": "local_ssd",
 					"seg_node_num":             "2",
 					"cpu_type":                 "Intel",
+					"security_ip_list": []string{"10.168.1.11","10.168.1.12"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
