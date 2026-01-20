@@ -34,19 +34,19 @@ func resourceAlibabacloudStackSlbRule() *schema.Resource {
 			},
 
 			"name": {
-				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ForceNew:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'rule_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'rule_name' instead.",
 				ConflictsWith: []string{"rule_name"},
 			},
 
 			"rule_name": {
-				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ForceNew:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"name"},
 			},
 
@@ -238,6 +238,7 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 	}
 
 	response, _ := raw.(*slb.CreateRulesResponse)
+
 	d.SetId(response.Rules.Rule[0].RuleId)
 
 	return nil
@@ -246,41 +247,89 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 func resourceAlibabacloudStackSlbRuleRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
-	object, err := slbService.DescribeSlbRule(d.Id())
+	request := slb.CreateDescribeRulesRequest()
+	client.InitRpcRequest(*request.RpcRequest)
+	request.LoadBalancerId = d.Get("load_balancer_id").(string)
+	request.ListenerPort = requests.NewInteger(d.Get("frontend_port").(int))
 
+	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
+		return slbClient.DescribeRules(request)
+	})
+	response, ok := raw.(*slb.DescribeRulesResponse)
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_rules", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	objectv2, err := slbService.DescribeSlbRule(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
-			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
 	}
 
-	connectivity.SetResourceData(d, object.RuleName, "rule_name", "name")
-	d.Set("load_balancer_id", object.LoadBalancerId)
-	if port, err := strconv.Atoi(object.ListenerPort); err != nil {
+	found := false
+	for _, rule := range response.Rules.Rule {
+		if rule.RuleId == d.Id() {
+			connectivity.SetResourceData(d, rule.RuleName, "rule_name", "name")
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return errmsgs.WrapError(fmt.Errorf("SLB rule %s not found in the response", d.Id()))
+	}
+
+	var targetRule *slb.Rule
+	for _, rule := range response.Rules.Rule {
+		if rule.RuleId == d.Id() {
+			targetRule = &rule
+			break
+		}
+	}
+
+	if targetRule == nil {
+		return errmsgs.WrapError(fmt.Errorf("SLB rule %s not found", d.Id()))
+	}
+
+	d.Set("load_balancer_id", objectv2.LoadBalancerId)
+	if port, err := strconv.Atoi(objectv2.ListenerPort); err != nil {
 		return errmsgs.WrapError(err)
 	} else {
 		d.Set("frontend_port", port)
 	}
-	d.Set("domain", object.Domain)
-	d.Set("url", object.Url)
-	d.Set("server_group_id", object.VServerGroupId)
-	d.Set("sticky_session", object.StickySession)
-	d.Set("sticky_session_type", object.StickySessionType)
-	d.Set("unhealthy_threshold", object.UnhealthyThreshold)
-	d.Set("healthy_threshold", object.HealthyThreshold)
-	d.Set("health_check_timeout", object.HealthCheckTimeout)
-	d.Set("health_check_connect_port", object.HealthCheckConnectPort)
-	d.Set("health_check_uri", object.HealthCheckURI)
-	d.Set("health_check", object.HealthCheck)
-	d.Set("health_check_http_code", object.HealthCheckHttpCode)
-	d.Set("health_check_interval", object.HealthCheckInterval)
-	d.Set("scheduler", object.Scheduler)
-	d.Set("listener_sync", object.ListenerSync)
-	d.Set("cookie_timeout", object.CookieTimeout)
-	d.Set("cookie", object.Cookie)
-	d.Set("health_check_domain", object.HealthCheckDomain)
+	d.Set("domain", targetRule.Domain)
+	d.Set("url", targetRule.Url)
+	d.Set("server_group_id", targetRule.VServerGroupId)
+	d.Set("sticky_session", targetRule.StickySession)
+	d.Set("sticky_session_type", targetRule.StickySessionType)
+	d.Set("unhealthy_threshold", targetRule.UnhealthyThreshold)
+	d.Set("healthy_threshold", targetRule.HealthyThreshold)
+	d.Set("health_check_timeout", targetRule.HealthCheckTimeout)
+	d.Set("health_check_connect_port", targetRule.HealthCheckConnectPort)
+	d.Set("health_check_uri", targetRule.HealthCheckURI)
+	d.Set("health_check", targetRule.HealthCheck)
+	d.Set("health_check_http_code", targetRule.HealthCheckHttpCode)
+	d.Set("health_check_interval", targetRule.HealthCheckInterval)
+	d.Set("scheduler", targetRule.Scheduler)
+	d.Set("listener_sync", targetRule.ListenerSync)
+	d.Set("cookie_timeout", targetRule.CookieTimeout)
+	d.Set("cookie", targetRule.Cookie)
+	d.Set("health_check_domain", targetRule.HealthCheckDomain)
+	if targetRule.StickySessionType != "" {
+		if targetRule.StickySessionType == string(InsertStickySessionType) {
+			d.Set("cookie", "")
+		} else {
+			d.Set("cookie_timeout", 0)
+
+		}
+
+	}
 	return nil
 }
 
@@ -323,10 +372,9 @@ func resourceAlibabacloudStackSlbRuleUpdate(d *schema.ResourceData, meta interfa
 		update = true
 	}
 
-	fullUpdate = d.HasChanges("listener_sync","scheduler","cookie","cookie_timeout","health_check", "health_check_http_code",
-		"health_check_interval","health_check_domain","health_check_uri","health_check_connect_port", "health_check_timeout",
-		"healthy_threshold","unhealthy_threshold", "sticky_session", "sticky_session_type")
-
+	fullUpdate = d.HasChanges("listener_sync", "scheduler", "cookie", "cookie_timeout", "health_check", "health_check_http_code",
+		"health_check_interval", "health_check_domain", "health_check_uri", "health_check_connect_port", "health_check_timeout",
+		"healthy_threshold", "unhealthy_threshold", "sticky_session", "sticky_session_type")
 	if fullUpdate {
 		request.ListenerSync = d.Get("listener_sync").(string)
 		if listenerSync, ok := d.GetOk("listener_sync"); ok && listenerSync == string(OffFlag) {

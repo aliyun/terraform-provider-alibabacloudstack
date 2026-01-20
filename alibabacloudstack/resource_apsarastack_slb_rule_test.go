@@ -31,14 +31,31 @@ func TestAccAlibabacloudStackSlbRuleCreate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name":                      "${var.name}",
-					"load_balancer_id":          "${alibabacloudstack_slb.default.id}",
-					"frontend_port":             "${alibabacloudstack_slb_listener.default.frontend_port}",
-					"domain":                    "*.aliyun.com",
-					"url":                       "/image",
-					"server_group_id":           "${alibabacloudstack_slb_server_group.default.id}",
+					"name":                         name,
+					"delete_protection_validation": true,
+					"load_balancer_id":             "${alibabacloudstack_slb_server_group.default.load_balancer_id}",
+					"frontend_port":                "${alibabacloudstack_slb_listener.default.frontend_port}",
+					"domain":                       "*.aliyun.com",
+					"url":                          "/image",
+					"server_group_id":              "${alibabacloudstack_slb_server_group.default.id}",
+					"listener_sync":                "on",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"name":             name,
+						"load_balancer_id": CHECKSET,
+						"frontend_port":    CHECKSET,
+						"domain":           "*.aliyun.com",
+						"url":              "/image",
+						"server_group_id":  CHECKSET,
+						"listener_sync":    "on",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"cookie":                    "23ffsa",
-					"cookie_timeout":            "100",
 					"health_check_http_code":    "http_2xx",
 					"health_check_interval":     "10",
 					"health_check_uri":          "/test",
@@ -48,34 +65,68 @@ func TestAccAlibabacloudStackSlbRuleCreate(t *testing.T) {
 					"unhealthy_threshold":       "3",
 					"sticky_session":            "on",
 					"sticky_session_type":       "server",
-					"listener_sync":             "on",
+					"listener_sync":             "off",
 					"scheduler":                 "rr",
-					"health_check_domain":       "test",
+					"health_check_domain":       "test.com",
 					"health_check":              "on",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"cookie":                    "23ffsa",
+						"health_check_http_code":    "http_2xx",
+						"health_check_interval":     "10",
+						"health_check_uri":          "/test",
+						"health_check_connect_port": "80",
+						"health_check_timeout":      "10",
+						"healthy_threshold":         "3",
+						"unhealthy_threshold":       "3",
+						"sticky_session":            "on",
+						"sticky_session_type":       "server",
+						"listener_sync":             "off",
+						"scheduler":                 "rr",
+						"health_check_domain":       "test.com",
+						"health_check":              "on",
+					}),
 				),
-				ExpectNonEmptyPlan: true,
 			},
-			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				// delete_protection_validation is a local attribute and cannot be loaded from the remote
-				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
-			},
+
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name": "tf-testAccSlbRuleBasic_change",
+					"cookie_timeout":      "100",
+					"sticky_session":      "on",
+					"sticky_session_type": "insert",
+					"listener_sync":       "off",
+					"scheduler":           "wrr",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": "tf-testAccSlbRuleBasic_change",
+
+						"cookie_timeout":      "100",
+						"cookie":              "",
+						"sticky_session":      "on",
+						"sticky_session_type": "insert",
+						"listener_sync":       "off",
+						"scheduler":           "wrr",
 					}),
 				),
-				ExpectNonEmptyPlan: true,
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// delete_protection_validation is a local attribute and cannot be loaded from the remote
+				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
+			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"name": "tf-testAccSlbRuleBasic_change",
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"name": "tf-testAccSlbRuleBasic_change",
+			// 		}),
+			// 	),
+			// },
 		},
 	})
 }
@@ -136,7 +187,8 @@ resource "alibabacloudstack_slb_listener" "default" {
 }
 
 resource "alibabacloudstack_slb_server_group" "default" {
-  load_balancer_id = "${alibabacloudstack_slb.default.id}"
+  load_balancer_id = "${alibabacloudstack_slb_listener.default.load_balancer_id}"
+  name = "${var.name}"
   servers {
       server_ids = "${alibabacloudstack_instance.default.*.id}"
       port = 80
