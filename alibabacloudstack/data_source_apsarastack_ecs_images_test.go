@@ -6,22 +6,13 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackEcsImagesDataSource_basic(t *testing.T) {
+func TestAccAlibabacloudStackImagesDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_images.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		fmt.Sprintf("tf-testacc-%d", rand),
 		dataSourceImagesConfigDependence)
-
-	ownerConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"owners": "system",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"owners": "self",
-		}),
-	}
 	ownerNameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "^win.*",
@@ -29,7 +20,7 @@ func TestAccAlibabacloudStackEcsImagesDataSource_basic(t *testing.T) {
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "^win.*-fake",
-			"owners":     "system",
+			"owners":     "self",
 		}),
 	}
 
@@ -87,7 +78,7 @@ func TestAccAlibabacloudStackEcsImagesDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeImagesMapFunc,
 	}
 
-	imagesCheckInfo.dataSourceTestCheck(t, rand, ownerConf, ownerNameRegexConf, ownerRecentConf, allConf)
+	imagesCheckInfo.dataSourceTestCheck(t, rand, ownerNameRegexConf, ownerRecentConf, allConf)
 }
 
 func dataSourceImagesConfigDependence(name string) string {

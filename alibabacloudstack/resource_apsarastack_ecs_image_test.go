@@ -104,7 +104,7 @@ func TestAccAlibabacloudStackImageBasic(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackEcsImageSnapshot(t *testing.T) {
+func TestAccAlibabacloudStackImageSnapshot(t *testing.T) {
 	var v ecs.Image
 
 	resourceId := "alibabacloudstack_image.default"
