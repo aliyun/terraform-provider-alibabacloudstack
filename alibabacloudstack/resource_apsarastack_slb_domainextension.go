@@ -23,20 +23,20 @@ func resourceAlibabacloudStackSlbDomainExtension() *schema.Resource {
 				ForceNew: true,
 			},
 			"frontend_port": {
-				Type:         schema.TypeInt,
-				ValidateFunc: validation.IntBetween(1, 65535),
-				Optional:true,
-				Computed:true,
-				ForceNew:     true,
-				Deprecated:   "Field 'frontend_port' is deprecated and will be removed in a future release. Please use new field 'listener_port' instead.",
+				Type:          schema.TypeInt,
+				ValidateFunc:  validation.IntBetween(1, 65535),
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'frontend_port' is deprecated and will be removed in a future release. Please use new field 'listener_port' instead.",
 				ConflictsWith: []string{"listener_port"},
 			},
 			"listener_port": {
-				Type:         schema.TypeInt,
-				ValidateFunc: validation.IntBetween(1, 65535),
-				Optional:true,
-				Computed:true,
-				ForceNew:     true,
+				Type:          schema.TypeInt,
+				ValidateFunc:  validation.IntBetween(1, 65535),
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"frontend_port"},
 			},
 			"domain": {
@@ -49,9 +49,9 @@ func resourceAlibabacloudStackSlbDomainExtension() *schema.Resource {
 				Required: true,
 			},
 			"id": {
-				Type:         schema.TypeString,
-				Computed:     true,
-				Deprecated:   "Field 'id' is deprecated and will be removed in a future release. Please use new field 'domain_extension_id' instead.",
+				Type:       schema.TypeString,
+				Computed:   true,
+				Deprecated: "Field 'id' is deprecated and will be removed in a future release. Please use new field 'domain_extension_id' instead.",
 			},
 			"domain_extension_id": {
 				Type:     schema.TypeString,
@@ -64,8 +64,8 @@ func resourceAlibabacloudStackSlbDomainExtension() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackSlbDomainExtensionCreate, 
-		resourceAlibabacloudStackSlbDomainExtensionRead, resourceAlibabacloudStackSlbDomainExtensionUpdate, 
+	setResourceFunc(resource, resourceAlibabacloudStackSlbDomainExtensionCreate,
+		resourceAlibabacloudStackSlbDomainExtensionRead, resourceAlibabacloudStackSlbDomainExtensionUpdate,
 		resourceAlibabacloudStackSlbDomainExtensionDelete)
 	return resource
 }
@@ -118,7 +118,6 @@ func resourceAlibabacloudStackSlbDomainExtensionRead(d *schema.ResourceData, met
 	domainExtension, err := slbService.DescribeDomainExtensionAttribute(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
-			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)

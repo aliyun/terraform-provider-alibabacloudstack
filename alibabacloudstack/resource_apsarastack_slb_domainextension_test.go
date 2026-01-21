@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackSlbDomainExtension0(t *testing.T) {
-	var v map[string]interface{}
+	var v *slb.DescribeDomainExtensionAttributeResponse
 
 	resourceId := "alibabacloudstack_slb_domainextension.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbDomainextensionCheckmap)
@@ -29,8 +30,9 @@ func TestAccAlibabacloudStackSlbDomainExtension0(t *testing.T) {
 
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 
 		CheckDestroy: rac.checkResourceDestroy(),
 
@@ -39,39 +41,43 @@ func TestAccAlibabacloudStackSlbDomainExtension0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"server_certificate_id": "1511928242963727_183698fd346_-318606714_-773395734",
+					"server_certificate_id": "${alibabacloudstack_slb_listener.new.server_certificate_id}",
 
-					"load_balancer_id": "lb-bp1jijiyb2hdauenc32zi",
+					"listener_port":                "${alibabacloudstack_slb_listener.new.frontend_port}",
+					"delete_protection_validation": "true",
+					"load_balancer_id":             "${alibabacloudstack_slb_listener.new.load_balancer_id}",
 
-					"domain": "test",
+					"domain": "test.com",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"server_certificate_id": "1511928242963727_183698fd346_-318606714_-773395734",
+						"server_certificate_id": CHECKSET,
+						"listener_port":         CHECKSET,
 
-						"load_balancer_id": "lb-bp1jijiyb2hdauenc32zi",
+						"load_balancer_id": CHECKSET,
 
-						"domain": "test",
+						"domain": "test.com",
 					}),
 				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"server_certificate_id": "1511928242963727_183698fd346_-318606714_-773395734",
+					"server_certificate_id": "${alibabacloudstack_slb_server_certificate.servercertificate.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"server_certificate_id": "1511928242963727_183698fd346_-318606714_-773395734",
+						"server_certificate_id": CHECKSET,
 					}),
 				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
 			},
 		},
 	})
@@ -96,7 +102,49 @@ variable "name" {
     default = "%s"
 }
 
+%s
+
+resource "alibabacloudstack_slb_server_certificate" "default" {
+	name = "${var.name}"
+	server_certificate = %s
+	private_key = %s
+  }
+
+resource "alibabacloudstack_slb_server_certificate" "servercertificate" {
+  name               = "slbservercertificate"
+  server_certificate = %s
+  private_key        = %s
+}
 
 
-`, name)
+resource "alibabacloudstack_slb_loadbalancer" "default" {
+	name = "${var.name}"
+	//address_type       = "internet"
+  	specification        = "slb.s2.small"
+  }
+
+
+resource "alibabacloudstack_slb_server_group" "default" {
+  vserver_group_name = "${var.name}"
+  load_balancer_id = "${alibabacloudstack_slb_loadbalancer.default.id}"
+  servers {
+      server_ids = ["${alibabacloudstack_ecs_instance.default.id}"]
+      port = 80
+      weight = 100
+    }
+}
+
+resource "alibabacloudstack_slb_listener" "new" {
+  load_balancer_id        = "${alibabacloudstack_slb_loadbalancer.default.id}"
+  bandwidth               = "10"
+  frontend_port           = "443"
+  backend_port            = "80"
+  sticky_session          = "off"
+  health_check            = "off"
+  protocol                = "https"
+  server_certificate_id   = "${alibabacloudstack_slb_server_certificate.default.id}"
+}
+
+
+`, name, ECSInstanceCommonTestCase, ServerCertificateTestCase(), RsaPrivateKeyTestCase(), ServerCertificateTestCase(), RsaPrivateKeyTestCase())
 }
