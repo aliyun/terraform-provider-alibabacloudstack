@@ -51,7 +51,6 @@ func dataSourceAlibabacloudStackAdbDbClusters() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"ClassChanging", "Creating", "Deleting", "NetAddressCreating", "NetAddressDeleting", "Preparing", "Restoring", "Running"}, false),
 			},
-			"tags": tagsSchema(),
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -236,16 +235,6 @@ func dataSourceAlibabacloudStackAdbDbClustersRead(d *schema.ResourceData, meta i
 	}
 	if v, ok := d.GetOk("status"); ok {
 		request["DBClusterStatus"] = v
-	}
-	if v, ok := d.GetOk("tags"); ok {
-		tags := make([]map[string]interface{}, 0)
-		for key, value := range v.(map[string]interface{}) {
-			tags = append(tags, map[string]interface{}{
-				"Key":   key,
-				"Value": value.(string),
-			})
-		}
-		request["Tag.*"] = tags
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1

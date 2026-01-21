@@ -49,12 +49,17 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			"db_cluster_category": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Basic", "Cluster", "basic", "cluster"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Basic", "Cluster"}, true),
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool{
+					return strings.EqualFold(oldValue, newValue)
+				},
+				DiffSuppressOnRefresh: true,
 			},
 			"db_cluster_class": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "It duplicates with attribute db_node_class and is deprecated from 1.121.2.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Deprecated:    "Field 'db_cluster_class' is deprecated and will be removed in a future release. Please use new field 'db_node_class' instead.",
+				ConflictsWith: []string{"db_node_class"},
 			},
 			"storage_resource": {
 				Type:     schema.TypeString,
@@ -81,12 +86,13 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			"cpu_type": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"intel", "hygon"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"intel", "hygon", "x86"}, false),
 			},
 			"db_node_class": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"db_cluster_class"},
 			},
 			"db_node_count": {
 				Type:     schema.TypeInt,
@@ -140,8 +146,12 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 				Computed:      true,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringInSlice([]string{"PayAsYouGo", "Subscription"}, false),
-				Deprecated:    "Field 'payment_type' is deprecated and will be removed in a future release. Please use new field 'pay_type' instead.",
+				Deprecated:    "Field 'payment_type' is deprecated and will and is scheduled for removal in version 3.21.0. Please use new field 'key_pair_name' instead.",
 				ConflictsWith: []string{"pay_type"},
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					return true
+				},
+				DiffSuppressOnRefresh: true,
 			},
 			"pay_type": {
 				Type:          schema.TypeString,
@@ -150,6 +160,11 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 				ForceNew:      true,
 				ValidateFunc:  validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
 				ConflictsWith: []string{"payment_type"},
+				Deprecated:    "Field 'pay_type' is deprecated and will and is scheduled for removal in version 3.21.0. Please use new field 'key_pair_name' instead.",
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					return true
+				},
+				DiffSuppressOnRefresh: true,
 			},
 			"period": {
 				Type:             schema.TypeInt,
@@ -217,7 +232,7 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackAdbDbClusterCreate, 
+	setResourceFunc(resource, resourceAlibabacloudStackAdbDbClusterCreate,
 		resourceAlibabacloudStackAdbDbClusterRead,
 		resourceAlibabacloudStackAdbDbClusterUpdate,
 		resourceAlibabacloudStackAdbDbClusterDelete)
@@ -232,9 +247,7 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 	request := adb.CreateCreateDBClusterRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.DBClusterCategory = d.Get("db_cluster_category").(string)
-	if v, ok := d.GetOk("db_node_class"); ok {
-		request.DBClusterClass = v.(string)
-	} else if v, ok := d.GetOk("db_cluster_class"); ok {
+	if v, ok := connectivity.GetResourceDataOk(d, "db_node_class", "db_cluster_class"); ok {
 		request.DBClusterClass = v.(string)
 	}
 
@@ -609,7 +622,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 
 func resourceAlibabacloudStackAdbDbClusterDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	//adbService := AdbService{client}
+	adbService := AdbService{client}
 	action := "DeleteDBCluster"
 	request := map[string]interface{}{
 		"DBClusterId": d.Id(),
@@ -621,10 +634,10 @@ func resourceAlibabacloudStackAdbDbClusterDelete(d *schema.ResourceData, meta in
 		}
 		return err
 	}
-	//stateConf := BuildStateConf([]string{"Waiting", "Running", "Failed", "Retry", "Pause", "Stop"}, []string{"Finished", "Closed", "Cancel"}, d.Timeout(schema.TimeoutDelete), 10*time.Minute, adbService.AdbTaskStateRefreshFunc(d.Id(), taskId))
-	//if _, err = stateConf.WaitForState(); err != nil {
-	//	return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	//}
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, adbService.AdbDbClusterStateRefreshFunc(d.Id(), []string{}))
+	if _, err = stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
 	return nil
 }
 

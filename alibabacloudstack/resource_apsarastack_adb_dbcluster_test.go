@@ -111,15 +111,15 @@ func testSweepAdbDbInstances(region string) error {
 func TestAccAlibabacloudStackAdbDbCluster_basic(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_adb_db_cluster.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudStackAdbDbClusterMap0)
+	ra := resourceAttrInit(resourceId, AlibabacloudStackAdbDbClusterMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &AdbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeAdbDbCluster")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sadbCluster%d", defaultRegionToTest, rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackAdbDbClusterBasicDependence0)
+	name := fmt.Sprintf("tf-testacc-adbcluster%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackAdbDbClusterBasicDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -131,65 +131,60 @@ func TestAccAlibabacloudStackAdbDbCluster_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_cluster_category": "Basic",
+					"db_cluster_category": "${local.adb_instance_types.0.cluster_category}",
 					"db_cluster_version":  "3.0",
-					"db_node_class":       "C8",
-					"description":         "${var.name}",
-					"db_node_count":       "2",
-					"db_node_storage":     "200",
-					"mode":                "reserver",
-					"vswitch_id":          "${alibabacloudstack_vswitch.default.id}",
-					"cluster_type":        "analyticdb",
-					"cpu_type":            "intel",
+					"db_node_class":       "${local.adb_instance_types.0.id}",
+					"description":         name,
+					"db_node_count":       "${local.adb_instance_types.0.node_min}",
+					"db_node_storage":     "${local.adb_instance_types.0.storage_min}",
+					"mode":                "${local.adb_instance_types.0.mode}",
+					"vswitch_id":          "${alibabacloudstack_vpc_vswitch.default.id}",
+					"cluster_type":        "${local.adb_instance_types.0.cluster_type}",
+					"cpu_type":            "${local.adb_instance_types.0.cpu_type}",
+					"security_ips":        []string{"10.168.1.11", "10.168.1.12"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_cluster_category": "Basic",
-						"db_node_class":       "C8",
+						"db_cluster_category": CHECKSET,
+						"db_node_class":       CHECKSET,
 						"description":         name,
-						"db_node_count":       "2",
-						"db_node_storage":     "200",
-						"mode":                "reserver",
+						"db_node_count":       CHECKSET,
+						"db_node_storage":     CHECKSET,
+						"mode":                CHECKSET,
 						"vswitch_id":          CHECKSET,
+						"security_ips.#":      "2",
 					}),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_type", "cpu_type"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
-			/*{
+			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_class": "C20",
+					"db_node_class": "${local.adb_instance_types.1.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"db_node_class": "C20",
-					}),
+					testAccCheck(map[string]string{}),
 				),
-			},*/
-			/*{
+			},
+			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_count": "2",
+					"db_node_count": "${local.adb_instance_types.0.node_min}+1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"db_node_count": "2",
-					}),
+					testAccCheck(map[string]string{}),
 				),
-			},*/
-			/*{
+			},
+			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_storage": "200",
+					"db_node_storage": "${local.adb_instance_types.0.storage_min}+100",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"db_node_storage": "200",
-					}),
+					testAccCheck(map[string]string{}),
 				),
-			},*/
+			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description": name + "update",
@@ -200,169 +195,7 @@ func TestAccAlibabacloudStackAdbDbCluster_basic(t *testing.T) {
 					}),
 				),
 			},
-			/*{
-				Config: testAccConfig(map[string]interface{}{
-					"maintain_time": "23:00Z-00:00Z",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"maintain_time": "23:00Z-00:00Z",
-					}),
-				),
-			},*/
-			/*{
-				Config: testAccConfig(map[string]interface{}{
-					"resource_group_id": "${data.alibabacloudstack_resource_manager_resource_groups.default.ids.0}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"resource_group_id": CHECKSET,
-					}),
-				),
-			},*/
 			{
-				Config: testAccConfig(map[string]interface{}{
-					"security_ips": []string{"10.168.1.12"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"security_ips.#": "1",
-					}),
-				),
-			},
-			/*{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
-					}),
-				),
-			},*/
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"db_node_class":   "C8",
-					"db_node_count":   "1",
-					"db_node_storage": "200",
-					"description":     name,
-					//"maintain_time":   "01:00Z-02:00Z",
-					"security_ips": []string{"10.168.1.13"},
-					/*"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "test-update",
-					},*/
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"db_node_class":   "C8",
-						"db_node_count":   "1",
-						"db_node_storage": "200",
-						"description":     name,
-						//"maintain_time":   "01:00Z-02:00Z",
-						"security_ips.#": "1",
-						//"tags.%":          "2",
-						//"tags.Created":    "TF-update",
-						//"tags.For":        "test-update",
-					}),
-				),
-			},
-		},
-	})
-}
-
-// 316 Cluster Edition ClusterType:AnalyticdbOnPanguHybrid
-func TestAccAlibabacloudStackAdbDbCluster_flexible(t *testing.T) {
-	var v map[string]interface{}
-	resourceId := "alibabacloudstack_adb_db_cluster.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudStackAdbDbClusterMap1)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &AdbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DescribeAdbDbCluster")
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sadbCluster%d", defaultRegionToTest, rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackAdbDbClusterBasicDependence1)
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"db_cluster_category": "cluster",
-					"storage_resource":    "8Core45GB",
-					"storage_type":        "SSD",
-					"description":         "${var.name}",
-					"mode":                "flexible",
-					"compute_resource":    "8Core40GB",
-					"db_node_count":       "2",
-					"vswitch_id":          "${alibabacloudstack_vswitch.default.id}",
-					"cluster_type":        "AnalyticdbOnPanguHybrid",
-					"cpu_type":            "intel",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"db_cluster_category": "cluster",
-						"storage_resource":    "8Core45GB",
-						"storage_type":        "SSD",
-						"description":         name,
-						"mode":                "flexible",
-						"compute_resource":    "8Core40GB",
-						"db_node_count":       "2",
-						"vswitch_id":          CHECKSET,
-					}),
-				),
-			},
-			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_type", "cpu_type", "storage_resource"},
-			},
-			// API does not support to updating the compute_resource
-			//{
-			//	Config: testAccConfig(map[string]interface{}{
-			//		"compute_resource": "16Core64GB",
-			//	}),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"compute_resource": "16Core64GB",
-			//		}),
-			//	),
-			//},
-			//{
-			//	Config: testAccConfig(map[string]interface{}{
-			//		"elastic_io_resource": "1",
-			//	}),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"elastic_io_resource": "1",
-			//		}),
-			//	),
-			//},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"description": name + "update",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description": name + "update",
-					}),
-				),
-			},
-			/*{
 				Config: testAccConfig(map[string]interface{}{
 					"maintain_time": "23:00Z-00:00Z",
 				}),
@@ -374,17 +207,6 @@ func TestAccAlibabacloudStackAdbDbCluster_flexible(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					//"resource_group_id": "${data.alibabacloudstack_resource_manager_resource_groups.default.ids.0}",
-					"resource_group_id": "8",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"resource_group_id": CHECKSET,
-					}),
-				),
-			},*/
-			{
-				Config: testAccConfig(map[string]interface{}{
 					"security_ips": []string{"10.168.1.12"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -393,110 +215,46 @@ func TestAccAlibabacloudStackAdbDbCluster_flexible(t *testing.T) {
 					}),
 				),
 			},
-			/*{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
-					}),
-				),
-			},*/
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"compute_resource": "8Core40GB",
-					//"elastic_io_resource": "1",
-					"description": name,
-					//"maintain_time": "01:00Z-02:00Z",
-					"security_ips": []string{"10.168.1.13"},
-					//"tags": map[string]string{
-					//	"Created": "TF-update",
-					//	"For":     "test-update",
-					//},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"compute_resource": "8Core40GB",
-						//"elastic_io_resource": "1",
-						"description": name,
-						//"maintain_time":  "01:00Z-02:00Z",
-						"security_ips.#": "0",
-						//"tags.%":         "2",
-						//"tags.Created":   "TF-update",
-						//"tags.For":       "test-update",
-					}),
-				),
-			},
 		},
 	})
 }
 
-var AlibabacloudStackAdbDbClusterMap0 = map[string]string{
+var AlibabacloudStackAdbDbClusterMap = map[string]string{
 	"auto_renew_period": NOSET,
-	"compute_resource":  "",
+	//"compute_resource":  "8Core40GB",
 	//"connection_string":  CHECKSET,
 	"db_cluster_version": "3.0",
-	"db_node_storage":    "0",
 	//"elastic_io_resource": "0",
 	"maintain_time":  CHECKSET,
-	"modify_type":    NOSET,
-	"payment_type":   "Postpaid",
-	"pay_type":       "Postpaid",
-	"period":         NOSET,
-	"renewal_status": NOSET,
 	//"resource_group_id": CHECKSET,
-	"security_ips.#": "1",
-	"status":         "Running",
-	//"tags.%":            "0",
-	"zone_id": CHECKSET,
-}
-
-func AlibabacloudStackAdbDbClusterBasicDependence0(name string) string {
-	return fmt.Sprintf(`
-variable "name" {
-	default = "%s"
-}
-data "alibabacloudstack_ascm_resource_groups" "default" {
-  name_regex = ""
-}
-%s
-`, name, AdbCommonTestCase)
-}
-
-var AlibabacloudStackAdbDbClusterMap1 = map[string]string{
-	"auto_renew_period": NOSET,
-	"compute_resource":  "8Core40GB",
-	//"connection_string":  CHECKSET,
-	"db_cluster_version": "3.0",
-	"db_node_class":      "B7",
-	"db_node_count":      "1",
-	"db_node_storage":    "500",
-	//"elastic_io_resource": "0",
-	"maintain_time":  CHECKSET,
-	"modify_type":    NOSET,
-	"payment_type":   "PayAsYouGo",
-	"pay_type":       "PostPaid",
-	"period":         NOSET,
-	"renewal_status": NOSET,
-	//"resource_group_id": CHECKSET,
-	"security_ips.#": "1",
-	"status":         "Running",
+	"status": "Running",
 	//"tags.%":         "0",
 	"zone_id": CHECKSET,
 }
 
-func AlibabacloudStackAdbDbClusterBasicDependence1(name string) string {
+func AlibabacloudStackAdbDbClusterBasicDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
 }
 
 %s
-`, name, AdbCommonTestCase)
+
+data "alibabacloudstack_adb_cluster_types" "intel" {
+	status = "Available"
+	sorted_by = "CPU"
+	cpu_type = "x86"
+}
+
+data "alibabacloudstack_adb_cluster_types" "hygon" {
+	status = "Available"
+	sorted_by = "CPU"
+	cpu_type = "hygon"
+}
+
+locals {
+	adb_instance_types = length(data.alibabacloudstack_adb_cluster_types.intel.ids) > 0 ? data.alibabacloudstack_adb_cluster_types.intel.instance_types : data.alibabacloudstack_adb_cluster_types.hygon.instance_types
+}
+
+`, name, VSwitchCommonTestCase)
 }

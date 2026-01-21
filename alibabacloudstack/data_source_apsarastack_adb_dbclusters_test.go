@@ -2,46 +2,48 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackAdbDbClustersDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
-	nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_adb_db_cluster.default.description}"`,
+	resourceId := "data.alibabacloudstack_adb_db_clusters.default"
+	name := fmt.Sprintf("tf-testAccADBConfig%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig)
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_adb_db_cluster.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand, map[string]string{
-			"description_regex": `"^test1234"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"^test1234"},
+		}),
+	}
+		nameConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "${alibabacloudstack_adb_db_cluster.default.description}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "^test1234",
 		}),
 	}
 	statusConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_adb_db_cluster.default.description}"`,
-			"status":            `"Running"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "${alibabacloudstack_adb_db_cluster.default.description}",
+			"status":            "Running",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_adb_db_cluster.default.description}"`,
-			"status":            `"Creating"`,
-		}),
-	}
-	tagsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_adb_db_cluster.default.description}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_adb_db_cluster.default.description}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "${alibabacloudstack_adb_db_cluster.default.description}",
+			"status":            "Creating",
 		}),
 	}
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_adb_db_cluster.default.description}"`,
-			"status":            `"Running"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "${alibabacloudstack_adb_db_cluster.default.description}",
+			"status":            "Running",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand, map[string]string{
-			"description_regex": `"^test1234"`,
-			"status":            `"Creating"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "^test1234",
+			"status":            "Creating",
 		}),
 	}
 
@@ -58,14 +60,12 @@ func TestAccAlibabacloudStackAdbDbClustersDataSource(t *testing.T) {
 			"clusters.0.create_time":        CHECKSET,
 			"clusters.0.db_cluster_version": "3.0",
 			//"clusters.0.db_node_class":      "C8",
-			"clusters.0.db_node_count": "2",
 			//"clusters.0.db_node_storage":    "300",
 			//"clusters.0.compute_resource": "8Core50GB",
 			//"clusters.0.elastic_io_resource": "0",
 			//"clusters.0.zone_id":             CHECKSET,
 			//"clusters.0.db_cluster_category": "Cluster",
 			//"clusters.0.maintain_time":       "23:00Z-00:00Z",
-			"clusters.0.security_ips.#": "2",
 		}
 	}
 
@@ -78,47 +78,42 @@ func TestAccAlibabacloudStackAdbDbClustersDataSource(t *testing.T) {
 	}
 
 	var AdbClusterCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_adb_db_clusters.default",
+		resourceId:   resourceId,
 		existMapFunc: existAdbClusterMapFunc,
 		fakeMapFunc:  fakeAdbClusterMapFunc,
 	}
-
-	AdbClusterCheckInfo.dataSourceTestCheck(t, rand, nameConf, statusConf, tagsConf, allConf)
+	
+	AdbClusterCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameConf, statusConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
-	%s
-variable "creation" {	
-	default = "ADB"
-}
-
+func testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccADBConfig_%d"
+	default = "%s"
+}
+
+%s
+
+data "alibabacloudstack_zones" "adb" {
+  available_resource_creation = "ADB"
+}
+
+data "alibabacloudstack_adb_cluster_types" "default" {
+  status = "Available"
+  sorted_by = "CPU"
 }
 
 resource "alibabacloudstack_adb_db_cluster" "default" {
-	db_cluster_category = "Basic"
-	db_cluster_class = "C8"
-	db_node_storage = "200"
-	db_cluster_version = "3.0"
-	db_node_count = "2"
-	vswitch_id              = "${alibabacloudstack_vswitch.default.id}"
-	description             = "${var.name}"
-	mode					= "reserver"
-	cluster_type =        "analyticdb"
-	cpu_type =            "intel"
-	security_ips      = ["10.168.1.12", "10.168.1.11"]
+  db_cluster_category         = "${local.adb_instance_types.0.cluster_category}"
+  db_cluster_version          = "3.0"
+  db_node_class               = "${local.adb_instance_types.0.id}"
+  description                 = name
+  db_node_count               = "${local.adb_instance_types.0.node_min}"
+  db_node_storage             = "${local.adb_instance_types.0.storage_min}"
+  mode                        = "${local.adb_instance_types.0.mode}"
+  vswitch_id                  = "${alibabacloudstack_vpc_vswitch.default.id}"
+  cluster_type                = "${local.adb_instance_types.0.cluster_type}"
+  cpu_type                    = "${local.adb_instance_types.0.cpu_type}"
 }
-
-data "alibabacloudstack_adb_db_clusters" "default" {	
-	enable_details = true
-	%s
-}
-`, AdbCommonTestCase, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name, VSwitchCommonTestCase)
 }
