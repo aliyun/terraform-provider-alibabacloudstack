@@ -877,6 +877,7 @@ data "alibabacloudstack_zones" "gpdb" {
 data "alibabacloudstack_gpdb_instance_types" "default" {
   engine_version = "6.0"
   status = "Available"
+  sorted_by = "CPU"
 }
 
 data "alibabacloudstack_gpdb_instances" "default" {
@@ -1011,27 +1012,45 @@ func removeEOFMarkers(input string) string {
 	return input
 }
 
-const AdbCommonTestCase = `
-resource "alibabacloudstack_vpc" "default" {
- name = "${var.name}"
- cidr_block = "192.168.0.0/16"
-}
-data "alibabacloudstack_zones" "default" {
- available_resource_creation = "ADB"
-}
-
-data "alibabacloudstack_vswitches" "default" {
- vpc_id = "${alibabacloudstack_vpc.default.id}"
- zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+func AdbCommonTestCase(needVswtich bool)  string {
+	var vswtichString string
+	if needVswtich {
+		vswtichString = `  vswitch_id                  = "${alibabacloudstack_vpc_vswitch.default.id}"`
+	}
+	return fmt.Sprintf(`
+data "alibabacloudstack_zones" "adb" {
+  available_resource_creation = "ADB"
 }
 
-resource "alibabacloudstack_vswitch" "default" {
- name = "tf_testAccAdb_vpc"
- vpc_id = "${alibabacloudstack_vpc.default.id}"
- availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
- cidr_block = "192.168.0.0/16"
+data "alibabacloudstack_adb_cluster_types" "default" {
+  status = "Available"
+  sorted_by = "CPU"
 }
-`
+
+data "alibabacloudstack_adb_db_clusters" "default" {
+	ids = ["%s"]
+}
+
+resource "alibabacloudstack_adb_db_cluster" "default" {
+  count                       = length(data.alibabacloudstack_adb_db_clusters.default.ids) > 0 ? 0 : 1
+  db_cluster_category         = "${data.alibabacloudstack_adb_cluster_types.default.instance_types.0.cluster_category}"
+  db_cluster_version          = "3.0"
+  db_node_class               = "${data.alibabacloudstack_adb_cluster_types.default.instance_types.0.id}"
+  description                 = var.name
+  db_node_count               = "${data.alibabacloudstack_adb_cluster_types.default.instance_types.0.node_min}"
+  db_node_storage             = "${data.alibabacloudstack_adb_cluster_types.default.instance_types.0.storage_min}"
+  mode                        = "${data.alibabacloudstack_adb_cluster_types.default.instance_types.0.mode}"
+%s
+  cluster_type                = "${data.alibabacloudstack_adb_cluster_types.default.instance_types.0.cluster_type}"
+  cpu_type                    = "${data.alibabacloudstack_adb_cluster_types.default.instance_types.0.cpu_type}"
+}
+
+locals {
+  adb_instance_id = length(data.alibabacloudstack_adb_db_clusters.default.ids) > 0 ? data.alibabacloudstack_adb_db_clusters.default.ids.0 : alibabacloudstack_adb_db_cluster.default.0.id
+}
+
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_ADB_ID"), vswtichString)
+}
 
 const DBMultiAZCommonTestCase = `
 data "alibabacloudstack_zones" "default" {

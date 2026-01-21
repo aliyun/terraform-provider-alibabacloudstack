@@ -64,7 +64,7 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory"}, true),
+				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory"}, false),
 			},
 			"output_file": {
 				Type:       schema.TypeString,
@@ -119,11 +119,26 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 	}
 }
 
+func removeRepByMap(slc []string) []string {
+	result := []string{}         // Store the returned non-duplicate slice
+	tempMap := map[string]byte{} // Store non-duplicate keys
+	for _, e := range slc {
+		l := len(tempMap)
+		tempMap[e] = 0 // When e exists in tempMap, it cannot be added again because keys are not allowed to be duplicated
+		// If the above line is successfully added, the length changes and the element is definitely not duplicated
+		if len(tempMap) != l { // After adding to the map, if the map length changes, the element is not duplicated
+			result = append(result, e) // When the element is not duplicated, add the element to the result slice
+		}
+	}
+	return result
+}
+
 func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// TODO: This interface is an asapi interface and is not open to pop
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "")
+	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 	mergeMaps(request.QueryParams, map[string]string{
 		"PageSize":  "500",
 		"saleType":  "new",
@@ -218,10 +233,10 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 	sortedBy := d.Get("sorted_by").(string)
 	if sortedBy != "" {
 		sort.SliceStable(Datas, func(i, j int) bool {
-			switch strings.ToUpper(sortedBy) {
+			switch sortedBy {
 			case "CPU":
 				return Datas[i].Cpu < Datas[j].Cpu
-			case "MEMORY":
+			case "Memory":
 				return Datas[i].Memory.(float64) < Datas[j].Memory.(float64)
 			}
 			return false

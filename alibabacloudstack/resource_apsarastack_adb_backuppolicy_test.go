@@ -35,7 +35,7 @@ func TestAccAlibabacloudStackAdbBackupPolicy(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					// Use given id to test with existing instance
 					//"db_cluster_id":    "am-3rq9uva152cn34drs",
-					"db_cluster_id":           "${alibabacloudstack_adb_db_cluster.default.id}",
+					"db_cluster_id":           "${local.adb_instance_id}",
 					"preferred_backup_period": []string{"Tuesday", "Wednesday"},
 					"preferred_backup_time":   "10:00Z-11:00Z",
 				}),
@@ -88,41 +88,11 @@ func TestAccAlibabacloudStackAdbBackupPolicy(t *testing.T) {
 
 func resourceAdbBackupPolicyConfigDependence(name string) string {
 	return fmt.Sprintf(`
+	variable "name" {
+		default = "%s"
+	}
+
 	%s
-	variable "creation" {
-		default = "ADB"
-	}
-
-	variable "name" {
-		default = "%s"
-	}
-
-	resource "alibabacloudstack_adb_db_cluster" "default" {
-	db_cluster_category = "Basic"
-	db_cluster_class = "C8"
-	db_node_storage = "200"
-	db_cluster_version = "3.0"
-	db_node_count = "2"
-	mode					= "reserver"
-	vswitch_id              = "${alibabacloudstack_vswitch.default.id}"
-	description             = "${var.name}"
-	cluster_type =        "analyticdb"
-	cpu_type =            "intel"
-
-	}`, AdbCommonTestCase, name)
+	
+`, name, AdbCommonTestCase(false))
 }
-
-// Create test using existing instance
-/*func resourceAdbBackupPolicyConfigDependence(name string) string {
-	return fmt.Sprintf(`
-
-	variable "creation" {
-		default = "ADB"
-	}
-
-	variable "name" {
-		default = "%s"
-	}
-
-	`, name)
-}*/
