@@ -95,9 +95,6 @@ func resourceAlibabacloudStackCrEeRepoCreate(d *schema.ResourceData, meta interf
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if !response["asapiSuccess"].(bool) {
-		return fmt.Errorf("create ee repo failed, %s", response["asapiErrorMessage"].(string))
-	}
 
 	d.SetId(crService.GenResourceId(instanceId, namespace, repoName))
 	if repoId, ok := response["RepoId"].(string); ok {
@@ -131,9 +128,24 @@ func resourceAlibabacloudStackCrEeRepoRead(d *schema.ResourceData, meta interfac
 
 func resourceAlibabacloudStackCrEeRepoUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	crService := &CrService{client}
 	instanceId := d.Get("instance_id").(string)
-	if d.HasChanges("repo_type", "summary", "detail") {
+	update := false
+	if d.IsNewResource() && d.Get("detail") != "" {
+		update = true
+	} else if !d.IsNewResource() && d.HasChanges("repo_type", "summary", "detail") {
+		update = true
+	}
 
+	if update{
+		repoId := d.Get("repo_type").(string)
+		if repoId == "" {
+			response, err := crService.DescribeCrEeRepo(d.Id())
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			repoId = response["RepoId"].(string)
+		}
 		request := client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "UpdateRepository", "")
 		mergeMaps(request.QueryParams, map[string]string{
 			"InstanceId": instanceId,
@@ -160,9 +172,6 @@ func resourceAlibabacloudStackCrEeRepoUpdate(d *schema.ResourceData, meta interf
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
 			return errmsgs.WrapError(err)
-		}
-		if !response["asapiSuccess"].(bool) {
-			return fmt.Errorf("update ee repo failed, %s", response["asapiErrorMessage"].(string))
 		}
 
 	}
@@ -194,9 +203,6 @@ func resourceAlibabacloudStackCrEeRepoDelete(d *schema.ResourceData, meta interf
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if !response["asapiSuccess"].(bool) {
-		return fmt.Errorf("delete ee repo failed, %s", response["asapiErrorMessage"].(string))
 	}
 
 	return nil

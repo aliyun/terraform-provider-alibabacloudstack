@@ -1111,6 +1111,81 @@ func buildClientToken(popcode, version, action string) string {
 	return token
 }
 
+func requestErrorHandler(api string, response map[string]interface{}, err error, retryTimes int) (*resource.RetryError, int) {
+	if err == nil {
+		success := true
+
+		// Check HTTP status code (must be 2xx)
+		if v, ok := response["HttpStatusCode"]; ok {
+			code := strings.TrimSpace(fmt.Sprintf("%v", v))
+			if len(code) == 3 && code[0] != '2' {
+				success = false
+			}
+		}
+
+		// Check asapiSuccess flag
+		if v, ok := response["asapiSuccess"]; ok && fmt.Sprintf("%v", v) == "false" {
+			success = false
+		}
+
+		// Check success flag
+		if v, ok := response["success"]; ok && fmt.Sprintf("%v", v) == "false" {
+			success = false
+		}
+
+		if !success {
+			var errmsg string
+			// Safely extract error message (avoid panic on type assert)
+			if v, ok := response["asapiErrorMessage"]; ok {
+				if msg, ok := v.(string); ok {
+					errmsg = msg
+				}
+			} else if v, ok := response["errorMessage"]; ok {
+				if msg, ok := v.(string); ok {
+					errmsg = msg
+				}
+			}
+			err = errmsgs.GetRequestFailedError(
+				fmt.Sprintf(errmsgs.RequestV1ErrorMsg, "Request API", api, errmsgs.AlibabacloudStackSdkGoERROR, errmsg),
+			)
+		}
+	}
+
+	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			return resource.NonRetryableError(err), retryTimes
+		}
+
+		if errmsgs.NeedRetry(err) {
+			return resource.RetryableError(err), retryTimes
+		}
+
+		// Timeout or transient errors
+		if errmsgs.IsExpectedErrors(err, []string{
+			errmsgs.LogClientTimeout,
+			"LockTimeout",
+			"RequestTimeout",
+			"asapi.server.timeout.socket",
+		}) {
+			return resource.RetryableError(err), retryTimes
+		}
+
+		// Auth or invalid action errors with retry budget
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable",}) && retryTimes > 0 {
+			retryTimes--
+			return resource.RetryableError(err), retryTimes
+		}
+
+		// Fallback: non-retryable error
+		errmsg := errmsgs.GetAsapiErrorMessage(response)
+		wrappedErr := errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "Request API", api, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return resource.NonRetryableError(wrappedErr), retryTimes
+	}
+
+	return nil, retryTimes
+}
+
+
 func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, apiname, pathpattern string, headers map[string]string, query, body map[string]interface{}) (_result map[string]interface{}, _err error) {
 	ServiceCodeStr := strings.ReplaceAll(strings.ToUpper(popcode), "-", "_")
 	endpoint := client.Config.Endpoints[ServiceCode(ServiceCodeStr)]
@@ -1213,28 +1288,12 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 		}
 
 		log.Printf(" ================================ %s ======================================\n query %#v \n request %#v \n response: %#v", apiname, query, body, response)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				return resource.NonRetryableError(err)
-			}
-			if errmsgs.NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "LockTimeout", "ServiceUnavailable", "RequestTimeout", "asapi.server.timeout.socket"}) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound"}) && retryTimes > 0 {
-				retryTimes -= 1
-				wait()
-				return resource.RetryableError(err)
-			}
-
-			errmsg := errmsgs.GetAsapiErrorMessage(response)
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, popcode, apiname, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		var retryErr *resource.RetryError
+		retryErr, retryTimes= requestErrorHandler(fmt.Sprintf("%s_%s_%s", popcode, version, apiname), response, err, retryTimes)
+		if retryErr != nil {
+			wait()
 		}
-		return nil
+		return retryErr
 	})
 	return response, err
 }
@@ -1295,7 +1354,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		// special logic, 3.16.2 mandatory, no longer required after 3.18.1
 		request.QueryParams["AccountInfo"] = client.GetAccountInfo()
 	}
-	
+
 	request.QueryParams["ClientToken"] = buildClientToken(request.Product, request.Version, request.ApiName)
 
 	if strings.HasPrefix(domain, "internal.asapi.") || strings.HasPrefix(domain, "public.asapi.") {
@@ -1331,31 +1390,19 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 	resource.Retry(5*time.Minute, func() *resource.RetryError {
 		// Retry only when the request does not return normally
 		response, err = conn.ProcessCommonRequest(request)
-		if err == nil {
-			return nil
-		}
+		resp := map[string]interface{}{}
+		json.Unmarshal(response.GetHttpContentBytes(), &resp)
 		if response == nil {
 			retryTimes -= 1
 			wait()
 			return resource.RetryableError(err)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "LockTimeout", "Throttling.User", "RequestTimeout", "asapi.server.timeout.socket"}) {
+		var retryErr *resource.RetryError
+		retryErr, retryTimes = requestErrorHandler(fmt.Sprintf("%s_%s_%s", request.Product, request.Version, request.ApiName), resp, err, retryTimes)
+		if retryErr != nil {
 			wait()
-			return resource.RetryableError(err)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable"}) && retryTimes > 0 {
-			retryTimes -= 1
-			wait()
-			return resource.RetryableError(err)
-		}
-		resp:= make(map[string]interface{})
-		if err := json.Unmarshal(response.GetHttpContentBytes(), &resp); err != nil {
-			if _, existed := resp["errorMessage"]; existed {
-				return resource.NonRetryableError(fmt.Errorf("%v",resp["errorMessage"]))
-			}
-		}
-		return resource.NonRetryableError(err)
-
+		return retryErr
 	})
 	return response, err
 }

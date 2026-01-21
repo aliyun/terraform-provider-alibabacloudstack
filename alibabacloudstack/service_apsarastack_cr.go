@@ -412,9 +412,6 @@ func (c *CrService) ListCrEeInstanceEndpoint(instanceId string) (map[string]inte
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	if !response["asapiSuccess"].(bool) {
-		return nil, fmt.Errorf("read ee repo failed, %s", response["asapiErrorMessage"].(string))
-	}
 
 	return response, nil
 }

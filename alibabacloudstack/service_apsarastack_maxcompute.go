@@ -122,10 +122,6 @@ func (s *MaxcomputeService) DescribeMaxcomputeQuota(cluster_id string) (object m
 		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_project", "GetOdpsQuotaForAscm", errmsgs.AlibabacloudStackSdkGoERROR)
 		return
 	}
-	if fmt.Sprintf(`%v`, response["HttpStatusCode"]) != "200" {
-		err = errmsgs.Error("ListOdpsCusForAscm failed for " + response["asapiErrorMessage"].(string))
-		return object, err
-	}
 
 	v, err := jsonpath.Get("$.Data.data", response)
 	if err != nil {

@@ -71,9 +71,6 @@ func resourceAlibabacloudStackCrEeNamespaceCreate(d *schema.ResourceData, meta i
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if !response["asapiSuccess"].(bool) {
-		return fmt.Errorf("create ee namespace failed, %s", response["asapiErrorMessage"].(string))
-	}
 	d.SetId(crService.GenResourceId(instanceId, namespace))
 
 	return nil
@@ -86,9 +83,6 @@ func resourceAlibabacloudStackCrEeNamespaceRead(d *schema.ResourceData, meta int
 
 	if err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if !response["asapiSuccess"].(bool) {
-		return fmt.Errorf("read ee namespace failed, %s", response["asapiErrorMessage"].(string))
 	}
 
 	d.Set("instance_id", response["InstanceId"].(string))
@@ -130,9 +124,6 @@ func resourceAlibabacloudStackCrEeNamespaceUpdate(d *schema.ResourceData, meta i
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
 			return errmsgs.WrapError(err)
-		}
-		if !response["asapiSuccess"].(bool) {
-			return fmt.Errorf("update ee namespace failed, %s", response["asapiErrorMessage"].(string))
 		}
 	}
 

@@ -33,6 +33,7 @@ const (
 	MessageInstanceNotFound = "instance is not found"
 	Throttling              = "Throttling"
 	ServiceUnavailable      = "ServiceUnavailable"
+	ReuqestFailed           = "Reuqest Failed"
 
 	// RAM Instance Not Found
 	RamInstanceNotFound              = "Forbidden.InstanceNotFound"
@@ -80,6 +81,14 @@ func GetNotFoundErrorFromString(str string) error {
 		message:   str,
 	}
 }
+
+func GetRequestFailedError(str string) error {
+	return &ProviderError{
+		errorCode: ReuqestFailed,
+		message:   str,
+	}
+}
+
 func GetNotFoundVPCError(str string) error {
 	return &ProviderError{
 		errorCode: VSwitchIdNotFound,
@@ -97,9 +106,6 @@ func NotFoundError(err error) bool {
 			}
 		}
 		return NotFoundError(e.Cause)
-	}
-	if err == nil {
-		return false
 	}
 
 	if e, ok := err.(*sdkerrors.ServerError); ok {
@@ -133,7 +139,7 @@ func NeedRetry(err error) bool {
 	}
 
 	throttlingRegex := regexp.MustCompile("^Throttling.*")
-	codeRegex := regexp.MustCompile("^code: 5[\\d]{2}")
+	codeRegex := regexp.MustCompile("^code: 5[0-9]{2}")
 
 	if e, ok := err.(*tea.SDKError); ok {
 		if strings.Contains(*e.Message, "code: 500, 您已开通过") {
@@ -182,9 +188,6 @@ func IsExpectedErrors(err error, expectCodes []string) bool {
 
 	if e, ok := err.(*ComplexError); ok {
 		return IsExpectedErrors(e.Cause, expectCodes)
-	}
-	if err == nil {
-		return false
 	}
 
 	if e, ok := err.(*sdkerrors.ServerError); ok {
@@ -274,7 +277,7 @@ func GetNotFoundMessage(product string, id string) string {
 	return fmt.Sprintf("The specified %s %s is not found.", product, id)
 }
 func GetNotVPCMessage() string {
-	return fmt.Sprintf("The VSwitchId is not found.")
+	return "The VSwitchId is not found."
 }
 func GetTimeoutMessage(product string, status string) string {
 	return fmt.Sprintf("Waitting for %s %s is timeout.", product, status)
