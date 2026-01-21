@@ -783,6 +783,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_gpdb_publicconnection":                  resourceAlibabacloudStackGpdbConnection(),
 		"alibabacloudstack_gpdb_instance":                          resourceAlibabacloudStackGpdbInstance(),
 		"alibabacloudstack_gpdb_dbinstance":                        resourceAlibabacloudStackGpdbInstance(),
+		"alibabacloudstack_gpdb_backup_policy":                     resourceAlibabacloudStackGpdbBackupPolicy(),
 		"alibabacloudstack_hbase_instance":                         resourceAlibabacloudStackHBaseInstance(),
 		"alibabacloudstack_hbase_cluster":                          resourceAlibabacloudStackHBaseInstance(),
 		"alibabacloudstack_image":                                  resourceAlibabacloudStackImage(),

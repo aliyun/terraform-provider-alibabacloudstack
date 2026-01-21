@@ -393,3 +393,17 @@ func (s *GpdbService) ignoreTag(t gpdb.Tag) bool {
 	}
 	return false
 }
+func (s *GpdbService) DescribeBackupPolicy(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{"DBInstanceId": id}
+
+	response, err := s.client.DoTeaRequest("GET", "gpdb", "2016-05-03", "DescribeBackupPolicy", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the resource exists
+	if response == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Backup policy for DBInstanceId %s not found", id))
+	}
+	return response, nil
+}
