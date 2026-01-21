@@ -23,6 +23,10 @@ func dataSourceAlibabacloudStackAdbInstanceTypes() *schema.Resource {
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"cpu_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"cpu": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -54,6 +58,10 @@ func dataSourceAlibabacloudStackAdbInstanceTypes() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"cpu_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"cpu": {
 							Type:     schema.TypeInt,
 							Computed: true,
@@ -74,7 +82,7 @@ func dataSourceAlibabacloudStackAdbInstanceTypes() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"db_instance_mode": {
+						"mode": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -98,6 +106,10 @@ func dataSourceAlibabacloudStackAdbInstanceTypes() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"cluster_category": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -115,6 +127,7 @@ func dataSourceAlibabacloudStackAdbInstanceTypesRead(d *schema.ResourceData, met
 	filterCpu := d.Get("cpu").(int)
 	filterMemroy := d.Get("memory").(int)
 	filterStatus := d.Get("status").(string)
+	filterCpuType := d.Get("cpu_type").(string)
 
 	reqQuery := map[string]interface{}{
 		"pageStart":    1,
@@ -153,6 +166,10 @@ func dataSourceAlibabacloudStackAdbInstanceTypesRead(d *schema.ResourceData, met
 			}
 
 			if filterStatus != "" && data["status"].(string) != filterStatus {
+				continue
+			}
+
+			if filterCpuType != "" && data["cpuType"].(string) != filterCpuType {
 				continue
 			}
 
@@ -206,17 +223,19 @@ func dataSourceAlibabacloudStackAdbInstanceTypesRead(d *schema.ResourceData, met
 
 			typeMap := map[string]interface{}{
 				"id":               data["specification"],
+				"cpu_type":         data["cpuType"],
 				"cpu":              cpu,
 				"memory":           memory,
 				"storage_type":     data["storageType"],
 				"storage_min":      storage_min,
 				"storage_max":      storage_max,
-				"db_instance_mode": data["mode"],
+				"mode":             data["mode"],
 				"node_min":         node_min,
 				"node_max":         node_max,
 				"cluster_type":     data["clusterType"],
 				"status":           data["status"],
 				"series":           data["series"],
+				"cluster_category": data["series"],
 			}
 
 			types = append(types, typeMap)
