@@ -423,7 +423,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 
 	//Retrieving available zones for SLB
 	slaveZones := make(map[string][]string)
-	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeSlb)) {
+	if strings.EqualFold(Trim(resType), string(ResourceTypeSlb)) {
 		request := slb.CreateDescribeZonesRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {

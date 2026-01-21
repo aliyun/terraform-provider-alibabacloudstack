@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackAdbInstanceTypesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackAdbClusterTypesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
-	resourceId := "data.alibabacloudstack_adb_instance_types.default"
+	resourceId := "data.alibabacloudstack_adb_cluster_types.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		fmt.Sprintf("tf_testAccAdbInstanceTypesDataSource_%d", rand),
@@ -17,7 +17,7 @@ func TestAccAlibabacloudStackAdbInstanceTypesDataSource(t *testing.T) {
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${data.alibabacloudstack_adb_instance_types.anyone.instance_types.0.id}"},
+			"ids": []string{"${data.alibabacloudstack_adb_cluster_types.anyone.instance_types.0.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"fake_id"},
@@ -35,7 +35,7 @@ func TestAccAlibabacloudStackAdbInstanceTypesDataSource(t *testing.T) {
 
 	clusterTypeConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"cluster_type": "${data.alibabacloudstack_adb_instance_types.anyone.instance_types.0.cluster_type}",
+			"cluster_type": "${data.alibabacloudstack_adb_cluster_types.anyone.instance_types.0.cluster_type}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"cluster_type": "fake_cluster_type",
@@ -44,7 +44,7 @@ func TestAccAlibabacloudStackAdbInstanceTypesDataSource(t *testing.T) {
 
 	cpuTypeConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"cpu_type": "${data.alibabacloudstack_adb_instance_types.anyone.instance_types.0.cpu_type}",
+			"cpu_type": "${data.alibabacloudstack_adb_cluster_types.anyone.instance_types.0.cpu_type}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"cpu_type": "fake_cpu_type",
@@ -53,7 +53,7 @@ func TestAccAlibabacloudStackAdbInstanceTypesDataSource(t *testing.T) {
 
 	cpuConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"cpu":       "${data.alibabacloudstack_adb_instance_types.anyone.instance_types.0.cpu}",
+			"cpu":       "${data.alibabacloudstack_adb_cluster_types.anyone.instance_types.0.cpu}",
 			"sorted_by": "Memory",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
@@ -63,7 +63,7 @@ func TestAccAlibabacloudStackAdbInstanceTypesDataSource(t *testing.T) {
 	}
 	memoryConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"memory":    "${data.alibabacloudstack_adb_instance_types.anyone.instance_types.0.memory}",
+			"memory":    "${data.alibabacloudstack_adb_cluster_types.anyone.instance_types.0.memory}",
 			"sorted_by": "CPU",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
@@ -108,7 +108,7 @@ func TestAccAlibabacloudStackAdbInstanceTypesDataSource(t *testing.T) {
 
 func dataSourceAdbInstanceTypesConfigDependence(name string) string {
 	return `
-	data "alibabacloudstack_adb_instance_types" "anyone" {
+	data "alibabacloudstack_adb_cluster_types" "anyone" {
 		status = "Available"
 	}
 `
