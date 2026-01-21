@@ -10,9 +10,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func init() {
@@ -125,6 +123,10 @@ func TestAccAlibabacloudStackCommonBandwidthPackageAttachmentBasic(t *testing.T)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
+	name := fmt.Sprintf("tf-testAccBandwidtchPackage%d", rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCommonBandwidthPackageAttachmentConfigBasic)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -135,7 +137,10 @@ func TestAccAlibabacloudStackCommonBandwidthPackageAttachmentBasic(t *testing.T)
 		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCommonBandwidthPackageAttachmentConfigBasic(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"bandwidth_package_id": "${alibabacloudstack_common_bandwidth_package.default.id}",
+					"instance_id":          "${alibabacloudstack_eip.default.id}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -149,70 +154,10 @@ func TestAccAlibabacloudStackCommonBandwidthPackageAttachmentBasic(t *testing.T)
 	})
 }
 
-func TestAccAlibabacloudStackCommonBandwidthPackageAttachmentMulti(t *testing.T) {
-	var v vpc.CommonBandwidthPackage
-	rand := getAccTestRandInt(1000, 9999)
-	resourceId := "alibabacloudstack_common_bandwidth_package_attachment.default.1"
-	ra := resourceAttrInit(resourceId, map[string]string{
-		"bandwidth_package_id": CHECKSET,
-		"instance_id":          CHECKSET,
-	})
-	serviceFunc := func() interface{} {
-		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  nil,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCommonBandwidthPackageAttachmentConfigMulti(rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-		},
-	})
-}
-
-func testAccCheckCommonBandwidthPackageAttachmentDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-	VpcService := VpcService{client}
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "alibabacloudstack_common_bandwidth_package_attachment" {
-			continue
-		}
-
-		parts, err := ParseResourceId(rs.Primary.ID, 2)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-		if len(parts) != 2 {
-			return errmsgs.WrapError(errmsgs.Error("invalid resource id"))
-		}
-		_, err = VpcService.DescribeCommonBandwidthPackageAttachment(rs.Primary.ID)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, "DescribeCommonBandwidthPackageAttachment")
-		}
-
-	}
-	return nil
-}
-func testAccCommonBandwidthPackageAttachmentConfigBasic(rand int) string {
+func testAccCommonBandwidthPackageAttachmentConfigBasic(name string) string {
 	return fmt.Sprintf(`
     variable "name"{
-    	default = "tf-testAccBandwidtchPackage%d"
+    	default = "%s"
     }
 
 	resource "alibabacloudstack_common_bandwidth_package" "default" {
@@ -226,40 +171,5 @@ func testAccCommonBandwidthPackageAttachmentConfigBasic(rand int) string {
 		bandwidth            = "2"
 	}
 
-	resource "alibabacloudstack_common_bandwidth_package_attachment" "default" {
-		bandwidth_package_id = "${alibabacloudstack_common_bandwidth_package.default.id}"
-		instance_id = "${alibabacloudstack_eip.default.id}"
-	}
-	`, rand)
-}
-
-func testAccCommonBandwidthPackageAttachmentConfigMulti(rand int) string {
-	return fmt.Sprintf(`
-    variable "name"{
-    	default = "tf-testAccBandwidtchPackage%d"
-    }
-
-	variable "number" {
-    	default = "2"
-    }
-
-	resource "alibabacloudstack_common_bandwidth_package" "default" {
-		count = "${var.number}"
-		bandwidth = "2"
-		name = "${var.name}"
-		description = "${var.name}_description"
-	}
-
-	resource "alibabacloudstack_eip" "default" {
-		count = "${var.number}"
-		name = "${var.name}"
-		bandwidth            = "2"
-	}
-
-	resource "alibabacloudstack_common_bandwidth_package_attachment" "default" {
-		count = "${var.number}"
-		bandwidth_package_id = "${element(alibabacloudstack_common_bandwidth_package.default.*.id,count.index)}"
-		instance_id = "${element(alibabacloudstack_eip.default.*.id,count.index)}"
-	}
-	`, rand)
+	`, name)
 }

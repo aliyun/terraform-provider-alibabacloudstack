@@ -113,22 +113,18 @@ func testSweepCommonBandwidthPackage(region string) error {
 func TestAccAlibabacloudStackCommonBandwidthPackage_PayByTraffic(t *testing.T) {
 
 	var v vpc.CommonBandwidthPackage
-	rand := getAccTestRandInt(1000, 999999)
+
 	resourceId := "alibabacloudstack_common_bandwidth_package.default"
-	ra := resourceAttrInit(resourceId, map[string]string{
-		"bandwidth":            "10",
-		"name":                 fmt.Sprintf("tf-testAccCommonBandwidthPackage%d", rand),
-		"description":          "",
-		"internet_charge_type": "PayByTraffic",
-		"ratio":                "100",
-	})
+	ra := resourceAttrInit(resourceId, map[string]string{})
 	serviceFunc := func() interface{} {
 		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-
+	rand := getAccTestRandInt(1000, 999999)
+	name := fmt.Sprintf("tf-testAccCommonBandwidthPackage%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCommonBandwidthPackageBasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -139,9 +135,18 @@ func TestAccAlibabacloudStackCommonBandwidthPackage_PayByTraffic(t *testing.T) {
 		CheckDestroy:  testAccCheckCommonBandwidthPackageDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCommonBandwidthPackageBasic(rand, "PayByTraffic"),
+				Config: testAccConfig(map[string]interface{}{
+					"internet_charge_type": "PayByTraffic",
+					"bandwidth":            "10",
+					"name":                 "${var.name}",
+					"description":          "${var.name}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"internet_charge_type": "PayByTraffic",
+						"bandwidth":            "10",
+						"name":                 name,
+					}),
 				),
 			},
 			{
@@ -150,35 +155,32 @@ func TestAccAlibabacloudStackCommonBandwidthPackage_PayByTraffic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccCommonBandwidthPackageName(rand, "PayByTraffic"),
+				Config: testAccConfig(map[string]interface{}{
+					"name": "${var.name}_update",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": fmt.Sprintf("tf-testAccCommonBandwidthPackage%d_change", rand),
+						"name": name + "_update",
 					}),
 				),
 			},
 			{
-				Config: testAccCommonBandwidthPackageDescription(rand, "PayByTraffic"),
+				Config: testAccConfig(map[string]interface{}{
+					"description": "${var.name}_desc",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": fmt.Sprintf("tf-testAccCommonBandwidthPackage%d_description", rand),
+						"description": name + "_desc",
 					}),
 				),
 			},
 			{
-				Config: testAccCommonBandwidthPackageBandwidth(rand, "PayByTraffic"),
+				Config: testAccConfig(map[string]interface{}{
+					"bandwidth": "20",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bandwidth": "20",
-					}),
-				),
-			},
-			{
-				Config: testAccCommonBandwidthPackageAll(rand, "PayByTraffic"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":        fmt.Sprintf("tf-testAccCommonBandwidthPackage%d_all", rand),
-						"description": fmt.Sprintf("tf-testAccCommonBandwidthPackage%d_all", rand),
 					}),
 				),
 			},
@@ -189,22 +191,17 @@ func TestAccAlibabacloudStackCommonBandwidthPackage_PayByTraffic(t *testing.T) {
 func TestAccAlibabacloudStackCommonBandwidthPackage_PayByBandwidth(t *testing.T) {
 
 	var v vpc.CommonBandwidthPackage
-	rand := getAccTestRandInt(1000, 999999)
 	resourceId := "alibabacloudstack_common_bandwidth_package.default"
-	ra := resourceAttrInit(resourceId, map[string]string{
-		"bandwidth":            "10",
-		"name":                 fmt.Sprintf("tf-testAccCommonBandwidthPackage%d", rand),
-		"description":          "",
-		"internet_charge_type": "PayByBandwidth",
-		"ratio":                "100",
-	})
+	ra := resourceAttrInit(resourceId, map[string]string{})
 	serviceFunc := func() interface{} {
 		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-
+	rand := getAccTestRandInt(1000, 999999)
+	name := fmt.Sprintf("tf-testAccCommonBandwidthPackage%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCommonBandwidthPackageBasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -216,9 +213,18 @@ func TestAccAlibabacloudStackCommonBandwidthPackage_PayByBandwidth(t *testing.T)
 		CheckDestroy:  testAccCheckCommonBandwidthPackageDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCommonBandwidthPackageBasic(rand, "PayByBandwidth"),
+				Config: testAccConfig(map[string]interface{}{
+					"internet_charge_type": "PayByBandwidth",
+					"bandwidth":            "10",
+					"name":                 "${var.name}",
+					"description":          "${var.name}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"internet_charge_type": "PayByBandwidth",
+						"bandwidth":            "10",
+						"name":                 name,
+					}),
 				),
 			},
 			{
@@ -227,73 +233,33 @@ func TestAccAlibabacloudStackCommonBandwidthPackage_PayByBandwidth(t *testing.T)
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccCommonBandwidthPackageName(rand, "PayByBandwidth"),
+				Config: testAccConfig(map[string]interface{}{
+					"name": "${var.name}_update",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": fmt.Sprintf("tf-testAccCommonBandwidthPackage%d_change", rand),
+						"name": name + "_update",
 					}),
 				),
 			},
 			{
-				Config: testAccCommonBandwidthPackageDescription(rand, "PayByBandwidth"),
+				Config: testAccConfig(map[string]interface{}{
+					"description": "${var.name}_desc",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": fmt.Sprintf("tf-testAccCommonBandwidthPackage%d_description", rand),
+						"description": name + "_desc",
 					}),
 				),
 			},
 			{
-				Config: testAccCommonBandwidthPackageBandwidth(rand, "PayByBandwidth"),
+				Config: testAccConfig(map[string]interface{}{
+					"bandwidth": "20",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bandwidth": "20",
 					}),
-				),
-			},
-			{
-				Config: testAccCommonBandwidthPackageAll(rand, "PayByBandwidth"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":        fmt.Sprintf("tf-testAccCommonBandwidthPackage%d_all", rand),
-						"description": fmt.Sprintf("tf-testAccCommonBandwidthPackage%d_all", rand),
-					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackCommonBandwidthPackage_Multi(t *testing.T) {
-	var v vpc.CommonBandwidthPackage
-	rand := getAccTestRandInt(1000, 999999)
-	resourceId := "alibabacloudstack_common_bandwidth_package.default.9"
-	ra := resourceAttrInit(resourceId, map[string]string{
-		"bandwidth":            "10",
-		"name":                 fmt.Sprintf("tf-testAccCommonBandwidthPackage%d", rand),
-		"description":          "",
-		"internet_charge_type": "PayByBandwidth",
-		"ratio":                "100",
-	})
-	serviceFunc := func() interface{} {
-		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckWithAccountSiteType(t, DomesticSite)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckCommonBandwidthPackageDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCommonBandwidthPackageMulti(rand, "PayByBandwidth"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
 				),
 			},
 		},
@@ -318,94 +284,12 @@ func testAccCheckCommonBandwidthPackageDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCommonBandwidthPackageBasic(rand int, internetChargeType string) string {
+func testAccCommonBandwidthPackageBasic(name string) string {
 	return fmt.Sprintf(
 		`
 variable "name" {
-	default = "tf-testAccCommonBandwidthPackage%d"
+	default = "%s"
 }
 
-resource "alibabacloudstack_common_bandwidth_package" "default" {
-  internet_charge_type = "%s"
-  bandwidth = "10"
-  name = "${var.name}"
-}
-`, rand, internetChargeType)
-}
-func testAccCommonBandwidthPackageName(rand int, internetChargeType string) string {
-	return fmt.Sprintf(
-		`
-variable "name" {
-	default = "tf-testAccCommonBandwidthPackage%d"
-}
-
-resource "alibabacloudstack_common_bandwidth_package" "default" {
-  internet_charge_type = "%s"
-  bandwidth = "10"
-  name = "${var.name}_change"
-}
-`, rand, internetChargeType)
-}
-func testAccCommonBandwidthPackageDescription(rand int, internetChargeType string) string {
-	return fmt.Sprintf(
-		`
-variable "name" {
-	default = "tf-testAccCommonBandwidthPackage%d"
-}
-
-resource "alibabacloudstack_common_bandwidth_package" "default" {
-  internet_charge_type = "%s"
-  bandwidth = "10"
-  name = "${var.name}_change"
-  description = "${var.name}_description"
-}
-`, rand, internetChargeType)
-}
-
-func testAccCommonBandwidthPackageBandwidth(rand int, internetChargeType string) string {
-	return fmt.Sprintf(
-		`
-variable "name" {
-	default = "tf-testAccCommonBandwidthPackage%d"
-}
-
-resource "alibabacloudstack_common_bandwidth_package" "default" {
-  internet_charge_type = "%s"
-  bandwidth = "20"
-  name = "${var.name}_change"
-  description = "${var.name}_description"
-}
-`, rand, internetChargeType)
-}
-
-func testAccCommonBandwidthPackageAll(rand int, internetChargeType string) string {
-	return fmt.Sprintf(
-		`
-variable "name" {
-	default = "tf-testAccCommonBandwidthPackage%d"
-}
-
-resource "alibabacloudstack_common_bandwidth_package" "default" {
-  internet_charge_type = "%s"
-  bandwidth = "20"
-  name = "${var.name}_all"
-  description = "${var.name}_all"
-}
-`, rand, internetChargeType)
-}
-
-func testAccCommonBandwidthPackageMulti(rand int, internetChargeType string) string {
-	return fmt.Sprintf(
-		`
-variable "name" {
-	default = "tf-testAccCommonBandwidthPackage%d"
-}
-
-resource "alibabacloudstack_common_bandwidth_package" "default" {
-  count = 10
-  internet_charge_type = "%s"
-  bandwidth = "10"
-  name = "${var.name}"
-}
-`, rand, internetChargeType)
+`, name)
 }

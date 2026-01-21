@@ -2,53 +2,48 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackCommonBandwidthPackagesDataSourceBasic(t *testing.T) {
-	rand := getAccTestRandInt(1000, 9999)
-
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-testAccCommonBandwidthPackageDataSource%v", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(commonBandwidthPackagesCheckInfo.resourceId, name, testAccCheckAlibabacloudStackCommonBandwidthPackagesDataSourceConfigBasic)
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackCommonBandwidthPackagesDataSourceConfigBasic(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_common_bandwidth_package.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_common_bandwidth_package.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackCommonBandwidthPackagesDataSourceConfigBasic(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_common_bandwidth_package.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_common_bandwidth_package.default.name}_fake",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackCommonBandwidthPackagesDataSourceConfigBasic(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_common_bandwidth_package.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_common_bandwidth_package.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackCommonBandwidthPackagesDataSourceConfigBasic(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_common_bandwidth_package.default.id}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_common_bandwidth_package.default.id}_fake"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackCommonBandwidthPackagesDataSourceConfigBasic(rand, map[string]string{
-			"ids":        `[ "${alibabacloudstack_common_bandwidth_package.default.id}" ]`,
-			"name_regex": `"${alibabacloudstack_common_bandwidth_package.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_common_bandwidth_package.default.id}"},
+			"name_regex": "${alibabacloudstack_common_bandwidth_package.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackCommonBandwidthPackagesDataSourceConfigBasic(rand, map[string]string{
-			"ids":        `[ "${alibabacloudstack_common_bandwidth_package.default.id}_fake" ]`,
-			"name_regex": `"${alibabacloudstack_common_bandwidth_package.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_common_bandwidth_package.default.id}_fake"},
+			"name_regex": "${alibabacloudstack_common_bandwidth_package.default.name}_fake",
 		}),
 	}
 	commonBandwidthPackagesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackCommonBandwidthPackagesDataSourceConfigBasic(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudStackCommonBandwidthPackagesDataSourceConfigBasic(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccCommonBandwidthPackageDataSource%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_common_bandwidth_package" "default" {
@@ -57,12 +52,7 @@ resource "alibabacloudstack_common_bandwidth_package" "default" {
   description = "${var.name}_description"
 
 }
-
-data "alibabacloudstack_common_bandwidth_packages" "default"  {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name)
 }
 
 var existsCommonBandwidthPackagesMapFunc = func(rand int) map[string]string {

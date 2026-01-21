@@ -90,7 +90,6 @@ func TestAccAlibabacloudStackVpcIpv6AddressesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeVpcIpv6AddressMapFunc,
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithEnvVariable(t, "ECS_WITH_IPV6_ADDRESS")
 		},
 	}
 
