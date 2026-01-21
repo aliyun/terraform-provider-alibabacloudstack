@@ -30,15 +30,18 @@ func resourceAlibabacloudStackAdbAccount() *schema.Resource {
 			},
 
 			"account_password": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				Sensitive: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"kms_encrypted_password"},
 			},
 
 			"kms_encrypted_password": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				DiffSuppressFunc: kmsDiffSuppressFunc,
+				Sensitive:        true,
+				ConflictsWith:    []string{"account_password"},
 			},
 
 			"kms_encryption_context": {
@@ -53,22 +56,26 @@ func resourceAlibabacloudStackAdbAccount() *schema.Resource {
 			"account_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{string("Super")}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Super"}, false),
 				Default:      "Super",
 				ForceNew:     true,
-				//Removed:      "Field 'account_type' has been removed from provider version 1.81.0.",
 			},
 
 			"account_description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 
-	setResourceFunc(resource, resourceAlibabacloudStackAdbAccountCreate, 
-		resourceAlibabacloudStackAdbAccountRead, 
-		resourceAlibabacloudStackAdbAccountUpdate, 
+	setResourceFunc(resource, resourceAlibabacloudStackAdbAccountCreate,
+		resourceAlibabacloudStackAdbAccountRead,
+		resourceAlibabacloudStackAdbAccountUpdate,
 		resourceAlibabacloudStackAdbAccountDelete)
 	return resource
 }
@@ -158,6 +165,7 @@ func resourceAlibabacloudStackAdbAccountRead(d *schema.ResourceData, meta interf
 	d.Set("account_name", object.AccountName)
 	d.Set("account_description", object.AccountDescription)
 	d.Set("account_type", object.AccountType)
+	d.Set("status", object.AccountStatus)
 
 	return nil
 }

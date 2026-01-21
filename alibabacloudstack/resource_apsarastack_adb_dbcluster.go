@@ -41,6 +41,8 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 					}
 					return false
 				},
+				Computed:    true,
+				Description: "Unsupported in Apsarastack",
 			},
 			/*"connection_string": {
 				Type:     schema.TypeString,
@@ -50,7 +52,7 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Basic", "Cluster"}, true),
-				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool{
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					return strings.EqualFold(oldValue, newValue)
 				},
 				DiffSuppressOnRefresh: true,
@@ -58,18 +60,21 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			"db_cluster_class": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				Computed:      true,
 				Deprecated:    "Field 'db_cluster_class' is deprecated and will be removed in a future release. Please use new field 'db_node_class' instead.",
 				ConflictsWith: []string{"db_node_class"},
 			},
 			"storage_resource": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Unsupported in Apsarastack",
 			},
 			"storage_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"db_cluster_version": {
 				Type:         schema.TypeString,
@@ -128,7 +133,6 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			//},
 			"maintain_time": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"mode": {
@@ -251,13 +255,13 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 		request.DBClusterClass = v.(string)
 	}
 
-	if v, ok := d.GetOk("storage_resource"); ok {
-		request.StorageResource = v.(string)
-	}
+	//	if v, ok := d.GetOk("storage_resource"); ok {
+	//		request.StorageResource = v.(string)
+	//	}
 
-	if v, ok := d.GetOk("compute_resource"); ok {
-		request.ComputeResource = v.(string)
-	}
+	//	if v, ok := d.GetOk("compute_resource"); ok {
+	//		request.ComputeResource = v.(string)
+	//	}
 
 	if v, ok := d.GetOk("mode"); ok {
 		request.Mode = v.(string)
@@ -340,7 +344,7 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 	response, _ = raw.(*adb.CreateDBClusterResponse)
 
 	d.SetId(fmt.Sprint(response.DBClusterId))
-	stateConf := BuildStateConf([]string{"Preparing", "Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 900*time.Second, adbService.AdbDbClusterStateRefreshFunc(d.Id(), []string{"Deleting"}))
+	stateConf := BuildStateConf([]string{"Preparing", "Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, adbService.AdbDbClusterStateRefreshFunc(d.Id(), []string{"Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -369,7 +373,7 @@ func resourceAlibabacloudStackAdbDbClusterRead(d *schema.ResourceData, meta inte
 	d.Set("compute_resource", object["ComputeResource"])
 	//d.Set("connection_string", object["ConnectionString"])
 	d.Set("db_cluster_category", object["Category"])
-	d.Set("db_node_class", object["DBNodeClass"])
+	connectivity.SetResourceData(d, object["DBNodeClass"], "db_node_class", "db_cluster_class")
 	d.Set("db_node_count", object["DBNodeCount"])
 	d.Set("executor_count", object["ExecutorCount"])
 	d.Set("db_node_storage", object["DBNodeStorage"])
@@ -385,6 +389,8 @@ func resourceAlibabacloudStackAdbDbClusterRead(d *schema.ResourceData, meta inte
 	//d.Set("tags", tagsToMap(object["Tags"].(map[string]interface{})["Tag"]))
 	d.Set("vswitch_id", object["VSwitchId"])
 	d.Set("zone_id", object["ZoneId"])
+	d.Set("cpu_type", object["CpuType"])
+	d.Set("cluster_type", object["ClusterType"])
 
 	if object["PayType"].(string) == string(Prepaid) {
 		describeAutoRenewAttributeObject, err := adbService.DescribeAutoRenewAttribute(d.Id())
@@ -424,7 +430,8 @@ func resourceAlibabacloudStackAdbDbClusterRead(d *schema.ResourceData, meta inte
 func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	adbService := AdbService{client}
-	d.Partial(true)
+
+	noUpdatesAllowedCheck(d, []string{"db_node_class", "db_cluster_class", "db_node_storage"})
 
 	//Private cloud does not have UntagResources interface
 	/*if d.HasChange("tags") {
@@ -605,7 +612,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		if err != nil {
 			return err
 		}
-		stateConf := BuildStateConf([]string{"ClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 900*time.Second, adbService.AdbDbClusterStateRefreshFunc(d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{"ClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, adbService.AdbDbClusterStateRefreshFunc(d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -616,7 +623,6 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		//d.SetPartial("db_node_storage")
 		//d.SetPartial("elastic_io_resource")
 	}
-	d.Partial(false)
 	return nil
 }
 
@@ -634,7 +640,7 @@ func resourceAlibabacloudStackAdbDbClusterDelete(d *schema.ResourceData, meta in
 		}
 		return err
 	}
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, adbService.AdbDbClusterStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, adbService.AdbDbClusterStateRefreshFunc(d.Id(), []string{}))
 	if _, err = stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

@@ -40,11 +40,6 @@ func dataSourceAlibabacloudStackAdbDbClusters() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"resource_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"status": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -210,6 +205,10 @@ func dataSourceAlibabacloudStackAdbDbClusters() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"db_cluster_version": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -229,9 +228,6 @@ func dataSourceAlibabacloudStackAdbDbClustersRead(d *schema.ResourceData, meta i
 	request := make(map[string]interface{})
 	if v, ok := d.GetOk("description"); ok {
 		request["DBClusterDescription"] = v
-	}
-	if v, ok := d.GetOk("resource_group_id"); ok {
-		request["ResourceGroupId"] = v
 	}
 	if v, ok := d.GetOk("status"); ok {
 		request["DBClusterStatus"] = v
@@ -321,6 +317,8 @@ func dataSourceAlibabacloudStackAdbDbClustersRead(d *schema.ResourceData, meta i
 			"vpc_id":                  object["VPCId"],
 			"vswitch_id":              object["VSwitchId"],
 			"zone_id":                 object["ZoneId"],
+			"db_cluster_version":      object["DBVersion"],
+			"maintain_time":           object["MaintainTime"],
 		}
 		descriptions = append(descriptions, object["DBClusterDescription"].(string))
 
@@ -358,19 +356,6 @@ func dataSourceAlibabacloudStackAdbDbClustersRead(d *schema.ResourceData, meta i
 			return errmsgs.WrapError(err)
 		}
 		mapping["security_ips"] = strings.Split(getResp1["SecurityIPList"].(string), ",")
-
-		getResp2, err := adbService.DescribeAdbDbCluster(id)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		//mapping["engine_version"] = getResp2["EngineVersion"]
-		mapping["maintain_time"] = getResp2["MaintainTime"]
-
-		getResp3, err := adbService.DescribeDBClusters(id)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		mapping["db_cluster_version"] = getResp3["DBVersion"]
 
 		ids = append(ids, fmt.Sprint(object["DBClusterId"]))
 		s = append(s, mapping)

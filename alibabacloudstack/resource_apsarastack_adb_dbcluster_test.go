@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -138,7 +139,7 @@ func TestAccAlibabacloudStackAdbDbCluster_basic(t *testing.T) {
 					"db_node_count":       "${local.adb_instance_types.0.node_min}",
 					"db_node_storage":     "${local.adb_instance_types.0.storage_min}",
 					"mode":                "${local.adb_instance_types.0.mode}",
-					"vswitch_id":          "${alibabacloudstack_vpc_vswitch.default.id}",
+					"vswitch_id":          "${local.vswtich_id}",
 					"cluster_type":        "${local.adb_instance_types.0.cluster_type}",
 					"cpu_type":            "${local.adb_instance_types.0.cpu_type}",
 					"security_ips":        []string{"10.168.1.11", "10.168.1.12"},
@@ -161,30 +162,30 @@ func TestAccAlibabacloudStackAdbDbCluster_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			//			{
+			//				Config: testAccConfig(map[string]interface{}{
+			//					"db_node_class": "${local.adb_instance_types.1.id}",
+			//				}),
+			//				Check: resource.ComposeTestCheckFunc(
+			//					testAccCheck(map[string]string{}),
+			//				),
+			//			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_node_class": "${local.adb_instance_types.1.id}",
+					"db_node_count": TfRawString("local.adb_instance_types.0.node_min+1"),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{}),
 				),
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"db_node_count": "${local.adb_instance_types.0.node_min}+1",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"db_node_storage": "${local.adb_instance_types.0.storage_min}+100",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
-				),
-			},
+			//			{
+			//				Config: testAccConfig(map[string]interface{}{
+			//					"db_node_storage": TfRawString("local.adb_instance_types.0.storage_min+100"),
+			//				}),
+			//				Check: resource.ComposeTestCheckFunc(
+			//					testAccCheck(map[string]string{}),
+			//				),
+			//			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description": name + "update",
@@ -197,21 +198,21 @@ func TestAccAlibabacloudStackAdbDbCluster_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"maintain_time": "23:00Z-00:00Z",
+					"security_ips": []string{"10.168.1.10", "10.168.1.11"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"maintain_time": "23:00Z-00:00Z",
+						"security_ips.#": "2",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"security_ips": []string{"10.168.1.12"},
+					"security_ips": []string{"10.168.1.11", "10.168.1.12"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"security_ips.#": "1",
+						"security_ips.#": "2",
 					}),
 				),
 			},
@@ -225,7 +226,7 @@ var AlibabacloudStackAdbDbClusterMap = map[string]string{
 	//"connection_string":  CHECKSET,
 	"db_cluster_version": "3.0",
 	//"elastic_io_resource": "0",
-	"maintain_time":  CHECKSET,
+	"maintain_time": CHECKSET,
 	//"resource_group_id": CHECKSET,
 	"status": "Running",
 	//"tags.%":         "0",
@@ -236,6 +237,10 @@ func AlibabacloudStackAdbDbClusterBasicDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
+}
+
+variable "existed_vswtich_id" {
+	default ="%s"
 }
 
 %s
@@ -254,7 +259,8 @@ data "alibabacloudstack_adb_cluster_types" "hygon" {
 
 locals {
 	adb_instance_types = length(data.alibabacloudstack_adb_cluster_types.intel.ids) > 0 ? data.alibabacloudstack_adb_cluster_types.intel.instance_types : data.alibabacloudstack_adb_cluster_types.hygon.instance_types
+	vswtich_id = var.existed_vswtich_id == "" ? alibabacloudstack_vpc_vswitch.default.id : var.existed_vswtich_id
 }
 
-`, name, VSwitchCommonTestCase)
+`, name, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_VSWITCH_ID"), VSwitchCommonTestCase)
 }

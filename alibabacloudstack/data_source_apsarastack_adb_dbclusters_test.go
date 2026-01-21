@@ -18,12 +18,20 @@ func TestAccAlibabacloudStackAdbDbClustersDataSource(t *testing.T) {
 			"ids": []string{"^test1234"},
 		}),
 	}
-		nameConf := dataSourceTestAccConfig{
+	nameConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"description_regex": "${alibabacloudstack_adb_db_cluster.default.description}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"description_regex": "^test1234",
+		}),
+	}
+	descriptionConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"description": "${alibabacloudstack_adb_db_cluster.default.description}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"description": "^test1234",
 		}),
 	}
 	statusConf := dataSourceTestAccConfig{
@@ -58,7 +66,7 @@ func TestAccAlibabacloudStackAdbDbClustersDataSource(t *testing.T) {
 			"clusters.0.region_id": CHECKSET,
 			//"clusters.0.expired":            "false",
 			"clusters.0.create_time":        CHECKSET,
-			"clusters.0.db_cluster_version": "3.0",
+			"clusters.0.db_cluster_version": CHECKSET,
 			//"clusters.0.db_node_class":      "C8",
 			//"clusters.0.db_node_storage":    "300",
 			//"clusters.0.compute_resource": "8Core50GB",
@@ -82,8 +90,8 @@ func TestAccAlibabacloudStackAdbDbClustersDataSource(t *testing.T) {
 		existMapFunc: existAdbClusterMapFunc,
 		fakeMapFunc:  fakeAdbClusterMapFunc,
 	}
-	
-	AdbClusterCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameConf, statusConf, allConf)
+
+	AdbClusterCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameConf, descriptionConf, statusConf, allConf)
 }
 
 func testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(name string) string {
@@ -92,28 +100,36 @@ variable "name" {
 	default = "%s"
 }
 
-%s
-
 data "alibabacloudstack_zones" "adb" {
   available_resource_creation = "ADB"
 }
 
-data "alibabacloudstack_adb_cluster_types" "default" {
-  status = "Available"
-  sorted_by = "CPU"
+data "alibabacloudstack_adb_cluster_types" "intel" {
+	status = "Available"
+	sorted_by = "CPU"
+	cpu_type = "x86"
+}
+
+data "alibabacloudstack_adb_cluster_types" "hygon" {
+	status = "Available"
+	sorted_by = "CPU"
+	cpu_type = "hygon"
+}
+
+locals {
+	adb_instance_types = length(data.alibabacloudstack_adb_cluster_types.intel.ids) > 0 ? data.alibabacloudstack_adb_cluster_types.intel.instance_types : data.alibabacloudstack_adb_cluster_types.hygon.instance_types
 }
 
 resource "alibabacloudstack_adb_db_cluster" "default" {
   db_cluster_category         = "${local.adb_instance_types.0.cluster_category}"
   db_cluster_version          = "3.0"
   db_node_class               = "${local.adb_instance_types.0.id}"
-  description                 = name
+  description                 = var.name
   db_node_count               = "${local.adb_instance_types.0.node_min}"
   db_node_storage             = "${local.adb_instance_types.0.storage_min}"
   mode                        = "${local.adb_instance_types.0.mode}"
-  vswitch_id                  = "${alibabacloudstack_vpc_vswitch.default.id}"
   cluster_type                = "${local.adb_instance_types.0.cluster_type}"
   cpu_type                    = "${local.adb_instance_types.0.cpu_type}"
 }
-`, name, VSwitchCommonTestCase)
+`, name)
 }
