@@ -317,8 +317,8 @@ func resourceAlibabacloudStackNatgatewayBandwidthpackageRead(d *schema.ResourceD
 				public_ip_addresses = append(public_ip_addresses, ip_address_map)
 			}
 			d.Set("public_ip_addresses", public_ip_addresses)
+			break
 		}
-		break
 	}
 	return nil
 }

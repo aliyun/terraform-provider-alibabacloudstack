@@ -80,6 +80,10 @@ func dataSourceAlibabacloudStackNatGateways() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"vpc_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -169,6 +173,7 @@ func NatGatewaysDecriptionAttributes(d *schema.ResourceData, gateways []vpc.NatG
 			"creation_time":    gateway.CreationTime,
 			"snat_table_id":    gateway.SnatTableIds.SnatTableId[0],
 			"forward_table_id": gateway.ForwardTableIds.ForwardTableId[0],
+			"vpc_id":           gateway.VpcId,
 		}
 		names = append(names, gateway.Name)
 		ids = append(ids, gateway.NatGatewayId)

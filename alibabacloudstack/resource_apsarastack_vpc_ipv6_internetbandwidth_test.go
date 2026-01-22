@@ -79,7 +79,7 @@ variable "name" {
 %s
 
 resource "alibabacloudstack_vpc_ipv6_gateway" "default" {
-  vpc_id            = alibabacloudstack_vpc.default.id
+  vpc_id            = alibabacloudstack_vpc_vpc.default.id
   ipv6_gateway_name = var.name
   description       = var.name
 }

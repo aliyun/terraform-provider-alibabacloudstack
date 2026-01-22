@@ -6,8 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"strconv"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -97,6 +95,7 @@ func resourceAlibabacloudStackNatGateway() *schema.Resource {
 				},
 				MaxItems: 4,
 				Optional: true,
+				Deprecated: "The field `bandwidth_packages` has been deprecated and is scheduled for removal in version 3.21.0. Please use the resource `alibabacloudstack_natgateway_bandwidth_package` instead.",
 			},
 			"tags": tagsSchema(),
 		},
@@ -118,20 +117,20 @@ func resourceAlibabacloudStackNatGatewayCreate(d *schema.ResourceData, meta inte
 		request.Spec = "Small"
 	}
 	request.ClientToken = buildClientToken(request.GetActionName())
-	bandwidthPackages := []vpc.CreateNatGatewayBandwidthPackage{}
-	for _, e := range d.Get("bandwidth_packages").([]interface{}) {
-		pack := e.(map[string]interface{})
-		bandwidthPackage := vpc.CreateNatGatewayBandwidthPackage{
-			IpCount:   strconv.Itoa(pack["ip_count"].(int)),
-			Bandwidth: strconv.Itoa(pack["bandwidth"].(int)),
-		}
-		if pack["zone"].(string) != "" {
-			bandwidthPackage.Zone = pack["zone"].(string)
-		}
-		bandwidthPackages = append(bandwidthPackages, bandwidthPackage)
-	}
-
-	request.BandwidthPackage = &bandwidthPackages
+//	bandwidthPackages := []vpc.CreateNatGatewayBandwidthPackage{}
+//	for _, e := range d.Get("bandwidth_packages").([]interface{}) {
+//		pack := e.(map[string]interface{})
+//		bandwidthPackage := vpc.CreateNatGatewayBandwidthPackage{
+//			IpCount:   strconv.Itoa(pack["ip_count"].(int)),
+//			Bandwidth: strconv.Itoa(pack["bandwidth"].(int)),
+//		}
+//		if pack["zone"].(string) != "" {
+//			bandwidthPackage.Zone = pack["zone"].(string)
+//		}
+//		bandwidthPackages = append(bandwidthPackages, bandwidthPackage)
+//	}
+//
+//	request.BandwidthPackage = &bandwidthPackages
 
 	if v, ok := connectivity.GetResourceDataOk(d, "nat_gateway_name", "name"); ok {
 		request.Name = v.(string)
