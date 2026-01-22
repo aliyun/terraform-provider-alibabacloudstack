@@ -223,12 +223,13 @@ func dataSourceAlibabacloudStackRouterInterfacesRead(d *schema.ResourceData, met
 		request.PageNumber = page
 	}
 
-	var filteredRouterInterfaces []vpc.RouterInterfaceType
 	var r *regexp.Regexp
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
 		r = regexp.MustCompile(nameRegex.(string))
 	}
-
+	var ids []string
+	var names []string
+	var s []map[string]interface{}
 	for _, v := range allRouterInterfaces {
 		if len(idsMap) > 0 {
 			if _, ok := idsMap[v.RouterInterfaceId]; !ok {
@@ -244,39 +245,28 @@ func dataSourceAlibabacloudStackRouterInterfacesRead(d *schema.ResourceData, met
 		if spec := d.Get("specification").(string); spec != "" && spec != v.Spec {
 			continue
 		}
-		filteredRouterInterfaces = append(filteredRouterInterfaces, v)
-	}
-
-	return riDecriptionAttributes(d, filteredRouterInterfaces, meta)
-}
-
-func riDecriptionAttributes(d *schema.ResourceData, riSetTypes []vpc.RouterInterfaceType, meta interface{}) error {
-	var ids []string
-	var names []string
-	var s []map[string]interface{}
-	for _, ri := range riSetTypes {
 		mapping := map[string]interface{}{
-			"id":                          ri.RouterInterfaceId,
-			"status":                      ri.Status,
-			"name":                        ri.Name,
-			"description":                 ri.Description,
-			"role":                        ri.Role,
-			"specification":               ri.Spec,
-			"router_id":                   ri.RouterId,
-			"router_type":                 ri.RouterType,
-			"vpc_id":                      ri.VpcInstanceId,
-			"access_point_id":             ri.AccessPointId,
-			"creation_time":               ri.CreationTime,
-			"opposite_region_id":          ri.OppositeRegionId,
-			"opposite_interface_id":       ri.OppositeInterfaceId,
-			"opposite_router_id":          ri.OppositeRouterId,
-			"opposite_router_type":        ri.OppositeRouterType,
-			"opposite_interface_owner_id": ri.OppositeInterfaceOwnerId,
-			"health_check_source_ip":      ri.HealthCheckSourceIp,
-			"health_check_target_ip":      ri.HealthCheckTargetIp,
+			"id":                          v.RouterInterfaceId,
+			"status":                      v.Status,
+			"name":                        v.Name,
+			"description":                 v.Description,
+			"role":                        v.Role,
+			"specification":               v.Spec,
+			"router_id":                   v.RouterId,
+			"router_type":                 v.RouterType,
+			"vpc_id":                      v.VpcInstanceId,
+			"access_point_id":             v.AccessPointId,
+			"creation_time":               v.CreationTime,
+			"opposite_region_id":          v.OppositeRegionId,
+			"opposite_interface_id":       v.OppositeInterfaceId,
+			"opposite_router_id":          v.OppositeRouterId,
+			"opposite_router_type":        v.OppositeRouterType,
+			"opposite_interface_owner_id": v.OppositeInterfaceOwnerId,
+			"health_check_source_ip":      v.HealthCheckSourceIp,
+			"health_check_target_ip":      v.HealthCheckTargetIp,
 		}
-		ids = append(ids, ri.RouterInterfaceId)
-		names = append(names, ri.Name)
+		ids = append(ids, v.RouterInterfaceId)
+		names = append(names, v.Name)
 		s = append(s, mapping)
 	}
 

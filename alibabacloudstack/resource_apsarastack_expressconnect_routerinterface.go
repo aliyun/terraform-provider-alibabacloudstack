@@ -92,6 +92,10 @@ func resourceAlibabacloudStackRouterInterface() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"status":{
+				Type:     schema.TypeString,
+								Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackRouterInterfaceCreate, resourceAlibabacloudStackRouterInterfaceRead, resourceAlibabacloudStackRouterInterfaceUpdate, resourceAlibabacloudStackRouterInterfaceDelete)
@@ -212,6 +216,7 @@ func resourceAlibabacloudStackRouterInterfaceRead(d *schema.ResourceData, meta i
 	d.Set("opposite_interface_owner_id", object.OppositeInterfaceOwnerId)
 	d.Set("health_check_source_ip", object.HealthCheckSourceIp)
 	d.Set("health_check_target_ip", object.HealthCheckTargetIp)
+	d.Set("status", object.Status)
 	return nil
 }
 

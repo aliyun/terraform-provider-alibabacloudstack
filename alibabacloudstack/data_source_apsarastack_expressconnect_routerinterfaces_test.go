@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackRouterInterfacesDataSource(t *testing.T) {
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_router_interface.initiating.name}",
+			"name_regex": "^${alibabacloudstack_router_interface.initiating.name}$",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "fake-regex",
@@ -32,36 +32,44 @@ func TestAccAlibabacloudStackRouterInterfacesDataSource(t *testing.T) {
 
 	statusConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_router_interface.initiating.id}"},
 			"status": "${alibabacloudstack_router_interface.initiating.status}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_router_interface.initiating.id}"},
 			"status": "fake_status",
 		}),
 	}
 
 	specificationConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_router_interface.initiating.id}"},
 			"specification": "Large.2",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_router_interface.initiating.id}"},
 			"specification": "Small.1",
 		}),
 	}
 
 	routerIdConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_router_interface.initiating.id}"},
 			"router_id": "${alibabacloudstack_vpc.default.0.router_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_router_interface.initiating.id}"},
 			"router_id": "fake-router-id",
 		}),
 	}
 
 	roleConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_router_interface.initiating.id}"},
 			"role": "InitiatingSide",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_router_interface.initiating.id}"},
 			"role": "AcceptingSide",
 		}),
 	}
