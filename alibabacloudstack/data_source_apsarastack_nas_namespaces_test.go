@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackNasNamespacespaces_basic(t *testing.T) {
+func TestAccAlibabacloudStackNasNamespaces_basic(t *testing.T) {
 	resourceId := "data.alibabacloudstack_nas_namespaces.default"
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf-testnasfs%d", rand)
@@ -53,28 +53,34 @@ func TestAccAlibabacloudStackNasNamespacespaces_basic(t *testing.T) {
 
 	zoneIdConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"zone_id": "${alibabacloudstack_nas_namespace.default.zone_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"zone_id": "${alibabacloudstack_nas_namespace.default.zone_id}_fake",
 		}),
 	}
 
 	storageTypeConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"storage_type": "${alibabacloudstack_nas_namespace.default.storage_type}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"storage_type": "${alibabacloudstack_nas_namespace.default.storage_type}_fake",
 		}),
 	}
 
 	protocolTypeConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"protocol_type": "${alibabacloudstack_nas_namespace.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"protocol_type": "SMB",
+			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
+			"protocol_type": "SMB_fake",
 		}),
 	}
 
