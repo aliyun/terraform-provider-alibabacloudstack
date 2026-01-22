@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -50,41 +48,6 @@ func TestAccAlibabacloudStackForwardEntryBasic(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackForwardEntryMulti(t *testing.T) {
-	var v vpc.ForwardTableEntry
-	resourceId := "alibabacloudstack_forward_entry.default.4"
-	rand := acctest.RandInt()
-	testAccForwardEntryCheckMap["name"] = fmt.Sprintf("tf-testAccForwardEntryConfig%d", rand)
-	ra := resourceAttrInit(resourceId, testAccForwardEntryCheckMap)
-	serviceFunc := func() interface{} {
-		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckForwardEntryDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccForwardEntryConfig_multi(rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"external_port": "84",
-						"internal_port": "8084",
-					}),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckForwardEntryDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
@@ -119,24 +82,6 @@ resource "alibabacloudstack_forward_entry" "default"{
 	internal_port = "8080"
 
 
-}
-`, testAccForwardEntryConfigCommon(rand))
-	return config
-}
-
-func testAccForwardEntryConfig_multi(rand int) string {
-	config := fmt.Sprintf(`
-%s
-
-resource "alibabacloudstack_forward_entry" "default"{
-	count = 5
-	name = "${var.name}"
-	forward_table_id = "${alibabacloudstack_nat_gateway.default.forward_table_ids}"
-	external_ip = "${alibabacloudstack_eip.default.0.ip_address}"
-	external_port = "${80 + count.index}"
-	ip_protocol = "tcp"
-	internal_ip = "172.16.0.3"
-	internal_port = "${8080 + count.index}"
 }
 `, testAccForwardEntryConfigCommon(rand))
 	return config

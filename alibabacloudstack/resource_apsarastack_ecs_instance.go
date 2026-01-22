@@ -368,7 +368,13 @@ func resourceAlibabacloudStackInstanceCreate(d *schema.ResourceData, meta interf
 		}
 	}
 	if d.Get("enable_ipv6").(bool) && d.Get("ipv6_address_count").(int) > 0 {
-		_, err := AssignIpv6AddressesFunc(d.Id(), d.Get("ipv6_address_count").(int), d.Get("ipv6_address_list").([]string), meta)
+		ipv6_address_list := make([]string, 0)
+		ipv6Addresses := d.Get("ipv6_address_list").([]interface{})
+		log.Printf("[DEBUG] =========================================================================  ipv6_address_list: %#v", ipv6Addresses)
+		for _, ipv6_address := range ipv6Addresses {
+			ipv6_address_list = append(ipv6_address_list, ipv6_address.(string))
+		}
+		_, err := AssignIpv6AddressesFunc(d.Id(), d.Get("ipv6_address_count").(int), ipv6_address_list, meta)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}

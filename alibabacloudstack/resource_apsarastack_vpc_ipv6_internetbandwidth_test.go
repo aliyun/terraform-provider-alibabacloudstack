@@ -24,7 +24,6 @@ func TestAccAlibabacloudStackVPCIpv6InternetBandwidth_basic0(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithEnvVariable(t, "ECS_WITH_IPV6_ADDRESS")
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -77,14 +76,17 @@ variable "name" {
   default = "%s"
 }
 
-data "alibabacloudstack_instances" "default" {
-  name_regex = "no-deleteing-ipv6-address"
-  status     = "Running"
+%s
+
+resource "alibabacloudstack_vpc_ipv6_gateway" "default" {
+  vpc_id            = alibabacloudstack_vpc.default.id
+  ipv6_gateway_name = var.name
+  description       = var.name
 }
 
 data "alibabacloudstack_vpc_ipv6_addresses" "default" {
-  associated_instance_id = data.alibabacloudstack_instances.default.instances.0.id
+  associated_instance_id = alibabacloudstack_ecs_instance.default.id
   status                 = "Available"
 }
-`, name)
+`, name, ECSInstanceCommonTestCase)
 }

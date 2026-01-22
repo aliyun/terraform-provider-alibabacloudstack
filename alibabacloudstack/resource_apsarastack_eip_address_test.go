@@ -137,7 +137,7 @@ func testAccCheckEIPDestroy(s *terraform.State) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackEipBasic_PayByBandwidth(t *testing.T) {
+func TestAccAlibabacloudStackEip_basic(t *testing.T) {
 	var v vpc.EipAddress
 	resourceId := "alibabacloudstack_eip.default"
 	ra := resourceAttrInit(resourceId, testAccCheckEipCheckMap)
@@ -147,9 +147,10 @@ func TestAccAlibabacloudStackEipBasic_PayByBandwidth(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-
+	rand := getAccTestRandInt(1000, 999999)
+	name := fmt.Sprintf("tf-testAcceEipName%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCheckEipConfigBasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -163,9 +164,18 @@ func TestAccAlibabacloudStackEipBasic_PayByBandwidth(t *testing.T) {
 		CheckDestroy: testAccCheckEIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckEipConfigBasic(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"bandwidth":   "5",
+					"name":        "${var.name}",
+					"description": "${var.name}",
+					"ip_address":  "43.149.7.150",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"bandwidth":   "5",
+						"name":        name,
+						"description": name,
+					}),
 				),
 			},
 			{
@@ -174,7 +184,9 @@ func TestAccAlibabacloudStackEipBasic_PayByBandwidth(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccCheckEipConfig_bandwidth(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"bandwidth": "10",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bandwidth": "10",
@@ -182,23 +194,32 @@ func TestAccAlibabacloudStackEipBasic_PayByBandwidth(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckEipConfig_name(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"name": "${var.name}_update",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": fmt.Sprintf("tf-testAcceEipName%d", rand),
+						"name": name + "_update",
 					}),
 				),
 			},
 			{
-				Config: testAccCheckEipConfig_description(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"description": "${var.name}_desc",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": fmt.Sprintf("tf-testAcceEipName%d_description", rand),
+						"description": name + "_desc",
 					}),
 				),
 			},
 			{
-				Config: testAccCheckEipConfig_tags(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "Test",
+					},
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"tags.%":       "2",
@@ -207,72 +228,30 @@ func TestAccAlibabacloudStackEipBasic_PayByBandwidth(t *testing.T) {
 					}),
 				),
 			},
-		},
-	})
-
-}
-
-func TestAccAlibabacloudStackEipBasic_PayByTraffic(t *testing.T) {
-	var v vpc.EipAddress
-	resourceId := "alibabacloudstack_eip.default"
-	ra := resourceAttrInit(resourceId, testAccCheckEipCheckMap)
-	serviceFunc := func() interface{} {
-		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-
-	rand := getAccTestRandInt(1000, 9999)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEIPDestroy,
-		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckEipConfigBasic(rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
-				),
-			},
-			{
-				Config: testAccCheckEipConfig_bandwidth(rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"bandwidth": "10",
-					}),
-				),
-			},
-			{
-				Config: testAccCheckEipConfig_name(rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name": fmt.Sprintf("tf-testAcceEipName%d", rand),
-					}),
-				),
-			},
-			{
-				Config: testAccCheckEipConfig_description(rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description": fmt.Sprintf("tf-testAcceEipName%d_description", rand),
-					}),
-				),
-			},
-			{
-				Config: testAccCheckEipConfig_tags(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF-update",
+						"For":     "Test-update",
+					},
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "Test",
+						"tags.Created": "TF-update",
+						"tags.For":     "Test-update",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "0",
+						"tags.Created": REMOVEKEY,
+						"tags.For":     REMOVEKEY,
 					}),
 				),
 			},
@@ -281,119 +260,13 @@ func TestAccAlibabacloudStackEipBasic_PayByTraffic(t *testing.T) {
 
 }
 
-func TestAccAlibabacloudStackEipMulti(t *testing.T) {
-	var v vpc.EipAddress
-	resourceId := "alibabacloudstack_eip.default.9"
-	ra := resourceAttrInit(resourceId, testAccCheckEipCheckMap)
-	serviceFunc := func() interface{} {
-		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-
-	rand := getAccTestRandInt(1000, 9999)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckWithAccountSiteType(t, DomesticSite)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEIPDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckEipConfig_multi(rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-		},
-	})
-
-}
-
-func testAccCheckEipConfigBasic(rand int) string {
+func testAccCheckEipConfigBasic(name string) string {
 	return fmt.Sprintf(`
 variable "name"{
-	default = "tf-testAcceEipName%d"
+	default = "%s"
 }
 
-resource "alibabacloudstack_eip" "default" {
-	bandwidth = "5"
-}
-`, rand)
-}
-
-func testAccCheckEipConfig_bandwidth(rand int) string {
-	return fmt.Sprintf(`
-variable "name"{
-	default = "tf-testAcceEipName%d"
-}
-
-resource "alibabacloudstack_eip" "default" {
-     bandwidth = "10"
-}
-`, rand)
-}
-
-func testAccCheckEipConfig_name(rand int) string {
-	return fmt.Sprintf(`
-
-variable "name"{
-	default = "tf-testAcceEipName%d"
-}
-resource "alibabacloudstack_eip" "default" {
-	bandwidth = "10"
-	name = "${var.name}"
-}
-`, rand)
-}
-
-func testAccCheckEipConfig_description(rand int) string {
-	return fmt.Sprintf(`
-
-variable "name"{
-	default = "tf-testAcceEipName%d"
-}
-resource "alibabacloudstack_eip" "default" {
-	bandwidth = "10"
-	name = "${var.name}"
-    description = "${var.name}_description"
-}
-`, rand)
-}
-
-func testAccCheckEipConfig_tags(rand int) string {
-	return fmt.Sprintf(`
-
-variable "name"{
-	default = "tf-testAcceEipName%d"
-}
-resource "alibabacloudstack_eip" "default" {	
-	bandwidth = "10"
-	name = "${var.name}"
-    description = "${var.name}_description"
-	tags = {
-		Created= "TF",
-		For=     "Test",
-	}
-}
-`, rand)
-}
-
-func testAccCheckEipConfig_multi(rand int) string {
-	return fmt.Sprintf(`
-
-resource "alibabacloudstack_eip" "default" {
-    count = 10
-	bandwidth = "5"
-}
-`)
+`, name)
 }
 
 var testAccCheckEipCheckMap = map[string]string{

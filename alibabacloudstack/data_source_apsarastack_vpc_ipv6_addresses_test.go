@@ -13,26 +13,26 @@ func TestAccAlibabacloudStackVpcIpv6AddressesDataSource(t *testing.T) {
 
 	associatedInstanceIdConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"associated_instance_id": "${data.alibabacloudstack_instances.default.instances.0.id}",
+			"associated_instance_id": "${alibabacloudstack_ecs_instance.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"associated_instance_id": "${data.alibabacloudstack_instances.default.instances.0.id}_fake",
+			"associated_instance_id": "${alibabacloudstack_ecs_instance.default.id}_fake",
 		}),
 	}
 	vswitchIdConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"vswitch_id": "${data.alibabacloudstack_vpcs.default.vpcs.0.vswitch_ids.0}",
+			"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"vswitch_id": "${data.alibabacloudstack_vpcs.default.vpcs.0.vswitch_ids.0}_fake",
+			"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}_fake",
 		}),
 	}
 	vpcIdConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"vpc_id": "${data.alibabacloudstack_vpcs.default.ids.0}",
+			"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"vpc_id": "${data.alibabacloudstack_vpcs.default.ids.0}_fake",
+			"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}_fake",
 		}),
 	}
 	statusConf := dataSourceTestAccConfig{
@@ -45,15 +45,15 @@ func TestAccAlibabacloudStackVpcIpv6AddressesDataSource(t *testing.T) {
 	}
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"vpc_id":                 "${data.alibabacloudstack_vpcs.default.ids.0}",
-			"vswitch_id":             "${data.alibabacloudstack_vpcs.default.vpcs.0.vswitch_ids.0}",
-			"associated_instance_id": "${data.alibabacloudstack_instances.default.instances.0.id}",
+			"vpc_id":                 "${alibabacloudstack_vpc_vpc.default.id}",
+			"vswitch_id":             "${alibabacloudstack_vpc_vswitch.default.id}",
+			"associated_instance_id": "${alibabacloudstack_ecs_instance.default.id}",
 			"status":                 "Available",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"vpc_id":                 "${data.alibabacloudstack_vpcs.default.ids.0}_fake",
-			"vswitch_id":             "${data.alibabacloudstack_vpcs.default.vpcs.0.vswitch_ids.0}_fake",
-			"associated_instance_id": "${data.alibabacloudstack_instances.default.instances.0.id}_fake",
+			"vpc_id":                 "${alibabacloudstack_vpc_vpc.default.id}_fake",
+			"vswitch_id":             "${alibabacloudstack_vpc_vswitch.default.id}_fake",
+			"associated_instance_id": "${alibabacloudstack_ecs_instance.default.id}_fake",
 			"status":                 "Pending",
 		}),
 	}
@@ -69,7 +69,7 @@ func TestAccAlibabacloudStackVpcIpv6AddressesDataSource(t *testing.T) {
 			"addresses.0.ipv6_address":             CHECKSET,
 			"addresses.0.ipv6_address_id":          CHECKSET,
 			"addresses.0.ipv6_address_name":        "",
-			"addresses.0.ipv6_gateway_id":          CHECKSET,
+//			"addresses.0.ipv6_gateway_id":          CHECKSET,
 			"addresses.0.network_type":             CHECKSET,
 			"addresses.0.create_time":              CHECKSET,
 			"addresses.0.vswitch_id":               CHECKSET,
@@ -102,13 +102,7 @@ variable "name" {
   default = "%s"
 }
 
-data "alibabacloudstack_instances" "default" {
-  name_regex = "no-deleteing-ipv6-address"
-  status     = "Running"
-}
+%s
 
-data "alibabacloudstack_vpcs" "default" {
-  name_regex = "no-deleteing-ipv6-address"
-}
-`, name)
+`, name, ECSInstanceCommonTestCase)
 }

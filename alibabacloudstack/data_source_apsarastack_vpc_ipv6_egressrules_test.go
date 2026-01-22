@@ -114,7 +114,6 @@ func TestAccAlibabacloudStackVPCIpv6EgressRulesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeVpcIpv6EgressRuleMapFunc,
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithEnvVariable(t, "ECS_WITH_IPV6_ADDRESS")
 		},
 	}
 
@@ -127,13 +126,10 @@ variable "name" {
   default = "%s"
 }
 
-data "alibabacloudstack_instances" "default" {
-  name_regex = "no-deleteing-ipv6-address"
-  status     = "Running"
-}
+%s
 
 data "alibabacloudstack_vpc_ipv6_addresses" "default" {
-  associated_instance_id = data.alibabacloudstack_instances.default.instances.0.id
+  associated_instance_id = alibabacloudstack_ecs_instance.default.id
   status                 = "Available"
 }
 
@@ -143,5 +139,5 @@ resource "alibabacloudstack_vpc_ipv6_egress_rule" "default" {
   instance_id           = data.alibabacloudstack_vpc_ipv6_addresses.default.ids.0
   instance_type         = "Ipv6Address"
   description           = var.name
-}`, name)
+}`, name, ECSInstanceCommonTestCase)
 }

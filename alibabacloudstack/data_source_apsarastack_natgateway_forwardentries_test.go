@@ -2,90 +2,86 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackForwardEntriesDataSourceBasic(t *testing.T) {
-	rand := getAccTestRandInt(10000, 20000)
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("tf-testAccForwardEntryConfig%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(forwardEntriesCheckInfo.resourceId, name, testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic)
 	forwardTableIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-			"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-			"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}_fake",
 		}),
 	}
 
 	externalIpConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-			"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
-			"external_ip":      `"${alibabacloudstack_forward_entry.default.external_ip}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
+			"external_ip":      "${alibabacloudstack_forward_entry.default.external_ip}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-			"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
-			"external_ip":      ` "${alibabacloudstack_forward_entry.default.external_ip}_fake" `,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
+			"external_ip":      "${alibabacloudstack_forward_entry.default.external_ip}_fake",
 		}),
 	}
 
 	internalIpConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-			"internal_ip":      `"${alibabacloudstack_forward_entry.default.internal_ip}"`,
-			"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"internal_ip":      "${alibabacloudstack_forward_entry.default.internal_ip}",
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-			"internal_ip":      `"${alibabacloudstack_forward_entry.default.internal_ip}_fake"`,
-			"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"internal_ip":      "${alibabacloudstack_forward_entry.default.internal_ip}_fake",
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-			"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
-			"ids":              `[ "${alibabacloudstack_forward_entry.default.forward_entry_id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
+			"ids":              []string{ "${alibabacloudstack_forward_entry.default.forward_entry_id}" },
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-			"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
-			"ids":              `[ "${alibabacloudstack_forward_entry.default.forward_entry_id}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
+			"ids":              []string{ "${alibabacloudstack_forward_entry.default.forward_entry_id}_fake" },
 		}),
 	}
 
-	//nameRegexConf := dataSourceTestAccConfig{
-	//	existConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-	//		"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
-	//		"name_regex":       `"${alibabacloudstack_forward_entry.default.name}"`,
-	//	}),
-	//	fakeConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-	//		"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
-	//		"name_regex":       `"${alibabacloudstack_forward_entry.default.name}_fake"`,
-	//	}),
-	//}
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
+			"name_regex":       "${alibabacloudstack_forward_entry.default.name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
+			"name_regex":       "${alibabacloudstack_forward_entry.default.name}_fake",
+		}),
+	}
 
-	//allConf := dataSourceTestAccConfig{
-	//	existConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-	//		"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
-	//		"external_ip":      `"${alibabacloudstack_forward_entry.default.external_ip}"`,
-	//		"internal_ip":      `"${alibabacloudstack_forward_entry.default.internal_ip}"`,
-	//	}),
-	//	fakeConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
-	//		"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,
-	//		"external_ip":      `"${alibabacloudstack_forward_entry.default.external_ip}"`,
-	//		"internal_ip":      `"${alibabacloudstack_forward_entry.default.internal_ip}"`,
-	//	}),
-	//}
-	forwardEntriesCheckInfo.dataSourceTestCheck(t, rand, forwardTableIdConf, externalIpConf, internalIpConf, idsConf /*,nameRegexConf/*, allConf*/)
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
+			"external_ip":      "${alibabacloudstack_forward_entry.default.external_ip}",
+			"internal_ip":      "${alibabacloudstack_forward_entry.default.internal_ip}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"forward_table_id": "${alibabacloudstack_forward_entry.default.forward_table_id}",
+			"external_ip":      "${alibabacloudstack_forward_entry.default.external_ip}_fake",
+			"internal_ip":      "${alibabacloudstack_forward_entry.default.internal_ip}_fake",
+		}),
+	}
+	forwardEntriesCheckInfo.dataSourceTestCheck(t, rand, forwardTableIdConf, externalIpConf, internalIpConf, idsConf ,nameRegexConf, allConf)
 
 }
 
-func testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccForwardEntryConfig%d"
+	default = "%s"
 }
 
 data "alibabacloudstack_zones" "default" {
@@ -128,10 +124,7 @@ resource "alibabacloudstack_forward_entry" "default"{
 	internal_port = "8080"
 }
 
-data "alibabacloudstack_forward_entries" "default" {
-	%s
-}`, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name)
 }
 
 var existForwardEntriesMapFunc = func(rand int) map[string]string {

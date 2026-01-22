@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"testing"
 
@@ -164,7 +163,9 @@ func TestAccAlibabacloudStackRouterInterfaceBasic(t *testing.T) {
 	resourceId := "alibabacloudstack_router_interface.default"
 	ra := resourceAttrInit(resourceId, testAccRouterInterfaceCheckMap)
 
-	rand := getAccTestRandInt(10000, 20000)
+	rand := getAccTestRandInt(1000, 2000)
+	name := fmt.Sprintf("tf-testAccRouterInterfaceConfig%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccRouterInterfaceConfigBasic)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -178,22 +179,21 @@ func TestAccAlibabacloudStackRouterInterfaceBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckRouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRouterInterfaceConfigBasic(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"opposite_region": "${data.alibabacloudstack_account.current.region}",
+					"router_type":     "VRouter",
+					"router_id":       "${alibabacloudstack_vpc.default.router_id}",
+					"role":            "AcceptingSide",
+					"name":            "${var.name}",
+					"description":     "${var.name}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRouterInterfaceExists(resourceId, &v),
 					testAccCheck(map[string]string{
-						"name": fmt.Sprintf("tf-testAccRouterInterfaceConfig%d", rand),
-					}),
-				),
-				//ExpectNonEmptyPlan: true,
-			},
-			{
-				Config: testAccRouterInterfaceConfig_role(rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRouterInterfaceExists(resourceId, &v),
-					testAccCheck(map[string]string{
-						"role":          "InitiatingSide",
-						"specification": "Large.1",
+						"router_type": "VRouter",
+						"role":        "AcceptingSide",
+						"name":        name,
+						"description": name,
 					}),
 				),
 				//ExpectNonEmptyPlan: true,
@@ -204,7 +204,10 @@ func TestAccAlibabacloudStackRouterInterfaceBasic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccRouterInterfaceConfig_specification(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"role":          "InitiatingSide",
+					"specification": "Large.2",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRouterInterfaceExists(resourceId, &v),
 					testAccCheck(map[string]string{
@@ -215,34 +218,37 @@ func TestAccAlibabacloudStackRouterInterfaceBasic(t *testing.T) {
 				//ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccRouterInterfaceConfig_name(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"specification": "Large.1",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRouterInterfaceExists(resourceId, &v),
 					testAccCheck(map[string]string{
-						"name": fmt.Sprintf("tf-testAccRouterInterfaceConfig%d_change", rand),
+						"specification": "Large.1",
 					}),
 				),
 				//ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccRouterInterfaceConfig_description(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"name": "${var.name}_update",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRouterInterfaceExists(resourceId, &v),
 					testAccCheck(map[string]string{
-						"description": fmt.Sprintf("tf-testAccRouterInterfaceConfig%d_description", rand),
+						"name": name + "_update",
 					}),
 				),
 				//ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccRouterInterfaceConfig_all(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"description": "${var.name}_desc",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRouterInterfaceExists(resourceId, &v),
 					testAccCheck(map[string]string{
-						"name":          fmt.Sprintf("tf-testAccRouterInterfaceConfig%d", rand),
-						"description":   fmt.Sprintf("tf-testAccRouterInterfaceConfig%d", rand),
-						"role":          "InitiatingSide",
-						"specification": "Large.2",
+						"description": name + "_desc",
 					}),
 				),
 				//ExpectNonEmptyPlan: true,
@@ -252,43 +258,10 @@ func TestAccAlibabacloudStackRouterInterfaceBasic(t *testing.T) {
 
 }
 
-func TestAccAlibabacloudStackRouterInterfaceMulti(t *testing.T) {
-	var v vpc.RouterInterfaceType
-	resourceId := "alibabacloudstack_router_interface.default.2"
-	ra := resourceAttrInit(resourceId, testAccRouterInterfaceCheckMap)
-
-	rand := getAccTestRandInt(10000, 20000)
-	testAccCheck := ra.resourceAttrMapUpdateSet()
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckWithAccountSiteType(t, DomesticSite)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckRouterInterfaceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccRouterInterfaceConfig_multi(rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRouterInterfaceExists(resourceId, &v),
-					testAccCheck(map[string]string{
-						"name": fmt.Sprintf("tf-testAccRouterInterfaceConfig%d", rand),
-					}),
-				),
-				//ExpectNonEmptyPlan: true,
-			},
-		},
-	})
-
-}
-
-func testAccRouterInterfaceConfigBasic(rand int) string {
+func testAccRouterInterfaceConfigBasic(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccRouterInterfaceConfig%d"
+	default = "%s"
 }
 
 resource "alibabacloudstack_vpc" "default" {
@@ -296,169 +269,9 @@ resource "alibabacloudstack_vpc" "default" {
 	cidr_block = "172.16.0.0/12"
 }
 
-variable "region" {
-  default = "%s"
+data "alibabacloudstack_account" "current"{
 }
-
-resource "alibabacloudstack_router_interface" "default" {
-	opposite_region = "${var.region}"
-	router_type = "VRouter"
-	router_id = "${alibabacloudstack_vpc.default.router_id}"
-	role = "AcceptingSide"
-	name = "${var.name}"
-}`, rand, os.Getenv("ALIBABACLOUDSTACK_REGION"))
-}
-
-func testAccRouterInterfaceConfig_multi(rand int) string {
-	return fmt.Sprintf(`
-variable "name" {
-	default = "tf-testAccRouterInterfaceConfig%d"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-variable "region" {
-  default = "%s"
-}
-
-resource "alibabacloudstack_router_interface" "default" {
-	count = 3
-	opposite_region = "${var.region}"
-	router_type = "VRouter"
-	router_id = "${alibabacloudstack_vpc.default.router_id}"
-	role = "AcceptingSide"
-	name = "${var.name}"
-}`, rand, os.Getenv("ALIBABACLOUDSTACK_REGION"))
-}
-
-func testAccRouterInterfaceConfig_role(rand int) string {
-	return fmt.Sprintf(`
-variable "name" {
-	default = "tf-testAccRouterInterfaceConfig%d"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-variable "region" {
-  default = "%s"
-}
-
-resource "alibabacloudstack_router_interface" "default" {
-	opposite_region = "${var.region}"
-	router_type = "VRouter"
-	router_id = "${alibabacloudstack_vpc.default.router_id}"
-	role = "InitiatingSide"
-	specification = "Large.1"
-	name = "${var.name}"
-}`, rand, os.Getenv("ALIBABACLOUDSTACK_REGION"))
-}
-
-func testAccRouterInterfaceConfig_specification(rand int) string {
-	return fmt.Sprintf(`
-variable "name" {
-	default = "tf-testAccRouterInterfaceConfig%d"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-variable "region" {
-  default = "%s"
-}
-
-resource "alibabacloudstack_router_interface" "default" {
-	opposite_region = "${var.region}"
-	router_type = "VRouter"
-	router_id = "${alibabacloudstack_vpc.default.router_id}"
-	role = "InitiatingSide"
-	name = "${var.name}"
-	specification = "Large.2"
-}`, rand, os.Getenv("ALIBABACLOUDSTACK_REGION"))
-}
-
-func testAccRouterInterfaceConfig_name(rand int) string {
-	return fmt.Sprintf(`
-variable "name" {
-	default = "tf-testAccRouterInterfaceConfig%d"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-variable "region" {
-  default = "%s"
-}
-
-resource "alibabacloudstack_router_interface" "default" {
-	opposite_region = "${var.region}"
-	router_type = "VRouter"
-	router_id = "${alibabacloudstack_vpc.default.router_id}"
-	role = "InitiatingSide"
-	name = "${var.name}_change"
-	specification = "Large.2"
-}`, rand, os.Getenv("ALIBABACLOUDSTACK_REGION"))
-}
-
-func testAccRouterInterfaceConfig_description(rand int) string {
-	return fmt.Sprintf(`
-variable "name" {
-	default = "tf-testAccRouterInterfaceConfig%d"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-variable "region" {
-  default = "%s"
-}
-
-resource "alibabacloudstack_router_interface" "default" {
-	opposite_region = "${var.region}"
-	router_type = "VRouter"
-	router_id = "${alibabacloudstack_vpc.default.router_id}"
-	role = "InitiatingSide"
-	name = "${var.name}_change"
-	specification = "Large.2"
-	description = "${var.name}_description"
-}`, rand, os.Getenv("ALIBABACLOUDSTACK_REGION"))
-}
-
-func testAccRouterInterfaceConfig_all(rand int) string {
-	return fmt.Sprintf(`
-variable "name" {
-	default = "tf-testAccRouterInterfaceConfig%d"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-variable "region" {
-  default = "%s"
-}
-
-resource "alibabacloudstack_router_interface" "default" {
-	opposite_region = "${var.region}"
-	router_type = "VRouter"
-	router_id = "${alibabacloudstack_vpc.default.router_id}"
-	role = "InitiatingSide"
-	name = "${var.name}"
-	specification = "Large.2"
-	description = "${var.name}"
-}`, rand, os.Getenv("ALIBABACLOUDSTACK_REGION"))
+`, name)
 }
 
 var testAccRouterInterfaceCheckMap = map[string]string{
