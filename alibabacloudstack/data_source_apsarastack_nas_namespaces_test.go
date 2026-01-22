@@ -17,8 +17,8 @@ func TestAccAlibabacloudStackNasNamespaces_basic(t *testing.T) {
 				"namespaces.#":                    "1",
 				"namespaces.0.description":        name,
 				"namespaces.0.protocol_type":      "NFS",
-				"namespaces.0.storage_type":       "Capacity",
-				"namespaces.0.file_system_type":   "standard",
+				"namespaces.0.storage_type":       CHECKSET,
+				"namespaces.0.file_system_type":   CHECKSET,
 				"namespaces.0.zone_id":            CHECKSET,
 				"namespaces.0.status":             CHECKSET,
 				"namespaces.0.create_time":        CHECKSET,
@@ -80,7 +80,7 @@ func TestAccAlibabacloudStackNasNamespaces_basic(t *testing.T) {
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
-			"protocol_type": "SMB_fake",
+			"protocol_type": "SMB",
 		}),
 	}
 
@@ -101,7 +101,7 @@ resource "alibabacloudstack_nas_namespace" "default" {
 	cluster_id = "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.cluster_id}"
 	description = var.name
 	storage_type = "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.instance_types.0.storage_type}"
-	protocol_type = "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.instance_types.0.protocol_type}"
+	protocol_type = "NFS"
 	encrypt_type = "0"
 }
 
