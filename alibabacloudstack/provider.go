@@ -614,6 +614,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_oss_single_tunnels":                               dataSourceAlibabacloudStackOssSingleTunnels(),
 		"alibabacloudstack_kvstore_parameter_groups":                         dataSourceAlibabacloudStackKvstoreParameterGroups(),
 		"alibabacloudstack_nas_dir_quotas":                                   dataSourceAlibabacloudStackNasDirQuotas(),
+		"alibabacloudstack_nas_namespaces":                                   dataSourceAlibabacloudStackNasNamespaces(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
@@ -1077,6 +1078,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_oss_single_tunnel":                               resourceAlibabacloudStackOssSingleTunnel(),
 		"alibabacloudstack_kvstore_parameter_group":                         resourceAlibabacloudStackKvstoreParameterGroup(),
 		"alibabacloudstack_nas_dir_quota":                                   resourceAlibabacloudStackNasDirQuota(),
+		"alibabacloudstack_nas_namespace":                                   resourceAlibabacloudStackNasNamespace(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps

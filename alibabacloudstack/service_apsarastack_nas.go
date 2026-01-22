@@ -287,3 +287,29 @@ func (s *NasService) NasDirQuotaStateRefreshFunc(id string, failStates []string)
 		return object, object["Status"].(string), nil
 	}
 }
+
+func (s *NasService) DescribeNasNamespace(id string) (map[string]interface{}, error) {
+	request := map[string]interface{}{
+		"NasNamespaceId": id,
+	}
+	response, err := s.client.DoTeaRequest("GET", "Nas", "2017-06-26", "DescribeNamespaces", "", nil, request, nil)
+	addDebug("DescribeNamespaces", response, request)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidNasNamespace.NotFound", "Forbidden.NasNotFound", "Resource.NotFound"}) {
+			err = errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespace:%s Not found!", id))
+			return nil, err
+		}
+		return nil, err
+	}
+	nasNamespaces, ok := response["NasNamespaces"].([]interface{})
+	if !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespace:%s Not found!", id))
+	}
+	for _, v := range nasNamespaces {
+		nasNamespace := v.(map[string]interface{})
+		if nasNamespace["NasNamespaceId"].(string) == id {
+			return nasNamespace, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespace:%s Not found!", id))
+}
