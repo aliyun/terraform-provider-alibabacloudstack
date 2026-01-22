@@ -1,9 +1,9 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
-	"encoding/json"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -180,7 +180,7 @@ func (s *NasService) DescribeNasFileSystemStateRefreshFunc(id string, defaultRet
 			if errmsgs.NotFoundError(err) {
 				return nil, "", nil
 			}
-			
+
 			if errmsgs.NeedRetry(err) && errmsgs.IsExpectedErrors(err, []string{errmsgs.InvalidFileSystemStatus_Ordering}) {
 				return nil, defaultRetryState, nil
 			}
@@ -195,17 +195,16 @@ func (s *NasService) DescribeNasFileSystemStateRefreshFunc(id string, defaultRet
 	}
 }
 
-
 type NasDescribelifecyclepoliciesResponse struct {
 	LifecyclePolicies []struct {
-			FileSystemId        string `json:"FileSystemId"`
-			LifecyclePolicyName string `json:"LifecyclePolicyName"`
-			Path                string `json:"Path"`
-			Recursive           bool   `json:"Recursive"`
-			LifecycleRuleName   string `json:"LifecycleRuleName"`
-			StorageType         string `json:"StorageType"`
-			CreateTime          string `json:"CreateTime"`
-			OssBucket           string `json:"OssBucket"`
+		FileSystemId        string `json:"FileSystemId"`
+		LifecyclePolicyName string `json:"LifecyclePolicyName"`
+		Path                string `json:"Path"`
+		Recursive           bool   `json:"Recursive"`
+		LifecycleRuleName   string `json:"LifecycleRuleName"`
+		StorageType         string `json:"StorageType"`
+		CreateTime          string `json:"CreateTime"`
+		OssBucket           string `json:"OssBucket"`
 	} `json:"LifecyclePolicies"`
 	RequestId  string `json:"RequestId"`
 	TotalCount int    `json:"TotalCount"`
@@ -235,4 +234,56 @@ func (s *NasService) DoNasDescribelifecyclepoliciesRequest(id string) (*NasDescr
 	}
 
 	return NasDescribelifecyclepoliciesResponseObj, nil
+}
+
+func (s *NasService) DescribeNasDirQuota(id string) (map[string]interface{}, error) {
+	parts := strings.SplitN(id, ":", 2)
+	fileSystemId := parts[0]
+	path := parts[1]
+
+	request := map[string]interface{}{
+		"FileSystemId": fileSystemId,
+		"Path":         path,
+		"PageSize":     100,
+		"PageNumber":   1,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "Nas", "2017-06-26", "DescribeDirQuotas", "", nil, request, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	dirQuotaInfos := response["DirQuotaInfos"].([]interface{})
+	if len(dirQuotaInfos) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Nas dir quota not found with id: %s", id))
+	}
+	for _, v := range dirQuotaInfos {
+		dirQuotaInfo := v.(map[string]interface{})
+		if dirQuotaInfo["Path"] == path {
+			return dirQuotaInfo, nil
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Nas dir quota not found with id: %s", id))
+}
+
+func (s *NasService) NasDirQuotaStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeNasDirQuota(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object["Status"].(string) == failState {
+				return object, object["Status"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["Status"].(string)))
+			}
+		}
+
+		return object, object["Status"].(string), nil
+	}
 }
