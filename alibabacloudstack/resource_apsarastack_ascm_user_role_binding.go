@@ -7,6 +7,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"strings"
 )
 
 func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
@@ -15,6 +16,7 @@ func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
 			"login_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"role_ids": {
 				Type:     schema.TypeSet,
@@ -23,10 +25,24 @@ func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeInt},
 			},
 		},
-		DeprecationMessage: "ascm_user already includes corresponding functions",
+		DeprecationMessage: "ascm_user already includes corresponding functions. This resource may be removed in future versions.",
+		Importer: &schema.ResourceImporter{
+			State: resourceAlibabacloudStackAscmUserRoleBindingImportState,
+		},
 	}
+
 	setResourceFunc(resource, resourceAlibabacloudStackAscmUserRoleBindingCreate, resourceAlibabacloudStackAscmUserRoleBindingRead, resourceAlibabacloudStackAscmUserRoleBindingUpdate, resourceAlibabacloudStackAscmUserRoleBindingDelete)
 	return resource
+}
+
+func resourceAlibabacloudStackAscmUserRoleBindingImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	id := d.Id()
+	if strings.HasPrefix(id, "user:") {
+		id = strings.TrimPrefix(id, "user:")
+	}
+	d.Set("login_name", id)
+	d.SetId(id)
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, meta interface{}) error {
@@ -35,7 +51,7 @@ func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, 
 	flag := false
 	var roleids []int
 	if v, ok := d.GetOk("role_ids"); ok {
-		for _ ,id := range v.(*schema.Set).List() {
+		for _, id := range v.(*schema.Set).List() {
 			roleids = append(roleids, id.(int))
 		}
 	}
@@ -62,7 +78,6 @@ func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, 
 	}
 
 	d.SetId(lname)
-
 	return nil
 }
 
@@ -81,8 +96,12 @@ func resourceAlibabacloudStackAscmUserRoleBindingRead(d *schema.ResourceData, me
 		d.SetId("")
 		return nil
 	}
-	d.Set("login_name", object.Data[0].LoginName)
-	role_ids := []int{}
+
+	loginName := object.Data[0].LoginName
+	d.SetId(loginName)
+	d.Set("login_name", loginName)
+
+	role_ids := make([]int, 0)
 	for _, role := range object.Data[0].Roles {
 		role_ids = append(role_ids, role.ID)
 	}

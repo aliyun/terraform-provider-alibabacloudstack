@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscm_UserRoleBinding(t *testing.T) {
+func TestAccAlibabacloudStackAscmUserRoleBinding(t *testing.T) {
 	var v *User
 	resourceId := "alibabacloudstack_ascm_user_role_binding.default"
 	ra := resourceAttrInit(resourceId, testAccCheckUserRoleBinding)
