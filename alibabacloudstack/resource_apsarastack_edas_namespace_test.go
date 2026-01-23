@@ -122,14 +122,14 @@ func TestAccAlibabacloudStackEDASNamespace_basic0(t *testing.T) {
 // 					"debug_enable":         "false",
 					"description":          "${var.name}",
 					"namespace_name":       "${var.name}",
-					"namespace_logical_id": "${var.logical_id}",
+					"namespace_logical_id": TfRawString("substr(local.logical_id, 0, min(length(local.logical_id), 32))"),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 // 						"debug_enable":         "false",
 						"description":          name,
 						"namespace_name":       name,
-						"namespace_logical_id": defaultRegionToTest + ":" + name,
+						"namespace_logical_id": CHECKSET,
 					}),
 				),
 			},
@@ -183,10 +183,17 @@ func AlibabacloudStackEDASNamespaceBasicDependence0(name string) string {
 variable "name" {
   default = "%s"
 }
-variable "logical_id" {
-  default = "%s:%s"
+
+data "alibabacloudstack_account" "current" {
 }
-`, name, defaultRegionToTest, name)
+
+locals {
+  logical_id = "${data.alibabacloudstack_account.current.region}:${var.name}"
+}
+
+
+
+`, name)
 }
 
 //func TestUnitAccAlibabacloudStackEDASNamespace(t *testing.T) {

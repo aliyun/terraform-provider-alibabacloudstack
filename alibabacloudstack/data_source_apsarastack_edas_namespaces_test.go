@@ -2,91 +2,95 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
-func TestAccAlibabacloudStackEdasNamespacesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackEDASNamespacesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(100, 999)
+	resourceId := "data.alibabacloudstack_edas_namespaces.default"
+	name := fmt.Sprintf("tfnsdata%d", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceEdasNamespacesConfigDependence)
+
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEdasNamespacesDataSourceName(rand, map[string]string{
-			"ids": `["${alibabacloudstack_edas_namespace.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_edas_namespace.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEdasNamespacesDataSourceName(rand, map[string]string{
-			"ids": `["${alibabacloudstack_edas_namespace.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_edas_namespace.default.id}_fake"},
 		}),
 	}
+
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEdasNamespacesDataSourceName(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_edas_namespace.default.namespace_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_edas_namespace.default.namespace_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEdasNamespacesDataSourceName(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_edas_namespace.default.namespace_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "fake_*",
 		}),
 	}
+
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEdasNamespacesDataSourceName(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_edas_namespace.default.id}"]`,
-			"name_regex": `"${alibabacloudstack_edas_namespace.default.namespace_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_edas_namespace.default.id}"},
+			"name_regex": "${alibabacloudstack_edas_namespace.default.namespace_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEdasNamespacesDataSourceName(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_edas_namespace.default.id}_fake"]`,
-			"name_regex": `"${alibabacloudstack_edas_namespace.default.namespace_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_edas_namespace.default.id}_fake"},
+			"name_regex": "fake_*",
 		}),
 	}
-	var existAlibabacloudStackEdasNamespacesDataSourceNameMapFunc = func(rand int) map[string]string {
+
+	var existEdasNamespacesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":        "1",
-			"names.#":      "1",
-			"namespaces.#": "1",
-			// 			"namespaces.0.debug_enable":         "false",
-			"namespaces.0.description":          fmt.Sprintf("tf-testAccNamespace-%d", rand),
-			"namespaces.0.namespace_logical_id": fmt.Sprintf("%s:tftest%d", defaultRegionToTest, rand),
-			"namespaces.0.namespace_name":       fmt.Sprintf("tf-testAccNamespace-%d", rand),
-			"namespaces.0.user_id":              CHECKSET,
-			"namespaces.0.belong_region":        CHECKSET,
+			"ids.#":                         "1",
+			"names.#":                       "1",
+			"namespaces.#":                  "1",
+			"namespaces.0.id":               CHECKSET,
+			"namespaces.0.namespace_id":     CHECKSET,
+			"namespaces.0.description":      name,
+			"namespaces.0.namespace_logical_id": CHECKSET,
+			"namespaces.0.namespace_name":   name,
+			"namespaces.0.user_id":          CHECKSET,
+			"namespaces.0.belong_region":    CHECKSET,
 		}
 	}
-	var fakeAlibabacloudStackEdasNamespacesDataSourceNameMapFunc = func(rand int) map[string]string {
+
+	var fakeEdasNamespacesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":   "0",
-			"names.#": "0",
+			"ids.#":        "0",
+			"names.#":      "0",
+			"namespaces.#": "0",
 		}
 	}
-	var alibabacloudstackEdasNamespacesCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_edas_namespaces.default",
-		existMapFunc: existAlibabacloudStackEdasNamespacesDataSourceNameMapFunc,
-		fakeMapFunc:  fakeAlibabacloudStackEdasNamespacesDataSourceNameMapFunc,
+
+	var edasNamespacesCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existEdasNamespacesMapFunc,
+		fakeMapFunc:  fakeEdasNamespacesMapFunc,
 	}
-
-	alibabacloudstackEdasNamespacesCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
-}
-func testAccCheckAlibabacloudStackEdasNamespacesDataSourceName(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
-
-variable "name" {	
-	default = "tf-testAccNamespace-%d"
+	edasNamespacesCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
 
-variable "logical_id" {
-  default = "%s:tftest%d"
+func dataSourceEdasNamespacesConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
+}
+
+%s
+
+data "alibabacloudstack_account" "current" {}
+
+locals {
+  logical_id = "${data.alibabacloudstack_account.current.region}:${var.name}"
 }
 
 resource "alibabacloudstack_edas_namespace" "default" {
-	//debug_enable = false
-	description = var.name
-	namespace_logical_id = var.logical_id
-	namespace_name = var.name
+  description            = var.name
+  namespace_logical_id   = substr(local.logical_id, 0, min(length(local.logical_id), 32))
+  namespace_name         = var.name
 }
 
-data "alibabacloudstack_edas_namespaces" "default" {	
-	%s
-}
-`, rand, defaultRegionToTest, rand, strings.Join(pairs, " \n "))
-	return config
+`, name, DataZoneCommonTestCase)
 }
