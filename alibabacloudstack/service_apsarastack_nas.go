@@ -313,3 +313,34 @@ func (s *NasService) DescribeNasNamespace(id string) (map[string]interface{}, er
 	}
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespace:%s Not found!", id))
 }
+func (s *NasService) DescribeNasNamespaceFilesystemAttachment(id string) (map[string]interface{}, error) {
+	parts := strings.SplitN(id, ":", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid resource id format, expected NasNamespaceId:FileSystemId")
+	}
+
+	nasNamespaceId := parts[0]
+	fileSystemId := parts[1]
+
+	reqQuery := map[string]interface{}{
+		"NasNamespaceId": nasNamespaceId,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "Nas", "2017-06-26", "ListFileSystemsInNamespace", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	nsMembers, ok := response["NSMembers"].([]interface{})
+	if !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("No filesystem found in namespace %s", nasNamespaceId))
+	}
+	for _, v := range nsMembers {
+		member := v.(map[string]interface{})
+		if member["FileSystemId"] == fileSystemId {
+			return member, nil
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Filesystem %s not found in namespace %s", fileSystemId, nasNamespaceId))
+}
