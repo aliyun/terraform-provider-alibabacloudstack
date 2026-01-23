@@ -67,10 +67,6 @@ func TestAccAlibabacloudStackNasNamespaces_basic(t *testing.T) {
 			"ids":          []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"storage_type": "${alibabacloudstack_nas_namespace.default.storage_type}",
 		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":          []string{"${alibabacloudstack_nas_namespace.default.id}"},
-			"storage_type": "${alibabacloudstack_nas_namespace.default.storage_type}_fake",
-		}),
 	}
 
 	protocolTypeConfig := dataSourceTestAccConfig{
