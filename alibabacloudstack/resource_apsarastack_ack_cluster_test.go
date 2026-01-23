@@ -236,7 +236,7 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 					"security_group_id":            "${alibabacloudstack_ecs_securitygroup.default.id}",
 					"is_enterprise_security_group": "false",
 					"enable_ssh":                   "${var.enable_ssh}",
-					"password":                     "${var.password}",
+					"key_name":                      "${alibabacloudstack_ecs_keypair.default.key_name}",
 					"delete_protection":            "false",
 					"pod_cidr":                     "${var.pod_cidr}",
 					"service_cidr":                 "${var.service_cidr}",
@@ -252,117 +252,6 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids"},
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackCsK8sKeyName(t *testing.T) {
-	var v *KubernetesClusterDetail
-	resourceId := "alibabacloudstack_cs_kubernetes.k8s"
-	ra := resourceAttrInit(resourceId, CsK8sMap)
-	serviceFunc := func() interface{} {
-		return &CsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testAccCsK8sConfigBasic%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCsK8sKeyNameDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckCsK8sDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"runtime": []map[string]interface{}{
-						{"name": "containerd", "version": "1.6.28"},
-					},
-					"addons": []map[string]interface{}{
-						{
-							"name": "flannel",
-						},
-						{
-							"name": "arms-prometheus",
-						},
-						{
-							"name": "csi-plugin",
-						},
-						{
-							"name": "csi-provisioner",
-						},
-						{
-							"name":   "logtail-ds",
-							"config": "{\\\"IngressDashboardEnabled\\\":\\\"true\\\"}",
-						},
-						{
-							"name":   "ack-node-problem-detector",
-							"config": "{\\\"sls_project_name\\\":\\\"\\\"}",
-						},
-						{
-							"name":   "nginx-ingress-controller",
-							"config": "{\\\"IngressSlbNetworkType\\\":\\\"intranet\\\"}",
-						},
-					},
-					"name":                          "${var.name}",
-					"version":                       "1.32.1-aliyun.1",
-					"os_type":                       "linux",
-					"platform":                      "AliyunLinux",
-					"timeout_mins":                  "60",
-					"vpc_id":                        "${alibabacloudstack_vpc_vpc.default.id}",
-					"master_count":                  "3",
-					"master_disk_category":          "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
-					"master_disk_size":              "40",
-					"master_instance_types":         []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
-					"master_vswitch_ids":            []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
-					"master_disk_encrypted":         "true",
-					"master_disk_encrypt_algorithm": "aes-256",
-					"master_disk_kms_key_id":        "${alibabacloudstack_kms_key.default.id}",
-					"num_of_nodes":                  "1",
-					"worker_disk_category":          "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
-					"worker_disk_size":              "40",
-					"worker_instance_types":         []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
-					"worker_vswitch_ids":            []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
-					"worker_disk_encrypted":         "true",
-					"worker_disk_encrypt_algorithm": "aes-256",
-					"worker_disk_kms_key_id":        "${alibabacloudstack_kms_key.default.id}",
-					"is_enterprise_security_group":  "true",
-					"enable_ssh":                    "${var.enable_ssh}",
-					"key_name":                      "${alibabacloudstack_ecs_keypair.default.key_name}",
-					"delete_protection":             "false",
-					"pod_cidr":                      "${var.pod_cidr}",
-					"service_cidr":                  "${var.service_cidr}",
-					"node_cidr_mask":                "${var.node_cidr_mask}",
-					"new_nat_gateway":               "false",
-					"slb_internet_enabled":          "false",
-					"proxy_mode":                    "ipvs",
-					"worker_data_disks": []map[string]interface{}{
-						{
-							"size":       "40",
-							"encrypted":  "true",
-							"category":   "cloud_pperf",
-							"kms_key_id": "${alibabacloudstack_kms_key.default.id}",
-						},
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":         name,
-						"num_of_nodes": "1",
-					}),
-				),
-			},
-			{
 				Config: testAccConfig(map[string]interface{}{
 					"num_of_nodes": "3",
 				}),
@@ -373,10 +262,9 @@ func TestAccAlibabacloudStackCsK8sKeyName(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-				// cs k8s does not support reading back some attributes for now
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids"},
 			},
 		},
@@ -476,74 +364,5 @@ resource "alibabacloudstack_kms_key" "default" {
 `, name, SecurityGroupCommonTestCase, getAccTestPassword(12))
 }
 
-func resourceCsK8sKeyNameDependence(name string) string {
-	return fmt.Sprintf(`
-variable "name" {
-	default = "%s"
-}
-
-variable "k8s_number" {
-  description = "The number of kubernetes cluster."
-  default     = 1
-}
-
-variable "image_id" {
-  default     = "centos_7_9_x64_20G_alibase_20220322.vhd"
-}
-%s
-
-data "alibabacloudstack_instance_types" "default" {
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-}
-
-
-variable "new_nat_gateway" {
-  description = "Whether to create a new nat gateway. In this template, a new nat gateway will create a nat gateway, eip and server snat entries."
-  default     = "ture"
-}
-
-# options: between 24-28
-variable "node_cidr_mask" {
-  description = "The node cidr block to specific how many pods can run on single node."
-  default     = 26
-}
-
-variable "enable_ssh" {
-  description = "Enable login to the node through SSH."
-  default     = true
-}
-
-
-variable "password" {
-  description = "The password of ECS instance."
-  default     = "%s"
-}
-
-variable "worker_number" {
-  description = "The number of worker nodes in kubernetes cluster."
-  default     = 3
-}
-
-# k8s_pod_cidr is only for flannel network
-variable "pod_cidr" {
-  description = "The kubernetes pod cidr block. It cannot be equals to vpc's or vswitch's and cannot be in them."
-  default     = "172.24.0.0/16"
-}
-
-variable "service_cidr" {
-  description = "The kubernetes service cidr block. It cannot be equals to vpc's or vswitch's or pod's and cannot be in them."
-  default     = "172.25.0.0/16"
-}
-
-resource "alibabacloudstack_ecs_keypair" "default" {
-	key_name = "${var.name}"
-}
-
-resource "alibabacloudstack_kms_key" "default" {
-	description = "${var.name}"
-}
-
-`, name, SecurityGroupCommonTestCase, getAccTestPassword(12))
-}
 
 var CsK8sMap = map[string]string{}

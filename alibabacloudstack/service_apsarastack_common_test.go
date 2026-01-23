@@ -1609,7 +1609,7 @@ locals {
 `, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1))
 }
 
-func checkOrCreateEdasK8sInstance(k8sId string) error {
+func checkOrImportEdasK8sInstance(k8sId string) error {
 	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
@@ -1680,7 +1680,9 @@ func checkOrCreateEdasK8sInstance(k8sId string) error {
 
 func EdasClusterCommonTestCase() string {
 	k8sId := os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID")
-	checkOrCreateEdasK8sInstance(k8sId)
+	if k8sId != "" {
+		checkOrImportEdasK8sInstance(k8sId)
+	}
 	return AckK8sCommonTestCase() + `
 	
 data "alibabacloudstack_edas_clusters" "default" {
@@ -1688,14 +1690,14 @@ data "alibabacloudstack_edas_clusters" "default" {
 }
 
 resource "alibabacloudstack_edas_k8s_cluster" "default" {
-	count			= var.existed_k8s_cluster_id == "" ? 1 : 0
+	count			= local.create_count
 	cs_cluster_id	= local.k8s_cluster_id
 }
 
 locals {
-	edas_cluster_id = var.existed_k8s_cluster_id != "" ? data.alibabacloudstack_edas_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
+	edas_cluster_id = local.create_count == 0 ? data.alibabacloudstack_edas_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
 }
-`
+` 
 }
 
 const ExpressconnectPhysicalConnectionsCommonTestCase = `

@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -194,24 +193,27 @@ func testAccCheckEdasK8sClusterDestroy(s *terraform.State) error {
 }
 
 func resourceEdasK8sClusterConfigDependence(name string) string {
-	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
-	namespace_logical_id := fmt.Sprintf("%s:%s", region, name)
 	return fmt.Sprintf(`
-variable "name" {
-	default = "%s"
+		variable "name" {
+		  default = "%s"
+		}
+		
+		data "alibabacloudstack_account" "current" {
+		}
+
+		locals {
+		  logical_id = "${data.alibabacloudstack_account.current.region}:${var.name}"
+		}
+		
+		%s
+
+		resource "alibabacloudstack_edas_namespace" "default" {
+		  	description =      "${var.name}"
+			namespace_name =       "${var.name}"
+			namespace_logical_id = substr(local.logical_id, 0, min(length(local.logical_id), 32))
+		}
+
+
+		`, name, AckK8sCommonTestCase())
 }
 
-variable "namespace_logical_id" {
-	default = "%s"
-}
-
-resource "alibabacloudstack_edas_namespace" "default" {
-	description          = "${var.name}"
-	namespace_name       = "${var.name}"
-	namespace_logical_id = "${var.namespace_logical_id}"
-}
-
-%s
-
-`, name, namespace_logical_id, AckK8sCommonTestCase())
-}
