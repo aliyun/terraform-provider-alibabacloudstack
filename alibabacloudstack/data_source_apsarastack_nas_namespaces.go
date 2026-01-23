@@ -173,7 +173,7 @@ func dataSourceAlibabacloudStackNasNamespacesRead(d *schema.ResourceData, meta i
 			continue
 		}
 
-		if protocolType, ok := d.GetOk("protocol_type"); ok && protocolType != namespace["protocol_type"] {
+		if protocolType, ok := d.GetOk("protocol_type"); ok && protocolType != namespace["ProtocolType"] {
 			continue
 		}
 

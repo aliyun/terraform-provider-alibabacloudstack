@@ -53,33 +53,33 @@ func TestAccAlibabacloudStackNasNamespaces_basic(t *testing.T) {
 
 	zoneIdConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
+			"ids":     []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"zone_id": "${alibabacloudstack_nas_namespace.default.zone_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
+			"ids":     []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"zone_id": "${alibabacloudstack_nas_namespace.default.zone_id}_fake",
 		}),
 	}
 
 	storageTypeConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
+			"ids":          []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"storage_type": "${alibabacloudstack_nas_namespace.default.storage_type}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
+			"ids":          []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"storage_type": "${alibabacloudstack_nas_namespace.default.storage_type}_fake",
 		}),
 	}
 
 	protocolTypeConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
-			"protocol_type": "${alibabacloudstack_nas_namespace.default.id}",
+			"ids":           []string{"${alibabacloudstack_nas_namespace.default.id}"},
+			"protocol_type": "${alibabacloudstack_nas_namespace.default.protocol_type}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_nas_namespace.default.id}"},
+			"ids":           []string{"${alibabacloudstack_nas_namespace.default.id}"},
 			"protocol_type": "SMB",
 		}),
 	}
