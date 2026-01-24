@@ -133,11 +133,27 @@ data "alibabacloudstack_vpc_ipv6_addresses" "default" {
   status                 = "Available"
 }
 
+resource "alibabacloudstack_vpc_ipv6_gateway" "default" {
+  vpc_id            = alibabacloudstack_vpc_vpc.default.id
+  ipv6_gateway_name = var.name
+  description       = var.name
+  spec              = "Medium"
+}
+
+resource "alibabacloudstack_vpc_ipv6_internet_bandwidth" "default" {
+  ipv6_address_id      = data.alibabacloudstack_vpc_ipv6_addresses.default.addresses.0.id
+  ipv6_gateway_id      = data.alibabacloudstack_vpc_ipv6_addresses.default.addresses.0.ipv6_gateway_id
+  internet_charge_type = "PayByBandwidth"
+  bandwidth            = "20"
+  depends_on = ["alibabacloudstack_vpc_ipv6_gateway.default"]
+}
+
 resource "alibabacloudstack_vpc_ipv6_egress_rule" "default" {
   ipv6_egress_rule_name = var.name
   ipv6_gateway_id       = data.alibabacloudstack_vpc_ipv6_addresses.default.addresses.0.ipv6_gateway_id
   instance_id           = data.alibabacloudstack_vpc_ipv6_addresses.default.ids.0
   instance_type         = "Ipv6Address"
   description           = var.name
+  depends_on = ["alibabacloudstack_vpc_ipv6_internet_bandwidth.default"]
 }`, name, ECSInstanceCommonTestCase)
 }
