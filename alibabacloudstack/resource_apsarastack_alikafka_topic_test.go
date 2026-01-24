@@ -116,7 +116,7 @@ func TestAccAlibabacloudStackAlikafkaTopic_basic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testacc-alikafkatopicbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaTopicConfigDependence)
@@ -138,7 +138,7 @@ func TestAccAlibabacloudStackAlikafkaTopic_basic(t *testing.T) {
 					"local_topic":   "true",
 					"compact_topic": "false",
 					"partition_num": "12",
-					"remark":        "alibabacloudstack_alikafka_topic_remark",
+					"remark":        "${var.name}_remark",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -146,7 +146,7 @@ func TestAccAlibabacloudStackAlikafkaTopic_basic(t *testing.T) {
 						"local_topic":   "true",
 						"compact_topic": "false",
 						"partition_num": "12",
-						"remark":        "alibabacloudstack_alikafka_topic_remark",
+						"remark":        name + "_remark",
 					}),
 				),
 			},
@@ -168,135 +168,11 @@ func TestAccAlibabacloudStackAlikafkaTopic_basic(t *testing.T) {
 					}),
 				),
 			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"topic":  "tf-testacc-alibabacloudstack_alikafka_default_topic_change",
-					"remark": "modified remark",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"topic":  "tf-testacc-alibabacloudstack_alikafka_default_topic_change",
-						"remark": "modified remark"}),
-				),
-			},
-
-			// alibabacloudstack_alikafka_instance only support create post pay instance.
-			// Post pay instance does not support create local or compact topic, so skip the following two test case temporarily.
-			//{
-			//	SkipFunc: shouldSkipLocalAndCompact("${alibabacloudstack_alikafka_instance.default.id}"),
-			//	Config: testAccConfig(map[string]interface{}{
-			//		"local_topic": "true",
-			//	}),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"local_topic": "true",
-			//		}),
-			//	),
-			//},
-
-			//{
-			//	SkipFunc: shouldSkipLocalAndCompact("${alibabacloudstack_alikafka_instance.default.id}"),
-			//	Config: testAccConfig(map[string]interface{}{
-			//		"compact_topic": "true",
-			//	}),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"compact_topic": "true",
-			//		}),
-			//	),
-			//},
-
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"tags": map[string]string{
-			// 			"Created": "TF",
-			// 			"For":     "acceptance test",
-			// 		},
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"tags.%":       "2",
-			// 			"tags.Created": "TF",
-			// 			"tags.For":     "acceptance test",
-			// 		}),
-			// 	),
-			// },
-
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"tags": map[string]string{
-			// 			"Created": "TF",
-			// 			"For":     "acceptance test",
-			// 			"Updated": "TF",
-			// 		},
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"tags.%":       "3",
-			// 			"tags.Created": "TF",
-			// 			"tags.For":     "acceptance test",
-			// 			"tags.Updated": "TF",
-			// 		}),
-			// 	),
-			// },
 		},
 	})
 
 }
 
-/*
-func TestAccAlibabacloudStackAlikafkaTopic_multi(t *testing.T) {
-
-	var v *alikafka.InstanceDo
-	resourceId := "alibabacloudstack_alikafka_topic.default.4"
-	ra := resourceAttrInit(resourceId, alikafkaTopicBasicMap)
-	serviceFunc := func() interface{} {
-		return &AlikafkaService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-
-	rand := acctest.RandInt()
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testacc-alikafkatopicbasic%v", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaTopicConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheckWithRegions(t, true, connectivity.AlikafkaSupportedRegions)
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"count":         "5",
-					"instance_id":   "${alibabacloudstack_alikafka_instance.default.id}",
-					"topic":         "${var.name}-${count.index}",
-					"local_topic":   "false",
-					"compact_topic": "false",
-					"partition_num": "6",
-					"remark":        "alibabacloudstack_alikafka_topic_remark",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"topic":         fmt.Sprintf("tf-testacc-alikafkatopicbasic%v-4", rand),
-						"local_topic":   "false",
-						"compact_topic": "false",
-						"partition_num": "6",
-						"remark":        "alibabacloudstack_alikafka_topic_remark",
-					}),
-				),
-			},
-		},
-	})
-
-}
-*/
 func resourceAlikafkaTopicConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
@@ -305,29 +181,9 @@ variable "name" {
 
 %s
 
-data "alibabacloudstack_alikafka_instances" "default" {
-	ids = ["cluster-private-paas-default"]
-}
+%s
 
-resource "alibabacloudstack_alikafka_instance" "default" {
-	count = length(data.alibabacloudstack_alikafka_instances.default.instances) > 0 ? 0 : 1
-	name = "${var.name}"
-	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	sasl = true
-	plaintext = true
-	spec = "Broker4C16G"
-	
-	provisioner "local-exec" {
-		// Prevent failure due to broker not being ready
-		command = "sleep 300"
-	}
-}
-
-locals{
-alikafka_instnace_id = length(data.alibabacloudstack_alikafka_instances.default.instances) > 0 ? data.alibabacloudstack_alikafka_instances.default.instances.0.id : alibabacloudstack_alikafka_instance.default.0.id
-}
-
-`, name, DataZoneCommonTestCase)
+`, name, DataZoneCommonTestCase, KafkaCommonTestCase)
 }
 
 var alikafkaTopicBasicMap = map[string]string{

@@ -1219,7 +1219,30 @@ data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
   enable_details = true
 }
+`
 
+const KafkaCommonTestCase = `
+data "alibabacloudstack_alikafka_instances" "default" {
+	ids = ["cluster-private-paas-default"]
+}
+
+resource "alibabacloudstack_alikafka_instance" "default" {
+	count = length(data.alibabacloudstack_alikafka_instances.default.instances) > 0 ? 0 : 1
+	name = "${var.name}"
+	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	sasl = true
+	plaintext = true
+	spec = "Broker4C16G"
+	
+	provisioner "local-exec" {
+		// Prevent failure due to broker not being ready
+		command = "sleep 300"
+	}
+}
+
+locals{
+alikafka_instnace_id = length(data.alibabacloudstack_alikafka_instances.default.instances) > 0 ? data.alibabacloudstack_alikafka_instances.default.instances.0.id : alibabacloudstack_alikafka_instance.default.0.id
+}
 `
 
 const NasCommonTestCase = `

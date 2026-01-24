@@ -34,16 +34,18 @@ func resourceAlibabacloudStackAlikafkaTopic() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(1, 64),
 			},
 			"local_topic": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     false,
+				Description: "The 'local_topic' field has been deprecated and is scheduled for removal in version 3.21.0.",
 			},
 			"compact_topic": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     false,
+				Description: "The 'compact_topic' field has been deprecated and is scheduled for removal in version 3.21.0.",
 			},
 			"partition_num": {
 				Type:         schema.TypeInt,
@@ -55,6 +57,7 @@ func resourceAlibabacloudStackAlikafkaTopic() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(1, 64),
+				Description:  "The 'remark' field has been deprecated and is scheduled for removal in version 3.21.0.",
 			},
 			"tags": tagsSchema(),
 		},
@@ -128,34 +131,35 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 	}
 
 	instanceId := d.Get("instance_id").(string)
-	if d.HasChange("remark") {
-		remark := d.Get("remark").(string)
-		topic := d.Get("topic").(string)
-
-		modifyRemarkRequest := alikafka.CreateModifyTopicRemarkRequest()
-		client.InitRpcRequest(*modifyRemarkRequest.RpcRequest)
-		modifyRemarkRequest.InstanceId = instanceId
-		modifyRemarkRequest.Topic = topic
-		modifyRemarkRequest.Remark = remark
-
-		err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-			raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
-				return alikafkaClient.ModifyTopicRemark(modifyRemarkRequest)
-			})
-			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
-					time.Sleep(10 * time.Second)
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			addDebug(modifyRemarkRequest.GetActionName(), raw, modifyRemarkRequest.RpcRequest, modifyRemarkRequest)
-			return nil
-		})
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), modifyRemarkRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-	}
+	noUpdatesAllowedCheck(d, []string{"remark"})
+	//	if d.HasChange("remark") {
+	//		remark := d.Get("remark").(string)
+	//		topic := d.Get("topic").(string)
+	//
+	//		modifyRemarkRequest := alikafka.CreateModifyTopicRemarkRequest()
+	//		client.InitRpcRequest(*modifyRemarkRequest.RpcRequest)
+	//		modifyRemarkRequest.InstanceId = instanceId
+	//		modifyRemarkRequest.Topic = topic
+	//		modifyRemarkRequest.Remark = remark
+	//
+	//		err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+	//			raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
+	//				return alikafkaClient.ModifyTopicRemark(modifyRemarkRequest)
+	//			})
+	//			if err != nil {
+	//				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+	//					time.Sleep(10 * time.Second)
+	//					return resource.RetryableError(err)
+	//				}
+	//				return resource.NonRetryableError(err)
+	//			}
+	//			addDebug(modifyRemarkRequest.GetActionName(), raw, modifyRemarkRequest.RpcRequest, modifyRemarkRequest)
+	//			return nil
+	//		})
+	//		if err != nil {
+	//			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), modifyRemarkRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	//		}
+	//	}
 
 	if d.HasChange("partition_num") {
 		o, n := d.GetChange("partition_num")
