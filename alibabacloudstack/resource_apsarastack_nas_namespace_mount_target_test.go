@@ -32,14 +32,14 @@ func TestAccAlibabacloudStackNasNamespaceMountTarget_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"network_type":      "Vpc",
-					"access_group_name": "${alibabacloudstack_nas_accessgroup.default1.access_group_name}",
+					"access_group_name": "${alibabacloudstack_nas_accessgroup.default.0.access_group_name}",
 					"nas_namespace_id":  "${alibabacloudstack_nas_namespace.default.id}",
 					"vswitch_id":        "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"network_type":        "Vpc",
-						"access_group_name":   name + "1",
+						"access_group_name":   name + "_0",
 						"vpc_id":              CHECKSET,
 						"mount_target_domain": CHECKSET,
 						"status":              CHECKSET,
@@ -48,11 +48,11 @@ func TestAccAlibabacloudStackNasNamespaceMountTarget_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"access_group_name": "${alibabacloudstack_nas_accessgroup.default2.access_group_name}",
+					"access_group_name": "${alibabacloudstack_nas_accessgroup.default.1.access_group_name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"access_group_name": name + "2",
+						"access_group_name": name + "_1",
 					}),
 				),
 			},
@@ -107,13 +107,9 @@ resource "alibabacloudstack_nas_namespace" "default" {
 	encrypt_type = "0"
 }
 
-resource "alibabacloudstack_nas_accessgroup" "default1" {
-	access_group_name = "${var.name}1"
-	access_group_type = "Vpc"
-}
-
-resource "alibabacloudstack_nas_accessgroup" "default2" {
-	access_group_name = "${var.name}2"
+resource "alibabacloudstack_nas_accessgroup" "default" {
+	count             = 2
+	access_group_name = "${var.name}_${count.index}"
 	access_group_type = "Vpc"
 }
 
