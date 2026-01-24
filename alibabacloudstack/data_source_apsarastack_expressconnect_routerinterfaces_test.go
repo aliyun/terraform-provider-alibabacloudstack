@@ -37,7 +37,7 @@ func TestAccAlibabacloudStackRouterInterfacesDataSource(t *testing.T) {
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"${alibabacloudstack_router_interface.initiating.id}"},
-			"status": "fake_status",
+			"status": "Inactive",
 		}),
 	}
 

@@ -21,10 +21,10 @@ func resourceAlibabacloudStackRouterInterface() *schema.Resource {
 				ForceNew: true,
 			},
 			"router_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{string(VRouter), string(VBR)}, false),
-				ForceNew:     true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateFunc:     validation.StringInSlice([]string{string(VRouter), string(VBR)}, false),
+				ForceNew:         true,
 				DiffSuppressFunc: routerInterfaceAcceptsideDiffSuppressFunc,
 			},
 			"router_id": {
@@ -58,11 +58,13 @@ func resourceAlibabacloudStackRouterInterface() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				DiffSuppressFunc: routerInterfaceVBRTypeDiffSuppressFunc,
+				RequiredWith:     []string{"health_check_target_ip"},
 			},
 			"health_check_target_ip": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				DiffSuppressFunc: routerInterfaceVBRTypeDiffSuppressFunc,
+				RequiredWith:     []string{"health_check_source_ip"},
 			},
 			"access_point_id": {
 				Type:     schema.TypeString,
@@ -92,9 +94,9 @@ func resourceAlibabacloudStackRouterInterface() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"status":{
+			"status": {
 				Type:     schema.TypeString,
-								Computed: true,
+				Computed: true,
 			},
 		},
 	}
@@ -138,8 +140,6 @@ func resourceAlibabacloudStackRouterInterfaceCreate(d *schema.ResourceData, meta
 
 func resourceAlibabacloudStackRouterInterfaceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
-	d.Partial(true)
 
 	request, attributeUpdate, err := buildAlibabacloudStackRouterInterfaceModifyAttrArgs(d, meta)
 	if err != nil {
@@ -186,7 +186,6 @@ func resourceAlibabacloudStackRouterInterfaceUpdate(d *schema.ResourceData, meta
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	d.Partial(false)
 	return nil
 }
 
@@ -342,11 +341,6 @@ func buildAlibabacloudStackRouterInterfaceCreateArgs(d *schema.ResourceData, met
 
 func buildAlibabacloudStackRouterInterfaceModifyAttrArgs(d *schema.ResourceData, meta interface{}) (*vpc.ModifyRouterInterfaceAttributeRequest, bool, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	sourceIp, sourceOk := d.GetOk("health_check_source_ip")
-	targetIp, targetOk := d.GetOk("health_check_target_ip")
-	if sourceOk && !targetOk || !sourceOk && targetOk {
-		return nil, false, errmsgs.WrapError(errmsgs.Error("The 'health_check_source_ip' and 'health_check_target_ip' should be specified or not at one time."))
-	}
 
 	request := vpc.CreateModifyRouterInterfaceAttributeRequest()
 	client.InitRpcRequest(*request.RpcRequest)
@@ -354,15 +348,9 @@ func buildAlibabacloudStackRouterInterfaceModifyAttrArgs(d *schema.ResourceData,
 
 	attributeUpdate := false
 
-	if d.HasChange("health_check_source_ip") {
-		request.HealthCheckSourceIp = sourceIp.(string)
-		request.HealthCheckTargetIp = targetIp.(string)
-		attributeUpdate = true
-	}
-
-	if d.HasChange("health_check_target_ip") {
-		request.HealthCheckTargetIp = targetIp.(string)
-		request.HealthCheckSourceIp = sourceIp.(string)
+	if d.HasChanges("health_check_source_ip", "health_check_target_ip") {
+		request.HealthCheckSourceIp = d.Get("health_check_source_ip").(string)
+		request.HealthCheckTargetIp = d.Get("health_check_target_ip").(string)
 		attributeUpdate = true
 	}
 
