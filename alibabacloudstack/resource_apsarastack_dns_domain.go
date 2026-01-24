@@ -13,13 +13,6 @@ import (
 func resourceAlibabacloudStackDnsDomain() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"dns_servers": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
 			"domain_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -27,23 +20,11 @@ func resourceAlibabacloudStackDnsDomain() *schema.Resource {
 			"domain_name": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-			"group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"lang": {
-				Type:     schema.TypeString,
-				Optional: true,
+				ForceNew: true,
 			},
 			"remark": {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
-			"resource_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
 			},
 		},
 	}
@@ -61,7 +42,6 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 	}
 	if check == nil || len(check.Data) == 0 {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "AddGlobalZone", "")
-		request.Scheme="HTTP" // CloudDns does not support HTTPS
 		request.QueryParams["Name"] = DomainName
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
@@ -104,36 +84,13 @@ func resourceAlibabacloudStackDnsDomainRead(d *schema.ResourceData, meta interfa
 
 func resourceAlibabacloudStackDnsDomainUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	dnsService := DnsService{client}
-	remarkUpdate := false
-	check, err := dnsService.DescribeDnsDomain(d.Id())
 	did := strings.Split(d.Id(), COLON_SEPARATED)
 
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsDomainExist", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	var desc string
-
 	if d.HasChange("remark") {
-		if v, ok := d.GetOk("remark"); ok {
-			desc = v.(string)
-		}
-		check.Data[0].Remark = desc
-		remarkUpdate = true
-	} else {
-		if v, ok := d.GetOk("remark"); ok {
-			desc = v.(string)
-		}
-		check.Data[0].Remark = desc
-	}
-
-	if remarkUpdate {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "UpdateGlobalZoneRemark", "")
-		request.Scheme="HTTP" // CloudDns does not support HTTPS
 		request.QueryParams["Name"] = did[0]
 		request.QueryParams["Id"] = did[1]
-		request.QueryParams["Remark"] = desc
+		request.QueryParams["Remark"] = d.Get("remark").(string)
 		response, err := client.ProcessCommonRequest(request)
 		log.Printf(" response of raw UpdateGlobalZoneRemark : %s", response)
 
@@ -146,7 +103,6 @@ func resourceAlibabacloudStackDnsDomainUpdate(d *schema.ResourceData, meta inter
 		}
 		addDebug(request.GetActionName(), response, request)
 	}
-	d.SetId(check.Data[0].Name + COLON_SEPARATED + fmt.Sprint(check.Data[0].Id))
 	return nil
 }
 
@@ -161,7 +117,6 @@ func resourceAlibabacloudStackDnsDomainDelete(d *schema.ResourceData, meta inter
 
 	if len(check.Data) != 0 {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DeleteGlobalZone", "")
-		request.Scheme="HTTP" // CloudDns does not support HTTPS
 		request.QueryParams["Id"] = did[1]
 		response, err := client.ProcessCommonRequest(request)
 		if err != nil {

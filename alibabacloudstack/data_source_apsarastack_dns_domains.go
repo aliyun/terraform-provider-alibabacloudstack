@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -93,18 +92,26 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 		}
 	}
 
-	var r *regexp.Regexp
-	if nameRegex, ok := d.GetOk("domain_name"); ok && nameRegex.(string) != "" {
-		r = regexp.MustCompile(nameRegex.(string))
+	var domain_name string
+	if v, ok := d.GetOk("domain_name"); ok {
+		domain_name = v.(string)
 	}
+	idsMap := getIdsStringFilter(d)
+	namesMap := getStringListFilters(d, "names")
 	var ids []string
 	var names []string
 	var s []map[string]interface{}
 	for _, rg := range addDomains.Data {
-		if r != nil && !r.MatchString(rg.Name) {
+		if domain_name != "" && rg.Name != domain_name {
 			continue
 		}
 		id := (rg.Id)
+		if _, existed := idsMap[id]; len(idsMap) > 0 && !existed {
+			continue
+		}
+		if _, existed := namesMap[rg.Name]; len(namesMap) > 0 && !existed {
+			continue
+		}
 		mapping := map[string]interface{}{
 			"domain_id":   id,
 			"domain_name": rg.Name,
@@ -118,6 +125,13 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 	if err := d.Set("domains", s); err != nil {
 		return errmsgs.WrapError(err)
 	}
+	if err := d.Set("ids", ids); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("names", names); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		if err := writeToFile(output.(string), s); err != nil {
 			return err

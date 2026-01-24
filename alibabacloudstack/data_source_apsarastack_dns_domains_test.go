@@ -2,38 +2,76 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
 )
 
-func TestAccAlibabacloudStackDnsDomainDataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: dataSourceAlibabacloudStackDnsDomain(),
-				Check: resource.ComposeTestCheckFunc(
+func TestAccAlibabacloudStackDnsDomainsDataSource(t *testing.T) {
+	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_dns_domains.default"
+	name := fmt.Sprintf("tftestdomain%d", rand)
 
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_dns_domains.default"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_domains.default", "domains.domain_id"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_domains.default", "domains.domain_name"),
-				),
-			},
-		},
-	})
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceDnsDomainsConfigDependence)
+
+	domainNameConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"domain_name": "${alibabacloudstack_dns_domain.default.domain_name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"domain_name": "fake-domain.com.",
+		}),
+	}
+
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_dns_domain.default.domain_id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake-domain-id"},
+		}),
+	}
+
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"domain_name": "${alibabacloudstack_dns_domain.default.domain_name}",
+			"ids":         []string{"${alibabacloudstack_dns_domain.default.domain_id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"domain_name": "fake-domain.com.",
+			"ids":         []string{"fake-domain-id"},
+		}),
+	}
+
+	var existDnsDomainsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"domains.#":        "1",
+			"ids.#":            "1",
+			"names.#":          "1",
+			"domains.0.domain_id":   CHECKSET,
+			"domains.0.domain_name": name+".",
+			"domains.0.dns_servers.#": CHECKSET,
+		}
+	}
+
+	var fakeDnsDomainsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"domains.#": "0",
+			"ids.#":     "0",
+			"names.#":   "0",
+		}
+	}
+
+	var dnsDomainsCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existDnsDomainsMapFunc,
+		fakeMapFunc:  fakeDnsDomainsMapFunc,
+	}
+	dnsDomainsCheckInfo.dataSourceTestCheck(t, rand, domainNameConf, idsConf, allConf)
 }
 
-func dataSourceAlibabacloudStackDnsDomain() string {
+func dataSourceDnsDomainsConfigDependence(name string) string {
 	return fmt.Sprintf(`
-
 resource "alibabacloudstack_dns_domain" "default" {
- domain_name = "testdummy%d."
+  domain_name = "%s."
 }
-data "alibabacloudstack_dns_domains" "default"{
- domain_name  = alibabacloudstack_dns_domain.default.domain_name
-}`, getAccTestRandInt(10000, 99999))
-
+`, name)
 }

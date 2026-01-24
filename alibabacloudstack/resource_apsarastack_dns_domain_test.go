@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -51,13 +52,19 @@ func (rc *resourceCheck) checkResourceDnsDomainDestroy() resource.TestCheckFunc 
 func TestAccAlibabacloudStackDnsDomain_basic(t *testing.T) {
 	var v *DnsDomains
 	resourceId := "alibabacloudstack_dns_domain.default"
-	ra := resourceAttrInit(resourceId, dnsDomainBasicMap)
+	ra := resourceAttrInit(resourceId, map[string]string{
+		"domain_name": CHECKSET,
+	})
 	serviceFunc := func() interface{} {
 		return &DnsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tfacc%d", rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlibabacloudStackDnsDomainDepend)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -69,15 +76,26 @@ func TestAccAlibabacloudStackDnsDomain_basic(t *testing.T) {
 		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
-				Config: resourceAlibabacloudStackDns_Domain,
+				Config: testAccConfig(map[string]interface{}{
+					"domain_name": "${var.name}.",
+					"remark":      "${var.name}_remark",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"domain_name": name + ".",
+						"remark":      name + "_remark",
+					}),
 				),
 			},
 			{
-				Config: resourceAlibabacloudStackDns_Domain2,
+				Config: testAccConfig(map[string]interface{}{
+					"remark": "${var.name}_remark1",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"domain_name": name + ".",
+						"remark":      name + "_remark1",
+					}),
 				),
 			},
 			{
@@ -90,20 +108,10 @@ func TestAccAlibabacloudStackDnsDomain_basic(t *testing.T) {
 
 }
 
-const resourceAlibabacloudStackDns_Domain = `
-resource "alibabacloudstack_dns_domain" "default" {
-	domain_name = "testdummy."
-
+func resourceAlibabacloudStackDnsDomainDepend(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+	default = "%s"
 }
-`
-const resourceAlibabacloudStackDns_Domain2 = `
-resource "alibabacloudstack_dns_domain" "default" {
-	domain_name = "testdummy."
-     remark = "test_dummy_1"
-
-}
-`
-
-var dnsDomainBasicMap = map[string]string{
-	"domain_name": CHECKSET,
+`, name)
 }
