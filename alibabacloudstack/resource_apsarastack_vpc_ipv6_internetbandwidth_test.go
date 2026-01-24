@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -35,6 +35,7 @@ func TestAccAlibabacloudStackVPCIpv6InternetBandwidth_basic0(t *testing.T) {
 					"ipv6_gateway_id":      "${data.alibabacloudstack_vpc_ipv6_addresses.default.addresses.0.ipv6_gateway_id}",
 					"internet_charge_type": "PayByBandwidth",
 					"bandwidth":            "20",
+					"depends_on":           []string{"alibabacloudstack_vpc_ipv6_gateway.default"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

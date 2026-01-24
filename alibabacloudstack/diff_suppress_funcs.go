@@ -137,7 +137,7 @@ func httpHttpsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool 
 }
 func httpsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if protocol, ok := d.GetOk("protocol"); ok && Protocol(protocol.(string)) == Https {
-		return old == new 
+		return old == new
 	}
 	return true
 }
@@ -175,14 +175,14 @@ func tcpUdpDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 func healthCheckDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	httpDiff := httpHttpsDiffSuppressFunc(k, old, new, d)
 	if health, ok := d.GetOk("health_check"); httpDiff || (ok && health.(string) == string(OnFlag)) {
-		return old == new 
+		return old == new
 	}
 	return true
 }
 
 func healthCheckTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if protocol, ok := d.GetOk("protocol"); ok && Protocol(protocol.(string)) == Tcp {
-		return old == new 
+		return old == new
 	}
 	return true
 }
@@ -193,19 +193,19 @@ func httpHttpsTcpDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bo
 	checkType, okType := d.GetOk("health_check_type")
 	if (!httpDiff && okHc && health.(string) == string(OnFlag)) ||
 		(okPro && Protocol(protocol.(string)) == Tcp && okType && checkType.(string) == string(HTTPHealthCheckType)) {
-		return old == new 
+		return old == new
 	}
 	return true
 }
 func sslCertificateIdDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if protocol, ok := d.GetOk("protocol"); ok && Protocol(protocol.(string)) == Https {
-		return old == new 
+		return old == new
 	}
 	return true
 }
 func establishedTimeoutDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if protocol, ok := d.GetOk("protocol"); ok && Protocol(protocol.(string)) == Tcp {
-		return old == new 
+		return old == new
 	}
 	return true
 }
@@ -218,7 +218,7 @@ func httpDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 func forwardPortDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	httpDiff := httpDiffSuppressFunc(k, old, new, d)
 	if listenerForward, ok := d.GetOk("listener_forward"); !httpDiff && ok && listenerForward.(string) == string(OnFlag) {
-		return old == new 
+		return old == new
 	}
 	return true
 }
@@ -283,7 +283,7 @@ func routerInterfaceVBRTypeDiffSuppressFunc(k, old, new string, d *schema.Resour
 	if d.Get("router_type").(string) == string(VRouter) {
 		return true
 	}
-	return false
+	return old == new
 }
 
 func logRetentionPeriodDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
@@ -293,7 +293,7 @@ func logRetentionPeriodDiffSuppressFunc(k, old, new string, d *schema.ResourceDa
 	if v, err := strconv.Atoi(new); err != nil && v > d.Get("backup_retention_period").(int) {
 		return false
 	}
-	return true
+	return old == new
 }
 func enableBackupLogDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if d.Get("enable_backup_log").(bool) {
