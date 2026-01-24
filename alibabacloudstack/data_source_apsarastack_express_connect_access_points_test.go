@@ -15,48 +15,39 @@ func TestAccAlibabacloudStackExpressConnectAccessPointsDataSource(t *testing.T) 
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"ap-cn-qingdao-env17-d01-amtest17"},
+			"ids": []string{"${data.alibabacloudstack_express_connect_access_points.anyone.points.0.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"fake"},
 		}),
 	}
-	statusConf := dataSourceTestAccConfig{
+	name_regex := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":    []string{"ap-cn-qingdao-env17-d01-amtest17"},
-			"status": "recommended",
+			"name_regex": "^${data.alibabacloudstack_express_connect_access_points.anyone.points.0.access_point_name}$",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":    []string{"fake"},
-			"status": "full",
+			"name_regex": "fake",
 		}),
 	}
-
-	allConf := dataSourceTestAccConfig{
+	statusConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":    []string{"ap-cn-qingdao-env17-d01-amtest17"},
-			"status": "recommended",
+			"ids":    []string{"${data.alibabacloudstack_express_connect_access_points.anyone.points.0.id}"},
+			"status": "${data.alibabacloudstack_express_connect_access_points.anyone.points.0.status}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":    []string{"fake"},
-			"status": "full",
+			"status": "disabled",
 		}),
 	}
 
 	var existExpressConnectAccessPointsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":                       "1",
-			"names.#":                     "1",
-			"points.#":                    "1",
-			"points.0.id":                 CHECKSET,
-			"points.0.access_point_id":    "ap-cn-qingdao-env17-d01-amtest17",
-			"points.0.access_point_name":  "",
-			"points.0.attached_region_no": "",
-			"points.0.description":        "",
-			"points.0.host_operator":      CHECKSET,
-			"points.0.location":           "",
-			"points.0.status":             "recommended",
-			"points.0.type":               "VPC",
+			"ids.#":                    "1",
+			"names.#":                  "1",
+			"points.#":                 "1",
+			"points.0.id":              CHECKSET,
+			"points.0.access_point_id": CHECKSET,
+			"points.0.host_operator":   CHECKSET,
 		}
 	}
 
@@ -74,7 +65,7 @@ func TestAccAlibabacloudStackExpressConnectAccessPointsDataSource(t *testing.T) 
 		fakeMapFunc:  fakeExpressConnectAccessPointsMapFunc,
 	}
 
-	ExpressConnectAccessPointsCheckInfo.dataSourceTestCheck(t, rand, idsConf, statusConf, allConf)
+	ExpressConnectAccessPointsCheckInfo.dataSourceTestCheck(t, rand, idsConf, name_regex, statusConf)
 }
 
 func dataSourceExpressConnectAccessPointsConfigDependence(name string) string {
@@ -82,5 +73,9 @@ func dataSourceExpressConnectAccessPointsConfigDependence(name string) string {
 		variable "name" {
 		 default = "%v"
 		}
+		
+		data "alibabacloudstack_express_connect_access_points" "anyone" {
+		}
+		
 		`, name)
 }
