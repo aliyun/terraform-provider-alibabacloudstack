@@ -10,7 +10,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alikafka"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -121,7 +121,7 @@ func TestAccAlibabacloudStackAlikafkaSaslUser_basic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testacc-alikafkasasluserbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaSaslUserConfigDependence)
@@ -132,21 +132,22 @@ func TestAccAlibabacloudStackAlikafkaSaslUser_basic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					//"instance_id": "${alibabacloudstack_alikafka_instance.default.id}",
-					"instance_id": "cluster-private-paas-default",
+					"instance_id": "${local.alikafka_instnace_id}",
 					"username":    "${var.name}",
-					"password":    "inputYourCodeHere",
+					"password":    "${random_password.password.0.result}",
 					"type":        "scram",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"username": fmt.Sprintf("tf-testacc-alikafkasasluserbasic%v", rand),
+						"username": name,
 					}),
 				),
 			},
@@ -159,33 +160,21 @@ func TestAccAlibabacloudStackAlikafkaSaslUser_basic(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"username": "newSaslUserName",
+					"username": name + "_new",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"username": "newSaslUserName"}),
+						"username": name + "_new",
+					}),
 				),
 			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"password": "inputYourCodeHere",
+					"password": "${random_password.password.1.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"password": "inputYourCodeHere"}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"username": "${var.name}",
-					"password": "inputYourCodeHere",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"username": fmt.Sprintf("tf-testacc-alikafkasasluserbasic%v", rand),
-						"password": "inputYourCodeHere"}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 		},
@@ -246,29 +235,10 @@ variable "name" {
 	default = "%v"
 }
 
-//data "alibabacloudstack_vpcs" "default" {
-// name_regex = "^default-NODELETING"
-//}
-//data "alibabacloudstack_vswitches" "default" {
-//  vpc_id = data.alibabacloudstack_vpcs.default.ids.0
-//}
-//
-//resource "alibabacloudstack_security_group" "default" {
-//  name   = var.name
-//  vpc_id = data.alibabacloudstack_vpcs.default.ids.0
-//}
-//
-//resource "alibabacloudstack_alikafka_instance" "default" {
-//  name = "${var.name}"
-//  topic_quota = "50"
-//  disk_type = "1"
-//  disk_size = "500"
-//  deploy_type = "5"
-//  io_max = "20"
-//  vswitch_id = "${data.alibabacloudstack_vswitches.default.ids.0}"
-//  security_group = alibabacloudstack_security_group.default.id
-//}
-`, name)
+%s
+
+%s
+`, name, KafkaCommonTestCase, RandomPasswordTestCase(12, 2))
 }
 
 var alikafkaSaslUserBasicMap = map[string]string{
