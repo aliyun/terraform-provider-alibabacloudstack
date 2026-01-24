@@ -78,7 +78,6 @@ func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta inter
 	line_ids_json, _ := json.Marshal(line_ids)
 	line_ids_str := string(line_ids_json)
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "AddGlobalZoneRecord", "")
-	request.Scheme = "HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["LineIds"] = line_ids_str
 	request.QueryParams["Type"] = Type
 	request.QueryParams["Ttl"] = fmt.Sprintf("%d", TTL)
@@ -165,7 +164,6 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		}
 		check.Data[0].Remark = desc
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "UpdateGlobalZoneRecordRemark", "")
-		request.Scheme = "HTTP" // CloudDns does not support HTTPS
 		request.QueryParams["Id"] = ID
 		request.QueryParams["Remark"] = desc
 		response, err := client.ProcessCommonRequest(request)
@@ -246,7 +244,6 @@ func resourceAlibabacloudStackDnsRecordDelete(d *schema.ResourceData, meta inter
 	ID := d.Get("record_id").(string)
 	ZoneId := SplitDnsZone(d.Get("zone_id").(string))
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DeleteGlobalZoneRecord", "")
-	request.Scheme = "HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["Id"] = ID
 	request.QueryParams["ZoneId"] = ZoneId
 	bresponse, err := client.ProcessCommonRequest(request)

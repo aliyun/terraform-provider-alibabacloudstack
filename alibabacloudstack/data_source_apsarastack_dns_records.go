@@ -91,10 +91,14 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 	ZoneId := d.Get("zone_id").(string)
 
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZoneRecords", "")
-	request.Scheme = "HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["ZoneId"] = ZoneId
 
 	response := DnsRecord{}
+	idsMap := getIdsStringFilter(d)
+	var filterType string
+	if v, ok :=d.GetOk("type"); ok {
+		filterType= v.(string)
+	}
 
 	for {
 		bresponse, err := client.ProcessCommonRequest(request)
@@ -118,7 +122,7 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 	}
 
 	var r *regexp.Regexp
-	if nameRegex, ok := d.GetOk("name"); ok && nameRegex.(string) != "" {
+	if nameRegex, ok := d.GetOk("host_record_regex"); ok && nameRegex.(string) != "" {
 		r = regexp.MustCompile(nameRegex.(string))
 	}
 
@@ -128,6 +132,16 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 		if r != nil && !r.MatchString(record.Name) {
 			continue
 		}
+		if _, existed := idsMap[record.Id]; len(idsMap) > 0 && !existed {
+			continue
+		}
+		if filterType != "" && filterType != record.Type {
+			continue
+		}
+		rr_set := make([]string, 0)
+		for _, v := range record.RDatas {
+			rr_set = append(rr_set, v.Value)
+		}
 		mapping := map[string]interface{}{
 			"record_id": record.Id,
 			"zone_id":   ZoneId,
@@ -135,6 +149,7 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 			"type":      record.Type,
 			"remark":    record.Remark,
 			"ttl":       record.TTL,
+			"rr_set":    rr_set,
 		}
 		ids = append(ids, record.Id)
 		s = append(s, mapping)
