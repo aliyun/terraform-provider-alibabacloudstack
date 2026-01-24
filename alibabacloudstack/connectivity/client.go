@@ -1169,6 +1169,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 			response, err = func() (map[string]interface{}, error) {
 				sdkConfig := client.teaRoaSdkConfig
 				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) // Unit: milliseconds
+				sdkConfig.SetProtocol(protocol)
 				conn, err := roa.NewClient(&sdkConfig)
 				if err != nil {
 					return nil, err
@@ -1201,6 +1202,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 			response, err = func() (map[string]interface{}, error) {
 				sdkConfig := client.teaRpcSdkConfig
 				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) // Unit: milliseconds
+				sdkConfig.SetProtocol(protocol)
 				conn, err := rpc.NewClient(&sdkConfig)
 				if err != nil {
 					return nil, err
@@ -1315,6 +1317,12 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			// If it's an internal asapi gateway, force HTTP
 			request.SetScheme("http")
 		}
+		
+	}
+	
+	if request.Product == "CloudDns" || request.Product == "bms" {
+		// CloudDns / bms does not support HTTPS
+		request.SetScheme("http")
 	}
 
 	var response *responses.CommonResponse

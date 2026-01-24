@@ -29,7 +29,6 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 		recordId = ""
 	}
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZoneRecords", "")
-	request.Scheme = "HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["ZoneId"] = zoneId
 	var resp = &DnsRecord{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -38,7 +37,7 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorRecordNotFound"}) {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		if response == nil {
+		if bresponse == nil {
 			return resp, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
@@ -252,7 +251,6 @@ func (s *DnsService) SetResourceTags(d *schema.ResourceData, resourceType string
 func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZones", "")
-	request.Scheme = "HTTP" // CloudDns does not support HTTPS
 	request.QueryParams["Name"] = did[0]
 	request.QueryParams["Forwardedregionid"] = s.client.RegionId
 	request.QueryParams["SignatureVersion"] = "2.1"
@@ -264,7 +262,7 @@ func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err err
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorDomainNotFound"}) {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		if response == nil {
+		if bresponse == nil {
 			return resp, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
@@ -301,7 +299,6 @@ func (s *DnsService) DescribeDnsForwardDomain(id string) (map[string]interface{}
 	}
 
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalForwardZones", "")
-	request.Scheme = "HTTP"
 	for key, value := range reqQuery {
 		request.QueryParams[key] = fmt.Sprint(value)
 	}
@@ -392,7 +389,6 @@ func (s *DnsService) DescribeDnsRecursorAcl(id string) (map[string]interface{}, 
 func (s *DnsService) DescribePrivateZone(id string) (map[string]interface{}, error) {
 
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribePrivateZones", "")
-	request.Scheme = "HTTP"
 	request.QueryParams["Id"] = id
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug("DescribePrivateZones", bresponse, request, request.QueryParams)
