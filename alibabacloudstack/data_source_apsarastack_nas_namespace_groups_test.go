@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackNamespaceGroups_basic(t *testing.T) {
+func TestAccAlibabacloudStackNasNamespaceGroups_basic(t *testing.T) {
 	resourceId := "data.alibabacloudstack_nas_namespace_groups.default"
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf-testnasng%d", rand)
-	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudStackNasNamespaceMountTarget)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, AlibabacloudStackNasNamespaceGroupsBasicDependence)
 	datasourceData := dataSourceAttr{
 		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
@@ -17,10 +17,10 @@ func TestAccAlibabacloudStackNamespaceGroups_basic(t *testing.T) {
 				"groups.#":                     "1",
 				"groups.0.mount_target_domain": CHECKSET,
 				"groups.0.network_type":        CHECKSET,
-				"groups.0.vpc_id":              CHECKSET,
-				"groups.0.vsw_id":              CHECKSET,
-				"groups.0.access_group":        CHECKSET,
+				"groups.0.member_id":           CHECKSET,
 				"groups.0.status":              CHECKSET,
+				"groups.0.create_time":         CHECKSET,
+				"groups.0.mapped_path":         name,
 			}
 		},
 		fakeMapFunc: func(rand int) map[string]string {
@@ -32,72 +32,56 @@ func TestAccAlibabacloudStackNamespaceGroups_basic(t *testing.T) {
 
 	idsConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_nas_namespace_groups.default.id}"},
+			"ids": []string{"${alibabacloudstack_nas_namespace_group.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_nas_namespace_groups.default.id}_fake"},
+			"ids": []string{"${alibabacloudstack_nas_namespace_group.default.id}_fake"},
 		}),
 	}
 
 	nasNamespaceConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"nas_namespace_id": "${alibabacloudstack_nas_namespace_groups.default.nas_namespace_id}",
-			"ids":              []string{"${alibabacloudstack_nas_namespace_groups.default.id}"},
+			"nas_namespace_id": "${alibabacloudstack_nas_namespace_group.default.nas_namespace_id}",
+			"ids":              []string{"${alibabacloudstack_nas_namespace_group.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"nas_namespace_id": "${alibabacloudstack_nas_namespace_groups.default.nas_namespace_id}",
-			"ids":              []string{"${alibabacloudstack_nas_namespace_groups.default.id}_fake"},
+			"nas_namespace_id": "${alibabacloudstack_nas_namespace_group.default.nas_namespace_id}",
+			"ids":              []string{"${alibabacloudstack_nas_namespace_group.default.id}_fake"},
 		}),
 	}
 
 	nameRegexConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"${alibabacloudstack_nas_namespace_groups.default.id}"},
-			"name_regex": "${alibabacloudstack_nas_namespace_groups.default.mount_target_domain}",
+			"ids":               []string{"${alibabacloudstack_nas_namespace_group.default.id}"},
+			"mapped_path_regex": "${alibabacloudstack_nas_namespace_group.default.mapped_path}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"${alibabacloudstack_nas_namespace_groups.default.id}"},
-			"name_regex": "${alibabacloudstack_nas_namespace_groups.default.mount_target_domain}_fake",
+			"ids":               []string{"${alibabacloudstack_nas_namespace_group.default.id}"},
+			"mapped_path_regex": "${alibabacloudstack_nas_namespace_group.default.mapped_path}_fake",
 		}),
 	}
 
 	mountTargetDomainConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"mount_target_domain": "${alibabacloudstack_nas_namespace_groups.default.mount_target_domain}",
+			"mount_target_domain": "${alibabacloudstack_nas_namespace_group.default.mount_target_domain}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"mount_target_domain": "${alibabacloudstack_nas_namespace_groups.default.mount_target_domain}_fake",
-		}),
-	}
-
-	mappedPathConfig := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"mapped_path": "${alibabacloudstack_nas_namespace_groups.default.mapped_path}",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"mapped_path": "${alibabacloudstack_nas_namespace_groups.default.mapped_path}_fake",
+			"mount_target_domain": "${alibabacloudstack_nas_namespace_group.default.mount_target_domain}_fake",
 		}),
 	}
 
 	networkType := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
+			"ids":          []string{"${alibabacloudstack_nas_namespace_group.default.id}"},
 			"network_type": "Vpc",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"mapped_path": "Classic",
+			"ids":          []string{"${alibabacloudstack_nas_namespace_group.default.id}"},
+			"network_type": "Classic",
 		}),
 	}
 
-	statusType := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"status": "Enabled",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"status": "All",
-		}),
-	}
-
-	datasourceData.dataSourceTestCheck(t, rand, idsConfig, nasNamespaceConfig, nameRegexConfig, mountTargetDomainConfig, mappedPathConfig, networkType, statusType)
+	datasourceData.dataSourceTestCheck(t, rand, idsConfig, nasNamespaceConfig, nameRegexConfig, mountTargetDomainConfig, networkType)
 }
 
 func AlibabacloudStackNasNamespaceGroupsBasicDependence(name string) string {
@@ -136,7 +120,7 @@ resource "alibabacloudstack_nas_namespace_group" "default" {
   	network_type = "Vpc"
 	nas_namespace_id = "${alibabacloudstack_nas_namespace.default.id}"
 	mount_target_domain = "${alibabacloudstack_nas_namespace_mount_target.default.mount_target_domain}"
-	mapped_path = var.name
+	mapped_path = "${var.name}"
 }
 
 `, name, VSwitchCommonTestCase)

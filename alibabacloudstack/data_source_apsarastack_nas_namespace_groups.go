@@ -22,7 +22,7 @@ func dataSourceAlibabacloudStackNasNamespaceGroups() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "A list of NAS namespace group IDs.",
 			},
-			"name_regex": {
+			"mapped_path_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
@@ -38,20 +38,10 @@ func dataSourceAlibabacloudStackNasNamespaceGroups() *schema.Resource {
 				Optional:    true,
 				Description: "Filter results by mount target domain.",
 			},
-			"mapped_path": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Filter results by mapped path.",
-			},
 			"network_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Filter results by network type (e.g., Vpc or Classic).",
-			},
-			"status": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Filter results by status (e.g., Enabled or All).",
 			},
 			"names": {
 				Type:        schema.TypeList,
@@ -114,21 +104,12 @@ func dataSourceAlibabacloudStackNasNamespaceGroupsRead(d *schema.ResourceData, m
 	if v, ok := d.GetOk("mount_target_domain"); ok && v.(string) != "" {
 		request["MountTargetDomain"] = v.(string)
 	}
-	if v, ok := d.GetOk("mapped_path"); ok && v.(string) != "" {
-		request["MappedPath"] = v.(string)
-	}
-	if v, ok := d.GetOk("network_type"); ok && v.(string) != "" {
-		request["NetworkType"] = v.(string)
-	}
-	if v, ok := d.GetOk("status"); ok && v.(string) != "All" {
-		request["Status"] = v.(string)
-	}
 	request["PageSize"] = 10
 
 	idsMap := getIdsStringFilter(d)
 
 	var nameRegex *regexp.Regexp
-	if v, ok := d.GetOk("name_regex"); ok {
+	if v, ok := d.GetOk("mapped_path_regex"); ok {
 		nameRegex = regexp.MustCompile(v.(string))
 	}
 	pageNumber := 1
@@ -174,11 +155,16 @@ func dataSourceAlibabacloudStackNasNamespaceGroupsRead(d *schema.ResourceData, m
 		}
 
 		if nameRegex != nil {
-			description := ""
-			if desc, ok := namespace["MountTargetDomain"]; ok && desc != nil {
-				description = desc.(string)
+			mappedPath := ""
+			if desc, ok := namespace["MappedPath"]; ok && desc != nil {
+				mappedPath = desc.(string)
 			}
-			if !nameRegex.MatchString(description) {
+			if !nameRegex.MatchString(mappedPath) {
+				continue
+			}
+		}
+		if v, ok := d.GetOk("network_type"); ok {
+			if v.(string) != namespace["NetworkType"].(string) {
 				continue
 			}
 		}
