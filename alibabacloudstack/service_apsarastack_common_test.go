@@ -1221,9 +1221,18 @@ data "alibabacloudstack_zones" "default" {
 }
 `
 
-const KafkaCommonTestCase = `
+func KafkaCommonTestCase() string {
+	instanceid := os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_KAFKA_ID")
+	if instanceid == "" {
+		instanceid = "cluster-private-paas-default"
+	}
+	return `
+variable "existed_kafka_instance_id" {
+	default = "%s"
+}
+
 data "alibabacloudstack_alikafka_instances" "default" {
-	ids = ["cluster-private-paas-default"]
+	ids = [var.existed_kafka_instance_id]
 }
 
 resource "alibabacloudstack_alikafka_instance" "default" {
@@ -1243,7 +1252,7 @@ resource "alibabacloudstack_alikafka_instance" "default" {
 locals{
 alikafka_instnace_id = length(data.alibabacloudstack_alikafka_instances.default.instances) > 0 ? data.alibabacloudstack_alikafka_instances.default.instances.0.id : alibabacloudstack_alikafka_instance.default.0.id
 }
-`
+`}
 
 const NasCommonTestCase = `
 data "alibabacloudstack_nas_zones" "default" {

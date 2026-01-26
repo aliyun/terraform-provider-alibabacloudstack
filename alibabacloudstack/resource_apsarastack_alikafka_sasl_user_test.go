@@ -128,7 +128,6 @@ func TestAccAlibabacloudStackAlikafkaSaslUser_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithAlikafkaAclEnable(t)
 			testAccPreCheck(t)
 		},
 		// module name
@@ -234,11 +233,12 @@ func resourceAlikafkaSaslUserConfigDependence(name string) string {
 variable "name" {
 	default = "%v"
 }
-
 %s
 
 %s
-`, name, KafkaCommonTestCase, RandomPasswordTestCase(12, 2))
+
+%s
+`, name, DataZoneCommonTestCase, KafkaCommonTestCase(), RandomPasswordTestCase(12, 2))
 }
 
 var alikafkaSaslUserBasicMap = map[string]string{

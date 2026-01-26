@@ -183,7 +183,7 @@ variable "name" {
 
 %s
 
-`, name, DataZoneCommonTestCase, KafkaCommonTestCase)
+`, name, DataZoneCommonTestCase, KafkaCommonTestCase())
 }
 
 var alikafkaTopicBasicMap = map[string]string{
