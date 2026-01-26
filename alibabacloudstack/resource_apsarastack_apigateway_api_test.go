@@ -492,7 +492,7 @@ func resourceApigatewayApiConfigDependence_vpc(name string) string {
 	}
 	%s
 	
-	`, name, ApigatewayVpcAccessConfigDependence)
+	`, name, ECSInstanceCommonTestCase)
 }
 
 var apiGatewayApiMap = map[string]string{

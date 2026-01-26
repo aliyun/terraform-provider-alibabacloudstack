@@ -263,9 +263,9 @@ func (s *CloudApiService) DescribeApiGatewayVpcAccess(id string) (*cloudapi.VpcA
 		}
 	}
 
+	iPort, _ := strconv.Atoi(parts[3])
 	var filteredVpcsTemp []cloudapi.VpcAccessAttribute
 	for _, vpc := range allVpcs {
-		iPort, _ := strconv.Atoi(parts[3])
 		if vpc.Port == iPort && vpc.InstanceId == parts[2] && vpc.VpcId == parts[1] && vpc.Name == parts[0] {
 			filteredVpcsTemp = append(filteredVpcsTemp, vpc)
 		}
@@ -396,7 +396,7 @@ func (s *CloudApiService) DescribeTags(resourceId string, resourceTags map[strin
 	request.ResourceType = string(resourceType)
 	request.ResourceId = &[]string{resourceId}
 
-	if resourceTags != nil && len(resourceTags) > 0 {
+	if len(resourceTags) > 0 {
 		var reqTags []cloudapi.ListTagResourcesTag
 		for key, value := range resourceTags {
 			reqTags = append(reqTags, cloudapi.ListTagResourcesTag{
