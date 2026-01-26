@@ -352,31 +352,52 @@ func (s *NasService) DescribeNasNamespaceMountTarget(id string) (map[string]inte
 		return nil, err
 	}
 
-	nasNamespaceId := parts[0]
-	fileSystemId := parts[1]
-
-	reqQuery := map[string]interface{}{
-		"NasNamespaceId": nasNamespaceId,
+	request := map[string]interface{}{
+		"NasNamespaceId":    parts[0],
+		"MountTargetDomain": parts[1],
 	}
-
-	response, err := s.client.DoTeaRequest("GET", "Nas", "2017-06-26", "ListFileSystemsInNamespace", "", nil, reqQuery, nil)
+	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeNamespaceMountTargets", "", nil, nil, request)
+	addDebug("DescribeNamespaceMountTargets", response, request)
 	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.NasNotFound", "InvalidNasNamespace.NotFound", "InvalidMountTarget.NotFound"}) {
+			err = errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespaceMountTarget:%s Not found!", id))
+			return nil, err
+		}
 		return nil, err
 	}
-
-	nsMembers, ok := response["NSMembers"].([]interface{})
+	mountTargets, ok := response["MountTargets"].([]interface{})
 	if !ok {
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("No filesystem found in namespace %s", nasNamespaceId))
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespaceMountTarget:%s Not found!", id))
 	}
-	for _, v := range nsMembers {
-		member := v.(map[string]interface{})
-		if member["FileSystemId"] == fileSystemId {
-			return member, nil
+	for _, v := range mountTargets {
+		if v.(map[string]interface{})["MountTargetDomain"] == parts[1] {
+			return v.(map[string]interface{}), nil
 		}
 	}
-
-	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Filesystem %s not found in namespace %s", fileSystemId, nasNamespaceId))
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespaceMountTarget:%s Not found!", id))
 }
+
+func (s *NasService) NasNamespaceMountTargetStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeNasNamespaceMountTarget(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		status := object["Status"].(string)
+		for _, failState := range failStates {
+			if status == failState {
+				return object, status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, status))
+			}
+		}
+		return object, status, nil
+	}
+}
+
 func (s *NasService) DescribeNasNamespaceGroup(id string) (map[string]interface{}, error) {
 	request := map[string]interface{}{
 		"MountTargetDomain": id,
