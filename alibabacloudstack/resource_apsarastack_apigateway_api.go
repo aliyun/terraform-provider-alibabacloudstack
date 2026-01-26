@@ -834,16 +834,12 @@ func serviceConfigToJsonStr(d *schema.ResourceData) (string, error) {
 	switch serviceType {
 	case "HTTP":
 		configStr, err = getHttpServiceConfig(d)
-		break
 	case "HTTP-VPC":
 		configStr, err = getHttpVpcServiceConfig(d)
-		break
 	case "FunctionCompute":
 		configStr, err = getFcServiceConfig(d)
-		break
 	case "MOCK":
 		configStr, err = getMockServiceConfig(d)
-		break
 	}
 	if err != nil {
 		return "", errmsgs.WrapError(err)

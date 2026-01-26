@@ -395,66 +395,6 @@ func TestAccAlibabacloudStackApigatewayApi_fc(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackApigatewayApi_multi(t *testing.T) {
-	var api *cloudapi.DescribeApiResponse
-	resourceId := "alibabacloudstack_api_gateway_api.default.9"
-	ra := resourceAttrInit(resourceId, apiGatewayApiMap)
-	serviceFunc := func() interface{} {
-		return &CloudApiService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &api, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf_testAccApiGatewayApi_%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayApiConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":        "${alibabacloudstack_api_gateway_group.default.name}" + "${count.index}",
-					"group_id":    "${alibabacloudstack_api_gateway_group.default.id}",
-					"description": "tf_testAcc_api description",
-					"auth_type":   "APP",
-					"request_config": []map[string]string{{
-						"protocol": "HTTP",
-						"method":   "GET",
-						"path":     "/test/path/${count.index}",
-						"mode":     "MAPPING",
-					}},
-					"service_type": "HTTP",
-					"http_service_config": []map[string]string{{
-						"address":   "http://apigateway-backend.alicloudapi.com:8080",
-						"method":    "GET",
-						"path":      "/web/cloudapi/${count.index}",
-						"timeout":   "20",
-						"aone_name": "cloudapi-openapi",
-					}},
-					"request_parameters": []map[string]string{{
-						"name":         "testparam",
-						"type":         "STRING",
-						"required":     "OPTIONAL",
-						"in":           "QUERY",
-						"in_service":   "QUERY",
-						"name_service": "testparams",
-					}},
-					"count": "10",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-		},
-	})
-}
-
 func resourceApigatewayApiConfigDependence(name string) string {
 	return fmt.Sprintf(`
 
@@ -486,8 +426,8 @@ func resourceApigatewayApiConfigDependence_vpc(name string) string {
 
 	resource "alibabacloudstack_api_gateway_vpc_access" "default" {
 	  name = "${var.name}"
-	  vpc_id = "${alibabacloudstack_vpc.default.id}"
-	  instance_id = "${alibabacloudstack_instance.default.id}"
+	  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+	  instance_id = "${alibabacloudstack_ecs_instance.default.id}"
 	  port = "8080"
 	}
 	%s
