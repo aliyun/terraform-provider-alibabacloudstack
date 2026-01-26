@@ -140,10 +140,6 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"reserver", "flexible"}, false),
 			},
-			"modify_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"payment_type": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -182,11 +178,6 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 				ValidateFunc:     validation.StringInSlice([]string{"AutoRenewal", "Normal", "NotRenewal"}, false),
 				Default:          "NotRenewal",
 				DiffSuppressFunc: adbPostPaidDiffSuppressFunc,
-			},
-			"resource_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
 			},
 			"security_ips": {
 				Type:     schema.TypeSet,
@@ -299,10 +290,6 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 		}
 	} else {
 		request.PayType = "Postpaid"
-	}
-
-	if v, ok := d.GetOk("resource_group_id"); ok {
-		request.ResourceGroupId = v.(string)
 	}
 
 	if v, ok := d.GetOk("zone_id"); ok {
@@ -590,12 +577,13 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 	}
 	if !d.IsNewResource() && d.HasChange("executor_count") {
 		update = true
+		// Only work for pangu type
 		modifyDBClusterReq["ExecutorCount"] = d.Get("executor_count")
 	}
-	if !d.IsNewResource() && d.HasChange("db_node_storage") {
-		update = true
-		modifyDBClusterReq["DBNodeStorage"] = d.Get("db_node_storage")
-	}
+//	if !d.IsNewResource() && d.HasChange("db_node_storage") {
+//		update = true
+//		modifyDBClusterReq["DBNodeStorage"] = d.Get("db_node_storage")
+//	}
 	//if d.HasChange("elastic_io_resource") {
 	//	update = true
 	//	modifyDBClusterReq["ElasticIOResource"] = d.Get("elastic_io_resource")
@@ -603,9 +591,6 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 	if update {
 		if _, ok := d.GetOk("mode"); ok {
 			modifyDBClusterReq["Mode"] = d.Get("mode")
-		}
-		if _, ok := d.GetOk("modify_type"); ok {
-			modifyDBClusterReq["ModifyType"] = d.Get("modify_type")
 		}
 		action := "ModifyDBCluster"
 		_, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, nil, modifyDBClusterReq)

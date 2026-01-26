@@ -34,23 +34,29 @@ func resourceAlibabacloudStackAdbAccount() *schema.Resource {
 				Optional:      true,
 				Sensitive:     true,
 				ConflictsWith: []string{"kms_encrypted_password"},
+				AtLeastOneOf:  []string{"kms_encrypted_password"},
 			},
 
 			"kms_encrypted_password": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				DiffSuppressFunc: kmsDiffSuppressFunc,
 				Sensitive:        true,
 				ConflictsWith:    []string{"account_password"},
+				AtLeastOneOf:     []string{"account_password"},
+				RequiredWith:     []string{"kms_encryption_context"},
 			},
 
 			"kms_encryption_context": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Get("kms_encrypted_password").(string) == ""
+					if d.Get("kms_encrypted_password").(string) == "" {
+						return true
+					}
+					return old == new
 				},
-				Elem: schema.TypeString,
+				Elem:         schema.TypeString,
+				RequiredWith: []string{"kms_encrypted_password"},
 			},
 
 			"account_type": {
@@ -90,10 +96,6 @@ func resourceAlibabacloudStackAdbAccountCreate(d *schema.ResourceData, meta inte
 
 	password := d.Get("account_password").(string)
 	kmsPassword := d.Get("kms_encrypted_password").(string)
-
-	if password == "" && kmsPassword == "" {
-		return errmsgs.WrapError(errmsgs.Error("One of the 'password' and 'kms_encrypted_password' should be set."))
-	}
 
 	if password != "" {
 		request.AccountPassword = password
@@ -189,9 +191,6 @@ func resourceAlibabacloudStackAdbAccountUpdate(d *schema.ResourceData, meta inte
 
 		password := d.Get("account_password").(string)
 		kmsPassword := d.Get("kms_encrypted_password").(string)
-		if password == "" && kmsPassword == "" {
-			return errmsgs.WrapError(errmsgs.Error("One of the 'password' and 'kms_encrypted_password' should be set."))
-		}
 
 		if password != "" {
 			request.AccountPassword = password

@@ -54,7 +54,7 @@ func (s *KmsService) Decrypt(ciphertextBlob string, encryptionContext map[string
 	request := kms.CreateDecryptRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.CiphertextBlob = ciphertextBlob
-	request.EncryptionContext = string(context[:])
+	request.EncryptionContext = string(context)
 
 	raw, err := s.client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.Decrypt(request)

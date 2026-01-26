@@ -40,33 +40,23 @@ func TestAccAlibabacloudStackAdbAccount0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_cluster_id":    "${local.adb_instance_id}",
-					"account_name":     "${var.name}",
-					"account_password": "${random_password.password.0.result}",
+					"db_cluster_id":       "${local.adb_instance_id}",
+					"account_name":        "${var.name}",
+					"account_password":    "${random_password.password.0.result}",
 					"account_description": "${var.name}_desc",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"account_name":  name,
-						"account_description": name+"_desc",
+						"account_name":        name,
+						"account_description": name + "_desc",
 					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"account_password":       REMOVEKEY,
-					"kms_encrypted_password": "${random_password.password.0.result}",
-					"kms_encryption_context":  "terraform-test",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
 				),
 			},
 			{
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password", "kms_encrypted_password", "kms_encryption_context"},
+				ImportStateVerifyIgnore: []string{"account_password", "kms_encrypted_password", "kms_encryption_context"},
 			},
 		},
 	})

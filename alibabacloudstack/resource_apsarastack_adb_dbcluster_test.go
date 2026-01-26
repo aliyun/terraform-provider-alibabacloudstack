@@ -143,6 +143,7 @@ func TestAccAlibabacloudStackAdbDbCluster_basic(t *testing.T) {
 					"cluster_type":        "${local.adb_instance_types.0.cluster_type}",
 					"cpu_type":            "${local.adb_instance_types.0.cpu_type}",
 					"security_ips":        []string{"10.168.1.11", "10.168.1.12"},
+					"zone_id":             "${data.alibabacloudstack_zones.default.zones.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
