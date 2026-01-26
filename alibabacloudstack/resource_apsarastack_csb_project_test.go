@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackCSBProject_basic1(t *testing.T) {
+func TestAccAlibabacloudStackCSBProject_basic(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_csb_project.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackCSBProjectMap0)
@@ -69,6 +69,5 @@ var AlibabacloudStackCSBProjectMap0 = map[string]string{
 }
 
 func AlibabacloudStackCSBProjectBasicDependence0(name string) string {
-	return fmt.Sprintf(`
-`)
+	return ``
 }

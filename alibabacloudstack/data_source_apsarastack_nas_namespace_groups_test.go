@@ -66,7 +66,7 @@ func TestAccAlibabacloudStackNasNamespaceGroups_basic(t *testing.T) {
 			"mount_target_domain": "${alibabacloudstack_nas_namespace_group.default.mount_target_domain}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"mount_target_domain": "${alibabacloudstack_nas_namespace_group.default.mount_target_domain}_fake",
+			"mount_target_domain": "fake_${alibabacloudstack_nas_namespace_group.default.mount_target_domain}",
 		}),
 	}
 
