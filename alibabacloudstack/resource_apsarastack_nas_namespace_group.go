@@ -49,7 +49,7 @@ func resourceAlibabacloudStackNasNamespaceGroup() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackNasNamespaceGroupCreate, resourceAlibabacloudStackNasNamespaceGroupRead, resourceAlibabacloudStackNasNamespaceGroupUpdate, resourceAlibabacloudStackNasNamespaceGroupDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackNasNamespaceGroupCreate, resourceAlibabacloudStackNasNamespaceGroupRead, nil, resourceAlibabacloudStackNasNamespaceGroupDelete)
 	return resource
 }
 
@@ -90,16 +90,16 @@ func resourceAlibabacloudStackNasNamespaceGroupRead(d *schema.ResourceData, meta
 
 	d.Set("nas_namespace_id", object["NasNamespaceId"])
 	d.Set("mapped_path", object["MappedPath"])
-	d.Set("mount_target_domain", object["MountTargetDomain"])
+	domain := object["MountTargetDomain"].(string)
+	if len(domain) > 0 && domain[len(domain)-1] == '.' {
+		domain = domain[:len(domain)-1]
+	}
+	d.Set("mount_target_domain", domain)
 	d.Set("network_type", object["NetworkType"])
 	d.Set("member_id", object["MemberId"])
 	d.Set("status", object["Status"])
 	d.Set("create_time", object["CreateTime"])
 
-	return nil
-}
-
-func resourceAlibabacloudStackNasNamespaceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 

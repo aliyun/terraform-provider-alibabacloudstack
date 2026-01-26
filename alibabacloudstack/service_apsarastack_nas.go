@@ -402,7 +402,7 @@ func (s *NasService) DescribeNasNamespaceGroup(id string) (map[string]interface{
 	request := map[string]interface{}{
 		"MountTargetDomain": id,
 	}
-	response, err := s.client.DoTeaRequest("GET", "Nas", "2017-06-26", "DescribeNamespaceGroup", "", nil, nil, request)
+	response, err := s.client.DoTeaRequest("GET", "Nas", "2017-06-26", "DescribeNamespaceGroup", "", nil, request, nil)
 	addDebug("DescribeNamespaceGroup", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidNasNamespace.NotFound", "Forbidden.NasNotFound", "Resource.NotFound"}) {
@@ -415,5 +415,8 @@ func (s *NasService) DescribeNasNamespaceGroup(id string) (map[string]interface{
 	if !ok || len(nasNamespaces) == 0 {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespaceGroup:%s Not found!", id))
 	}
+	// for _, v := range nasNamespaces {
+
+	// }
 	return nasNamespaces[0].(map[string]interface{}), nil
 }
