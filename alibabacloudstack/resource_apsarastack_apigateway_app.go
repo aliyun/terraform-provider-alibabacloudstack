@@ -26,7 +26,7 @@ func resourceAlibabacloudStackApigatewayApp() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tags": tagsSchema(),
+//			"tags": tagsSchema(),
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackApigatewayAppCreate,
@@ -76,21 +76,21 @@ func resourceAlibabacloudStackApigatewayAppRead(d *schema.ResourceData, meta int
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cloudApiService := CloudApiService{client}
 
-	wait := incrementalWait(3*time.Second, 5*time.Second)
-	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-		tags, err := cloudApiService.DescribeTags(d.Id(), nil, TagResourceApp)
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"NotFoundResourceId"}) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		d.Set("tags", cloudApiService.tagsToMap(tags))
-		return nil
-	}); err != nil {
-		return errmsgs.WrapError(err)
-	}
+//	wait := incrementalWait(3*time.Second, 5*time.Second)
+//	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+//		tags, err := cloudApiService.DescribeTags(d.Id(), nil, TagResourceApp)
+//		if err != nil {
+//			if errmsgs.IsExpectedErrors(err, []string{"NotFoundResourceId"}) {
+//				wait()
+//				return resource.RetryableError(err)
+//			}
+//			return resource.NonRetryableError(err)
+//		}
+//		d.Set("tags", cloudApiService.tagsToMap(tags))
+//		return nil
+//	}); err != nil {
+//		return errmsgs.WrapError(err)
+//	}
 
 	if err := resource.Retry(3*time.Second, func() *resource.RetryError {
 		object, err := cloudApiService.DescribeApiGatewayApp(d.Id())
@@ -112,10 +112,10 @@ func resourceAlibabacloudStackApigatewayAppRead(d *schema.ResourceData, meta int
 
 func resourceAlibabacloudStackApigatewayAppUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	cloudApiService := CloudApiService{client}
-	if err := cloudApiService.setInstanceTags(d, TagResourceApp); err != nil {
-		return errmsgs.WrapError(err)
-	}
+//	cloudApiService := CloudApiService{client}
+//	if err := cloudApiService.setInstanceTags(d, TagResourceApp); err != nil {
+//		return errmsgs.WrapError(err)
+//	}
 	if d.IsNewResource() {
 		return nil
 	}

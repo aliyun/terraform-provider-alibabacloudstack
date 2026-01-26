@@ -29,7 +29,6 @@ func dataSourceAlibabacloudStackApiGatewayApps() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			"tags": tagsSchema(),
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -79,7 +78,6 @@ func dataSourceAlibabacloudStackApiGatewayApps() *schema.Resource {
 
 func dataSourceAlibabacloudStackApigatewayAppsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	cloudApiService := CloudApiService{client}
 
 	request := cloudapi.CreateDescribeAppAttributesRequest()
 	client.InitRpcRequest(*request.RpcRequest)
@@ -135,15 +133,6 @@ func dataSourceAlibabacloudStackApigatewayAppsRead(d *schema.ResourceData, meta 
 		}
 		if len(idsMap) > 0 {
 			if _, ok := idsMap[strconv.FormatInt(app.AppId, 10)]; !ok {
-				continue
-			}
-		}
-		if value, ok := d.GetOk("tags"); ok {
-			tags, err := cloudApiService.DescribeTags(strconv.FormatInt(app.AppId, 10), value.(map[string]interface{}), TagResourceApp)
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-			if len(tags) < 1 {
 				continue
 			}
 		}

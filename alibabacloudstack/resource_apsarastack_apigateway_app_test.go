@@ -78,7 +78,7 @@ func testSweepApiGatewayApp(region string) error {
 	return nil
 }
 
-func SkipTestAccAlibabacloudStackApigatewayApp_basic(t *testing.T) {
+func TestAccAlibabacloudStackApigatewayApp_basic(t *testing.T) {
 	var v *cloudapi.DescribeAppResponse
 
 	resourceId := "alibabacloudstack_api_gateway_app.default"
@@ -150,75 +150,21 @@ func SkipTestAccAlibabacloudStackApigatewayApp_basic(t *testing.T) {
 					}),
 				),
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":        "${var.name}",
-					"description": "${var.description}",
-					"tags":        REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":         name,
-						"description":  "tf_testAcc api gateway description",
-						"tags.%":       REMOVEKEY,
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
-					}),
-				),
-			},
-		},
-	})
-}
-
-func SkipTestAccAlibabacloudStackApigatewayApp_multi(t *testing.T) {
-	var v *cloudapi.DescribeAppResponse
-	resourceId := "alibabacloudstack_api_gateway_app.default.9"
-	ra := resourceAttrInit(resourceId, apigatewayAppBasicMap)
-	serviceFunc := func() interface{} {
-		return &CloudApiService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf_testAccApp_%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayAppConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":        "${var.name}",
-					"description": "${var.description}",
-					"count":       "10",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name": name,
-					}),
-				),
-			},
+//			{
+//				Config: testAccConfig(map[string]interface{}{
+//					"tags": map[string]string{
+//						"Created": "TF",
+//						"For":     "acceptance test",
+//					},
+//				}),
+//				Check: resource.ComposeTestCheckFunc(
+//					testAccCheck(map[string]string{
+//						"tags.%":       "2",
+//						"tags.Created": "TF",
+//						"tags.For":     "acceptance test",
+//					}),
+//				),
+//			},
 		},
 	})
 }
