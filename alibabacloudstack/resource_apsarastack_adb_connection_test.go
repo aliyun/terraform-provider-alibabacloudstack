@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/adb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAdbConnection0(t *testing.T) {
-	var v map[string]interface{}
+	var v *adb.Address
 
 	resourceId := "alibabacloudstack_adb_connection.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccAdbConnectionCheckmap)
@@ -21,7 +22,7 @@ func TestAccAlibabacloudStackAdbConnection0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sadbconnection%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-adbconnection%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccAdbConnectionBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -35,20 +36,14 @@ func TestAccAlibabacloudStackAdbConnection0(t *testing.T) {
 		CheckDestroy: rac.checkResourceDestroy(),
 
 		Steps: []resource.TestStep{
-
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"db_cluster_id": "am-bp1j43v9c35ef2cvf",
-
-					"connection_string_prefix": "am-bp1j43v9c35ef2cvf80808",
+					"db_cluster_id": "${local.adb_instance_id}",
+					"connection_prefix": "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"db_cluster_id": "am-bp1j43v9c35ef2cvf",
-
-						"connection_string_prefix": "am-bp1j43v9c35ef2cvf80808",
+						"connection_prefix": name,
 					}),
 				),
 			},
@@ -57,20 +52,13 @@ func TestAccAlibabacloudStackAdbConnection0(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 			},
-
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"connection_string_prefix": "am-bp1j43v9c35ef2cvf80808",
-
-					"connection_string": "am-bp1j43v9c35ef2cvf907780.ads.aliyuncs.com",
+					"connection_prefix": "${var.name}-update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"connection_string_prefix": "am-bp1j43v9c35ef2cvf80808",
-
-						"connection_string": "am-bp1j43v9c35ef2cvf907780.ads.aliyuncs.com",
+						"connection_prefix": name+"-update",
 					}),
 				),
 			},
@@ -79,25 +67,20 @@ func TestAccAlibabacloudStackAdbConnection0(t *testing.T) {
 }
 
 var AlibabacloudTestAccAdbConnectionCheckmap = map[string]string{
-
 	"port": CHECKSET,
-
 	"db_cluster_id": CHECKSET,
-
 	"connection_string": CHECKSET,
-
 	"ip_address": CHECKSET,
-
-	"connection_string_prefix": CHECKSET,
+	"connection_prefix": CHECKSET,
 }
 
 func AlibabacloudTestAccAdbConnectionBasicdependence(name string) string {
 	return fmt.Sprintf(`
-variable "name" {
-    default = "%s"
-}
+		variable "name" {
+			default = "%s"
+		}
 
-
-
-`, name)
+		%s
+		
+	`, name, AdbCommonTestCase(false))
 }
