@@ -377,3 +377,22 @@ func (s *NasService) DescribeNasNamespaceMountTarget(id string) (map[string]inte
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Filesystem %s not found in namespace %s", fileSystemId, nasNamespaceId))
 }
+func (s *NasService) DescribeNasNamespaceGroup(id string) (map[string]interface{}, error) {
+	request := map[string]interface{}{
+		"MountTargetDomain": id,
+	}
+	response, err := s.client.DoTeaRequest("GET", "Nas", "2017-06-26", "DescribeNamespaceGroup", "", nil, nil, request)
+	addDebug("DescribeNamespaceGroup", response, request)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidNasNamespace.NotFound", "Forbidden.NasNotFound", "Resource.NotFound"}) {
+			err = errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespaceGroup:%s Not found!", id))
+			return nil, err
+		}
+		return nil, err
+	}
+	nasNamespaces, ok := response["NasNamespaces"].([]interface{})
+	if !ok || len(nasNamespaces) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespaceGroup:%s Not found!", id))
+	}
+	return nasNamespaces[0].(map[string]interface{}), nil
+}
