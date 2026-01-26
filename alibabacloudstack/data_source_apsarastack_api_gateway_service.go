@@ -13,7 +13,7 @@ import (
 func dataSourceAlibabacloudStackApiGatewayService() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackApigatewayServiceRead,
-
+		DeprecationMessage: "The 'alibabacloudstack_api_gateway_service' resource is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 		Schema: map[string]*schema.Schema{
 			"enable": {
 				Type:         schema.TypeString,

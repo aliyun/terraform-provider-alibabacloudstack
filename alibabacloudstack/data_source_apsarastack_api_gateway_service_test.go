@@ -1,32 +1,55 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func SkipTestAccAlibabacloudStackApigatewayServiceDataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
+func TestAccAlibabacloudStackApiGatewayServiceDataSource(t *testing.T) {
+	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_api_gateway_service.current"
+	name := fmt.Sprintf("tf-testacc-apigateway-service%v", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceApiGatewayServiceConfigDependence)
+
+	enableOnConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"enable": "On",
+		}),
+	}
+
+	var existApiGatewayServiceMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"id":     CHECKSET,
+			"status": "Opened",
+		}
+	}
+
+	var fakeApiGatewayServiceMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"id":     "",
+			"status": "",
+		}
+	}
+
+	var apiGatewayServiceCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existApiGatewayServiceMapFunc,
+		fakeMapFunc:  fakeApiGatewayServiceMapFunc,
+		PreCheck: func(){
+			testAccPreCheckWithAPIIsNotSupport(t)
 		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackApigatewayServiceDataSource,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_api_gateway_service.current"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_api_gateway_service.current", "id"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_api_gateway_service.current", "status", "Opened"),
-				),
-			},
-		},
-	})
+	}
+	apiGatewayServiceCheckInfo.dataSourceTestCheck(t, rand, enableOnConf)
 }
 
-const testAccCheckAlibabacloudStackApigatewayServiceDataSource = `
-data "alibabacloudstack_api_gateway_service" "current" {
-	enable = "On"
+func dataSourceApiGatewayServiceConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
 }
-`
+
+%s
+
+`, name, DataZoneCommonTestCase)
+}
