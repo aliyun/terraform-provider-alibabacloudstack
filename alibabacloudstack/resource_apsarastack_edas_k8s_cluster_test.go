@@ -121,13 +121,14 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckEdasK8sClusterDestroy,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      testAccCheckEdasK8sClusterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cs_cluster_id": "${alibabacloudstack_cs_kubernetes.default.id}",
+					"cs_cluster_id": "${local.k8s_cluster_id}",
 					"namespace_id":  "${alibabacloudstack_edas_namespace.default.namespace_logical_id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -196,133 +197,21 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	namespace_logical_id := fmt.Sprintf("%s:%s", region, name)
 	return fmt.Sprintf(`
-		variable "name" {
-		  default = "%s"
-		}
+variable "name" {
+	default = "%s"
+}
 
-		variable "namespace_logical_id" {
-		  default = "%s"
-		}
+variable "namespace_logical_id" {
+	default = "%s"
+}
 
-		variable "cluster_addons" {
-			description = "Addon components in kubernetes cluster"
+resource "alibabacloudstack_edas_namespace" "default" {
+	description          = "${var.name}"
+	namespace_name       = "${var.name}"
+	namespace_logical_id = "${var.namespace_logical_id}"
+}
 
-			type = list(object({
-				name   = string
-				config = string
-			}))
-		}
-		
-		resource "alibabacloudstack_edas_namespace" "default" {
-		  	description =      "${var.name}"
-			namespace_name =       "${var.name}"
-			namespace_logical_id = "${var.namespace_logical_id}"
-		}
+%s
 
-
-		resource "alibabacloudstack_cs_kubernetes" "default" {
-		 name = var.name
-		 version 					= "1.20.11-aliyun.1"
-		 os_type 					= "linux"
-		 platform 					= "AliyunLinux"
-		 num_of_nodes 				= "1"
-		 master_count				= "3"
-		 master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
-		 master_instance_types 		= ["ecs.n4v2.large","ecs.n4v2.large","ecs.n4v2.large"]
-		 master_disk_category 		= "cloud_ssd"
-		 vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
-		 worker_instance_types 		= ["ecs.n4v2.large"]
-		 worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
-		 worker_disk_category 		= "cloud_ssd"
-		 password 					= "Test12345"
-		 pod_cidr 					= "172.20.0.0/16"
-		 service_cidr 				= "172.21.0.0/20"
-		 worker_disk_size 			= "40"
-		 master_disk_size 			= "40"
-		 slb_internet_enabled 		= "true"
-		}
-
-			default = [
-					{
-					"name": "arms-prometheus",
-					"config":"",
-				},
-				{
-					"name": "csi-plugin",
-					"config":"",
-				},
-				{
-					"name": "csi-provisioner",
-					"config":"",
-				},
-				{
-					"name": "logtail-ds",
-					"config": "{\"IngressDashboardEnabled\":\"true\"}"
-				},
-				{
-					"name": "ack-node-problem-detector",
-					"config": "{\"sls_project_name\":\"\"}"
-				},
-				{
-					"name": "nginx-ingress-controller",
-					"config": "{\"IngressSlbNetworkType\":\"intranet\"}"
-				}
-			]
-		}
-
-		%s
-
-		data "alibabacloudstack_images" "default" {
-		  name_regex  = "^anolisos_"
-		  most_recent = true
-		  owners      = "system"
-		}
-
-		data "alibabacloudstack_instance_types" "default" {
-		  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-		  cpu_core_count       = 2
-		  memory_size          = 4
-		}
-
-		resource "alibabacloudstack_cs_kubernetes" "default" {
-			name 						= var.name
-			version 					= "1.30.1-aliyun.1"
-			os_type 					= "linux"
-			platform 					= "AliyunLinux"
-			image_id                    = "${data.alibabacloudstack_images.default.images.0.id}"
-			num_of_nodes 				= "3"
-			master_count				= "3"
-			master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
-			master_instance_types 		= ["${data.alibabacloudstack_instance_types.default.instance_types.0.id}","${data.alibabacloudstack_instance_types.default.instance_types.0.id}","${data.alibabacloudstack_instance_types.default.instance_types.0.id}"]
-			master_disk_category 		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-			vpc_id 					    = "${alibabacloudstack_vpc_vpc.default.id}"
-			worker_instance_types 		= ["${data.alibabacloudstack_instance_types.default.instance_types.0.id}"]
-			worker_vswitch_ids 		    = ["${alibabacloudstack_vpc_vswitch.default.id}"]
-			worker_disk_category 		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-			password 					= "%s"
-			pod_cidr 					= "172.20.0.0/16"
-			service_cidr 				= "172.21.0.0/20"
-			worker_disk_size 			= "40"
-			master_disk_size 			= "40"
-			slb_internet_enabled 		= "true"
-			runtime {
-				name    = "containerd"
-				version = "1.6.28"
-			}
-			dynamic "addons" {
-				for_each = var.cluster_addons
-				content {
-					name   = lookup(addons.value, "name", var.cluster_addons)
-					config = lookup(addons.value, "config", var.cluster_addons)
-				}
-			}
-			lifecycle {
-				ignore_changes = [
-					master_instance_types,
-					worker_instance_types,
-				]
-			}
-		}
-
-		`, name, namespace_logical_id, SecurityGroupCommonTestCase, getAccTestPassword(12))
+`, name, namespace_logical_id, AckK8sCommonTestCase())
 }
