@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -13,70 +14,41 @@ import (
 func dataSourceAlibabacloudStackAscmUserGroups() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackAscmUserGroupsRead,
+
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-				ForceNew: true,
-				MinItems: 1,
-			},
 			"name_regex": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+			},
+			"ids": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"names": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"organization_id": {
-				Type:     schema.TypeInt,
-				Computed: true,
-				Optional: true,
-			},
-			"role_ids": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
-			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
-			},
 			"groups": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
+						"id":              {Type: schema.TypeString, Computed: true},
+						"group_name":      {Type: schema.TypeString, Computed: true},
+						"organization_id": {Type: schema.TypeString, Computed: true},
+						"user_group_id":   {Type: schema.TypeString, Computed: true},
+						"role_ids": {
+							Type:     schema.TypeList,
 							Computed: true,
-						},
-						"group_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"organization_id": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"user_group_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"users": {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"role_ids": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeInt},
 						},
 					},
 				},
@@ -117,43 +89,57 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
 		reg = regexp.MustCompile(nameRegex.(string))
 	}
+
 	var ids []string
-	var roleids []int
-	var users []string
+	var names []string
 	var groups []map[string]interface{}
+
 	for _, group := range response.Data {
 		if reg != nil && !reg.MatchString(group.GroupName) {
 			continue
 		}
 
-		for _, rid := range response.Data[0].Roles {
-			roleids = append(roleids, rid.Id)
+		// ✅ 提取当前组的 role_ids
+		var roleIds []string
+		for _, role := range group.Roles {
+			if role.Id != 0 {
+				roleIds = append(roleIds, fmt.Sprintf("%d", role.Id))
+			}
 		}
 
-		for _, user := range response.Data[0].Users {
-			users = append(users, user.Username)
+		// ✅ 提取当前组的 users
+		var users []string
+		for _, user := range group.Users {
+			if user.Username != "" {
+				users = append(users, user.Username)
+			}
 		}
 
 		mapping := map[string]interface{}{
 			"id":              fmt.Sprint(group.Id),
 			"group_name":      group.GroupName,
-			"organization_id": group.Organization.Id,
+			"organization_id": strconv.Itoa(group.Organization.Id),
 			"user_group_id":   group.AugId,
-			"role_ids":        roleids,
+			"role_ids":        roleIds,
 			"users":           users,
 		}
 
 		ids = append(ids, fmt.Sprint(group.Id))
+		names = append(names, group.GroupName)
 		groups = append(groups, mapping)
 	}
-	d.SetId(dataResourceIdHash(ids))
 
+	d.SetId(dataResourceIdHash(ids))
+	if err := d.Set("ids", ids); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("names", names); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	if err := d.Set("groups", groups); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if err := d.Set("role_ids", roleids); err != nil {
-		return errmsgs.WrapError(err)
-	}
+
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		if err := writeToFile(output.(string), groups); err != nil {
 			return err

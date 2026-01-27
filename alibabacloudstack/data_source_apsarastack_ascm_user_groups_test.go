@@ -1,34 +1,70 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"fmt"
 	"testing"
 )
 
 func TestAccAlibabacloudStackAscm_User_GroupsDataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: dataSourceAlibabacloudStackAscm_User_Group_Organization,
-				Check: resource.ComposeTestCheckFunc(
+	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_ascm_user_groups.default"
+	name := fmt.Sprintf("tf-testacc-ascmusergroup-%d", rand)
 
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ascm_user_groups.default"),
-				),
-			},
-		},
-	})
-}
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceAscmUserGroupsConfigDependence)
 
-const dataSourceAlibabacloudStackAscm_User_Group_Organization = `
-data "alibabacloudstack_ascm_user_groups" "default" {
-	name_regex = "cxt"
-	
-}
-output "groups" {
-	  value = "${data.alibabacloudstack_ascm_user_groups.default.groups}"
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_ascm_user_group.demo.group_name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "fake-group-name-12345",
+		}),
 	}
-`
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_ascm_user_group.demo.group_name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "fake-group-name-12345",
+		}),
+	}
+
+	var existAscmUserGroupsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"groups.#":                 "1",
+			"groups.0.id":              CHECKSET,
+			"groups.0.group_name":      name,
+			"groups.0.organization_id": CHECKSET,
+			"groups.0.user_group_id":   CHECKSET,
+			"groups.0.role_ids.#":     CHECKSET,
+			"groups.0.users.#":        CHECKSET,
+		}
+	}
+
+	var fakeAscmUserGroupsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"groups.#": "0",
+		}
+	}
+
+	var ascmUserGroupsCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existAscmUserGroupsMapFunc,
+		fakeMapFunc:  fakeAscmUserGroupsMapFunc,
+	}
+
+	ascmUserGroupsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, allConf)
+}
+
+func dataSourceAscmUserGroupsConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
+}
+
+resource "alibabacloudstack_ascm_user_group" "demo" {
+  group_name = var.name
+  role_ids   = ["2"]
+}
+`, name)
+}
