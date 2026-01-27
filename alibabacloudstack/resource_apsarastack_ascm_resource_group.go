@@ -128,10 +128,13 @@ func resourceAlibabacloudStackAscmResourceGroupUpdate(d *schema.ResourceData, me
 	if attributeUpdate {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateResourceGroup", "/ascm/auth/resource_group/update_resource_group")
 		request.QueryParams["resourceGroupName"] = name
-		request.QueryParams["id"] = did[2]
-		request.QueryParams["OrganizationId"] = did[0]
-		request.QueryParams["Department"] = did[0]
-		request.QueryParams["ResourceGroup"] = did[2]
+		if len(did) < 3 {
+         return fmt.Errorf("invalid resource group id format, expected 3 parts separated by colon, got: %s", d.Id())
+         }
+        request.QueryParams["id"] = did[2]
+        request.QueryParams["OrganizationId"] = did[0]
+        request.QueryParams["Department"] = did[0]
+        request.QueryParams["ResourceGroup"] = did[2]
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 
@@ -188,11 +191,16 @@ func resourceAlibabacloudStackAscmResourceGroupDelete(d *schema.ResourceData, me
 	addDebug("IsResourceGroupExist", check, requestInfo, map[string]string{"resourceGroupName": did[1]})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveResourceGroup", "/ascm/auth/resource_group/delete_resource_group")
-		request.QueryParams["OrganizationId"] = did[0]
-		request.QueryParams["Department"] = did[0]
-		request.QueryParams["resourceGroupName"] = did[1]
-		request.QueryParams["ResourceGroup"] = did[2]
-		request.QueryParams["resource_group_id"] = did[2]
+		if len(did) < 3 {
+            return resource.NonRetryableError(
+                fmt.Errorf("invalid resource group id format, expected 3 parts separated by colon, got: %s", d.Id()),
+            )
+        }
+        request.QueryParams["OrganizationId"] = did[0]
+        request.QueryParams["Department"] = did[0]
+        request.QueryParams["resourceGroupName"] = did[1]
+        request.QueryParams["ResourceGroup"] = did[2]
+        request.QueryParams["resource_group_id"] = did[2]
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 

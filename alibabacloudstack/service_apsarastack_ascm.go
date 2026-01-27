@@ -50,9 +50,12 @@ func (s *AscmService) DescribeAscmLogonPolicy(id string) (response *LoginPolicy,
 func (s *AscmService) DescribeAscmResourceGroup(id string) (response *ResourceGroup, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "/ascm/auth/resource_group/list_resource_group")
-	request.QueryParams["OrganizationId"] = did[0]
-	request.QueryParams["Department"] = did[0]
-	request.QueryParams["resourceGroupName"] = did[1]
+	if len(did) < 2 {
+    return nil, fmt.Errorf("invalid id format, expected at least 2 parts separated by colon")
+    }
+    request.QueryParams["OrganizationId"] = did[0]
+    request.QueryParams["Department"] = did[0]
+    request.QueryParams["resourceGroupName"] = did[1]
 	var resp = &ResourceGroup{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 
