@@ -32,7 +32,7 @@ resource "alibabacloudstack_ascm_organization" "default" {
   parent_id = "1"
 }
  resource "alibabacloudstack_ascm_resource_group" "default" {
-  organization_id = alibabacloudstack_ascm_organization.default.org_id
+  organization_id = alibabacloudstack_ascm_organization.default.id
   name = "alibabacloudstack-Datasource-resourceGroup"
 }
 data "alibabacloudstack_ascm_resource_groups" "default" {
