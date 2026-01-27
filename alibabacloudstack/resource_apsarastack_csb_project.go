@@ -114,7 +114,6 @@ func resourceAlibabacloudStackCsbProjectRead(d *schema.ResourceData, meta interf
 		}
 		return errmsgs.WrapError(err)
 	}
-	fmt.Sprint(object["ProjectName"])
 	d.Set("project_name", fmt.Sprint(object["ProjectName"]))
 	d.Set("csb_id", fmt.Sprint(object["CsbId"]))
 	return nil

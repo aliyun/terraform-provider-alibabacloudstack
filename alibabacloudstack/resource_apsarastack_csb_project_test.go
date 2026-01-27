@@ -20,7 +20,7 @@ func TestAccAlibabacloudStackCSBProject_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sdataworksconnection%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-csbproject%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackCSBProjectBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -32,15 +32,15 @@ func TestAccAlibabacloudStackCSBProject_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"data":         "{\\\"projectName\\\":\\\"test3\\\",\\\"projectOwnerName\\\":\\\"test3\\\",\\\"projectOwnerEmail\\\":\\\"\\\",\\\"projectOwnerPhoneNum\\\":\\\"\\\",\\\"description\\\":\\\"\\\"}",
-					"data2":        "{\\\"projectName\\\":\\\"test15\\\",\\\"projectOwnerName\\\":\\\"test15\\\",\\\"projectOwnerEmail\\\":\\\"\\\",\\\"projectOwnerPhoneNum\\\":\\\"\\\",\\\"description\\\":\\\"\\\",\\\"gmtModified\\\":1672912101000,\\\"csbId\\\":134,\\\"gmtCreate\\\":1672912101000,\\\"ownerId\\\":\\\"1827872887260637\\\",\\\"apiNum\\\":0,\\\"userId\\\":\\\"1827872887260637\\\",\\\"srcType\\\":0,\\\"deleteFlag\\\":0,\\\"id\\\":259,\\\"status\\\":1}",
+					"data": "{\\\"projectName\\\":\\\"test3\\\",\\\"projectOwnerName\\\":\\\"test3\\\",\\\"projectOwnerEmail\\\":\\\"\\\",\\\"projectOwnerPhoneNum\\\":\\\"\\\",\\\"description\\\":\\\"\\\"}",
+					//					"data2":        "{\\\"projectName\\\":\\\"test15\\\",\\\"projectOwnerName\\\":\\\"test15\\\",\\\"projectOwnerEmail\\\":\\\"\\\",\\\"projectOwnerPhoneNum\\\":\\\"\\\",\\\"description\\\":\\\"\\\",\\\"gmtModified\\\":1672912101000,\\\"csbId\\\":134,\\\"gmtCreate\\\":1672912101000,\\\"ownerId\\\":\\\"1827872887260637\\\",\\\"apiNum\\\":0,\\\"userId\\\":\\\"1827872887260637\\\",\\\"srcType\\\":0,\\\"deleteFlag\\\":0,\\\"id\\\":259,\\\"status\\\":1}",
 					"csb_id":       "134",
-					"project_name": "test3",
+					"project_name": "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"csb_id":       "134",
-						"project_name": "test3",
+						"project_name": name,
 					}),
 				),
 			},
@@ -51,11 +51,11 @@ func TestAccAlibabacloudStackCSBProject_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"project_name": "test15",
+					"project_name": "${var.name}_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"project_name": "test15",
+						"project_name": name + "_update",
 					}),
 				),
 			},
@@ -69,5 +69,8 @@ var AlibabacloudStackCSBProjectMap0 = map[string]string{
 }
 
 func AlibabacloudStackCSBProjectBasicDependence0(name string) string {
-	return ``
+	return fmt.Sprintf(`
+	variable name {
+		default = "%s"
+	}`, name)
 }

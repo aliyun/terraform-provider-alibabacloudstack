@@ -1039,6 +1039,8 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 	if popcode == "CloudDns" || popcode == "bms" {
 		// CloudDns / bms does not support HTTPS
 		protocol = "http"
+	} else if popcode == "CSB" {
+		protocol = "https"
 	}
 	authType := "AK"
 
@@ -1210,6 +1212,8 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 	if request.Product == "CloudDns" || request.Product == "bms" {
 		// CloudDns / bms does not support HTTPS
 		request.SetScheme("http")
+	} else if popcode == "CSB" {
+		request.SetScheme("https")
 	}
 
 	var response *responses.CommonResponse
