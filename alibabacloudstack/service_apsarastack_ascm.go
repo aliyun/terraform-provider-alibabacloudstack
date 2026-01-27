@@ -50,8 +50,9 @@ func (s *AscmService) DescribeAscmLogonPolicy(id string) (response *LoginPolicy,
 func (s *AscmService) DescribeAscmResourceGroup(id string) (response *ResourceGroup, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "/ascm/auth/resource_group/list_resource_group")
-	request.QueryParams["resourceGroupName"] = did[0]
-
+	request.QueryParams["OrganizationId"] = did[0]
+	request.QueryParams["Department"] = did[0]
+	request.QueryParams["resourceGroupName"] = did[1]
 	var resp = &ResourceGroup{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 
@@ -74,7 +75,7 @@ func (s *AscmService) DescribeAscmResourceGroup(id string) (response *ResourceGr
 		return resp, errmsgs.WrapError(err)
 	}
 
-	if len(resp.Data) < 1 || resp.Code == "200" {
+	if len(resp.Data) < 1 || resp.Code != "200" {
 		return resp, errmsgs.WrapError(err)
 	}
 	return resp, nil

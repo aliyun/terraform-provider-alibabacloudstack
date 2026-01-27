@@ -24,7 +24,7 @@ func resourceAlibabacloudStackAscmResourceGroup() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(2, 128),
 			},
 			"organization_id": {
-				Type:     schema.TypeString,
+				Type:       schema.TypeString,
 				Optional:   true,
 				Computed:   true,
 				ForceNew:   true,
@@ -46,15 +46,17 @@ func resourceAlibabacloudStackAscmResourceGroupCreate(d *schema.ResourceData, me
 	var requestInfo *ecs.Client
 
 	name := d.Get("name").(string)
-	check, err := ascmService.DescribeAscmResourceGroup(name)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_resource_group", "RG alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
 	var organizationId string
-	if _, ok:= d.GetOk("organization_id"); ok {
+	if _, ok := d.GetOk("organization_id"); ok {
 		organizationId = d.Get("organization_id").(string)
 	} else {
 		organizationId = client.Department
+	}
+	organizationInfo := fmt.Sprintf("%s:%s", organizationId, name)
+	d.SetId(organizationInfo)
+	check, err := ascmService.DescribeAscmResourceGroup(d.Id())
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_resource_group", "RG alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	if len(check.Data) == 0 {
@@ -62,6 +64,8 @@ func resourceAlibabacloudStackAscmResourceGroupCreate(d *schema.ResourceData, me
 		request.QueryParams["ProductName"] = "ascm"
 		request.QueryParams["resource_group_name"] = name
 		request.QueryParams["organization_id"] = organizationId
+		request.QueryParams["OrganizationId"] = organizationId
+		request.QueryParams["Department"] = organizationId
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 
@@ -82,14 +86,14 @@ func resourceAlibabacloudStackAscmResourceGroupCreate(d *schema.ResourceData, me
 	}
 
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		check, err = ascmService.DescribeAscmResourceGroup(name)
+		check, err = ascmService.DescribeAscmResourceGroup(d.Id())
 		if err != nil {
 			return resource.NonRetryableError(err)
 		}
 		return resource.RetryableError(err)
 	})
-	d.SetId(check.Data[0].ResourceGroupName + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
-
+	resourceId := fmt.Sprintf("%s:%s:%d", organizationId, name, check.Data[0].ID)
+	d.SetId(resourceId)
 	return nil
 }
 
@@ -121,7 +125,10 @@ func resourceAlibabacloudStackAscmResourceGroupUpdate(d *schema.ResourceData, me
 	if attributeUpdate {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateResourceGroup", "/ascm/auth/resource_group/update_resource_group")
 		request.QueryParams["resourceGroupName"] = name
-		request.QueryParams["id"] = did[1]
+		request.QueryParams["id"] = did[2]
+		request.QueryParams["OrganizationId"] = did[0]
+		request.QueryParams["Department"] = did[0]
+		request.QueryParams["ResourceGroup"] = did[2]
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 
@@ -137,7 +144,6 @@ func resourceAlibabacloudStackAscmResourceGroupUpdate(d *schema.ResourceData, me
 		}
 		addDebug(request.GetActionName(), bresponse, request)
 	}
-	d.SetId(name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
 
 	return nil
 }
@@ -147,7 +153,6 @@ func resourceAlibabacloudStackAscmResourceGroupRead(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmResourceGroup(d.Id())
-	did := strings.Split(d.Id(), COLON_SEPARATED)
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -160,8 +165,8 @@ func resourceAlibabacloudStackAscmResourceGroupRead(d *schema.ResourceData, meta
 		return nil
 	}
 
-	d.Set("name", did[0])
-	d.Set("rg_id", did[1])
+	d.Set("name", object.Data[0].ResourceGroupName)
+	d.Set("rg_id", strconv.Itoa(object.Data[0].ID))
 	d.Set("organization_id", strconv.Itoa(object.Data[0].OrganizationID))
 
 	return nil
@@ -177,10 +182,14 @@ func resourceAlibabacloudStackAscmResourceGroupDelete(d *schema.ResourceData, me
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsResourceGroupExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	addDebug("IsResourceGroupExist", check, requestInfo, map[string]string{"resourceGroupName": did[0]})
+	addDebug("IsResourceGroupExist", check, requestInfo, map[string]string{"resourceGroupName": did[1]})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveResourceGroup", "/ascm/auth/resource_group/delete_resource_group")
-		request.QueryParams["resourceGroupName"] = did[0]
+		request.QueryParams["OrganizationId"] = did[0]
+		request.QueryParams["Department"] = did[0]
+		request.QueryParams["resourceGroupName"] = did[1]
+		request.QueryParams["ResourceGroup"] = did[2]
+		request.QueryParams["resource_group_id"] = did[2]
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 

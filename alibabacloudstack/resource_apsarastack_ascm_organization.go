@@ -56,7 +56,7 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_organization", "ORG alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	parentid := d.Get("parent_id").(string)
-
+	time.Sleep(15 * time.Second)
 	if len(check.Data) == 0 {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateOrganization", "/ascm/auth/organization/add")
 		request.QueryParams["parentId"] = parentid
