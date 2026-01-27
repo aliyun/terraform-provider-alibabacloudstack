@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -11,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscm_UserGroupRoleBinding(t *testing.T) {
+func TestAccAlibabacloudStackAscmUserGroupRoleBinding(t *testing.T) {
 	var v *UserGroup
 	resourceId := "alibabacloudstack_ascm_user_group_role_binding.default"
 	ra := resourceAttrInit(resourceId, testAccCheckUserGroupRoleBinding)
@@ -19,8 +18,8 @@ func TestAccAlibabacloudStackAscm_UserGroupRoleBinding(t *testing.T) {
 		return &AscmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-ascmusergroup%v", rand)
-	org_id := os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT")
+	name := fmt.Sprintf("tf-ascmgrouprole%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCheckAscm_UserGroupRoleBinding)
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -36,7 +35,10 @@ func TestAccAlibabacloudStackAscm_UserGroupRoleBinding(t *testing.T) {
 		CheckDestroy: testAccCheckAscm_UserGroupRoleBinding_Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAscm_UserGroupRoleBinding, org_id, name),
+				Config: testAccConfig(map[string]interface{}{
+					"role_ids" : []int{5},
+					"user_group_id" : "${alibabacloudstack_ascm_user_group.default.user_group_id}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"role_ids.#": "1",
@@ -48,6 +50,17 @@ func TestAccAlibabacloudStackAscm_UserGroupRoleBinding(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"role_ids" : []int{6},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_ids.#": "1",
+						"role_ids.0": "6",
+					}),
+				),
 			},
 		},
 	})
@@ -77,21 +90,23 @@ func testAccCheckAscm_UserGroupRoleBinding_Destroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccCheckAscm_UserGroupRoleBinding = `
-variable org_id {
+func testAccCheckAscm_UserGroupRoleBinding(name string) string{
+	return fmt.Sprintf( `
+variable name {
  default = "%s"
 }
 
-resource "alibabacloudstack_ascm_user_group" "default" {
- group_name =      "%s"
- organization_id = "${var.org_id}"
+data alibabacloudstack_account current {
+	
 }
 
-resource "alibabacloudstack_ascm_user_group_role_binding" "default" {
-  role_ids = [5,]
-  user_group_id = alibabacloudstack_ascm_user_group.default.user_group_id
+resource "alibabacloudstack_ascm_user_group" "default" {
+ group_name =      var.name
+ organization_id = data.alibabacloudstack_account.current.organization_id
 }
-`
+
+`, name)
+}
 
 var testAccCheckUserGroupRoleBinding = map[string]string{
 	"user_group_id": CHECKSET,

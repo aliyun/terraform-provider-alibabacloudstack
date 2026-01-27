@@ -150,17 +150,6 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d *schema.ResourceD
 			newValue[v.(int)] = struct{}{}
 		}
 
-		for key := range oldValue {
-			if _, exist := newValue[key]; !exist {
-				requestBody := map[string]interface{}{
-					"userGroupId": user_group_id,
-					"roleId":      key,
-				}
-				if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUserGroup", "/ascm/auth/user/removeRoleFromUserGroup", nil, nil, requestBody); err != nil {
-					return err
-				}
-			}
-		}
 		for key := range newValue {
 			if _, exist := oldValue[key]; !exist {
 				requestBody := map[string]interface{}{
@@ -168,6 +157,17 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d *schema.ResourceD
 					"roleId":      key,
 				}
 				if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "AddRoleToUserGroup", "/ascm/auth/user/addRoleToUserGroup", nil, nil, requestBody); err != nil {
+					return err
+				}
+			}
+		}
+		for key := range oldValue {
+			if _, exist := newValue[key]; !exist {
+				requestBody := map[string]interface{}{
+					"userGroupId": user_group_id,
+					"roleId":      key,
+				}
+				if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUserGroup", "/ascm/auth/user/removeRoleFromUserGroup", nil, nil, requestBody); err != nil {
 					return err
 				}
 			}
