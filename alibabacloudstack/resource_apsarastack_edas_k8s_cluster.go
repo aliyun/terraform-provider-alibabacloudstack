@@ -61,11 +61,14 @@ type ImportK8sClusterResponse struct {
 }
 
 func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
 	retry := 5
+	var id string
 	var err error
 	for retry > 0 {
-		err = importK8sCluster(d, meta)
+		id, err = importK8sCluster(client, d.Get("cs_cluster_id").(string), d.Get("namespace_id").(string))
 		if err == nil {
+			d.SetId(id)
 			break
 		}
 		retry -= 1
@@ -73,43 +76,43 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 	return err
 }
 
-func importK8sCluster(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
+func importK8sCluster(client *connectivity.AlibabacloudStackClient, clusterId, namesapceId string) (string, error) {
+	var id string
 
 	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "ImportK8sCluster", "/pop/v5/import_k8s_cluster")
-	request.QueryParams["ClusterId"] = d.Get("cs_cluster_id").(string)
-	if v, ok := d.GetOk("namespace_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
+	request.QueryParams["ClusterId"] = clusterId
+	if namesapceId != "" {
+		request.QueryParams["RegionId"] = namesapceId
 	}
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			return id, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return id, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	response := ImportK8sClusterResponse{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
-		return errmsgs.WrapError(err)
+		return id, errmsgs.WrapError(err)
 	}
 
 	log.Printf("unmarshal response for read %v", &response)
 
 	if len(response.Data) == 0 {
-		return errmsgs.WrapError(errmsgs.Error("null cluster id after import k8s cluster"))
+		return id, errmsgs.WrapError(errmsgs.Error("null cluster id after import k8s cluster"))
 	}
-	d.SetId(response.Data)
+	id = response.Data
 	// Wait until import succeed
 	edasService := EdasService{client}
-	stateConf := BuildStateConf([]string{"3"}, []string{"1"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, edasService.ClusterImportK8sStateRefreshFunc(d.Id(), []string{"0", "2", "4"}))
+	stateConf := BuildStateConf([]string{"3"}, []string{"1"}, 30*time.Minute, 10*time.Second, edasService.ClusterImportK8sStateRefreshFunc(id, []string{"0", "2", "4"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		return id, errmsgs.WrapErrorf(err, errmsgs.IdMsg, id)
 	}
 
-	return nil
+	return id, nil
 }
 
 func resourceAlibabacloudStackEdasK8sClusterRead(d *schema.ResourceData, meta interface{}) error {

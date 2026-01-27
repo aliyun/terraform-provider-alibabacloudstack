@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"reflect"
@@ -1153,218 +1152,6 @@ resource "alibabacloudstack_ram_role" "default" {
 }
 `
 
-const EmrGatewayTestCase = `
-data "alibabacloudstack_emr_main_versions" "default" {
-}
-
-data "alibabacloudstack_emr_instance_types" "default" {
-    destination_resource = "InstanceType"
-    cluster_type = data.alibabacloudstack_emr_main_versions.default.main_versions.0.cluster_types.0
-    support_local_storage = false
-    instance_charge_type = "PostPaid"
-    support_node_type = ["MASTER","CORE"]
-}
-
-data "alibabacloudstack_emr_instance_types" "gateway" {
-    destination_resource = "InstanceType"
-    cluster_type = "GATEWAY"
-    support_local_storage = false
-    instance_charge_type = "PostPaid"
-    support_node_type = ["GATEWAY"]
-}
-
-data "alibabacloudstack_emr_disk_types" "data_disk" {
-	destination_resource = "DataDisk"
-	cluster_type = data.alibabacloudstack_emr_main_versions.default.main_versions.0.cluster_types.0
-	instance_charge_type = "PostPaid"
-	instance_type = data.alibabacloudstack_emr_instance_types.default.types.0.id
-	zone_id = data.alibabacloudstack_emr_instance_types.default.types.0.zone_id
-}
-
-data "alibabacloudstack_emr_disk_types" "gateway_data_disk" {
-	destination_resource = "DataDisk"
-	cluster_type = "GATEWAY"
-	instance_charge_type = "PostPaid"
-	instance_type = data.alibabacloudstack_emr_instance_types.gateway.types.0.id
-	zone_id = data.alibabacloudstack_emr_instance_types.gateway.types.0.zone_id
-}
-
-data "alibabacloudstack_emr_disk_types" "system_disk" {
-	destination_resource = "SystemDisk"
-	cluster_type = data.alibabacloudstack_emr_main_versions.default.main_versions.0.cluster_types.0
-	instance_charge_type = "PostPaid"
-	instance_type = data.alibabacloudstack_emr_instance_types.default.types.0.id
-	zone_id = data.alibabacloudstack_emr_instance_types.default.types.0.zone_id
-}
-
-data "alibabacloudstack_emr_disk_types" "gateway_system_disk" {
-	destination_resource = "SystemDisk"
-	cluster_type = "GATEWAY"
-	instance_charge_type = "PostPaid"
-	instance_type = data.alibabacloudstack_emr_instance_types.gateway.types.0.id
-	zone_id = data.alibabacloudstack_emr_instance_types.gateway.types.0.zone_id
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "172.16.0.0/12"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "172.16.0.0/21"
-  availability_zone = "${data.alibabacloudstack_emr_instance_types.default.types.0.zone_id}"
-  name = "${var.name}"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-    name = "${var.name}"
-    vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-
-resource "alibabacloudstack_ram_role" "default" {
-	name = "${var.name}"
-	document = <<EOF
-    {
-        "Statement": [
-        {
-            "Action": "sts:AssumeRole",
-            "Effect": "Allow",
-            "Principal": {
-            "Service": [
-                "emr.aliyuncs.com", 
-                "ecs.aliyuncs.com"
-            ]
-            }
-        }
-        ],
-        "Version": "1"
-    }
-    EOF
-    description = "this is a role test."
-    force = true
-}
-variable "password" {
-}
-resource "alibabacloudstack_emr_cluster" "default" {
-    name = "${var.name}"
-
-    emr_ver = data.alibabacloudstack_emr_main_versions.default.main_versions.0.emr_version
-
-    cluster_type = data.alibabacloudstack_emr_main_versions.default.main_versions.0.cluster_types.0
-
-    host_group {
-        host_group_name = "master_group"
-        host_group_type = "MASTER"
-        node_count = "2"
-        instance_type = data.alibabacloudstack_emr_instance_types.default.types.0.id
-        disk_type = data.alibabacloudstack_emr_disk_types.data_disk.types.0.value
-        disk_capacity = data.alibabacloudstack_emr_disk_types.data_disk.types.0.min > 160 ? data.alibabacloudstack_emr_disk_types.data_disk.types.0.min : 160
-        disk_count = "1"
-        sys_disk_type = data.alibabacloudstack_emr_disk_types.system_disk.types.0.value
-		sys_disk_capacity = data.alibabacloudstack_emr_disk_types.system_disk.types.0.min > 160 ? data.alibabacloudstack_emr_disk_types.system_disk.types.0.min : 160
-    }
-
-	host_group {
-        host_group_name = "core_group"
-        host_group_type = "CORE"
-        node_count = "2"
-        instance_type = data.alibabacloudstack_emr_instance_types.default.types.0.id
-        disk_type = data.alibabacloudstack_emr_disk_types.data_disk.types.0.value
-        disk_capacity = data.alibabacloudstack_emr_disk_types.data_disk.types.0.min > 160 ? data.alibabacloudstack_emr_disk_types.data_disk.types.0.min : 160
-        disk_count = "4"
-        sys_disk_type = data.alibabacloudstack_emr_disk_types.system_disk.types.0.value
-        sys_disk_capacity = data.alibabacloudstack_emr_disk_types.system_disk.types.0.min > 160 ? data.alibabacloudstack_emr_disk_types.system_disk.types.0.min : 160
-    }
-
-    high_availability_enable = true
-    zone_id = data.alibabacloudstack_emr_instance_types.default.types.0.zone_id
-    security_group_id = alibabacloudstack_security_group.default.id
-    is_open_public_ip = true
-    charge_type = "PostPaid"
-    vswitch_id = alibabacloudstack_vswitch.default.id
-    user_defined_emr_ecs_role = alibabacloudstack_ram_role.default.name
-    ssh_enable = true
-    master_pwd = var.password
-}
-`
-const EmrLocalStorageTestCase = `
-data "alibabacloudstack_emr_main_versions" "default" {
-}
-
-data "alibabacloudstack_emr_instance_types" "local_disk" {
-    destination_resource = "InstanceType"
-    cluster_type = data.alibabacloudstack_emr_main_versions.default.main_versions.0.cluster_types.0
-    support_local_storage = true
-    instance_charge_type = "PostPaid"
-    support_node_type = ["CORE"]
-}
-
-data "alibabacloudstack_emr_instance_types" "cloud_disk" {
-    destination_resource = "InstanceType"
-    cluster_type = data.alibabacloudstack_emr_main_versions.default.main_versions.0.cluster_types.0
-    instance_charge_type = "PostPaid"
-    support_node_type = ["MASTER"]
-    zone_id = data.alibabacloudstack_emr_instance_types.local_disk.types.0.zone_id
-}
-
-data "alibabacloudstack_emr_disk_types" "data_disk" {
-	destination_resource = "DataDisk"
-	cluster_type = data.alibabacloudstack_emr_main_versions.default.main_versions.0.cluster_types.0
-	instance_charge_type = "PostPaid"
-	instance_type = data.alibabacloudstack_emr_instance_types.cloud_disk.types.0.id
-	zone_id = data.alibabacloudstack_emr_instance_types.cloud_disk.types.0.zone_id
-}
-
-data "alibabacloudstack_emr_disk_types" "system_disk" {
-	destination_resource = "SystemDisk"
-	cluster_type = data.alibabacloudstack_emr_main_versions.default.main_versions.0.cluster_types.0
-	instance_charge_type = "PostPaid"
-	instance_type = data.alibabacloudstack_emr_instance_types.cloud_disk.types.0.id
-	zone_id = data.alibabacloudstack_emr_instance_types.cloud_disk.types.0.zone_id
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "172.16.0.0/12"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "172.16.0.0/21"
-  availability_zone = "${data.alibabacloudstack_emr_instance_types.cloud_disk.types.0.zone_id}"
-  name = "${var.name}"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-    name = "${var.name}"
-    vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-
-resource "alibabacloudstack_ram_role" "default" {
-	name = "${var.name}"
-	document = <<EOF
-    {
-        "Statement": [
-        {
-            "Action": "sts:AssumeRole",
-            "Effect": "Allow",
-            "Principal": {
-            "Service": [
-                "emr.aliyuncs.com", 
-                "ecs.aliyuncs.com"
-            ]
-            }
-        }
-        ],
-        "Version": "1"
-    }
-    EOF
-    description = "this is a role test."
-    force = true
-}
-`
-
 const SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + SecurityGroupCommonTestCase + `
 resource "alibabacloudstack_instance" "default" {
   image_id = "${data.alibabacloudstack_images.default.images.0.id}"
@@ -1644,37 +1431,16 @@ func checkOrImportEdasK8sInstance(k8sId string) error {
 			}
 		}
 	}
-
-	{
-		request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "ImportK8sCluster", "/pop/v5/import_k8s_cluster")
-		request.QueryParams["ClusterId"] = k8sId
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	retry := 5
+	for {
+		if _, err := importK8sCluster(client, k8sId, ""); err == nil {
+			return nil
+		} else {
+			if retry < 0 {
+				return err
 			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			retry -= 1
 		}
-		response := ImportK8sClusterResponse{}
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-
-		log.Printf("unmarshal response for read %v", &response)
-
-		if len(response.Data) == 0 {
-			return errmsgs.WrapError(errmsgs.Error("null cluster id after import k8s cluster"))
-		}
-		// Wait until import succeed
-		edasService := EdasService{client}
-		stateConf := BuildStateConf([]string{"3"}, []string{"1"}, 5*time.Minute, 10*time.Second, edasService.ClusterImportK8sStateRefreshFunc(k8sId, []string{"0", "2", "4"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, k8sId)
-		}
-		return nil
 	}
 }
 
@@ -1697,7 +1463,7 @@ resource "alibabacloudstack_edas_k8s_cluster" "default" {
 locals {
 	edas_cluster_id = local.create_count == 0 ? data.alibabacloudstack_edas_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
 }
-` 
+`
 }
 
 const ExpressconnectPhysicalConnectionsCommonTestCase = `
