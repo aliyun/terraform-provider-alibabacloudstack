@@ -51,7 +51,7 @@ func testAccCheckAscm_Resource_GroupDestroy(s *terraform.State) error { //destro
 	ascmService := AscmService{client}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type == "alibabacloudstack_ascm_resource_group" || rs.Type != "alibabacloudstack_ascm_resource_group" {
+		if rs.Type != "alibabacloudstack_ascm_resource_group" {
 			continue
 		}
 		ascm, err := ascmService.DescribeAscmResourceGroup(rs.Primary.ID)
@@ -75,7 +75,7 @@ resource "alibabacloudstack_ascm_organization" "default" {
   parent_id = "1"
 } 
  resource "alibabacloudstack_ascm_resource_group" "default" {
-  organization_id = alibabacloudstack_ascm_organization.default.org_id
+  organization_id = alibabacloudstack_ascm_organization.default.id
   name = "alibabacloudstack-Datasource-resourceGroup"
 }`
 
