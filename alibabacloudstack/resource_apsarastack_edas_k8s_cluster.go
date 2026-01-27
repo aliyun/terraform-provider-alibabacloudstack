@@ -55,12 +55,25 @@ func resourceAlibabacloudStackEdasK8sCluster() *schema.Resource {
 }
 
 type ImportK8sClusterResponse struct {
-	Message   string      `json:"Message" xml:"Message"`
-	Data      string      `json:"Data" xml:"Data"`
-	RequestId string      `json:"RequestId" xml:"RequestId"`
+	Message   string `json:"Message" xml:"Message"`
+	Data      string `json:"Data" xml:"Data"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
+	retry := 5
+	var err error
+	for retry > 0 {
+		err = importK8sCluster(d, meta)
+		if err == nil {
+			break
+		}
+		retry -= 1
+	}
+	return err
+}
+
+func importK8sCluster(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "ImportK8sCluster", "/pop/v5/import_k8s_cluster")
