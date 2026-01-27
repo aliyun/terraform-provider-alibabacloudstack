@@ -556,50 +556,6 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 	})
 }
 
-/*
-	func TestAccAlibabacloudStackEdasK8sApplication_multi(t *testing.T) {
-		var v *edas.Applcation
-		resourceId := "alibabacloudstack_edas_k8s_application.default.1"
-		ra := resourceAttrInit(resourceId, edasK8sApplicationBasicMap)
-		serviceFunc := func() interface{} {
-			return &EdasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-		}
-		rc := resourceCheckInit(resourceId, &v, serviceFunc)
-		rac := resourceAttrCheckInit(rc, ra)
-
-		rand := getAccTestRandInt(100, 999)
-		testAccCheck := rac.resourceAttrMapUpdateSet()
-		name := fmt.Sprintf("tf-testacc-edask8sappm%v", rand)
-		testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sApplicationConfigDependence)
-		region := os.Getenv("ALIBABACLOUDSTACK_REGION")
-		image := fmt.Sprintf("registry-vpc.%s.aliyuncs.com/edas-demo-image/consumer:1.0", region)
-		ResourceTest(t, resource.TestCase{
-			PreCheck: func() {
-
-				testAccPreCheck(t)
-			},
-
-			IDRefreshName: resourceId,
-			Providers:     testAccProviders,
-			CheckDestroy:  testAccCheckEdasApplicationDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccConfig(map[string]interface{}{
-						"count":            "2",
-						"application_name": "${var.name}-${count.index}",
-						"cluster_id":       "${local.edas_cluster_id}",
-						"replicas":         "1",
-						"package_type":     "Image",
-						"image_url":        image,
-					}),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheck(nil),
-					),
-				},
-			},
-		})
-	}
-*/
 var edasK8sApplicationBasicMap = map[string]string{
 	// "application_name": CHECKSET,
 	// "cluster_id":       CHECKSET,
