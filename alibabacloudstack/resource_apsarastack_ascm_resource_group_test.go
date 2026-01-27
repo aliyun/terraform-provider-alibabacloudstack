@@ -61,7 +61,7 @@ func testAccCheckAscm_Resource_GroupDestroy(s *terraform.State) error { //destro
 			}
 			return errmsgs.WrapError(err)
 		}
-		if ascm.Message != "" {
+		if len(ascm.Data) > 0 {
 			return errmsgs.WrapError(errmsgs.Error("resource  still exist"))
 		}
 	}
