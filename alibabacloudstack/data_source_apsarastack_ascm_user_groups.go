@@ -99,7 +99,6 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 			continue
 		}
 
-		// ✅ 提取当前组的 role_ids
 		var roleIds []string
 		for _, role := range group.Roles {
 			if role.Id != 0 {
@@ -107,7 +106,6 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 			}
 		}
 
-		// ✅ 提取当前组的 users
 		var users []string
 		for _, user := range group.Users {
 			if user.Username != "" {
