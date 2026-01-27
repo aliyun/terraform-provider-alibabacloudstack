@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -18,10 +17,11 @@ func TestAccAlibabacloudStackAscmUserRoleBinding(t *testing.T) {
 	serviceFunc := func() interface{} {
 		return &AscmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rand := getAccTestRandInt(10000, 20000)
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
-	org_id := os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT")
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-ascmuserrole%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCheckAscm_UserRoleBinding)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -35,7 +35,10 @@ func TestAccAlibabacloudStackAscmUserRoleBinding(t *testing.T) {
 		CheckDestroy: testAccCheckAscm_UserRoleBinding_Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAscm_UserRoleBinding, org_id, rand),
+				Config: testAccConfig(map[string]interface{}{
+					"role_ids" : []int{5},
+					"login_name" : "${alibabacloudstack_ascm_user.default.login_name}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"role_ids.#": "1",
@@ -47,6 +50,18 @@ func TestAccAlibabacloudStackAscmUserRoleBinding(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"role_ids" : []int{6},
+					"login_name" : "${alibabacloudstack_ascm_user.default.login_name}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_ids.#": "1",
+						"role_ids.0": "6",
+					}),
+				),
 			},
 		},
 	})
@@ -76,26 +91,27 @@ func testAccCheckAscm_UserRoleBinding_Destroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccCheckAscm_UserRoleBinding = `
-variable org_id {
- default = "%s"
+func testAccCheckAscm_UserRoleBinding(name string) string{
+	return fmt.Sprintf( `
+variable name {
+	default = "%s"
+}
+data alibabacloudstack_account current {
+	
 }
 
 resource "alibabacloudstack_ascm_user" "default" {
  cellphone_number = "13900000000"
  email = "test@gmail.com"
  display_name = "C2C-DELTA"
- organization_id = "${var.org_id}"
+ organization_id = data.alibabacloudstack_account.current.organization_id
  mobile_nation_code = "91"
- login_name = "User_Role_Test%d"
+ login_name = var.name
  login_policy_id = 1
 }
 
-resource "alibabacloudstack_ascm_user_role_binding" "default" {
-  role_ids = [5,]
-  login_name = alibabacloudstack_ascm_user.default.login_name
+`, name )
 }
-`
 
 var testAccCheckUserRoleBinding = map[string]string{
 	"login_name": CHECKSET,

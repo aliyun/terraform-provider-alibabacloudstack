@@ -7,7 +7,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strings"
 )
 
 func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
@@ -26,23 +25,10 @@ func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
 			},
 		},
 		DeprecationMessage: "ascm_user already includes corresponding functions. This resource may be removed in future versions.",
-		Importer: &schema.ResourceImporter{
-			State: resourceAlibabacloudStackAscmUserRoleBindingImportState,
-		},
 	}
 
 	setResourceFunc(resource, resourceAlibabacloudStackAscmUserRoleBindingCreate, resourceAlibabacloudStackAscmUserRoleBindingRead, resourceAlibabacloudStackAscmUserRoleBindingUpdate, resourceAlibabacloudStackAscmUserRoleBindingDelete)
 	return resource
-}
-
-func resourceAlibabacloudStackAscmUserRoleBindingImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	id := d.Id()
-	if strings.HasPrefix(id, "user:") {
-		id = strings.TrimPrefix(id, "user:")
-	}
-	d.Set("login_name", id)
-	d.SetId(id)
-	return []*schema.ResourceData{d}, nil
 }
 
 func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, meta interface{}) error {
@@ -132,18 +118,6 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 		for _, v := range n.(*schema.Set).List() {
 			newValue[v.(int)] = struct{}{}
 		}
-
-		for key := range oldValue {
-			if _, exist := newValue[key]; !exist {
-				requestBody := map[string]interface{}{
-					"loginName": lname,
-					"roleId":    key,
-				}
-				if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUser", "/ascm/auth/role/removeRoleFromUser", nil, nil, requestBody); err != nil {
-					return err
-				}
-			}
-		}
 		for key := range newValue {
 			if _, exist := oldValue[key]; !exist {
 				requestBody := map[string]interface{}{
@@ -151,6 +125,17 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 					"roleId":    key,
 				}
 				if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "AddRoleToUser", "/ascm/auth/role/addRoleToUser", nil, nil, requestBody); err != nil {
+					return err
+				}
+			}
+		}
+		for key := range oldValue {
+			if _, exist := newValue[key]; !exist {
+				requestBody := map[string]interface{}{
+					"loginName": lname,
+					"roleId":    key,
+				}
+				if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUser", "/ascm/auth/role/removeRoleFromUser", nil, nil, requestBody); err != nil {
 					return err
 				}
 			}
