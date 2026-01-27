@@ -619,6 +619,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_nas_namespace_filesystem_attachments":             dataSourceAlibabacloudStackNasNamespaceFilesystemAttachments(),
 		"alibabacloudstack_nas_namespace_mount_targets":                      dataSourceAlibabacloudStackNasNamespaceMountTargets(),
 		"alibabacloudstack_nas_namespace_groups":                             dataSourceAlibabacloudStackNasNamespaceGroups(),
+		"alibabacloudstack_edas_k8s_clusters":                                dataSourceAlibabacloudStackEdasK8sClusters(),
 		"alibabacloudstack_edas_instance_cluster_attachments":                dataSourceAlibabacloudStackEdasinstanceClusterAttachments(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {

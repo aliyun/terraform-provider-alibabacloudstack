@@ -1451,8 +1451,8 @@ func EdasClusterCommonTestCase() string {
 	}
 	return AckK8sCommonTestCase() + `
 	
-data "alibabacloudstack_edas_clusters" "default" {
-	ids = ["^${local.k8s_cluster_id}$"]
+data "alibabacloudstack_edas_k8s_clusters" "default" {
+	ids = ["${local.k8s_cluster_id}"]
 }
 
 resource "alibabacloudstack_edas_k8s_cluster" "default" {
@@ -1461,7 +1461,7 @@ resource "alibabacloudstack_edas_k8s_cluster" "default" {
 }
 
 locals {
-	edas_cluster_id = local.create_count == 0 ? data.alibabacloudstack_edas_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
+	edas_cluster_id = local.create_count == 0 ? data.alibabacloudstack_edas_k8s_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
 }
 `
 }
