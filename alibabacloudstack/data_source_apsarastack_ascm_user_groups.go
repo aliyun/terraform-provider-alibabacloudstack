@@ -16,20 +16,28 @@ func dataSourceAlibabacloudStackAscmUserGroups() *schema.Resource {
 		Read: dataSourceAlibabacloudStackAscmUserGroupsRead,
 
 		Schema: map[string]*schema.Schema{
+			"ids": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+				ForceNew: true,
+				MinItems: 1,
+			},
 			"name_regex": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"ids": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
 			"names": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"output_file": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"groups": {
 				Type:     schema.TypeList,
@@ -90,6 +98,7 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 		reg = regexp.MustCompile(nameRegex.(string))
 	}
 
+	idsMap := getIdsStringFilter(d)
 	var ids []string
 	var names []string
 	var groups []map[string]interface{}
@@ -105,6 +114,11 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 				roleIds = append(roleIds, fmt.Sprintf("%d", role.Id))
 			}
 		}
+		
+		groupId := fmt.Sprint(group.Id)
+		if _, existed := idsMap[groupId]; len(idsMap) >0 && !existed {
+			continue
+		}
 
 		var users []string
 		for _, user := range group.Users {
@@ -114,7 +128,7 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 		}
 
 		mapping := map[string]interface{}{
-			"id":              fmt.Sprint(group.Id),
+			"id":              groupId,
 			"group_name":      group.GroupName,
 			"organization_id": strconv.Itoa(group.Organization.Id),
 			"user_group_id":   group.AugId,

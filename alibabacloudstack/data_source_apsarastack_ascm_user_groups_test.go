@@ -20,6 +20,14 @@ func TestAccAlibabacloudStackAscmUserGroupsDataSource(t *testing.T) {
 			"name_regex": "fake-group-name-12345",
 		}),
 	}
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ascm_user_group.demo.user_group_id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake-group-id"},
+		}),
+	}
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "${alibabacloudstack_ascm_user_group.demo.group_name}",
@@ -53,7 +61,7 @@ func TestAccAlibabacloudStackAscmUserGroupsDataSource(t *testing.T) {
 		fakeMapFunc:  fakeAscmUserGroupsMapFunc,
 	}
 
-	ascmUserGroupsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, allConf)
+	ascmUserGroupsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
 
 func dataSourceAscmUserGroupsConfigDependence(name string) string {
