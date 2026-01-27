@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscm_User_Group_Basic(t *testing.T) {
+func TestAccAlibabacloudStackAscmUserGroup_Basic(t *testing.T) {
 	var v *UserGroup
 	resourceId := "alibabacloudstack_ascm_user_group.default"
 	ra := resourceAttrInit(resourceId, ascmusergroupBasicMap)

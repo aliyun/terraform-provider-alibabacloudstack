@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackAscm_User_GroupsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackAscmUserGroupsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_ascm_user_groups.default"
 	name := fmt.Sprintf("tf-testacc-ascmusergroup-%d", rand)

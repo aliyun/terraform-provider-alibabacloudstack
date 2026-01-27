@@ -12,7 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
-	return &schema.Resource{
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"group_name": {
 				Type:     schema.TypeString,
@@ -46,14 +46,11 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 				ConflictsWith: []string{"role_in_ids"},
 			},
 		},
-		Create: resourceAlibabacloudStackAscmUserGroupCreate,
-		Read:   resourceAlibabacloudStackAscmUserGroupRead,
-		Update: resourceAlibabacloudStackAscmUserGroupUpdate,
-		Delete: resourceAlibabacloudStackAscmUserGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmUserGroupCreate,
+		resourceAlibabacloudStackAscmUserGroupRead, resourceAlibabacloudStackAscmUserGroupUpdate,
+		resourceAlibabacloudStackAscmUserGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta interface{}) error {
