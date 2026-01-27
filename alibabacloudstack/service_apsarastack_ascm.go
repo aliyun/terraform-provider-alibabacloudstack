@@ -47,18 +47,18 @@ func (s *AscmService) DescribeAscmLogonPolicy(id string) (response *LoginPolicy,
 	return resp, nil
 }
 
-func (s *AscmService) DescribeAscmResourceGroup(id string) (response *ResourceGroup, err error) {
+func (s *AscmService) DescribeAscmResourceGroup(id string) (result *ResourceGroupData, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "/ascm/auth/resource_group/list_resource_group")
 	if len(did) < 2 {
-    return nil, fmt.Errorf("invalid id format, expected at least 2 parts separated by colon")
-    }
-    request.QueryParams["OrganizationId"] = did[0]
-    request.QueryParams["Department"] = did[0]
-    request.QueryParams["resourceGroupName"] = did[1]
+		return nil, fmt.Errorf("invalid id format, expected at least 2 parts separated by colon")
+	}
+	request.QueryParams["OrganizationId"] = did[0]
+	request.QueryParams["Department"] = did[0]
+	request.QueryParams["Department"] = did[0]
 	var resp = &ResourceGroup{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
-
+	addDebug("ListResourceGroup", bresponse, request, request.QueryParams)
 	if err != nil {
 		errmsg := ""
 		if bresponse != nil {
@@ -67,21 +67,26 @@ func (s *AscmService) DescribeAscmResourceGroup(id string) (response *ResourceGr
 			return nil, err
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorResourceGroupNotFound"}) {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "ListResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "ListResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("ListResourceGroup", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, errmsgs.WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code != "200" {
-		return resp, errmsgs.WrapError(err)
+		return nil, errmsgs.GetNotFoundErrorFromString("ResourceGroup not found.")
 	}
-	return resp, nil
+	for _, v := range resp.Data {
+		if did[1] != "" && fmt.Sprint(v.ID) == did[1] {
+			return &v, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString("ResourceGroup not found.")
 }
 
 func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRole, err error) {

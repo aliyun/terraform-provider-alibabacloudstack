@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 	"time"
 
@@ -20,7 +19,7 @@ func dataSourceAlibabacloudStackAscmResourceGroups() *schema.Resource {
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 				ForceNew: true,
 				MinItems: 1,
@@ -29,11 +28,6 @@ func dataSourceAlibabacloudStackAscmResourceGroups() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-			},
-			"names": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"organization_id": {
 				Type:     schema.TypeInt,
@@ -52,7 +46,7 @@ func dataSourceAlibabacloudStackAscmResourceGroups() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"name": {
@@ -88,23 +82,26 @@ func dataSourceAlibabacloudStackAscmResourceGroups() *schema.Resource {
 
 func dataSourceAlibabacloudStackAscmResourceGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	name := d.Get("name_regex").(string)
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "/ascm/auth/resource_group/list_resource_group")
-	request.QueryParams["resourceGroupName"] = name
+	if v, ok := d.GetOk("organization_id"); ok {
+		request.QueryParams["OrganizationId"] = fmt.Sprint(v)
+		request.QueryParams["Department"] = fmt.Sprint(v)
+	} else {
+		request.QueryParams["OrganizationId"] = ""
+		request.QueryParams["Department"] = ""
 
+	}
 	response := ResourceGroup{}
 
 	bresponse, err := client.ProcessCommonRequest(request)
-	log.Printf(" response of raw ListResourceGroup : %s", bresponse)
-
-	// TODO: Need to consider data retrieval when data exceeds one page
+	addDebug(" ================== ListResourceGroup ==================", bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_resource_group", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
@@ -112,18 +109,25 @@ func dataSourceAlibabacloudStackAscmResourceGroupsRead(d *schema.ResourceData, m
 		return errmsgs.WrapError(err)
 	}
 
-	var r *regexp.Regexp
-	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
-		r = regexp.MustCompile(nameRegex.(string))
+	var nameRegex *regexp.Regexp
+	if v, ok := d.GetOk("name_regex"); ok {
+		nameRegex = regexp.MustCompile(v.(string))
 	}
+	idsMap := getIdsStringFilter(d)
 	var ids []string
 	var s []map[string]interface{}
 	for _, rg := range response.Data {
-		if r != nil && !r.MatchString(name) {
+		resourceId := fmt.Sprintf("%d:%d", rg.OrganizationID, rg.ID)
+		if nameRegex != nil && !nameRegex.MatchString(rg.ResourceGroupName) {
 			continue
 		}
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[resourceId]; !ok {
+				continue
+			}
+		}
 		mapping := map[string]interface{}{
-			"id":                  rg.ID,
+			"id":                  resourceId,
 			"name":                rg.ResourceGroupName,
 			"organization_id":     rg.OrganizationID,
 			"creator":             rg.Creator,
@@ -131,12 +135,15 @@ func dataSourceAlibabacloudStackAscmResourceGroupsRead(d *schema.ResourceData, m
 			"rs_id":               rg.RsID,
 			"resource_group_type": rg.ResourceGroupType,
 		}
-		ids = append(ids, fmt.Sprint(rg.ID))
+		ids = append(ids, resourceId)
 		s = append(s, mapping)
 	}
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("groups", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 

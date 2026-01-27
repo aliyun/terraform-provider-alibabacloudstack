@@ -4,20 +4,21 @@ package alibabacloudstack
 //		ResourceGroupID int    `json:"resource_group_id"`
 //		AscmUserIds     string `json:"ascm_user_ids"`
 //	}
+type ResourceGroupData struct {
+	GmtCreated        int64  `json:"gmtCreated"`
+	ID                int    `json:"id"`
+	OrganizationID    int    `json:"organizationID"`
+	ResourceGroupName string `json:"resourceGroupName"`
+	RsID              string `json:"rsId"`
+	Creator           string `json:"creator,omitempty"`
+	GmtModified       int64  `json:"gmtModified,omitempty"`
+	ResourceGroupType int    `json:"resourceGroupType,omitempty"`
+}
 type ResourceGroup struct {
-	Code string `json:"code"`
-	Cost int    `json:"cost"`
-	Data []struct {
-		GmtCreated        int64  `json:"gmtCreated"`
-		ID                int    `json:"id"`
-		OrganizationID    int    `json:"organizationID"`
-		ResourceGroupName string `json:"resourceGroupName"`
-		RsID              string `json:"rsId"`
-		Creator           string `json:"creator,omitempty"`
-		GmtModified       int64  `json:"gmtModified,omitempty"`
-		ResourceGroupType int    `json:"resourceGroupType,omitempty"`
-	} `json:"data"`
-	Message  string `json:"message"`
+	Code     string              `json:"code"`
+	Cost     int                 `json:"cost"`
+	Data     []ResourceGroupData `json:"data"`
+	Message  string              `json:"message"`
 	PageInfo struct {
 		CurrentPage int   `json:"currentPage"`
 		PageSize    int64 `json:"pageSize"`

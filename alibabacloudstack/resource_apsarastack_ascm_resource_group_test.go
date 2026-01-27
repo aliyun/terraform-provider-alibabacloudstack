@@ -1,16 +1,15 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscm_Resource_GroupBasic(t *testing.T) {
-	var v *ResourceGroup
+func TestAccAlibabacloudStackascmResourceGroupBasic(t *testing.T) {
+	var v *ResourceGroupData
 	resourceId := "alibabacloudstack_ascm_resource_group.default"
 	ra := resourceAttrInit(resourceId, testAccCheckResourceGroup)
 	serviceFunc := func() interface{} {
@@ -19,6 +18,9 @@ func TestAccAlibabacloudStackAscm_Resource_GroupBasic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-ascmregp%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccAscmResourceGroup)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -27,13 +29,29 @@ func TestAccAlibabacloudStackAscm_Resource_GroupBasic(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		//CheckDestroy:  rac.checkResourceDestroy(),
-		CheckDestroy: testAccCheckAscm_Resource_GroupDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		// CheckDestroy: testAccCheckAscm_Resource_GroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAscmResource_Group_resource,
+				Config: testAccConfig(map[string]interface{}{
+					"name":            "${var.name}",
+					"organization_id": "${alibabacloudstack_ascm_organization.default.id}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"name":  name,
+						"rg_id": CHECKSET,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name": "${var.name}_update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name": name + "_update",
+					}),
 				),
 			},
 			{
@@ -46,38 +64,42 @@ func TestAccAlibabacloudStackAscm_Resource_GroupBasic(t *testing.T) {
 
 }
 
-func testAccCheckAscm_Resource_GroupDestroy(s *terraform.State) error { //destroy function
-	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-	ascmService := AscmService{client}
+// func testAccCheckAscm_Resource_GroupDestroy(s *terraform.State) error { //destroy function
+// 	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
+// 	ascmService := AscmService{client}
 
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "alibabacloudstack_ascm_resource_group" {
-			continue
-		}
-		ascm, err := ascmService.DescribeAscmResourceGroup(rs.Primary.ID)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-		if len(ascm.Data) > 0 {
-			return errmsgs.WrapError(errmsgs.Error("resource  still exist"))
-		}
-	}
+// 	for _, rs := range s.RootModule().Resources {
+// 		if rs.Type != "alibabacloudstack_ascm_resource_group" {
+// 			continue
+// 		}
+// 		ascm, err := ascmService.DescribeAscmResourceGroup(rs.Primary.ID)
+// 		if err != nil {
+// 			if errmsgs.NotFoundError(err) {
+// 				continue
+// 			}
+// 			return errmsgs.WrapError(err)
+// 		}
+// 		if len(ascm.Data) > 0 {
+// 			return errmsgs.WrapError(errmsgs.Error("resource  still exist"))
+// 		}
+// 	}
 
-	return nil
+// 	return nil
+// }
+
+func testAccAscmResourceGroup(name string) string {
+	return fmt.Sprintf(`
+variable name{
+	default = "%s"
 }
 
-const testAccAscmResource_Group_resource = `
 resource "alibabacloudstack_ascm_organization" "default" {
-  name = "Tf-testingresource-org"
+  name = "${var.name}"
   parent_id = "1"
 } 
- resource "alibabacloudstack_ascm_resource_group" "default" {
-  organization_id = alibabacloudstack_ascm_organization.default.id
-  name = "alibabacloudstack-Datasource-resourceGroup"
-}`
+
+`, name)
+}
 
 var testAccCheckResourceGroup = map[string]string{
 	"name":            CHECKSET,

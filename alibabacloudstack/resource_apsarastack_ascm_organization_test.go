@@ -40,7 +40,20 @@ func TestAccAlibabacloudStackAscmOrganizationBasic(t *testing.T) {
 					"parent_id": "1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"name":      name,
+						"parent_id": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name": "${var.name}_update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name": name + "_update",
+					}),
 				),
 			},
 			{
