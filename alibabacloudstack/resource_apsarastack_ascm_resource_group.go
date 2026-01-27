@@ -90,8 +90,11 @@ func resourceAlibabacloudStackAscmResourceGroupCreate(d *schema.ResourceData, me
 		if err != nil {
 			return resource.NonRetryableError(err)
 		}
-		return resource.RetryableError(err)
+		return nil
 	})
+	if len(check.Data) == 0 {
+		return fmt.Errorf("failed to get created resource group: empty data returned")
+	}
 	resourceId := fmt.Sprintf("%s:%s:%d", organizationId, name, check.Data[0].ID)
 	d.SetId(resourceId)
 	return nil
