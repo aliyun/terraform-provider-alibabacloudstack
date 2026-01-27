@@ -1452,7 +1452,7 @@ func EdasClusterCommonTestCase() string {
 	return AckK8sCommonTestCase() + `
 	
 data "alibabacloudstack_edas_k8s_clusters" "default" {
-	ids = ["${local.k8s_cluster_id}"]
+	cs_cluster_id = local.k8s_cluster_id
 }
 
 resource "alibabacloudstack_edas_k8s_cluster" "default" {

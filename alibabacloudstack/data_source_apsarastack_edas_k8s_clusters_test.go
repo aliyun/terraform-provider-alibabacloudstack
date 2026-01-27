@@ -29,6 +29,14 @@ func TestAccAlibabacloudStackEdasK8sClustersDataSource(t *testing.T) {
 			"ids": []string{"${alibabacloudstack_edas_k8s_cluster.default.id}_fake"},
 		}),
 	}
+	csidConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"cs_clsuter_id": "${alibabacloudstack_edas_k8s_cluster.default.cs_cluster_id}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"cs_clsuter_id": "${alibabacloudstack_edas_k8s_cluster.default.cs_cluster_id}_fake",
+		}),
+	}
 
 	logicalRegionConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -80,7 +88,7 @@ func TestAccAlibabacloudStackEdasK8sClustersDataSource(t *testing.T) {
 		ExternalProviders: testAccExternalProviders,
 	}
 
-	edasApplicationCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, logicalRegionConf, allConf)
+	edasApplicationCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, csidConf, logicalRegionConf, allConf)
 }
 
 func dataSourceEdasK8sClustersConfigDependence(name string) string {

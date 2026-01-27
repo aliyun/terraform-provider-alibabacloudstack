@@ -21,6 +21,10 @@ func dataSourceAlibabacloudStackEdasK8sClusters() *schema.Resource {
 				Computed: true,
 				MinItems: 1,
 			},
+			"cs_clsuter_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"name_regex": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -119,6 +123,7 @@ func dataSourceAlibabacloudStackEdasK8SClusterRead(d *schema.ResourceData, meta 
 		r = nameRegex
 	}
 	idsMap := getIdsStringFilter(d)
+	csClusterId := d.Get("cs_clsuter_id").(string)
 	clusterIds := make([]string, 0, len(filteredClusters))
 	clusterList := make([]map[string]interface{}, 0, len(filteredClusters))
 
@@ -130,6 +135,9 @@ func dataSourceAlibabacloudStackEdasK8SClusterRead(d *schema.ResourceData, meta 
 			if _, exist := idsMap[cluster.ClusterId]; !exist {
 				continue
 			}
+		}
+		if csClusterId != "" && csClusterId != cluster.CsClusterId {
+			continue
 		}
 		if v, ok := d.GetOk("logical_region_id"); ok && v != cluster.RegionId {
 			continue
