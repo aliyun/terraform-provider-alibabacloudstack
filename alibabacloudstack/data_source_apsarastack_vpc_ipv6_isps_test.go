@@ -1,99 +1,102 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackVpcIpv6IspsDataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackVpcIpv6IspsDataSourceBasicConfig,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_vpc_ipv6_isps.isps"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.service_provider"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.zone_id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.type"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.cidr_block"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.available_count"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ids.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.in_use_count"),
-				),
-			},
-		},
-	})
+	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_vpc_ipv6_isps.isps"
+	name := fmt.Sprintf("tf-testacc-vpcipv6isps%v", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceVpcIpv6IspsConfigDependence)
+
+	defaultConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{}),
+	}
+	
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${data.alibabacloudstack_vpc_ipv6_isps.anyone.ids.0}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${data.alibabacloudstack_vpc_ipv6_isps.anyone.ids.0}_fake"},
+		}),
+	}
+
+	serviceProviderConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"service_provider": "BGP",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"service_provider": "fake_provider",
+		}),
+	}
+
+	lockStatusConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"lock_status": "unlocked",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"lock_status": "locked",
+		}),
+	}
+
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"service_provider": "BGP",
+			"lock_status":      "unlocked",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"service_provider": "fake_provider",
+			"lock_status":      "locked",
+		}),
+	}
+
+	var existVpcIpv6IspsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ipv6_isps.#":                    CHECKSET,
+			"ids.#":                          CHECKSET,
+			"ipv6_isps.0.id":                 CHECKSET,
+			"ipv6_isps.0.service_provider":   CHECKSET,
+			"ipv6_isps.0.zone_id":            CHECKSET,
+			"ipv6_isps.0.type":               CHECKSET,
+			"ipv6_isps.0.cidr_block":         CHECKSET,
+			"ipv6_isps.0.available_count":    CHECKSET,
+			"ipv6_isps.0.in_use_count":       CHECKSET,
+			"ipv6_isps.0.lock_status":        CHECKSET,
+			"ipv6_isps.0.need_declare":       CHECKSET,
+			"ipv6_isps.0.pool_id":            CHECKSET,
+			"ipv6_isps.0.ula":                CHECKSET,
+		}
+	}
+
+	var fakeVpcIpv6IspsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ipv6_isps.#": "0",
+			"ids.#":       "0",
+		}
+	}
+
+	var vpcIpv6IspsCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existVpcIpv6IspsMapFunc,
+		fakeMapFunc:  fakeVpcIpv6IspsMapFunc,
+	}
+	vpcIpv6IspsCheckInfo.dataSourceTestCheck(t, rand, defaultConf, idsConf, serviceProviderConf, lockStatusConf, allConf)
 }
 
-const testAccCheckAlibabacloudStackVpcIpv6IspsDataSourceBasicConfig = `
-data "alibabacloudstack_vpc_ipv6_isps" "isps" {
-}
-`
-
-func TestAccAlibabacloudStackVpcIpv6IspsServiceProviderDataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackVpcIpv6IspsServiceProviderDataSourceBasicConfig,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_vpc_ipv6_isps.isps"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.service_provider"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.zone_id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.type"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.cidr_block"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.available_count"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ids.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.in_use_count"),
-				),
-			},
-		},
-	})
+func dataSourceVpcIpv6IspsConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
 }
 
-const testAccCheckAlibabacloudStackVpcIpv6IspsServiceProviderDataSourceBasicConfig = `
-data "alibabacloudstack_vpc_ipv6_isps" "isps" {
-	service_provider = "BGP"
-}
-`
+%s
 
-func TestAccAlibabacloudStackVpcIpv6IspsLockStatusDataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackVpcIpv6IspsLockStatusDataSourceBasicConfig,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_vpc_ipv6_isps.isps"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.service_provider"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.zone_id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.type"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.cidr_block"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.available_count"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ids.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_vpc_ipv6_isps.isps", "ipv6_isps.0.in_use_count"),
-				),
-			},
-		},
-	})
+data alibabacloudstack_vpc_ipv6_isps anyone {
 }
 
-const testAccCheckAlibabacloudStackVpcIpv6IspsLockStatusDataSourceBasicConfig = `
-data "alibabacloudstack_vpc_ipv6_isps" "isps" {
-   lock_status = "unlocked"
+`, name, DataZoneCommonTestCase)
 }
-`
