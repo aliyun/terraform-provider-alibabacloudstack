@@ -33,6 +33,7 @@ func TestAccAlibabacloudStackEdasSlbAttachment_basic(t *testing.T) {
 
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 		CheckDestroy:  testEdasCheckSLBAttachmentDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -73,8 +74,9 @@ func resourceEdasSLBAttachmentDependence(name string) string {
 		variable "name" {
 		  default = "%v"
 		}
-		variable "password" {
-		}
+		
+		%s
+		
 		data "alibabacloudstack_zones" "default" {
 			available_resource_creation= "VSwitch"
 		}
@@ -126,7 +128,7 @@ func resourceEdasSLBAttachmentDependence(name string) string {
 		resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
 		cluster_id = "${alibabacloudstack_edas_cluster.default.id}"
 		instance_ids = ["${alibabacloudstack_instance.default.id}"]
-		pass_word = var.password
+		pass_word = random_password.password.0.result
 		}
 		
 		resource "alibabacloudstack_edas_application" "default" {
@@ -143,5 +145,5 @@ func resourceEdasSLBAttachmentDependence(name string) string {
           address_type  = "internet"
 		  specification = "slb.s1.small"
 		}
-		`, name)
+		`, name, RandomPasswordTestCase(12,1))
 }

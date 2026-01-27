@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -25,9 +25,10 @@ func TestAccAlibabacloudStackDTSSynchronizationJob_basic0(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -38,13 +39,13 @@ func TestAccAlibabacloudStackDTSSynchronizationJob_basic0(t *testing.T) {
 					"source_endpoint_engine_name":        "MySQL",
 					"source_endpoint_database_name":      "tfaccountpri_0",
 					"source_endpoint_user_name":          "tftestdts",
-					"source_endpoint_password":           "inputYourCodeHere",
+					"source_endpoint_password":           "${random_password.password.0.result}",
 					"destination_endpoint_instance_type": "RDS",
 					"destination_endpoint_instance_id":   "${alibabacloudstack_db_instance.dsinstance.id}",
 					"destination_endpoint_engine_name":   "MySQL",
 					"destination_endpoint_database_name": "tfaccountpri_0",
 					"destination_endpoint_user_name":     "tftestdts",
-					"destination_endpoint_password":      "inputYourCodeHere",
+					"destination_endpoint_password":      "${random_password.password.0.result}",
 					"db_list":                            "{\\\"tfaccountpri_0\\\":{\\\"name\\\":\\\"tfaccountpri_0\\\",\\\"all\\\":true,\\\"state\\\":\\\"normal\\\"}}",
 					"structure_initialization":           "true",
 					"data_initialization":                "true",
@@ -57,12 +58,10 @@ func TestAccAlibabacloudStackDTSSynchronizationJob_basic0(t *testing.T) {
 						"source_endpoint_engine_name":        "MySQL",
 						"source_endpoint_database_name":      "tfaccountpri_0",
 						"source_endpoint_user_name":          "tftestdts",
-						"source_endpoint_password":           "inputYourCodeHere",
 						"destination_endpoint_instance_type": "RDS",
 						"destination_endpoint_engine_name":   "MySQL",
 						"destination_endpoint_database_name": "tfaccountpri_0",
 						"destination_endpoint_user_name":     "tftestdts",
-						"destination_endpoint_password":      "inputYourCodeHere",
 						"db_list":                            "{\"tfaccountpri_0\":{\"name\":\"tfaccountpri_0\",\"all\":true,\"state\":\"normal\"}}",
 					}),
 				),
@@ -184,9 +183,7 @@ variable "name" {
   default = "%s"
 }
 
-variable "password" {
-  default = "%s"
-}
+%s
 
 variable "creation" {
   default = "Rds"
@@ -277,5 +274,5 @@ resource "alibabacloudstack_dts_synchronization_instance" "default" {
   sync_architecture                   = "oneway"
 }
 
-`, name, getAccTestPassword(12))
+`, name, RandomPasswordTestCase(12, 2))
 }

@@ -34,6 +34,7 @@ func TestAccAlibabacloudStackEdasApplicationPackageAttachment_basic(t *testing.T
 
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 		CheckDestroy:  testEdasCheckDeploymentDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -70,10 +71,7 @@ func resourceEdasAPAttachmentDependence(name string) string {
 		variable "name" {
 		  default = "%v"
 		}
-
-		variable "password" {
-		}
-
+		%s
 		data "alibabacloudstack_zones" "default" {
 			available_resource_creation= "VSwitch"
 		}	
@@ -122,7 +120,7 @@ func resourceEdasAPAttachmentDependence(name string) string {
 		resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
 		  cluster_id = "${alibabacloudstack_edas_cluster.default.id}"
 		  instance_ids = ["${alibabacloudstack_instance.default.id}"]
-		  pass_word = var.password
+		  pass_word = random_password.password.0.result
 		}
 		
 		resource "alibabacloudstack_edas_application" "default" {
@@ -132,5 +130,5 @@ func resourceEdasAPAttachmentDependence(name string) string {
 		  ecu_info = ["${alibabacloudstack_edas_instance_cluster_attachment.default.ecu_map[alibabacloudstack_instance.default.id]}"]
 		  build_pack_id = "15"
 		}
-		`, name)
+		`, name, RandomPasswordTestCase(12, 1))
 }

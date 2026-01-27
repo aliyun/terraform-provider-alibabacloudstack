@@ -56,9 +56,10 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckCsK8sDestroy,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      testAccCheckCsK8sDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -114,7 +115,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"worker_instance_types":               []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
 					"worker_vswitch_ids":                  []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"enable_ssh":                          "${var.enable_ssh}",
-					"password":                            "${var.password}",
+					"password":                            "${random_password.password.0.result}",
 					"delete_protection":                   "false",
 					"pod_cidr":                            "${var.pod_cidr}",
 					"service_cidr":                        "${var.service_cidr}",
@@ -236,7 +237,7 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 					"security_group_id":            "${alibabacloudstack_ecs_securitygroup.default.id}",
 					"is_enterprise_security_group": "false",
 					"enable_ssh":                   "${var.enable_ssh}",
-					"key_name":                      "${alibabacloudstack_ecs_keypair.default.key_name}",
+					"key_name":                     "${alibabacloudstack_ecs_keypair.default.key_name}",
 					"delete_protection":            "false",
 					"pod_cidr":                     "${var.pod_cidr}",
 					"service_cidr":                 "${var.service_cidr}",
@@ -333,11 +334,7 @@ variable "enable_ssh" {
   default     = true
 }
 
-
-variable "password" {
-  description = "The password of ECS instance."
-  default     = "%s"
-}
+%s
 
 variable "worker_number" {
   description = "The number of worker nodes in kubernetes cluster."
@@ -361,8 +358,7 @@ resource "alibabacloudstack_kms_key" "default" {
 	pending_window_in_days = "7"
 }
 
-`, name, SecurityGroupCommonTestCase, getAccTestPassword(12))
+`, name, SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1))
 }
-
 
 var CsK8sMap = map[string]string{}
