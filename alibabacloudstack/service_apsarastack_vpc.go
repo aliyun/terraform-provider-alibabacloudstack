@@ -455,8 +455,8 @@ func (s *VpcService) DescribeRouterInterface(id, regionId string) (ri vpc.Router
 	return
 }
 
-func (s *VpcService) DescribeRouterInterfaceConnection(id, regionId string) (ri vpc.RouterInterfaceType, err error) {
-	ri, err = s.DescribeRouterInterface(id, regionId)
+func (s *VpcService) DescribeRouterInterfaceConnection(id string) (ri vpc.RouterInterfaceType, err error) {
+	ri, err = s.DescribeRouterInterface(id, s.client.RegionId)
 	if err != nil {
 		return ri, errmsgs.WrapError(err)
 	}
@@ -783,7 +783,7 @@ func (s *VpcService) WaitForRouterInterface(id, regionId string, status Status, 
 func (s *VpcService) WaitForRouterInterfaceConnection(id, regionId string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
-		object, err := s.DescribeRouterInterfaceConnection(id, regionId)
+		object, err := s.DescribeRouterInterfaceConnection(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				if status == Deleted {

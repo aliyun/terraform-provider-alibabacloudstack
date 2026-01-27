@@ -54,7 +54,7 @@ func resourceAlibabacloudStackRouterInterfaceConnection() *schema.Resource {
 		},
 	}
 
-	setResourceFunc(resource, resourceAlibabacloudStackRouterInterfaceConnectionCreate, 
+	setResourceFunc(resource, resourceAlibabacloudStackRouterInterfaceConnectionCreate,
 		resourceAlibabacloudStackRouterInterfaceConnectionRead, nil, resourceAlibabacloudStackRouterInterfaceConnectionDelete)
 
 	return resource
@@ -181,7 +181,7 @@ func resourceAlibabacloudStackRouterInterfaceConnectionCreate(d *schema.Resource
 func resourceAlibabacloudStackRouterInterfaceConnectionRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-	object, err := vpcService.DescribeRouterInterfaceConnection(d.Id(), client.RegionId)
+	object, err := vpcService.DescribeRouterInterfaceConnection(d.Id())
 
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
@@ -211,7 +211,7 @@ func resourceAlibabacloudStackRouterInterfaceConnectionRead(d *schema.ResourceDa
 func resourceAlibabacloudStackRouterInterfaceConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-	object, err := vpcService.DescribeRouterInterfaceConnection(d.Id(), client.RegionId)
+	object, err := vpcService.DescribeRouterInterfaceConnection(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
