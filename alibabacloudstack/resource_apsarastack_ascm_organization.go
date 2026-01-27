@@ -56,7 +56,17 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_organization", "ORG alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	parentid := d.Get("parent_id").(string)
-	time.Sleep(15 * time.Second)
+	const waitDuration = 15 * time.Second
+        err = resource.Retry(waitDuration, func() *resource.RetryError {
+            check, err = ascmService.DescribeAscmOrganizationByName(name)
+            if err != nil {
+                return resource.NonRetryableError(err)
+            }
+            if len(check.Data) > 0 {
+                return nil
+            }
+            return resource.RetryableError(fmt.Errorf("waiting for organization to be available"))
+        })
 	if len(check.Data) == 0 {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateOrganization", "/ascm/auth/organization/add")
 		request.QueryParams["parentId"] = parentid
