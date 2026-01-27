@@ -100,6 +100,17 @@ func dataSourceAlibabacloudStackAscmResourceGroupsRead(d *schema.ResourceData, m
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		if errmsgs.IsExpectedErrors(err, []string{"ascm.auth.EntityNotExist"}) {
+			ids := []string{}
+			d.SetId(dataResourceIdHash(ids))
+			if err := d.Set("groups", []map[string]interface{}{}); err != nil {
+				return errmsgs.WrapError(err)
+			}
+			if err := d.Set("ids", ids); err != nil {
+				return errmsgs.WrapError(err)
+			}
+			return nil
+		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_resource_group", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}

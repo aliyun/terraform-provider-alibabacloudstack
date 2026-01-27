@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackascmResourceGroupDataSource(t *testing.T) {
 			"ids":             []string{"${alibabacloudstack_ascm_resource_group.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"organization_id": "1",
+			"organization_id": "${alibabacloudstack_ascm_organization.default.id}1",
 			"ids":             []string{"${alibabacloudstack_ascm_resource_group.default.id}"},
 		}),
 	}
@@ -49,7 +49,7 @@ func TestAccAlibabacloudStackascmResourceGroupDataSource(t *testing.T) {
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"name_regex":      "${alibabacloudstack_ascm_resource_group.default.name}_fake",
-			"organization_id": "1",
+			"organization_id": "${alibabacloudstack_ascm_organization.default.id}1",
 			"ids":             []string{"${alibabacloudstack_ascm_resource_group.default.id}_fake"},
 		}),
 	}
