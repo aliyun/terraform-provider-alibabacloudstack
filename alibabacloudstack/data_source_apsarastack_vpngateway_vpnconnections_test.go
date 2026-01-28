@@ -103,7 +103,7 @@ func TestAccAlibabacloudStackVpnConnectionsDataSourceBasic(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existVpnConnectionsMapFunc,
 		fakeMapFunc:  fakeVpnConnectionsMapFunc,
-		PreCheck: 		func() {
+		PreCheck: func() {
 			testAccPreCheck(t)
 		},
 	}
@@ -120,27 +120,14 @@ variable "name" {
 }
 
 
-resource "alibabacloudstack_vpc" "default" {
-	cidr_block = "172.16.0.0/12"
-	name = "${var.name}"
-}
-
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation= "VSwitch"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
-	cidr_block = "172.16.0.0/21"
-	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	name = "${var.name}"
-}
+%s
 
 resource "alibabacloudstack_vpn_gateway" "default" {
 	name = "${var.name}"
-	vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
+	vpc_id = "${alibabacloudstack_vpc_vswitch.default.vpc_id}"
 	bandwidth = "10"
 	enable_ssl = true
+	ipsec_vpn            = true
 	instance_charge_type = "PostPaid"
 	description = "test_create_description"
 }
@@ -178,5 +165,5 @@ resource "alibabacloudstack_vpn_connection" "default" {
     }
 }
 
-`, name)
+`, name, VSwitchCommonTestCase)
 }

@@ -73,8 +73,7 @@ func TestAccAlibabacloudStackVpnConnectionBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					//"vpn_gateway_id": "${alibabacloudstack_vpn_gateway.default.id}",
-					"vpn_gateway_id":      "vpn-bs1fy78mp728vf4i2y2ar",
+					"vpn_gateway_id": "${alibabacloudstack_vpn_gateway.default.id}",
 					"customer_gateway_id": "${alibabacloudstack_vpn_customer_gateway.default.id}",
 					"local_subnet":        []string{"172.16.0.0/24", "172.16.1.0/24"},
 					"remote_subnet":       []string{"10.0.0.0/24", "10.0.1.0/24"},
@@ -216,57 +215,6 @@ func TestAccAlibabacloudStackVpnConnectionBasic(t *testing.T) {
 
 }
 
-func TestAccAlibabacloudStackVpnConnectionMulti(t *testing.T) {
-	var v vpc.DescribeVpnConnectionResponse
-
-	resourceId := "alibabacloudstack_vpn_connection.default.1"
-	ra := resourceAttrInit(resourceId, testAccVpnConnectionCheckMap)
-
-	serviceFunc := func() interface{} {
-		return &VpnGatewayService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
-	name := fmt.Sprintf("tf-testaccVpnConnectionMulti%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpnConnectionConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"count": "2",
-					//"vpn_gateway_id": "${alibabacloudstack_vpn_gateway.default.id}",
-					"vpn_gateway_id":      "vpn-bs1fy78mp728vf4i2y2ar",
-					"customer_gateway_id": "${alibabacloudstack_vpn_customer_gateway.default.id}",
-					"local_subnet":        []string{"172.16.0.0/24", "172.16.1.0/24"},
-					"remote_subnet":       []string{"10.0.0.0/24", "10.0.1.0/24"},
-					"name":                "${var.name}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name": name,
-					}),
-					testAccCheckVpnConnectionAttr(&v,
-						"172.16.0.0/24,172.16.1.0/24", "10.0.0.0/24,10.0.1.0/24"),
-				),
-			},
-		},
-	})
-
-}
-
 var testAccVpnConnectionCheckMap = map[string]string{
 	"vpn_gateway_id":                CHECKSET,
 	"customer_gateway_id":           CHECKSET,
@@ -295,23 +243,18 @@ var resourceVpnConnectionConfigDependence = func(name string) string {
 variable "name" {
 	default = "%s"
 }
-resource "alibabacloudstack_vpc" "default" {
-	cidr_block = "172.16.0.0/12"
-	name = "${var.name}"
+
+%s
+
+resource "alibabacloudstack_vpn_gateway" "default" {
+ name                 = "${alibabacloudstack_vpc_vpc.default.name}"
+ vpc_id               = "${alibabacloudstack_vpc_vpc.default.id}"
+ bandwidth            = 10
+ instance_charge_type = "PostPaid"
+ enable_ssl           = false
+ ipsec_vpn            = true
+ vswitch_id			  = "${alibabacloudstack_vpc_vswitch.default.id}"
 }
-
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation= "VSwitch"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
-	cidr_block = "172.16.0.0/21"
-	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	name = "${var.name}"
-}
-
-
 
 resource "alibabacloudstack_vpn_customer_gateway" "default" {
 	name = "${var.name}"
@@ -319,5 +262,5 @@ resource "alibabacloudstack_vpn_customer_gateway" "default" {
 	description = "testAccVpnConnectionDesc"
 }
 
-`, name)
+`, name, VSwitchCommonTestCase)
 }

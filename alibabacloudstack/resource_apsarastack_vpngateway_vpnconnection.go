@@ -275,8 +275,11 @@ func resourceAlibabacloudStackVpnConnectionUpdate(d *schema.ResourceData, meta i
 		update = true
 	}
 
-	request.LocalSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("local_subnet").(*schema.Set).List())
-	request.RemoteSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("remote_subnet").(*schema.Set).List())
+	if d.HasChanges("local_subnet", "remote_subnet") {
+		request.LocalSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("local_subnet").(*schema.Set).List())
+		request.RemoteSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("remote_subnet").(*schema.Set).List())
+		update = true
+	}
 
 	/* If not set effect_immediately value, VPN connection will automatically set the value to false*/
 	if v, ok := d.GetOk("effect_immediately"); ok {
