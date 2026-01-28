@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -428,9 +429,9 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*Membe
 func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUsers", "/ascm/auth/user/listUsers")
 	request.QueryParams["loginName"] = id
-	request.QueryParams["ResourceGroup"] = ""
-	request.QueryParams["OrganizationId"] = ""
-	request.QueryParams["Department"] = ""
+	delete(request.QueryParams, "ResourceGroup")
+	delete(request.QueryParams, "OrganizationId")
+	delete(request.QueryParams, "Department")
 	var resp = &User{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug("ListUsers", bresponse, request, request.QueryParams)
@@ -464,6 +465,9 @@ func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUserGroups", "/ascm/auth/user/listUserGroups")
 	if id != "" {
 		request.QueryParams["userGroupName"] = id
+		delete(request.QueryParams, "ResourceGroup")
+		delete(request.QueryParams, "OrganizationId")
+		delete(request.QueryParams, "Department")
 	}
 	var resp = &UserGroup{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -799,22 +803,31 @@ func (s *AscmService) DescribeAscmPasswordPolicy(id string) (response *PasswordP
 func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err error) {
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUsersInUserGroup", "/ascm/auth/user/listUsersInUserGroup")
 	request.QueryParams["userGroupId"] = id
+	delete(request.QueryParams, "ResourceGroup")
+	delete(request.QueryParams, "OrganizationId")
+	delete(request.QueryParams, "Department")
+	body := map[string]interface{}{
+		"userGroupId": id,
+	}
+	jsonData, err := json.Marshal(body)
+	if err != nil {
+		return nil, errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+	}
+	request.SetContentType(requests.Json)
+	request.SetContent(jsonData)
 	var resp = &User{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
-
+	addDebug("ListUsersInUserGroup", bresponse, request, request.QueryParams)
 	if err != nil {
 		errmsg := ""
 		if bresponse != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		} else {
-			return nil, err
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
 			return resp, errmsgs.GetNotFoundErrorFromString("ascm usergroup user not found!")
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsersInUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUsersInUserGroup", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {

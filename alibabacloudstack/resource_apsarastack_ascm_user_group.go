@@ -179,6 +179,8 @@ func resourceAlibabacloudStackAscmUserGroupDelete(d *schema.ResourceData, meta i
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 		req := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DeleteUserGroup", "/ascm/auth/user/deleteUserGroup")
 		req.QueryParams["userGroupId"] = strconv.Itoa(check.Data[0].Id)
+		req.QueryParams["OrganizationId"] = d.Get("organization_id").(string)
+		req.QueryParams["Department"] = d.Get("organization_id").(string)
 		bresp, err := client.ProcessCommonRequest(req)
 		if err != nil {
 			errmsg := ""

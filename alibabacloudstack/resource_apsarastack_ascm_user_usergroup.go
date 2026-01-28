@@ -1,11 +1,8 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
-	"fmt"
 	"strconv"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -33,43 +30,22 @@ func resourceAlibabacloudStackAscmUserGroupUser() *schema.Resource {
 func resourceAlibabacloudStackAscmUserGroupUserCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	userGroupId := d.Get("user_group_id").(int)
-	var loginNamesList []string
+	var loginNames []string
 
 	if v, ok := d.GetOk("login_names"); ok {
-		loginNames := expandStringList(v.(*schema.Set).List())
-		loginNamesList = append(loginNamesList, loginNames...)
+		loginNames = expandStringList(v.(*schema.Set).List())
 	}
 
 	body := map[string]interface{}{
 		"userGroupId":   userGroupId,
-		"loginNameList": loginNamesList,
+		"loginNameList": loginNames,
 	}
-
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/ascm/auth/user/addUsersToUserGroup")
-	jsonData, err := json.Marshal(body)
-	if err != nil {
-		return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
-	}
-	request.SetContentType(requests.Json)
-	request.SetContent(jsonData)
-	bresponse, err := client.ProcessCommonRequest(request)
+	addresponse, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/ascm/auth/user/addUsersToUserGroup", nil, nil, body)
 
 	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		errmsg := errmsgs.GetAsapiErrorMessage(addresponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", errmsg)
 	}
-
-	if bresponse.GetHttpStatus() != 200 {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug("AddUsersToUserGroup", bresponse, nil, bresponse.GetHttpContentString())
 
 	d.SetId(strconv.Itoa(userGroupId))
 
@@ -119,20 +95,10 @@ func resourceAlibabacloudStackAscmUserGroupUserUpdate(d *schema.ResourceData, me
 			"loginNameList": removeLoginNames,
 		}
 
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/ascm/auth/user/removeUsersFromUserGroup")
-		jsonData, err := json.Marshal(body)
-		if err != nil {
-			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
-		}
-		request.SetContentType(requests.Json)
-		request.SetContent(jsonData)
-		bresponse, err := client.ProcessCommonRequest(request)
+		response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/ascm/auth/user/removeUsersFromUserGroup", nil, nil, body)
 
 		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			errmsg := errmsgs.GetAsapiErrorMessage(response)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "RemoveUsersFromUserGroup", errmsg)
 		}
 		addLoginNames := expandStringList(new)
@@ -140,22 +106,11 @@ func resourceAlibabacloudStackAscmUserGroupUserUpdate(d *schema.ResourceData, me
 			"userGroupId":   d.Id(),
 			"loginNameList": addLoginNames,
 		}
-
-		addrequest := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/ascm/auth/user/addUsersToUserGroup")
-		addData, err := json.Marshal(addbody)
-		if err != nil {
-			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
-		}
-		request.SetContentType(requests.Json)
-		request.SetContent(addData)
-		addbresponse, err := client.ProcessCommonRequest(addrequest)
+		addresponse, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/ascm/auth/user/addUsersToUserGroup", nil, nil, addbody)
 
 		if err != nil {
-			if addbresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(addbresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "RemoveUsersFromUserGroup", errmsg)
+			errmsg := errmsgs.GetAsapiErrorMessage(addresponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", errmsg)
 		}
 
 	}
@@ -170,25 +125,15 @@ func resourceAlibabacloudStackAscmUserGroupUserDelete(d *schema.ResourceData, me
 	if v, ok := d.GetOk("login_names"); ok {
 		loginNames = expandStringList(v.(*schema.Set).List())
 	}
-
 	body := map[string]interface{}{
 		"userGroupId":   d.Id(),
-		"LoginNameList": loginNames,
+		"loginNameList": loginNames,
 	}
 
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/ascm/auth/user/removeUsersFromUserGroup")
-	jsonData, err := json.Marshal(body)
+	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/ascm/auth/user/removeUsersFromUserGroup", nil, nil, body)
+
 	if err != nil {
-		return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
-	}
-	request.SetContentType(requests.Json)
-	request.SetContent(jsonData)
-	bresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		errmsg := errmsgs.GetAsapiErrorMessage(response)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "RemoveUsersFromUserGroup", errmsg)
 	}
 

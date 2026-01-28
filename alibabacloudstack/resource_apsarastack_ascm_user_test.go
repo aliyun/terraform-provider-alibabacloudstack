@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
+func TestAccAlibabacloudStackAscmUserBasic(t *testing.T) {
 	var v *User
 	resourceId := "alibabacloudstack_ascm_user.default"
 	ra := resourceAttrInit(resourceId, ascmuserBasicMap)

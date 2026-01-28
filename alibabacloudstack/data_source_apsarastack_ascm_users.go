@@ -5,6 +5,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"regexp"
 	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -26,12 +27,13 @@ func dataSourceAlibabacloudStackAscmUsers() *schema.Resource {
 				ForceNew: true,
 				MinItems: 1,
 			},
-			"login_name": {
+			"name_regex": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
-			"role_id": {
-				Type:     schema.TypeInt,
+			"login_name": {
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"login_policy_id": {
@@ -42,32 +44,19 @@ func dataSourceAlibabacloudStackAscmUsers() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"current_page": {
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
-			"page_size": {
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
-			"mark": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"output_file": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"users": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"cellphone_num": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -140,61 +129,66 @@ func dataSourceAlibabacloudStackAscmUsersRead(d *schema.ResourceData, meta inter
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUsers", "/ascm/auth/user/listUsers")
-
-	bodyMap := make(map[string]string)
+	delete(request.QueryParams, "ResourceGroup")
+	delete(request.QueryParams, "OrganizationId")
+	delete(request.QueryParams, "Department")
+	request.QueryParams["pageSize"] = "100"
+	pageNumber := 1
 	if v, ok := d.GetOk("login_name"); ok && v.(string) != "" {
-		bodyMap["LoginName"] = v.(string)
-	}
-	if v, ok := d.GetOk("role_id"); ok {
-		bodyMap["RoleId"] = strconv.Itoa(v.(int))
+		request.QueryParams["loginName"] = v.(string)
 	}
 	if v, ok := d.GetOk("login_policy_id"); ok {
-		bodyMap["LoginPolicyId"] = strconv.Itoa(v.(int))
+		request.QueryParams["loginPolicyId"] = strconv.Itoa(v.(int))
 	}
 	if v, ok := d.GetOk("organization_id"); ok {
-		bodyMap["OrganizationId"] = strconv.Itoa(v.(int))
-	}
-	if v, ok := d.GetOk("current_page"); ok {
-		bodyMap["CurrentPage"] = strconv.Itoa(v.(int))
-	}
-	if v, ok := d.GetOk("page_size"); ok {
-		bodyMap["PageSize"] = strconv.Itoa(v.(int))
+		request.QueryParams["organizationId"] = strconv.Itoa(v.(int))
 	}
 	if v, ok := d.GetOk("status"); ok && v.(string) != "" {
-		bodyMap["Status"] = v.(string)
+		request.QueryParams["status"] = v.(string)
 	}
-	if v, ok := d.GetOk("mark"); ok && v.(string) != "" {
-		bodyMap["Mark"] = v.(string)
-	}
-
-	mergeMaps(request.QueryParams, bodyMap)
-
 	var resp = &User{}
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug("ListUsers", bresponse, request, request.QueryParams)
-	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		} else {
-			return err
+	for {
+		response := &User{}
+		request.QueryParams["CurrentPage"] = strconv.Itoa(pageNumber)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("ListUsers", bresponse, request, request.QueryParams)
+		if err != nil {
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ListUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), response)
+		if err != nil {
+			return errmsgs.WrapError(err)
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ListUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		if len(response.Data) > 0 {
+			resp.Data = append(resp.Data, response.Data...)
+		}
+		if resp.PageInfo.Total <= pageNumber*100 {
+			break
+		}
+		pageNumber++
 	}
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
-	if err != nil {
-		return errmsgs.WrapError(err)
+	var reg *regexp.Regexp
+	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
+		reg = regexp.MustCompile(nameRegex.(string))
 	}
 
-	// mapping resp
-
+	idsMap := getIdsStringFilter(d)
+	var ids []string
 	var users []map[string]interface{}
 	for _, Data_item := range resp.Data {
+		if reg != nil && !reg.MatchString(Data_item.LoginName) {
+			continue
+		}
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[Data_item.LoginName]; !ok {
+				continue
+			}
+		}
 		users_item := map[string]interface{}{
+			"id":                   Data_item.LoginName,
 			"cellphone_num":        Data_item.CellphoneNum,
 			"default":              Data_item.Default,
 			"deleted":              Data_item.Deleted,
@@ -212,11 +206,13 @@ func dataSourceAlibabacloudStackAscmUsersRead(d *schema.ResourceData, meta inter
 			"organization_id":      Data_item.Organization.ID,
 		}
 		users = append(users, users_item)
+		ids = append(ids, Data_item.LoginName)
 	}
-
-	// set result
-
+	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("users", users); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 

@@ -5,11 +5,13 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscm_UserGroup_User_Basic(t *testing.T) {
+func TestAccAlibabacloudStackAscmUserGroup_User_Basic(t *testing.T) {
 	var v *User
 	resourceId := "alibabacloudstack_ascm_usergroup_user.default"
 	ra := resourceAttrInit(resourceId, testAccCheckUserGroupUserBinding)
@@ -30,7 +32,7 @@ func TestAccAlibabacloudStackAscm_UserGroup_User_Basic(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		CheckDestroy:  testAccCheckAscmUserGroupUserDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -65,6 +67,32 @@ func TestAccAlibabacloudStackAscm_UserGroup_User_Basic(t *testing.T) {
 		},
 	})
 
+}
+
+func testAccCheckAscmUserGroupUserDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
+	ascmService := AscmService{client}
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type == "alibabacloudstack_ascm_usergroup_user" || rs.Type != "alibabacloudstack_ascm_usergroup_user" {
+			continue
+		}
+		ascm, err := ascmService.DescribeAscmUsergroupUser(rs.Primary.ID)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				continue
+			}
+			if errmsgs.IsExpectedErrors(err, []string{"ascm.manage.EntityNotExisted.AscmUserGroup"}) {
+				continue
+			}
+			return errmsgs.WrapError(err)
+		}
+		if ascm.Message != "" {
+			return errmsgs.WrapError(errmsgs.Error("user still exist"))
+		}
+	}
+
+	return nil
 }
 
 func testAccCheckAscmUserGroupUserconfigbasic(name string) string {
