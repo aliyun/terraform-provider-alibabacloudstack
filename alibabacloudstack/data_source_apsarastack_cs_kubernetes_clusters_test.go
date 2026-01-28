@@ -84,9 +84,10 @@ func TestAccAlibabacloudStackCsK8sClustersDataSource(t *testing.T) {
 	}
 
 	var csKubernetesClustersCheckInfo = dataSourceAttr{
-		resourceId:   resourceId,
-		existMapFunc: existCSKubernetesClustersMapFunc,
-		fakeMapFunc:  fakeCSKubernetesClustersMapFunc,
+		resourceId:        resourceId,
+		existMapFunc:      existCSKubernetesClustersMapFunc,
+		fakeMapFunc:       fakeCSKubernetesClustersMapFunc,
+		ExternalProviders: testAccExternalProviders,
 	}
 	csKubernetesClustersCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
