@@ -106,6 +106,7 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 			"mobileNationCode": mobnationcode,
 			"email":            email,
 			"organizationId":   organizationId,
+			"OrganizationId":   organizationId,
 			"loginPolicyId":    fmt.Sprint(loginpolicyid),
 		}
 		if roleIdsInterface, ok := d.GetOk("role_ids"); ok {
@@ -160,6 +161,12 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lname := d.Get("login_name").(string)
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ModifyUserInformation", "/ascm/auth/user/modifyUserInformation")
+	var organizationId string
+	if _, ok := d.GetOk("organization_id"); ok {
+		organizationId = d.Get("organization_id").(string)
+	} else {
+		organizationId = client.Department
+	}
 	update := false
 	if d.HasChange("display_name") {
 		update = true
@@ -185,6 +192,7 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 	}
 	if update {
 		request.QueryParams["loginName"] = lname
+		request.QueryParams["OrganizationId"] = organizationId
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 		bresponse, err := client.ProcessCommonRequest(request)
@@ -223,7 +231,7 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddRoleToUser", "/ascm/auth/role/addRoleToUser")
 			request.QueryParams["loginName"] = lname
 			request.QueryParams["roleId"] = roleId.(string)
-
+			request.QueryParams["OrganizationId"] = organizationId
 			bresponse, err := client.ProcessCommonRequest(request)
 			if err != nil || bresponse.GetHttpStatus() != 200 {
 				errmsg := ""
@@ -282,7 +290,7 @@ func resourceAlibabacloudStackAscmUserRead(d *schema.ResourceData, meta interfac
 	d.Set("email", object.Data[0].Email)
 	d.Set("mobile_nation_code", object.Data[0].MobileNationCode)
 	d.Set("cellphone_number", object.Data[0].CellphoneNum)
-	d.Set("organization_id", client.Department)
+	d.Set("organization_id", fmt.Sprint(object.Data[0].Organization.ID))
 	d.Set("login_policy_id", object.Data[0].LoginPolicy.ID)
 	var user_roles []string
 	for _, role := range object.Data[0].UserRoles {

@@ -428,6 +428,9 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*Membe
 func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUsers", "/ascm/auth/user/listUsers")
 	request.QueryParams["loginName"] = id
+	request.QueryParams["ResourceGroup"] = ""
+	request.QueryParams["OrganizationId"] = ""
+	request.QueryParams["Department"] = ""
 	var resp = &User{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug("ListUsers", bresponse, request, request.QueryParams)
@@ -450,8 +453,8 @@ func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
 		return resp, errmsgs.WrapError(err)
 	}
 
-	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, errmsgs.WrapError(err)
+	if len(resp.Data) < 1 {
+		return resp, errmsgs.GetNotFoundErrorFromString("Ascm User not found!")
 	}
 
 	return resp, nil
@@ -484,8 +487,8 @@ func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err
 		return resp, errmsgs.WrapError(err)
 	}
 
-	if len(resp.Data) < 1 || resp.Code != "200" {
-		return resp, errmsgs.WrapError(err)
+	if len(resp.Data) < 1 {
+		return resp, errmsgs.GetNotFoundErrorFromString("Ascm usergroup not found!")
 	}
 
 	return resp, nil
@@ -807,7 +810,7 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 			return nil, err
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return resp, errmsgs.GetNotFoundErrorFromString("ascm usergroup user not found!")
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsersInUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
@@ -818,8 +821,8 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 		return resp, errmsgs.WrapError(err)
 	}
 
-	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, errmsgs.WrapError(err)
+	if len(resp.Data) < 1 {
+		return resp, errmsgs.GetNotFoundErrorFromString("ascm usergroup user not found!")
 	}
 
 	return resp, nil

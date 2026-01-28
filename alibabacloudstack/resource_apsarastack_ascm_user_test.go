@@ -4,12 +4,10 @@ import (
 	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
@@ -38,7 +36,7 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckAscm_UserDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -57,26 +55,47 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 						"display_name":       "Test-Apsara",
 						"mobile_nation_code": "86",
 						"login_name":         name,
-						"login_policy_id":    "1",
+						"login_policy_id":    "2",
 						"role_ids.#":         "2",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"role_ids":           []string{"2"},
+					"cellphone_number":   "13600000000",
+					"email":              "test02@gmail.com",
+					"display_name":       "Test-Apsara1",
+					"mobile_nation_code": "85",
+					"login_name":         name + "_update",
+					"login_policy_id":    "2",
+					"role_ids":           []string{"8", "9"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"role_ids.#":         "1",
-						"role_ids.0":         "2",
+						"cellphone_number":   "13600000000",
+						"email":              "test02@gmail.com",
+						"display_name":       "Test-Apsara1",
+						"mobile_nation_code": "85",
+						"login_name":         name + "_update",
+						"login_policy_id":    "2",
 					}),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				Config: testAccConfig(map[string]interface{}{
+					"role_ids": []string{"2"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_ids.#": "1",
+						"role_ids.0": "2",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// init_password is only returned once during creation, and will not be returned during subsequent imports
 				ImportStateVerifyIgnore: []string{"init_password"},
 			},
@@ -85,25 +104,6 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 
 }
 
-func testAccCheckAscm_UserDestroy(s *terraform.State) error { // destroy function
-	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-	ascmService := AscmService{client}
-
-	for _, rs := range s.RootModule().Resources {
-		if true {
-			continue
-		}
-		_, err := ascmService.DescribeAscmUser(rs.Primary.ID)
-		if err == nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	return nil
-}
 func testascmuserconfigbasic(name string) string {
 	return fmt.Sprintf(`
 variable name{

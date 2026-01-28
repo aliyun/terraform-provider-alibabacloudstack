@@ -31,11 +31,11 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 				Computed: true,
 			},
 			"role_in_ids": {
-				Type:       schema.TypeSet,
-				Optional:   true,
-				Computed:   true,
-				Elem:       &schema.Schema{Type: schema.TypeString},
-				Deprecated: "Field 'role_in_ids' is deprecated and will be removed in a future release. Please use 'role_ids' instead.",
+				Type:          schema.TypeSet,
+				Optional:      true,
+				Computed:      true,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				Deprecated:    "Field 'role_in_ids' is deprecated and will be removed in a future release. Please use 'role_ids' instead.",
 				ConflictsWith: []string{"role_ids"},
 			},
 			"role_ids": {
@@ -73,6 +73,7 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 	requeststring, _ := json.Marshal(map[string]interface{}{"roleIdList": roleIdList})
 	request.QueryParams["groupName"] = groupName
 	request.QueryParams["organizationId"] = organizationId
+	request.QueryParams["OrganizationId"] = organizationId
 	request.SetContent(requeststring)
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
@@ -90,6 +91,12 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	userGroupId := d.Get("user_group_id").(string)
+	var organizationId string
+	if v, ok := d.GetOk("organization_id"); ok {
+		organizationId = v.(string)
+	} else {
+		organizationId = client.Department
+	}
 	if _, ok := d.GetOk("role_ids"); ok && !d.IsNewResource() {
 		oldV, newV := d.GetChange("role_ids")
 		newSet, okNew := newV.(*schema.Set)
@@ -105,6 +112,7 @@ func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta i
 		for _, roleId := range create {
 			req := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddRoleToUserGroup", "/ascm/auth/user/addRoleToUserGroup")
 			req.QueryParams["userGroupId"] = userGroupId
+			req.QueryParams["OrganizationId"] = organizationId
 			req.QueryParams["roleId"] = roleId.(string)
 			bresp, err := client.ProcessCommonRequest(req)
 			if err != nil || bresp.GetHttpStatus() != 200 {
@@ -119,6 +127,7 @@ func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta i
 		for _, roleId := range remove {
 			req := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUserGroup", "/ascm/auth/user/removeRoleFromUserGroup")
 			req.QueryParams["userGroupId"] = userGroupId
+			req.QueryParams["OrganizationId"] = organizationId
 			req.QueryParams["roleId"] = roleId.(string)
 			bresp, err := client.ProcessCommonRequest(req)
 			if err != nil || bresp.GetHttpStatus() != 200 {
