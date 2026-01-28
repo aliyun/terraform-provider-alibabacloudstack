@@ -55,7 +55,7 @@ func TestAccAlibabacloudStackAscmUser_Basic(t *testing.T) {
 						"display_name":       "Test-Apsara",
 						"mobile_nation_code": "86",
 						"login_name":         name,
-						"login_policy_id":    "2",
+						"login_policy_id":    "1",
 						"role_ids.#":         "2",
 					}),
 				),
