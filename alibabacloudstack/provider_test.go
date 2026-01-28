@@ -9,7 +9,9 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
 	//	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
+
 	//
 	//	"log"
 	"os"
@@ -22,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	schemaHelper "github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/schema"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -256,6 +259,41 @@ func testAccPreCheckWithAlikafkaAclEnable(t *testing.T) {
 	}
 }
 
+func testAccPreCheckWithMultiAZ(t *testing.T) {
+	req := ecs.CreateDescribeZonesRequest()
+	rawClient, err := sharedClientForRegion(os.Getenv("ALIBABACLOUDSTACK_REGION"))
+	if err != nil {
+		t.Skipf("Skipping the test case with err: %s", err)
+		t.Skipped()
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	client.InitRpcRequest(*req.RpcRequest)
+
+	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.DescribeZones(req)
+	})
+	resp, ok := raw.(*ecs.DescribeZonesResponse)
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(resp.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_zones", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		t.Fatalf("%v", err)
+		t.Failed()
+	}
+	addDebug(req.GetActionName(), raw, req.RpcRequest, req)
+	if resp == nil {
+		t.Fatalf("There are no availability zones in the region: %#v.", client.Region)
+		t.Failed()
+	}
+
+	if len(resp.Zones.Zone) < 3 {
+		t.Skipf("Insufficient number of zones")
+		t.Skipped()
+	}
+}
+
 func testAccPreCheckWithNoDefaultVpc(t *testing.T) {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rawClient, err := sharedClientForRegion(region)
@@ -366,8 +404,8 @@ func testAccPreCheckPhysicalConnection(t *testing.T) {
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	action := "DescribePhysicalConnections"
 	request := map[string]interface{}{
-	"PageSize" : 100,
-	"PageNumber" : 1,
+		"PageSize":   100,
+		"PageNumber": 1,
 	}
 	response, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {

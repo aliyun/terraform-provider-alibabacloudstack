@@ -71,15 +71,12 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 	})
 	bresponse, ok := raw.(*dds.DescribeDBInstanceAttributeResponse)
 	if err != nil {
-		if sdkErr, ok := err.(*errors.ServerError); ok && sdkErr.ErrorCode() == "InvalidDBInstanceId.NotFound" {
-			return instance, errmsgs.GetNotFoundErrorFromString("Mongodb Instance " + id + " Not Found")
-		}
 		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return instance, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return instance, err
 		}
 		return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}

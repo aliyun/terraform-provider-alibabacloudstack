@@ -498,8 +498,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-
-			testAccPreCheckWithNoDefaultVpc(t)
+			testAccPreCheckWithMultiAZ(t)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
