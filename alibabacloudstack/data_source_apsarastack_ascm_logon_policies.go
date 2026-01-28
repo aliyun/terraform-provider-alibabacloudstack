@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -17,7 +18,7 @@ func dataSourceAlibabacloudStackAscmLogonPolicies() *schema.Resource {
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem:     &schema.Schema{Type: schema.TypeInt},
 				Computed: true,
 				ForceNew: true,
 				MinItems: 1,
@@ -84,14 +85,18 @@ func dataSourceAlibabacloudStackAscmLogonPolicies() *schema.Resource {
 func dataSourceAlibabacloudStackAscmLogonPoliciesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	name := d.Get("name_regex").(string)
+	pageSize := 50
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListLoginPolicies", "/ascm/auth/loginPolicy/listLoginPolicies")
 	request.QueryParams["name"] = name
+	request.QueryParams["pageSize"] = strconv.Itoa(pageSize)
 
 	response := LoginPolicy{}
 
 	page := 1
-
+	var idsString []string
+	var ids []int
+	var t []map[string]interface{}
 	for {
 		request.QueryParams["currentPage"] = fmt.Sprintf("%d", page)
 		bresponse, err := client.ProcessCommonRequest(request)
@@ -112,54 +117,85 @@ func dataSourceAlibabacloudStackAscmLogonPoliciesRead(d *schema.ResourceData, me
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		if response.Code == "200" {
+
+		var r *regexp.Regexp
+		if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
+			r = regexp.MustCompile(nameRegex.(string))
+		}
+
+		idsMap := make(map[int]struct{})
+		if v, ok := d.GetOk("ids"); ok {
+			for _, vv := range v.([]interface{}) {
+				if vv == nil {
+					idsMap[-1] = struct{}{}
+				} else {
+					idsMap[vv.(int)] = struct{}{}
+				}
+			}
+		}
+
+		description := d.Get("description").(string)
+
+		if response.Code != "200" {
+			break
+		}
+		for _, u := range response.Data {
+			if r != nil && !r.MatchString(u.Name) {
+				continue
+			}
+			if _, existed := idsMap[u.ID]; len(idsMap) > 0 && !existed {
+				continue
+			}
+			if description != "" && description != u.Description {
+				continue
+			}
+
+			var startTime, endTime string
+			for _, k := range u.TimeRanges {
+				if k.LoginPolicyID != u.ID {
+					continue
+				}
+				startTime = k.StartTime
+				endTime = k.EndTime
+			}
+
+			var ipranges []string
+			var iprange string
+			for _, k := range u.IPRanges {
+				ipranges = append(ipranges, k.IPRange)
+				if len(ipranges) > 1 {
+					iprange = iprange + "," + k.IPRange
+				} else {
+					iprange = k.IPRange
+				}
+			}
+			allmapping := map[string]interface{}{
+				"id":              fmt.Sprint(u.ID),
+				"name":            u.Name,
+				"rule":            u.Rule,
+				"description":     u.Description,
+				"ip_range":        iprange,
+				"login_policy_id": u.LpID,
+				"start_time":      startTime,
+				"end_time":        endTime,
+			}
+			t = append(t, allmapping)
+			idsString = append(idsString, fmt.Sprint(u.ID))
+			ids = append(ids, u.ID)
+		}
+
+		if len(response.Data) < pageSize {
 			break
 		}
 		page += 1
 	}
 
-	var r *regexp.Regexp
-	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
-		r = regexp.MustCompile(nameRegex.(string))
-	}
-	var ids []string
-	var t []map[string]interface{}
-	for _, u := range response.Data {
-		if r != nil && !r.MatchString(u.Name) {
-			continue
-		}
-		for _, times := range response.Data {
-			for _, k := range times.TimeRanges {
-
-				var ipranges []string
-				var iprange string
-				for _, k := range u.IPRanges {
-					ipranges = append(ipranges, k.IPRange)
-					if len(ipranges) > 1 {
-						iprange = iprange + "," + k.IPRange
-					} else {
-						iprange = k.IPRange
-					}
-				}
-				allmapping := map[string]interface{}{
-					"id":              fmt.Sprint(u.ID),
-					"name":            u.Name,
-					"rule":            u.Rule,
-					"description":     u.Description,
-					"ip_range":        iprange,
-					"login_policy_id": u.LpID,
-					"start_time":      k.StartTime,
-					"end_time":        k.EndTime,
-				}
-				t = append(t, allmapping)
-			}
-		}
-
-	}
-
-	d.SetId(dataResourceIdHash(ids))
+	d.SetId(dataResourceIdHash(idsString))
 
 	if err := d.Set("policies", t); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
