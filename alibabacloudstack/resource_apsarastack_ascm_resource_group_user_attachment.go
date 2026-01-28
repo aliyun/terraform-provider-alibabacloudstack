@@ -22,10 +22,11 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachment() *schema.Resource
 			"user_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate, resourceAlibabacloudStackAscmResourceGroupUserAttachmentRead, resourceAlibabacloudStackAscmResourceGroupUserAttachmentUpdate, resourceAlibabacloudStackAscmResourceGroupUserAttachmentDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate, resourceAlibabacloudStackAscmResourceGroupUserAttachmentRead, nil, resourceAlibabacloudStackAscmResourceGroupUserAttachmentDelete)
 	return resource
 }
 
@@ -52,10 +53,6 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate(d *schema.Re
 	}
 	id := fmt.Sprintf("%s:%s", RgId, userIds)
 	d.SetId(id)
-	return nil
-}
-
-func resourceAlibabacloudStackAscmResourceGroupUserAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 

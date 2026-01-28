@@ -1,3 +1,44 @@
+# 3.18.23
+
+## 新增
+
+1. ACR企业版的镜像生命周期规则的编排能力（`alibabacloudstack_cr_ee_attestor_lifecycle_rule`)
+2. 资源集和用户关系绑定能力的编排能力（`alibabacloudstack_ascm_resource_group_user_attachment`）
+3. 云防火墙中的IP或端口地址簿的编排能力（`alibabacloudstack_cloudfw_address_book`)
+4. VPC网络流量的访问控制规则的编排能力（`alibabacloudstack_cloudfw_vpc_control_policy`)
+5. OSS单隧道的编排能力（`alibabacloudstack_oss_single_tunnel`)
+6. redis参数模板的编排能力（`alibabacloudstack_kvstore_parameter_group`)
+7. gpdb备份规则的编排能力（`alibabacloudstack_gpdb_backup_policy`)
+8. nas目录配额的编排能力（`alibabacloudstack_nas_dir_quota`)
+9. nas命名空间的编排能力（`alibabacloudstack_nas_namespace`)
+10. nas统一命名空间文件存储映射的编排能力（`alibabacloudstack_nas_namespace_filesystem_attachment`)
+11. nas命名空间文件系统挂载的编排能力（`alibabacloudstack_nas_namespace_mount_target`)
+12. NAS跨域挂载编排的编排能力（`alibabacloudstack_nas_namespace_group`)
+13. gpdb实例规格的查询能力（`alibabacloudstack_gpdb_instance_types`)
+14. adb集群规格的查询能力（`alibabacloudstack_adb_cluster_types`)
+15. edas k8s集群的查询能力（`alibabacloudstack_edas_k8s_clusters`)
+
+## 修复
+1. 批量修复datasource资源不能使用`ids`正确过滤的问题
+2. 批量移除datasource资源不能正确过滤的`tags`字段，移除reousrce中不支持的`tags`字段
+3. 批量修复多除代码缺陷，并修正测试用例
+
+
+## 变更
+1. `alibabacloudstack_expressconnect_physicalconnection`的`bandwidth`字段类型从字符串改为整型
+2. `alibabacloudstack_dns_domain`删除`dns_servers`、`group_id`、`lang`等原先不支持的字段
+3. `alibabacloudstack_ecs_deployment_set`删除不支持的`on_unable_to_redeploy_failed_instance`字段
+
+## 废弃
+
+1. dns域名组的编排能力（`alibabacloudstack_alidns_domaingroup`)
+2. apigateway服务的查询能力`alibabacloudstack_api_gateway_service`)
+3. ESS的生命周期管理能力（`alibabacloudstack_ess_lifecycle_hook`)
+4. ESS的虚拟服务组的编排能力（`alibabacloudstack_ess_scalinggroup_vserver_groups`）
+5. Kms密文能力（`alibabacloudstack_kms_secret`）
+
+---
+
 # 3.18.22
 
 ## 新增

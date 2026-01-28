@@ -1,3 +1,45 @@
+# 3.18.23
+
+## New
+
+1. Orchestration support for ACR Enterprise Edition image lifecycle rules (`alibabacloudstack_cr_ee_attestor_lifecycle_rule`)
+2. Orchestration support for binding relationships between resource sets and users (`alibabacloudstack_ascm_resource_group_user_attachment`)
+3. Orchestration support for IP or port address books in Cloud Firewall (`alibabacloudstack_cloudfw_address_book`)
+4. Orchestration support for VPC network traffic access control policies (`alibabacloudstack_cloudfw_vpc_control_policy`)
+5. Orchestration support for OSS single tunnel (`alibabacloudstack_oss_single_tunnel`)
+6. Orchestration support for Redis parameter templates (`alibabacloudstack_kvstore_parameter_group`)
+7. Orchestration support for GPDB backup policies (`alibabacloudstack_gpdb_backup_policy`)
+8. Orchestration support for NAS directory quotas (`alibabacloudstack_nas_dir_quota`)
+9. Orchestration support for NAS namespaces (`alibabacloudstack_nas_namespace`)
+10. Orchestration support for NAS unified namespace filesystem mappings (`alibabacloudstack_nas_namespace_filesystem_attachment`)
+11. Orchestration support for NAS namespace filesystem mount targets (`alibabacloudstack_nas_namespace_mount_target`)
+12. Orchestration support for NAS cross-region mount configurations (`alibabacloudstack_nas_namespace_group`)
+13. Data source for querying GPDB instance types (`alibabacloudstack_gpdb_instance_types`)
+14. Data source for querying ADB cluster types (`alibabacloudstack_adb_cluster_types`)
+15. Data source for querying EDAS Kubernetes clusters (`alibabacloudstack_edas_k8s_clusters`)
+
+## Fixes
+
+1. Batch-fixed issues where data sources could not correctly filter resources using the `ids` attribute
+2. Batch-removed unsupported tags fields from data sources that couldn't properly filter by `tags`, and removed unsupported `tags` fields from resources
+3. Batch-fixed multiple code defects and corrected test cases
+
+## Changes
+
+1. Changed the type of the bandwidth attribute in `alibabacloudstack_expressconnect_physicalconnection` from string to integer
+2. Removed previously unsupported fields (`dns_servers`, `group_id`, `lang`, etc.) from `alibabacloudstack_dns_domain`
+3. Removed unsupported field `on_unable_to_redeploy_failed_instance` from `alibabacloudstack_ecs_deployment_set`
+
+## Deprecations
+
+1. DNS domain group orchestration capability (alibabacloudstack_alidns_domaingroup)
+2. API Gateway service data source (alibabacloudstack_api_gateway_service)
+3. ESS lifecycle management capability (alibabacloudstack_ess_lifecycle_hook)
+4. ESS scaling group virtual server group orchestration capability (alibabacloudstack_ess_scalinggroup_vserver_groups)
+5. KMS secret capability (alibabacloudstack_kms_secret)
+
+---
+
 # 3.18.22
 
 ## New
