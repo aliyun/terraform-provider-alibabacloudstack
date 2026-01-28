@@ -62,6 +62,27 @@ func resourceAlibabacloudStackEdasK8sService() *schema.Resource {
 			"labels": {
 				Type:     schema.TypeMap,
 				Optional: true,
+				Computed: true,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					o, n := d.GetChange("labels")
+					oldValues := map[string]string{}
+					for k, v := range o.(map[string]interface{}) {
+						oldValues[k] = v.(string)
+					}
+					newValues := map[string]string{}
+					for k, v := range n.(map[string]interface{}) {
+						newValues[k] = v.(string)
+					}
+					for k, v := range newValues {
+						if value, existed := oldValues[k]; ! existed {
+							return false
+						} else if value != v{
+							return false
+						}
+					}
+					return true
+				},
+				DiffSuppressOnRefresh: true,
 			},
 			"external_traffic_policy": {
 				Type:         schema.TypeString,
@@ -182,16 +203,7 @@ func resourceAlibabacloudStackEdasK8sServiceRead(d *schema.ResourceData, meta in
 		})
 	}
 	d.Set("port_mappings", port_mappings)
-	if len(service.Labels) > 0 {
-		labels := d.Get("labels").(map[string]interface{})
-		new_labels := make(map[string]interface{})
-		for k, _ := range labels {
-			if v, ok := service.Labels[k]; ok {
-				new_labels[k] = v
-			}
-		}
-		d.Set("labels", new_labels)
-	}
+	d.Set("labels", service.Labels)
 	d.Set("annotations", service.Annotations)
 	return nil
 }

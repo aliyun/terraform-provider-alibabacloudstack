@@ -70,7 +70,7 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 						},
 					},
 					"labels": map[string]string{
-						"Creator": "TF",
+						"Creator": "TF-test",
 						"Foo":     "Bar",
 					},
 					"annotations": map[string]string{
