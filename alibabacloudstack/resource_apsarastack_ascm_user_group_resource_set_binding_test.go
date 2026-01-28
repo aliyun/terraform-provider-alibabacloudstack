@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscmUserGroup_ResourceSetBinding(t *testing.T) {
+func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding(t *testing.T) {
 	var v *MembersInsideResourceSet
 	resourceId := "alibabacloudstack_ascm_user_group_resource_set_binding.default"
 	ra := resourceAttrInit(resourceId, testAccCheckUserGroupResourceSetBinding)

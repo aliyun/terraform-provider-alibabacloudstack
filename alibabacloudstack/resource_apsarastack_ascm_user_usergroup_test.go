@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscmUserGroup_User_Basic(t *testing.T) {
+func TestAccAlibabacloudStackAscmUserGroupUser_Basic(t *testing.T) {
 	var v *User
 	resourceId := "alibabacloudstack_ascm_usergroup_user.default"
 	ra := resourceAttrInit(resourceId, testAccCheckUserGroupUserBinding)
