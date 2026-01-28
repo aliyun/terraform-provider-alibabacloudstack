@@ -21,7 +21,7 @@ func dataSourceAlibabacloudStackEdasK8sClusters() *schema.Resource {
 				Computed: true,
 				MinItems: 1,
 			},
-			"cs_clsuter_id": {
+			"cs_cluster_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -112,7 +112,6 @@ func dataSourceAlibabacloudStackEdasK8SClusterRead(d *schema.ResourceData, meta 
 
 	clusters = response.ClusterPage.ClusterList
 
-	// 如果设置了name_regex过滤器，则过滤结果
 	var filteredClusters []EdasK8sCluster
 	var r *regexp.Regexp
 	if nameRegex, hasNameRegex := d.GetOk("name_regex"); hasNameRegex {
@@ -123,7 +122,7 @@ func dataSourceAlibabacloudStackEdasK8SClusterRead(d *schema.ResourceData, meta 
 		r = nameRegex
 	}
 	idsMap := getIdsStringFilter(d)
-	csClusterId := d.Get("cs_clsuter_id").(string)
+	csClusterId := d.Get("cs_cluster_id").(string)
 	clusterIds := make([]string, 0, len(filteredClusters))
 	clusterList := make([]map[string]interface{}, 0, len(filteredClusters))
 

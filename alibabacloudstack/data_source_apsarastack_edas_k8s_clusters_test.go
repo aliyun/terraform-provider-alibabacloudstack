@@ -31,10 +31,10 @@ func TestAccAlibabacloudStackEdasK8sClustersDataSource(t *testing.T) {
 	}
 	csidConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"cs_clsuter_id": "${alibabacloudstack_edas_k8s_cluster.default.cs_cluster_id}",
+			"cs_cluster_id": "${alibabacloudstack_edas_k8s_cluster.default.cs_cluster_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"cs_clsuter_id": "${alibabacloudstack_edas_k8s_cluster.default.cs_cluster_id}_fake",
+			"cs_cluster_id": "${alibabacloudstack_edas_k8s_cluster.default.cs_cluster_id}_fake",
 		}),
 	}
 
