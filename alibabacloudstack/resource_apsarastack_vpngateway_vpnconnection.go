@@ -275,9 +275,9 @@ func resourceAlibabacloudStackVpnConnectionUpdate(d *schema.ResourceData, meta i
 		update = true
 	}
 
+	request.LocalSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("local_subnet").(*schema.Set).List())
+	request.RemoteSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("remote_subnet").(*schema.Set).List())
 	if d.HasChanges("local_subnet", "remote_subnet") {
-		request.LocalSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("local_subnet").(*schema.Set).List())
-		request.RemoteSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("remote_subnet").(*schema.Set).List())
 		update = true
 	}
 
