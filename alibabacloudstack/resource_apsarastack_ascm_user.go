@@ -32,6 +32,7 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 			"login_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"email": {
 				Type:     schema.TypeString,

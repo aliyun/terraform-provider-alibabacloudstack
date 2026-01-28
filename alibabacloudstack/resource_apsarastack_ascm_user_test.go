@@ -62,22 +62,20 @@ func TestAccAlibabacloudStackAscmUser_Basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cellphone_number":   "13600000000",
+					"cellphone_number":   "13687654321",
 					"email":              "test02@gmail.com",
 					"display_name":       "Test-Apsara1",
-					"mobile_nation_code": "85",
-					"login_name":         name + "_update",
-					"login_policy_id":    "2",
+					"mobile_nation_code": "852",
+					"login_policy_id":    "${alibabacloudstack_ascm_logon_policy.default.policy_id}",
 					"role_ids":           []string{"8", "9"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"cellphone_number":   "13600000000",
+						"cellphone_number":   "13687654321",
 						"email":              "test02@gmail.com",
 						"display_name":       "Test-Apsara1",
-						"mobile_nation_code": "85",
-						"login_name":         name + "_update",
-						"login_policy_id":    "2",
+						"mobile_nation_code": "852",
+						"login_policy_id":    CHECKSET,
 					}),
 				),
 			},
@@ -108,6 +106,12 @@ func testascmuserconfigbasic(name string) string {
 	return fmt.Sprintf(`
 variable name{
  default = "%s"
+}
+
+resource alibabacloudstack_ascm_logon_policy default {
+	description= "testing purpose"
+	rule=        "ALLOW"
+	name=        var.name
 }
 `, name)
 }
