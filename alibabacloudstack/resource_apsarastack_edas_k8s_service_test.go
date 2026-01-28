@@ -46,6 +46,12 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 							"protocol":     "TCP",
 						},
 					},
+					"labels": map[string]string{
+						"Creator": "TF",
+					},
+					"annotations": map[string]string{
+						"Creator": "TF",
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -63,6 +69,14 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 							"protocol":     "TCP",
 						},
 					},
+					"labels": map[string]string{
+						"Creator": "TF",
+						"Foo":     "Bar",
+					},
+					"annotations": map[string]string{
+						"Creator": "TF",
+						"Foo":     "Bar",
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -75,6 +89,15 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"labels":      REMOVEKEY,
+					"annotations": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
 			},
 		},
 	})
