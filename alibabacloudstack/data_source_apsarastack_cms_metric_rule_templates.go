@@ -3,10 +3,10 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -116,18 +116,16 @@ func dataSourceAlibabacloudStackCmsMetricRuleTemplatesRead(d *schema.ResourceDat
 
 	var resp *cms.DescribeMetricRuleTemplateListResponse
 	for {
-		raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
-			return cmsClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+		log.Printf(" response of raw DescribeMetricRuleTemplateList : %s", bresponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "cms_metric_rule_templates", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms_metric_rule_templates", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
 
 		for _, item := range resp.Templates.Template {

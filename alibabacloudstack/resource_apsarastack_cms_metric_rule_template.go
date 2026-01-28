@@ -197,69 +197,105 @@ func resourceAlibabacloudStackCmsMetricRuleTemplate() *schema.Resource {
 
 func resourceAlibabacloudStackCmsMetricRuleTemplateCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := cms.CreateCreateMetricRuleTemplateRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.Name = d.Get("metric_rule_template_name").(string)
-	request.Description = d.Get("description").(string)
+
+	request := client.NewCommonRequest("POST", "Cms", "2019-01-01", "CreateMetricRuleTemplate", "")
+
+	request.QueryParams["Name"] = d.Get("metric_rule_template_name").(string)
+	if v, ok := d.GetOk("description"); ok {
+		request.QueryParams["Description"] = v.(string)
+	}
 
 	if v, ok := d.GetOk("alert_templates"); ok {
-		alertTemplatesMaps := make([]cms.CreateMetricRuleTemplateAlertTemplates, 0)
-		for _, alertTemplates := range v.(*schema.Set).List() {
-			alertTemplatesArg := alertTemplates.(map[string]interface{})
-			if escalationsMaps, ok := alertTemplatesArg["escalations"]; ok {
-				for _, escalationsArg := range escalationsMaps.(*schema.Set).List() {
-					alertTemplate := cms.CreateMetricRuleTemplateAlertTemplates{}
-					alertTemplate.Category = alertTemplatesArg["category"].(string)
-					alertTemplate.MetricName = alertTemplatesArg["metric_name"].(string)
-					alertTemplate.Namespace = alertTemplatesArg["namespace"].(string)
-					alertTemplate.RuleName = alertTemplatesArg["rule_name"].(string)
-					alertTemplate.Webhook = alertTemplatesArg["webhook"].(string)
-					if criticalMaps, ok := escalationsArg.(map[string]interface{})["critical"]; ok {
-						for _, criticalMap := range criticalMaps.(*schema.Set).List() {
-							criticalArg := criticalMap.(map[string]interface{})
-							alertTemplate.EscalationsCriticalComparisonOperator = criticalArg["comparison_operator"].(string)
-							alertTemplate.EscalationsCriticalStatistics = criticalArg["statistics"].(string)
-							alertTemplate.EscalationsCriticalThreshold = criticalArg["threshold"].(string)
-							alertTemplate.EscalationsCriticalTimes = criticalArg["times"].(string)
+		alertTemplatesList := v.(*schema.Set).List()
+		if len(alertTemplatesList) > 0 {
+
+			for i, alertTemplate := range alertTemplatesList {
+				alertTemplateMap := alertTemplate.(map[string]interface{})
+
+				request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Category", i+1)] = alertTemplateMap["category"].(string)
+				request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.MetricName", i+1)] = alertTemplateMap["metric_name"].(string)
+				request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Namespace", i+1)] = alertTemplateMap["namespace"].(string)
+				request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.RuleName", i+1)] = alertTemplateMap["rule_name"].(string)
+				request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Webhook", i+1)] = alertTemplateMap["webhook"].(string)
+
+				if escalations, ok := alertTemplateMap["escalations"]; ok {
+					escalationsList := escalations.(*schema.Set).List()
+					if len(escalationsList) > 0 {
+						escalationMap := escalationsList[0].(map[string]interface{}) // MaxItems 为 1，所以只取第一个
+
+						if critical, ok := escalationMap["critical"]; ok {
+							criticalList := critical.(*schema.Set).List()
+							if len(criticalList) > 0 {
+								criticalMap := criticalList[0].(map[string]interface{}) // MaxItems 为 1
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Critical.%d.ComparisonOperator", i+1, 1)] = criticalMap["comparison_operator"].(string)
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Critical.%d.Statistics", i+1, 1)] = criticalMap["statistics"].(string)
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Critical.%d.Threshold", i+1, 1)] = criticalMap["threshold"].(string)
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Critical.%d.Times", i+1, 1)] = criticalMap["times"].(string)
+							}
+						}
+
+						if info, ok := escalationMap["info"]; ok {
+							infoList := info.(*schema.Set).List()
+							if len(infoList) > 0 {
+								infoMap := infoList[0].(map[string]interface{}) // MaxItems 为 1
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Info.%d.ComparisonOperator", i+1, 1)] = infoMap["comparison_operator"].(string)
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Info.%d.Statistics", i+1, 1)] = infoMap["statistics"].(string)
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Info.%d.Threshold", i+1, 1)] = infoMap["threshold"].(string)
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Info.%d.Times", i+1, 1)] = infoMap["times"].(string)
+							}
+						}
+
+						if warn, ok := escalationMap["warn"]; ok {
+							warnList := warn.(*schema.Set).List()
+							if len(warnList) > 0 {
+								warnMap := warnList[0].(map[string]interface{}) // MaxItems 为 1
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Warn.%d.ComparisonOperator", i+1, 1)] = warnMap["comparison_operator"].(string)
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Warn.%d.Statistics", i+1, 1)] = warnMap["statistics"].(string)
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Warn.%d.Threshold", i+1, 1)] = warnMap["threshold"].(string)
+								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Warn.%d.Times", i+1, 1)] = warnMap["times"].(string)
+							}
 						}
 					}
-					if infoMaps, ok := escalationsArg.(map[string]interface{})["info"]; ok {
-						for _, infoMap := range infoMaps.(*schema.Set).List() {
-							infoArg := infoMap.(map[string]interface{})
-							alertTemplate.EscalationsInfoComparisonOperator = infoArg["comparison_operator"].(string)
-							alertTemplate.EscalationsInfoStatistics = infoArg["statistics"].(string)
-							alertTemplate.EscalationsInfoThreshold = infoArg["threshold"].(string)
-							alertTemplate.EscalationsInfoTimes = infoArg["times"].(string)
-						}
-					}
-					if warnMaps, ok := escalationsArg.(map[string]interface{})["warn"]; ok {
-						for _, warnMap := range warnMaps.(*schema.Set).List() {
-							warnArg := warnMap.(map[string]interface{})
-							alertTemplate.EscalationsWarnComparisonOperator = warnArg["comparison_operator"].(string)
-							alertTemplate.EscalationsWarnStatistics = warnArg["statistics"].(string)
-							alertTemplate.EscalationsWarnThreshold = warnArg["threshold"].(string)
-							alertTemplate.EscalationsWarnTimes = warnArg["times"].(string)
-						}
-					}
-					alertTemplatesMaps = append(alertTemplatesMaps, alertTemplate)
 				}
 			}
 		}
-		request.AlertTemplates = &alertTemplatesMaps
 	}
-	raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
-		return cmsClient.CreateMetricRuleTemplate(request)
-	})
-	addDebug(request.GetActionName(), raw, request, request.QueryParams)
+
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw CreateMetricRuleTemplate : %s", bresponse)
+
 	if err != nil {
-		errmsg := ""
-		if response, ok := raw.(*responses.BaseResponse); ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "cms_metric_rule_templates", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	response, _ := raw.(*cms.CreateMetricRuleTemplateResponse)
-	d.SetId(fmt.Sprint(response.Id))
+
+	var response map[string]interface{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "CreateMetricRuleTemplate", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	if code, ok := response["Code"]; ok {
+		if codeFloat, ok := code.(float64); ok && codeFloat != 200 {
+			return errmsgs.WrapError(fmt.Errorf("CreateMetricRuleTemplate failed: %v", response["Message"]))
+		} else if codeInt, ok := code.(int); ok && codeInt != 200 {
+			return errmsgs.WrapError(fmt.Errorf("CreateMetricRuleTemplate failed: %v", response["Message"]))
+		}
+	} else {
+		if _, ok := response["Id"]; !ok {
+			return errmsgs.WrapError(fmt.Errorf("CreateMetricRuleTemplate unexpected response: %v", response))
+		}
+	}
+
+	if id, exists := response["Id"]; exists {
+		d.SetId(fmt.Sprintf("%v", id))
+	} else {
+		return errmsgs.WrapError(fmt.Errorf("CreateMetricRuleTemplate response missing Id: %v", response))
+	}
 
 	return nil
 }
@@ -362,18 +398,16 @@ func resourceAlibabacloudStackCmsMetricRuleTemplateUpdate(d *schema.ResourceData
 			request.QueryParams["Webhook"] = v.(string)
 		}
 
-		raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
-			return cmsClient.ProcessCommonRequest(request)
-		})
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		log.Printf(" response of raw ApplyMetricRuleTemplate : %s", bresponse)
 		if err != nil {
-			errmsg := ""
-			if response, ok := raw.(*responses.BaseResponse); ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ApplyMetricRuleTemplate", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms_metric_rule_template", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		bresponse, _ := raw.(*responses.CommonResponse)
 		resource := make(map[string]interface{})
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resource)
 		if err != nil {

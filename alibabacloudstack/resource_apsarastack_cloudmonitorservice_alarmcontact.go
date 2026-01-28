@@ -73,7 +73,7 @@ func resourceAlibabacloudStackCmsAlarmContactCreate(d *schema.ResourceData, meta
 		request.QueryParams["Channels.DingWebHook"] = v.(string)
 	}
 	if v, ok := d.GetOk("channels_mail"); ok {
-		request.QueryParams["ChannelsMail"] = v.(string)
+		request.QueryParams["Channels.Mail"] = v.(string)
 	}
 	if v, ok := d.GetOk("channels_sms"); ok {
 		request.QueryParams["Channels.SMS"] = v.(string)
@@ -82,21 +82,15 @@ func resourceAlibabacloudStackCmsAlarmContactCreate(d *schema.ResourceData, meta
 		request.QueryParams["Lang"] = v.(string)
 	}
 
-	raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
-		return cmsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*cms.PutContactResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	log.Printf(" response of raw PutContact : %s", bresponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms_alarm_contact", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), raw)
-
-	if bresponse.Code != "200" {
-		return errmsgs.WrapError(errmsgs.Error("PutContact failed for " + bresponse.Message))
 	}
 	d.SetId(fmt.Sprintf("%v", d.Get("alarm_contact_name").(string)))
 
