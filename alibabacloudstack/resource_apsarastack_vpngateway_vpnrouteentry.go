@@ -131,7 +131,10 @@ func resourceAlibabacloudStackVpnRouteEntryRead(d *schema.ResourceData, meta int
 
 func resourceAlibabacloudStackVpnRouteEntryUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	d.Partial(true)
+	
+	if d.IsNewResource(){
+		return nil
+	}
 
 	if d.HasChange("publish_vpc") {
 		request := vpc.CreatePublishVpnRouteEntryRequest()
@@ -186,7 +189,6 @@ func resourceAlibabacloudStackVpnRouteEntryUpdate(d *schema.ResourceData, meta i
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	d.Partial(false)
 	return nil
 }
 
