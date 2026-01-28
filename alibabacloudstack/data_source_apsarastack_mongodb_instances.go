@@ -41,7 +41,7 @@ func dataSourceAlibabacloudStackMongoDBInstances() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tags": tagsSchema(),
+//			"tags": tagsSchema(),
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -215,16 +215,16 @@ func dataSourceAlibabacloudStackMongoDBInstancesRead(d *schema.ResourceData, met
 		request.DBInstanceType = v.(string)
 	}
 
-	if v, ok := d.GetOk("tags"); ok {
-		var reqTags []dds.DescribeDBInstancesTag
-		for key, value := range v.(map[string]interface{}) {
-			reqTags = append(reqTags, dds.DescribeDBInstancesTag{
-				Key:   key,
-				Value: value.(string),
-			})
-		}
-		request.Tag = &reqTags
-	}
+//	if v, ok := d.GetOk("tags"); ok {
+//		var reqTags []dds.DescribeDBInstancesTag
+//		for key, value := range v.(map[string]interface{}) {
+//			reqTags = append(reqTags, dds.DescribeDBInstancesTag{
+//				Key:   key,
+//				Value: value.(string),
+//			})
+//		}
+//		request.Tag = &reqTags
+//	}
 
 	var nameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {

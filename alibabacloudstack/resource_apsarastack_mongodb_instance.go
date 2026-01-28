@@ -627,25 +627,25 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		//d.SetPartial("maintain_end_time")
 	}
 
-	if d.HasChange("security_group_id") {
-		request := dds.CreateModifySecurityGroupConfigurationRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.DBInstanceId = d.Id()
-		request.SecurityGroupId = d.Get("security_group_id").(string)
-
-		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
-			return client.ModifySecurityGroupConfiguration(request)
-		})
-		if err != nil {
-			errmsg := ""
-			if bresponse, ok := raw.(*dds.ModifySecurityGroupConfigurationResponse); ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("security_group_id")
-	}
+//	if d.HasChange("security_group_id") {
+//		request := dds.CreateModifySecurityGroupConfigurationRequest()
+//		client.InitRpcRequest(*request.RpcRequest)
+//		request.DBInstanceId = d.Id()
+//		request.SecurityGroupId = d.Get("security_group_id").(string)
+//
+//		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+//			return client.ModifySecurityGroupConfiguration(request)
+//		})
+//		if err != nil {
+//			errmsg := ""
+//			if bresponse, ok := raw.(*dds.ModifySecurityGroupConfigurationResponse); ok {
+//				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+//			}
+//			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+//		}
+//		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+//		//d.SetPartial("security_group_id")
+//	}
 
 	enablePublicConnection := false
 	if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeReplicaSetRole", "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {
