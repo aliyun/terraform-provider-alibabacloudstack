@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackCms_Alarams_DataSource(t *testing.T) {
+func TestAccAlibabacloudStackCmsAlaramsDataSource(t *testing.T) {
 	// testAccPreCheckWithAPIIsNotSupport(t)
 	rand := getAccTestRandInt(10000, 20000)
 	nameRegexConf := dataSourceTestAccConfig{

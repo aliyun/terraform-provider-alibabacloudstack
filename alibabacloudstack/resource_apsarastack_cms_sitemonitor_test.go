@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceSitemonitor0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%scloud_monitor_servicesite_monitor%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-csm_sitemonitor%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCloudmonitorserviceSitemonitorBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -38,29 +38,19 @@ func TestAccAlibabacloudStackCloudmonitorserviceSitemonitor0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"option_json": "{'Dnstype': 'A', 'Failurerate': 0.5, 'Pingnum': 10}",
-
+					"options_json": "{'Dnstype': 'A', 'Failurerate': 0.5, 'Pingnum': 10}",
 					"interval": "1",
-
 					"address": "www.aliyun.com",
-
-					"task_name": "siteMonitorTest",
-
-					"task_type": "PING",
+					"task_name": "${var.name}",
+					"task_type": "Ping",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"option_json": "{'Dnstype': 'A', 'Failurerate': 0.5, 'Pingnum': 10}",
-
+						"options_json": "{'Dnstype': 'A', 'Failurerate': 0.5, 'Pingnum': 10}",
 						"interval": "1",
-
 						"address": "www.aliyun.com",
-
-						"task_name": "siteMonitorTest",
-
-						"task_type": "PING",
+						"task_name": name,
+						"task_type": "Ping",
 					}),
 				),
 			},
@@ -72,28 +62,18 @@ func TestAccAlibabacloudStackCloudmonitorserviceSitemonitor0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"status": "1",
-
-					"option_json": "{'Dnstype': 'A', 'Failurerate': 1, 'Pingnum': 15}",
-
+					"options_json": "{'Dnstype': 'A', 'Failurerate': 1, 'Pingnum': 15}",
 					"address": "http://www.aliyun.com",
-
-					"task_name": "RekSiteMonitor",
-
+					"task_name": "${var.name}_update",
 					"interval": "5",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"status": "1",
-
-						"option_json": "{'Dnstype': 'A', 'Failurerate': 1, 'Pingnum': 15}",
-
+						"options_json": "{'Dnstype': 'A', 'Failurerate': 1, 'Pingnum': 15}",
 						"address": "http://www.aliyun.com",
-
-						"task_name": "RekSiteMonitor",
-
+						"task_name": name+"_update",
 						"interval": "5",
 					}),
 				),
@@ -103,23 +83,14 @@ func TestAccAlibabacloudStackCloudmonitorserviceSitemonitor0(t *testing.T) {
 }
 
 var AlibabacloudTestAccCloudmonitorserviceSitemonitorCheckmap = map[string]string{
-
 	"status": CHECKSET,
-
-	"option_json": CHECKSET,
-
+	"options_json": CHECKSET,
 	"task_id": CHECKSET,
-
 	"address": CHECKSET,
-
 	"task_name": CHECKSET,
-
 	"create_time": CHECKSET,
-
 	"task_type": CHECKSET,
-
 	"isp_cities": CHECKSET,
-
 	"interval": CHECKSET,
 }
 

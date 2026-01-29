@@ -258,7 +258,7 @@ func resourceAlibabacloudStackCmsSiteMonitorDelete(d *schema.ResourceData, meta 
 }
 
 func getAlertId(alertIds []interface{}) string {
-	if alertIds != nil && len(alertIds) > 0 {
+	if len(alertIds) > 0 {
 		alertId := strings.Join(expandStringList(alertIds), ",")
 		return alertId
 	}
