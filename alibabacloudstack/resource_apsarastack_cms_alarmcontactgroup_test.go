@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceAlarmcontactgroup0(t *testing.T)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCloudmonitorserviceAlarmcontactgroupBasicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-
+			testAccPreCheckWithAPIIsNotSupport(t)
 			testAccPreCheck(t)
 		},
 		IDRefreshName: resourceId,

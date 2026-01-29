@@ -19,6 +19,7 @@ import (
 
 func resourceAlibabacloudStackCmsSiteMonitor() *schema.Resource {
 	resource := &schema.Resource{
+		DeprecationMessage: "The 'alibabacloudstack_cms_site_monitor' resource is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 		Schema: map[string]*schema.Schema{
 			"address": {
 				Type:     schema.TypeString,

@@ -61,6 +61,9 @@ func TestAccAlibabacloudstackCmsAlarmContactGroupGroups_basic(t *testing.T) {
 		resourceId:   "data.alibabacloudstack_cms_alarm_contact_groups.default",
 		existMapFunc: existCmsAlarmContactGroupsMapFunc,
 		fakeMapFunc:  fakeCmsAlarmContactGroupsMapFunc,
+		PreCheck: func(){
+			testAccPreCheckWithAPIIsNotSupport(t)
+		},
 	}
 
 	cmsAlarmContactGroupsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)

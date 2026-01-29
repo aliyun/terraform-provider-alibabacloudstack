@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceSitemonitor0(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCloudmonitorserviceSitemonitorBasicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-
+			testAccPreCheckWithAPIIsNotSupport(t)
 			testAccPreCheck(t)
 		},
 		IDRefreshName: resourceId,
@@ -39,18 +39,18 @@ func TestAccAlibabacloudStackCloudmonitorserviceSitemonitor0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"options_json": "{'Dnstype': 'A', 'Failurerate': 0.5, 'Pingnum': 10}",
-					"interval": "1",
-					"address": "www.aliyun.com",
-					"task_name": "${var.name}",
-					"task_type": "Ping",
+					"interval":     "1",
+					"address":      "www.aliyun.com",
+					"task_name":    "${var.name}",
+					"task_type":    "Ping",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"options_json": "{'Dnstype': 'A', 'Failurerate': 0.5, 'Pingnum': 10}",
-						"interval": "1",
-						"address": "www.aliyun.com",
-						"task_name": name,
-						"task_type": "Ping",
+						"interval":     "1",
+						"address":      "www.aliyun.com",
+						"task_name":    name,
+						"task_type":    "Ping",
 					}),
 				),
 			},
@@ -62,19 +62,19 @@ func TestAccAlibabacloudStackCloudmonitorserviceSitemonitor0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"status": "1",
+					"status":       "1",
 					"options_json": "{'Dnstype': 'A', 'Failurerate': 1, 'Pingnum': 15}",
-					"address": "http://www.aliyun.com",
-					"task_name": "${var.name}_update",
-					"interval": "5",
+					"address":      "http://www.aliyun.com",
+					"task_name":    "${var.name}_update",
+					"interval":     "5",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"status": "1",
+						"status":       "1",
 						"options_json": "{'Dnstype': 'A', 'Failurerate': 1, 'Pingnum': 15}",
-						"address": "http://www.aliyun.com",
-						"task_name": name+"_update",
-						"interval": "5",
+						"address":      "http://www.aliyun.com",
+						"task_name":    name + "_update",
+						"interval":     "5",
 					}),
 				),
 			},
@@ -83,15 +83,15 @@ func TestAccAlibabacloudStackCloudmonitorserviceSitemonitor0(t *testing.T) {
 }
 
 var AlibabacloudTestAccCloudmonitorserviceSitemonitorCheckmap = map[string]string{
-	"status": CHECKSET,
+	"status":       CHECKSET,
 	"options_json": CHECKSET,
-	"task_id": CHECKSET,
-	"address": CHECKSET,
-	"task_name": CHECKSET,
-	"create_time": CHECKSET,
-	"task_type": CHECKSET,
-	"isp_cities": CHECKSET,
-	"interval": CHECKSET,
+	"task_id":      CHECKSET,
+	"address":      CHECKSET,
+	"task_name":    CHECKSET,
+	"create_time":  CHECKSET,
+	"task_type":    CHECKSET,
+	"isp_cities":   CHECKSET,
+	"interval":     CHECKSET,
 }
 
 func AlibabacloudTestAccCloudmonitorserviceSitemonitorBasicdependence(name string) string {

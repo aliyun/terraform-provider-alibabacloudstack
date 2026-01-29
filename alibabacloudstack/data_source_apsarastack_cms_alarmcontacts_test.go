@@ -2,39 +2,40 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudstackCmsAlarmContacts_basic(t *testing.T) {
-	testAccPreCheckWithAPIIsNotSupport(t)
-	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_cms_alarm_contacts.default"
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testAccCmsAlarmContactBisic%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudstackCmsAlarmContactsDataSourceConfig)
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackCmsAlarmContactsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cms_alarm_contact.default.id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_cms_alarm_contact.default.id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackCmsAlarmContactsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cms_alarm_contact.default.id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_cms_alarm_contact.default.id}_fake",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackCmsAlarmContactsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cms_alarm_contact.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_cms_alarm_contact.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackCmsAlarmContactsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cms_alarm_contact.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_cms_alarm_contact.default.id}_fake"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackCmsAlarmContactsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cms_alarm_contact.default.id}"`,
-			"ids":        `["${alibabacloudstack_cms_alarm_contact.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_cms_alarm_contact.default.id}",
+			"ids":        []string{"${alibabacloudstack_cms_alarm_contact.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackCmsAlarmContactsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cms_alarm_contact.default.id}_fake"`,
-			"ids":        `["${alibabacloudstack_cms_alarm_contact.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_cms_alarm_contact.default.id}_fake",
+			"ids":        []string{"${alibabacloudstack_cms_alarm_contact.default.id}_fake"},
 		}),
 	}
 
@@ -59,20 +60,18 @@ func TestAccAlibabacloudstackCmsAlarmContacts_basic(t *testing.T) {
 		resourceId:   "data.alibabacloudstack_cms_alarm_contacts.default",
 		existMapFunc: existcmsAlarmContactsMapFunc,
 		fakeMapFunc:  fakecmsAlarmContactsMapFunc,
+		PreCheck: func(){
+			testAccPreCheckWithAPIIsNotSupport(t)
+		},
 	}
 
 	cmsAlarmContactsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func testAccCheckAlibabacloudstackCmsAlarmContactsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func testAccCheckAlibabacloudstackCmsAlarmContactsDataSourceConfig(name string) string {
+	return fmt.Sprintf(`
 		variable "name" {
-			default = "tf-testAccCmsAlarmContactBisic-%d"
+			default = "%s"
 		}
 		resource "alibabacloudstack_cms_alarm_contact" "default" {
 			alarm_contact_name = var.name
@@ -83,9 +82,5 @@ func testAccCheckAlibabacloudstackCmsAlarmContactsDataSourceConfig(rand int, att
   			}	
 		}
 
-		data "alibabacloudstack_cms_alarm_contacts" "default" {
-		  %s
-		}
-`, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name)
 }

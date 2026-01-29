@@ -13,6 +13,7 @@ import (
 
 func resourceAlibabacloudStackCmsAlarmContact() *schema.Resource {
 	resource := &schema.Resource{
+		DeprecationMessage: "The 'alibabacloudstack_cms_alarm_contact' resource is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 		Schema: map[string]*schema.Schema{
 			"alarm_contact_name": {
 				Type:     schema.TypeString,
