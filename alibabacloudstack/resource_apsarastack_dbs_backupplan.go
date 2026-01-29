@@ -17,6 +17,7 @@ import (
 
 func resourceAlibabacloudStackDbsBackupPlan() *schema.Resource {
 	resource := &schema.Resource{
+		DeprecationMessage: "The 'alibabacloudstack_dbs_backup_plan' resource is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 		Schema: map[string]*schema.Schema{
 			"backup_plan_id": {
 				Type:     schema.TypeString,
@@ -58,8 +59,7 @@ func resourceAlibabacloudStackDbsBackupPlan() *schema.Resource {
 			},
 			"backup_plan_name": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 			},
 		},
 	}
@@ -71,7 +71,7 @@ func resourceAlibabacloudStackDbsBackupPlanCreate(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateBackupPlan"
-	request := client.NewCommonRequest("POST", "dbs", "2019-03-06", action, "")
+	request := client.NewCommonRequest("POST", "Dbs", "2019-03-06", action, "")
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-type"] = "application/json"
 	request.QueryParams["Period"] = "Year"

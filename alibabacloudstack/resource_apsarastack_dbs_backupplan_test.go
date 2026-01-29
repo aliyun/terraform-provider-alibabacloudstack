@@ -23,6 +23,7 @@ func TestAccAlibabacloudStackDbsBackupPlan_basic0(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackDbsBackupPlanBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
+			testAccPreCheckWithAPIIsNotSupport(t)
 			testAccPreCheck(t)
 		},
 		IDRefreshName: resourceId,
@@ -32,12 +33,14 @@ func TestAccAlibabacloudStackDbsBackupPlan_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"backup_plan_name": "${var.name}",
 					"backup_method":  "logical",
 					"database_type":  "MySQL",
 					"instance_class": "large",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"backup_plan_name": name,
 						"backup_method":  "logical",
 						"database_type":  "MySQL",
 						"instance_class": "large",
@@ -46,11 +49,11 @@ func TestAccAlibabacloudStackDbsBackupPlan_basic0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"backup_plan_name": name,
+					"backup_plan_name": "${var.name}_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"backup_plan_name": name,
+						"backup_plan_name": name+"_update",
 					}),
 				),
 			},

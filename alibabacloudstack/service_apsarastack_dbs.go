@@ -19,7 +19,7 @@ func (s *DbsService) DescribeDbsBackupPlan(id string) (object map[string]interfa
 		"PageNumber":   1,
 	}
 
-	response, err = s.client.DoTeaRequest("POST", "dbs", "2019-03-06", "DescribeBackupPlanList", "", nil, nil, request)
+	response, err = s.client.DoTeaRequest("POST", "Dbs", "2019-03-06", "DescribeBackupPlanList", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -32,7 +32,7 @@ func (s *DbsService) DescribeDbsBackupPlan(id string) (object map[string]interfa
 	if len(i) > 0 {
 		object = i[0].(map[string]interface{})
 	} else {
-		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("dbs", id)), errmsgs.NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Dbs", id)), errmsgs.NotFoundWithResponse, response)
 	}
 
 	return object, nil
