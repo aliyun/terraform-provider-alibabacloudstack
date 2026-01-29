@@ -2,19 +2,20 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
-func TestAccAlibabacloudStackCmsAlaramsDataSource(t *testing.T) {
-	// testAccPreCheckWithAPIIsNotSupport(t)
-	rand := getAccTestRandInt(10000, 20000)
+func TestAccAlibabacloudStackCmsAlarmsDataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_cms_alarms.default"
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf_testacc_cmsalarm%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, dataSourceAlibabacloudStackcms_alarms)
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: dataSourceAlibabacloudStackcms_alarms(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cms_alarm.default.rule_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_cms_alarm.default.rule_name}",
 		}),
-		fakeConfig: dataSourceAlibabacloudStackcms_alarms(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cms_alarm.default.rule_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_cms_alarm.default.rule_name}_fake",
 		}),
 	}
 
@@ -32,7 +33,7 @@ func TestAccAlibabacloudStackCmsAlaramsDataSource(t *testing.T) {
 	}
 
 	var cmsAlarmContactsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_cms_alarms.default",
+		resourceId:   resourceId,
 		existMapFunc: existcmsAlarmsMapFunc,
 		fakeMapFunc:  fakecmsAlarmsMapFunc,
 	}
@@ -40,16 +41,11 @@ func TestAccAlibabacloudStackCmsAlaramsDataSource(t *testing.T) {
 	cmsAlarmContactsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf)
 }
 
-func dataSourceAlibabacloudStackcms_alarms(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
+func dataSourceAlibabacloudStackcms_alarms(name string) string {
 	return fmt.Sprintf(`
 
 variable "name" {
- default = "tf_testacc_cmsalarm%d"
+ default = "%s"
 }
 
 resource "alibabacloudstack_slb" "basic" {
@@ -79,9 +75,5 @@ resource "alibabacloudstack_cms_alarm" "default" {
     ]
   }
 }
-
-data "alibabacloudstack_cms_alarms" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n  "))
+`, name)
 }

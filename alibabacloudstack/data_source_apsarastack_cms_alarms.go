@@ -179,7 +179,7 @@ func dataSourceAlibabacloudStackCmsAlarmsRead(d *schema.ResourceData, meta inter
 		bresponse, err := client.ProcessCommonRequest(request)
 
 		if err != nil {
-			if bresponse != nil {
+			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)

@@ -26,6 +26,7 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 				ConflictsWith: []string{"name"},
+				AtLeastOneOf:  []string{"name"},
 			},
 			"rule_id": {
 				Type:     schema.TypeString,
@@ -37,6 +38,7 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 				Computed:      true,
 				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'rule_name' instead.",
 				ConflictsWith: []string{"rule_name"},
+				AtLeastOneOf:  []string{"rule_name"},
 			},
 			"namespace": {
 				Type:          schema.TypeString,
@@ -76,6 +78,7 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 				Elem:          schema.TypeString,
 				Deprecated:    "Field 'dimensions' is deprecated and will be removed in a future release. Please use new field 'resources' instead.",
 				ConflictsWith: []string{"resources"},
+				AtLeastOneOf:  []string{"resources"},
 			},
 			"resources": {
 				Type:     schema.TypeMap,
@@ -95,10 +98,13 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 						return nil, nil
 					},
 				},
+				ConflictsWith: []string{"dimensions"},
+				AtLeastOneOf:  []string{"dimensions"},
 			},
 			"period": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"escalations_critical": {
 				Type:     schema.TypeList,
@@ -235,207 +241,7 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 }
 
 func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	cmsService := CmsService{client}
-	d.Partial(true)
-
-	request := cms.CreatePutResourceMetricRuleRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	d.SetId(resource.UniqueId() + ":" + request.RuleName)
-	request.RuleName = connectivity.GetResourceData(d, "rule_name", "name").(string)
-	if err := errmsgs.CheckEmpty(request.RuleName, schema.TypeString, "rule_name", "name"); err != nil {
-		return errmsgs.WrapError(err)
-	}
-	parts, err := ParseResourceId(d.Id(), 2)
-	request.RuleId = parts[0]
-
-	request.Namespace = connectivity.GetResourceData(d, "namespace", "project").(string)
-	if err := errmsgs.CheckEmpty(request.Namespace, schema.TypeString, "namespace", "project"); err != nil {
-		return errmsgs.WrapError(err)
-	}
-	request.MetricName = connectivity.GetResourceData(d, "metric_name", "metric").(string)
-	if err := errmsgs.CheckEmpty(request.MetricName, schema.TypeString, "metric_name", "metric"); err != nil {
-		return errmsgs.WrapError(err)
-	}
-	request.Period = strconv.Itoa(d.Get("period").(int))
-
-	request.ContactGroups = strings.Join(expandStringList(d.Get("contact_groups").([]interface{})), ",")
-	if v, ok := d.GetOk("escalations_critical"); ok && len(v.([]interface{})) != 0 {
-		for _, val := range v.([]interface{}) {
-			val := val.(map[string]interface{})
-			request.EscalationsCriticalStatistics = val["statistics"].(string)
-			request.EscalationsCriticalComparisonOperator = convertOperator(val["comparison_operator"].(string))
-			request.EscalationsCriticalThreshold = val["threshold"].(string)
-			request.EscalationsCriticalTimes = requests.NewInteger(val["times"].(int))
-		}
-	}
-	// Warn
-	if v, ok := d.GetOk("escalations_warn"); ok && len(v.([]interface{})) != 0 {
-		for _, val := range v.([]interface{}) {
-			val := val.(map[string]interface{})
-			request.EscalationsWarnStatistics = val["statistics"].(string)
-			request.EscalationsWarnComparisonOperator = convertOperator(val["comparison_operator"].(string))
-			request.EscalationsWarnThreshold = val["threshold"].(string)
-			request.EscalationsWarnTimes = requests.NewInteger(val["times"].(int))
-		}
-	}
-	// Info
-	if v, ok := d.GetOk("escalations_info"); ok && len(v.([]interface{})) != 0 {
-		for _, val := range v.([]interface{}) {
-			val := val.(map[string]interface{})
-			request.EscalationsInfoStatistics = val["statistics"].(string)
-			request.EscalationsInfoComparisonOperator = convertOperator(val["comparison_operator"].(string))
-			request.EscalationsInfoThreshold = val["threshold"].(string)
-			request.EscalationsInfoTimes = requests.NewInteger(val["times"].(int))
-		}
-	}
-
-	if v, ok := d.GetOk("effective_interval"); ok && v.(string) != "" {
-		request.EffectiveInterval = v.(string)
-	} else {
-		start, startOk := d.GetOk("start_time")
-		end, endOk := d.GetOk("end_time")
-		if startOk && endOk && end.(int) > 0 {
-			// The EffectiveInterval valid value between 00:00 and 23:59
-			request.EffectiveInterval = fmt.Sprintf("%d:00-%d:59", start.(int), end.(int)-1)
-		}
-	}
-	request.SilenceTime = requests.NewInteger(d.Get("silence_time").(int))
-
-	var instanceId string
-	var dimList []map[string]string
-
-	if dimensions, ok := connectivity.GetResourceDataOk(d, "dimensions", "resource"); ok {
-		for k, v := range dimensions.(map[string]interface{}) {
-			values := strings.Split(v.(string), COMMA_SEPARATED)
-			if len(values) > 0 {
-				instanceId = values[0]
-				for _, vv := range values {
-					dimList = append(dimList, map[string]string{k: Trim(vv)})
-				}
-			} else {
-				dimList = append(dimList, map[string]string{k: Trim(v.(string))})
-			}
-		}
-	} else if resources, ok := d.GetOk("resources"); ok {
-		for _, item := range resources.([]interface{}) {
-			for k, v := range item.(map[string]interface{}) {
-				dimList = append(dimList, map[string]string{k: Trim(v.(string))})
-			}
-		}
-	} else {
-		return fmt.Errorf("dimensions and resources can not be empty at the same time")
-	}
-
-	if len(dimList) > 0 {
-		if bytes, err := json.Marshal(dimList); err != nil {
-			return fmt.Errorf("marshaling dimensions to json string got an error: %#v", err)
-		} else {
-			request.Resources = string(bytes[:])
-		}
-	}
-
-	nrequest := client.NewCommonRequest("POST", "Cms", "2019-01-01", "PutResourceMetricRule", "")
-	mergeMaps(nrequest.QueryParams, map[string]string{
-		"RuleName":                       request.RuleName,
-		"RuleId":                         request.RuleId,
-		"Namespace":                      request.Namespace,
-		"MetricName":                     request.MetricName,
-		"Period":                         request.Period,
-		"EffectiveInterval":              request.EffectiveInterval,
-		"ContactGroups":                  request.ContactGroups,
-		"InstanceID":                     instanceId,
-		"Resources":                      request.Resources,
-		"Escalations.Critical.Threshold": request.EscalationsCriticalThreshold,
-		"Escalations.Critical.ComparisonOperator": request.EscalationsCriticalComparisonOperator,
-		"Escalations.Critical.Statistics":         request.EscalationsCriticalStatistics,
-		"Escalations.Critical.Times":              fmt.Sprint(request.EscalationsCriticalTimes),
-		"Escalations.Warn.Threshold":              request.EscalationsWarnThreshold,
-		"Escalations.Warn.ComparisonOperator":     request.EscalationsWarnComparisonOperator,
-		"Escalations.Warn.Statistics":             request.EscalationsWarnStatistics,
-		"Escalations.Warn.Times":                  fmt.Sprint(request.EscalationsWarnTimes),
-		"Escalations.Info.Threshold":              request.EscalationsInfoThreshold,
-		"Escalations.Info.ComparisonOperator":     request.EscalationsCriticalComparisonOperator,
-		"Escalations.Info.Statistics":             request.EscalationsInfoStatistics,
-		"Escalations.Info.Times":                  fmt.Sprint(request.EscalationsInfoTimes),
-		"SilenceTime":                             fmt.Sprint(request.SilenceTime),
-		"Format":                                  "JSON",
-		"SignatureVersion":                        "1.0",
-		"Webhook":                                 d.Get("webhook").(string),
-	})
-
-	response, err := client.ProcessCommonRequest(nrequest)
-	if err != nil {
-		if response == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	if d.Get("enabled").(bool) {
-		request := cms.CreateEnableMetricRulesRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.RuleId = &[]string{d.Id()}
-
-		wait := incrementalWait(1*time.Second, 2*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
-				return cmsClient.EnableMetricRules(request)
-			})
-			response, ok := raw.(*responses.CommonResponse)
-			if err != nil {
-				errmsg := ""
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-			}
-			return nil
-		})
-		if err != nil {
-			return fmt.Errorf("Enabling alarm got an error: %#v", err)
-		}
-	} else if err != nil {
-		return err
-	} else {
-		request := cms.CreateDisableMetricRulesRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.RuleId = &[]string{d.Id()}
-
-		wait := incrementalWait(1*time.Second, 2*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
-				return cmsClient.DisableMetricRules(request)
-			})
-			response, ok := raw.(*responses.CommonResponse)
-			if err != nil {
-				errmsg := ""
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-			}
-			return nil
-		})
-		if err != nil {
-			return fmt.Errorf("Disabling alarm got an error: %#v", err)
-		}
-	}
-	if err := cmsService.WaitForCmsAlarm(d.Id(), d.Get("enabled").(bool), 102); err != nil {
-		return err
-	}
-
-	d.Partial(false)
-
+	d.SetId(fmt.Sprintf("%s:%s", resource.UniqueId(), connectivity.GetResourceData(d, "name", "rule_name")))
 	return nil
 }
 
@@ -526,13 +332,197 @@ func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interfac
 		}
 		connectivity.SetResourceData(d, resources, "dimensions", "resources")
 	}
+	d.SetId(fmt.Sprintf("%s:%s", alarm.RuleId, alarm.RuleName))
 	return nil
 }
 
 func resourceAlibabacloudStackCmsAlarmUpdate(d *schema.ResourceData, meta interface{}) error {
-	noUpdateAllowedFields := []string{"period", "effective_interval", "enabled", "escalations_warn",
-		"contact_groups", "escalations_info", "silence_time", "webhook", "escalations_critical"}
-	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
+	parts, err := ParseResourceId(d.Id(), 2)
+	if err != nil {
+		return err
+	}
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	cmsService := CmsService{client}
+	if d.HasChanges("period", "effective_interval", "escalations_warn",
+		"contact_groups", "escalations_info", "silence_time", "webhook", "escalations_critical") {
+
+		request := cms.CreatePutResourceMetricRuleRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+
+		request.RuleName = connectivity.GetResourceData(d, "rule_name", "name").(string)
+		if err := errmsgs.CheckEmpty(request.RuleName, schema.TypeString, "rule_name", "name"); err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.RuleId = parts[0]
+
+		request.Namespace = connectivity.GetResourceData(d, "namespace", "project").(string)
+		if err := errmsgs.CheckEmpty(request.Namespace, schema.TypeString, "namespace", "project"); err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.MetricName = connectivity.GetResourceData(d, "metric_name", "metric").(string)
+		if err := errmsgs.CheckEmpty(request.MetricName, schema.TypeString, "metric_name", "metric"); err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.Period = strconv.Itoa(d.Get("period").(int))
+
+		request.ContactGroups = strings.Join(expandStringList(d.Get("contact_groups").([]interface{})), ",")
+		if v, ok := d.GetOk("escalations_critical"); ok && len(v.([]interface{})) != 0 {
+			for _, val := range v.([]interface{}) {
+				val := val.(map[string]interface{})
+				request.EscalationsCriticalStatistics = val["statistics"].(string)
+				request.EscalationsCriticalComparisonOperator = convertOperator(val["comparison_operator"].(string))
+				request.EscalationsCriticalThreshold = val["threshold"].(string)
+				request.EscalationsCriticalTimes = requests.NewInteger(val["times"].(int))
+			}
+		}
+		// Warn
+		if v, ok := d.GetOk("escalations_warn"); ok && len(v.([]interface{})) != 0 {
+			for _, val := range v.([]interface{}) {
+				val := val.(map[string]interface{})
+				request.EscalationsWarnStatistics = val["statistics"].(string)
+				request.EscalationsWarnComparisonOperator = convertOperator(val["comparison_operator"].(string))
+				request.EscalationsWarnThreshold = val["threshold"].(string)
+				request.EscalationsWarnTimes = requests.NewInteger(val["times"].(int))
+			}
+		}
+		// Info
+		if v, ok := d.GetOk("escalations_info"); ok && len(v.([]interface{})) != 0 {
+			for _, val := range v.([]interface{}) {
+				val := val.(map[string]interface{})
+				request.EscalationsInfoStatistics = val["statistics"].(string)
+				request.EscalationsInfoComparisonOperator = convertOperator(val["comparison_operator"].(string))
+				request.EscalationsInfoThreshold = val["threshold"].(string)
+				request.EscalationsInfoTimes = requests.NewInteger(val["times"].(int))
+			}
+		}
+
+		if v, ok := d.GetOk("effective_interval"); ok && v.(string) != "" {
+			request.EffectiveInterval = v.(string)
+		}
+		request.SilenceTime = requests.NewInteger(d.Get("silence_time").(int))
+
+		var instanceId string
+		var dimList []map[string]string
+
+		dimensions := connectivity.GetResourceData(d, "dimensions", "resource")
+		for k, v := range dimensions.(map[string]interface{}) {
+			values := strings.Split(v.(string), COMMA_SEPARATED)
+			if len(values) > 0 {
+				instanceId = values[0]
+				for _, vv := range values {
+					dimList = append(dimList, map[string]string{k: Trim(vv)})
+				}
+			} else {
+				dimList = append(dimList, map[string]string{k: Trim(v.(string))})
+			}
+		}
+
+		if len(dimList) > 0 {
+			if bytes, err := json.Marshal(dimList); err != nil {
+				return fmt.Errorf("marshaling dimensions to json string got an error: %#v", err)
+			} else {
+				request.Resources = string(bytes[:])
+			}
+		}
+
+		nrequest := client.NewCommonRequest("POST", "Cms", "2019-01-01", "PutResourceMetricRule", "")
+		mergeMaps(nrequest.QueryParams, map[string]string{
+			"RuleName":                       request.RuleName,
+			"RuleId":                         request.RuleId,
+			"Namespace":                      request.Namespace,
+			"MetricName":                     request.MetricName,
+			"Period":                         request.Period,
+			"EffectiveInterval":              request.EffectiveInterval,
+			"ContactGroups":                  request.ContactGroups,
+			"InstanceID":                     instanceId,
+			"Resources":                      request.Resources,
+			"Escalations.Critical.Threshold": request.EscalationsCriticalThreshold,
+			"Escalations.Critical.ComparisonOperator": request.EscalationsCriticalComparisonOperator,
+			"Escalations.Critical.Statistics":         request.EscalationsCriticalStatistics,
+			"Escalations.Critical.Times":              fmt.Sprint(request.EscalationsCriticalTimes),
+			"Escalations.Warn.Threshold":              request.EscalationsWarnThreshold,
+			"Escalations.Warn.ComparisonOperator":     request.EscalationsWarnComparisonOperator,
+			"Escalations.Warn.Statistics":             request.EscalationsWarnStatistics,
+			"Escalations.Warn.Times":                  fmt.Sprint(request.EscalationsWarnTimes),
+			"Escalations.Info.Threshold":              request.EscalationsInfoThreshold,
+			"Escalations.Info.ComparisonOperator":     request.EscalationsCriticalComparisonOperator,
+			"Escalations.Info.Statistics":             request.EscalationsInfoStatistics,
+			"Escalations.Info.Times":                  fmt.Sprint(request.EscalationsInfoTimes),
+			"SilenceTime":                             fmt.Sprint(request.SilenceTime),
+			"Format":                                  "JSON",
+			"SignatureVersion":                        "1.0",
+			"Webhook":                                 d.Get("webhook").(string),
+		})
+
+		response, err := client.ProcessCommonRequest(nrequest)
+		if err != nil {
+			if response == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		d.SetId(fmt.Sprintf("%s:%s", parts[0], connectivity.GetResourceData(d, "name", "rule_name")))
+	}
+	if d.HasChange("enabled") {
+		if d.Get("enabled").(bool) {
+			request := cms.CreateEnableMetricRulesRequest()
+			client.InitRpcRequest(*request.RpcRequest)
+			request.RuleId = &[]string{parts[0]}
+
+			wait := incrementalWait(1*time.Second, 2*time.Second)
+			if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+				raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
+					return cmsClient.EnableMetricRules(request)
+				})
+				response, ok := raw.(*responses.CommonResponse)
+				if err != nil {
+					errmsg := ""
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+					}
+					if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+						wait()
+						return resource.RetryableError(err)
+					}
+					return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+				}
+				return nil
+			}); err != nil {
+				return fmt.Errorf("Enabling alarm got an error: %#v", err)
+			}
+		} else {
+			request := cms.CreateDisableMetricRulesRequest()
+			client.InitRpcRequest(*request.RpcRequest)
+			request.RuleId = &[]string{parts[0]}
+
+			wait := incrementalWait(1*time.Second, 2*time.Second)
+			if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+				raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
+					return cmsClient.DisableMetricRules(request)
+				})
+				response, ok := raw.(*responses.CommonResponse)
+				if err != nil {
+					errmsg := ""
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+					}
+					if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+						wait()
+						return resource.RetryableError(err)
+					}
+					return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+				}
+				return nil
+			}); err != nil {
+				return fmt.Errorf("Disabling alarm got an error: %#v", err)
+			}
+		}
+		if err := cmsService.WaitForCmsAlarm(d.Id(), d.Get("enabled").(bool), 120); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func resourceAlibabacloudStackCmsAlarmDelete(d *schema.ResourceData, meta interface{}) error {
