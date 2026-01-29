@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -55,7 +54,7 @@ func resourceAlibabacloudStackCmsMetricRuleTemplate() *schema.Resource {
 													Optional: true,
 												},
 												"times": {
-													Type:     schema.TypeString,
+													Type:     schema.TypeInt,
 													Optional: true,
 												},
 											},
@@ -81,7 +80,7 @@ func resourceAlibabacloudStackCmsMetricRuleTemplate() *schema.Resource {
 													Optional: true,
 												},
 												"times": {
-													Type:     schema.TypeString,
+													Type:     schema.TypeInt,
 													Optional: true,
 												},
 											},
@@ -107,7 +106,7 @@ func resourceAlibabacloudStackCmsMetricRuleTemplate() *schema.Resource {
 													Optional: true,
 												},
 												"times": {
-													Type:     schema.TypeString,
+													Type:     schema.TypeInt,
 													Optional: true,
 												},
 											},
@@ -135,27 +134,7 @@ func resourceAlibabacloudStackCmsMetricRuleTemplate() *schema.Resource {
 					},
 				},
 			},
-			"apply_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"enable": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"enable_end_time": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"enable_start_time": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -163,29 +142,6 @@ func resourceAlibabacloudStackCmsMetricRuleTemplate() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-			"notify_level": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"rest_version": {
-				Optional: true,
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"silence_time": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ValidateFunc: validation.IntBetween(0, 86400),
-			},
-			"webhook": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"overwrite": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
 			},
 		},
 	}
@@ -198,85 +154,81 @@ func resourceAlibabacloudStackCmsMetricRuleTemplate() *schema.Resource {
 func resourceAlibabacloudStackCmsMetricRuleTemplateCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := client.NewCommonRequest("POST", "Cms", "2019-01-01", "CreateMetricRuleTemplate", "")
+	reqQuery := map[string]interface{}{
+		"Name": d.Get("metric_rule_template_name"),
+	}
 
-	request.QueryParams["Name"] = d.Get("metric_rule_template_name").(string)
 	if v, ok := d.GetOk("description"); ok {
-		request.QueryParams["Description"] = v.(string)
+		reqQuery["Description"] = v
 	}
 
 	if v, ok := d.GetOk("alert_templates"); ok {
 		alertTemplatesList := v.(*schema.Set).List()
 		if len(alertTemplatesList) > 0 {
+			alertTemplates := make([]interface{}, 0, len(alertTemplatesList))
 
-			for i, alertTemplate := range alertTemplatesList {
-				alertTemplateMap := alertTemplate.(map[string]interface{})
+			for _, alertTemplate := range alertTemplatesList {
+				tmpl := alertTemplate.(map[string]interface{})
+				templateMap := map[string]interface{}{
+					"Category":   tmpl["category"],
+					"MetricName": tmpl["metric_name"],
+					"Namespace":  tmpl["namespace"],
+					"RuleName":   tmpl["rule_name"],
+					"Webhook":    tmpl["webhook"],
+				}
 
-				request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Category", i+1)] = alertTemplateMap["category"].(string)
-				request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.MetricName", i+1)] = alertTemplateMap["metric_name"].(string)
-				request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Namespace", i+1)] = alertTemplateMap["namespace"].(string)
-				request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.RuleName", i+1)] = alertTemplateMap["rule_name"].(string)
-				request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Webhook", i+1)] = alertTemplateMap["webhook"].(string)
+				// Handle escalations
+				if escRaw, ok := tmpl["escalations"]; ok {
+					escList := escRaw.(*schema.Set).List()
+					if len(escList) > 0 {
+						escalation := escList[0].(map[string]interface{})
+						escalationsMap := map[string]interface{}{}
 
-				if escalations, ok := alertTemplateMap["escalations"]; ok {
-					escalationsList := escalations.(*schema.Set).List()
-					if len(escalationsList) > 0 {
-						escalationMap := escalationsList[0].(map[string]interface{}) // MaxItems 为 1，所以只取第一个
-
-						if critical, ok := escalationMap["critical"]; ok {
-							criticalList := critical.(*schema.Set).List()
-							if len(criticalList) > 0 {
-								criticalMap := criticalList[0].(map[string]interface{}) // MaxItems 为 1
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Critical.%d.ComparisonOperator", i+1, 1)] = criticalMap["comparison_operator"].(string)
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Critical.%d.Statistics", i+1, 1)] = criticalMap["statistics"].(string)
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Critical.%d.Threshold", i+1, 1)] = criticalMap["threshold"].(string)
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Critical.%d.Times", i+1, 1)] = criticalMap["times"].(string)
+						// Helper to extract level config
+						extractLevel := func(levelRaw interface{}) map[string]interface{} {
+							if levelRaw == nil {
+								return nil
+							}
+							levelList := levelRaw.(*schema.Set).List()
+							if len(levelList) == 0 {
+								return nil
+							}
+							lm := levelList[0].(map[string]interface{})
+							return map[string]interface{}{
+								"ComparisonOperator": lm["comparison_operator"],
+								"Statistics":         lm["statistics"],
+								"Threshold":          lm["threshold"],
+								"Times":              lm["times"],
 							}
 						}
 
-						if info, ok := escalationMap["info"]; ok {
-							infoList := info.(*schema.Set).List()
-							if len(infoList) > 0 {
-								infoMap := infoList[0].(map[string]interface{}) // MaxItems 为 1
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Info.%d.ComparisonOperator", i+1, 1)] = infoMap["comparison_operator"].(string)
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Info.%d.Statistics", i+1, 1)] = infoMap["statistics"].(string)
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Info.%d.Threshold", i+1, 1)] = infoMap["threshold"].(string)
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Info.%d.Times", i+1, 1)] = infoMap["times"].(string)
-							}
+						if critical := extractLevel(escalation["critical"]); critical != nil {
+							escalationsMap["Critical"] = critical
+						}
+						if info := extractLevel(escalation["info"]); info != nil {
+							escalationsMap["Info"] = info
+						}
+						if warn := extractLevel(escalation["warn"]); warn != nil {
+							escalationsMap["Warn"] = warn
 						}
 
-						if warn, ok := escalationMap["warn"]; ok {
-							warnList := warn.(*schema.Set).List()
-							if len(warnList) > 0 {
-								warnMap := warnList[0].(map[string]interface{}) // MaxItems 为 1
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Warn.%d.ComparisonOperator", i+1, 1)] = warnMap["comparison_operator"].(string)
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Warn.%d.Statistics", i+1, 1)] = warnMap["statistics"].(string)
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Warn.%d.Threshold", i+1, 1)] = warnMap["threshold"].(string)
-								request.QueryParams[fmt.Sprintf("AlertTemplates.AlertTemplate.%d.Escalations.Warn.%d.Times", i+1, 1)] = warnMap["times"].(string)
-							}
+						if len(escalationsMap) > 0 {
+							templateMap["Escalations"] = escalationsMap
 						}
 					}
 				}
+
+				alertTemplates = append(alertTemplates, templateMap)
 			}
+
+			reqQuery["AlertTemplates"] = alertTemplates
 		}
 	}
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	log.Printf(" response of raw CreateMetricRuleTemplate : %s", bresponse)
+	response, err := client.DoTeaRequest("POST", "Cms", "2019-01-01", "CreateMetricRuleTemplate", "", nil, reqQuery, nil)
 
 	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "cms_metric_rule_templates", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	var response map[string]interface{}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "CreateMetricRuleTemplate", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	if code, ok := response["Code"]; ok {
@@ -326,34 +278,40 @@ func resourceAlibabacloudStackCmsMetricRuleTemplateRead(d *schema.ResourceData, 
 			escalationsMap := map[string]interface{}{}
 
 			criticalMap := alertTemplate.Escalations.Critical
-			criticalMaps := make([]map[string]interface{}, 0)
-			criticalArg := map[string]interface{}{}
-			criticalArg["comparison_operator"] = criticalMap.ComparisonOperator
-			criticalArg["statistics"] = criticalMap.Statistics
-			criticalArg["threshold"] = criticalMap.Threshold
-			criticalArg["times"] = criticalMap.Times
-			criticalMaps = append(criticalMaps, criticalArg)
-			escalationsMap["critical"] = criticalMaps
+			if criticalMap.ComparisonOperator != "" {
+				criticalMaps := make([]map[string]interface{}, 0)
+				criticalArg := map[string]interface{}{}
+				criticalArg["comparison_operator"] = criticalMap.ComparisonOperator
+				criticalArg["statistics"] = criticalMap.Statistics
+				criticalArg["threshold"] = criticalMap.Threshold
+				criticalArg["times"] = criticalMap.Times
+				criticalMaps = append(criticalMaps, criticalArg)
+				escalationsMap["critical"] = criticalMaps
+			}
 
 			infoMap := alertTemplate.Escalations.Info
-			infoMaps := make([]map[string]interface{}, 0)
-			infoArg := map[string]interface{}{}
-			infoArg["comparison_operator"] = infoMap.ComparisonOperator
-			infoArg["statistics"] = infoMap.Statistics
-			infoArg["threshold"] = infoMap.Threshold
-			infoArg["times"] = infoMap.Times
-			infoMaps = append(infoMaps, infoArg)
-			escalationsMap["info"] = infoMaps
+			if infoMap.ComparisonOperator != "" {
+				infoMaps := make([]map[string]interface{}, 0)
+				infoArg := map[string]interface{}{}
+				infoArg["comparison_operator"] = infoMap.ComparisonOperator
+				infoArg["statistics"] = infoMap.Statistics
+				infoArg["threshold"] = infoMap.Threshold
+				infoArg["times"] = infoMap.Times
+				infoMaps = append(infoMaps, infoArg)
+				escalationsMap["info"] = infoMaps
+			}
 
 			warnMap := alertTemplate.Escalations.Warn
-			warnMaps := make([]map[string]interface{}, 0)
-			warnArg := map[string]interface{}{}
-			warnArg["comparison_operator"] = warnMap.ComparisonOperator
-			warnArg["statistics"] = warnMap.Statistics
-			warnArg["threshold"] = warnMap.Threshold
-			warnArg["times"] = warnMap.Times
-			warnMaps = append(warnMaps, warnArg)
-			escalationsMap["warn"] = warnMaps
+			if warnMap.ComparisonOperator != "" {
+				warnMaps := make([]map[string]interface{}, 0)
+				warnArg := map[string]interface{}{}
+				warnArg["comparison_operator"] = warnMap.ComparisonOperator
+				warnArg["statistics"] = warnMap.Statistics
+				warnArg["threshold"] = warnMap.Threshold
+				warnArg["times"] = warnMap.Times
+				warnMaps = append(warnMaps, warnArg)
+				escalationsMap["warn"] = warnMaps
+			}
 
 			escalationsMaps = append(escalationsMaps, escalationsMap)
 
@@ -364,71 +322,27 @@ func resourceAlibabacloudStackCmsMetricRuleTemplateRead(d *schema.ResourceData, 
 	}
 	d.Set("description", resource.Description)
 	d.Set("metric_rule_template_name", resource.Name)
-	d.Set("rest_version", resource.RestVersion)
+
 	return nil
 }
 
 func resourceAlibabacloudStackCmsMetricRuleTemplateUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	d.Partial(true)
-	update := false
 
-	if v, ok := d.GetOk("enable"); ok && v.(bool) {
-		request := client.NewCommonRequest("POST", "Cms", "2019-01-01", "ApplyMetricRuleTemplate", "")
-		request.QueryParams["TemplateId"] = "[]"
-		request.QueryParams["TemplateIds"] = d.Id()
-		request.QueryParams["GroupId"] = client.ResourceGroup
-		request.QueryParams["Overwrite"] = fmt.Sprintf("%t", d.Get("overwrite").(bool))
-		if v, ok := d.GetOk("apply_mode"); ok {
-			request.QueryParams["ApplyMode"] = v.(string)
-		}
-		if v, ok := d.GetOk("enable_end_time"); ok {
-			request.QueryParams["EnableEndTime"] = v.(string)
-		}
-		if v, ok := d.GetOk("enable_start_time"); ok {
-			request.QueryParams["EnableStartTime"] = v.(string)
-		}
-		if v, ok := d.GetOk("notify_level"); ok {
-			request.QueryParams["NotifyLevel"] = v.(string)
-		}
-		if v, ok := d.GetOk("silence_time"); ok {
-			request.QueryParams["SilenceTime"] = fmt.Sprint(v)
-		}
-		if v, ok := d.GetOk("webhook"); ok {
-			request.QueryParams["Webhook"] = v.(string)
-		}
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		log.Printf(" response of raw ApplyMetricRuleTemplate : %s", bresponse)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms_metric_rule_template", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		resource := make(map[string]interface{})
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resource)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "ApplyMetricRuleTemplate", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		if resource["Code"].(float64) != 200 {
-			return errmsgs.WrapError(fmt.Errorf("ApplyMetricRuleTemplate Error: %v", resource))
-		}
-		d.Set("group_id", client.ResourceGroup)
+	if d.IsNewResource() {
+		return nil
 	}
 
-	update = false
-	modifyMetricRuleTemplateReq := cms.CreateModifyMetricRuleTemplateRequest()
-	client.InitRpcRequest(*modifyMetricRuleTemplateReq.RpcRequest)
+	if d.HasChanges("alert_templates", "description", "metric_rule_template_name") {
+		modifyMetricRuleTemplateReq := cms.CreateModifyMetricRuleTemplateRequest()
+		client.InitRpcRequest(*modifyMetricRuleTemplateReq.RpcRequest)
 
-	if v, ok := d.GetOk("rest_version"); ok {
-		rest_version, _ := strconv.Atoi(v.(string))
-		modifyMetricRuleTemplateReq.RestVersion = requests.NewInteger(rest_version)
-	}
-	if !d.IsNewResource() && d.HasChange("alert_templates") {
-		update = true
+		cmsService := CmsService{client}
+		templateattr, err := cmsService.DescribeMetricRuleTemplateAttribute(d.Id())
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		modifyMetricRuleTemplateReq.RestVersion = requests.NewInteger(templateattr.Resource.RestVersion)
 		if v, ok := d.GetOk("alert_templates"); ok {
 			alertTemplatesMaps := make([]cms.ModifyMetricRuleTemplateAlertTemplates, 0)
 			for _, alertTemplates := range v.(*schema.Set).List() {
@@ -447,7 +361,7 @@ func resourceAlibabacloudStackCmsMetricRuleTemplateUpdate(d *schema.ResourceData
 								alertTemplate.EscalationsCriticalComparisonOperator = criticalArg["comparison_operator"].(string)
 								alertTemplate.EscalationsCriticalStatistics = criticalArg["statistics"].(string)
 								alertTemplate.EscalationsCriticalThreshold = criticalArg["threshold"].(string)
-								alertTemplate.EscalationsCriticalTimes = criticalArg["times"].(string)
+								alertTemplate.EscalationsCriticalTimes = strconv.Itoa(criticalArg["times"].(int))
 							}
 						}
 						if infoMaps, ok := escalationsArg.(map[string]interface{})["info"]; ok {
@@ -456,7 +370,7 @@ func resourceAlibabacloudStackCmsMetricRuleTemplateUpdate(d *schema.ResourceData
 								alertTemplate.EscalationsInfoComparisonOperator = infoArg["comparison_operator"].(string)
 								alertTemplate.EscalationsInfoStatistics = infoArg["statistics"].(string)
 								alertTemplate.EscalationsInfoThreshold = infoArg["threshold"].(string)
-								alertTemplate.EscalationsInfoTimes = infoArg["times"].(string)
+								alertTemplate.EscalationsInfoTimes = strconv.Itoa(infoArg["times"].(int))
 							}
 						}
 						if warnMaps, ok := escalationsArg.(map[string]interface{})["warn"]; ok {
@@ -465,7 +379,7 @@ func resourceAlibabacloudStackCmsMetricRuleTemplateUpdate(d *schema.ResourceData
 								alertTemplate.EscalationsWarnComparisonOperator = warnArg["comparison_operator"].(string)
 								alertTemplate.EscalationsWarnStatistics = warnArg["statistics"].(string)
 								alertTemplate.EscalationsWarnThreshold = warnArg["threshold"].(string)
-								alertTemplate.EscalationsWarnTimes = warnArg["times"].(string)
+								alertTemplate.EscalationsWarnTimes = strconv.Itoa(warnArg["times"].(int))
 							}
 						}
 						alertTemplatesMaps = append(alertTemplatesMaps, alertTemplate)
@@ -474,18 +388,15 @@ func resourceAlibabacloudStackCmsMetricRuleTemplateUpdate(d *schema.ResourceData
 			}
 			modifyMetricRuleTemplateReq.AlertTemplates = &alertTemplatesMaps
 		}
-	}
-	if !d.IsNewResource() && d.HasChange("description") {
-		update = true
 		if v, ok := d.GetOk("description"); ok {
 			modifyMetricRuleTemplateReq.Description = v.(string)
 		}
-	}
-	if !d.IsNewResource() && d.HasChange("metric_rule_template_name") {
-		update = true
 		modifyMetricRuleTemplateReq.Name = d.Get("metric_rule_template_name").(string)
-	}
-	if update {
+		id, err := strconv.Atoi(d.Id())
+		if err != nil {
+			return err
+		}
+		modifyMetricRuleTemplateReq.TemplateId = requests.NewInteger(id)
 		raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
 			return cmsClient.ModifyMetricRuleTemplate(modifyMetricRuleTemplateReq)
 		})
@@ -495,14 +406,13 @@ func resourceAlibabacloudStackCmsMetricRuleTemplateUpdate(d *schema.ResourceData
 			if response, ok := raw.(*responses.BaseResponse); ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response)
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ApplyMetricRuleTemplate", modifyMetricRuleTemplateReq.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ModifyMetricRuleTemplate", modifyMetricRuleTemplateReq.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		response, _ := raw.(*cms.ModifyMetricRuleTemplateResponse)
 		if response.Code != 200 {
 			return errmsgs.WrapError(fmt.Errorf("%s", response.Message))
 		}
 	}
-	d.Partial(false)
 	return nil
 }
 

@@ -10,7 +10,6 @@ import (
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/alibabacloud-go/tea/tea"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
@@ -106,7 +105,7 @@ func testSweepCmsMetricRuleTemplate(region string) error {
 }
 
 func TestAccAlibabacloudStackCmsMetricRuleTemplate_basic0(t *testing.T) {
-	var v *cms.DescribeMetricRuleTemplateAttributeResponse
+	var v *DescribeMetricRuleTemplateAttributeResponse
 	resourceId := "alibabacloudstack_cms_metric_rule_template.default"
 	ra := resourceAttrInit(resourceId, alibabacloudstackCloudMonitorServiceMetricRuleTemplateMap0)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
@@ -139,6 +138,22 @@ func TestAccAlibabacloudStackCmsMetricRuleTemplate_basic0(t *testing.T) {
 							"escalations": []map[string]interface{}{
 								{
 									"critical": []map[string]interface{}{
+										{
+											"comparison_operator": "GreaterThanThreshold",
+											"statistics":          "Average",
+											"threshold":           "90",
+											"times":               "3",
+										},
+									},
+									"info": []map[string]interface{}{
+										{
+											"comparison_operator": "GreaterThanThreshold",
+											"statistics":          "Average",
+											"threshold":           "90",
+											"times":               "3",
+										},
+									},
+									"warn": []map[string]interface{}{
 										{
 											"comparison_operator": "GreaterThanThreshold",
 											"statistics":          "Average",
@@ -219,22 +234,6 @@ func TestAccAlibabacloudStackCmsMetricRuleTemplate_basic0(t *testing.T) {
 					}),
 				),
 			},
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"group_id":          "${local.group_id}",
-			// 		"silence_time":      "8640",
-			// 		"enable_start_time": "00",
-			// 		"enable_end_time":   "23",
-			// 		"notify_level":      "4",
-			// 		"apply_mode":        "GROUP_INSTANCE_FIRST",
-			// 		"webhook":           "https://www.aliyun.com",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"group_id": CHECKSET,
-			// 		}),
-			// 	),
-			// },
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"alert_templates": []map[string]interface{}{
@@ -285,12 +284,6 @@ func TestAccAlibabacloudStackCmsMetricRuleTemplate_basic0(t *testing.T) {
 						"metric_rule_template_name": name,
 					}),
 				),
-			},
-			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"apply_mode", "notify_level", "enable_end_time", "silence_time", "enable_start_time", "group_id", "webhook"},
 			},
 		},
 	})

@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,11 +16,6 @@ func dataSourceAlibabacloudStackCmsMetricRuleTemplates() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackCmsMetricRuleTemplatesRead,
 		Schema: map[string]*schema.Schema{
-			"keyword": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"name_regex": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -45,11 +39,6 @@ func dataSourceAlibabacloudStackCmsMetricRuleTemplates() *schema.Resource {
 				Computed: true,
 			},
 			"is_default": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-			"history": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
@@ -90,7 +79,7 @@ func dataSourceAlibabacloudStackCmsMetricRuleTemplates() *schema.Resource {
 func dataSourceAlibabacloudStackCmsMetricRuleTemplatesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	var objects []cms.Template
+	var objects []Template
 	var templateNameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
@@ -101,21 +90,22 @@ func dataSourceAlibabacloudStackCmsMetricRuleTemplatesRead(d *schema.ResourceDat
 	}
 
 	idsMap := getIdsStringFilter(d)
+	pageNumber := 1
 
 	request := client.NewCommonRequest("GET", "Cms", "2019-01-01", "DescribeMetricRuleTemplateList", "")
-	request.QueryParams["pageSize"] = "10"
+	request.QueryParams["PageSize"] = "10"
 	request.QueryParams["IsDefault"] = fmt.Sprint(d.Get("is_default").(bool))
-	request.QueryParams["History"] = fmt.Sprint(d.Get("history").(bool))
+	request.QueryParams["History"] = "false"
 
-	if v, ok := d.GetOk("keyword"); ok {
-		request.QueryParams["Keyword"] = v.(string)
-	}
+	var templateId int
 	if v, ok := d.GetOk("template_id"); ok {
-		request.QueryParams["TemplateId"] = fmt.Sprint(v.(int))
+		templateId = v.(int)
+		request.QueryParams["TemplateId"] = strconv.Itoa(templateId)
 	}
 
-	var resp *cms.DescribeMetricRuleTemplateListResponse
+	var resp *DescribeMetricRuleTemplateListResponse
 	for {
+		request.QueryParams["PageNumber"] = strconv.Itoa(pageNumber)
 		bresponse, err := client.ProcessCommonRequest(request)
 		log.Printf(" response of raw DescribeMetricRuleTemplateList : %s", bresponse)
 		if err != nil {
@@ -139,17 +129,18 @@ func dataSourceAlibabacloudStackCmsMetricRuleTemplatesRead(d *schema.ResourceDat
 					continue
 				}
 			}
+			
+			if templateId != 0 && templateId != int(item.TemplateId) {
+				continue
+			}
+			
 			objects = append(objects, item)
 		}
 		if len(resp.Templates.Template) < PageSizeLarge {
 			break
 		}
 
-		page, err := strconv.Atoi(request.QueryParams["pageNumber"])
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		request.QueryParams["pageNumber"] = fmt.Sprintf("%d", page+1)
+		pageNumber += 1
 	}
 
 	ids := make([]string, 0)

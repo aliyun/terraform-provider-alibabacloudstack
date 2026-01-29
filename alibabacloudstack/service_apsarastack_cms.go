@@ -314,7 +314,7 @@ func (s *CmsService) DescribeCmsMetricRuleTemplateDetail(id string) (object cms.
 	return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("CmsMetricRuleTemplate", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 }
 
-func (s *CmsService) DescribeMetricRuleTemplateAttribute(id string) (object *cms.DescribeMetricRuleTemplateAttributeResponse, err error) {
+func (s *CmsService) DescribeMetricRuleTemplateAttribute(id string) (object *DescribeMetricRuleTemplateAttributeResponse, err error) {
 	request := s.client.NewCommonRequest("POST", "Cms", "2019-01-01", "DescribeMetricRuleTemplateAttribute", "")
 	request.QueryParams["TemplateId"] = id
 
@@ -333,14 +333,10 @@ func (s *CmsService) DescribeMetricRuleTemplateAttribute(id string) (object *cms
 		return nil, errmsgs.Error("DescribeMetricRuleTemplateAttribute response is nil")
 	}
 
-	responseBytes, err := json.Marshal(bresponse)
-	if err != nil {
+	typedResponse := &DescribeMetricRuleTemplateAttributeResponse{}
+	if err := json.Unmarshal(bresponse.GetHttpContentBytes(), typedResponse); err != nil {
 		return nil, errmsgs.WrapErrorf(err, "Failed to marshal CommonResponse to JSON")
 	}
 
-	typedResponse := &cms.DescribeMetricRuleTemplateAttributeResponse{}
-	if err := json.Unmarshal(responseBytes, typedResponse); err != nil {
-		return nil, errmsgs.WrapErrorf(err, "Failed to unmarshal response to DescribeMetricRuleTemplateAttributeResponse")
-	}
 	return typedResponse, nil
 }

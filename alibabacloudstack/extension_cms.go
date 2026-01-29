@@ -1,5 +1,7 @@
 package alibabacloudstack
 
+import "github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+
 const (
 	Average          = "Average"
 	Minimum          = "Minimum"
@@ -106,4 +108,77 @@ type AlarmsData struct {
 	} `json:"Alarms"`
 	Code    string `json:"Code"`
 	Success bool   `json:"Success"`
+}
+
+type DescribeMetricRuleTemplateAttributeResponse struct {
+	EagleEyeTraceID string `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool   `json:"asapiSuccess"`
+	ResponseVersion string `json:"responseVersion"`
+	RequestID       string `json:"RequestId"`
+	Success         bool   `json:"success"`
+	RequestId       string `json:"requestId"`
+	Resource        struct {
+		AlertTemplates struct {
+			AlertTemplate []struct {
+				MetricName  string `json:"MetricName"`
+				Category    string `json:"Category"`
+				Escalations struct {
+					Critical Escalation `json:"Critical"`
+					Info     Escalation `json:"Info"`
+					Warn     Escalation `json:"Warn"`
+				} `json:"Escalations"`
+				RuleName  string      `json:"RuleName"`
+				Namespace string      `json:"Namespace"`
+				Webhook   string      `json:"Webhook"`
+				Selector  interface{} `json:"Selector"` // Empty object {}, could be map[string]interface{}
+			} `json:"AlertTemplate"`
+		} `json:"AlertTemplates"`
+		Description string `json:"Description"`
+		RestVersion int    `json:"RestVersion"`
+		TemplateID  int    `json:"TemplateId"`
+		Name        string `json:"Name"`
+	} `json:"Resource"`
+	Code int `json:"Code"`
+}
+
+type Escalation struct {
+	ComparisonOperator string `json:"ComparisonOperator,omitempty"`
+	Times              int    `json:"Times,omitempty"`
+	Statistics         string `json:"Statistics,omitempty"`
+	Threshold          string `json:"Threshold,omitempty"`
+}
+
+type DescribeMetricRuleTemplateListResponse struct {
+	*responses.BaseResponse
+	Code      int    `json:"Code" xml:"Code"`
+	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Total     int64  `json:"Total" xml:"Total"`
+	Success   bool   `json:"Success" xml:"Success"`
+	Templates struct {
+		Template []Template `json:"Template" xml:"Template"`
+	} `json:"Templates" xml:"Templates"`
+}
+
+type Template struct {
+	Description  string `json:"Description" xml:"Description"`
+	GmtCreate    int64  `json:"GmtCreate" xml:"GmtCreate"`
+	Name         string `json:"Name" xml:"Name"`
+	RestVersion  int64  `json:"RestVersion" xml:"RestVersion"`
+	GmtModified  int64  `json:"GmtModified" xml:"GmtModified"`
+	TemplateId   int64  `json:"TemplateId" xml:"TemplateId"`
+	ApplyRecords struct {
+		ApplyItem []struct {
+			GroupName string `json:"GroupName" xml:"GroupName"`
+			ApplyTime int64  `json:"ApplyTime" xml:"ApplyTime"`
+			GroupId   int    `json:"GroupId" xml:"GroupId"`
+		} `json:"ApplyItem" xml:"ApplyItem"`
+	} `json:"ApplyRecords" xml:"ApplyRecords"`
+	ApplyHistories struct {
+		ApplyHistory []struct {
+			GroupId   int64  `json:"GroupId" xml:"GroupId"`
+			GroupName string `json:"GroupName" xml:"GroupName"`
+			ApplyTime int64  `json:"ApplyTime" xml:"ApplyTime"`
+		} `json:"ApplyHistory" xml:"ApplyHistory"`
+	} `json:"ApplyHistories" xml:"ApplyHistories"`
 }
