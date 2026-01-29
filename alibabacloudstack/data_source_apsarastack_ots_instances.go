@@ -132,13 +132,7 @@ func dataSourceAlibabacloudStackOtsInstancesRead(d *schema.ResourceData, meta in
 
 	// get full instance info via GetInstance
 	var allInstances []InstanceInfo
-	for _, instanceName := range filteredInstanceNames {
-		instanceInfo, err := otsService.DescribeOtsInstance(instanceName)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ots_instances", "DescribeOtsInstance", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		allInstances = append(allInstances, instanceInfo)
-	}
+
 
 	// filter by tag.
 	var filteredInstances []InstanceInfo

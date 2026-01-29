@@ -1,15 +1,15 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
+	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ots"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackOtsInstance() *schema.Resource {
@@ -21,223 +21,247 @@ func resourceAlibabacloudStackOtsInstance() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(3, 16),
 			},
-
-			"accessed_by": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      AnyNetwork,
-				ValidateFunc: validation.StringInSlice([]string{string(AnyNetwork), string(VpcOnly), string(VpcOrConsole)}, false),
-			},
-
-			"instance_type": {
+			"cluster_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      OtsHighPerformance,
-				ValidateFunc: validation.StringInSlice([]string{string(OtsCapacity), string(OtsHighPerformance)}, false),
+				AtLeastOneOf: []string{"cluster_type"},
+			},
+			"cluster_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				AtLeastOneOf: []string{"cluster_name"},
+			},
+			"alias_name": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Id() != ""
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"network": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"specification": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"table_quota": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"vcu_quota": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"user_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"create_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"sp_instance_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"storage_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"tags": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"tag_key": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"tag_value": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
 				},
 			},
-			"tags": tagsSchema(),
 		},
 	}
-	setResourceFunc(resource, resourceAliyunOtsInstanceCreate, resourceAliyunOtsInstanceRead, resourceAliyunOtsInstanceUpdate, resourceAliyunOtsInstanceDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackOtsInstanceCreate, resourceAlibabacloudStackOtsInstanceRead, resourceAlibabacloudStackOtsInstanceUpdate, resourceAlibabacloudStackOtsInstanceDelete)
 	return resource
 }
 
-func resourceAliyunOtsInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	otsService := OtsService{client}
 
-	instanceType := d.Get("instance_type").(string)
-	request := ots.CreateInsertInstanceRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.ClusterType = convertInstanceType(OtsInstanceType(instanceType))
+	instanceName := d.Get("name").(string)
+	request := map[string]interface{}{
+		"InstanceName": instanceName,
+	}
 
-	types, err := otsService.DescribeOtsInstanceTypes()
+	if v, ok := d.GetOk("cluster_name"); ok {
+		request["ClusterName"] = v.(string)
+	}
+	if v, ok := d.GetOk("cluster_type"); ok {
+		request["ClusterType"] = v.(string)
+	}
+
+	if v, ok := d.GetOk("description"); ok {
+		request["InstanceDescription"] = v.(string)
+	}
+
+	// Call the create API
+	_, err := client.DoTeaRequest("POST", "tablestore", "2020-12-09", "CreateInstance", "/v2/openapi/createinstance", nil, nil, request)
 	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	valid := false
-	for _, t := range types {
-		if request.ClusterType == t {
-			valid = true
-			break
-		}
-	}
-	if !valid {
-		return errmsgs.WrapError(errmsgs.Error("The instance type %s is not available in the region %s.", instanceType, client.RegionId))
+		return err
 	}
 
-	request.InstanceName = d.Get("name").(string)
-	request.Description = d.Get("description").(string)
-	request.Network = convertInstanceAccessedBy(InstanceAccessedByType(d.Get("accessed_by").(string)))
+	// Set the resource ID based on the instance name
 
-	raw, err := client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
-		return otsClient.InsertInstance(request)
-	})
-	if err != nil {
-		errmsg := ""
-		if response, ok := raw.(*ots.InsertInstanceResponse); ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	d.SetId(instanceName)
 
-	d.SetId(request.InstanceName)
-	if err := otsService.WaitForOtsInstance(request.InstanceName, Running, DefaultTimeout/3); err != nil {
-		return errmsgs.WrapError(err)
+	// Wait for the instance to be ready
+	stateConf := BuildStateConf([]string{"creating"}, []string{"normal"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, otsService.OtsInstanceStateRefreshFunc(instanceName, []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return err
 	}
-	return nil
+
+	return resourceAlibabacloudStackOtsInstanceRead(d, meta)
 }
 
-func resourceAliyunOtsInstanceRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	otsService := OtsService{client}
+	otsService := &OtsService{client}
+
 	object, err := otsService.DescribeOtsInstance(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
+			log.Printf("[DEBUG] Resource alibabacloudstack_ots_instance otsService.DescribeOtsInstanceNew Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
 	}
 
-	d.Set("name", object.InstanceName)
-	d.Set("accessed_by", convertInstanceAccessedByRevert(object.Network))
-	d.Set("instance_type", convertInstanceTypeRevert(object.ClusterType))
-	d.Set("description", object.Description)
-	d.Set("tags", otsTagsToMapFun(object.TagInfos))
+	// Set the basic attributes from the response
+	d.Set("name", object["InstanceName"])
+	d.Set("alias_name", object["AliasName"])
+	d.Set("network", object["Network"])
+	d.Set("description", object["InstanceDescription"])
+	d.Set("cluster_name", object["ClusterName"])
+	d.Set("storage_type", object["StorageType"])
+	d.Set("create_time", object["CreateTime"])
+	d.Set("table_quota", object["TableQuota"])
+	d.Set("vcu_quota", object["VCUQuota"])
+	d.Set("user_id", object["UserId"])
+	d.Set("sp_instance_id", object["SPInstanceId"])
+	d.Set("specification", object["InstanceSpecification"])
+
+	// Handle tags
+	if tags, ok := object["Tags"].([]interface{}); ok {
+		tagsList := make([]map[string]interface{}, 0, len(tags))
+		for _, tag := range tags {
+			if tagMap, isMap := tag.(map[string]interface{}); isMap {
+				tagItem := make(map[string]interface{})
+				if tagKey, exists := tagMap["TagKey"]; exists {
+					tagItem["tag_key"] = tagKey
+				}
+				if tagValue, exists := tagMap["TagValue"]; exists {
+					tagItem["tag_value"] = tagValue
+				}
+				tagsList = append(tagsList, tagItem)
+			}
+		}
+		d.Set("tags", tagsList)
+	}
+
 	return nil
 }
 
-func resourceAliyunOtsInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	otsService := OtsService{client}
 
-	d.Partial(true)
-
-	if !d.IsNewResource() && d.HasChange("accessed_by") {
-		request := ots.CreateUpdateInstanceRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.InstanceName = d.Id()
-		request.Network = convertInstanceAccessedBy(InstanceAccessedByType(d.Get("accessed_by").(string)))
-
-		raw, err := client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
-			return otsClient.UpdateInstance(request)
-		})
-		if err != nil {
-			errmsg := ""
-			if response, ok := raw.(*ots.UpdateInstanceResponse); ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	}
-
-	if d.HasChange("tags") {
-		oraw, nraw := d.GetChange("tags")
-		o := oraw.(map[string]interface{})
-		n := nraw.(map[string]interface{})
-		create, remove := diffTags(tagsFromMap(o), tagsFromMap(n))
-
-		if len(remove) > 0 {
-			request := ots.CreateDeleteTagsRequest()
-			client.InitRpcRequest(*request.RpcRequest)
-			request.InstanceName = d.Id()
-			var tags []ots.DeleteTagsTagInfo
-			for _, t := range remove {
-				tags = append(tags, ots.DeleteTagsTagInfo{
-					TagKey:   t.Key,
-					TagValue: t.Value,
-				})
-			}
-			request.TagInfo = &tags
-
-			raw, err := client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
-				return otsClient.DeleteTags(request)
-			})
-			if err != nil {
-				errmsg := ""
-				if response, ok := raw.(*ots.DeleteTagsResponse); ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		}
-
-		if len(create) > 0 {
-			request := ots.CreateInsertTagsRequest()
-			client.InitRpcRequest(*request.RpcRequest)
-			request.InstanceName = d.Id()
-			var tags []ots.InsertTagsTagInfo
-			for _, t := range create {
-				tags = append(tags, ots.InsertTagsTagInfo{
-					TagKey:   t.Key,
-					TagValue: t.Value,
-				})
-			}
-			request.TagInfo = &tags
-
-			raw, err := client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
-				return otsClient.InsertTags(request)
-			})
-			if err != nil {
-				errmsg := ""
-				if response, ok := raw.(*ots.InsertTagsResponse); ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		}
-	}
-
-	if err := otsService.WaitForOtsInstance(d.Id(), Running, DefaultTimeout); err != nil {
-		return errmsgs.WrapError(err)
-	}
-	d.Partial(false)
-	return nil
-}
-
-func resourceAliyunOtsInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	otsService := OtsService{client}
-	request := ots.CreateDeleteInstanceRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceName = d.Id()
-
-	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
-			return otsClient.DeleteInstance(request)
-		})
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"AuthFailed", "InvalidStatus", "ValidationFailed"}) {
-				return resource.RetryableError(err)
-			}
-			errmsg := ""
-			if response, ok := raw.(*ots.DeleteInstanceResponse); ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	if d.IsNewResource() && d.Get("alias_name").(string) == "" {
 		return nil
-	})
-	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			return nil
-		}
-		return errmsgs.WrapError(err)
 	}
-	return errmsgs.WrapError(otsService.WaitForOtsInstance(d.Id(), Deleted, DefaultLongTimeout))
+
+	requestInfo := make(map[string]interface{})
+
+	// Add instance name to request
+	requestInfo["InstanceName"] = d.Id()
+
+	// Check if alias_name has changed
+	if d.HasChanges("alias_name", "description", "network") {
+		if v, ok := d.GetOk("alias_name"); ok {
+			requestInfo["AliasName"] = v.(string)
+		}
+		if v, ok := d.GetOk("description"); ok {
+			requestInfo["InstanceDescription"] = v.(string)
+		}
+		if v, ok := d.GetOk("network"); ok {
+			requestInfo["Network"] = v.(string)
+		}
+
+		// Call the update API
+		_, err := client.DoTeaRequest("POST", "Tablestore", "2020-12-09", "UpdateInstance", "/v2/openapi/updateinstance", nil, nil, requestInfo)
+		if err != nil {
+			return err
+		}
+
+		// Wait for the instance to be updated by checking its status
+		stateConf := BuildStateConf([]string{"updating"}, []string{"normal"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, otsService.OtsInstanceStateRefreshFunc(d.Id(), []string{}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func resourceAlibabacloudStackOtsInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	otsService := OtsService{client}
+
+	if err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
+		request.QueryParams["OpenApiAction"] = "DeleteInstance"
+		request.QueryParams["ProductName"] = "ots"
+
+		params := map[string]string{
+			"Department":    client.Department,
+			"ResourceGroup": client.ResourceGroup,
+			"RegionId":      client.RegionId,
+			"InstanceName":  d.Id(),
+		}
+
+		if content, err := json.Marshal(params); err != nil {
+			return resource.NonRetryableError(err)
+		} else {
+			request.QueryParams["Params"] = string(content)
+		}
+
+		bresponse, err := client.ProcessCommonRequest(request)
+
+		if err != nil {
+			if bresponse == nil {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteInstance", errmsgs.AlibabacloudStackOssGoSdk, errmsg))
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	stateConf := BuildStateConf([]string{"deleting"}, []string{""}, d.Timeout(schema.TimeoutDelete), 10*time.Second, otsService.OtsInstanceStateRefreshFunc(d.Id(), []string{}))
+	_, err := stateConf.WaitForState()
+	return errmsgs.WrapError(err)
 }

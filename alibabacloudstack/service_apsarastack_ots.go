@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"strings"
 	"time"
 	"fmt"
@@ -189,36 +188,6 @@ func (s *OtsService) ListOtsInstance(pageSize int, pageNum int) ([]string, error
 	return allInstanceNames, nil
 }
 
-func (s *OtsService) DescribeOtsInstance(id string) (inst InstanceInfo, err error) {
-	request := s.client.NewCommonRequest("GET", "Ots", "2016-06-20", "GetInstance", "")
-	request.QueryParams["InstanceName"] = id
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request.QueryParams, errmsgs.AlibabacloudStackSdkGoERROR)
-	// OTS instance not found error code is "NotFound"
-	if err != nil {
-		if bresponse == nil {
-			return inst, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		if errmsgs.NotFoundError(err) {
-			return inst, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return inst, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	var instmap GetInstanceResponse
-
-	e := json.Unmarshal(bresponse.GetHttpContentBytes(), &instmap)
-	if e != nil {
-		return inst, errmsgs.WrapErrorf(e, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if instmap.AsapiSuccess {
-		inst = instmap.InstanceInfo
-		return inst, nil
-	} else {
-		return inst, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OtsInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-	}
-}
-
 func (s *OtsService) DescribeOtsInstanceAttachment(id string) (inst ots.VpcInfo, err error) {
 	request := ots.CreateListVpcInfoByInstanceRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
@@ -300,29 +269,24 @@ func (s *OtsService) ListOtsInstanceVpc(id string) (inst []ots.VpcInfo, err erro
 	return retInfos, nil
 }
 
-func (s *OtsService) WaitForOtsInstance(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-
-	for {
+func (s *OtsService) OtsInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
 		object, err := s.DescribeOtsInstance(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object["InstanceStatus"].(string) == failState {
+				return object, object["InstanceStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["InstanceStatus"].(string)))
 			}
 		}
-		if object.Status == convertOtsInstanceStatus(status) {
-			break
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, fmt.Sprint(object.Status), status, errmsgs.ProviderERROR)
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
+		return object, object["InstanceStatus"].(string), nil
 	}
-	return nil
 }
 
 func (s *OtsService) DescribeOtsInstanceTypes() (types []string, err error) {
@@ -373,3 +337,71 @@ type GetInstanceResponse struct {
 	AsapiRequestId  string       `json:"asapiRequestId" xml:"asapiRequestId"`
 	InstanceInfo    InstanceInfo `json:"InstanceInfo" xml:"InstanceInfo"`
 }
+
+func (s *OtsService) DescribeOtsInstance(id string) (map[string]interface{}, error) {
+    reqQuery := map[string]interface{}{
+        "InstanceName": id,
+    }
+
+    response, err := s.client.DoTeaRequest("GET", "Tablestore", "2020-12-09", "GetInstance", "/v2/openapi/getinstance", nil, reqQuery, nil)
+    if err != nil {
+        return nil, err
+    }
+
+    // Check if the instance exists
+    if response == nil || response["InstanceName"] == nil {
+        return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("OTS instance %s not found", id))
+    }
+
+    result := make(map[string]interface{})
+    
+    // Map the response fields to the result
+    if data, ok := response["data"].(map[string]interface{}); ok {
+        result["InstanceName"] = data["InstanceName"]
+        result["InstanceStatus"] = data["InstanceStatus"]
+        result["AliasName"] = data["AliasName"]
+        result["Network"] = data["Network"]
+        result["PaymentType"] = data["PaymentType"]
+        result["InstanceDescription"] = data["InstanceDescription"]
+        result["RegionId"] = data["RegionId"]
+        result["ClusterName"] = data["ClusterName"]
+        result["ClusterAliasName"] = data["ClusterAliasName"]
+        result["StorageType"] = data["StorageType"]
+        result["CreateTime"] = data["CreateTime"]
+        result["TableQuota"] = data["TableQuota"]
+        result["VCUQuota"] = data["VCUQuota"]
+        result["UserId"] = data["UserId"]
+        result["SPInstanceId"] = data["SPInstanceId"]
+        result["InstanceSpecification"] = data["InstanceSpecification"]
+        result["Tags"] = data["Tags"]
+        
+        // Also include fields from InstanceDetailInfo if available
+        if detailInfo, ok := data["InstanceDetailInfo"].(map[string]interface{}); ok {
+            if result["InstanceName"] == nil {
+                result["InstanceName"] = detailInfo["InstanceName"]
+            }
+            if result["InstanceStatus"] == nil {
+                result["InstanceStatus"] = detailInfo["Status"]
+            }
+            if result["AliasName"] == nil {
+                result["AliasName"] = detailInfo["AliasName"]
+            }
+            if result["ClusterName"] == nil {
+                result["ClusterName"] = detailInfo["ClusterName"]
+            }
+            if result["CreateTime"] == nil {
+                result["CreateTime"] = detailInfo["CreateTime"]
+            }
+        }
+    } else {
+        // If no nested data field, use the top level fields directly
+        for k, v := range response {
+            result[k] = v
+        }
+    }
+
+    return result, nil
+}
+
+
+
