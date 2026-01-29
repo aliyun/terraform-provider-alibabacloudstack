@@ -98,6 +98,7 @@ const (
 	ALIKAFKACode              = ServiceCode("ALIKAFKA")
 	DataworksPrivateCloudCode = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
 	Prometheus2Code           = ServiceCode("PROMETHEUS2")
+	TablestoreCode            = ServiceCode("TABLESTORE")
 	// Self-built gateway fake Code
 	SlSDataCode = ServiceCode("SLSDATA")
 	BssDataCode = ServiceCode("BSSDATA")
@@ -379,6 +380,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	HOLOGRAMCode: PopEndpoint{
 		"hologram.{{.domain}}",
 		"hologram.{{.region}}.{{.domain}}",
+	},
+	TablestoreCode: PopEndpoint{
+		"tablestore.{{.domain}}",
+		"tablestore.{{.region}}.{{.domain}}",
 	},
 	CSB2Code: PopEndpoint{
 		"csb-cop-api-biz.{{.domain}}",
