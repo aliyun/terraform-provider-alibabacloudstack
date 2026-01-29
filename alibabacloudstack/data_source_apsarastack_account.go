@@ -1,7 +1,7 @@
 package alibabacloudstack
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -13,7 +13,7 @@ func dataSourceAlibabacloudStackAccount() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			// Computed values
-			"id": {
+			"login_name" :{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -31,15 +31,18 @@ func dataSourceAlibabacloudStackAccount() *schema.Resource {
 
 func dataSourceAlibabacloudStackAccountRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	accountId, err := client.AccountId()
-
+	resp, err := client.GetCallerInfo()
 	if err != nil {
-		return err
+		return  err
+	}
+	ownerId := resp["primaryKey"].(string)
+
+	if ownerId == "" {
+		return  fmt.Errorf("ownerId not found")
 	}
 
-	log.Printf("[DEBUG] alibabacloudstack_account - account ID found: %#v", accountId)
-
-	d.SetId(accountId)
+	d.SetId(ownerId)
+	d.Set("login_name", resp["loginName"])
 	d.Set("organization_id", client.Department)
 	d.Set("region", client.RegionId)
 

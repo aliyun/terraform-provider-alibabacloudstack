@@ -13,10 +13,10 @@ func dataSourceAlibabacloudStackAscmRamPoliciesForUser() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackAscmRamPoliciesForUserRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
+			"names": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 				ForceNew: true,
 				MinItems: 1,
@@ -82,6 +82,17 @@ func dataSourceAlibabacloudStackAscmRamPoliciesForUserRead(d *schema.ResourceDat
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		if errmsgs.IsExpectedErrors(err, []string{"ascm.auth.EntityNotExist.User"}) {
+			if err := d.Set("policies", []map[string]interface{}{}); err != nil {
+				return errmsgs.WrapError(err)
+			}
+
+			if err := d.Set("names", []string{}); err != nil {
+				return errmsgs.WrapError(err)
+			}
+			d.SetId(dataResourceIdHash([]string{}))
+			return nil
+		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policies_for_user", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
@@ -91,9 +102,14 @@ func dataSourceAlibabacloudStackAscmRamPoliciesForUserRead(d *schema.ResourceDat
 		return errmsgs.WrapError(err)
 	}
 
+	namesMap := getStringListFilters(d, "names")
+
 	var names []string
 	var s []map[string]interface{}
 	for _, rp := range response.Data.DataItem {
+		if _, existed := namesMap[rp.PolicyName]; len(namesMap) > 0 && !existed {
+			continue
+		}
 		mapping := map[string]interface{}{
 			"policy_name":     rp.PolicyName,
 			"policy_type":     rp.PolicyType,
@@ -107,6 +123,10 @@ func dataSourceAlibabacloudStackAscmRamPoliciesForUserRead(d *schema.ResourceDat
 	}
 	d.SetId(dataResourceIdHash(names))
 	if err := d.Set("policies", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	if err := d.Set("names", names); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
