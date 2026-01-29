@@ -384,6 +384,10 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*Membe
 
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListMembersInsideResourceSet", "/ascm/auth/user/listMembersInsideResourceGroup")
 	request.QueryParams["resourceSetId"] = resourceSetId
+	request.QueryParams["activeOnly"] = "false"
+	delete(request.QueryParams, "ResourceGroup")
+	delete(request.QueryParams, "OrganizationId")
+	delete(request.QueryParams, "Department")
 
 	var resp = &MembersInsideResourceSet{}
 	bresponse, err := s.client.ProcessCommonRequest(request)

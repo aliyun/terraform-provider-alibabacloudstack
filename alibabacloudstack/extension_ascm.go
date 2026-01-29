@@ -331,6 +331,9 @@ type MembersInsideResourceData struct {
 	AuthorizedTime     int    `json:"authorizedTime"`
 	AuthorizedRoleId   int    `json:"authorizedRoleId"`
 	AuthorizedRoleName string `json:"authorizedRoleName"`
+	TimeConfig         string `json:"timeConfig"`
+	Status             string `json:"status"`
+	EnableAuthExpire   bool   `json:"enableAuthExpire"`
 }
 
 type MembersInsideResourceSet struct {
