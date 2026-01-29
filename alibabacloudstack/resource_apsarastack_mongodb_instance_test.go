@@ -410,12 +410,11 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_instance_storage":     "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.1.storage_min}",
-					"db_instance_class":       "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.1.id}",
+					"db_instance_storage": "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.1.storage_min}",
+					"db_instance_class":   "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.1.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
@@ -428,15 +427,14 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 					}),
 				),
 			},
-
-			//			 {
-			//			 	Config: testMongoDBInstance_classic_account_password,
-			//			 	Check: resource.ComposeTestCheckFunc(
-			//			 		testAccCheck(map[string]string{
-			//			 			"account_password": "inputYourCodeHere",
-			//			 		}),
-			//			 	),
-			//			 },
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"account_password": "${random_password.password.0.result}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
+			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"security_ip_list": []string{"10.168.1.12"},
