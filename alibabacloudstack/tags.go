@@ -59,7 +59,7 @@ func caseInsensitiveTagsSchema() *schema.Schema {
 			return nil, errs
 		}, // Key validation function
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			if strings.ToLower(old) == strings.ToLower(new) {
+			if strings.EqualFold(old, new) {
 				return true
 			}
 			return false
@@ -96,15 +96,6 @@ func setTags(client *connectivity.AlibabacloudStackClient, resourceType TagResou
 	if d.HasChange("tags") {
 		oraw, nraw := d.GetChange("tags")
 		return updateTags(client, []string{d.Id()}, resourceType, oraw, nraw)
-	}
-
-	return nil
-}
-
-func setCdnTags(client *connectivity.AlibabacloudStackClient, resourceType TagResourceType, d *schema.ResourceData) error {
-	if d.HasChange("tags") {
-		oraw, nraw := d.GetChange("tags")
-		return updateCdnTags(client, []string{d.Id()}, resourceType, oraw, nraw)
 	}
 
 	return nil
@@ -251,70 +242,6 @@ func updateTags(client *connectivity.AlibabacloudStackClient, ids []string, reso
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, ids, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-	}
-
-	return nil
-}
-
-func updateCdnTags(client *connectivity.AlibabacloudStackClient, ids []string, resourceType TagResourceType, oraw, nraw interface{}) error {
-	o := oraw.(map[string]interface{})
-	n := nraw.(map[string]interface{})
-	create, remove := diffTags(tagsFromMap(o), tagsFromMap(n))
-
-	// Set tags
-	if len(remove) > 0 {
-		request := cdn.CreateUntagResourcesRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.ResourceType = string(resourceType)
-		request.ResourceId = &ids
-
-		var tagsKey []string
-		for _, t := range remove {
-			tagsKey = append(tagsKey, t.Key)
-		}
-		request.TagKey = &tagsKey
-
-		raw, err := client.WithCdnClient(func(cdnClient *cdn.Client) (interface{}, error) {
-			return cdnClient.UntagResources(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, ids, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	}
-
-	if len(create) > 0 {
-		request := cdn.CreateTagResourcesRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.ResourceType = string(resourceType)
-		request.ResourceId = &ids
-
-		var tags []cdn.TagResourcesTag
-		for _, t := range create {
-			tags = append(tags, cdn.TagResourcesTag{
-				Key:   t.Key,
-				Value: t.Value,
-			})
-		}
-		request.Tag = &tags
-
-		raw, err := client.WithCdnClient(func(cdnClient *cdn.Client) (interface{}, error) {
-			return cdnClient.TagResources(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, ids, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
 	return nil

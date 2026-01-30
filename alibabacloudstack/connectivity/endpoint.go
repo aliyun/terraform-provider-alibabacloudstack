@@ -102,6 +102,7 @@ const (
 	// Self-built gateway fake Code
 	SlSDataCode = ServiceCode("SLSDATA")
 	BssDataCode = ServiceCode("BSSDATA")
+	OtsDataCode = ServiceCode("OTSDATA")
 
 	// ASAPI
 	ASAPICode = ServiceCode("ASAPI")
@@ -279,6 +280,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"data.{{.region}}.sls-pub.{{.domain}}",
 	},
 
+	OtsDataCode : PopEndpoint{
+		"{{.region}}.ots-internal.{{.domain}}",
+		"{{.region}}.ots-internal.{{.domain}}",
+	},
 	DmsEnterpriseCode: PopEndpoint{"", ""},
 	OSSCode:           PopEndpoint{"", ""},
 	DataworkspublicCode: PopEndpoint{

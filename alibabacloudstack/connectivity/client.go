@@ -241,17 +241,6 @@ func (client *AlibabacloudStackClient) WithEcsClient(do func(*ecs.Client) (inter
 	return do(client.ecsconn)
 }
 
-func (client *AlibabacloudStackClient) WithAscmClient(do func(*sdk.Client) (interface{}, error)) (interface{}, error) {
-	var err error
-	if client.ascmconn == nil {
-		client.ascmconn, err = client.WithProductSDKClient(ASCMCode)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return do(client.ascmconn)
-}
-
 func (client *AlibabacloudStackClient) WithElasticsearchClient(do func(*elasticsearch.Client) (interface{}, error)) (interface{}, error) {
 	if client.elasticsearchconn == nil {
 		conn, error := client.WithProductSDKClient(ElasticsearchK8sCode)
@@ -290,19 +279,6 @@ func (client *AlibabacloudStackClient) WithEssClient(do func(*ess.Client) (inter
 	return retryDo(func() (interface{}, error) {
 		return do(essconn)
 	})
-}
-
-func (client *AlibabacloudStackClient) WithOnsClient(do func(*ons.Client) (interface{}, error)) (interface{}, error) {
-	if client.onsconn == nil {
-		conn, error := client.WithProductSDKClient(ONSCode)
-		if error != nil {
-			return nil, error
-		}
-		client.onsconn = &ons.Client{
-			Client: *conn,
-		}
-	}
-	return do(client.onsconn)
 }
 
 func (client *AlibabacloudStackClient) WithRkvClient(do func(*r_kvstore.Client) (interface{}, error)) (interface{}, error) {
@@ -646,33 +622,6 @@ func (client *AlibabacloudStackClient) WithRdsClient(do func(*rds.Client) (inter
 	return do(client.rdsconn)
 }
 
-func (client *AlibabacloudStackClient) WithPolardbClient(do func(*polardb.Client) (interface{}, error)) (interface{}, error) {
-	if client.rdsconn == nil {
-		conn, error := client.WithProductSDKClient(RDSCode)
-		if error != nil {
-			return nil, error
-		}
-		client.rdsconn = &rds.Client{
-			Client: *conn,
-		}
-	}
-
-	return do(client.polarDBconn)
-}
-
-func (client *AlibabacloudStackClient) WithCdnClient(do func(*cdn.Client) (interface{}, error)) (interface{}, error) {
-	if client.cdnconn == nil {
-		conn, error := client.WithProductSDKClient(CDNCode)
-		if error != nil {
-			return nil, error
-		}
-		client.cdnconn = &cdn.Client{
-			Client: *conn,
-		}
-	}
-
-	return do(client.cdnconn)
-}
 func (client *AlibabacloudStackClient) GetUserAgent() string {
 	return fmt.Sprintf("%s/%s %s/%s %s/%s", Terraform, TerraformVersion, Provider, ProviderVersion, Module, client.Config.ConfigurationSource)
 }
@@ -694,19 +643,6 @@ func (client *AlibabacloudStackClient) getHttpProxyUrl() *url.URL {
 	return nil
 }
 
-func (client *AlibabacloudStackClient) WithSlsClient(do func(*slsPop.Client) (interface{}, error)) (interface{}, error) {
-	if client.logpopconn == nil {
-		conn, error := client.WithProductSDKClient(SLSCode)
-		if error != nil {
-			return nil, error
-		}
-		client.logpopconn = &slsPop.Client{
-			Client: *conn,
-		}
-	}
-
-	return do(client.logpopconn)
-}
 
 func (client *AlibabacloudStackClient) WithSlsDataClient(do func(*sls.Client) (interface{}, error)) (interface{}, error) {
 	goSdkMutex.Lock()
@@ -823,25 +759,6 @@ func (client *AlibabacloudStackClient) WithCmsClient(do func(*cms.Client) (inter
 	return do(client.cmsconn)
 }
 
-func (client *AlibabacloudStackClient) NewHitsdbClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("hitsdb", client.Config.Endpoints[HitsdbCode])
-}
-
-func (client *AlibabacloudStackClient) NewOdpsClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("odps", client.Config.Endpoints[ASCMCode])
-}
-func (client *AlibabacloudStackClient) NewKmsClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("kms", client.Config.Endpoints[KmsCode])
-}
-
-func (client *AlibabacloudStackClient) NewAscmClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("ascm", client.Config.Endpoints[ASCMCode])
-}
-func (client *AlibabacloudStackClient) NewCloudApiClient() (*rpc.Client, error) {
-	//sdkConfig.SetEndpoint(endpoint).SetReadTimeout(60000)
-	return client.NewTeaSDkClient("apigateway", client.Config.Endpoints[CLOUDAPICode])
-}
-
 func (client *AlibabacloudStackClient) NewAdsClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("ads", client.Config.Endpoints[ADBCode])
 }
@@ -857,13 +774,11 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 	// Initialize the TABLESTORE client if necessary
 	tableStoreClient, ok := client.tablestoreconnByInstanceName[instanceName]
 	if !ok {
-		endpoint := client.Config.Endpoints[OtsCode]
+		endpoint := client.Config.Endpoints[OtsDataCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
 		}
-		if !strings.HasPrefix(endpoint, "http") {
-			endpoint = fmt.Sprintf("%s://%s", strings.ToLower(client.Config.Protocol), endpoint)
-		}
+		endpoint = fmt.Sprintf("%s://%s", strings.ToLower(client.Config.Protocol), endpoint)
 		tableStoreClient = tablestore.NewClientWithConfig(endpoint, instanceName, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken, tablestore.NewDefaultTableStoreConfig())
 		client.tablestoreconnByInstanceName[instanceName] = tableStoreClient
 	}
@@ -884,30 +799,7 @@ func (client *AlibabacloudStackClient) WithOtsClient(do func(*ots.Client) (inter
 
 	return do(client.otsconn)
 }
-func (client *AlibabacloudStackClient) WithDataHubClient(do func(api datahub.DataHubApi) (interface{}, error)) (interface{}, error) {
-	goSdkMutex.Lock()
-	defer goSdkMutex.Unlock()
 
-	// Initialize the DataHub client if necessary
-	if client.dhconn == nil {
-		endpoint := client.Config.Endpoints[DatahubCode]
-		if endpoint == "" {
-			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
-		}
-		if !strings.HasPrefix(endpoint, "http") {
-			endpoint = fmt.Sprintf("%s://%s", strings.ToLower(client.Config.Protocol), endpoint)
-		}
-
-		account := datahub.NewStsCredential(client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
-		config := &datahub.Config{
-			UserAgent: client.GetUserAgent(),
-		}
-
-		client.dhconn = datahub.NewClientWithConfig(endpoint, config, account)
-	}
-
-	return do(client.dhconn)
-}
 func (client *AlibabacloudStackClient) NewVpcClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("vpc", client.Config.Endpoints[VPCCode])
 }
@@ -915,17 +807,11 @@ func (client *AlibabacloudStackClient) NewEcsClient() (*rpc.Client, error) {
 	//sdkConfig.SetEndpoint(endpoint).SetReadTimeout(60000)
 	return client.NewTeaSDkClient("ecs", client.Config.Endpoints[EcsCode])
 }
-func (client *AlibabacloudStackClient) NewElasticsearchClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("elasticsearch", client.Config.Endpoints[ElasticsearchK8sCode])
-}
 
 func (client *AlibabacloudStackClient) NewRosClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("ros", client.Config.Endpoints[RosCode])
 }
 
-func (client *AlibabacloudStackClient) NewRdsClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("rds", client.Config.Endpoints[RDSCode])
-}
 
 func (client *AlibabacloudStackClient) NewRoaCsClient() (*roaCS.Client, error) {
 	productCode := "ros"
@@ -963,10 +849,6 @@ func (client *AlibabacloudStackClient) NewDmsenterpriseClient() (*rpc.Client, er
 	return client.NewTeaSDkClient("dmsenterprise", client.Config.Endpoints[DmsEnterpriseCode])
 }
 
-func (client *AlibabacloudStackClient) NewHbaseClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("hbase", client.Config.Endpoints[HBASECode])
-}
-
 func (client *AlibabacloudStackClient) WithDrdsClient(do func(*drds.Client) (interface{}, error)) (interface{}, error) {
 	if client.drdsconn == nil {
 		conn, error := client.WithProductSDKClient(DRDSCode)
@@ -980,44 +862,16 @@ func (client *AlibabacloudStackClient) WithDrdsClient(do func(*drds.Client) (int
 
 	return do(client.drdsconn)
 }
-func (client *AlibabacloudStackClient) NewGpdbClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("gpdb", client.Config.Endpoints[GPDBCode])
-}
 
 func (client *AlibabacloudStackClient) NewQuickbiClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("quickbi", client.Config.Endpoints[QuickbiCode])
 }
-func (client *AlibabacloudStackClient) NewCsbClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("csb", client.Config.Endpoints[CSBCode])
-}
-func (client *AlibabacloudStackClient) NewGdbClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("gdb", client.Config.Endpoints[GDBCode])
-}
 
-func (client *AlibabacloudStackClient) NewDataworkspublicClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("dataworkspublic", client.Config.Endpoints[DataworkspublicCode])
-}
 
-func (client *AlibabacloudStackClient) NewDataworksPrivateClient() (*rpc.Client, error) {
-	endpoint := client.Config.Endpoints[DataworkspublicCode]
-	index := strings.Index(endpoint, ".")
-	privateEndpoint := "dataworks" + endpoint[index:]
-	return client.NewTeaSDkClient("dataworks-private-cloud", privateEndpoint)
-}
-
-func (client *AlibabacloudStackClient) NewDbsClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("dbs", client.Config.Endpoints[DDSCode])
-}
 func (client *AlibabacloudStackClient) NewArmsClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("arms", client.Config.Endpoints[ARMSCode])
 }
 
-func (client *AlibabacloudStackClient) NewOosClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("oos", client.Config.Endpoints[OosCode])
-}
-func (client *AlibabacloudStackClient) NewCloudfwClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("cloudfw", client.Config.Endpoints[WafOpenapiCode])
-}
 
 func (client *AlibabacloudStackClient) NewBastionhostClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("Bastionhostprivate", client.Config.Endpoints[BastionHostCode])
@@ -1171,7 +1025,7 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 		}
 
 		// Auth or invalid action errors with retry budget
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable",}) && retryTimes > 0 {
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable"}) && retryTimes > 0 {
 			retryTimes--
 			return resource.RetryableError(err), retryTimes
 		}
@@ -1184,7 +1038,6 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 
 	return nil, retryTimes
 }
-
 
 func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, apiname, pathpattern string, headers map[string]string, query, body map[string]interface{}) (_result map[string]interface{}, _err error) {
 	ServiceCodeStr := strings.ReplaceAll(strings.ToUpper(popcode), "-", "_")
@@ -1289,7 +1142,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 
 		log.Printf(" ================================ %s ======================================\n query %#v \n request %#v \n response: %#v", apiname, query, body, response)
 		var retryErr *resource.RetryError
-		retryErr, retryTimes= requestErrorHandler(fmt.Sprintf("%s_%s_%s", popcode, version, apiname), response, err, retryTimes)
+		retryErr, retryTimes = requestErrorHandler(fmt.Sprintf("%s_%s_%s", popcode, version, apiname), response, err, retryTimes)
 		if retryErr != nil {
 			wait()
 		}
@@ -1376,9 +1229,9 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			// If it's an internal asapi gateway, force HTTP
 			request.SetScheme("http")
 		}
-		
+
 	}
-	
+
 	if request.Product == "CloudDns" || request.Product == "bms" {
 		// CloudDns / bms does not support HTTPS
 		request.SetScheme("http")
