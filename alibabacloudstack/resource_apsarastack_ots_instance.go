@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"log"
 	"time"
 
@@ -132,7 +131,7 @@ func resourceAlibabacloudStackOtsInstanceCreate(d *schema.ResourceData, meta int
 		return err
 	}
 
-	return resourceAlibabacloudStackOtsInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOtsInstanceRead(d *schema.ResourceData, meta interface{}) error {
@@ -230,22 +229,9 @@ func resourceAlibabacloudStackOtsInstanceDelete(d *schema.ResourceData, meta int
 	otsService := OtsService{client}
 
 	if err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["OpenApiAction"] = "DeleteInstance"
-		request.QueryParams["ProductName"] = "ots"
+		request := client.NewCommonRequest("GET", "Ots", "2016-06-20", "DeleteInstance", "")
 
-		params := map[string]string{
-			"Department":    client.Department,
-			"ResourceGroup": client.ResourceGroup,
-			"RegionId":      client.RegionId,
-			"InstanceName":  d.Id(),
-		}
-
-		if content, err := json.Marshal(params); err != nil {
-			return resource.NonRetryableError(err)
-		} else {
-			request.QueryParams["Params"] = string(content)
-		}
+		request.QueryParams["InstanceName"] = d.Id()
 
 		bresponse, err := client.ProcessCommonRequest(request)
 

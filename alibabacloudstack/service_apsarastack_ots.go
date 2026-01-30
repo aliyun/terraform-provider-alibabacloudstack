@@ -1,9 +1,10 @@
 package alibabacloudstack
 
 import (
+	"fmt"
+	"slices"
 	"strings"
 	"time"
-	"fmt"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ots"
@@ -256,7 +257,7 @@ func (s *OtsService) ListOtsInstanceVpc(id string) (inst []ots.VpcInfo, err erro
 		return inst, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alicloud_ots_instance_attachments", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	
+
 	if resp.TotalCount < 1 {
 		return inst, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OtsInstanceAttachment", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
@@ -280,10 +281,8 @@ func (s *OtsService) OtsInstanceStateRefreshFunc(id string, failStates []string)
 			return nil, "", errmsgs.WrapError(err)
 		}
 
-		for _, failState := range failStates {
-			if object["InstanceStatus"].(string) == failState {
-				return object, object["InstanceStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["InstanceStatus"].(string)))
-			}
+		if slices.Contains(failStates, object["InstanceStatus"].(string)) {
+			return object, object["InstanceStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["InstanceStatus"].(string)))
 		}
 		return object, object["InstanceStatus"].(string), nil
 	}
@@ -317,17 +316,17 @@ type TagInfos struct {
 }
 
 type InstanceInfo struct {
-	InstanceName string            `json:"InstanceName" xml:"InstanceName"`
-	Status       int               `json:"Status" xml:"Status"`
-	TagInfos     TagInfos          `json:"TagInfos" xml:"TagInfos"`
-	Description  string            `json:"Description" xml:"Description"`
-	Quota        map[string]interface{} `json:"Quota" xml:"Quota"`
-	UserId       string            `json:"UserId" xml:"UserId"`
-	Network      string            `json:"Network" xml:"Network"`
-	CreateTime   string            `json:"CreateTime" xml:"CreateTime"`
-	ClusterType  string            `json:"ClusterType" xml:"ClusterType"`
-	WriteCapacity int              `json:"WriteCapacity" xml:"WriteCapacity"`
-	ReadCapacity  int              `json:"ReadCapacity" xml:"ReadCapacity"`
+	InstanceName  string                 `json:"InstanceName" xml:"InstanceName"`
+	Status        int                    `json:"Status" xml:"Status"`
+	TagInfos      TagInfos               `json:"TagInfos" xml:"TagInfos"`
+	Description   string                 `json:"Description" xml:"Description"`
+	Quota         map[string]interface{} `json:"Quota" xml:"Quota"`
+	UserId        string                 `json:"UserId" xml:"UserId"`
+	Network       string                 `json:"Network" xml:"Network"`
+	CreateTime    string                 `json:"CreateTime" xml:"CreateTime"`
+	ClusterType   string                 `json:"ClusterType" xml:"ClusterType"`
+	WriteCapacity int                    `json:"WriteCapacity" xml:"WriteCapacity"`
+	ReadCapacity  int                    `json:"ReadCapacity" xml:"ReadCapacity"`
 }
 
 type GetInstanceResponse struct {
@@ -339,69 +338,69 @@ type GetInstanceResponse struct {
 }
 
 func (s *OtsService) DescribeOtsInstance(id string) (map[string]interface{}, error) {
-    reqQuery := map[string]interface{}{
-        "InstanceName": id,
-    }
+	reqQuery := map[string]interface{}{
+		"InstanceName": id,
+	}
 
-    response, err := s.client.DoTeaRequest("GET", "Tablestore", "2020-12-09", "GetInstance", "/v2/openapi/getinstance", nil, reqQuery, nil)
-    if err != nil {
-        return nil, err
-    }
+	response, err := s.client.DoTeaRequest("GET", "Tablestore", "2020-12-09", "GetInstance", "/v2/openapi/getinstance", nil, reqQuery, nil)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"NotFound"}) {
+			return nil, errmsgs.GetNotFoundErrorFromString("Tablestore " + id + " Not Found")
+		}
+		return nil, err
+	}
 
-    // Check if the instance exists
-    if response == nil || response["InstanceName"] == nil {
-        return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("OTS instance %s not found", id))
-    }
+	// Check if the instance exists
+	if response == nil || response["InstanceName"] == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString("Tablestore " + id + " Not Found")
+	}
 
-    result := make(map[string]interface{})
-    
-    // Map the response fields to the result
-    if data, ok := response["data"].(map[string]interface{}); ok {
-        result["InstanceName"] = data["InstanceName"]
-        result["InstanceStatus"] = data["InstanceStatus"]
-        result["AliasName"] = data["AliasName"]
-        result["Network"] = data["Network"]
-        result["PaymentType"] = data["PaymentType"]
-        result["InstanceDescription"] = data["InstanceDescription"]
-        result["RegionId"] = data["RegionId"]
-        result["ClusterName"] = data["ClusterName"]
-        result["ClusterAliasName"] = data["ClusterAliasName"]
-        result["StorageType"] = data["StorageType"]
-        result["CreateTime"] = data["CreateTime"]
-        result["TableQuota"] = data["TableQuota"]
-        result["VCUQuota"] = data["VCUQuota"]
-        result["UserId"] = data["UserId"]
-        result["SPInstanceId"] = data["SPInstanceId"]
-        result["InstanceSpecification"] = data["InstanceSpecification"]
-        result["Tags"] = data["Tags"]
-        
-        // Also include fields from InstanceDetailInfo if available
-        if detailInfo, ok := data["InstanceDetailInfo"].(map[string]interface{}); ok {
-            if result["InstanceName"] == nil {
-                result["InstanceName"] = detailInfo["InstanceName"]
-            }
-            if result["InstanceStatus"] == nil {
-                result["InstanceStatus"] = detailInfo["Status"]
-            }
-            if result["AliasName"] == nil {
-                result["AliasName"] = detailInfo["AliasName"]
-            }
-            if result["ClusterName"] == nil {
-                result["ClusterName"] = detailInfo["ClusterName"]
-            }
-            if result["CreateTime"] == nil {
-                result["CreateTime"] = detailInfo["CreateTime"]
-            }
-        }
-    } else {
-        // If no nested data field, use the top level fields directly
-        for k, v := range response {
-            result[k] = v
-        }
-    }
+	result := make(map[string]interface{})
 
-    return result, nil
+	// Map the response fields to the result
+	if data, ok := response["data"].(map[string]interface{}); ok {
+		result["InstanceName"] = data["InstanceName"]
+		result["InstanceStatus"] = data["InstanceStatus"]
+		result["AliasName"] = data["AliasName"]
+		result["Network"] = data["Network"]
+		result["PaymentType"] = data["PaymentType"]
+		result["InstanceDescription"] = data["InstanceDescription"]
+		result["RegionId"] = data["RegionId"]
+		result["ClusterName"] = data["ClusterName"]
+		result["ClusterAliasName"] = data["ClusterAliasName"]
+		result["StorageType"] = data["StorageType"]
+		result["CreateTime"] = data["CreateTime"]
+		result["TableQuota"] = data["TableQuota"]
+		result["VCUQuota"] = data["VCUQuota"]
+		result["UserId"] = data["UserId"]
+		result["SPInstanceId"] = data["SPInstanceId"]
+		result["InstanceSpecification"] = data["InstanceSpecification"]
+		result["Tags"] = data["Tags"]
+
+		// Also include fields from InstanceDetailInfo if available
+		if detailInfo, ok := data["InstanceDetailInfo"].(map[string]interface{}); ok {
+			if result["InstanceName"] == nil {
+				result["InstanceName"] = detailInfo["InstanceName"]
+			}
+			if result["InstanceStatus"] == nil {
+				result["InstanceStatus"] = detailInfo["Status"]
+			}
+			if result["AliasName"] == nil {
+				result["AliasName"] = detailInfo["AliasName"]
+			}
+			if result["ClusterName"] == nil {
+				result["ClusterName"] = detailInfo["ClusterName"]
+			}
+			if result["CreateTime"] == nil {
+				result["CreateTime"] = detailInfo["CreateTime"]
+			}
+		}
+	} else {
+		// If no nested data field, use the top level fields directly
+		for k, v := range response {
+			result[k] = v
+		}
+	}
+
+	return result, nil
 }
-
-
-

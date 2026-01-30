@@ -352,10 +352,6 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"ons-biz.{{.region}}.{{.domain}}",
 		"ons-biz.{{.region}}.{{.domain}}",
 	},
-	OtsCode: PopEndpoint{
-		"ots.{{.domain}}",
-		"ots.{{.region}}.{{.domain}}",
-	},
 	FlinkCode: PopEndpoint{
 		"ververica.{{.region}}.{{.domain}}",
 		"ververica.{{.region}}.{{.domain}}",
@@ -431,6 +427,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 	},
 	SLSCode: PopEndpoint{
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+	},
+	OtsCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
 	},

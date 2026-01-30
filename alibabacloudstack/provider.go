@@ -1269,18 +1269,20 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if slsOpenAPIEndpoint != "" {
 		config.Endpoints[connectivity.SlSDataCode] = slsOpenAPIEndpoint
 	}
+	if asapiEndpoint, ok := d.GetOk("asapi_endpoint"); ok && asapiEndpoint.(string) != "" {
+		config.Endpoints[connectivity.ASAPICode] = asapiEndpoint.(string)
+		config.Endpoints[connectivity.OneRouterCode] = asapiEndpoint.(string)
+		config.Endpoints[connectivity.KmsCode] = asapiEndpoint.(string)
+		config.Endpoints[connectivity.SLSCode] = asapiEndpoint.(string)
+		config.Endpoints[connectivity.OtsCode] = asapiEndpoint.(string)
+	}
 	if kmsEndpoint, ok := d.GetOk("kms_endpoint"); ok && kmsEndpoint.(string) != "" {
 		config.Endpoints[connectivity.KmsCode] = kmsEndpoint.(string)
 	}
 
-	if asapiEndpoint, ok := d.GetOk("asapi_endpoint"); ok && asapiEndpoint.(string) != "" {
-		config.Endpoints[connectivity.ASAPICode] = asapiEndpoint.(string)
-		config.Endpoints[connectivity.OneRouterCode] = asapiEndpoint.(string)
-	}
 
-	slsEndpoint := d.Get("sls_endpoint").(string)
-	if slsEndpoint != "" {
-		config.Endpoints[connectivity.SLSCode] = slsEndpoint
+	if slsEndpoint, ok := d.GetOk("sls_endpoint");  ok && slsEndpoint.(string) != "" {
+		config.Endpoints[connectivity.SLSCode] = slsEndpoint.(string)
 	}
 
 	if strings.ToLower(config.Protocol) == "https" {
