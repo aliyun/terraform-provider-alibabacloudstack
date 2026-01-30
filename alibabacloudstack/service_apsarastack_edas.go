@@ -11,6 +11,7 @@ import (
 	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -344,6 +345,14 @@ func (s *EdasService) ClusterImportK8sStateRefreshFunc(id string, failStates []s
 	}
 }
 
+type GetEcsClusterResponse struct {
+	*responses.BaseResponse
+	Code      interface{}  `json:"Code" xml:"Code"`
+	Message   string       `json:"Message" xml:"Message"`
+	RequestId string       `json:"RequestId" xml:"RequestId"`
+	Cluster   edas.Cluster `json:"Cluster" xml:"Cluster"`
+}
+
 func (e *EdasService) DescribeEdasGetCluster(clusterId string) (*edas.Cluster, error) {
 	cluster := edas.Cluster{}
 	request := e.client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetCluster", "/pop/v5/resource/cluster")
@@ -362,14 +371,17 @@ func (e *EdasService) DescribeEdasGetCluster(clusterId string) (*edas.Cluster, e
 	}
 	addDebug(request.GetActionName(), bresponse, request, request)
 
-	response := edas.GetClusterResponse{}
+	response := GetEcsClusterResponse{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
 		return &cluster, errmsgs.WrapError(err)
 	}
 
-	if response.Code != 200 {
-		return &cluster, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
+	if fmt.Sprint(response.Code) != "200" {
+		if strings.HasSuffix(response.Message, " does not exist.") {
+			return &cluster, errmsgs.GetNotFoundErrorFromString("The cluster not found.")
+		}
+		return &cluster, errmsgs.WrapError(errmsgs.Error("get cluster failed for " + response.Message))
 	}
 
 	cluster = response.Cluster
