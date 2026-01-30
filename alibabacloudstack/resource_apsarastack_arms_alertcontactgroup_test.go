@@ -107,7 +107,7 @@ func TestAccAlibabacloudStackArmsAlertContactGroup_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"alert_contact_group_name": "${var.name}",
-					"contact_ids":              []string{"937", "938"},
+					"contact_ids":              []string{"${alibabacloudstack_arms_alertcontact.default.0.id}", "${alibabacloudstack_arms_alertcontact.default.1.id}"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -117,30 +117,30 @@ func TestAccAlibabacloudStackArmsAlertContactGroup_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
-			//{
-			//	Config: testAccConfig(map[string]interface{}{
-			//		"alert_contact_group_name": "${var.name}_update",
-			//	}),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"alert_contact_group_name": name + "_update",
-			//		}),
-			//	),
-			//},
-			//{
-			//	Config: testAccConfig(map[string]interface{}{
-			//		"contact_ids": []string{"937"},
-			//	}),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"contact_ids.#": "1",
-			//		}),
-			//	),
-			//},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"alert_contact_group_name": "${var.name}_update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"alert_contact_group_name": name + "_update",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"contact_ids": []string{"${alibabacloudstack_arms_alertcontact.default.0.id}", "${alibabacloudstack_arms_alertcontact.default.2.id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"contact_ids.#": "2",
+					}),
+				),
+			},
 			{
 				ResourceName:      resourceId,
 				ImportState:       true,
@@ -157,6 +157,13 @@ func ArmsAlertContactGroupBasicdependence(name string) string {
 
 variable "name" {
 	default = "%s"
+}
+resource "alibabacloudstack_arms_alertcontact" "default" {
+	count = 3
+	phone_num=              "1234567891${count.index}"
+	alert_contact_name=     "${var.name}_${count.index}"
+	email=                  "${var.name}_${count.index}@aliyun.test"
+	ding_robot_webhook_url= "http://tf-test.dingtalk.com/${var.name}_${count.index}"
 }
 `, name)
 }
