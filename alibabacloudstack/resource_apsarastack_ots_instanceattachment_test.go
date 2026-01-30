@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackOtsInstanceAttachmentBasic(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testAcc%d", rand)
+	name := fmt.Sprintf("tftestattch%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceAttachmentConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -40,64 +40,21 @@ func TestAccAlibabacloudStackOtsInstanceAttachmentBasic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_name": "${alibabacloudstack_ots_instance.default.name}",
-					"vpc_name":      "test",
-					"vswitch_id":    "${alibabacloudstack_vswitch.default.id}",
+					"vpc_name":      "${var.name}",
+					"vswitch_id":    "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"instance_name": name,
-						"vpc_name":      "test",
+						"vpc_name":      name,
 					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackOtsInstanceAttachmentHighPerformance(t *testing.T) {
-	var v ots.VpcInfo
-
-	resourceId := "alibabacloudstack_ots_instance_attachment.default"
-	ra := resourceAttrInit(resourceId, otsInstanceAttachmentBasicMap)
-
-	serviceFunc := func() interface{} {
-		return &OtsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testAcc%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceAttachmentConfigDependenceHighperformance)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"instance_name": "${alibabacloudstack_ots_instance.default.name}",
-					"vpc_name":      "test",
-					"vswitch_id":    "${alibabacloudstack_vswitch.default.id}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"instance_name": name,
-						"vpc_name":      "test",
-					}),
-				),
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"vswitch_id"},
 			},
 		},
 	})
@@ -109,58 +66,16 @@ func resourceOtsInstanceAttachmentConfigDependence(name string) string {
 	  default = "%s"
 	}
 
-	resource "alibabacloudstack_ots_instance" "default" {
-	  name = "${var.name}"
-	  description = "${var.name}"
-	  accessed_by = "Vpc"
-	  instance_type = "%s"
-	}
-
-	data "alibabacloudstack_zones" "default" {
-	  available_resource_creation = "VSwitch"
-	}
-	resource "alibabacloudstack_vpc" "default" {
-	  cidr_block = "172.16.0.0/16"
-	  name = "${var.name}"
-	}
-
-	resource "alibabacloudstack_vswitch" "default" {
-	  vpc_id = "${alibabacloudstack_vpc.default.id}"
-	  name = "${var.name}"
-	  cidr_block = "172.16.1.0/24"
-	  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	}
-	`, name, string(OtsCapacity))
-}
-
-func resourceOtsInstanceAttachmentConfigDependenceHighperformance(name string) string {
-	return fmt.Sprintf(`
-	variable "name" {
-	  default = "%s"
-	}
+	%s
+	
+	data "alibabacloudstack_ots_clusters" "default" {}
 
 	resource "alibabacloudstack_ots_instance" "default" {
-	  name = "${var.name}"
-	  description = "${var.name}"
-	  accessed_by = "Vpc"
-	  instance_type = "%s"
+	  name = var.name
+	  description   = var.name
+	  specification  = "HYBRID"
 	}
-
-	data "alibabacloudstack_zones" "default" {
-	  available_resource_creation = "VSwitch"
-	}
-	resource "alibabacloudstack_vpc" "default" {
-	  cidr_block = "172.16.0.0/16"
-	  name = "${var.name}"
-	}
-
-	resource "alibabacloudstack_vswitch" "default" {
-	  vpc_id = "${alibabacloudstack_vpc.default.id}"
-	  name = "${var.name}"
-	  cidr_block = "172.16.1.0/24"
-	  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	}
-	`, name, string(OtsHighPerformance))
+	`, name, VSwitchCommonTestCase)
 }
 
 var otsInstanceAttachmentBasicMap = map[string]string{

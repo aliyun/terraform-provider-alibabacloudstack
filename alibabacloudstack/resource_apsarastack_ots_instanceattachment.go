@@ -1,6 +1,8 @@
 package alibabacloudstack
 
 import (
+	"fmt"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ots"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -27,6 +29,14 @@ func resourceAlibabacloudStackOtsInstanceAttachment() *schema.Resource {
 				ForceNew: true,
 			},
 			"vpc_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"domain": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"endpoint": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -64,7 +74,7 @@ func resourceAliyunOtsInstanceAttachmentCreate(d *schema.ResourceData, meta inte
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	d.SetId(request.InstanceName)
+	d.SetId(fmt.Sprintf("%s:%s", request.InstanceName, request.InstanceVpcName))
 	return nil
 }
 
@@ -79,18 +89,20 @@ func resourceAliyunOtsInstanceAttachmentRead(d *schema.ResourceData, meta interf
 		}
 		return errmsgs.WrapError(err)
 	}
+	parts, _ := ParseResourceId(d.Id(), 2)
 	// There is a bug that inst does not contain instance name and vswitch ID, so this resource does not support import function.
-	//d.Set("instance_name", inst.InstanceName)
+	d.Set("instance_name", parts[0])
 	d.Set("vpc_name", object.InstanceVpcName)
 	d.Set("vpc_id", object.VpcId)
+	d.Set("domain", object.Domain)
+	d.Set("endpoint", object.Endpoint)
 	return nil
 }
 
 func resourceAliyunOtsInstanceAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	otsService := OtsService{client}
-	object, err := otsService.DescribeOtsInstanceAttachment(d.Id())
-	if err != nil {
+	if _, err := otsService.DescribeOtsInstanceAttachment(d.Id()); err != nil {
 		if errmsgs.NotFoundError(err) {
 			return nil
 		}
@@ -98,8 +110,8 @@ func resourceAliyunOtsInstanceAttachmentDelete(d *schema.ResourceData, meta inte
 	}
 	request := ots.CreateUnbindInstance2VpcRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceName = d.Id()
-	request.InstanceVpcName = object.InstanceVpcName
+	request.InstanceName = d.Get("instance_name").(string)
+	request.InstanceVpcName = d.Get("vpc_name").(string)
 
 	raw, err := client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
 		return otsClient.UnbindInstance2Vpc(request)

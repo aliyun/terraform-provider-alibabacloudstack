@@ -7,41 +7,42 @@ import (
 
 func TestAccAlibabacloudStackOtsInstanceAttachmentsDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
-	resourceId := "data.alibabacloudstack_ots_instances_attachment.default"
-
-	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf-testAcc%d", rand),
-		dataSourceOtsInstanceAttachmentsConfigDependence)
+	resourceId := "data.alibabacloudstack_ots_instance_attachments.default"
+	name := fmt.Sprintf("tfvpcatt%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOtsInstanceAttachmentsConfigDependence)
 
 	instanceNameConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"instance_name": "${alibabacloudstack_ots_instance_attachment.foo.instance_name}",
-		}),
-	}
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"instance_name": "${alibabacloudstack_ots_instance_attachment.foo.instance_name}",
-			"name_regex":    "${alibabacloudstack_ots_instance_attachment.foo.vpc_name}",
+			"instance_name": "${alibabacloudstack_ots_instance_attachment.default.instance_name}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"instance_name": "${alibabacloudstack_ots_instance_attachment.foo.instance_name}",
-			"name_regex":    "${alibabacloudstack_ots_instance_attachment.foo.vpc_name}-fake",
+			"instance_name": "fakeinstname",
+		}),
+	}
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_name": "${alibabacloudstack_ots_instance_attachment.default.instance_name}",
+			"name_regex":    "${alibabacloudstack_ots_instance_attachment.default.vpc_name}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_name": "${alibabacloudstack_ots_instance_attachment.default.instance_name}",
+			"name_regex":    "${alibabacloudstack_ots_instance_attachment.default.vpc_name}-fake",
 		}),
 	}
 
 	var existOtsInstanceAttachmentsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"names.#":                     "1",
-			"names.0":                     "testvpc",
+			"names.0":                     name,
 			"vpc_ids.#":                   "1",
 			"vpc_ids.0":                   CHECKSET,
 			"attachments.#":               "1",
-			"attachments.0.id":            fmt.Sprintf("tf-testAcc%d", rand),
+			"attachments.0.id":            CHECKSET,
 			"attachments.0.domain":        CHECKSET,
 			"attachments.0.endpoint":      CHECKSET,
 			"attachments.0.region":        CHECKSET,
-			"attachments.0.instance_name": fmt.Sprintf("tf-testAcc%d", rand),
-			"attachments.0.vpc_name":      "testvpc",
+			"attachments.0.instance_name": name,
+			"attachments.0.vpc_name":      name,
 			"attachments.0.vpc_id":        CHECKSET,
 		}
 	}
@@ -59,7 +60,7 @@ func TestAccAlibabacloudStackOtsInstanceAttachmentsDataSourceBasic(t *testing.T)
 		existMapFunc: existOtsInstanceAttachmentsMapFunc,
 		fakeMapFunc:  fakeOtsInstanceAttachmentsMapFunc,
 	}
-	otsInstanceAttachmentsCheckInfo.dataSourceTestCheck(t, rand, instanceNameConf, allConf)
+	otsInstanceAttachmentsCheckInfo.dataSourceTestCheck(t, rand, instanceNameConf, nameRegexConf)
 }
 
 func dataSourceOtsInstanceAttachmentsConfigDependence(name string) string {
@@ -68,31 +69,21 @@ func dataSourceOtsInstanceAttachmentsConfigDependence(name string) string {
 	  default = "%s"
 	}
 
-	resource "alibabacloudstack_ots_instance" "foo" {
-	  name = "${var.name}"
-	  description = "${var.name}"
-	  accessed_by = "Vpc"
-	  instance_type = "Capacity"
-	}
+	%s
 
-	data "alibabacloudstack_zones" "foo" {
-	  available_resource_creation = "VSwitch"
-	}
-	resource "alibabacloudstack_vpc" "foo" {
-	  cidr_block = "172.16.0.0/16"
-	  name = "${var.name}"
-	}
+	data "alibabacloudstack_ots_clusters" "default" {}
 
-	resource "alibabacloudstack_vswitch" "foo" {
-	  vpc_id = "${alibabacloudstack_vpc.foo.id}"
-	  name = "${var.name}"
-	  cidr_block = "172.16.1.0/24"
-	  availability_zone = "${data.alibabacloudstack_zones.foo.zones.0.id}"
+	resource "alibabacloudstack_ots_instance" "default" {
+	  name = var.name
+	  description   = var.name
+	  specification  = "HYBRID"
 	}
-	resource "alibabacloudstack_ots_instance_attachment" "foo" {
-	  instance_name = "${alibabacloudstack_ots_instance.foo.name}"
-	  vpc_name = "testvpc"
-	  vswitch_id = "${alibabacloudstack_vswitch.foo.id}"
+	
+	resource "alibabacloudstack_ots_instance_attachment" "default" {
+		instance_name = "${alibabacloudstack_ots_instance.default.name}"
+		vpc_name      = "${var.name}"
+		vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
 	}
-	`, name)
+	
+	`, name, VSwitchCommonTestCase)
 }

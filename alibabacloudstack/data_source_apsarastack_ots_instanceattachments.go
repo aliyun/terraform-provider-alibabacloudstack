@@ -86,7 +86,7 @@ func dataSourceAlibabacloudStackOtsInstanceAttachmentsRead(d *schema.ResourceDat
 	otsService := OtsService{client}
 	instanceName := d.Get("instance_name").(string)
 	allVpcs, err := otsService.ListOtsInstanceVpc(instanceName)
-	if err != nil {
+	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"NotFound"}) {
 		return errmsgs.WrapError(err)
 	}
 
@@ -111,7 +111,7 @@ func otsAttachmentsDescriptionAttributes(d *schema.ResourceData, vpcInfos []ots.
 	var s []map[string]interface{}
 	for _, vpc := range vpcInfos {
 		mapping := map[string]interface{}{
-			"id":            vpc.InstanceName,
+			"id":            vpc.InstanceName + ":" + vpc.InstanceVpcName,
 			"domain":        vpc.Domain,
 			"endpoint":      vpc.Endpoint,
 			"region":        vpc.RegionNo,

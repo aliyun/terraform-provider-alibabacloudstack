@@ -193,7 +193,11 @@ func (s *OtsService) DescribeOtsInstanceAttachment(id string) (inst ots.VpcInfo,
 	request := ots.CreateListVpcInfoByInstanceRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.Method = "GET"
-	request.InstanceName = id
+	parts, err := ParseResourceId(id, 2)
+	if err != nil {
+		return inst, err
+	}
+	request.InstanceName = parts[0]
 
 	raw, err := s.client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
 		return otsClient.ListVpcInfoByInstance(request)
@@ -213,7 +217,13 @@ func (s *OtsService) DescribeOtsInstanceAttachment(id string) (inst ots.VpcInfo,
 	if resp.TotalCount < 1 {
 		return inst, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OtsInstanceAttachment", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
-	return resp.VpcInfos.VpcInfo[0], nil
+	for _ , vpc := range resp.VpcInfos.VpcInfo {
+		if vpc.InstanceVpcName != parts[1] {
+			continue
+		}
+		return vpc, nil
+	}
+	return inst, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 }
 
 func (s *OtsService) WaitForOtsInstanceVpc(id string, status Status, timeout int) error {
