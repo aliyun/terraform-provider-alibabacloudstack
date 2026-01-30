@@ -6,19 +6,18 @@ import (
 )
 
 func TestAccAlibabacloudStackOtsInstancesDataSource(t *testing.T) {
-	rand := getAccTestRandInt(10000, 99999)
+	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_ots_instances.default"
+	name := fmt.Sprintf("tf-otsinst-%d", rand)
 
-	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf-testAcc%d", rand),
-		dataSourceOtsInstancesConfigDependence)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOtsInstancesConfigDependence)
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"${alibabacloudstack_ots_instance.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_ots_instance.default.id}-fake"},
+			"ids": []string{"${alibabacloudstack_ots_instance.default.id}_fake"},
 		}),
 	}
 
@@ -27,62 +26,53 @@ func TestAccAlibabacloudStackOtsInstancesDataSource(t *testing.T) {
 			"name_regex": "${alibabacloudstack_ots_instance.default.name}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_ots_instance.default.name}-fake",
+			"name_regex": "${alibabacloudstack_ots_instance.default.name}_fake",
 		}),
 	}
 
-	tagsConf := dataSourceTestAccConfig{
+	specificationConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"tags": "${alibabacloudstack_ots_instance.default.tags}",
+			"ids":           []string{"${alibabacloudstack_ots_instance.default.id}"},
+			"specification": "HYBRID",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"tags": map[string]string{
-				"Created": "TF-fake",
-				"For":     "acceptance test fake",
-			},
+			"ids":           []string{"${alibabacloudstack_ots_instance.default.id}"},
+			"specification": "SSD",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"${alibabacloudstack_ots_instance.default.id}"},
-			"name_regex": "${alibabacloudstack_ots_instance.default.name}",
-			"tags":       "${alibabacloudstack_ots_instance.default.tags}",
+			"ids":           []string{"${alibabacloudstack_ots_instance.default.id}"},
+			"name_regex":    "${alibabacloudstack_ots_instance.default.name}",
+			"specification": "HYBRID",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"${alibabacloudstack_ots_instance.default.id}"},
-			"name_regex": "${alibabacloudstack_ots_instance.default.name}",
-			"tags": map[string]string{
-				"Created": "TF-fake",
-				"For":     "acceptance test fake",
-			},
+			"ids":           []string{"${alibabacloudstack_ots_instance.default.id}_fake"},
+			"name_regex":    "${alibabacloudstack_ots_instance.default.name}_fake",
+			"specification": "SSD",
 		}),
 	}
 
 	var existOtsInstancesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"names.#":                    "1",
-			"names.0":                    fmt.Sprintf("tf-testAcc%d", rand),
-			"instances.#":                "1",
-			"instances.0.name":           fmt.Sprintf("tf-testAcc%d", rand),
-			"instances.0.id":             fmt.Sprintf("tf-testAcc%d", rand),
-			"instances.0.status":         string(Running),
-			"instances.0.write_capacity": CHECKSET,
-			"instances.0.read_capacity":  CHECKSET,
-			"instances.0.cluster_type":   CHECKSET,
-			"instances.0.create_time":    CHECKSET,
-			"instances.0.user_id":        CHECKSET,
-			"instances.0.network":        "NORMAL",
-			"instances.0.description":    fmt.Sprintf("tf-testAcc%d", rand),
-			"instances.0.entity_quota":   CHECKSET,
-			"instances.0.tags.%":         "2",
+			"names.#":                   "1",
+			"instances.#":               "1",
+			"instances.0.id":            CHECKSET,
+			"instances.0.name":          name,
+			"instances.0.user_id":       CHECKSET,
+			"instances.0.description":   name,
+			"instances.0.specification": "HYBRID",
+			"instances.0.vcu_quota":     CHECKSET,
+			"instances.0.create_time":   CHECKSET,
+			"instances.0.tags.#":        CHECKSET,
 		}
 	}
 
 	var fakeOtsInstancesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"names.#":  "0",
-			"topics.#": "0",
+			"names.#":     "0",
+			"instances.#": "0",
 		}
 	}
 
@@ -91,23 +81,21 @@ func TestAccAlibabacloudStackOtsInstancesDataSource(t *testing.T) {
 		existMapFunc: existOtsInstancesMapFunc,
 		fakeMapFunc:  fakeOtsInstancesMapFunc,
 	}
-
-	otsInstancesCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, tagsConf, allConf)
+	otsInstancesCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, specificationConf, allConf)
 }
 
 func dataSourceOtsInstancesConfigDependence(name string) string {
 	return fmt.Sprintf(`
-	variable "name" {
-	  default = "%s"
-	}
-	resource "alibabacloudstack_ots_instance" "default" {
-	  name = "${var.name}"
-	  description = "${var.name}"
-	  instance_type = "Capacity"
-	  tags = {
-		Created = "TF-${var.name}"
-		For = "acceptance test"
-	  }
-	}
-	`, name)
+variable "name" {
+  default = "%s"
+}
+
+data "alibabacloudstack_ots_clusters" "default" {}
+
+resource "alibabacloudstack_ots_instance" "default" {
+  name = var.name
+  description   = var.name
+  specification  = "HYBRID"
+}
+`, name)
 }

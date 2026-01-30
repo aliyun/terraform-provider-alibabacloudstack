@@ -31,10 +31,10 @@ func TestAccAlibabacloudStackOtsInstance_clusterName(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name":        "${var.name}",
-					"alias_name":  "${var.name}_alias",
+					"name":         "${var.name}",
+					"alias_name":   "${var.name}_alias",
 					"cluster_name": "${data.alibabacloudstack_ots_clusters.anyone.clusters.0.cluster_name}",
-					"description": "${var.name}_desc",
+					"description":  "${var.name}_desc",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -77,7 +77,7 @@ func TestAccAlibabacloudStackOtsInstance_clusterType(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	rand := getAccTestRandInt(10000, 999999)
-	name := fmt.Sprintf("tf-testAccdbaccount-%d", rand)
+	name := fmt.Sprintf("tf-otsinst-%d", rand)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceDependence)
 	ResourceTest(t, resource.TestCase{
@@ -90,10 +90,10 @@ func TestAccAlibabacloudStackOtsInstance_clusterType(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name":        "${var.name}",
-					"alias_name":  "${var.name}_alias",
-					"cluster_type": "${data.alibabacloudstack_ots_clusters.anyone.clusters.0.cluster_type}",
-					"description": "${var.name}_desc",
+					"name":          "${var.name}",
+					"alias_name":    "${var.name}_alias",
+					"specification": "${data.alibabacloudstack_ots_clusters.anyone.clusters.0.cluster_type}",
+					"description":   "${var.name}_desc",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

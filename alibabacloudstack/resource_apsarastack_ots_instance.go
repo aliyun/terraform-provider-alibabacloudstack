@@ -23,13 +23,16 @@ func resourceAlibabacloudStackOtsInstance() *schema.Resource {
 			"cluster_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
-				AtLeastOneOf: []string{"cluster_type"},
+				AtLeastOneOf: []string{"specification"},
 			},
-			"cluster_type": {
+			"specification": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"SSD", "HYBRID"}, false),
 				AtLeastOneOf: []string{"cluster_name"},
 			},
 			"alias_name": {
@@ -43,10 +46,6 @@ func resourceAlibabacloudStackOtsInstance() *schema.Resource {
 			"network": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
-			},
-			"specification": {
-				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"table_quota": {
@@ -107,7 +106,7 @@ func resourceAlibabacloudStackOtsInstanceCreate(d *schema.ResourceData, meta int
 	if v, ok := d.GetOk("cluster_name"); ok {
 		request["ClusterName"] = v.(string)
 	}
-	if v, ok := d.GetOk("cluster_type"); ok {
+	if v, ok := d.GetOk("specification"); ok {
 		request["ClusterType"] = v.(string)
 	}
 
@@ -247,7 +246,7 @@ func resourceAlibabacloudStackOtsInstanceDelete(d *schema.ResourceData, meta int
 		return err
 	}
 
-	stateConf := BuildStateConf([]string{"deleting"}, []string{""}, d.Timeout(schema.TimeoutDelete), 10*time.Second, otsService.OtsInstanceStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, otsService.OtsInstanceStateRefreshFunc(d.Id(), []string{}))
 	_, err := stateConf.WaitForState()
 	return errmsgs.WrapError(err)
 }
