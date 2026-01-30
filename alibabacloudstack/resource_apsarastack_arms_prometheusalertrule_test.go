@@ -27,6 +27,9 @@ func TestAccAlibabacloudStackARMSPrometheusAlertRule_basic0(t *testing.T) {
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  rac.checkResourceDestroy(),
+		PreCheck: func() {
+			testAccPreCheckWithAPIIsNotSupport(t)
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -177,7 +180,10 @@ func TestAccAlibabacloudStackARMSPrometheusAlertRule_basic1(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		PreCheck: func() {
+			testAccPreCheckWithAPIIsNotSupport(t)
+		},
+		CheckDestroy: rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{

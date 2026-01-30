@@ -124,6 +124,7 @@ func TestAccAlibabacloudStackArmsDispatchRule_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckWithAPIIsNotSupport(t)
 		},
 
 		IDRefreshName: resourceId,

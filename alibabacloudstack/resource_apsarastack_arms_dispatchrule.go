@@ -13,6 +13,7 @@ import (
 
 func resourceAlibabacloudStackArmsDispatchRule() *schema.Resource {
 	resource := &schema.Resource{
+		DeprecationMessage: "The 'alibabacloudstack_arms_dispatch_rule' resource is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 		Schema: map[string]*schema.Schema{
 			"is_recover": {
 				Type:     schema.TypeBool,
