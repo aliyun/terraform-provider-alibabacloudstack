@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -38,47 +38,39 @@ func TestAccAlibabacloudStackArmsAlertcontact0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"phone_num": "12345678910",
-
-					"alert_contact_name": "test",
-
-					"email": "123@qq.com",
+					"phone_num":              "12345678910",
+					"alert_contact_name":     "${var.name}",
+					"email":                  "${var.name}@aliyun.test",
+					"ding_robot_webhook_url": "http://tf-test.dingtalk.com/${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"phone_num": "12345678910",
-
-						"alert_contact_name": "test",
-
-						"email": "123@qq.com",
+						"phone_num":              "12345678910",
+						"alert_contact_name":     name,
+						"email":                  name + "@aliyun.test",
+						"ding_robot_webhook_url": "http://tf-test.dingtalk.com/" + name,
 					}),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"email": "1234@qq.com",
-
-					"alert_contact_name": "rdktest",
-
-					"phone_num": "99999999999",
+					"phone_num":              "1234567890",
+					"alert_contact_name":     "${var.name}_update",
+					"email":                  "${var.name}_update@aliyun.test",
+					"ding_robot_webhook_url": "http://tf-test.dingtalk.com/${var.name}_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"email": "1234@qq.com",
-
-						"alert_contact_name": "rdktest",
-
-						"phone_num": "99999999999",
+						"phone_num":              "1234567890",
+						"alert_contact_name":     name + "_update",
+						"email":                  name + "_update@aliyun.test",
+						"ding_robot_webhook_url": "http://tf-test.dingtalk.com/" + name + "_update",
 					}),
 				),
 			},
@@ -87,18 +79,12 @@ func TestAccAlibabacloudStackArmsAlertcontact0(t *testing.T) {
 }
 
 var AlibabacloudTestAccArmsAlertcontactCheckmap = map[string]string{
-
-	"alert_contact_id": CHECKSET,
-
-	"email": CHECKSET,
-
-	"alert_contact_name": CHECKSET,
-
-	"system_noc": CHECKSET,
-
+	"contact_id":             CHECKSET,
+	"email":                  CHECKSET,
+	"alert_contact_name":     CHECKSET,
+	"system_noc":             CHECKSET,
 	"ding_robot_webhook_url": CHECKSET,
-
-	"phone_num": CHECKSET,
+	"phone_num":              CHECKSET,
 }
 
 func AlibabacloudTestAccArmsAlertcontactBasicdependence(name string) string {

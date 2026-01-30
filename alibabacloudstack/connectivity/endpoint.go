@@ -172,8 +172,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	//arms endpoint
 	ARMSCode: PopEndpoint{
-		"arms-api.console.{{.region}}.{{.domain}}",
-		"arms-api.console.{{.region}}.{{.domain}}",
+		"arms-api.{{.domain}}",
+		"arms-api.{{.domain}}",
 	},
 	//ascm endpoint
 	ASCMCode: PopEndpoint{

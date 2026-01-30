@@ -32,6 +32,10 @@ func resourceAlibabacloudStackArmsAlertContact() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"contact_id": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackArmsAlertContactCreate, resourceAlibabacloudStackArmsAlertContactRead, resourceAlibabacloudStackArmsAlertContactUpdate, resourceAlibabacloudStackArmsAlertContactDelete)
@@ -94,6 +98,7 @@ func resourceAlibabacloudStackArmsAlertContactRead(d *schema.ResourceData, meta 
 		}
 		return errmsgs.WrapError(err)
 	}
+	d.Set("contact_id", object["ContactId"])
 	d.Set("alert_contact_name", object["ContactName"])
 	d.Set("ding_robot_webhook_url", object["DingRobot"])
 	d.Set("email", object["Email"])
