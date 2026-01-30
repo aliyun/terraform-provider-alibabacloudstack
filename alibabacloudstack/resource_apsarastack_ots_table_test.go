@@ -53,7 +53,7 @@ func TestAccAlibabacloudStackOtsTable_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"instance_name": "tf-" + name,
+						"instance_name": name,
 						"table_name":    name,
 					}),
 				),
@@ -75,11 +75,11 @@ func TestAccAlibabacloudStackOtsTable_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"time_to_live": "86401",
+					"time_to_live": "86500",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"time_to_live": "86401",
+						"time_to_live": "86500",
 					}),
 				),
 			},

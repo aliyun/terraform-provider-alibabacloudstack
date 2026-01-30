@@ -87,15 +87,12 @@ func dataSourceOtsTablesConfigDependence(name string) string {
 	variable "name" {
 	  default = "%s"
 	}
+	data "alibabacloudstack_ots_clusters" "default" {}
+
 	resource "alibabacloudstack_ots_instance" "default" {
-	  name = "tf-${var.name}"
-	  description = "${var.name}"
-	  accessed_by = "Any"
-	  instance_type = "Capacity"
-	  tags = {
-	    Created = "TF"
-	    For = "acceptance test"
-	  }
+	  name = var.name
+	  description   = var.name
+	  specification  = "HYBRID"
 	}
 
 	resource "alibabacloudstack_ots_table" "default" {

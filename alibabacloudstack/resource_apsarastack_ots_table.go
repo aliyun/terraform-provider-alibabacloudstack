@@ -102,6 +102,7 @@ func resourceAlibabacloudStackOtsTableCreate(d *schema.ResourceData, meta interf
 	}
 	tableOption := new(tablestore.TableOption)
 	tableOption.TimeToAlive = d.Get("time_to_live").(int)
+	tableOption.MaxVersion = d.Get("max_version").(int)
 	if deviation, ok := d.GetOk("deviation_cell_version_in_sec"); ok {
 		tableOption.DeviationCellVersionInSec, _ = strconv.ParseInt(deviation.(string), 10, 64)
 	}
