@@ -280,7 +280,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"data.{{.region}}.sls-pub.{{.domain}}",
 	},
 
-	OtsDataCode : PopEndpoint{
+	OtsDataCode: PopEndpoint{
 		"{{.region}}.ots-internal.{{.domain}}",
 		"{{.region}}.ots-internal.{{.domain}}",
 	},
@@ -382,6 +382,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"hologram.{{.domain}}",
 		"hologram.{{.region}}.{{.domain}}",
 	},
+	OtsCode: PopEndpoint{
+		"ots.{{.domain}}",
+		"ots.{{.region}}.{{.domain}}",
+	},
 	TablestoreCode: PopEndpoint{
 		"tablestore.{{.domain}}",
 		"tablestore.{{.region}}.{{.domain}}",
@@ -432,10 +436,6 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 	},
 	SLSCode: PopEndpoint{
-		"public.asapi.{{.region}}.{{.domain}}",
-		"public.asapi.{{.region}}.{{.domain}}",
-	},
-	OtsCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
 	},

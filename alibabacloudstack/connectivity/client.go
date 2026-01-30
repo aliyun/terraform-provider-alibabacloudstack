@@ -63,7 +63,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -466,27 +465,6 @@ func (client *AlibabacloudStackClient) getHttpProxy() (proxy *url.URL, err error
 	return proxy, err
 }
 
-func (client *AlibabacloudStackClient) skipProxy(endpoint string) (bool, error) {
-	var urls []string
-	if rawurl := os.Getenv("NO_PROXY"); rawurl != "" {
-		urls = strings.Split(rawurl, ",")
-	} else if rawurl := os.Getenv("no_proxy"); rawurl != "" {
-		urls = strings.Split(rawurl, ",")
-	}
-	for _, value := range urls {
-		if strings.HasPrefix(value, "*") {
-			value = fmt.Sprintf(".%s", value)
-		}
-		noProxyReg, err := regexp.Compile(value)
-		if err != nil {
-			return false, err
-		}
-		if noProxyReg.MatchString(endpoint) {
-			return true, nil
-		}
-	}
-	return false, nil
-}
 func (client *AlibabacloudStackClient) WithKmsClient(do func(*kms.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the KMS client if necessary
 	if client.kmsconn == nil {
@@ -626,24 +604,6 @@ func (client *AlibabacloudStackClient) GetUserAgent() string {
 	return fmt.Sprintf("%s/%s %s/%s %s/%s", Terraform, TerraformVersion, Provider, ProviderVersion, Module, client.Config.ConfigurationSource)
 }
 
-func (client *AlibabacloudStackClient) getHttpProxyUrl() *url.URL {
-	for _, v := range []string{"HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy"} {
-		value := strings.Trim(os.Getenv(v), " ")
-		if value != "" {
-			if !regexp.MustCompile(`^http(s)?://`).MatchString(value) {
-				value = fmt.Sprintf("https://%s", value)
-			}
-			proxyUrl, err := url.Parse(value)
-			if err == nil {
-				return proxyUrl
-			}
-			break
-		}
-	}
-	return nil
-}
-
-
 func (client *AlibabacloudStackClient) WithSlsDataClient(do func(*sls.Client) (interface{}, error)) (interface{}, error) {
 	goSdkMutex.Lock()
 	defer goSdkMutex.Unlock()
@@ -778,7 +738,13 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 		if endpoint == "" {
 			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
 		}
-		endpoint = fmt.Sprintf("%s://%s", strings.ToLower(client.Config.Protocol), endpoint)
+
+		if client.Config.Proxy != "" {
+			// FIXME: Modifying environment variables may pose risks
+			os.Setenv("http_proxy", client.Config.Proxy)
+			os.Setenv("https_proxy", client.Config.Proxy)
+		}
+		endpoint = fmt.Sprintf("%s://%s.%s", strings.ToLower(client.Config.Protocol), instanceName, endpoint)
 		tableStoreClient = tablestore.NewClientWithConfig(endpoint, instanceName, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken, tablestore.NewDefaultTableStoreConfig())
 		client.tablestoreconnByInstanceName[instanceName] = tableStoreClient
 	}
@@ -811,7 +777,6 @@ func (client *AlibabacloudStackClient) NewEcsClient() (*rpc.Client, error) {
 func (client *AlibabacloudStackClient) NewRosClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("ros", client.Config.Endpoints[RosCode])
 }
-
 
 func (client *AlibabacloudStackClient) NewRoaCsClient() (*roaCS.Client, error) {
 	productCode := "ros"
@@ -867,11 +832,9 @@ func (client *AlibabacloudStackClient) NewQuickbiClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("quickbi", client.Config.Endpoints[QuickbiCode])
 }
 
-
 func (client *AlibabacloudStackClient) NewArmsClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("arms", client.Config.Endpoints[ARMSCode])
 }
-
 
 func (client *AlibabacloudStackClient) NewBastionhostClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("Bastionhostprivate", client.Config.Endpoints[BastionHostCode])

@@ -1274,7 +1274,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Endpoints[connectivity.OneRouterCode] = asapiEndpoint.(string)
 		config.Endpoints[connectivity.KmsCode] = asapiEndpoint.(string)
 		config.Endpoints[connectivity.SLSCode] = asapiEndpoint.(string)
-		config.Endpoints[connectivity.OtsCode] = asapiEndpoint.(string)
 	}
 	if kmsEndpoint, ok := d.GetOk("kms_endpoint"); ok && kmsEndpoint.(string) != "" {
 		config.Endpoints[connectivity.KmsCode] = kmsEndpoint.(string)

@@ -228,7 +228,7 @@ func resourceAlibabacloudStackOtsInstanceDelete(d *schema.ResourceData, meta int
 	otsService := OtsService{client}
 
 	if err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("GET", "Ots", "2016-06-20", "DeleteInstance", "")
+		request := client.NewCommonRequest("POST", "Ots", "2016-06-20", "DeleteInstance", "")
 
 		request.QueryParams["InstanceName"] = d.Id()
 
