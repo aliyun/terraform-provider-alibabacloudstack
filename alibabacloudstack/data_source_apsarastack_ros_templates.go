@@ -100,6 +100,10 @@ func dataSourceAlibabacloudStackRosTemplates() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"create_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -188,6 +192,7 @@ func dataSourceAlibabacloudStackRosTemplatesRead(d *schema.ResourceData, meta in
 			"template_id":      fmt.Sprint(object["TemplateId"]),
 			"template_name":    object["TemplateName"],
 			"template_version": object["TemplateVersion"],
+			"create_time":      object["CreateTime"],
 		}
 		if detailedEnabled := d.Get("enable_details"); !detailedEnabled.(bool) {
 			ids = append(ids, fmt.Sprint(object["TemplateId"]))

@@ -97,6 +97,7 @@ func resourceAlibabacloudStackRosTemplateRead(d *schema.ResourceData, meta inter
 		}
 		d.Set("description", template["Description"].(string))
 		d.Set("template_name", template["TemplateName"].(string))
+		break
 	}
 	
 	return nil
