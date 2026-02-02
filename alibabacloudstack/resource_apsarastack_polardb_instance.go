@@ -931,6 +931,12 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 	encryptionKey := PolardbService.DescribeDBInstanceEncryptionKey(d.Id())
 	if encryptionKey != "" {
 		d.Set("encryption_key", encryptionKey)
+		d.Set("encryption", true)
+		if arnrole, err := PolardbService.CheckCloudResourceAuthorized(); err == nil {
+			d.Set("role_arn", arnrole)
+		}
+	} else {
+		d.Set("encryption", false)
 	}
 	return nil
 }

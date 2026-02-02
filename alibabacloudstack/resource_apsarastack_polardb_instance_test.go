@@ -57,6 +57,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"engine":              "MySQL",
 						"instance_name":       name,
 						"db_instance_class":   CHECKSET,
 						"db_instance_storage": CHECKSET,
@@ -232,6 +233,7 @@ func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"engine":         "MySQL",
 						"instance_name":  name,
 						"encryption":     "true",
 						"tde_status":     "true",
@@ -266,7 +268,7 @@ func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 	var instance *PolardbDescribedbinstancesResponse
 	resourceId := "alibabacloudstack_polardb_dbinstance.default"
-	ra := resourceAttrInit(resourceId, PolardbinstancePGSqlMap)
+	ra := resourceAttrInit(resourceId, PolardbinstanceBasicMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
 		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "Describedbinstances")
@@ -308,6 +310,7 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"engine":        "PolarDB_PG",
 						"instance_name": name,
 						"acl":           "require",
 						"encryption":    "true",
@@ -359,21 +362,9 @@ locals {
 }
 
 var PolardbinstanceBasicMap = map[string]string{
-	"engine":              "MySQL",
-	"engine_version":      "8.0",
+	"engine_version":      CHECKSET,
 	"db_instance_class":   CHECKSET,
-	"db_instance_storage": "10",
-	"instance_name":       CHECKSET,
-	"zone_id":             CHECKSET,
-	"connection_string":   CHECKSET,
-	"port":                CHECKSET,
-}
-
-var PolardbinstancePGSqlMap = map[string]string{
-	"engine":              "PolarDB_PG",
-	"engine_version":      "14",
-	"db_instance_class":   CHECKSET,
-	"db_instance_storage": "10",
+	"db_instance_storage": CHECKSET,
 	"instance_name":       CHECKSET,
 	"zone_id":             CHECKSET,
 	"connection_string":   CHECKSET,
