@@ -81,11 +81,13 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"maintain_time": "22:00Z-02:00Z",
+					"maintain_time":     "22:00Z-02:00Z",
+					"monitoring_period": 300,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"maintain_time": "22:00Z-02:00Z",
+						"maintain_time":     "22:00Z-02:00Z",
+						"monitoring_period": "300",
 					}),
 				),
 			},
@@ -147,6 +149,16 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 						"tags.%":       "0",
 						"tags.created": REMOVEKEY,
 						"tags.for":     REMOVEKEY,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tde_status": true,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tde_status": "true",
 					}),
 				),
 			},

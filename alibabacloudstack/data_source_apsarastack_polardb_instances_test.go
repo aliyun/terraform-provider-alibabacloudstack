@@ -12,6 +12,15 @@ func TestAccAlibabacloudStackPolardbInstancesDataSource(t *testing.T) {
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourcePolardbInstancesConfigDependence)
 
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_polardb_dbinstance.default.id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake_instance_id"},
+		}),
+	}
+	
 	dbInstanceIdConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
@@ -57,11 +66,11 @@ func TestAccAlibabacloudStackPolardbInstancesDataSource(t *testing.T) {
 	instanceClassConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.id}",
-			"db_instance_class": "${local.instance_type}",
+			"db_instance_class": "${alibabacloudstack_polardb_dbinstance.default.db_instance_class}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.id}",
-			"db_instance_class": "fake_instance_id",
+			"db_instance_class": "fake_instance_class",
 		}),
 	}
 
@@ -70,7 +79,7 @@ func TestAccAlibabacloudStackPolardbInstancesDataSource(t *testing.T) {
 			"vswitch_id": "${alibabacloudstack_polardb_dbinstance.default.vswitch_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"vswitch_id": "${alibabacloudstack_polardb_dbinstance.default.vswitch_id}",
+			"vswitch_id": "${alibabacloudstack_polardb_dbinstance.default.vswitch_id}_fake",
 		}),
 	}
 
@@ -79,20 +88,7 @@ func TestAccAlibabacloudStackPolardbInstancesDataSource(t *testing.T) {
 			"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
-		}),
-	}
-
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.id}",
-			"db_instance_class": "${alibabacloudstack_polardb_dbinstance.default.db_instance_class}",
-			"status":            "Running",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.id}_fake",
-			"db_instance_class": "${alibabacloudstack_polardb_dbinstance.default.db_instance_class}_fake",
-			"status":            "Running",
+			"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}_fake",
 		}),
 	}
 
@@ -118,7 +114,7 @@ func TestAccAlibabacloudStackPolardbInstancesDataSource(t *testing.T) {
 		existMapFunc: existPolardbInstancesMapFunc,
 		fakeMapFunc:  fakePolardbInstancesMapFunc,
 	}
-	polardbInstancesCheckInfo.dataSourceTestCheck(t, rand, dbInstanceIdConf, networkTypeConf, engineConf, engineVersionConf, instanceClassConf, vswtichIdConf, vpcIdConf, allConf)
+	polardbInstancesCheckInfo.dataSourceTestCheck(t, rand, idsConf, dbInstanceIdConf, networkTypeConf, engineConf, engineVersionConf, instanceClassConf, vswtichIdConf, vpcIdConf)
 }
 
 func dataSourcePolardbInstancesConfigDependence(name string) string {
