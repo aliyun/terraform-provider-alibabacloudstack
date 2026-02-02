@@ -322,6 +322,7 @@ func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckWithMultiAZ(t)
 		},
 
 		// module name
