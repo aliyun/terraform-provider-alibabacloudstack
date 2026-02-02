@@ -42,7 +42,7 @@ func TestAccAlibabacloudStackPolardbConnectionConfigUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id":       "${alibabacloudstack_polardb_dbinstance.instance.id}",
+					"instance_id":       "${local.polardb_dbinstance_id}",
 					"connection_prefix": "tftest",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -60,24 +60,10 @@ func TestAccAlibabacloudStackPolardbConnectionConfigUpdate(t *testing.T) {
 
 func resourcePolardbConnectionConfigDependence(name string) string {
 	return fmt.Sprintf(`
-	%s
-
-	variable "creation" {
-		default = "PolarDB"
-	}
-
 	variable "name" {
 		default = "%s"
 	}
-	resource "alibabacloudstack_polardb_dbinstance" "instance" {
-		engine            = "MySQL"
-		engine_version    = "5.7"
-		instance_name = "${var.name}"
-		db_instance_storage_type= "local_ssd"
-		db_instance_storage = 5
-		db_instance_class = "rds.mysql.t1.small"
-		zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
-		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-	}
-	`, VSwitchCommonTestCase, name)
+	%s
+	%s
+	`, name,VSwitchCommonTestCase, PolarDBCommonTestCase("MySQL", true))
 }

@@ -123,6 +123,11 @@ func resourceAlibabacloudStackPolardbConnectionRead(d *schema.ResourceData, meta
 }
 
 func resourceAlibabacloudStackPolardbConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
+	
+	if d.IsNewResource(){
+		return nil
+	}
+	
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	polardbService := PolardbService{client}
 

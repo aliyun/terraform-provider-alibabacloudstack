@@ -780,7 +780,7 @@ func (s *PolardbService) WaitForDBInstance(id string, status Status, timeout int
 		if object != nil {
 			if status == Deleted && len(object.Items.DBInstance) == 0 {
 				break
-			} else if strings.ToLower(object.Items.DBInstance[0].DBInstanceStatus) == strings.ToLower(string(status)) {
+			} else if strings.EqualFold(object.Items.DBInstance[0].DBInstanceStatus, string(status)) {
 				break
 			}
 		}
@@ -1170,7 +1170,7 @@ func (s *PolardbService) WaitForConnectionDBInstance(d *schema.ResourceData, cli
 				return errmsgs.WrapError(err)
 			}
 		}
-		if object != nil && strings.ToLower(object.Items.DBInstance[0].DBInstanceStatus) == strings.ToLower(string(status)) {
+		if object != nil && strings.EqualFold(object.Items.DBInstance[0].DBInstanceStatus, string(status)) {
 			break
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
@@ -1304,11 +1304,9 @@ func (s *PolardbService) DescribeDBConnection(id string) (*PolardbDescribedbinst
 	}
 
 	object := PolardbDescribedbinstancenetinfoResponse.DBInstanceNetInfos.DBInstanceNetInfo
-	if object != nil {
-		for _, o := range object {
-			if strings.HasPrefix(o.ConnectionString, parts[1]) {
-				return PolardbDescribedbinstancenetinfoResponse, nil
-			}
+	for _, o := range object {
+		if strings.HasPrefix(o.ConnectionString, parts[1]+".") {
+			return PolardbDescribedbinstancenetinfoResponse, nil
 		}
 	}
 
@@ -2242,7 +2240,6 @@ func (s *PolardbService) PolardbClusterProxyStateRefreshFunc(id string, failStat
 		return object, object["DBProxyClusterStatus"].(string), nil
 	}
 }
-
 
 func (s *PolardbService) DescribePolardbClusterBackupPolicy(id string) (map[string]interface{}, error) {
 	// DescribeBackupPolicy
