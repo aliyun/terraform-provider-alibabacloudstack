@@ -2,79 +2,80 @@ package alibabacloudstack
 
 import (
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackLindormInstanceTypesDataSource0(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackLindormInstanceTypesDataSourceBasicConfig,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_lindorm_instance_types.c4g8"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_lindorm_instance_types.c4g8", "instance_types.0.id"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_lindorm_instance_types.c4g8", "instance_types.0.cpu", "4"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_lindorm_instance_types.c4g8", "instance_types.0.memory", "8"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_lindorm_instance_types.c4g8", "instance_types.0.name"),
-				),
-			},
-		},
-	})
+func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_lindorm_instance_types.default"
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", dataSourceLindormInstanceTypesConfigDependence)
+
+	cpuConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"cpu":    4,
+			"sorted_by": "Memory",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"cpu":    999,
+			"sorted_by": "Memory",
+		}),
+	}
+	
+	MemoryConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"sorted_by": "CPU",
+			"memory": 8,
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"sorted_by": "CPU",
+			"memory": 999,
+		}),
+	}
+
+
+	engineTypeConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"engine_type": "lindorm",
+		}),
+	}
+
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"cpu":         32,
+			"memory":      64,
+			"engine_type": "lindorm",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"cpu":         999,
+			"memory":      999,
+		}),
+	}
+
+	var existLindormInstanceTypesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"instance_types.#":        CHECKSET,
+			"instance_types.0.id":     CHECKSET,
+			"instance_types.0.cpu":    CHECKSET,
+			"instance_types.0.memory": CHECKSET,
+			"instance_types.0.rate":   CHECKSET,
+			"instance_types.0.name":   CHECKSET,
+		}
+	}
+
+	var fakeLindormInstanceTypesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"instance_types.#": "0",
+		}
+	}
+
+	var lindormInstanceTypesCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existLindormInstanceTypesMapFunc,
+		fakeMapFunc:  fakeLindormInstanceTypesMapFunc,
+	}
+	lindormInstanceTypesCheckInfo.dataSourceTestCheck(t, 0, cpuConf, MemoryConf, engineTypeConf, allConf)
 }
 
-func TestAccAlibabacloudStackLindormInstanceTypesDataSource1(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackLindormInstanceTypesDataSourceK8Sc32g64,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_lindorm_instance_types.c32g64"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_lindorm_instance_types.c32g64", "instance_types.0.id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_lindorm_instance_types.c32g64", "instance_types.0.cpu"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_lindorm_instance_types.c32g64", "instance_types.0.memory"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_lindorm_instance_types.c32g64", "instance_types.0.name"),
-				),
-			},
-			{
-				Config: testAccCheckAlibabacloudStackLindormInstanceTypesDataSourceK8Ssortbycpu,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_lindorm_instance_types.sortbycpu"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_lindorm_instance_types.sortbycpu", "instance_types.0.id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_lindorm_instance_types.sortbycpu", "instance_types.0.cpu"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_lindorm_instance_types.sortbycpu", "instance_types.0.memory"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_lindorm_instance_types.sortbycpu", "instance_types.0.name"),
-				),
-			},
-		},
-	})
-}
-
-const testAccCheckAlibabacloudStackLindormInstanceTypesDataSourceBasicConfig = `
-data "alibabacloudstack_lindorm_instance_types" "c4g8" {
-	cpu = 4
-	memory = 8
-	engine_type = "lindorm"
-}
+func dataSourceLindormInstanceTypesConfigDependence(name string) string {
+	return `
 `
-
-const testAccCheckAlibabacloudStackLindormInstanceTypesDataSourceK8Sc32g64 = `
-data "alibabacloudstack_lindorm_instance_types" "c32g64" {
-	cpu = 32
-	memory = 64
 }
-`
-const testAccCheckAlibabacloudStackLindormInstanceTypesDataSourceK8Ssortbycpu = `
-data "alibabacloudstack_lindorm_instance_types" "sortbycpu" {
-	sorted_by = "CPU"
-	engine_type = "lindorm"
-}
-`
