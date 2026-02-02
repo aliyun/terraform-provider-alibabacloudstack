@@ -3,13 +3,11 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackEdasClusterMembers() *schema.Resource {
@@ -28,17 +26,6 @@ func dataSourceAlibabacloudStackEdasClusterMembers() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
-			},
-			"names": {
-				Type:        schema.TypeList,
-				Computed:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: "A list of instance IDs corresponding to the retrieved agents.",
 			},
 			"members": {
 				Type:     schema.TypeList,
@@ -98,21 +85,27 @@ func dataSourceAlibabacloudStackEdasClusterMembersRead(d *schema.ResourceData, m
 	clusterId := d.Get("cluster_id").(string)
 
 	request := map[string]interface{}{
-		"clusterId": clusterId,
-		"pageSize":  100, // Set a large page size to get all results at once
+		"ClusterId": clusterId,
+		"PageSize":  100, // Set a large page size to get all results at once
 	}
 	pageNumber := 1
 	result := make([]interface{}, 0)
 	for {
-		request["currentPage"] = pageNumber
+		request["CurrentPage"] = pageNumber
 		response, err := client.DoTeaRequest("GET", "Edas", "2017-08-01", "ListClusterMembers", "/pop/v5/resource/cluster_member_list", nil, request, nil)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
 		if instances, err := jsonpath.Get("$.ClusterMemberPage.ClusterMemberList.ClusterMember", response); err == nil {
-			result = append(result, instances.([]interface{})...)
+			if instances != nil {
+				result = append(result, instances.([]interface{})...)
+			}
 		}
-		totalSize, _ := response["TotalSize"].(json.Number).Int64()
+		pageinfo, err := jsonpath.Get("$.ClusterMemberPage.TotalSize", response)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_cluster_members", "ListClusterMembers", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		totalSize, _ := pageinfo.(json.Number).Int64()
 		if int(totalSize) <= pageNumber*100 {
 			break
 		}
@@ -126,14 +119,7 @@ func dataSourceAlibabacloudStackEdasClusterMembersRead(d *schema.ResourceData, m
 	members := make([]interface{}, 0)
 	for _, data := range result {
 		member := data.(map[string]interface{})
-		id := fmt.Sprintf("%s:%s", member["ClusterId"], member["InstanceId"])
-		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
-			r := regexp.MustCompile(description_regex.(string))
-			if !r.MatchString(member["InstanceName"].(string)) {
-				continue
-			}
-		}
-
+		id := fmt.Sprintf("%s:%s", member["ClusterId"], member["EcsId"])
 		if len(idsMap) > 0 {
 			if _, exist := idsMap[id]; !exist {
 				continue
@@ -141,13 +127,13 @@ func dataSourceAlibabacloudStackEdasClusterMembersRead(d *schema.ResourceData, m
 		}
 		i := map[string]interface{}{
 			"id":          id,
-			"cluster_id":  member["clusterId"],
-			"instance_id": member["instanceId"],
-			"ecu_id":      member["ecuId"],
-			"ecs_id":      member["ecsId"],
-			"status":      member["status"],
-			"create_time": member["createTime"],
-			"update_time": member["updateTime"],
+			"cluster_id":  member["ClusterId"],
+			"instance_id": member["EcsId"],
+			"ecu_id":      member["EcuId"],
+			"ecs_id":      member["EcsId"],
+			"status":      member["Status"],
+			"create_time": member["CreateTime"],
+			"update_time": member["UpdateTime"],
 		}
 
 		members = append(members, i)

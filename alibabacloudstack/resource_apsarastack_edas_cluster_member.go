@@ -2,12 +2,11 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
 	"strings"
-	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -41,30 +40,20 @@ func resourceAlibabacloudStackEdasClusterMemberCreate(d *schema.ResourceData, me
 	request := map[string]interface{}{
 		"ClusterId":   clusterId,
 		"InstanceIds": instanceId,
-		"DoAsync":     true,
 	}
-
-	_, err := client.DoTeaRequest("POST", "Edas", "2017-08-01", "InstallAgent", "/pop/v5/ecss/install_agent", nil, request, nil)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	id := fmt.Sprintf("%s:%s", clusterId, instanceId)
-	d.SetId(id)
 	edasService := EdasService{client}
-	wait := incrementalWait(1*time.Second, 10*time.Second)
-	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
-		_, err := edasService.DescribeClusterMember(d.Id())
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			errmsg := ""
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DescribeClusterMember", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+	client.Config.ClientReadTimeout = 120
+	client.Config.ClientConnectTimeout = 120
+	_, err := client.DoTeaRequest("POST", "Edas", "2017-08-01", "InstallAgent", "/pop/v5/ecss/install_agent", nil, request, nil)
+	id := fmt.Sprintf("%s:%s", clusterId, instanceId)
+	if err != nil {
+		_, e := edasService.DescribeClusterMember(id)
+		if e != nil {
+			return errmsgs.WrapError(err)
 		}
-		return nil
-	})
-	return err
+	}
+	d.SetId(id)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasClusterMemberRead(d *schema.ResourceData, meta interface{}) error {
@@ -79,12 +68,7 @@ func resourceAlibabacloudStackEdasClusterMemberRead(d *schema.ResourceData, meta
 		}
 		return errmsgs.WrapError(err)
 	}
-
-	parts := strings.SplitN(d.Id(), ":", 2)
-	if len(parts) != 2 {
-		return errmsgs.GetNotFoundErrorFromString("Resource not found")
-	}
-
+	log.Printf(" =================================================================== Reading EDAS Cluster Member: %#v", object)
 	d.Set("cluster_id", object["ClusterId"])
 	d.Set("instance_id", object["EcsId"])
 	d.Set("cluster_member_id", object["ClusterMemberId"])
@@ -101,8 +85,8 @@ func resourceAlibabacloudStackEdasClusterMemberDelete(d *schema.ResourceData, me
 	}
 
 	reqQuery := map[string]interface{}{
-		"clusterId":       parts[0],
-		"clusterMemberId": d.Get("cluster_member_id"),
+		"ClusterId":       parts[0],
+		"ClusterMemberId": d.Get("cluster_member_id"),
 	}
 
 	_, err := client.DoTeaRequest("DELETE", "Edas", "2017-08-01", "DeleteClusterMember", "/pop/v5/resource/cluster_member", nil, reqQuery, nil)

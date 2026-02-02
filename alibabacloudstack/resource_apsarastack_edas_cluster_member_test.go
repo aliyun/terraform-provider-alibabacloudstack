@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackEdasClusterMember_basic(t *testing.T) {
-	var v *edas.Cluster
+	var v map[string]interface{}
 	resourceId := "alibabacloudstack_edas_cluster_member.default"
 	ra := resourceAttrInit(resourceId, EdasClusterMemberBasicMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {

@@ -1155,9 +1155,12 @@ func (s *EdasService) DescribeClusterMember(id string) (map[string]interface{}, 
 		return nil, errmsgs.WrapError(err)
 	}
 	results, err := jsonpath.Get("$.ClusterMemberPage.ClusterMemberList.ClusterMember", response)
+	if results == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Edas cluster install agent with id %s not found", id))
+	}
 	for _, v := range results.([]interface{}) {
 		instance := v.(map[string]interface{})
-		if instance["InstanceId"] == instanceId {
+		if instance["EcsId"].(string) == instanceId {
 			return instance, nil
 		}
 	}

@@ -13,17 +13,6 @@ func TestAccAlibabacloudStackEdasClusterMembersDataSource(t *testing.T) {
 		fmt.Sprintf("tf%d", rand),
 		dataSourceEdasClusterMembersDependence)
 
-	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_edas_cluster_member.default.description}",
-			"cluster_id": "${alibabacloudstack_edas_cluster_member.default.cluster_id}",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_edas_cluster_member.default.description}-fake",
-			"cluster_id": "${alibabacloudstack_edas_cluster_member.default.cluster_id}",
-		}),
-	}
-
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids":        []string{"${alibabacloudstack_edas_cluster_member.default.id}"},
@@ -37,14 +26,10 @@ func TestAccAlibabacloudStackEdasClusterMembersDataSource(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_edas_cluster_member.default.description}",
-			"ids":        []string{"${alibabacloudstack_edas_cluster_member.default.id}"},
 			"cluster_id": "${alibabacloudstack_edas_cluster_member.default.cluster_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_edas_cluster_member.default.description}-fake",
-			"ids":        []string{"${alibabacloudstack_edas_cluster_member.default.id}-fake"},
-			"cluster_id": "${alibabacloudstack_edas_cluster_member.default.cluster_id}",
+			"cluster_id": "${alibabacloudstack_edas_cluster_member.default.cluster_id}-fake",
 		}),
 	}
 
@@ -76,7 +61,7 @@ func TestAccAlibabacloudStackEdasClusterMembersDataSource(t *testing.T) {
 		fakeMapFunc:  fakeEdasClusterMembersMapFunc,
 	}
 
-	EdasClusterMembersCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
+	EdasClusterMembersCheckInfo.dataSourceTestCheck(t, rand, idsConf, allConf)
 }
 
 func dataSourceEdasClusterMembersDependence(name string) string {

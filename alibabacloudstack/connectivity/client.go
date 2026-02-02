@@ -1048,6 +1048,11 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 		runtime.HttpsProxy = &client.Config.Proxy
 	}
 	runtime.SetAutoretry(false) // When using ASAPI, the Tea package cannot retry, as it will modify the endpoint
+	readTimeout := client.Config.ClientReadTimeout * 1000
+	connectTimeout := client.Config.ClientConnectTimeout * 1000
+	// runtime.ConnectTimeout = &runtimeout
+	runtime.SetConnectTimeout(connectTimeout)
+	runtime.SetReadTimeout(readTimeout)
 
 	var response map[string]interface{}
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
@@ -1059,7 +1064,8 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 		if pathpattern != "" {
 			response, err = func() (map[string]interface{}, error) {
 				sdkConfig := client.teaRoaSdkConfig
-				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) // Unit: milliseconds
+				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(readTimeout)    // Unit: milliseconds
+				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(connectTimeout) // Unit: milliseconds
 				sdkConfig.SetProtocol(protocol)
 				conn, err := roa.NewClient(&sdkConfig)
 				if err != nil {
