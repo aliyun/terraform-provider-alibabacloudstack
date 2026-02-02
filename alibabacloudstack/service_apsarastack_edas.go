@@ -1139,3 +1139,27 @@ func (s *EdasService) DescribeEdasSwimmingLane(id string) (map[string]interface{
 	}
 	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("edas_swimming_lane", id))
 }
+func (s *EdasService) DescribeClusterMember(id string) (map[string]interface{}, error) {
+	parts := strings.SplitN(id, ":", 2)
+	clusterId := parts[0]
+	instanceId := parts[1]
+
+	reqQuery := map[string]interface{}{
+		"ClusterId":   clusterId,
+		"CurrentPage": 1,
+		"PageSize":    100,
+	}
+
+	response, err := s.client.DoTeaRequest("GET", "Edas", "2017-08-01", "ListClusterMembers", "/pop/v5/resource/cluster_member_list", nil, reqQuery, nil)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	results, err := jsonpath.Get("$.ClusterMemberPage.ClusterMemberList.ClusterMember", response)
+	for _, v := range results.([]interface{}) {
+		instance := v.(map[string]interface{})
+		if instance["InstanceId"] == instanceId {
+			return instance, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Edas cluster install agent with id %s not found", id))
+}

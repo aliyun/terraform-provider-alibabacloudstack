@@ -1086,6 +1086,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_nas_namespace_filesystem_attachment":             resourceAlibabacloudStackNasNamespaceFilesystemAttachment(),
 		"alibabacloudstack_nas_namespace_mount_target":                      resourceAlibabacloudStackNasNamespaceMountTarget(),
 		"alibabacloudstack_nas_namespace_group":                             resourceAlibabacloudStackNasNamespaceGroup(),
+		"alibabacloudstack_edas_cluster_member":                             resourceAlibabacloudStackEdasClusterMember(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
