@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -12,7 +13,7 @@ func TestAccAlibabacloudStackPolarDBReadonlyInstance_update(t *testing.T) {
 	var instance *PolardbDescribedbinstanceattributeResponse
 	resourceId := "alibabacloudstack_polardb_readonly_instance.default"
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testAccDBInstance%d", rand)
+	name := fmt.Sprintf("tf-testAccROInstance%d", rand)
 	var PolarDBReadonlyMap = map[string]string{}
 	ra := resourceAttrInit(resourceId, PolarDBReadonlyMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
@@ -37,13 +38,13 @@ func TestAccAlibabacloudStackPolarDBReadonlyInstance_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"master_db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.id}",
-					"zone_id":                  "${alibabacloudstack_polardb_dbinstance.default.zone_id}",
-					"engine_version":           "${alibabacloudstack_polardb_dbinstance.default.engine_version}",
-					"instance_type":            "${alibabacloudstack_polardb_dbinstance.default.instance_type}",
-					"instance_storage":         "${alibabacloudstack_polardb_dbinstance.default.instance_storage}",
+					"master_db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.0.id}",
+					"zone_id":                  "${alibabacloudstack_polardb_dbinstance.default.0.zone_id}",
+					"engine_version":           "${alibabacloudstack_polardb_dbinstance.default.0.engine_version}",
+					"instance_type":            "${alibabacloudstack_polardb_dbinstance.default.0.instance_type}",
+					"instance_storage":         "${alibabacloudstack_polardb_dbinstance.default.0.instance_storage}",
 					"instance_name":            "${var.name}",
-					"db_instance_storage_type": "${alibabacloudstack_polardb_dbinstance.default.storage_type}",
+					"db_instance_storage_type": "${alibabacloudstack_polardb_dbinstance.default.0.storage_type}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -82,7 +83,7 @@ func TestAccAlibabacloudStackPolarDBReadonlyInstance_update(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_storage": "${local.new_instance_storage}",
+					"instance_storage": TfRawString("data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_min + 10"),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -106,24 +107,24 @@ func TestAccAlibabacloudStackPolarDBReadonlyInstance_update(t *testing.T) {
 }
 
 func resourcePolarDBReadonlyInstanceConfigDependence(name string) string {
+	os.Unsetenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_ID")
 	return fmt.Sprintf(`
 	variable "name" {
 		default = "%s"
 	}
 %s
 
-	locals {
-		new_instance_storage = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_min + 10
-		new_cpu = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.cpu * 2
-	}
+data "alibabacloudstack_polardb_instances" "existed" {
+  ids                  = [local.polardb_dbinstance_id]
+}
 
 	data "alibabacloudstack_polardb_instance_types" "update" {
 	  engine               = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.engine
 	  engine_version       = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.engine_version
 	  sorted_by            = "Memory"
 	  series               = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.series
-	  cpu                  = local.new_cpu
+	  cpu                  = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.cpu * 2
 	}
 
-`, name, PolarDBMysqlCommonTestCase(false))
+`, name, PolarDBCommonTestCase("MySQL",false))
 }
