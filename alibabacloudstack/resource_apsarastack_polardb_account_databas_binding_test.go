@@ -32,25 +32,26 @@ func TestAccAlibabacloudStackPolardbAccountDatabaseBinding_basic0(t *testing.T) 
 			testAccPreCheck(t)
 		},
 		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+					"db_instance_id": "${local.polardb_dbinstance_id}",
 					"account_name":   "${alibabacloudstack_polardb_account.default.account_name}",
 					"database_privileges": []map[string]interface{}{
 						{
-							"db_name":   "${alibabacloudstack_polardb_database.default0.data_base_name}",
+							"db_name":   "${alibabacloudstack_polardb_database.default.0.data_base_name}",
 							"privilege": "ReadOnly",
 						},
 						{
-							"db_name":   "${alibabacloudstack_polardb_database.default1.data_base_name}",
+							"db_name":   "${alibabacloudstack_polardb_database.default.1.data_base_name}",
 							"privilege": "ReadWrite",
 						},
 						{
-							"db_name":   "${alibabacloudstack_polardb_database.default2.data_base_name}",
+							"db_name":   "${alibabacloudstack_polardb_database.default.2.data_base_name}",
 							"privilege": "DDLOnly",
 						},
 					},
@@ -76,11 +77,11 @@ func TestAccAlibabacloudStackPolardbAccountDatabaseBinding_basic0(t *testing.T) 
 				Config: testAccConfig(map[string]interface{}{
 					"database_privileges": []map[string]interface{}{
 						{
-							"db_name":   "${alibabacloudstack_polardb_database.default0.data_base_name}",
+							"db_name":   "${alibabacloudstack_polardb_database.default.0.data_base_name}",
 							"privilege": "DDLOnly",
 						},
 						{
-							"db_name":   "${alibabacloudstack_polardb_database.default1.data_base_name}",
+							"db_name":   "${alibabacloudstack_polardb_database.default.1.data_base_name}",
 							"privilege": "ReadOnly",
 						},
 					},
@@ -109,43 +110,22 @@ variable "name" {
 
 %s
 
-variable "creation" {
-	default = "PolarDB"
-}
-resource "alibabacloudstack_polardb_dbinstance" "instance" {
-	engine            = "MySQL"
-	engine_version    = "5.7"
-	instance_name = "${var.name}"
-	db_instance_storage_type= "local_ssd"
-	db_instance_storage = 5
-	db_instance_class = "rds.mysql.t1.small"
-	zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
-	vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-}
+%s
 
-resource "alibabacloudstack_polardb_database" "default0" {
-    data_base_instance_id  = "${alibabacloudstack_polardb_dbinstance.instance.id}"
-	data_base_name = "${var.name}0"
-	character_set_name = "utf8mb4"
-}
+%s
 
-resource "alibabacloudstack_polardb_database" "default1" {
-    data_base_instance_id  = "${alibabacloudstack_polardb_dbinstance.instance.id}"
-	data_base_name = "${var.name}1"
-	character_set_name = "utf8mb4"
-}
-
-resource "alibabacloudstack_polardb_database" "default2" {
-    data_base_instance_id  = "${alibabacloudstack_polardb_dbinstance.instance.id}"
-	data_base_name = "${var.name}2"
+resource "alibabacloudstack_polardb_database" "default" {
+	count = 3
+    data_base_instance_id  = "${local.polardb_dbinstance_id}"
+	data_base_name = "${var.name}${count.index}"
 	character_set_name = "utf8mb4"
 }
 
 resource "alibabacloudstack_polardb_account" "default" {
-    data_base_instance_id  = "${alibabacloudstack_polardb_dbinstance.instance.id}"
+    data_base_instance_id  = "${local.polardb_dbinstance_id}"
 	account_name = "${var.name}"
-	account_password     = "Test@1234"
+	account_password     = random_password.password.0.result
 }
 
- `, name, VSwitchCommonTestCase)
+ `, name, VSwitchCommonTestCase, PolarDBCommonTestCase("MySQL", true), RandomPasswordTestCase(12, 1))
 }
