@@ -165,8 +165,8 @@ data "alibabacloudstack_edas_cluster_members" "default" {
 ## 参数说明
 以下参数用于配置数据源查询条件：
 
-- `cluster_id` (字符串)：EDAS集群的唯一标识符。 (必填, 变更时重建)
-- `ids` (列表)：用于过滤结果的集群成员ID列表，每个ID格式为`ClusterId:InstanceId`。 (可选)
+- `cluster_id` (必填, 变更时重建)：EDAS集群的唯一标识符。 (必填, 变更时重建)
+- `ids` (列表, 选填)：用于过滤结果的集群成员ID列表，每个ID格式为`ClusterId:InstanceId`。 (可选)
 
 ## 属性说明
 以下属性从查询结果中导出：

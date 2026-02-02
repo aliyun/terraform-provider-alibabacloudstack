@@ -103,7 +103,7 @@ func dataSourceAlibabacloudStackEdasClusterMembersRead(d *schema.ResourceData, m
 		}
 		pageinfo, err := jsonpath.Get("$.ClusterMemberPage.TotalSize", response)
 		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_edas_cluster_members", "ListClusterMembers", errmsgs.AlibabacloudStackSdkGoERROR)
+			break
 		}
 		totalSize, _ := pageinfo.(json.Number).Int64()
 		if int(totalSize) <= pageNumber*100 {
@@ -111,6 +111,10 @@ func dataSourceAlibabacloudStackEdasClusterMembersRead(d *schema.ResourceData, m
 		}
 		pageNumber++
 
+	}
+	if len(result) == 0 {
+		d.SetId("")
+		return nil
 	}
 
 	idsMap := getIdsStringFilter(d)
