@@ -856,6 +856,7 @@ data "alibabacloudstack_rds_instance_types" "default" {
 
 resource "alibabacloudstack_db_instance" "default" {
   engine               = data.alibabacloudstack_rds_instance_types.default.instance_types.0.engine
+  cpu_type             = data.alibabacloudstack_rds_instance_types.default.instance_types.0.cpu_type
   engine_version       = data.alibabacloudstack_rds_instance_types.default.instance_types.0.engine_version
   instance_type        = data.alibabacloudstack_rds_instance_types.default.instance_types.0.id
   instance_storage     = data.alibabacloudstack_rds_instance_types.default.instance_types.0.storage_min
