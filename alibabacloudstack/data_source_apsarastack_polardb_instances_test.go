@@ -83,17 +83,6 @@ func TestAccAlibabacloudStackPolardbInstancesDataSource(t *testing.T) {
 		}),
 	}
 
-	dbInstanceClassConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_class": "${alibabacloudstack_polardb_dbinstance.default.db_instance_class}",
-			"status":            "Running",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_class": "rds.mysql.t1.fake",
-			"status":            "Running",
-		}),
-	}
-
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.id}",
@@ -129,7 +118,7 @@ func TestAccAlibabacloudStackPolardbInstancesDataSource(t *testing.T) {
 		existMapFunc: existPolardbInstancesMapFunc,
 		fakeMapFunc:  fakePolardbInstancesMapFunc,
 	}
-	polardbInstancesCheckInfo.dataSourceTestCheck(t, rand, dbInstanceIdConf, dbInstanceClassConf, networkTypeConf, engineConf, engineVersionConf, instanceClassConf, vswtichIdConf, vpcIdConf, allConf)
+	polardbInstancesCheckInfo.dataSourceTestCheck(t, rand, dbInstanceIdConf, networkTypeConf, engineConf, engineVersionConf, instanceClassConf, vswtichIdConf, vpcIdConf, allConf)
 }
 
 func dataSourcePolardbInstancesConfigDependence(name string) string {

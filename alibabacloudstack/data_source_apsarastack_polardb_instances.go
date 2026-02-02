@@ -416,6 +416,9 @@ func dataSourceAlibabacloudStackPolardbDbInstancesRead(d *schema.ResourceData, m
 		request.QueryParams["PageNumber"] = strconv.Itoa(pageNumber)
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				break
+			}
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}

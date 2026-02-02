@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc-polardb-instance_mysql%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceVpcDependence("MySQL"))
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceClassicConfigDependence("MySQL"))
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -183,15 +183,6 @@ func testPolardbAccCheckSecurityIpExists(n string, ips []map[string]interface{})
 	}
 }
 
-func resourcePolardbInstanceVpcDependence(engine string) func(string) string {
-	return func(name string) string {
-		return fmt.Sprintf(`
-		%s
-		%s
-`, resourcePolardbInstanceClassicConfigDependence(engine)(name), SecurityGroupCommonTestCase)
-	}
-}
-
 func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 	var instance *PolardbDescribedbinstancesResponse
 
@@ -339,14 +330,20 @@ variable "name" {
 	default = "%s"
 }
 
+variable "engine" {
+	default = "%s"
+}
+
+%s
+
 data "alibabacloudstack_polardb_instance_types" "intel" {
-	engine = "%s"
+	engine = var.engine
 	cpu_type = "intel"
 	sorted_by = "CPU"
 }
 
 data "alibabacloudstack_polardb_instance_types" "anyone" {
-	engine = "%s"
+	engine = var.engine
 	sorted_by = "CPU"
 }
 
@@ -357,7 +354,7 @@ locals {
 
 %s
 
-`, name, engine, engine, KeyCommonTestCase)
+`, name, engine, SecurityGroupCommonTestCase, KeyCommonTestCase)
 	}
 }
 
