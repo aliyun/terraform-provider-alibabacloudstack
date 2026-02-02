@@ -8,29 +8,29 @@ import (
 func TestAccAlibabacloudStackPolardbDatabasesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_polardb_databases.default"
-	name := fmt.Sprintf("tf-testAccPolardbBackups%v", rand)
+	name := fmt.Sprintf("tf-testaccpolardbdatabases%v", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourcePolardbDatabaseDependence)
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids":                   []string{"${alibabacloudstack_polardb_database.default.id}"},
-			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+			"data_base_instance_id": "${local.polardb_dbinstance_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":                   []string{"${alibabacloudstack_polardb_database.default.id}_fake"},
-			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+			"data_base_instance_id": "${local.polardb_dbinstance_id}",
 		}),
 	}
 
 	data_base_nameConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids":                   []string{"${alibabacloudstack_polardb_database.default.id}"},
-			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+			"data_base_instance_id": "${local.polardb_dbinstance_id}",
 			"data_base_name":        "${alibabacloudstack_polardb_database.default.data_base_name}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":                   []string{"${alibabacloudstack_polardb_database.default.id}_fake"},
-			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+			"data_base_instance_id": "${local.polardb_dbinstance_id}",
 			"data_base_name":        "${alibabacloudstack_polardb_database.default.data_base_name}_fake",
 		}),
 	}
@@ -38,11 +38,11 @@ func TestAccAlibabacloudStackPolardbDatabasesDataSource(t *testing.T) {
 	name_regex_Conf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"name_regex":            "${alibabacloudstack_polardb_database.default.data_base_name}",
-			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+			"data_base_instance_id": "${local.polardb_dbinstance_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"name_regex":            "${alibabacloudstack_polardb_database.default.data_base_name}-fakeTestAcccc",
-			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+			"data_base_instance_id": "${local.polardb_dbinstance_id}",
 		}),
 	}
 
@@ -79,20 +79,13 @@ data "alibabacloudstack_zones" default {
   enable_details = true
 }
 
-resource "alibabacloudstack_polardb_dbinstance" "instance" {
-	engine            = "MySQL"
-	engine_version    = "5.7"
-	instance_name = "${var.name}"
-	db_instance_storage_type= "local_ssd"
-	db_instance_storage = 5
-	db_instance_class = "rds.mysql.t1.small"
-	zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
-}
+%s
+
 resource "alibabacloudstack_polardb_database" "default" {
-	data_base_instance_id = "${alibabacloudstack_polardb_dbinstance.instance.id}"
+	data_base_instance_id = "${local.polardb_dbinstance_id}"
 	data_base_description = "Automatically generated test"
-	data_base_name        = "tftest"
+	data_base_name        = var.name
 	character_set_name = "utf8"
 }
-`, name)
+`, name, PolarDBCommonTestCase("MySQL",false))
 }

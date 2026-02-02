@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -172,7 +173,7 @@ func dataSourceAlibabacloudStackPolardbDatabasesRead(d *schema.ResourceData, met
 
 		data_base_name := data.DBName
 
-		dbid := fmt.Sprintf("%s:%s", data_base_instance_id, data_base_name)
+		dbid := fmt.Sprintf("%s:%s", data_base_instance_id, strings.ToLower(data_base_name))
 
 		if len(idsMap) > 0 {
 			if _, exist := idsMap[dbid]; !exist {

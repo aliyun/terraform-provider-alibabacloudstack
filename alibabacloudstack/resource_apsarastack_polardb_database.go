@@ -5,6 +5,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -33,6 +34,10 @@ func resourceAlibabacloudStackPolardbDatabase() *schema.Resource {
 			"data_base_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					return strings.EqualFold(oldValue, newValue)
+				},
+				DiffSuppressOnRefresh: true,
 			},
 
 			"engine": {

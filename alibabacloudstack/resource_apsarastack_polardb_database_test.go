@@ -8,10 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackPolardbDBDatabaseUpdate(t *testing.T) {
+func TestAccAlibabacloudStackPolardbDatabase_Update(t *testing.T) {
 	var database *PolardbDescribedatabasesResponse
 	resourceId := "alibabacloudstack_polardb_database.default"
-	name := "tf-testaccdbdatabase_basic"
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-testaccdatabse%d", rand)
 
 	var dbDatabaseBasicMap = map[string]string{
 		"data_base_instance_id": CHECKSET,
@@ -40,7 +41,7 @@ func TestAccAlibabacloudStackPolardbDBDatabaseUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+					"data_base_instance_id": "${local.polardb_dbinstance_id}",
 					"data_base_name":        name,
 					"character_set_name":    "utf8",
 				}),
@@ -68,21 +69,12 @@ func TestAccAlibabacloudStackPolardbDBDatabaseUpdate(t *testing.T) {
 
 func resourcePolardbDatabaseConfigDependence(name string) string {
 	return fmt.Sprintf(`
-
-
 	variable "name" {
 		default = "%s"
 	}
 
 	%s
-	resource "alibabacloudstack_polardb_dbinstance" "instance" {
-		engine            = "MySQL"
-		engine_version    = "5.7"
-		instance_name = "${var.name}"
-		db_instance_storage_type= "local_ssd"
-		db_instance_storage = 5
-		db_instance_class = "rds.mysql.t1.small"
-		zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
-		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-	}`, name, VSwitchCommonTestCase)
+	
+	%s
+	`, name, VSwitchCommonTestCase, PolarDBCommonTestCase("MySQL", true))
 }

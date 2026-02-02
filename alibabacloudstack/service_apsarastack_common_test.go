@@ -918,10 +918,14 @@ locals {
 `, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_GPDB_ID"))
 }
 
-func PolarDBMysqlCommonTestCase(enableVpc bool) string {
+func PolarDBCommonTestCase(engine string, enableVpc bool) string {
 	var vswtichId string
 	if enableVpc {
 		vswtichId = `vswitch_id           = "${alibabacloudstack_vpc_vswitch.default.id}"`
+	}
+	cpuType := os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_CPU_TYPE")
+	if cpuType != "" {
+		cpuType = fmt.Sprintf(`cpu_type = "%s"`, cpuType)
 	}
 	return fmt.Sprintf(`
 variable "polardb_instance_type" {
@@ -930,16 +934,30 @@ variable "polardb_instance_type" {
   sensitive = true
 }
 
+variable "polardb_instance_id" {
+  type      = string
+  default   = "%s"
+}
+
+variable "polardb_engine" {
+  default = "%s"
+}
+
 data "alibabacloudstack_polardb_instance_types" "default" {
   ids                  = var.polardb_instance_type != "" ? [var.polardb_instance_type] : null
-  engine               = "MySQL"
-  engine_version       = "5.7"
-  sorted_by            = "CPU"
-  series               = "dual_ha"
+  engine               = var.polardb_engine
+  %s
+}
+
+data "alibabacloudstack_polardb_instances" "default" {
+  ids                  = [var.polardb_instance_id]
+  engine               = var.polardb_engine
 }
 
 resource "alibabacloudstack_polardb_dbinstance" "default" {
+  count                = length(data.alibabacloudstack_polardb_instances.default.ids) > 0 ? 0 : 1
   engine               = "${data.alibabacloudstack_polardb_instance_types.default.instance_types.0.engine}"
+  cpu_type             = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.cpu_type
   engine_version       = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.engine_version
   instance_type        = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.id
   instance_storage     = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_min
@@ -947,7 +965,12 @@ resource "alibabacloudstack_polardb_dbinstance" "default" {
   %s
   storage_type         = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_type
 }
-`, os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_TYPE"), vswtichId)
+
+locals {
+	polardb_dbinstance_id = length(data.alibabacloudstack_polardb_instances.default.ids) > 0 ? data.alibabacloudstack_polardb_instances.default.ids.0 : alibabacloudstack_polardb_dbinstance.default.0.id
+}
+
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_TYPE"), os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_ID"), engine, cpuType, vswtichId)
 }
 
 const PolardbxCommonTestCase = `
