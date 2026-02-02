@@ -142,6 +142,11 @@ func resourceAlibabacloudStackDBConnectionRead(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
+	
+	if d.IsNewResource() {
+		return nil
+	}
+	
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
 
