@@ -17,32 +17,32 @@ func TestAccAlibabacloudStackPolardbBackupsDataSource_basic(t *testing.T) {
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"db_instance_id": "${local.polardb_dbinstance_id}",
 			"ids":            []string{"${alibabacloudstack_polardb_backup.default.backup_id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"db_instance_id": "${local.polardb_dbinstance_id}",
 			"ids":            []string{"${alibabacloudstack_polardb_backup.default.backup_id}_fake"},
 		}),
 	}
 	startTimeConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"db_instance_id": "${local.polardb_dbinstance_id}",
 			"start_time":     createTime.Format("2006-01-02T15:04Z"),
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"db_instance_id": "${local.polardb_dbinstance_id}",
 			"start_time":     tomorrowTime.Format("2006-01-02T15:04Z"),
 			"end_time":       twoDayAgoTime.Format("2006-01-02T15:04Z"),
 		}),
 	}
 	endTimeConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
-			"end_time":       tomorrowTime.Format("2006-01-02T15:04Z"),
+			"db_instance_id": "${local.polardb_dbinstance_id}",
+			"end_time":       twoDayAgoTime.Format("2006-01-02T15:04Z"),
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"db_instance_id": "${local.polardb_dbinstance_id}",
 			"end_time":       createTime.Format("2006-01-02T15:04Z"),
 		}),
 	}
@@ -95,19 +95,12 @@ data "alibabacloudstack_zones" default {
   enable_details = true
 }
 
-resource "alibabacloudstack_polardb_dbinstance" "default" {
-  instance_storage = "5"
-  instance_name = "${var.name}"
-  storage_type = "local_ssd"
-  engine = "MySQL"
-  engine_version = "5.7"
-  instance_type = "rds.mysql.t1.small"
-}
+%s
   
 resource "alibabacloudstack_polardb_backup" "default" {
-  db_instance_id = "${alibabacloudstack_polardb_dbinstance.default.id}"
+  db_instance_id = "${local.polardb_dbinstance_id}"
   backup_method = "Physical"
 }
 
-`, name)
+`, name, PolarDBCommonTestCase("MySQL",false))
 }

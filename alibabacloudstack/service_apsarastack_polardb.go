@@ -1445,6 +1445,44 @@ func (s *PolardbService) DoPolardbDescribebackupsRequest(id string) (*Polardbbac
 			return &v, nil
 		}
 	}
+
+	// XXX: safety net logic
+	delete(request.QueryParams, "BackupId")
+	now := time.Now().UTC()
+	oneDayAgo := now.Add(-24 * time.Hour)
+	format := "2006-01-02T15:04Z"
+	request.QueryParams["StartTime"] = oneDayAgo.Format(format)
+	request.QueryParams["EndTime"] = now.Format(format)
+	request.QueryParams["PageSize"] = "10"
+	pageNumber := 1
+	for {
+		request.QueryParams["PageNumber"] = strconv.Itoa(pageNumber)
+		bresponse, err := s.client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBackups", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbDescribebackupsResponseObj)
+
+		if err != nil {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackups", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		for _, v := range PolardbDescribebackupsResponseObj.Items.Backup {
+			if fmt.Sprint(v.BackupId) == param[1] {
+				return &v, nil
+			}
+		}
+		if len(PolardbDescribebackupsResponseObj.Items.Backup) < 10 {
+			break
+		}
+		pageNumber += 1
+	}
+
 	return nil, errmsgs.Error(errmsgs.NotFoundWithResponse, id)
 }
 

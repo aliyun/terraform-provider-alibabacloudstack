@@ -19,6 +19,7 @@ func TestAccAlibabacloudStackPolardbBackup_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1, 254)
 	name := fmt.Sprintf("tf-testAccPolardbBackupBasic_%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbBackupBasicDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -29,7 +30,10 @@ func TestAccAlibabacloudStackPolardbBackup_basic(t *testing.T) {
 		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
-				Config: resourcePolardbBackupBasicDependence(name),
+				Config: testAccConfig(map[string]interface{}{
+					"db_instance_id" : "${local.polardb_dbinstance_id}",
+					"backup_method" : "Physical",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"backup_method": "Physical",
@@ -74,19 +78,7 @@ data "alibabacloudstack_zones" default {
   enable_details = true
 }
 
-resource "alibabacloudstack_polardb_dbinstance" "default" {
-  instance_storage = "5"
-  instance_name = "${var.name}"
-  storage_type = "local_ssd"
-  engine = "MySQL"
-  engine_version = "5.7"
-  instance_type = "rds.mysql.t1.small"
-}
+%s
 
-resource "alibabacloudstack_polardb_backup" "default" {
-	db_instance_id = "${alibabacloudstack_polardb_dbinstance.default.id}"
-	backup_method = "Physical"
-}
-
-`, name)
+`, name, PolarDBCommonTestCase("MySQL",false))
 }
