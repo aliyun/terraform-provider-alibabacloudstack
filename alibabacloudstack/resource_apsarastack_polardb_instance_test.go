@@ -43,7 +43,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 					"engine_version":           "${local.polardb_instance_type_0.engine_version}",
 					"db_instance_class":        "${local.polardb_instance_type_0.id}",
 					"db_instance_storage":      "${local.polardb_instance_type_0.storage_min}",
-					"encryption":               "true",
+					"tde_status":               "true",
 					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            name,
@@ -91,7 +91,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_instance_storage": "${local.polardb_instance_type_0.storage_min}+10",
+					"db_instance_storage": TfRawString("local.polardb_instance_type_0.storage_min+10"),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{}),

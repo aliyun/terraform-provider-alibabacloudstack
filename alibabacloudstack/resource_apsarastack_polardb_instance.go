@@ -87,10 +87,9 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Optional: true,
 			},
 			"encryption": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Field 'encryption' is deprecated and will be removed in a future release. Please use new field 'tde_status' instead.",
 			},
 			"instance_type": {
 				Type:          schema.TypeString,
@@ -314,7 +313,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	var err error
 	var encryption bool
 	EncryptionKey := d.Get("encryption_key").(string)
-	encryption = d.Get("encryption").(bool)
+	encryption = d.Get("tde_status").(bool)
 	EncryptAlgorithm := d.Get("encrypt_algorithm").(string)
 	log.Print("Encryption key input")
 	if EncryptionKey != "" && encryption {
@@ -323,7 +322,6 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		if err != nil {
 			return errmsgs.WrapErrorf(err, "CheckCloudResourceAuthorized", "CheckCloudResourceAuthorized", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		d.Set("role_arn", arnrole)
 	} else if EncryptionKey == "" && encryption {
 		return errmsgs.WrapErrorf(nil, "Add EncryptionKey or Set encryption to false", "CheckCloudResourceAuthorized", errmsgs.AlibabacloudStackSdkGoERROR)
 	} else if EncryptionKey != "" && !encryption {
@@ -331,7 +329,6 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	} else {
 		log.Print("Encryption key condition failed")
 	}
-	d.Set("encryption", encryption)
 	log.Printf("encryptionbool %v", d.Get("encryption").(bool))
 	log.Printf("check arnrole %v", arnrole)
 	enginever := Trim(d.Get("engine_version").(string))
@@ -389,7 +386,6 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	mergeMaps(request.QueryParams, map[string]string{
 		"EngineVersion":         enginever,
 		"Engine":                engine,
-		"Encryption":            strconv.FormatBool(encryption),
 		"DBInstanceStorage":     strconv.Itoa(DBInstanceStorage),
 		"DBInstanceClass":       DBInstanceClass,
 		"DBInstanceNetType":     DBInstanceNetType,
@@ -401,10 +397,8 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		"SecurityIPList":        SecurityIPList,
 		"ZoneIdSlave1":          ZoneIdSlave1,
 		"ZoneIdSlave2":          ZoneIdSlave2,
-		"EncryptionKey":         EncryptionKey,
 		"ZoneId":                ZoneId,
 		"VPCId":                 VPCId,
-		"RoleARN":               arnrole,
 	})
 	if v, ok := d.GetOk("cpu_type"); ok && v.(string) != "" {
 		request.QueryParams["CpuType"] = v.(string)
@@ -412,6 +406,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	if tde := d.Get("tde_status"); tde.(bool) && engine != "MySQL" {
 		request.QueryParams["TdeStatus"] = "1"
 		request.QueryParams["EncryptAlgorithm"] = EncryptAlgorithm
+		request.QueryParams["Encryption"] = strconv.FormatBool(encryption)
 		request.QueryParams["RoleARN"] = arnrole
 		if EncryptionKey != "" {
 			request.QueryParams["EncryptionKey"] = EncryptionKey
@@ -908,6 +903,13 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 	}
 	d.Set("tde_status", tde_object["TDEStatus"].(string) == "Enabled")
 	d.Set("encrypt_algorithm", tde_object["EncryptAlgorithm"].(string))
+	encryptionKey := PolardbService.DescribeDBInstanceEncryptionKey(d.Id())
+	if encryptionKey != "" {
+		d.Set("encryption_key", encryptionKey)
+	}
+	if arnrole, err := PolardbService.CheckCloudResourceAuthorized(); err == nil && arnrole != "" {
+		d.Set("role_arn", arnrole)
+	}
 	if err = PolardbService.RefreshParameters(d, client); err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -927,16 +929,6 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 			return errmsgs.WrapError(err)
 		}
 		d.Set("period", period)
-	}
-	encryptionKey := PolardbService.DescribeDBInstanceEncryptionKey(d.Id())
-	if encryptionKey != "" {
-		d.Set("encryption_key", encryptionKey)
-		d.Set("encryption", true)
-		if arnrole, err := PolardbService.CheckCloudResourceAuthorized(); err == nil {
-			d.Set("role_arn", arnrole)
-		}
-	} else {
-		d.Set("encryption", false)
 	}
 	return nil
 }
