@@ -113,7 +113,7 @@ func dataSourceAlibabacloudStackEdasClusterMembersRead(d *schema.ResourceData, m
 
 	}
 	if len(result) == 0 {
-		d.SetId("")
+		d.SetId(dataResourceIdHash([]string{}))
 		return nil
 	}
 
