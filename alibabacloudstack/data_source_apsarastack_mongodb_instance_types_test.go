@@ -127,11 +127,10 @@ func dataSourceMongodbInstanceTypesConfigDependence(name string) string {
 }
 
 func dataSourceMongodbInstanceTypesPresetDependence(name string) string {
-	return fmt.Sprintf(`
-	
+	return `
 	data "alibabacloudstack_mongodb_instance_types" "preset" {
 		db_instnace_type = "replicate"
 		engine_version = "4.0"
 	}
-`)
+`
 }

@@ -138,6 +138,94 @@ func testAccCheckMongoDBShardingInstanceDestroy(s *terraform.State) error {
 	return nil
 }
 
+func TestAccAlibabacloudStackMongoDBShardingInstance_basicv3(t *testing.T) {
+	var v dds.DBInstance
+	resourceId := "alibabacloudstack_mongodb_sharding_instance.default"
+	serverFunc := func() interface{} {
+		return &MongoDBService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tfaccount%d", rand)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
+	ra := resourceAttrInit(resourceId, map[string]string{
+		"zone_id": CHECKSET,
+	})
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	engine_version := "4.0"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBShardingInstance_base(true, engine_version))
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+		},
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		// CheckDestroy:  testAccCheckMongoDBShardingInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"zone_id":        "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"engine_version": engine_version,
+					"shard_list": []map[string]interface{}{
+						{
+							"description":  "shard1",
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min}",
+						},
+						{
+							"description":  "shard2",
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min}",
+						},
+					},
+					"mongo_list": []map[string]interface{}{
+						{
+							"description": "mongo1",
+							"node_class":  "${data.alibabacloudstack_mongodb_instance_types.mongos.instance_types.0.id}",
+						},
+						{
+							"description": "mongo2",
+							"node_class":  "${data.alibabacloudstack_mongodb_instance_types.mongos.instance_types.0.id}",
+						},
+					},
+					"configserver_list": []map[string]interface{}{
+						{
+							"description":  "cs1",
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.configserver.instance_types.0.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.configserver.instance_types.0.storage_min}",
+						},
+					},
+					"vswitch_id":              "${alibabacloudstack_vpc_vswitch.default.id}",
+					"security_ip_list":        []string{"10.168.1.12", "10.168.1.13"},
+					"db_instance_description": "${var.name}",
+					"db_account_name":         "tf_testacc",
+					"db_account_password":     "${random_password.password.0.result}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"zone_id":            CHECKSET,
+						"engine_version":     engine_version,
+						"shard_list.#":       "2",
+						"mongo_list.#":       "2",
+						"security_ip_list.#": "2",
+						"security_ip_list.0": "10.168.1.12",
+						"security_ip_list.1": "10.168.1.13",
+						"storage_engine":     "WiredTiger",
+						//						"instance_charge_type": "PostPaid",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"db_account_password", "account_password"},
+			},
+		},
+	})
+}
+
 func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 	var v dds.DBInstance
 	resourceId := "alibabacloudstack_mongodb_sharding_instance.default"
@@ -461,6 +549,6 @@ variable "name" {
 
 %s
 
-`, name, engineVersion, engineVersion, engineVersion, vpcString, RandomPasswordTestCase(12,2))
+`, name, engineVersion, engineVersion, engineVersion, vpcString, RandomPasswordTestCase(12, 2))
 	}
 }
