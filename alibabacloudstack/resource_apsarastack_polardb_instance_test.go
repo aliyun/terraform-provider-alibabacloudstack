@@ -207,7 +207,7 @@ func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc-polardb-instance_mysql%d", rand)
+	name := fmt.Sprintf("tf-testacc-polardb-instance_ted%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceClassicConfigDependence("MySQL"))
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
