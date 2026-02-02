@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -90,9 +91,14 @@ func dataSourceAlibabacloudStackAscmRamServiceRolesRead(d *schema.ResourceData, 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoles", "/ascm/auth/role/listRAMServiceRoles")
 	request.QueryParams["roleType"] = "ROLETYPE_RAM"
+	request.QueryParams["pageSize"] = "10"
+	pageNumber := 1
 	response := RamRole{}
 
+	var ids []string
+	var s []map[string]interface{}
 	for {
+		request.QueryParams["currentPage"] = strconv.Itoa(pageNumber)
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug("ListRAMServiceRoles", bresponse, request, request.QueryParams)
 		if err != nil {
@@ -107,34 +113,36 @@ func dataSourceAlibabacloudStackAscmRamServiceRolesRead(d *schema.ResourceData, 
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		if response.Code == "200" || len(response.Data) < 1 {
+		if response.Code != "200" || len(response.Data) < 1 {
 			break
 		}
 
-	}
-
-	var r *regexp.Regexp
-	if nameRegex, ok := d.GetOk("product"); ok && nameRegex.(string) != "" {
-		r = regexp.MustCompile(strings.ToUpper(nameRegex.(string)))
-	}
-	var ids []string
-	var s []map[string]interface{}
-	for _, rg := range response.Data {
-		if r != nil && !r.MatchString(rg.Product) {
-			continue
-		}
-		mapping := map[string]interface{}{
-			"id":                fmt.Sprint(rg.ID),
-			"name":              rg.RoleName,
-			"description":       rg.Description,
-			"role_type":         rg.RoleType,
-			"product":           rg.Product,
-			"organization_name": rg.OrganizationName,
-			"aliyun_user_id":    rg.AliyunUserID,
+		var r *regexp.Regexp
+		if nameRegex, ok := d.GetOk("product"); ok && nameRegex.(string) != "" {
+			r = regexp.MustCompile(strings.ToUpper(nameRegex.(string)))
 		}
 
-		ids = append(ids, fmt.Sprint(rg.ID))
-		s = append(s, mapping)
+		for _, rg := range response.Data {
+			if r != nil && !r.MatchString(rg.Product) {
+				continue
+			}
+			mapping := map[string]interface{}{
+				"id":                fmt.Sprint(rg.ID),
+				"name":              rg.RoleName,
+				"description":       rg.Description,
+				"role_type":         rg.RoleType,
+				"product":           rg.Product,
+				"organization_name": rg.OrganizationName,
+				"aliyun_user_id":    rg.AliyunUserID,
+			}
+
+			ids = append(ids, fmt.Sprint(rg.ID))
+			s = append(s, mapping)
+		}
+		if len(response.Data) < 10 {
+			break
+		}
+		pageNumber += 1
 	}
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("roles", s); err != nil {
