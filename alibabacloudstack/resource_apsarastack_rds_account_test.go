@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackDBAccountUpdate(t *testing.T) {
+func TestAccAlibabacloudStackDBAccount_Update(t *testing.T) {
 	var v *rds.DBInstanceAccount
 	rand := getAccTestRandInt(10000, 999999)
 	name := fmt.Sprintf("tf-testAccdbaccount-%d", rand)
