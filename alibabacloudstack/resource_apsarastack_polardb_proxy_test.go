@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -35,7 +36,7 @@ func TestAccAlibabacloudStackPolardbProxy_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_instance_id":        "${alibabacloudstack_polardb_dbinstance.default.id}",
+					"db_instance_id":        "${local.polardb_dbinstance_id}",
 					"db_proxy_instance_num": "1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -124,13 +125,13 @@ func TestAccAlibabacloudStackPolardbProxy_ReadWriteSpliting(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_instance_id":                    "${alibabacloudstack_polardb_dbinstance.default.id}",
+					"db_instance_id":                    "${local.polardb_dbinstance_id}",
 					"db_proxy_instance_num":             "1",
 					"read_write_spliting":               "1",
 					"read_only_instance_max_delay_time": "30",
 					"read_only_instance_weight": []map[string]interface{}{
 						{
-							"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+							"db_instance_id": "${local.polardb_dbinstance_id}",
 							"weight":         "0",
 						},
 						{
@@ -157,7 +158,7 @@ func TestAccAlibabacloudStackPolardbProxy_ReadWriteSpliting(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"read_only_instance_weight": []map[string]interface{}{
 						{
-							"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+							"db_instance_id": "${local.polardb_dbinstance_id}",
 							"weight":         "50",
 						},
 						{
@@ -213,10 +214,13 @@ func resourcePolardbProxyConfigDependence(name string) string {
 	}
 
 	%s
-	`, name, one_minute_later.Format("2006-01-02T15:04:05Z"), PolarDBMysqlCommonTestCase(false))
+	
+	%s
+	`, name, one_minute_later.Format("2006-01-02T15:04:05Z"), VSwitchCommonTestCase, PolarDBCommonTestCase("MySQL", true))
 }
 
 func resourcePolardbProxyReadWriteSplitingDependence(name string) string {
+	os.Unsetenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_ID")
 	return fmt.Sprintf(`
 	variable "name" {
 		default = "%v"
@@ -225,13 +229,13 @@ func resourcePolardbProxyReadWriteSplitingDependence(name string) string {
 	%s
 
 	resource "alibabacloudstack_polardb_readonly_instance" "default" {
-		master_db_instance_id = "${alibabacloudstack_polardb_dbinstance.default.id}"
-		zone_id = "${alibabacloudstack_polardb_dbinstance.default.zone_id}"
-		engine_version = "${alibabacloudstack_polardb_dbinstance.default.engine_version}"
-		instance_type = "${alibabacloudstack_polardb_dbinstance.default.instance_type}"
-		instance_storage = "${alibabacloudstack_polardb_dbinstance.default.instance_storage}"
-		instance_name = "${var.name}"
-		db_instance_storage_type = "${alibabacloudstack_polardb_dbinstance.default.storage_type}"
+		master_db_instance_id = "${alibabacloudstack_polardb_dbinstance.default.0.id}"
+		zone_id = "${alibabacloudstack_polardb_dbinstance.default.0.zone_id}"
+		engine_version = "${alibabacloudstack_polardb_dbinstance.default.0.engine_version}"
+		instance_type = "${alibabacloudstack_polardb_dbinstance.default.0.instance_type}"
+		instance_storage = "${alibabacloudstack_polardb_dbinstance.default.0.instance_storage}"
+		instance_name = "${var.name}_ro"
+		db_instance_storage_type = "${alibabacloudstack_polardb_dbinstance.default.0.storage_type}"
 	}
-	`, name, PolarDBMysqlCommonTestCase(false))
+	`, name, PolarDBCommonTestCase("MySQL", false))
 }

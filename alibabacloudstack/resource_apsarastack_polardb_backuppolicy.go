@@ -24,6 +24,7 @@ func resourceAlibabacloudStackPolardbBackuppolicy() *schema.Resource {
 			"backup_policy_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Deprecated: "The `backup_policy_mode` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 
 			"backup_retention_period": {
@@ -35,6 +36,7 @@ func resourceAlibabacloudStackPolardbBackuppolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Deprecated: "The `compress_type` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 
 			"db_instance_id": {
@@ -46,35 +48,41 @@ func resourceAlibabacloudStackPolardbBackuppolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Deprecated: "The `enable_backup_log` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 
 			"high_space_usage_protection": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Deprecated: "The `high_space_usage_protection` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 
 			"local_log_retention_hours": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Deprecated: "The `local_log_retention_hours` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 
 			"local_log_retention_space": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Deprecated: "The `local_log_retention_space` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 
 			"log_backup_frequency": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Deprecated: "The `log_backup_frequency` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 
 			"log_backup_local_retention_number": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
+				Deprecated: "The `log_backup_local_retention_number` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 
 			"log_backup_retention_period": {
@@ -96,6 +104,7 @@ func resourceAlibabacloudStackPolardbBackuppolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Deprecated: "The `released_keep_policy` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 		},
 	}
