@@ -165,19 +165,12 @@ func TestAccAlibabacloudStackDBReadonlyInstance_multi(t *testing.T) {
 
 func resourceDBReadonlyInstanceConfigDependence(name string) string {
 	return fmt.Sprintf(`
-%s
 	variable "name" {
 		default = "%s"
 	}
-resource "alibabacloudstack_db_instance" "default" {
-	engine=           "MySQL"
-	engine_version=   "5.6"
-	instance_type=    "rds.mysql.s2.large"
-	instance_storage= "20"
-	instance_name=    "${var.name}"
-	vswitch_id=       "${alibabacloudstack_vpc_vswitch.default.id}"
-	storage_type=     "local_ssd"
-	}
+%s
+
+%s
 	
-`, VSwitchCommonTestCase, name)
+`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase())
 }
