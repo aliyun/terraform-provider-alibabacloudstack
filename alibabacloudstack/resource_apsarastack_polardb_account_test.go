@@ -8,14 +8,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackPolardbAccountUpdate(t *testing.T) {
+func TestAccAlibabacloudStackPolardbAccount_Update(t *testing.T) {
 	var account *PolardbDescribeaccountsResponse
-	rand := getAccTestRandInt(10000, 999999)
-	name := fmt.Sprintf("tf-testAccdbaccount-%d", rand)
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf_account%d", rand)
 	var basicMap = map[string]string{
 		"data_base_instance_id": CHECKSET,
-		"account_name":          "tftestnormal",
-		"account_password":      "inputYourCodeHere",
+		"account_name":          name,
 		"account_type":          "Normal",
 	}
 	resourceId := "alibabacloudstack_polardb_account.default"
@@ -35,23 +34,24 @@ func TestAccAlibabacloudStackPolardbAccountUpdate(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 
-		Providers: testAccProviders,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 		// CheckDestroy: rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
-					"account_name":          "tftestnormal",
-					"account_password":      "inputYourCodeHere",
+					"data_base_instance_id": "${local.polardb_dbinstance_id}",
+					"account_name":          "${var.name}",
+					"account_password":      "${random_password.password.0.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// password is a sensitive field, it will not be displayed after setting
 				ImportStateVerifyIgnore: []string{"account_password"},
 			},
@@ -67,23 +67,20 @@ func TestAccAlibabacloudStackPolardbAccountUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"account_password": "inputYourCodeHere",
+					"account_password": "${random_password.password.1.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"account_password": "inputYourCodeHere",
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"account_description": "tf test",
-					"account_password":    "inputYourCodeHere",
+					"account_password":    "${random_password.password.2.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"account_description": "tf test",
-						"account_password":    "inputYourCodeHere",
 					}),
 				),
 			},
@@ -93,22 +90,16 @@ func TestAccAlibabacloudStackPolardbAccountUpdate(t *testing.T) {
 
 func resourcePolardbAccountConfigDependence(name string) string {
 	return fmt.Sprintf(`
-	%s
 	variable "name" {
 		default = "%v"
 	}
+	%s
 	variable "creation" {
 		default = "PolarDB"
 	}
-	resource "alibabacloudstack_polardb_dbinstance" "instance" {
-		engine            = "MySQL"
-		engine_version    = "5.7"
-		instance_name = "${var.name}"
-		db_instance_storage_type= "local_ssd"
-		db_instance_storage = 5
-		db_instance_class = "rds.mysql.t1.small"
-		zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
-		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-	}
-	`, VSwitchCommonTestCase, name)
+	%s
+	
+	%s
+	
+	`, name, VSwitchCommonTestCase, PolarDBCommonTestCase("MySQL", true), RandomPasswordTestCase(12, 3))
 }

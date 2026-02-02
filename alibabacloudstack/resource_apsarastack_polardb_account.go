@@ -197,6 +197,10 @@ func resourceAlibabacloudStackPolardbAccountRead(d *schema.ResourceData, meta in
 		PolardbService{client}
 	response, err := polardbaccountservice.DescribeDBAccount(d.Id())
 	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_account", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	data := response
