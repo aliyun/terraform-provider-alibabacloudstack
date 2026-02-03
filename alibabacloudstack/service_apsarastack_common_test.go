@@ -923,7 +923,7 @@ func PolarDBCommonTestCase(engine string, enableVpc bool) string {
 	if enableVpc {
 		vswtichId = `vswitch_id           = "${alibabacloudstack_vpc_vswitch.default.id}"`
 	}
-	cpuType := os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_CPU_TYPE")
+	cpuType := os.Getenv("ALIBABACLOUDSTACK_TEST_CPU_TYPE")
 	if cpuType != "" {
 		cpuType = fmt.Sprintf(`cpu_type = "%s"`, cpuType)
 	}

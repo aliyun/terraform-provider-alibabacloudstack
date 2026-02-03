@@ -41,7 +41,7 @@ func dataSourceAlibabacloudStackPolardbInstanceTypes() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"intel", "arm64"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"intel", "arm64", "hygon"}, false),
 			},
 			"memory": {
 				Type:     schema.TypeInt,
@@ -138,7 +138,7 @@ func dataSourceAlibabacloudStackPolardbInstanceTypesRead(d *schema.ResourceData,
 	if v, ok := d.GetOk("engine_version"); ok {
 		reqQuery["engineVersion"] = v
 	}
-	if v, ok := d.GetOk("cpu_type"); ok {
+	if v, ok := d.GetOk("cpu_type"); ok && v.(string) != "" {
 		reqQuery["cpuType"] = v
 	}
 
