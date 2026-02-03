@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackEdasClusterMember_basic(t *testing.T) {
-	var v map[string]interface{}
-	resourceId := "alibabacloudstack_edas_cluster_member.default"
+func TestAccAlibabacloudStackEdasinstanceClusterAttachment_basic(t *testing.T) {
+	var v []interface{}
+	resourceId := "alibabacloudstack_edas_instance_cluster_attachment.default"
 	ra := resourceAttrInit(resourceId, EdasClusterMemberBasicMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &EdasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -32,14 +32,14 @@ func TestAccAlibabacloudStackEdasClusterMember_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cluster_id":  "${alibabacloudstack_edas_cluster.default.id}",
-					"instance_id": "${alibabacloudstack_ecs_instance.default.id}",
+					"cluster_id":   "${alibabacloudstack_edas_cluster.default.id}",
+					"instance_ids": []string{"${alibabacloudstack_ecs_instance.default.id}"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"cluster_id":        CHECKSET,
-						"instance_id":       CHECKSET,
-						"cluster_member_id": CHECKSET,
+						"status_map":         CHECKSET,
+						"ecu_map":            CHECKSET,
+						"cluster_member_ids": CHECKSET,
 					}),
 				),
 			},

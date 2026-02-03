@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceAlibabacloudStackEdasClusterMembers() *schema.Resource {
+func dataSourceAlibabacloudStackEdasinstanceClusterAttachments() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackEdasClusterMembersRead,
+		Read: dataSourceAlibabacloudStackEdasinstanceClusterAttachmentsRead,
 
 		Schema: map[string]*schema.Schema{
 			"ids": {
@@ -79,7 +79,7 @@ func dataSourceAlibabacloudStackEdasClusterMembers() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackEdasClusterMembersRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackEdasinstanceClusterAttachmentsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	clusterId := d.Get("cluster_id").(string)

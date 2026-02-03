@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackEdasClusterMembersDataSource(t *testing.T) {
+func TestAccAlibabacloudStackEdasinstanceClusterAttachmentsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
-	resourceId := "data.alibabacloudstack_edas_cluster_members.default"
+	resourceId := "data.alibabacloudstack_edas_instance_cluster_attachments.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		fmt.Sprintf("tf%d", rand),
@@ -15,21 +15,21 @@ func TestAccAlibabacloudStackEdasClusterMembersDataSource(t *testing.T) {
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"${alibabacloudstack_edas_cluster_member.default.id}"},
-			"cluster_id": "${alibabacloudstack_edas_cluster_member.default.cluster_id}",
+			"ids":        []string{"${alibabacloudstack_edas_instance_cluster_attachment.default.id}"},
+			"cluster_id": "${alibabacloudstack_edas_instance_cluster_attachment.default.cluster_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"${alibabacloudstack_edas_cluster_member.default.id}-fake"},
-			"cluster_id": "${alibabacloudstack_edas_cluster_member.default.cluster_id}",
+			"ids":        []string{"${alibabacloudstack_edas_instance_cluster_attachment.default.id}-fake"},
+			"cluster_id": "${alibabacloudstack_edas_instance_cluster_attachment.default.cluster_id}",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"cluster_id": "${alibabacloudstack_edas_cluster_member.default.cluster_id}",
+			"cluster_id": "${alibabacloudstack_edas_instance_cluster_attachment.default.cluster_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"cluster_id": "${alibabacloudstack_edas_cluster_member.default.cluster_id}-fake",
+			"cluster_id": "${alibabacloudstack_edas_instance_cluster_attachment.default.cluster_id}-fake",
 		}),
 	}
 
@@ -90,9 +90,9 @@ resource "alibabacloudstack_edas_cluster" "default" {
   vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
 }
 
-resource "alibabacloudstack_edas_cluster_member" "default" { 
+resource "alibabacloudstack_edas_instance_cluster_attachment" "default" { 
     cluster_id = "${alibabacloudstack_edas_cluster.default.id}"
-	instance_id = "${alibabacloudstack_ecs_instance.default.id}"
+	instance_ids =["${alibabacloudstack_ecs_instance.default.id}"]
 }
 
 `, name, defaultRegionToTest, name, ECSInstanceCommonTestCase)

@@ -1048,6 +1048,12 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 		runtime.HttpsProxy = &client.Config.Proxy
 	}
 	runtime.SetAutoretry(false) // When using ASAPI, the Tea package cannot retry, as it will modify the endpoint
+	if client.Config.ClientReadTimeout > 0 {
+		log.Printf("====================================================================== client.Config.ClientReadTimeout: %d", client.Config.ClientReadTimeout)
+	}
+	if client.Config.ClientConnectTimeout > 0 {
+		log.Printf("====================================================================== client.Config.ClientConnectTimeout: %d", client.Config.ClientConnectTimeout)
+	}
 	readTimeout := client.Config.ClientReadTimeout * 1000
 	connectTimeout := client.Config.ClientConnectTimeout * 1000
 	// runtime.ConnectTimeout = &runtimeout

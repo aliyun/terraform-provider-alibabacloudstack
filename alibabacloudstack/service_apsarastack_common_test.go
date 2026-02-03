@@ -1436,7 +1436,6 @@ resource "alibabacloudstack_vpc_vpc" "default" {
     common_test = "terraform"
 	filter = var.name
   }
-  enable_ipv6 = true
   lifecycle {
       ignore_changes = [
 		secondary_cidr_blocks,
@@ -1464,7 +1463,6 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
   vswitch_name = "${var.name}_vsw"
   vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
   cidr_block = "172.16.1.0/24"
-  enable_ipv6 = true
   zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
   lifecycle {
       ignore_changes = [
@@ -1539,8 +1537,6 @@ resource "alibabacloudstack_ecs_instance" "default" {
   vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
   zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
   is_outdated          = false
-  enable_ipv6          = true
-  ipv6_address_count   = 1
   lifecycle {
     ignore_changes = [
       instance_type,
