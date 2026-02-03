@@ -2,8 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"os"
-	"regexp"
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
@@ -14,23 +12,12 @@ import (
 
 func TestAccAlibabacloudStackDBConnectionConfigUpdate(t *testing.T) {
 	var v *rds.DBInstanceNetInfo
-	var rdsEndpoint string
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-testAccDBconnection%d", rand)
-
-	if rdsEndpoint = os.Getenv("RDS_ENDPOINT"); rdsEndpoint == "" {
-		if rdsEndpoint = os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"); rdsEndpoint == "" {
-			t.Fatal("ALIBABACLOUDSTACK_POPGW_DOMAIN must be set for acceptance tests")
-		}
-		regMatched := regexp.MustCompile(`.*\.(intra\..*\.com)\/.*`).FindStringSubmatch(rdsEndpoint)
-		if len(regMatched) > 0 {
-			rdsEndpoint = regMatched[1]
-		}
-	}
+	name := fmt.Sprintf("tf-testacc%d", rand)
 
 	var basicMap = map[string]string{
 		"instance_id":       CHECKSET,
-		"connection_string": REGEXMATCH + fmt.Sprintf("tf-testacc%d.mysql.rds.%s", rand, rdsEndpoint),
+		"connection_string": REGEXMATCH + fmt.Sprintf(`%s\.mysql\.rds\..*`, name),
 		"port":              "3306",
 		"ip_address":        CHECKSET,
 	}
@@ -57,7 +44,7 @@ func TestAccAlibabacloudStackDBConnectionConfigUpdate(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":       "${alibabacloudstack_db_instance.default.id}",
-					"connection_prefix": fmt.Sprintf("tf-testacc%d", rand),
+					"connection_prefix": "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
