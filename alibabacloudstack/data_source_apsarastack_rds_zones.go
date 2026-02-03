@@ -21,7 +21,6 @@ func dataSourceAlibabacloudStackDBZones() *schema.Resource {
 			"multi": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"output_file": {
 				Type:       schema.TypeString,
@@ -32,6 +31,7 @@ func dataSourceAlibabacloudStackDBZones() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
 			},
 			"zones": {
 				Type:     schema.TypeList,
@@ -57,10 +57,11 @@ func dataSourceAlibabacloudStackDBZones() *schema.Resource {
 func dataSourceAlibabacloudStackDBZonesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	multi := d.Get("multi").(bool)
 	var zoneIds []string
 	request := rds.CreateDescribeRegionsRequest()
 	client.InitRpcRequest(*request.RpcRequest)
+
+	idsMap := getIdsStringFilter(d)
 
 	var response *rds.DescribeRegionsResponse
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -92,13 +93,24 @@ func dataSourceAlibabacloudStackDBZonesRead(d *schema.ResourceData, meta interfa
 		return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available zone for RDS."))
 	}
 	for _, r := range response.Regions.RDSRegion {
-		if multi && strings.Contains(r.ZoneId, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
-			zoneIds = append(zoneIds, r.ZoneId)
+		if _, existed := idsMap[r.ZoneId]; len(idsMap) > 0 && !existed {
 			continue
 		}
-		if !multi && !strings.Contains(r.ZoneId, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
-			zoneIds = append(zoneIds, r.ZoneId)
-			continue
+
+		if multi, ok := d.GetOk("multi"); !ok {
+			if r.RegionId == string(client.Region) {
+				zoneIds = append(zoneIds, r.ZoneId)
+				continue
+			}
+		} else {
+			if multi.(bool) && strings.Contains(r.ZoneId, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
+				zoneIds = append(zoneIds, r.ZoneId)
+				continue
+			}
+			if !multi.(bool) && !strings.Contains(r.ZoneId, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
+				zoneIds = append(zoneIds, r.ZoneId)
+				continue
+			}
 		}
 	}
 	if len(zoneIds) > 0 {
@@ -106,13 +118,11 @@ func dataSourceAlibabacloudStackDBZonesRead(d *schema.ResourceData, meta interfa
 	}
 
 	var s []map[string]interface{}
-	if !multi {
-		for _, zoneId := range zoneIds {
+	for _, zoneId := range zoneIds {
+		if !strings.Contains(zoneId, MULTI_IZ_SYMBOL) {
 			mapping := map[string]interface{}{"id": zoneId}
 			s = append(s, mapping)
-		}
-	} else {
-		for _, zoneId := range zoneIds {
+		} else {
 			mapping := map[string]interface{}{
 				"id":             zoneId,
 				"multi_zone_ids": splitMultiZoneId(zoneId),

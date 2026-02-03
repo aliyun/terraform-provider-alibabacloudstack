@@ -1,9 +1,7 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"sort"
-	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -41,7 +39,7 @@ func dataSourceAlibabacloudStackRdsInstanceTypes() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"intel", "arm64"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"intel", "arm64", "hygon"}, false),
 			},
 			"memory": {
 				Type:     schema.TypeInt,
@@ -138,7 +136,7 @@ func dataSourceAlibabacloudStackRdsInstanceTypesRead(d *schema.ResourceData, met
 	if v, ok := d.GetOk("engine_version"); ok {
 		reqQuery["engineVersion"] = v
 	}
-	if v, ok := d.GetOk("cpu_type"); ok {
+	if v, ok := d.GetOk("cpu_type"); ok && v.(string) != "" {
 		reqQuery["cpuType"] = v
 	}
 
@@ -170,31 +168,25 @@ func dataSourceAlibabacloudStackRdsInstanceTypesRead(d *schema.ResourceData, met
 		if _, exists := existedId[id]; exists {
 			continue
 		}
-		cpu, err := data["cpu"].(json.Number).Int64()
+		cpu, err := toInt(data["cpu"])
 		if err != nil {
 			return err
 		}
-		memory, err := data["memory"].(json.Number).Int64()
+		memory, err := toInt(data["memory"])
 		if err != nil {
 			return err
 		}
-		var connections int
-		if v, ok := data["connections"].(json.Number); ok {
-			vv, err := v.Int64()
-			if err != nil {
-				return err
-			}
-			connections = int(vv)
-		} else if v, ok := data["connections"].(string); ok {
-			if v == "Unlimited" {
-				connections = -1
-			} else {
-				vv, err := strconv.Atoi(v)
-				if err != nil {
-					return err
-				}
-				connections = vv
-			}
+		connections, err := toInt(data["connections"])
+		if err != nil {
+			return err
+		}
+		storageMin, err := toInt(data["storageMin"])
+		if err != nil {
+			return err
+		}
+		storageMax, err := toInt(data["storageMax"])
+		if err != nil {
+			return err
 		}
 		types = append(types, map[string]interface{}{
 			"id":             id,
@@ -206,8 +198,8 @@ func dataSourceAlibabacloudStackRdsInstanceTypesRead(d *schema.ResourceData, met
 			"cpu_type":       data["cpuType"],
 			"connections":    connections,
 			"storage_type":   data["dbInstanceStorageType"],
-			"storage_min":    data["storageMin"],
-			"storage_max":    data["storageMax"],
+			"storage_min":    storageMin,
+			"storage_max":    storageMax,
 		})
 		existedId[id] = ""
 		ids = append(ids, id)
@@ -218,9 +210,9 @@ func dataSourceAlibabacloudStackRdsInstanceTypesRead(d *schema.ResourceData, met
 		sort.SliceStable(types, func(i, j int) bool {
 			switch sortedBy {
 			case "CPU":
-				return types[i]["cpu"].(int64) < types[j]["cpu"].(int64)
+				return types[i]["cpu"].(int) < types[j]["cpu"].(int)
 			case "Memory":
-				return types[i]["memory"].(int64) < types[j]["memory"].(int64)
+				return types[i]["memory"].(int) < types[j]["memory"].(int)
 			}
 			return false
 		})

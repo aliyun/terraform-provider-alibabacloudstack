@@ -839,6 +839,10 @@ data "alibabacloudstack_images" "default" {
 `
 
 func RdsMysqlCommonTestCase() string {
+	cpuType := os.Getenv("ALIBABACLOUDSTACK_TEST_CPU_TYPE")
+	if cpuType != "" {
+		cpuType = fmt.Sprintf(`cpu_type = "%s"`, cpuType)
+	}
 	return fmt.Sprintf(`
 variable "rds_instance_type" {
   type      = string
@@ -846,11 +850,20 @@ variable "rds_instance_type" {
   sensitive = true
 }
 
+variable "rds_zone" {
+	default = "%s"
+}
+
+data "alibabacloudstack_db_zones" "default" {
+	ids = var.rds_zone == "" ? [] : [var.rds_zone]
+}
+
 data "alibabacloudstack_rds_instance_types" "default" {
   ids                  = var.rds_instance_type != "" ? [var.rds_instance_type] : null
   engine               = "MySQL"
   engine_version       = "5.7"
   sorted_by            = "CPU"
+  %s
   series               = "dual_ha"
 }
 
@@ -865,8 +878,9 @@ resource "alibabacloudstack_db_instance" "default" {
   vswitch_id           = "${alibabacloudstack_vpc_vswitch.default.id}"
   monitoring_period    = "60"
   storage_type         = data.alibabacloudstack_rds_instance_types.default.instance_types.0.storage_type
+  zone_id              = data.alibabacloudstack_db_zones.default.ids.0
 }
-`, os.Getenv("ALIBABACLOUDSTACK_TEST_RDS_INSTNCE_TYPE"))
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_RDS_INSTNCE_TYPE"), os.Getenv("ALIBABACLOUDSTACK_TEST_RDS_ZONE_ID"), cpuType)
 }
 
 func GpdbCommonTestCase() string {
@@ -1013,7 +1027,7 @@ func removeEOFMarkers(input string) string {
 	return input
 }
 
-func AdbCommonTestCase(needVswtich bool)  string {
+func AdbCommonTestCase(needVswtich bool) string {
 	var vswtichString string
 	if needVswtich {
 		vswtichString = `  vswitch_id                  = "${alibabacloudstack_vpc_vswitch.default.id}"`

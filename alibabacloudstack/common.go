@@ -460,6 +460,13 @@ func toInt(v interface{}) (int, error) {
 	if s, ok := v.(string); ok {
 		return strconv.Atoi(s)
 	}
+	if n, ok := v.(json.Number); ok {
+		if i, err := n.Int64(); err != nil {
+			return 0, err
+		} else {
+			return int(i), nil
+		}
+	}
 	return 0, fmt.Errorf("value is neither int nor string")
 }
 
