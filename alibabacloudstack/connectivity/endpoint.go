@@ -91,7 +91,7 @@ const (
 	SLSCode                   = ServiceCode("SLS")
 	RosCode                   = ServiceCode("ROS")
 	QuickbiCode               = ServiceCode("QUICKBI")
-	DataworkspublicCode       = ServiceCode("DATAWORKSPUBLIC")
+	DataworkspublicCode       = ServiceCode("DATAWORKS_PUBLIC")
 	OneRouterCode             = ServiceCode("ONEROUTER")
 	BastionHostCode           = ServiceCode("BASTIONHOSTPRIVATE")
 	WAFONECSCode              = ServiceCode("WAF_ONECS")

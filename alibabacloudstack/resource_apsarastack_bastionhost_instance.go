@@ -270,12 +270,6 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	// 	"Value": d.Get("bandwidth").(string),
 	// })
 	request["SubscriptionType"] = "Subscription"
-	if v, ok := d.GetOk("period"); ok {
-		request["Period"] = v
-	}
-	if v, ok := d.GetOk("renewal_status"); ok {
-		request["RenewalStatus"] = v
-	}
 
 	if v, ok := d.GetOk("vpc_id"); ok {
 		request["VpcId"] = v
@@ -295,12 +289,6 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 
 	if v, ok := d.GetOk("license_code"); ok {
 		request["LicenseCode"] = v
-	}
-
-	if v, ok := d.GetOk("renew_period"); ok {
-		request["RenewPeriod"] = v
-	} else if v, ok := d.GetOk("renewal_status"); ok && v.(string) == "AutoRenewal" {
-		return errmsgs.WrapError(fmt.Errorf("attribute '%s' is required when '%s' is %v ", "renew_period", "renewal_status", d.Get("renewal_status")))
 	}
 	request["ProductCode"] = "bastionhost"
 	request["ProductType"] = "bastionhost"
@@ -464,10 +452,10 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 		update = true
 		request["HighAvailability"] = d.Get("highavailability")
 	}
-	if d.HasChange("disasterrecovery") {
-		update = true
-		request["DisasterRecovery"] = d.Get("disasterrecovery")
-	}
+	// if d.HasChange("disasterrecovery") {
+	// 	update = true
+	// 	request["DisasterRecovery"] = d.Get("disasterrecovery")
+	// }
 	if d.HasChange("license_code") {
 		update = true
 		request["LicenseCode"] = d.Get("license_code")
@@ -476,7 +464,7 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 		update = true
 		request["Description"] = d.Get("description")
 	}
-	if update && !d.IsNewResource() {
+	if update {
 		response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
 		addDebug(action, response, request)
 		if err != nil {

@@ -55,25 +55,20 @@ func dataSourceAlibabacloudStackBastionhostInstances() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"private_domain": {
+						"vpc_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"public_domain": {
-							Type:     schema.TypeString,
+						"highavailability": {
+							Type:     schema.TypeBool,
 							Computed: true,
-							Optional: true,
 						},
-						"instance_status": {
-							Type:     schema.TypeString,
+						"disasterrecovery": {
+							Type:     schema.TypeBool,
 							Computed: true,
 						},
 						"license_code": {
 							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"public_network_access": {
-							Type:     schema.TypeBool,
 							Computed: true,
 						},
 						"security_group_ids": {
@@ -81,11 +76,9 @@ func dataSourceAlibabacloudStackBastionhostInstances() *schema.Resource {
 							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
-						"tags": tagsSchema(),
 					},
 				},
 			},
-			"tags": tagsSchema(),
 		},
 	}
 }
@@ -113,16 +106,16 @@ func dataSourceAlibabacloudStackBastionhostInstancesRead(d *schema.ResourceData,
 
 	idsMap := getIdsStringFilter(d)
 
-	if v, ok := d.GetOk("tags"); ok {
-		tags := make([]map[string]interface{}, 0)
-		for key, value := range v.(map[string]interface{}) {
-			tags = append(tags, map[string]interface{}{
-				"Key":   key,
-				"Value": value.(string),
-			})
-		}
-		request["Tag.*"] = tags
-	}
+	// if v, ok := d.GetOk("tags"); ok {
+	// 	tags := make([]map[string]interface{}, 0)
+	// 	for key, value := range v.(map[string]interface{}) {
+	// 		tags = append(tags, map[string]interface{}{
+	// 			"Key":   key,
+	// 			"Value": value.(string),
+	// 		})
+	// 	}
+	// 	request["Tag.*"] = tags
+	// }
 	for {
 		response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
 		if err != nil {
@@ -160,14 +153,13 @@ func dataSourceAlibabacloudStackBastionhostInstancesRead(d *schema.ResourceData,
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
 		mapping := map[string]interface{}{
-			"id":                    object["InstanceId"],
-			"description":           object["Description"],
-			"user_vswitch_id":       object["VswitchId"],
-			"private_domain":        object["IntranetEndpoint"],
-			"public_domain":         object["InternetEndpoint"],
-			"instance_status":       object["InstanceStatus"],
-			"license_code":          object["LicenseCode"],
-			"public_network_access": object["PublicNetworkAccess"],
+			"id":               object["InstanceId"],
+			"description":      object["Description"],
+			"user_vswitch_id":  object["VswitchId"],
+			"vpc_id":           object["VpcId"],
+			"license_code":     object["LicenseCode"],
+			"highavailability": object["HighAvailability"],
+			"disasterrecovery": object["DisasterRecovery"],
 		}
 
 		id := fmt.Sprint(object["InstanceId"])
