@@ -152,7 +152,7 @@ resource "alibabacloudstack_edas_cluster" "default" {
 
 resource "alibabacloudstack_edas_cluster_member" "default" {
   cluster_id  = alibabacloudstack_edas_cluster.default.id
-  instance_id = alibabacloudstack_ecs_instance.default.id
+  instance_ids = [alibabacloudstack_ecs_instance.default.id]
 }
 ```
 
@@ -161,11 +161,13 @@ resource "alibabacloudstack_edas_cluster_member" "default" {
 The following arguments are supported:
 
 * `cluster_id` - (Required, ForceNew) The ID of the EDAS cluster. Must be a valid EDAS cluster identifier in UUID string format.
-* `instance_id` - (Required, ForceNew) The ID of the ECS instance to be imported. Must be a valid ECS instance identifier under the current account, in the format of a string starting with `i-`.
+* `instance_ids` - (Required, ForceNew) A list of ECS instance IDs that will be attached to the specified cluster.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The resource ID in the format `cluster_id:instance_id`.
-* `cluster_member_id` - The unique identifier assigned by the EDAS system for cluster members, used for instance management within the cluster.
+* `status_map` -  A map indicating the status of each instance in the cluster. The keys are instance IDs, and the values represent the status: `1` (Running), `0` (Converting), `-1` (Failed), and `-2` (Offline).
+* `ecu_map` -  A map linking each instance to its corresponding ECU (Elastic Compute Unit). The keys are instance IDs, and the values are ECU IDs.
+* `cluster_member_ids` -  A map of cluster member IDs associated with each instance. The keys are instance IDs, and the values are the cluster member IDs.

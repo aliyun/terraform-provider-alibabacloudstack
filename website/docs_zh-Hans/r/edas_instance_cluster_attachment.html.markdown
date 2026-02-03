@@ -1,31 +1,36 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "EDAS"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_edas_cluster_members"
-sidebar_current: "docs-Alibabacloudstack-datasource-edas-cluster-members"
+page_title: "Alibabacloudstack: alibabacloudstack_edas_instance_cluster_attachment"
+sidebar_current: "docs-Alibabacloudstack-edas-instance-cluster-attachment"
 description: |-
-  Queries the list of ECS instances imported into a specified EDAS cluster
+  将ECS实例导入到EDAS集群
 ---
 
-# alibabacloudstack_edas_cluster_members
+# alibabacloudstack_edas_cluster_member
 
-This data source retrieves the list of ECS instance members imported into an Alibaba Cloud EDAS (Enterprise Distributed Application Service) cluster. By specifying the cluster ID, you can obtain all associated instance information, including instance status, ECU (Elastic Compute Unit) identifier, and timestamps.
+将ECS实例导入到EDAS集群，实现应用部署环境的统一管理。
 
-## Example Usage
+## 示例用法
+
+### 基础用法
 
 ```hcl
+
 variable "name" {
-  default = "tf6972"
+  default = "tf16"
 }
 
 variable "logical_id" {
-  default = ":tf6972"
+  default = ":tf16"
 }
+
 
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
   enable_details              = true
 }
+
 
 resource "alibabacloudstack_vpc_vpc" "default" {
   vpc_name   = "${var.name}_vpc"
@@ -56,6 +61,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
   }
 }
 
+
 resource "alibabacloudstack_ecs_securitygroup" "default" {
   name   = "${var.name}_sg"
   vpc_id = alibabacloudstack_vpc_vpc.default.id
@@ -72,13 +78,15 @@ resource "alibabacloudstack_security_group_rule" "default" {
   cidr_ip           = "192.168.0.0/16"
 }
 
+
 data "alibabacloudstack_images" "default" {
-  name_regex  = "^ubuntu_"
-  //name_regex = "arm_centos_7_6_20G_20211110.raw"  # ARM CentOS image example
-  //name_regex = "^arm_centos_7"                    # ARM CentOS regex pattern
+  name_regex = "^ubuntu_"
+  //name_regex  = "arm_centos_7_6_20G_20211110.raw"
+  //name_regex  = "^arm_centos_7"
   most_recent = true
   owners      = "system"
 }
+
 
 data "alibabacloudstack_instance_types" "all" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
@@ -125,6 +133,8 @@ resource "alibabacloudstack_ecs_instance" "default" {
   }
 }
 
+
+
 resource "alibabacloudstack_edas_namespace" "default" {
   description          = var.name
   namespace_logical_id = var.logical_id
@@ -139,35 +149,26 @@ resource "alibabacloudstack_edas_cluster" "default" {
   vpc_id            = alibabacloudstack_vpc_vpc.default.id
 }
 
+
+
 resource "alibabacloudstack_edas_cluster_member" "default" {
   cluster_id  = alibabacloudstack_edas_cluster.default.id
-  instance_id = alibabacloudstack_ecs_instance.default.id
-}
-
-data "alibabacloudstack_edas_cluster_members" "default" {
-  cluster_id = alibabacloudstack_edas_cluster_member.default.cluster_id
-  ids = [
-    "${alibabacloudstack_edas_cluster_member.default.id}"
-  ]
+  instance_ids = [alibabacloudstack_ecs_instance.default.id]
 }
 ```
 
-## Argument Reference
+## 参数说明
 
-The following arguments are supported:
+支持以下参数：
 
-* `cluster_id` (Required) - The unique identifier of the EDAS cluster. (Required, Forces new resource when changed)
-* `ids` (Optional) - A list of cluster member IDs used to filter results. Each ID is in the format `ClusterId:InstanceId`. (Optional)
+* `cluster_id` - (必填, 变更时重建) EDAS集群ID。需为有效的EDAS集群标识符，格式为UUID字符串。
+* `instance_id` - (必填, 变更时重建) 要导入的ECS实例ID。需为当前账号下可用的ECS实例标识符，格式为`i-`开头的字符串。
 
-## Attributes Reference
+## 属性说明
 
-The following attributes are exported:
+导出以下属性：
 
-* `id` (String) - The unique identifier of the cluster member, in the format `ClusterId:InstanceId`.
-* `cluster_id` (String) - The ID of the EDAS cluster.
-* `create_time` (Integer) - The timestamp when the cluster member was created, in Unix timestamp format.
-* `ecu_id` (String) - The unique identifier of the ECU (Elastic Compute Unit).
-* `ecs_id` (String) - The ID of the ECS instance (same as `instance_id`).
-* `instance_id` (String) - The ID of the ECS instance (i.e., the cluster member instance identifier).
-* `status` (Integer) - The current status of the cluster member (refer to EDAS documentation for specific status values).
-* `update_time` (Integer) - The timestamp of the last update to the cluster member, in Unix timestamp format.
+* `id` - 资源ID，格式为`cluster_id:instance_id`。
+* `status_map` -  A map indicating the status of each instance in the cluster. The keys are instance IDs, and the values represent the status: `1` (Running), `0` (Converting), `-1` (Failed), and `-2` (Offline).
+* `ecu_map` -  A map linking each instance to its corresponding ECU (Elastic Compute Unit). The keys are instance IDs, and the values are ECU IDs.
+* `cluster_member_ids` -  A map of cluster member IDs associated with each instance. The keys are instance IDs, and the values are the cluster member IDs.

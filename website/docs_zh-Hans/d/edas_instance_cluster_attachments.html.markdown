@@ -1,28 +1,26 @@
 ---
-subcategory: "EDAS"
+subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_edas_cluster_member"
-sidebar_current: "docs-Alibabacloudstack-edas-cluster-member"
+page_title: "Alibabacloudstack: alibabacloudstack_edas_instance_cluster_attachments"
+sidebar_current: "docs-Alibabacloudstack-datasource-edas-instance-cluster-attachments"
 description: |-
-  将ECS实例导入到EDAS集群
+  查询指定EDAS集群中已导入的ECS实例列表
 ---
 
-# alibabacloudstack_edas_cluster_member
+# alibabacloudstack_edas_cluster_members
 
-将ECS实例导入到EDAS集群，实现应用部署环境的统一管理。
+当前数据源用于查询阿里云EDAS（Enterprise Distributed Application Service）集群中已导入的ECS实例成员列表。通过指定集群ID，可检索该集群关联的所有实例信息，包括实例状态、ECU标识及时间戳等。
 
 ## 示例用法
-
-### 基础用法
 
 ```hcl
 
 variable "name" {
-  default = "tf16"
+  default = "tf6972"
 }
 
 variable "logical_id" {
-  default = ":tf16"
+  default = ":tf6972"
 }
 
 
@@ -149,24 +147,35 @@ resource "alibabacloudstack_edas_cluster" "default" {
   vpc_id            = alibabacloudstack_vpc_vpc.default.id
 }
 
-
-
-resource "alibabacloudstack_edas_cluster_member" "default" {
+resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
   cluster_id  = alibabacloudstack_edas_cluster.default.id
-  instance_id = alibabacloudstack_ecs_instance.default.id
+  instance_ids =[ alibabacloudstack_ecs_instance.default.id]
+}
+
+
+
+data "alibabacloudstack_edas_instance_cluster_attachments" "default" {
+  cluster_id = alibabacloudstack_edas_instance_cluster_attachment.default.cluster_id
+  ids = [
+    "${alibabacloudstack_edas_instance_cluster_attachment.default.id}"
+  ]
 }
 ```
 
 ## 参数说明
+以下参数用于配置数据源查询条件：
 
-支持以下参数：
-
-* `cluster_id` - (必填, 变更时重建) EDAS集群ID。需为有效的EDAS集群标识符，格式为UUID字符串。
-* `instance_id` - (必填, 变更时重建) 要导入的ECS实例ID。需为当前账号下可用的ECS实例标识符，格式为`i-`开头的字符串。
+- `cluster_id` (必填, 变更时重建)：EDAS集群的唯一标识符。 (必填, 变更时重建)
+- `ids` (列表, 选填)：用于过滤结果的集群成员ID列表，每个ID格式为`ClusterId:InstanceId`。 (可选)
 
 ## 属性说明
+以下属性从查询结果中导出：
 
-导出以下属性：
-
-* `id` - 资源ID，格式为`cluster_id:instance_id`。
-* `cluster_member_id` - EDAS系统分配的集群成员唯一标识符，用于集群内实例管理。
+- `id` (字符串)：集群成员的唯一标识符，格式为`ClusterId:InstanceId`。
+- `cluster_id` (字符串)：EDAS集群的ID。
+- `create_time` (整数)：集群成员创建的时间戳（Unix时间戳格式）。
+- `ecu_id` (字符串)：ECU（Elastic Compute Unit）的唯一标识符。
+- `ecs_id` (字符串)：ECS实例的ID（与`instance_id`值相同）。
+- `instance_id` (字符串)：ECS实例的ID（即集群成员实例标识）。
+- `status` (整数)：集群成员的当前状态（具体状态值参考EDAS文档）。
+- `update_time` (整数)：集群成员最后更新的时间戳（Unix时间戳格式）。

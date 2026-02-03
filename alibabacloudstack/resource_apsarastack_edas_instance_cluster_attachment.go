@@ -102,13 +102,13 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentRead(d *schema.Resour
 		return errmsgs.WrapError(err)
 	}
 	instanceIdstr := strs[1]
-	statusMap := make(map[string]int)
+	statusMap := make(map[string]interface{})
 	ecuMap := make(map[string]string)
 	memMap := make(map[string]string)
 	for _, v := range objects {
 		member := v.(map[string]interface{})
 		if strings.Contains(instanceIdstr, member["EcsId"].(string)) {
-			statusMap[member["EcsId"].(string)] = member["Status"].(int)
+			statusMap[member["EcsId"].(string)] = member["Status"]
 			ecuMap[member["EcsId"].(string)] = member["EcsId"].(string)
 			memMap[member["EcsId"].(string)] = member["ClusterMemberId"].(string)
 		}
