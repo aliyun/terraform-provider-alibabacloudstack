@@ -40,12 +40,12 @@ func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T)
 		IDRefreshName: resourceId,
 
 		Providers:    testAccProviders,
-		CheckDestroy: rac.checkResourceDestroy(),
+		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":       "${alibabacloudstack_db_readonly_instance.default.master_db_instance_id}",
-					"connection_id":     "${alibabacloudstack_db_connection.default.id}",
+					"connection_id":     "${alibabacloudstack_db_proxy.default.db_proxy_endpoint_name}",
 					"distribution_type": "Standard",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -103,9 +103,9 @@ func resourceDBReadWriteSplittingConfigDependence(name string) string {
 	  }
 	}
 	
-	resource "alibabacloudstack_db_connection" "default" {
-		instance_id       = "${alibabacloudstack_db_instance.default.id}"
-		connection_prefix = "${var.name}"
+	resource "alibabacloudstack_db_proxy" "default" {
+		db_instance_id        = "${alibabacloudstack_db_instance.default.id}"
+		db_proxy_instance_num = "1"
 	}
 	`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase())
 }

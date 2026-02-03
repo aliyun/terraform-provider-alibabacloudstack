@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"regexp"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -145,9 +146,9 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate(d *schema.Res
 		return err
 	}
 	rdsService := RdsService{client}
-
-	if err := rdsService.WaitForDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
-		return errmsgs.WrapError(err)
+	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsService.RdsProxyStateRefreshFunc(d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return nil
@@ -165,5 +166,11 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionDelete(d *schema.Res
 	if _, err := client.DoTeaRequest("POST", "Rds", "2014-08-15", "ModifyDBProxyEndpoint", "", nil, reqQuery, nil); err != nil {
 		return err
 	}
+	rdsService := RdsService{client}
+	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsService.RdsProxyStateRefreshFunc(d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+
 	return nil
 }
