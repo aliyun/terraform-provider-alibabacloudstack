@@ -205,6 +205,17 @@ func resourceAlibabacloudStackRosStackCreate(d *schema.ResourceData, meta interf
 		request["TimeoutInMinutes"] = v
 	}
 
+	if v, ok := d.GetOk("tags"); ok {
+		tags := make([]map[string]interface{}, 0)
+		for key, value := range v.(map[string]interface{}) {
+			tags = append(tags, map[string]interface{}{
+				"Key":   key,
+				"Value": value.(string),
+			})
+		}
+		request["Tag"] = tags
+	}
+
 	response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, nil, request)
 	if err != nil {
 		return err

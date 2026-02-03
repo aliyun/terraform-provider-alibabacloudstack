@@ -248,6 +248,15 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 			"status_reason":        object["StatusReason"],
 			"timeout_in_minutes":   formatInt(object["TimeoutInMinutes"]),
 		}
+
+		if tagsRaw, exists := object["Tags"]; exists && tagsRaw != nil {
+			if tagsMap, ok := tagsRaw.(map[string]interface{}); ok {
+				if tagList, ok := tagsMap["Tag"].([]interface{}); ok {
+					mapping["tags"] = tagsToMap(tagList)
+				}
+			}
+		}
+
 		if detailedEnabled := d.Get("enable_details"); !detailedEnabled.(bool) {
 			ids = append(ids, fmt.Sprint(object["StackId"]))
 			names = append(names, object["StackName"].(string))
@@ -292,12 +301,6 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 		getResp1 := raw
 		b, err := json.Marshal(getResp1["StackPolicyBody"])
 		mapping["stack_policy_body"] = string(b)
-
-		tags, err := rosService.ListTagResources(id, "stack")
-		if err != nil {
-			return err
-		}
-		mapping["tags"] = tagsToMap(tags)
 
 		ids = append(ids, fmt.Sprint(object["StackId"]))
 		names = append(names, object["StackName"].(string))
