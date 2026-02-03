@@ -68,12 +68,14 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				Computed:      true,
 				Deprecated:    "Field 'instance_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
 				ConflictsWith: []string{"db_instance_class"},
+				AtLeastOneOf:  []string{"db_instance_class"},
 			},
 			"db_instance_class": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
 				ConflictsWith: []string{"instance_type"},
+				AtLeastOneOf:  []string{"instance_type"},
 			},
 
 			"instance_storage": {
@@ -82,12 +84,14 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				Computed:      true,
 				Deprecated:    "Field 'instance_storage' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage' instead.",
 				ConflictsWith: []string{"db_instance_storage"},
+				AtLeastOneOf:  []string{"db_instance_storage"},
 			},
 			"db_instance_storage": {
 				Type:          schema.TypeInt,
 				Optional:      true,
 				Computed:      true,
 				ConflictsWith: []string{"instance_storage"},
+				AtLeastOneOf:  []string{"instance_storage"},
 			},
 
 			"zone_id": {
@@ -141,11 +145,16 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				Computed: true,
 			},
 			"tags": tagsSchema(),
+			"force_restart": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackDBReadonlyInstanceCreate, 
-	resourceAlibabacloudStackDBReadonlyInstanceRead, resourceAlibabacloudStackDBReadonlyInstanceUpdate, 
-	resourceAlibabacloudStackDBReadonlyInstanceDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackDBReadonlyInstanceCreate,
+		resourceAlibabacloudStackDBReadonlyInstanceRead, resourceAlibabacloudStackDBReadonlyInstanceUpdate,
+		resourceAlibabacloudStackDBReadonlyInstanceDelete)
 	return resource
 }
 
@@ -246,32 +255,15 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 
 	}
 
-	update := false
 	request := rds.CreateModifyDBInstanceSpecRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
 	request.PayType = string(Postpaid)
 
-	if d.HasChange("db_instance_storage_type") {
+	if d.HasChanges("db_instance_storage_type", "db_instance_class", "instance_type", "db_instance_storage", "instance_storage") {
 		request.DBInstanceStorageType = d.Get("db_instance_storage_type").(string)
-		update = true
-	}
-	if d.HasChanges("db_instance_class", "instance_type") {
 		request.DBInstanceClass = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
-		if err := errmsgs.CheckEmpty(request.DBInstanceClass, schema.TypeString, "db_instance_class", "instance_type"); err != nil {
-			return errmsgs.WrapError(err)
-		}
-		update = true
-	}
-
-	if d.HasChanges("db_instance_storage", "instance_storage") {
 		request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
-		if err := errmsgs.CheckEmpty(request.DBInstanceStorage, schema.TypeInt, "db_instance_storage", "instance_storage"); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	if update {
 		// wait instance status is running before modifying
 		stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Minute, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 		_, err := stateConf.WaitForState()
@@ -371,7 +363,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceDelete(d *schema.ResourceData, m
 		}
 		return errmsgs.WrapError(err)
 	}
-		if v, existed:= instance["PayType"]; existed && PayType(v.(string)) == Prepaid {
+	if v, existed := instance["PayType"]; existed && PayType(v.(string)) == Prepaid {
 		return errmsgs.WrapError(errmsgs.Error("At present, 'Prepaid' instance cannot be deleted and must wait it to be expired and release it automatically."))
 	}
 

@@ -55,7 +55,7 @@ func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T)
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":       "${alibabacloudstack_db_readonly_instance.default.master_db_instance_id}",
-					"connection_prefix": "${var.prefix}",
+					"connection_prefix": "${var.name}",
 					"distribution_type": "Standard",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -89,7 +89,7 @@ func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T)
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":       "${alibabacloudstack_db_readonly_instance.default.master_db_instance_id}",
-					"connection_prefix": "${var.prefix}",
+					"connection_prefix": "${var.name}",
 					"distribution_type": "Standard",
 					"max_delay_time":    "30",
 					"weight":            REMOVEKEY,
@@ -109,20 +109,9 @@ func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T)
 	})
 }
 
-func resourceDBReadWriteSplittingConfigDependence(prefix string) string {
+func resourceDBReadWriteSplittingConfigDependence(name string) string {
 	return fmt.Sprintf(`
-	
-	variable "creation" {
-		default = "Rds"
-	}
-	variable "multi_az" {
-		default = "false"
-	}
 	variable "name" {
-		default = "tf-testAccDBInstance_vpc"
-	}
-
-	variable "prefix" {
 		default = "%s"
 	}
 
@@ -140,5 +129,5 @@ func resourceDBReadWriteSplittingConfigDependence(prefix string) string {
 		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 		db_instance_storage_type = "${alibabacloudstack_db_instance.default.storage_type}"
 	}
-`, prefix, VSwitchCommonTestCase, RdsMysqlCommonTestCase() )
+`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase() )
 }
