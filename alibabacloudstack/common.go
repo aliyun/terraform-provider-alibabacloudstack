@@ -453,6 +453,16 @@ func convertJsonStringToList(configured string) ([]interface{}, error) {
 	return result, nil
 }
 
+func toInt(v interface{}) (int, error) {
+	if i, ok := v.(int); ok {
+		return i, nil
+	}
+	if s, ok := v.(string); ok {
+		return strconv.Atoi(s)
+	}
+	return 0, fmt.Errorf("value is neither int nor string")
+}
+
 func StringPointer(s string) *string {
 	return &s
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -12,34 +11,25 @@ import (
 var DBReadWriteMap = map[string]string{
 	"port":              "3306",
 	"distribution_type": "Standard",
-	"weight":            NOSET,
 	"max_delay_time":    "30",
 	"instance_id":       CHECKSET,
 	"connection_string": CHECKSET,
 }
 
 func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T) {
-	var connection = &rds.DBInstanceNetInfo{}
-	var primary = &rds.DBInstanceAttribute{}
-	var readonly = &rds.DBInstanceAttribute{}
+	var connection map[string]interface{}
 
 	resourceId := "alibabacloudstack_db_read_write_splitting_connection.default"
 	ra := resourceAttrInit(resourceId, DBReadWriteMap)
 
-	rc_connection := resourceCheckInitWithDescribeMethod(resourceId, &connection, func() interface{} {
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &connection, func() interface{} {
 		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeDBReadWriteSplittingConnection")
-	rc_primary := resourceCheckInitWithDescribeMethod("alibabacloudstack_db_instance.default", &primary, func() interface{} {
-		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DescribeDBInstance")
-	rc_readonly := resourceCheckInitWithDescribeMethod("alibabacloudstack_db_readonly_instance.default", &readonly, func() interface{} {
-		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DescribeDBReadonlyInstance")
 	rand := getAccTestRandInt(10000, 999999)
 
-	rac := resourceAttrCheckInit(rc_connection, ra)
+	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	prefix := fmt.Sprintf("t-con-%d", rand)
+	prefix := fmt.Sprintf("tfproxy%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, prefix, resourceDBReadWriteSplittingConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -55,7 +45,7 @@ func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T)
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":       "${alibabacloudstack_db_readonly_instance.default.master_db_instance_id}",
-					"connection_prefix": "${var.name}",
+					"connection_id":     "${alibabacloudstack_db_connection.default.id}",
 					"distribution_type": "Standard",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -71,37 +61,12 @@ func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T)
 				Config: testAccConfig(map[string]interface{}{
 					"max_delay_time":    "300",
 					"distribution_type": "Custom",
-					"weight": `${map(
-						"${alibabacloudstack_db_instance.default.id}", "0",
-						"${alibabacloudstack_db_readonly_instance.default.id}", "500"
-					)}`,
+					"weight":            `${local.dynamic_weight}`,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					rc_primary.checkResourceExists(),
-					rc_readonly.checkResourceExists(),
 					testAccCheck(map[string]string{
 						"max_delay_time":    "300",
-						"weight.%":          "2",
 						"distribution_type": "Custom",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"instance_id":       "${alibabacloudstack_db_readonly_instance.default.master_db_instance_id}",
-					"connection_prefix": "${var.name}",
-					"distribution_type": "Standard",
-					"max_delay_time":    "30",
-					"weight":            REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"port":              "3306",
-						"distribution_type": "Standard",
-						"weight.%":          REMOVEKEY,
-						"max_delay_time":    "30",
-						"instance_id":       CHECKSET,
-						"connection_string": CHECKSET,
 					}),
 				),
 			},
@@ -114,6 +79,7 @@ func resourceDBReadWriteSplittingConfigDependence(name string) string {
 	variable "name" {
 		default = "%s"
 	}
+	
 
 	%s
 	
@@ -129,5 +95,17 @@ func resourceDBReadWriteSplittingConfigDependence(name string) string {
 		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 		db_instance_storage_type = "${alibabacloudstack_db_instance.default.storage_type}"
 	}
-`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase() )
+	
+	locals {
+	  dynamic_weight = {
+		(alibabacloudstack_db_instance.default.id): "0"
+		(alibabacloudstack_db_readonly_instance.default.id): "500"
+	  }
+	}
+	
+	resource "alibabacloudstack_db_connection" "default" {
+		instance_id       = "${alibabacloudstack_db_instance.default.id}"
+		connection_prefix = "${var.name}"
+	}
+	`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase())
 }

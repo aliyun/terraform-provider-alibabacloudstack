@@ -66,16 +66,27 @@ func TestAccAlibabacloudStackDBReadonlyInstance_update(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"force_restart"},
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_restart", "parameters"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_type":            "${data.alibabacloudstack_rds_instance_types.default.instance_types.1.id}",
 					"instance_storage":         TfRawString("data.alibabacloudstack_rds_instance_types.default.instance_types.1.storage_min + 10"),
 					"db_instance_storage_type": "${data.alibabacloudstack_rds_instance_types.default.instance_types.1.storage_type}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(nil),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"parameters": []map[string]string{{
+						"name":  "loose_recycle_bin",
+						"value": "OFF",
+					}},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),

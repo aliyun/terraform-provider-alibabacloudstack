@@ -271,34 +271,26 @@ func (s *RdsService) RefreshParameters(d *schema.ResourceData, attribute string)
 		return errmsgs.WrapError(err)
 	}
 
-	var parameters = make(map[string]interface{})
+	var parameters = make(map[string]string)
 	for _, i := range object.RunningParameters.DBInstanceParameter {
 		if i.ParameterName != "" {
-			parameter := map[string]interface{}{
-				"name":  i.ParameterName,
-				"value": i.ParameterValue,
-			}
-			parameters[i.ParameterName] = parameter
+			parameters[i.ParameterName] = i.ParameterValue
 		}
 	}
 
 	for _, i := range object.ConfigParameters.DBInstanceParameter {
 		if i.ParameterName != "" {
-			parameter := map[string]interface{}{
-				"name":  i.ParameterName,
-				"value": i.ParameterValue,
-			}
-			parameters[i.ParameterName] = parameter
+			parameters[i.ParameterName] = i.ParameterValue
 		}
 	}
 
 	for _, parameter := range documented.(*schema.Set).List() {
-		name := parameter.(map[string]interface{})["name"]
-		for _, value := range parameters {
-			if value.(map[string]interface{})["name"] == name {
-				param = append(param, value.(map[string]interface{}))
-				break
-			}
+		name := parameter.(map[string]interface{})["name"].(string)
+		if v, existed := parameters[name]; existed {
+			param = append(param, map[string]interface{}{
+				"name":  name,
+				"value": v,
+			})
 		}
 	}
 	if err := d.Set(attribute, param); err != nil {
@@ -334,7 +326,19 @@ func (s *RdsService) ModifyParameters(d *schema.ResourceData, attribute string) 
 			req := rds.CreateDescribeParameterTemplatesRequest()
 			s.client.InitRpcRequest(*req.RpcRequest)
 			req.DBInstanceId = d.Id()
-			req.Engine = d.Get("engine").(string)
+			if d.Get("engine").(string) == "" {
+				instance, err := s.DescribeDBInstance(d.Id())
+				if err != nil {
+					if errmsgs.NotFoundError(err) {
+						d.SetId("")
+						return nil
+					}
+					return errmsgs.WrapError(err)
+				}
+				req.Engine = instance["Engine"].(string)
+			} else {
+				req.Engine = d.Get("engine").(string)
+			}
 			req.EngineVersion = d.Get("engine_version").(string)
 			req.ClientToken = buildClientToken(req.GetActionName())
 			forceRestartMap := make(map[string]string)
@@ -442,27 +446,12 @@ func (s *RdsService) DescribeDBConnection(id string) (*rds.DBInstanceNetInfo, er
 	return info, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
-func (s *RdsService) DescribeDBReadWriteSplittingConnection(id string) (*rds.DBInstanceNetInfo, error) {
-	ds := &rds.DBInstanceNetInfo{}
-	object, err := s.DescribeDBInstanceNetInfo(id)
-	if err != nil && !errmsgs.NotFoundError(err) {
-		return ds, err
+func (s *RdsService) DescribeDBReadWriteSplittingConnection(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{
+		"DBInstanceId": id,
 	}
-
-	for _, conn := range object {
-		if conn.ConnectionStringType != "ReadWriteSplitting" {
-			continue
-		}
-		if conn.MaxDelayTime == "" {
-			continue
-		}
-		if _, err := strconv.Atoi(conn.MaxDelayTime); err != nil {
-			return ds, err
-		}
-		return &conn, nil
-	}
-
-	return ds, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ReadWriteSplittingConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+	response, err := s.client.DoTeaRequest("GET", "Rds", "2014-08-15", "DescribeDBProxyEndpoint", "", nil, reqQuery, nil)
+	return response, err
 }
 
 func (s *RdsService) GrantAccountPrivilege(id, dbName string) error {
@@ -1144,31 +1133,7 @@ func (s *RdsService) WaitForDBConnection(id string, status Status, timeout int) 
 			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ConnectionString, id, errmsgs.ProviderERROR)
 		}
 	}
-}
-
-func (s *RdsService) WaitForDBReadWriteSplitting(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeDBReadWriteSplittingConnection(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if err == nil {
-			break
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ConnectionString, id, errmsgs.ProviderERROR)
-		}
-	}
-	return nil
-}
+}	
 
 func (s *RdsService) WaitForAccount(id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
