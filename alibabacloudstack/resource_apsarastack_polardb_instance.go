@@ -128,8 +128,10 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				ValidateFunc:  validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
 				Optional:      true,
 				Computed:      true,
-				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
+				Deprecated:    "The field `instance_charge_type` has been deprecated and is scheduled for removal in version 3.21.0.",
 				ConflictsWith: []string{"payment_type"},
+				DiffSuppressFunc: DeprecatedDiffSuppressFunc,
+				DiffSuppressOnRefresh: true,
 			},
 			"payment_type": {
 				Type:          schema.TypeString,
@@ -137,13 +139,17 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 				ConflictsWith: []string{"instance_charge_type"},
+				Deprecated:    "The field `payment_type` has been deprecated and is scheduled for removal in version 3.21.0.",
+				DiffSuppressFunc: DeprecatedDiffSuppressFunc,
+				DiffSuppressOnRefresh: true,
 			},
 			"period": {
 				Type:             schema.TypeInt,
 				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
 				Optional:         true,
 				Default:          1,
-				DiffSuppressFunc: PostPaidDiffSuppressFunc,
+				DiffSuppressFunc: DeprecatedDiffSuppressFunc,
+				DiffSuppressOnRefresh: true,
 			},
 			"monitoring_period": {
 				Type:         schema.TypeInt,
@@ -155,14 +161,18 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Type:             schema.TypeBool,
 				Optional:         true,
 				Default:          false,
-				DiffSuppressFunc: PostPaidDiffSuppressFunc,
+				DiffSuppressFunc: DeprecatedDiffSuppressFunc,
+				Deprecated:    "The field `auto_renew` has been deprecated and is scheduled for removal in version 3.21.0.",
+				DiffSuppressOnRefresh: true,
 			},
 			"auto_renew_period": {
 				Type:             schema.TypeInt,
 				ValidateFunc:     validation.IntBetween(1, 12),
 				Optional:         true,
 				Default:          1,
-				DiffSuppressFunc: PostPaidAndRenewDiffSuppressFunc,
+				DiffSuppressFunc: DeprecatedDiffSuppressFunc,
+				Deprecated:    "The field `auto_renew_period` has been deprecated and is scheduled for removal in version 3.21.0.",
+				DiffSuppressOnRefresh: true,
 			},
 			"zone_id": {
 				Type:     schema.TypeString,
@@ -366,9 +376,6 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		VPCId = vsw.VpcId
 	}
 	payType := string(Postpaid)
-	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok && Trim(v.(string)) != "" {
-		payType = Trim(v.(string))
-	}
 	DBInstanceStorageType := connectivity.GetResourceData(d, "db_instance_storage_type", "storage_type").(string)
 	ZoneIdSlave1 = d.Get("zone_id_slave1").(string)
 	ZoneIdSlave2 = d.Get("zone_id_slave2").(string)
@@ -521,21 +528,12 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 	if err := PolardbService.SetInstanceTags(d); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
 	payType := Postpaid
-	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok && Trim(v.(string)) != "" {
-		payType = PayType(Trim(v.(string)))
-	}
-
 	if !d.IsNewResource() && d.HasChanges("instance_type", "db_instance_class", "instance_storage", "db_instance_storage") {
 		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceSpec", "")
 		PolardbModifydbinstancespecResponse := PolardbModifydbinstancespecResponse{}
 		request.QueryParams["DBInstanceId"] = d.Id()
-		if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
-			request.QueryParams["PayType"] = v.(string)
-		} else {
-			request.QueryParams["PayType"] = string(Postpaid)
-		}
+		request.QueryParams["PayType"] = string(payType)
 
 		request.QueryParams["DBInstanceClass"] = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
 		request.QueryParams["DBInstanceStorage"] = strconv.Itoa(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
@@ -561,70 +559,6 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-	}
-
-	if !d.IsNewResource() && d.HasChanges("instance_charge_type", "payment_type") && payType == Prepaid {
-		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstancePayType", "")
-		PolardbModifydbinstancepaytypeResponse := PolardbModifydbinstancepaytypeResponse{}
-		request.QueryParams["DBInstanceId"] = d.Id()
-		request.QueryParams["PayType"] = string(payType)
-		request.QueryParams["AutoPay"] = "true"
-		period := d.Get("period").(int)
-		request.QueryParams["UsedTime"] = strconv.Itoa(period)
-		request.QueryParams["Period"] = string(Month)
-		if period > 9 {
-			request.QueryParams["UsedTime"] = strconv.Itoa(period / 12)
-			request.QueryParams["Period"] = string(Year)
-		}
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_polardb_db_instance", "ModifyDBInstancePayType", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbModifydbinstancepaytypeResponse)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_polardb_db_instance", "ModifyDBInstancePayType", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-	}
-
-	if payType == Prepaid && d.HasChanges("auto_renew", "auto_renew_period") {
-		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyInstanceAutoRenewalAttribute", "")
-		PolardbModifyinstanceautorenewalattributeResponse := PolardbModifyinstanceautorenewalattributeResponse{}
-		request.QueryParams["DBInstanceId"] = d.Id()
-		auto_renew := d.Get("auto_renew").(bool)
-		if auto_renew {
-			request.QueryParams["AutoRenew"] = "True"
-		} else {
-			request.QueryParams["AutoRenew"] = "False"
-		}
-		request.QueryParams["Duration"] = strconv.Itoa(d.Get("auto_renew_period").(int))
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_polardb_db_instance", "ModifyInstanceAutoRenewalAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbModifyinstanceautorenewalattributeResponse)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_polardb_db_instance", "ModifyInstanceAutoRenewalAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
 	}
 
 	if d.HasChanges("instance_type", "db_instance_class", "monitoring_period") && d.Get("monitoring_period").(int) != 0 {

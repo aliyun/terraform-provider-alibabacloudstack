@@ -236,6 +236,10 @@ func ecsSecurityGroupRulePortRangeDiffSuppressFunc(k, old, new string, d *schema
 	return true
 }
 
+func DeprecatedDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	return true
+}
+
 func slbInternetDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if internet, ok := d.GetOkExists("internet"); ok && internet.(bool) {
 		return true
