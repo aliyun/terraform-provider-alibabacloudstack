@@ -73,6 +73,7 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Computed:      true,
 				Deprecated:    "Field 'storage_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage_type' instead.",
 				ConflictsWith: []string{"db_instance_storage_type"},
+				AtLeastOneOf:  []string{"db_instance_storage_type"},
 			},
 			"db_instance_storage_type": {
 				Type:          schema.TypeString,
@@ -81,6 +82,7 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 				ConflictsWith: []string{"storage_type"},
+				AtLeastOneOf:  []string{"storage_type"},
 			},
 			"encryption_key": {
 				Type:     schema.TypeString,
@@ -97,12 +99,14 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Computed:      true,
 				Deprecated:    "Field 'instance_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
 				ConflictsWith: []string{"db_instance_class"},
+				AtLeastOneOf:  []string{"db_instance_class"},
 			},
 			"db_instance_class": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
 				ConflictsWith: []string{"instance_type"},
+				AtLeastOneOf:  []string{"instance_type"},
 			},
 			"instance_storage": {
 				Type:          schema.TypeInt,
@@ -110,12 +114,14 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Computed:      true,
 				Deprecated:    "Field 'instance_storage' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage' instead.",
 				ConflictsWith: []string{"db_instance_storage"},
+				AtLeastOneOf:  []string{"db_instance_storage"},
 			},
 			"db_instance_storage": {
 				Type:          schema.TypeInt,
 				Optional:      true,
 				Computed:      true,
 				ConflictsWith: []string{"instance_storage"},
+				AtLeastOneOf:  []string{"instance_storage"},
 			},
 			"instance_charge_type": {
 				Type:          schema.TypeString,
@@ -334,13 +340,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	enginever := Trim(d.Get("engine_version").(string))
 	engine := Trim(d.Get("engine").(string))
 	DBInstanceStorage := connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int)
-	if err := errmsgs.CheckEmpty(DBInstanceStorage, schema.TypeString, "db_instance_storage", "instance_storage"); err != nil {
-		return errmsgs.WrapError(err)
-	}
 	DBInstanceClass := Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string))
-	if err := errmsgs.CheckEmpty(DBInstanceClass, schema.TypeString, "db_instance_class", "instance_type"); err != nil {
-		return errmsgs.WrapError(err)
-	}
 	DBInstanceNetType := string(Intranet)
 	DBInstanceDescription := connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
 	if zone, ok := d.GetOk("zone_id"); ok && Trim(zone.(string)) != "" {
@@ -370,9 +370,6 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		payType = Trim(v.(string))
 	}
 	DBInstanceStorageType := connectivity.GetResourceData(d, "db_instance_storage_type", "storage_type").(string)
-	if err := errmsgs.CheckEmpty(DBInstanceStorageType, schema.TypeString, "db_instance_storage_type", "storage_type"); err != nil {
-		return errmsgs.WrapError(err)
-	}
 	ZoneIdSlave1 = d.Get("zone_id_slave1").(string)
 	ZoneIdSlave2 = d.Get("zone_id_slave2").(string)
 	SecurityIPList := LOCAL_HOST_IP
@@ -530,6 +527,42 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 		payType = PayType(Trim(v.(string)))
 	}
 
+	if !d.IsNewResource() && d.HasChanges("instance_type", "db_instance_class", "instance_storage", "db_instance_storage") {
+		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceSpec", "")
+		PolardbModifydbinstancespecResponse := PolardbModifydbinstancespecResponse{}
+		request.QueryParams["DBInstanceId"] = d.Id()
+		if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
+			request.QueryParams["PayType"] = v.(string)
+		} else {
+			request.QueryParams["PayType"] = string(Postpaid)
+		}
+
+		request.QueryParams["DBInstanceClass"] = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
+		request.QueryParams["DBInstanceStorage"] = strconv.Itoa(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+		// wait instance status is running before modifying
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSpec", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbModifydbinstancespecResponse)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSpec", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
+
 	if !d.IsNewResource() && d.HasChanges("instance_charge_type", "payment_type") && payType == Prepaid {
 		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstancePayType", "")
 		PolardbModifydbinstancepaytypeResponse := PolardbModifydbinstancepaytypeResponse{}
@@ -594,7 +627,8 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 
 	}
 
-	if d.HasChange("monitoring_period") {
+	if d.HasChanges("instance_type", "db_instance_class", "monitoring_period") && d.Get("monitoring_period").(int) != 0 {
+		// XXX: It needs to be reset `monitoring_period` after the change type
 		period := d.Get("monitoring_period").(int)
 		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceMonitor", "")
 		PolardbModifydbinstancemonitorResponse := PolardbModifydbinstancemonitorResponse{}
@@ -753,55 +787,6 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 
 	}
 
-	update := false
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceSpec", "")
-	PolardbModifydbinstancespecResponse := PolardbModifydbinstancespecResponse{}
-	request.QueryParams["DBInstanceId"] = d.Id()
-	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
-		request.QueryParams["PayType"] = v.(string)
-	} else {
-		request.QueryParams["PayType"] = string(Postpaid)
-	}
-
-	if d.HasChanges("instance_type", "db_instance_class") {
-		request.QueryParams["DBInstanceClass"] = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
-		if err := errmsgs.CheckEmpty(request.QueryParams["DBInstanceClass"], schema.TypeString, "db_instance_class", "instance_type"); err != nil {
-			return errmsgs.WrapError(err)
-		}
-		update = true
-	}
-
-	if d.HasChanges("instance_storage", "db_instance_storage") {
-		request.QueryParams["DBInstanceStorage"] = strconv.Itoa(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
-		if err := errmsgs.CheckEmpty(request.QueryParams["DBInstanceStorage"], schema.TypeString, "db_instance_storage", "instance_storage"); err != nil {
-			return errmsgs.WrapError(err)
-		}
-		update = true
-	}
-	if update {
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		// wait instance status is running before modifying
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSpec", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbModifydbinstancespecResponse)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSpec", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-	}
 	if d.HasChange("tde_status") && d.Get("tde_status").(bool) && engine == "MySQL" {
 		arnrole, err := PolardbService.CheckCloudResourceAuthorized()
 		if err != nil {
