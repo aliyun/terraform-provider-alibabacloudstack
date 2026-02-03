@@ -99,6 +99,7 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentRead(d *schema.Resour
 		return errmsgs.WrapError(err)
 	}
 	instanceIdstr := strs[1]
+	instances := strings.Split(instanceIdstr, ",")
 	statusMap := make(map[string]interface{})
 	ecuMap := make(map[string]string)
 	memMap := make(map[string]string)
@@ -106,10 +107,15 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentRead(d *schema.Resour
 		member := v.(map[string]interface{})
 		if strings.Contains(instanceIdstr, member["EcsId"].(string)) {
 			statusMap[member["EcsId"].(string)] = member["Status"]
-			ecuMap[member["EcsId"].(string)] = member["EcsId"].(string)
+			ecuMap[member["EcsId"].(string)] = member["EcuId"].(string)
 			memMap[member["EcsId"].(string)] = member["ClusterMemberId"].(string)
 		}
 	}
+	d.Set("cluster_id", strs[0])
+	d.Set("instance_ids", instances)
+	d.Set("status_map", statusMap)
+	d.Set("ecu_map", ecuMap)
+	d.Set("cluster_member_ids", memMap)
 	return nil
 }
 
@@ -120,11 +126,16 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentDelete(d *schema.Reso
 	if len(parts) != 2 {
 		return errmsgs.GetNotFoundErrorFromString("Resource not found")
 	}
+
 	cluster_member_ids := d.Get("cluster_member_ids").(map[string]interface{})
 	for _, v := range cluster_member_ids {
+		if v == nil {
+			continue
+		}
+
 		reqQuery := map[string]interface{}{
 			"ClusterId":       parts[0],
-			"ClusterMemberId": v,
+			"ClusterMemberId": v.(string),
 		}
 
 		_, err := client.DoTeaRequest("DELETE", "Edas", "2017-08-01", "DeleteClusterMember", "/pop/v5/resource/cluster_member", nil, reqQuery, nil)
@@ -132,7 +143,6 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentDelete(d *schema.Reso
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-
 	}
 
 	return nil

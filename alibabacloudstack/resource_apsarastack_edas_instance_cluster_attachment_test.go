@@ -37,9 +37,9 @@ func TestAccAlibabacloudStackEdasinstanceClusterAttachment_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"status_map":         CHECKSET,
-						"ecu_map":            CHECKSET,
-						"cluster_member_ids": CHECKSET,
+						"status_map.%":         "1",
+						"ecu_map.%":            "1",
+						"cluster_member_ids.%": "1",
 					}),
 				),
 			},
