@@ -16,16 +16,6 @@ func dataSourceAlibabacloudStackRosStacks() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackRosStacksRead,
 		Schema: map[string]*schema.Schema{
-			"parent_stack_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"show_nested_stack": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-			},
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -165,6 +155,7 @@ func dataSourceAlibabacloudStackRosStacks() *schema.Resource {
 func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
+	var stackName string
 	action := "ListStacks"
 	request := make(map[string]interface{})
 	if v, ok := d.GetOk("parent_stack_id"); ok {
@@ -175,6 +166,7 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 	}
 	if v, ok := d.GetOk("stack_name"); ok {
 		request["StackName"] = v
+		stackName = v.(string)
 	}
 	if v, ok := d.GetOk("tags"); ok {
 		tags := make([]map[string]interface{}, 0)
@@ -219,6 +211,9 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 				if !stackNameRegex.MatchString(item["StackName"].(string)) {
 					continue
 				}
+			}
+			if stackName != "" && stackName != item["StackName"].(string) {
+				continue
 			}
 			if len(idsMap) > 0 {
 				if _, ok := idsMap[fmt.Sprint(item["StackId"])]; !ok {

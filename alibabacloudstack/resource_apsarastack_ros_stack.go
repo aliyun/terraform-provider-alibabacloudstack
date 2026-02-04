@@ -24,6 +24,7 @@ func resourceAlibabacloudStackRosStack() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Deprecated: "The `notification_urls` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"deletion_protection": {
 				Type:         schema.TypeString,
@@ -44,6 +45,7 @@ func resourceAlibabacloudStackRosStack() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				ForceNew: true,
+				Deprecated: "The `notification_urls` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"parameters": {
 				Type:     schema.TypeSet,
@@ -64,6 +66,7 @@ func resourceAlibabacloudStackRosStack() *schema.Resource {
 			"ram_role_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Deprecated: "The `ram_role_name` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"replacement_option": {
 				Type:     schema.TypeString,
@@ -93,6 +96,7 @@ func resourceAlibabacloudStackRosStack() *schema.Resource {
 					equal, _ := compareJsonTemplateAreEquivalent(old, new)
 					return equal
 				},
+				Deprecated: "The `stack_policy_body` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"stack_policy_during_update_body": {
 				Type:     schema.TypeString,
@@ -123,10 +127,12 @@ func resourceAlibabacloudStackRosStack() *schema.Resource {
 			"template_url": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Deprecated: "The `template_url` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"template_version": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Deprecated: "The `template_version` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"timeout_in_minutes": {
 				Type:     schema.TypeInt,

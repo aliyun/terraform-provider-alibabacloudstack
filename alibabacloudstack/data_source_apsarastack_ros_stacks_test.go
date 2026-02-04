@@ -21,6 +21,16 @@ func TestAccAlibabacloudStackRosStacksDataSource(t *testing.T) {
 			"enable_details": "true",
 		}),
 	}
+	nameConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"stack_name": "${alibabacloudstack_ros_stack.default.stack_name}",
+			"enable_details": "true",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"stack_name": "${alibabacloudstack_ros_stack.default.stack_name}-fake",
+			"enable_details": "true",
+		}),
+	}
 	tagsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids":            []string{"${alibabacloudstack_ros_stack.default.id}"},
@@ -117,7 +127,7 @@ func TestAccAlibabacloudStackRosStacksDataSource(t *testing.T) {
 		fakeMapFunc:  fakeRosStacksMapFunc,
 	}
 
-	rosStacksInfo.dataSourceTestCheck(t, 0, nameRegexConf, tagsConf, statusConf, idsConf, allConf)
+	rosStacksInfo.dataSourceTestCheck(t, 0, nameConf, nameRegexConf, tagsConf, statusConf, idsConf, allConf)
 }
 
 func dataSourceRosStacksDependence(name string) string {
