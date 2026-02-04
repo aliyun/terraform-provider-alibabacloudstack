@@ -311,7 +311,6 @@ func resourceAlibabacloudStackEdasApplicationRead(d *schema.ResourceData, meta i
 }
 
 func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta interface{}) error {
-	return nil
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
 	var changeOrderId string
