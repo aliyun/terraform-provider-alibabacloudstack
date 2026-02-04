@@ -2,38 +2,27 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceAlibabacloudStackPolardbReadWriteSplittingConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackPolardbReadWriteSplittingConnectionCreate,
-		Read:   resourceAlibabacloudStackPolardbReadWriteSplittingConnectionRead,
-		Update: resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate,
-		Delete: resourceAlibabacloudStackPolardbReadWriteSplittingConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Required: true,
 			},
-			"connection_prefix": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringLenBetween(1, 31),
+			"connection_id": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
 			},
 			"distribution_type": {
 				Type:         schema.TypeString,
@@ -43,11 +32,22 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnection() *schema.Reso
 			"weight": {
 				Type:     schema.TypeMap,
 				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
+				Computed: true,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					if d.Get("distribution_type") == "Standard" {
+						return true
+					}
+					return oldValue == newValue
+				},
+				DiffSuppressOnRefresh: true,
 			},
 			"max_delay_time": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
+				Default:  30,
 			},
 			"connection_string": {
 				Type:     schema.TypeString,
@@ -55,191 +55,116 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnection() *schema.Reso
 			},
 			"port": {
 				Type:     schema.TypeInt,
-				Optional: true,
 				Computed: true,
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackPolardbReadWriteSplittingConnectionCreate,
+		resourceAlibabacloudStackPolardbReadWriteSplittingConnectionRead,
+		resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate,
+		resourceAlibabacloudStackPolardbReadWriteSplittingConnectionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "AllocateReadWriteSplittingConnection", "")
+	dbInstanceId := d.Get("instance_id").(string)
 
-	request.QueryParams["DBInstanceId"] = Trim(d.Get("instance_id").(string))
-	request.QueryParams["MaxDelayTime"] = strconv.Itoa(d.Get("max_delay_time").(int))
+	d.SetId(dbInstanceId)
 
-	prefix, ok := d.GetOk("connection_prefix")
-	if ok && prefix.(string) != "" {
-		request.QueryParams["ConnectionStringPrefix"] = prefix.(string)
-	}
-
-	port, ok := d.GetOk("port")
-	if ok {
-		request.QueryParams["Port"] = strconv.Itoa(port.(int))
-	}
-
-	request.QueryParams["DistributionType"] = d.Get("distribution_type").(string)
-
-	if weight, ok := d.GetOk("weight"); ok && weight != nil && len(weight.(map[string]interface{})) > 0 {
-		if serial, err := json.Marshal(weight); err != nil {
-			return errmsgs.WrapError(err)
-		} else {
-			request.QueryParams["Weight"] = string(serial)
-		}
-	}
-
-	if err := resource.Retry(60*time.Minute, func() *resource.RetryError {
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		if err != nil {
-			if bresponse == nil {
-				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "AllocateInstancePublicConnection", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-
-	d.SetId(request.QueryParams["DBInstanceId"])
-
-	return resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	PolardbService := PolardbService{client}
+	polardbServce := PolardbService{client}
+	response, err := polardbServce.DescribeDBReadWriteSplittingConnection(d.Id())
+	if err != nil {
+		return err
+	}
 
-	res, err := PolardbService.DoPolardbDescribedbinstancenetinfoRequest(d.Id())
-	if res != nil {
-		for _, conn := range res.DBInstanceNetInfos.DBInstanceNetInfo {
-			if conn.ConnectionStringType != "ReadWriteSplitting" {
-				continue
-			}
-			if conn.MaxDelayTime == "" {
-				continue
-			}
+	d.Set("instance_id", d.Id())
+	d.Set("connection_id", response["DBProxyEndpointId"])
+	d.Set("connection_string", response["DBProxyConnectString"])
+	d.Set("distribution_type", response["ReadOnlyInstanceDistributionType"])
+	{
+		var instances []map[string]interface{}
+		if err := json.Unmarshal([]byte(response["ReadOnlyInstanceWeight"].(string)), &instances); err != nil {
+			panic(err)
+		}
 
-			// if _, err := strconv.Atoi(conn.MaxDelayTime); err != nil {
-			// 	return ds, err
-			// }
-			d.Set("instance_id", d.Id())
-			d.Set("connection_string", conn.ConnectionString)
-			d.Set("distribution_type", conn.DistributionType)
-			if port, err := strconv.Atoi(conn.Port); err == nil {
-				d.Set("port", port)
-			}
-			if mdt, err := strconv.Atoi(conn.MaxDelayTime); err == nil {
-				d.Set("max_delay_time", mdt)
-			}
-			if w, ok := d.GetOk("weight"); ok {
-				documented := w.(map[string]interface{})
-				for _, config := range conn.DBInstanceWeights.DBInstanceWeight {
-					if config.Availability != "Available" {
-						delete(documented, config.DBInstanceId)
-						continue
-					}
-					if config.Weight != "0" {
-						if _, ok := documented[config.DBInstanceId]; ok {
-							documented[config.DBInstanceId] = config.Weight
-						}
+		result := make(map[string]int)
+		for _, inst := range instances {
+			if avail, ok := inst["Availability"].(string); ok && avail == "Available" {
+				if id, ok := inst["DBInstanceId"].(string); ok {
+					if weight, ok := inst["Weight"].(float64); ok {
+						result[id] = int(weight)
+					} else if weight, ok := inst["Weight"].(int); ok {
+						result[id] = weight
 					}
 				}
-				d.Set("weight", documented)
-			}
-			submatch := dbConnectionPrefixWithSuffixRegexp.FindStringSubmatch(conn.ConnectionString)
-			if len(submatch) > 1 {
-				d.Set("connection_prefix", submatch[1])
 			}
 		}
+		d.Set("weight", result)
 	}
-
-	if err != nil {
-		return errmsgs.WrapError(err)
+	if v, err := toInt(response["ReadOnlyInstanceMaxDelayTime"]); err == nil {
+		d.Set("max_delay_time", v)
 	}
-
+	if v, err := toInt(response["DBProxyConnectStringPort"]); err == nil {
+		d.Set("port", v)
+	}
 	return nil
 }
 
 func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	PolardbService := PolardbService{client}
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyReadWriteSplittingConnection", "")
 
-	request.QueryParams["DBInstanceId"] = d.Id()
-
-	update := false
-
-	if d.HasChange("max_delay_time") {
-		request.QueryParams["MaxDelayTime"] = strconv.Itoa(d.Get("max_delay_time").(int))
-		update = true
+	reqQuery := map[string]interface{}{
+		"DBInstanceId":                     d.Id(),
+		"ConfigDBProxyFeatures":            "ReadWriteSpliting:1;",
+		"ReadOnlyInstanceDistributionType": d.Get("distribution_type"),
+		"DBProxyEndpointId":                d.Get("connection_id"),
 	}
-
-	if !update && d.IsNewResource() {
-		return resourceAlibabacloudStackPolardbReadWriteSplittingConnectionRead(d, meta)
+	if v, ok := d.GetOk("max_delay_time"); ok && v.(int) != 0 {
+		reqQuery["ReadOnlyInstanceMaxDelayTime"] = v
 	}
-
-	if d.HasChange("weight") {
-		if weight, ok := d.GetOk("weight"); ok && weight != nil && len(weight.(map[string]interface{})) > 0 {
-			if serial, err := json.Marshal(weight); err != nil {
-				return err
-			} else {
-				request.QueryParams["Weight"] = string(serial)
-			}
-		}
-		update = true
-	}
-
-	if d.HasChange("distribution_type") {
-		request.QueryParams["DistributionType"] = d.Get("distribution_type").(string)
-		update = true
-	}
-
-	if update {
-		// wait instance running before modifying
-		if err := PolardbService.WaitForDBInstance(d.Id(), Running, 60*60); err != nil {
-			return errmsgs.WrapError(err)
-		}
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if d.Get("distribution_type").(string) == "Custom" {
+		weigth, err := json.Marshal(d.Get("weight").(map[string]interface{}))
 		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "AllocateInstancePublicConnection", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return err
 		}
-		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Running"}, d.Timeout(schema.TimeoutDelete), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Failed"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
+		reqQuery["ReadOnlyInstanceWeight"] = string(weigth)
 	}
 
-	return resourceAlibabacloudStackPolardbReadWriteSplittingConnectionRead(d, meta)
+	if _, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "ModifyDBProxyEndpoint", "", nil, reqQuery, nil); err != nil {
+		return err
+	}
+	polardbServce := PolardbService{client}
+	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbServce.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ReleaseReadWriteSplittingConnection", "")
-	request.QueryParams["DBInstanceId"] = d.Id()
+	reqQuery := map[string]interface{}{
+		"DBInstanceId":          d.Id(),
+		"ConfigDBProxyFeatures": "ReadWriteSpliting:0;",
+		"DBProxyEndpointId":     d.Get("connection_id"),
+	}
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "AllocateInstancePublicConnection", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	if _, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "ModifyDBProxyEndpoint", "", nil, reqQuery, nil); err != nil {
+		return err
+	}
+	polardbServce := PolardbService{client}
+	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbServce.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return nil

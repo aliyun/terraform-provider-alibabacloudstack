@@ -54,14 +54,14 @@ func resourceAlibabacloudStackPolardbConnection() *schema.Resource {
 
 func resourceAlibabacloudStackPolardbConnectionCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	PolardbService := PolardbService{client}
+	polardbService := PolardbService{client}
 
 	instanceId := d.Get("instance_id").(string)
 	prefix := d.Get("connection_prefix").(string)
 	if prefix == "" {
 		prefix = fmt.Sprintf("%stf", instanceId)
 	}
-	if err := PolardbService.WaitForConnectionDBInstance(d, client, instanceId, Running, DefaultTimeoutMedium); err != nil {
+	if err := polardbService.WaitForConnectionDBInstance(d, client, instanceId, Running, DefaultTimeoutMedium); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "AllocateInstancePublicConnection", "")
@@ -80,13 +80,10 @@ func resourceAlibabacloudStackPolardbConnectionCreate(d *schema.ResourceData, me
 	}
 
 	d.SetId(fmt.Sprintf("%s%s%s", instanceId, COLON_SEPARATED, prefix))
-	if err := PolardbService.WaitForDBConnection(d, client, d.Id(), Available, DefaultTimeoutMedium); err != nil {
-		return errmsgs.WrapError(err)
+	stateConf := BuildStateConfByTimes([]string{"NET_CREATING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbService.PolardbDBInstanceStateRefreshFunc(d, client, instanceId, []string{"Deleting"}), 100)
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	if err := PolardbService.WaitForConnectionDBInstance(d, client, instanceId, Running, DefaultTimeoutMedium); err != nil {
-		return errmsgs.WrapError(err)
-	}
-
 	return nil
 }
 
@@ -128,11 +125,6 @@ func resourceAlibabacloudStackPolardbConnectionUpdate(d *schema.ResourceData, me
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	polardbService := PolardbService{client}
 
-	submatch := dbConnectionIdWithSuffixRegexp.FindStringSubmatch(d.Id())
-	if len(submatch) > 1 {
-		d.SetId(submatch[1])
-	}
-
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return errmsgs.WrapError(err)
@@ -159,10 +151,9 @@ func resourceAlibabacloudStackPolardbConnectionUpdate(d *schema.ResourceData, me
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceConnectionString", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		// wait instance running after modifying
-		if err := polardbService.WaitForConnectionDBInstance(d, client, parts[0], Running, DefaultTimeoutMedium); err != nil {
-			return errmsgs.WrapError(err)
+		stateConf := BuildStateConfByTimes([]string{"NET_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbService.PolardbDBInstanceStateRefreshFunc(d, client, parts[0], []string{"Deleting"}), 100)
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 		d.SetId(fmt.Sprintf("%s%s%s", parts[0], COLON_SEPARATED, d.Get("connection_prefix").(string)))
 	}
@@ -171,19 +162,14 @@ func resourceAlibabacloudStackPolardbConnectionUpdate(d *schema.ResourceData, me
 
 func resourceAlibabacloudStackPolardbConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	PolardbService := PolardbService{client}
-
-	submatch := dbConnectionIdWithSuffixRegexp.FindStringSubmatch(d.Id())
-	if len(submatch) > 1 {
-		d.SetId(submatch[1])
-	}
+	polardbService := PolardbService{client}
 
 	split := strings.Split(d.Id(), COLON_SEPARATED)
 
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ReleaseInstancePublicConnection", "")
 	request.QueryParams["DBInstanceId"] = split[0]
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err := PolardbService.DescribeDBConnection(d.Id())
+		response, err := polardbService.DescribeDBConnection(d.Id())
 		if err != nil {
 			return resource.NonRetryableError(errmsgs.WrapError(err))
 		}
@@ -207,6 +193,10 @@ func resourceAlibabacloudStackPolardbConnectionDelete(d *schema.ResourceData, me
 	if err != nil {
 		return err
 	}
-
-	return PolardbService.WaitForDBConnection(d, client, d.Id(), Deleted, DefaultTimeoutMedium)
+	
+	stateConf := BuildStateConfByTimes([]string{"NET_DELETING"}, []string{"Running"}, d.Timeout(schema.TimeoutDelete), 10*time.Second, polardbService.PolardbDBInstanceStateRefreshFunc(d, client, split[0], []string{"Deleting"}), 100)
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+	return nil
 }

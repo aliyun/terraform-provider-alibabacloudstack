@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"slices"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -1044,7 +1045,7 @@ type TemplateRecord struct {
 
 func (s *PolardbService) PolardbDBInstanceStateRefreshFunc(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		object, err := s.DoPolardbDescribedbinstancesRequest(d.Id())
+		object, err := s.DoPolardbDescribedbinstancesRequest(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"ServiceUnavailable"}) {
 				// Set this to nil as if we didn't find anything.
@@ -1053,18 +1054,16 @@ func (s *PolardbService) PolardbDBInstanceStateRefreshFunc(d *schema.ResourceDat
 			return nil, "", errmsgs.WrapError(err)
 		}
 
-		for _, failState := range failStates {
-			if object.Items.DBInstance[0].DBInstanceStatus == failState {
+		if slices.Contains(failStates, object.Items.DBInstance[0].DBInstanceStatus) {
 				return object, object.Items.DBInstance[0].DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Items.DBInstance[0].DBInstanceStatus))
 			}
-		}
 		return object, object.Items.DBInstance[0].DBInstanceStatus, nil
 	}
 }
 
 func (s *PolardbService) PolardbDBInstanceTdeStateRefreshFunc(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		object, err := s.DescribeDBInstanceTDE(d.Id())
+		object, err := s.DescribeDBInstanceTDE(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
@@ -1073,11 +1072,9 @@ func (s *PolardbService) PolardbDBInstanceTdeStateRefreshFunc(d *schema.Resource
 			return nil, "", errmsgs.WrapError(err)
 		}
 
-		for _, failState := range failStates {
-			if object["TDEStatus"].(string) == failState {
+		if slices.Contains(failStates, object["TDEStatus"].(string)) {
 				return object, object["TDEStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["TDEStatus"].(string)))
 			}
-		}
 		return object, object["TDEStatus"].(string), nil
 	}
 }
@@ -2310,6 +2307,6 @@ func (s *PolardbService) DescribeDBReadWriteSplittingConnection(id string) (map[
 	reqQuery := map[string]interface{}{
 		"DBInstanceId": id,
 	}
-	response, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBProxyEndpoint", "", nil, reqQuery, nil)
+	response, err := s.client.DoTeaRequest("GET", "polardb", "2024-01-30", "DescribeDBProxyEndpoint", "", nil, reqQuery, nil)
 	return response, err
 }
