@@ -15,8 +15,8 @@ func dataSourceAlibabacloudStackEdasClusters() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"logical_region_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
 				Deprecated: "The 'logical_region_id' field has been deprecated and is scheduled for removal in version 3.19.0. ",
 			},
 			"output_file": {
@@ -111,7 +111,7 @@ func dataSourceAlibabacloudStackEdasClustersRead(d *schema.ResourceData, meta in
 
 	request := edas.CreateListClusterRequest()
 	client.InitRoaRequest(*request.RoaRequest)
-	if  logicalRegionId, ok  := d.GetOk("logical_region_id"); ok {
+	if logicalRegionId, ok := d.GetOk("logical_region_id"); ok {
 		request.LogicalRegionId = logicalRegionId.(string)
 	}
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
@@ -137,27 +137,23 @@ func dataSourceAlibabacloudStackEdasClustersRead(d *schema.ResourceData, meta in
 
 	var filteredClusters []edas.Cluster
 	nameRegex, ok := d.GetOk("name_regex")
-	if (ok && nameRegex.(string) != "") || (len(idsMap) > 0) {
-		var r *regexp.Regexp
-		if nameRegex != "" {
-			r, err = regexp.Compile(nameRegex.(string))
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
+	var r *regexp.Regexp
+	if nameRegex != "" {
+		r, err = regexp.Compile(nameRegex.(string))
+		if err != nil {
+			return errmsgs.WrapError(err)
 		}
-		for _, cluster := range response.ClusterList.Cluster {
-			if r != nil && !r.MatchString(cluster.ClusterName) {
+	}
+	for _, cluster := range response.ClusterList.Cluster {
+		if r != nil && !r.MatchString(cluster.ClusterName) {
+			continue
+		}
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[cluster.ClusterId]; !ok {
 				continue
 			}
-			if len(idsMap) > 0 {
-				if _, ok := idsMap[cluster.ClusterId]; !ok {
-					continue
-				}
-			}
-			filteredClusters = append(filteredClusters, cluster)
 		}
-	} else {
-		filteredClusters = response.ClusterList.Cluster
+		filteredClusters = append(filteredClusters, cluster)
 	}
 
 	return edasClusterDescriptionAttributes(d, filteredClusters)
