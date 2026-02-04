@@ -324,6 +324,9 @@ func (e *EdasService) DescribeEdasApplication(appId string) (*edas.Applcation, e
 	}
 
 	v := response.Applcation
+	if v.AppId == "" {
+		return nil, errmsgs.GetNotFoundErrorFromString("Edas Ecs application not found!")
+	}
 
 	return &v, nil
 }

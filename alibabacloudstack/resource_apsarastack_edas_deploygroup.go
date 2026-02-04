@@ -26,7 +26,10 @@ func resourceAlibabacloudStackEdasDeployGroup() *schema.Resource {
 			"group_type": {
 				Type:     schema.TypeInt,
 				Computed: true,
-				ForceNew: true,
+			},
+			"group_id": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -102,6 +105,7 @@ func resourceAlibabacloudStackEdasDeployGroupRead(d *schema.ResourceData, meta i
 	d.Set("group_type", deployGroup.GroupType)
 	d.Set("app_id", deployGroup.AppId)
 	d.Set("group_name", deployGroup.GroupName)
+	d.Set("group_id", deployGroup.GroupId)
 
 	return nil
 }

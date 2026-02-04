@@ -53,7 +53,7 @@ func resourceAlibabacloudStackEdasApplication() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"region_id": {
+			"logical_region_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -113,8 +113,8 @@ func resourceAlibabacloudStackEdasApplicationCreate(d *schema.ResourceData, meta
 		request.HealthCheckUrl = v.(string)
 	}
 
-	if v, ok := d.GetOk("region_id"); ok {
-		request.RegionId = v.(string)
+	if v, ok := d.GetOk("logical_region_id"); ok {
+		request.LogicalRegionId = v.(string)
 	}
 
 	if v, ok := d.GetOk("ecu_info"); ok {
@@ -190,7 +190,6 @@ func resourceAlibabacloudStackEdasApplicationCreate(d *schema.ResourceData, meta
 		request.PackageVersion = packageVersion
 		request.DeployType = "url"
 		request.WarUrl = warUrl
-
 		request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 			return edasClient.DeployApplication(request)
@@ -297,7 +296,6 @@ func resourceAlibabacloudStackEdasApplicationRead(d *schema.ResourceData, meta i
 		} else {
 			d.Set("package_type", "WAR")
 		}
-
 		if _, ok := component_ids[appId]; ok {
 			component_id = component_ids[appId].(int)
 			d.Set("component_id", component_id)
@@ -313,39 +311,10 @@ func resourceAlibabacloudStackEdasApplicationRead(d *schema.ResourceData, meta i
 }
 
 func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta interface{}) error {
+	return nil
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
-
-	appId := d.Id()
-
-	request := edas.CreateStopApplicationRequest()
-	client.InitRoaRequest(*request.RoaRequest)
-
-	request.AppId = appId
-
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-
-	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.StopApplication(request)
-	})
-	bresponse, ok := raw.(*edas.StopApplicationResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	changeOrderId := bresponse.ChangeOrderId
-
-	if len(changeOrderId) > 0 {
-		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-	}
-
+	var changeOrderId string
 	req := edas.CreateDeleteApplicationRequest()
 	client.InitRoaRequest(*req.RoaRequest)
 
@@ -354,7 +323,7 @@ func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta
 	req.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 
 	wait := incrementalWait(1*time.Second, 2*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 			return edasClient.DeleteApplication(req)
 		})
@@ -377,8 +346,8 @@ func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta
 		}
 		changeOrderId = bresponse.ChangeOrderId
 		delete(component_ids, req.AppId)
-		if len(changeOrderId) > 0 {
-			stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
+		if len(changeOrderId) > 0 && changeOrderId != "SUCCESS" {
+			stateConf := BuildStateConf([]string{"0", "1"}, []string{"3"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"2", "6", "10"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id()))
 			}

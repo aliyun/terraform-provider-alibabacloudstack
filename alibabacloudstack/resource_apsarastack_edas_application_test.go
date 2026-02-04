@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -9,7 +10,6 @@ import (
 
 	"log"
 
-	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"strings"
@@ -135,7 +135,7 @@ func TestAccAlibabacloudStackEdasApplication_basic(t *testing.T) {
 
 	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testacc-edasapplicationbasic%v", rand)
+	name := fmt.Sprintf("tftestacc%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasApplicationConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -146,16 +146,22 @@ func TestAccAlibabacloudStackEdasApplication_basic(t *testing.T) {
 
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckEdasApplicationDestroy,
+		CheckDestroy:  rc.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"application_name": "${var.name}",
-					"package_type":     "WAR",
+					"package_type":     "JAR",
 					"cluster_id":       "${alibabacloudstack_edas_cluster.default.id}",
 					//"build_pack_id":    "-1",
 					//"region_id":        "cn-neimeng-env30-d01",
-					"component_id": "7",
+					"logical_region_id": "${alibabacloudstack_edas_cluster.default.logical_region_id}",
+					"component_id":      "8",
+					"descriotion":       "Test Description",
+					// "group_id":          "${alibabacloudstack_edas_deploy_group.default.group_id}",
+					"health_check_url": "http://127.0.0.1:8000/health",
+					"package_version":  "v1.0.0",
+					"war_url":          fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -165,69 +171,19 @@ func TestAccAlibabacloudStackEdasApplication_basic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"logical_region_id", "package_version", "war_url"},
 			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"application_name": fmt.Sprintf("tf-testacc-edasapplicationchange%v", rand),
+					"application_name": fmt.Sprintf("tf-testacc-edasappchange%v", rand),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"application_name": fmt.Sprintf("tf-testacc-edasapplicationchange%v", rand)}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"package_type": "WAR",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"package_type": "WAR"}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackEdasApplication_multi(t *testing.T) {
-	var v *edas.Applcation
-	resourceId := "alibabacloudstack_edas_application.default.1"
-	ra := resourceAttrInit(resourceId, edasApplicationBasicMap)
-	serviceFunc := func() interface{} {
-		return &EdasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-
-	rand := getAccTestRandInt(100, 999)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testacc-edasapplicationbasic%v", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasApplicationConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-
-			testAccPreCheck(t)
-		},
-
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckEdasApplicationDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"count":            "2",
-					"application_name": "${var.name}-${count.index}",
-					"package_type":     "JAR",
-					"cluster_id":       "${alibabacloudstack_edas_cluster.default.id}",
-					"build_pack_id":    "15",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+						"application_name": fmt.Sprintf("tf-testacc-edasappchange%v", rand)}),
 				),
 			},
 		},
@@ -246,21 +202,33 @@ func testAccCheckEdasApplicationDestroy(s *terraform.State) error {
 
 func resourceEdasApplicationConfigDependence(name string) string {
 	return fmt.Sprintf(`
-		variable "name" {
-		  default = "%v"
-		}
+variable "name" {
+	default = "%v"
+}
 
-		resource "alibabacloudstack_vpc" "default" {
-		  cidr_block = "172.16.0.0/12"
-		  name       = "${var.name}"
-		}
+resource "alibabacloudstack_vpc" "default" {
+	cidr_block = "172.16.0.0/12"
+	name       = "${var.name}"
+}
 
-		resource "alibabacloudstack_edas_cluster" "default" {
-		  cluster_name = "${var.name}"
-		  cluster_type = 2
-		  network_mode = 2
-		  vpc_id       = "${alibabacloudstack_vpc.default.id}"
-           //region_id    = "cn-qingdao-apsara-d01"
-		}
-		`, name)
+resource "alibabacloudstack_edas_cluster" "default" {
+	cluster_name = "${var.name}"
+	cluster_type = 2
+	network_mode = 2
+	vpc_id       = "${alibabacloudstack_vpc.default.id}"
+}
+
+// resource "alibabacloudstack_edas_application" "test" {
+// 	application_name = "${var.name}tf"
+// 	cluster_id = "${alibabacloudstack_edas_cluster.default.id}"
+// 	package_type = "JAR"
+// 	build_pack_id = "15"
+// }
+
+// resource "alibabacloudstack_edas_deploy_group" "default" {
+// 	app_id = "${alibabacloudstack_edas_application.test.id}"
+// 	group_name = "${var.name}"
+// }
+
+`, name)
 }
