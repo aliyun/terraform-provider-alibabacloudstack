@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -25,14 +26,13 @@ func resourceAlibabacloudStackPolardbConnection() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(1, 31),
 			},
 			"port": {
-				Type:         schema.TypeString,
+				Type:         schema.TypeInt,
 				Optional:     true,
-				ValidateFunc: validateDBConnectionPort,
-				Default:      "3306",
+				ValidateFunc: validation.IntBetween(1000, 65534),
+				Default:      3306,
 			},
 			"connection_string": {
 				Type:     schema.TypeString,
@@ -44,7 +44,7 @@ func resourceAlibabacloudStackPolardbConnection() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, 
+	setResourceFunc(resource,
 		resourceAlibabacloudStackPolardbConnectionCreate,
 		resourceAlibabacloudStackPolardbConnectionRead,
 		resourceAlibabacloudStackPolardbConnectionUpdate,
@@ -67,7 +67,7 @@ func resourceAlibabacloudStackPolardbConnectionCreate(d *schema.ResourceData, me
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "AllocateInstancePublicConnection", "")
 
 	request.QueryParams["DBInstanceId"] = instanceId
-	request.QueryParams["Port"] = d.Get("port").(string)
+	request.QueryParams["Port"] = strconv.Itoa(d.Get("port").(int))
 	request.QueryParams["ConnectionStringPrefix"] = prefix
 
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -91,10 +91,6 @@ func resourceAlibabacloudStackPolardbConnectionCreate(d *schema.ResourceData, me
 }
 
 func resourceAlibabacloudStackPolardbConnectionRead(d *schema.ResourceData, meta interface{}) error {
-	submatch := dbConnectionIdWithSuffixRegexp.FindStringSubmatch(d.Id())
-	if len(submatch) > 1 {
-		d.SetId(submatch[1])
-	}
 	parts, _ := ParseResourceId(d.Id(), 2)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
@@ -102,32 +98,33 @@ func resourceAlibabacloudStackPolardbConnectionRead(d *schema.ResourceData, meta
 		PolardbService{client}
 	response, err := polardbdb_instanceservice.DescribeDBConnection(d.Id())
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_dbinstance", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return errmsgs.WrapError(err)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_dbinstance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	data := response
 	d.Set("instance_id", parts[0])
 	d.Set("connection_prefix", parts[1])
 
-	d.Set("port", data.DBInstanceNetInfos.DBInstanceNetInfo[0].Port)
-	d.Set("connection_string", data.DBInstanceNetInfos.DBInstanceNetInfo[0].ConnectionString)
-	d.Set("ip_address", data.DBInstanceNetInfos.DBInstanceNetInfo[0].IPAddress)
+	if port, err := toInt(data.Port); err != nil {
+		return err
+	} else {
+		d.Set("port", port)
+	}
+	d.Set("connection_string", data.ConnectionString)
+	d.Set("ip_address", data.IPAddress)
 
 	return nil
 }
 
 func resourceAlibabacloudStackPolardbConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
-	
-	if d.IsNewResource(){
+
+	if d.IsNewResource() {
 		return nil
 	}
-	
+
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	polardbService := PolardbService{client}
 
@@ -141,21 +138,16 @@ func resourceAlibabacloudStackPolardbConnectionUpdate(d *schema.ResourceData, me
 		return errmsgs.WrapError(err)
 	}
 
-	if d.HasChanges("connection_string", "port") {
+	if d.HasChanges("connection_prefix", "port") {
 		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceConnectionString", "")
 		request.QueryParams["DBInstanceId"] = parts[0]
-		request.QueryParams["ConnectionStringPrefix"] = parts[1]
+		request.QueryParams["ConnectionStringPrefix"] = d.Get("connection_prefix").(string)
+		request.QueryParams["Port"] = strconv.Itoa(d.Get("port").(int))
 
 		if v, ok := d.GetOk("connection_string"); ok {
 			request.QueryParams["CurrentConnectionString"] = v.(string)
 		} else {
 			return fmt.Errorf("CurrentConnectionString is required")
-		}
-
-		if v, ok := d.GetOk("port"); ok {
-			request.QueryParams["Port"] = v.(string)
-		} else {
-			return fmt.Errorf("Port is required")
 		}
 
 		bresponse, err := client.ProcessCommonRequest(request)
@@ -172,6 +164,7 @@ func resourceAlibabacloudStackPolardbConnectionUpdate(d *schema.ResourceData, me
 		if err := polardbService.WaitForConnectionDBInstance(d, client, parts[0], Running, DefaultTimeoutMedium); err != nil {
 			return errmsgs.WrapError(err)
 		}
+		d.SetId(fmt.Sprintf("%s%s%s", parts[0], COLON_SEPARATED, d.Get("connection_prefix").(string)))
 	}
 	return nil
 }
@@ -194,7 +187,7 @@ func resourceAlibabacloudStackPolardbConnectionDelete(d *schema.ResourceData, me
 		if err != nil {
 			return resource.NonRetryableError(errmsgs.WrapError(err))
 		}
-		request.QueryParams["CurrentConnectionString"] = response.DBInstanceNetInfos.DBInstanceNetInfo[0].ConnectionString
+		request.QueryParams["CurrentConnectionString"] = response.ConnectionString
 		rsp, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), rsp, request, request.QueryParams)
 		if err != nil {

@@ -10,9 +10,9 @@ import (
 )
 
 func TestAccAlibabacloudStackPolardbConnectionConfigUpdate(t *testing.T) {
-	var v *PolardbDescribedbinstancenetinfoResponse
+	var v *DBInstanceNetInfo
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-testAccDBconnection%d", rand)
+	name := fmt.Sprintf("tf-testacc%d", rand)
 
 	var basicMap = map[string]string{
 		"instance_id":       CHECKSET,
@@ -43,7 +43,7 @@ func TestAccAlibabacloudStackPolardbConnectionConfigUpdate(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":       "${local.polardb_dbinstance_id}",
-					"connection_prefix": "tftest",
+					"connection_prefix": "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -53,6 +53,17 @@ func TestAccAlibabacloudStackPolardbConnectionConfigUpdate(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"connection_prefix": "${var.name}-update",
+					"port": "3333",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"port": "3333",
+					}),
+				),
 			},
 		},
 	})

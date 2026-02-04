@@ -381,36 +381,38 @@ func (s *PolardbService) DoPolardbDescriberegionsRequest(d *schema.ResourceData,
 	return PolardbDescriberegionsResponse, nil
 }
 
+type DBInstanceNetInfo struct {
+	SecurityIPGroups struct {
+		SecurityIPGroup []struct {
+			SecurityIPGroupName string `json:"SecurityIPGroupName"`
+			SecurityIPs         string `json:"SecurityIPs"`
+		} `json:"securityIPGroup"`
+	} `json:"SecurityIPGroups"`
+
+	DBInstanceWeights struct {
+		DBInstanceWeight []struct {
+			DBInstanceId   string `json:"DBInstanceId"`
+			DBInstanceType string `json:"DBInstanceType"`
+			Availability   string `json:"Availability"`
+			Weight         string `json:"Weight"`
+		} `json:"DBInstanceWeight"`
+	} `json:"DBInstanceWeights"`
+	Upgradeable          string `json:"Upgradeable"`
+	ExpiredTime          string `json:"ExpiredTime"`
+	ConnectionString     string `json:"ConnectionString"`
+	IPAddress            string `json:"IPAddress"`
+	IPType               string `json:"IPType"`
+	Port                 string `json:"Port"`
+	VPCId                string `json:"VPCId"`
+	VSwitchId            string `json:"VSwitchId"`
+	ConnectionStringType string `json:"ConnectionStringType"`
+	MaxDelayTime         string `json:"MaxDelayTime"`
+	DistributionType     string `json:"DistributionType"`
+}
+
 type PolardbDescribedbinstancenetinfoResponse struct {
 	DBInstanceNetInfos struct {
-		DBInstanceNetInfo []struct {
-			SecurityIPGroups struct {
-				SecurityIPGroup []struct {
-					SecurityIPGroupName string `json:"SecurityIPGroupName"`
-					SecurityIPs         string `json:"SecurityIPs"`
-				} `json:"securityIPGroup"`
-			} `json:"SecurityIPGroups"`
-
-			DBInstanceWeights struct {
-				DBInstanceWeight []struct {
-					DBInstanceId   string `json:"DBInstanceId"`
-					DBInstanceType string `json:"DBInstanceType"`
-					Availability   string `json:"Availability"`
-					Weight         string `json:"Weight"`
-				} `json:"DBInstanceWeight"`
-			} `json:"DBInstanceWeights"`
-			Upgradeable          string `json:"Upgradeable"`
-			ExpiredTime          string `json:"ExpiredTime"`
-			ConnectionString     string `json:"ConnectionString"`
-			IPAddress            string `json:"IPAddress"`
-			IPType               string `json:"IPType"`
-			Port                 string `json:"Port"`
-			VPCId                string `json:"VPCId"`
-			VSwitchId            string `json:"VSwitchId"`
-			ConnectionStringType string `json:"ConnectionStringType"`
-			MaxDelayTime         string `json:"MaxDelayTime"`
-			DistributionType     string `json:"DistributionType"`
-		} `json:"DBInstanceNetInfo"`
+		DBInstanceNetInfo []DBInstanceNetInfo `json:"DBInstanceNetInfo"`
 	} `json:"DBInstanceNetInfos"`
 	RequestId           string `json:"RequestId"`
 	InstanceNetworkType string `json:"InstanceNetworkType"`
@@ -1148,7 +1150,7 @@ func (s *PolardbService) WaitForDBConnection(d *schema.ResourceData, client *con
 			}
 		}
 		data := response
-		if data != nil && data.DBInstanceNetInfos.DBInstanceNetInfo[0].ConnectionString != "" {
+		if data != nil && data.ConnectionString != "" {
 			return nil
 		}
 		if time.Now().After(deadline) {
@@ -1278,7 +1280,7 @@ func (s *PolardbService) flattenDBSecurityIPs(resp *PolardbDescribedbinstanceipa
 	return result
 }
 
-func (s *PolardbService) DescribeDBConnection(id string) (*PolardbDescribedbinstancenetinfoResponse, error) {
+func (s *PolardbService) DescribeDBConnection(id string) (*DBInstanceNetInfo, error) {
 	parts, _ := ParseResourceId(id, 2)
 	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceNetInfo", "")
 	PolardbDescribedbinstancenetinfoResponse := &PolardbDescribedbinstancenetinfoResponse{}
@@ -1290,9 +1292,9 @@ func (s *PolardbService) DescribeDBConnection(id string) (*PolardbDescribedbinst
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidCurrentConnectionString.NotFound"}) {
-			return PolardbDescribedbinstancenetinfoResponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return PolardbDescribedbinstancenetinfoResponse, errmsgs.WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbDescribedbinstancenetinfoResponse)
@@ -1300,17 +1302,17 @@ func (s *PolardbService) DescribeDBConnection(id string) (*PolardbDescribedbinst
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDBInstanceNetInfo", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if len(PolardbDescribedbinstancenetinfoResponse.DBInstanceNetInfos.DBInstanceNetInfo) < 1 {
-		return PolardbDescribedbinstancenetinfoResponse, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBInstanceNetInfo", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+		return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBInstanceNetInfo", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 
 	object := PolardbDescribedbinstancenetinfoResponse.DBInstanceNetInfos.DBInstanceNetInfo
 	for _, o := range object {
 		if strings.HasPrefix(o.ConnectionString, parts[1]+".") {
-			return PolardbDescribedbinstancenetinfoResponse, nil
+			return &o, nil
 		}
 	}
 
-	return PolardbDescribedbinstancenetinfoResponse, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+	return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
 type PolardbBackupJob struct {
@@ -2302,4 +2304,12 @@ func (s *PolardbService) DescribePolardbClusterLogBackupPolicy(id string) (map[s
 		return nil, err
 	}
 	return logResp, nil
+}
+
+func (s *PolardbService) DescribeDBReadWriteSplittingConnection(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{
+		"DBInstanceId": id,
+	}
+	response, err := s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBProxyEndpoint", "", nil, reqQuery, nil)
+	return response, err
 }

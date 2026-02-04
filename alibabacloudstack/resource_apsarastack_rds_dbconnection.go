@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -37,10 +38,10 @@ func resourceAlibabacloudStackDBConnection() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(1, 31),
 			},
 			"port": {
-				Type:         schema.TypeString,
+				Type:         schema.TypeInt,
 				Optional:     true,
-				ValidateFunc: validateDBConnectionPort,
-				Default:      "3306",
+				ValidateFunc: validation.IntBetween(1000, 65534),
+				Default:      3306,
 			},
 			"connection_string": {
 				Type:     schema.TypeString,
@@ -69,7 +70,7 @@ func resourceAlibabacloudStackDBConnectionCreate(d *schema.ResourceData, meta in
 	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = instanceId
 	request.ConnectionStringPrefix = prefix
-	request.Port = d.Get("port").(string)
+	request.Port = strconv.Itoa(d.Get("port").(int))
 
 	var raw interface{}
 	var err error
@@ -134,7 +135,11 @@ func resourceAlibabacloudStackDBConnectionRead(d *schema.ResourceData, meta inte
 	}
 	d.Set("instance_id", parts[0])
 	d.Set("connection_prefix", parts[1])
-	d.Set("port", object.Port)
+	if port, err := toInt(object.Port); err != nil {
+		return err
+	} else {
+		d.Set("port", port)
+	}
 	d.Set("connection_string", object.ConnectionString)
 	d.Set("ip_address", object.IPAddress)
 
@@ -142,11 +147,11 @@ func resourceAlibabacloudStackDBConnectionRead(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
-	
+
 	if d.IsNewResource() {
 		return nil
 	}
-	
+
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
 
@@ -170,7 +175,7 @@ func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta in
 		}
 		request.CurrentConnectionString = object.ConnectionString
 		request.ConnectionStringPrefix = parts[1]
-		request.Port = d.Get("port").(string)
+		request.Port = strconv.Itoa(d.Get("port").(int))
 
 		if err := resource.Retry(8*time.Minute, func() *resource.RetryError {
 			raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {

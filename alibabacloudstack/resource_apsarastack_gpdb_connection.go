@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -36,10 +37,10 @@ func resourceAlibabacloudStackGpdbConnection() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(1, 31),
 			},
 			"port": {
-				Type:         schema.TypeString,
+				Type:         schema.TypeInt,
 				Optional:     true,
-				ValidateFunc: validateDBConnectionPort,
-				Default:      "3306",
+				ValidateFunc: validation.IntBetween(1000, 65534),
+				Default:      3306,
 			},
 			"connection_string": {
 				Type:     schema.TypeString,
@@ -67,7 +68,7 @@ func resourceAlibabacloudStackGpdbConnectionCreate(d *schema.ResourceData, meta 
 	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = instanceId
 	request.ConnectionStringPrefix = prefix
-	request.Port = d.Get("port").(string)
+	request.Port = strconv.Itoa(d.Get("port").(int))
 
 	err := resource.Retry(8*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithGpdbClient(func(gpdbClient *gpdb.Client) (interface{}, error) {
@@ -121,7 +122,11 @@ func resourceAlibabacloudStackGpdbConnectionRead(d *schema.ResourceData, meta in
 
 	d.Set("instance_id", parts[0])
 	d.Set("connection_prefix", parts[1])
-	d.Set("port", object.Port)
+	if port, err := toInt(object.Port); err != nil {
+		return err
+	} else {
+		d.Set("port", port)
+	}
 	d.Set("connection_string", object.ConnectionString)
 	d.Set("ip_address", object.IPAddress)
 
@@ -157,7 +162,7 @@ func resourceAlibabacloudStackGpdbConnectionUpdate(d *schema.ResourceData, meta 
 			"DBInstanceId":            parts[0],
 			"CurrentConnectionString": object.ConnectionString,
 			"ConnectionStringPrefix":  d.Get("connection_prefix"),
-			"Port":                    d.Get("port"),
+			"Port":                    strconv.Itoa(d.Get("port").(int)),
 			"DBInstanceNetType":       "public",
 		}
 
