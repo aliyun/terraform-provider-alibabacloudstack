@@ -313,7 +313,36 @@ func resourceAlibabacloudStackEdasApplicationRead(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
-	var changeOrderId string
+
+	appId := d.Id()
+
+	request := edas.CreateStopApplicationRequest()
+	client.InitRoaRequest(*request.RoaRequest)
+
+	request.AppId = appId
+
+	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+
+	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
+		return edasClient.StopApplication(request)
+	})
+	bresponse, ok := raw.(*edas.StopApplicationResponse)
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
+	changeOrderId := bresponse.ChangeOrderId
+
+	if len(changeOrderId) > 0 {
+		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
 	req := edas.CreateDeleteApplicationRequest()
 	client.InitRoaRequest(*req.RoaRequest)
 
@@ -322,7 +351,7 @@ func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta
 	req.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 
 	wait := incrementalWait(1*time.Second, 2*time.Second)
-	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 			return edasClient.DeleteApplication(req)
 		})
@@ -346,7 +375,7 @@ func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta
 		changeOrderId = bresponse.ChangeOrderId
 		delete(component_ids, req.AppId)
 		if len(changeOrderId) > 0 && changeOrderId != "SUCCESS" {
-			stateConf := BuildStateConf([]string{"0", "1"}, []string{"3"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"2", "6", "10"}))
+			stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id()))
 			}

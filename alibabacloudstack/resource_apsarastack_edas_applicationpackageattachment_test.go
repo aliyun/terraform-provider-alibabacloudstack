@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
@@ -24,7 +25,7 @@ func TestAccAlibabacloudStackEdasApplicationPackageAttachment_basic(t *testing.T
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
-	name := fmt.Sprintf("tf-testacc-edasdeploymentbasic%v", rand)
+	name := fmt.Sprintf("tftestacc%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasAPAttachmentDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -32,16 +33,17 @@ func TestAccAlibabacloudStackEdasApplicationPackageAttachment_basic(t *testing.T
 
 		},
 
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:  testEdasCheckDeploymentDestroy,
+		CheckDestroy:      testEdasCheckDeploymentDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"app_id":   "${alibabacloudstack_edas_application.default.id}",
-					"group_id": "all",
-					"war_url":  "http://edas-sz.oss-cn-shenzhen.aliyuncs.com/prod/demo/SPRING_CLOUD_CONSUMER.jar",
+					"app_id":          "${alibabacloudstack_edas_application.default.id}",
+					"group_id":        "${alibabacloudstack_edas_deploy_group.default.group_id}",
+					"war_url":         fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
+					"package_version": "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -68,67 +70,32 @@ var edasAPAttachmentBasicMap = map[string]string{
 
 func resourceEdasAPAttachmentDependence(name string) string {
 	return fmt.Sprintf(`
-		variable "name" {
-		  default = "%v"
-		}
-		%s
-		data "alibabacloudstack_zones" "default" {
-			available_resource_creation= "VSwitch"
-		}	
-		resource "alibabacloudstack_vpc" "default" {
-		  name = "${var.name}"
-		  cidr_block = "10.1.0.0/21"
-		}
-		
-		resource "alibabacloudstack_vswitch" "default" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "10.1.1.0/24"
-		 // availability_zone = "cn-neimeng-env30-amtest30001-a"
-	      availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}"
-		}
-		
-		resource "alibabacloudstack_security_group" "default" {
-		  name = "${var.name}"
-		  description = "New security group"
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		}
-		
-		resource "alibabacloudstack_instance" "default" {
-		  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-		  image_id = "centos_7_7_x64_20G_alibase_20211028.vhd"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  system_disk_category = "cloud_ssd"
-		  system_disk_size ="60"
-		  instance_type = "ecs.xn4.small"
-		
-		  security_groups = ["${alibabacloudstack_security_group.default.id}"]
-		  instance_name = "${var.name}"
-		  tags = {
-			Name = "TerraformTest-instance"
-		  }
-		}
+variable "name" {
+	default = "%v"
+}
 
-		resource "alibabacloudstack_edas_cluster" "default" {
-		  cluster_name = "${var.name}"
-		  cluster_type = 2
-		  network_mode = 2
-		  vpc_id       = "${alibabacloudstack_vpc.default.id}"
-		  //region_id    = "cn-neimeng-env30-d01"
-		}
-		
-		resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
-		  cluster_id = "${alibabacloudstack_edas_cluster.default.id}"
-		  instance_ids = ["${alibabacloudstack_instance.default.id}"]
-		  pass_word = random_password.password.0.result
-		}
-		
-		resource "alibabacloudstack_edas_application" "default" {
-		  application_name = "${var.name}"
-		  cluster_id = "${alibabacloudstack_edas_cluster.default.id}"
-		  package_type = "JAR"
-		  ecu_info = ["${alibabacloudstack_edas_instance_cluster_attachment.default.ecu_map[alibabacloudstack_instance.default.id]}"]
-		  build_pack_id = "15"
-		}
-		`, name, RandomPasswordTestCase(12, 1))
+// resource "alibabacloudstack_vpc" "default" {
+// 	cidr_block = "172.16.0.0/12"
+// 	name       = "${var.name}"
+// }
+
+// resource "alibabacloudstack_edas_cluster" "default" {
+// 	cluster_name = "${var.name}"
+// 	cluster_type = 2
+// 	network_mode = 2
+// 	vpc_id       = "${alibabacloudstack_vpc.default.id}"
+// }
+
+resource "alibabacloudstack_edas_application" "default" {
+	application_name = "${var.name}"
+	cluster_id = "7ccfd5b3-a164-424f-8de3-906d22262f8c"
+	package_type = "JAR"
+	component_id = "8"
+}
+
+resource "alibabacloudstack_edas_deploy_group" "default" {
+	app_id = "${alibabacloudstack_edas_application.default.id}"
+	group_name = "${var.name}"
+}
+`, name)
 }

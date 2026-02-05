@@ -157,6 +157,32 @@ func (e *EdasService) GetDeployGroup(appId, groupId string) (groupInfo *edas.Dep
 	return groupInfo, nil
 }
 
+func (e *EdasService) GetDeployGroupByAppId(appId string) (groupInfo []edas.DeployGroup, err error) {
+	request := edas.CreateListDeployGroupRequest()
+	e.client.InitRoaRequest(*request.RoaRequest)
+	request.AppId = appId
+
+	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
+		return edasClient.ListDeployGroup(request)
+	})
+	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
+	rsp, ok := raw.(*edas.ListDeployGroupResponse)
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(rsp.BaseResponse)
+		}
+		return groupInfo, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, appId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
+	if rsp.Code != 200 {
+		return groupInfo, errmsgs.Error("get deploy group failed for " + rsp.Message)
+	}
+	return rsp.DeployGroupList.DeployGroup, nil
+}
+
 func (e *EdasService) EdasChangeOrderStatusRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		object, err := e.GetChangeOrderStatus(id)

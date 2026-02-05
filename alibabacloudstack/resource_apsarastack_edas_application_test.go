@@ -152,14 +152,11 @@ func TestAccAlibabacloudStackEdasApplication_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"application_name": "${var.name}",
 					"package_type":     "JAR",
-					"cluster_id":       "${alibabacloudstack_edas_cluster.default.id}",
-					//"build_pack_id":    "-1",
-					//"region_id":        "cn-neimeng-env30-d01",
-					"logical_region_id": "${alibabacloudstack_edas_cluster.default.logical_region_id}",
-					"component_id":      "8",
-					"descriotion":       "Test Description",
-					// "group_id":          "${alibabacloudstack_edas_deploy_group.default.group_id}",
-					"health_check_url": "http://127.0.0.1:8000/health",
+					"cluster_id":       "7ccfd5b3-a164-424f-8de3-906d22262f8c",
+					"group_id":         "all",
+					"component_id":     "8",
+					"descriotion":      "Test Description",
+					"ecu_info":         []string{"cdd2c64f-6b0f-44eb-8b89-13759b54c2e4"},
 					"package_version":  "v1.0.0",
 					"war_url":          fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
 				}),
@@ -174,7 +171,7 @@ func TestAccAlibabacloudStackEdasApplication_basic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"logical_region_id", "package_version", "war_url"},
+				ImportStateVerifyIgnore: []string{"logical_region_id", "package_version", "war_url", "ecu_info", "group_id"},
 			},
 
 			{
@@ -206,17 +203,18 @@ variable "name" {
 	default = "%v"
 }
 
-resource "alibabacloudstack_vpc" "default" {
-	cidr_block = "172.16.0.0/12"
-	name       = "${var.name}"
-}
+// resource "alibabacloudstack_vpc" "default" {
+// 	cidr_block = "172.16.0.0/12"
+// 	name       = "${var.name}"
+// }
 
-resource "alibabacloudstack_edas_cluster" "default" {
-	cluster_name = "${var.name}"
-	cluster_type = 2
-	network_mode = 2
-	vpc_id       = "${alibabacloudstack_vpc.default.id}"
-}
+// resource "alibabacloudstack_edas_cluster" "default" {
+// 	cluster_name = "${var.name}"
+// 	cluster_type = 2
+// 	network_mode = 2
+// 	vpc_id       = "${alibabacloudstack_vpc.default.id}"
+// 	ecu_info = []
+// }
 
 // resource "alibabacloudstack_edas_application" "test" {
 // 	application_name = "${var.name}tf"
@@ -224,11 +222,5 @@ resource "alibabacloudstack_edas_cluster" "default" {
 // 	package_type = "JAR"
 // 	build_pack_id = "15"
 // }
-
-// resource "alibabacloudstack_edas_deploy_group" "default" {
-// 	app_id = "${alibabacloudstack_edas_application.test.id}"
-// 	group_name = "${var.name}"
-// }
-
-`, name)
+		`, name)
 }

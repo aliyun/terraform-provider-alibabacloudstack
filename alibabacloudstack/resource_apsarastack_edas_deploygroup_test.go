@@ -102,7 +102,6 @@ resource "alibabacloudstack_edas_application" "default" {
 	application_name = "${var.name}"
 	cluster_id = "${alibabacloudstack_edas_cluster.default.id}"
 	package_type = "JAR"
-	build_pack_id = "15"
 }
 `, name)
 }
