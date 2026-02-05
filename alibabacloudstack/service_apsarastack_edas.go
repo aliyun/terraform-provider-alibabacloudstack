@@ -1188,3 +1188,32 @@ func (s *EdasService) DescribeClusterMember(id string) ([]interface{}, error) {
 	}
 	return results.([]interface{}), nil
 }
+
+func (s *EdasService) DescribeApplicationDeployment(id string) (group *edas.Group, err error) {
+	pastr := strings.Split(id, ":")
+	appId := pastr[0]
+	groupId := pastr[1]
+	request := edas.CreateQueryApplicationStatusRequest()
+	s.client.InitRoaRequest(*request.RoaRequest)
+	request.AppId = appId
+
+	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	raw, err := s.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
+		return edasClient.QueryApplicationStatus(request)
+	})
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
+	response, _ := raw.(*edas.QueryApplicationStatusResponse)
+
+	if response.Code != 200 {
+		return nil, errmsgs.WrapError(errmsgs.Error("QueryApplicationStatus failed for " + response.Message))
+	}
+	for _, v := range response.AppInfo.GroupList.Group {
+		if v.GroupId == groupId {
+			return &v, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString("QueryApplicationStatus failed for group not found!")
+}
