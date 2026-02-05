@@ -64,7 +64,7 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingCreate(d *schema.ResourceD
 
 func resourceAlibabacloudStackDataWorksUserRoleBindingRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	dataworksPublicService := DataworksPublicService{client}
+	dataworksPublicService := DataworksService{client}
 	object, err := dataworksPublicService.DescribeDataWorksUserRoleBinding(d.Id())
 	log.Printf(fmt.Sprint(object))
 	if err != nil {

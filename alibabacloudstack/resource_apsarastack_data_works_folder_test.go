@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackDataWorksFolder_basic0(t *testing.T) {
 	resourceId := "alibabacloudstack_data_works_folder.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackDataWorksFolderMap0)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &DataworksPublicService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &DataworksService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeDataWorksFolder")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()

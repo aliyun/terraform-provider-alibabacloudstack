@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackDataWorksRemind_basic0(t *testing.T) {
 	resourceId := "alibabacloudstack_data_works_remind.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackDataWorksRemindMap0)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &DataworksPublicService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &DataworksService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeDataWorksRemind")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()

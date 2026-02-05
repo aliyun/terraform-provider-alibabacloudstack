@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackDataWorksProject_basic0(t *testing.T) {
 	resourceId := "alibabacloudstack_data_works_project.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackDataWorksProjectMap0)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &DataworksPublicService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &DataworksService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeDataWorksProject")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -31,12 +31,14 @@ func TestAccAlibabacloudStackDataWorksProject_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"project_name":   name,
+					"name":           "${var.name}",
+					"description":    "${var.name}_desc",
 					"task_auth_type": "PROJECT",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"project_name":   name,
+						"name":           name,
+						"description":    name + "_desc",
 						"task_auth_type": "PROJECT",
 					}),
 				),
@@ -46,11 +48,39 @@ func TestAccAlibabacloudStackDataWorksProject_basic0(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"allow_download": true,
+					"status":         "FORBIDDEN",
+					"description":    "${var.name}_desc update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"allow_download": "true",
+						"status":         "FORBIDDEN",
+						"description":    name + "_desc update",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"allow_download": false,
+					"status":         "AVAILABLE",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"allow_download": "false",
+						"status":         "AVAILABLE",
+					}),
+				),
+			},
 		},
 	})
 }
 
-var AlibabacloudStackDataWorksProjectMap0 = map[string]string{}
+var AlibabacloudStackDataWorksProjectMap0 = map[string]string{
+	"identifier": CHECKSET,
+}
 
 func AlibabacloudStackDataWorksProjectBasicDependence0(name string) string {
 	return fmt.Sprintf(` 

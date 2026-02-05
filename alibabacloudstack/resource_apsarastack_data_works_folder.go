@@ -63,7 +63,7 @@ func resourceAlibabacloudStackDataWorksFolderCreate(d *schema.ResourceData, meta
 
 func resourceAlibabacloudStackDataWorksFolderRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	dataworksPublicService := DataworksPublicService{client}
+	dataworksPublicService := DataworksService{client}
 	object, err := dataworksPublicService.DescribeDataWorksFolder(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {

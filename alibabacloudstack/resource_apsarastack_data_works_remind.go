@@ -122,7 +122,7 @@ func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta
 
 func resourceAlibabacloudStackDataWorksRemindRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	dataworksPublicService := DataworksPublicService{client}
+	dataworksPublicService := DataworksService{client}
 	object, err := dataworksPublicService.DescribeDataWorksRemind(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {

@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackDataWorksUserRoleBinding_basic0(t *testing.T) {
 	resourceId := "alibabacloudstack_data_works_user_role_binding.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackDataWorksUserRoleBindingMap0)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &DataworksPublicService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &DataworksService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeDataWorksUserRoleBinding")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()

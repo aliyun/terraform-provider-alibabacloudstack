@@ -64,7 +64,7 @@ func resourceAlibabacloudStackDataWorksUserCreate(d *schema.ResourceData, meta i
 
 func resourceAlibabacloudStackDataWorksUserRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	dataworksPublicService := DataworksPublicService{client}
+	dataworksPublicService := DataworksService{client}
 	object, err := dataworksPublicService.DescribeDataWorksUser(d.Id())
 	log.Printf(fmt.Sprint(object))
 	if err != nil {

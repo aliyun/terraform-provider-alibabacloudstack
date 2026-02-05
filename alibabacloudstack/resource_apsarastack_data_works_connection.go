@@ -105,7 +105,7 @@ func resourceAlibabacloudStackDataWorksConnectionCreate(d *schema.ResourceData, 
 
 func resourceAlibabacloudStackDataWorksConnectionRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	dataworksPublicService := DataworksPublicService{client}
+	dataworksPublicService := DataworksService{client}
 	object, err := dataworksPublicService.DescribeDataWorksConnection(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {

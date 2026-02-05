@@ -90,13 +90,13 @@ const (
 	DTSCode                   = ServiceCode("DTS")
 	SLSCode                   = ServiceCode("SLS")
 	RosCode                   = ServiceCode("ROS")
-	QuickbiCode               = ServiceCode("QUICKBI_PUBLIC")
-	DataworkspublicCode       = ServiceCode("DATAWORKS_PUBLIC")
+	QuickbiCode               = ServiceCode("QUICKBI")
+	DataworksPublicCode       = ServiceCode("DATAWORKS_PUBLIC")
+	DataworksPrivateCode      = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
 	OneRouterCode             = ServiceCode("ONEROUTER")
 	BastionHostCode           = ServiceCode("BASTIONHOSTPRIVATE")
 	WAFONECSCode              = ServiceCode("WAF_ONECS")
 	ALIKAFKACode              = ServiceCode("ALIKAFKA")
-	DataworksPrivateCloudCode = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
 	Prometheus2Code           = ServiceCode("PROMETHEUS2")
 	TablestoreCode            = ServiceCode("TABLESTORE")
 	// Self-built gateway fake Code
@@ -289,7 +289,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"newdms-api.{{.region}}.{{.domain}}", 
 	},
 	OSSCode:           PopEndpoint{"", ""},
-	DataworkspublicCode: PopEndpoint{
+	DataworksPublicCode: PopEndpoint{
 		"dataworks-public.{{.domain}}",
 		"dataworks-public.{{.region}}.{{.domain}}",
 	},
@@ -375,7 +375,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"polarx-vpc.{{.domain}}",
 		"polarx-vpc.{{.region}}.{{.domain}}",
 	},
-	DataworksPrivateCloudCode: PopEndpoint{
+	DataworksPrivateCode: PopEndpoint{
 		"dataworks-vpc.{{.domain}}",
 		"dataworks-vpc.{{.region}}.{{.domain}}",
 	},
