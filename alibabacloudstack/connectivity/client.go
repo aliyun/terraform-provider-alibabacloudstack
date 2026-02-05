@@ -1,6 +1,7 @@
 package connectivity
 
 import (
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"log"
@@ -739,13 +740,28 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
 		}
 
-		if client.Config.Proxy != "" {
-			// FIXME: Modifying environment variables may pose risks
-			os.Setenv("http_proxy", client.Config.Proxy)
-			os.Setenv("https_proxy", client.Config.Proxy)
+		transport := &http.Transport{
+			MaxIdleConns:    2000,
+			IdleConnTimeout: 90 * time.Second,
 		}
+
+		if client.Config.Insecure {
+			transport.TLSClientConfig = &tls.Config{
+				InsecureSkipVerify: true,
+			}
+		}
+
+		if client.Config.Proxy != "" {
+			if proxyURL, err := url.Parse(client.Config.Proxy); err == nil {
+				transport.Proxy = http.ProxyURL(proxyURL)
+			}
+		}
+
+		config := tablestore.NewDefaultTableStoreConfig()
+		config.Transport = transport
+
 		endpoint = fmt.Sprintf("%s://%s.%s", strings.ToLower(client.Config.Protocol), instanceName, endpoint)
-		tableStoreClient = tablestore.NewClientWithConfig(endpoint, instanceName, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken, tablestore.NewDefaultTableStoreConfig())
+		tableStoreClient = tablestore.NewClientWithConfig(endpoint, instanceName, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken, config)
 		client.tablestoreconnByInstanceName[instanceName] = tableStoreClient
 	}
 
