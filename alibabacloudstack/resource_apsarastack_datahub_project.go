@@ -86,7 +86,9 @@ func resourceAlibabacloudStackDatahubProjectCreate(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackDatahubProjectUpdate(d *schema.ResourceData, meta interface{}) error {
-	noUpdatesAllowedCheck(d, []string{"comment"})
+	if err := noUpdatesAllowedCheck(d, []string{"comment"}); err != nil {
+		return err
+	}
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
@@ -147,13 +149,13 @@ func resourceAlibabacloudStackDatahubProjectRead(d *schema.ResourceData, meta in
 	d.Set("comment", object.Comment)
 	d.Set("create_time", strconv.FormatInt(object.CreateTime, 10))
 	d.Set("last_modify_time", strconv.FormatInt(object.LastModifyTime, 10))
-	
-	if resp, err := client.DoTeaRequest("GET", "datahub", "2019-11-20", "GetProjectVpcWhiteList", "", nil, map[string]interface{}{"ProjectName":d.Id()}, nil); err != nil {
+
+	if resp, err := client.DoTeaRequest("GET", "datahub", "2019-11-20", "GetProjectVpcWhiteList", "", nil, map[string]interface{}{"ProjectName": d.Id()}, nil); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteProjectVpcWhiteList", errmsgs.AlibabacloudStackSdkGoERROR)
 	} else {
 		d.Set("vpc_ids", resp["VpcWhiteList"])
 	}
-	
+
 	return nil
 }
 

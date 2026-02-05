@@ -129,12 +129,12 @@ func resourceAlibabacloudStackDatahubKafkaGroupUpdate(d *schema.ResourceData, me
 		}
 
 		var kafkaGroupTopicListStr string
-		if v, err := json.Marshal(kafkaGroupTopicList) ; err == nil {
+		if v, err := json.Marshal(kafkaGroupTopicList); err == nil {
 			kafkaGroupTopicListStr = string(v)
 		} else {
 			return err
 		}
-		
+
 		query := map[string]interface{}{
 			"RegionId":            client.RegionId,
 			"ProjectName":         projectName,
@@ -148,7 +148,9 @@ func resourceAlibabacloudStackDatahubKafkaGroupUpdate(d *schema.ResourceData, me
 		}
 	}
 
-	noUpdatesAllowedCheck(d, []string{"comment"})
+	if err := noUpdatesAllowedCheck(d, []string{"comment"}); err != nil {
+		return err
+	}
 
 	return nil
 }

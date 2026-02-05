@@ -418,7 +418,9 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	adbService := AdbService{client}
 
-	noUpdatesAllowedCheck(d, []string{"db_node_class", "db_cluster_class", "db_node_storage"})
+	if err := noUpdatesAllowedCheck(d, []string{"db_node_class", "db_cluster_class", "db_node_storage"}); err != nil {
+		return err
+	}
 
 	//Private cloud does not have UntagResources interface
 	/*if d.HasChange("tags") {

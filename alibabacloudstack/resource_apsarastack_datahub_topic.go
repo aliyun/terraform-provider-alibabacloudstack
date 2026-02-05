@@ -215,7 +215,9 @@ func resourceAlibabacloudStackDatahubTopicUpdate(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	noUpdateAllowedFields := []string{"life_cycle", "comment"}
 
-	noUpdatesAllowedCheck(d, noUpdateAllowedFields)
+	if err := noUpdatesAllowedCheck(d, noUpdateAllowedFields); err != nil {
+		return err
+	}
 
 	if d.IsNewResource() {
 		return nil

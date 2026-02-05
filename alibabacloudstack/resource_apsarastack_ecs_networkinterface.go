@@ -183,7 +183,9 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 
-	noUpdatesAllowedCheck(d, []string{"network_interface_name"})
+	if err := noUpdatesAllowedCheck(d, []string{"network_interface_name"}); err != nil {
+		return err
+	}
 
 	attributeUpdate := false
 	request := ecs.CreateModifyNetworkInterfaceAttributeRequest()

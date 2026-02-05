@@ -24,6 +24,10 @@ func resourceAlibabacloudStackDataWorksBusiness() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"business_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackDataWorksBusinessCreate, resourceAlibabacloudStackDataWorksBusinessRead, resourceAlibabacloudStackDataWorksBusinessUpdate, resourceAlibabacloudStackDataWorksBusinessDelete)
@@ -67,6 +71,7 @@ func resourceAlibabacloudStackDataWorksBusinessRead(d *schema.ResourceData, meta
 	d.Set("project_id", object["ProjectId"])
 	d.Set("name", object["BusinessName"])
 	d.Set("description", object["Description"])
+	d.Set("business_id", object["BusinessId"])
 	return nil
 }
 

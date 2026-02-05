@@ -160,7 +160,9 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionRead(d *schema.Res
 }
 
 func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
-	noUpdatesAllowedCheck(d, []string{"port_type", "redundant_physical_connection_id"})
+	if err := noUpdatesAllowedCheck(d, []string{"port_type", "redundant_physical_connection_id"}); err != nil {
+		return err
+	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
