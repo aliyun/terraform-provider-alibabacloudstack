@@ -357,7 +357,6 @@ func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
-	time.Sleep(30 * time.Second)
 	req := edas.CreateDeleteApplicationRequest()
 	client.InitRoaRequest(*req.RoaRequest)
 

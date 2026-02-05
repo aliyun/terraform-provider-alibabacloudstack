@@ -40,8 +40,10 @@ func TestAccAlibabacloudStackEdasApplicationPackageAttachment_basic(t *testing.T
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"app_id":   "${alibabacloudstack_edas_application.default.id}",
-					"group_id": "${alibabacloudstack_edas_deploy_group.default.group_id}",
+					"app_id":          "${alibabacloudstack_edas_application.default.id}",
+					"group_id":        "${alibabacloudstack_edas_deploy_group.default.group_id}",
+					"war_url":         fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
+					"package_version": "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -78,12 +80,8 @@ resource "alibabacloudstack_edas_application" "default" {
 	application_name = "${var.name}"
 	package_type = "JAR"
 	cluster_id = "${alibabacloudstack_edas_instance_cluster_attachment.default.cluster_id}"
-	group_id = "all"
 	component_id = "8"
 	descriotion = "Test Description"
-	ecu_info = ["${alibabacloudstack_edas_instance_cluster_attachment.default.ecu_map[alibabacloudstack_ecs_instance.default.id]}"]
-	package_version = "v1.0.0"
-	war_url = "http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar"
 }
 
 resource "alibabacloudstack_edas_deploy_group" "default" {
@@ -91,4 +89,5 @@ resource "alibabacloudstack_edas_deploy_group" "default" {
 	group_name = "${var.name}"
 }
 `, name, EdasEcsClusterCommonTestCase(), os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"))
+
 }
