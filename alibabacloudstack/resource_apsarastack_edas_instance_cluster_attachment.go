@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -72,20 +73,20 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate(d *schema.Reso
 	client.Config.ClientConnectTimeout = 120
 	_, err := client.DoTeaRequest("POST", "Edas", "2017-08-01", "InstallAgent", "/pop/v5/ecss/install_agent", nil, request, nil)
 	id := fmt.Sprintf("%s:%s", clusterId, strings.Join(aString, ","))
+	d.SetId(id)
+	time.Sleep(time.Duration(30) * time.Second)
 	if err != nil {
 		_, e := edasService.DescribeClusterMember(id)
 		if e != nil {
 			return errmsgs.WrapError(err)
 		}
 	}
-	d.SetId(id)
 	return nil
 }
 
 func resourceAlibabacloudStackEdasInstanceClusterAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
-
 	objects, err := edasService.DescribeClusterMember(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {

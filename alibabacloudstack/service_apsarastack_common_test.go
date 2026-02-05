@@ -829,6 +829,7 @@ locals {
 const DataAlibabacloudstackImages = `
 data "alibabacloudstack_images" "default" {
   name_regex  = "^ubuntu_"
+  //name_regex  = "^aliyun_3_x86_64_20G_pro_dengbao_alibase"
   //name_regex  = "arm_centos_7_6_20G_20211110.raw"
   //name_regex  = "^arm_centos_7"
   most_recent = true
@@ -1487,6 +1488,25 @@ locals {
 	edas_cluster_id = local.create_count == 0 ? data.alibabacloudstack_edas_k8s_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
 }
 `
+}
+
+func EdasEcsClusterCommonTestCase() string {
+	return fmt.Sprintf(`
+%s
+
+resource "alibabacloudstack_edas_cluster" "default" {
+  cluster_name = "${var.name}"
+  network_mode = "2"
+  cluster_type = "2"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+}
+
+resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
+	cluster_id 	 = "${alibabacloudstack_edas_cluster.default.id}"
+	instance_ids = ["${alibabacloudstack_ecs_instance.default.id}"]
+}
+
+`, ECSInstanceCommonTestCase)
 }
 
 const ExpressconnectPhysicalConnectionsCommonTestCase = `

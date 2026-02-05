@@ -343,10 +343,11 @@ func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
+	time.Sleep(30 * time.Second)
 	req := edas.CreateDeleteApplicationRequest()
 	client.InitRoaRequest(*req.RoaRequest)
 
-	req.AppId = d.Id()
+	req.AppId = appId
 
 	req.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 
@@ -368,8 +369,7 @@ func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(req.GetActionName(), raw, req.RoaRequest, req)
-		if bresponse.Code == 601 && strings.Contains(bresponse.Message, "Operation cannot be processed because there are running instances.") {
-			err = errmsgs.Error("Operation cannot be processed because there are running instances.")
+		if bresponse.Code == 601 && strings.Contains(bresponse.Message, "instance is running.") {
 			return resource.RetryableError(err)
 		}
 		changeOrderId = bresponse.ChangeOrderId
