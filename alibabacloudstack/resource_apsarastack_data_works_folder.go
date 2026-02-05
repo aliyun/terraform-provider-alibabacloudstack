@@ -3,34 +3,38 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"path"
 	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackDataWorksFolder() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"folder_id": {
+			"project_id": {
 				Type:     schema.TypeString,
+				Required: true,
 				ForceNew: true,
-				Computed: true,
+			},
+			"business_name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"engine_type": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Data Integration", "Hologres", "Algorithm", "Database", "General", "UserDefined"}, false),
 			},
 			"folder_path": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"project_id": {
+			"folder_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"project_identifier": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 		},
 	}
@@ -38,26 +42,23 @@ func resourceAlibabacloudStackDataWorksFolder() *schema.Resource {
 	return resource
 }
 
+func getDataworksFolderPath(d *schema.ResourceData) string {
+	return fmt.Sprintf("业务流程/%v/%v/%v", d.Get("business_name"), d.Get("engine_type"), d.Get("folder_path"))
+}
+
 func resourceAlibabacloudStackDataWorksFolderCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateFolder"
-	request := make(map[string]interface{})
-	folderPath := ConvertDataWorksFrontEndFolderPathToBackEndFolderPath(d.Get("folder_path").(string))
-	request["FolderPath"] = folderPath
-	if v, ok := d.GetOk("project_id"); ok {
-		request["ProjectId"] = v
+	request := map[string]interface{}{
+		"ProjectId":  d.Get("project_id"),
+		"FolderPath": getDataworksFolderPath(d),
 	}
-	if v, ok := d.GetOk("project_identifier"); ok {
-		request["ProjectIdentifier"] = v
-	}
-	request["PageSize"] = 1
-	request["PageNumber"] = 1
 	response, err := client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
-	d.SetId(fmt.Sprint(response["Data"], ":", request["ProjectId"]))
+	d.SetId(fmt.Sprintf("%s:%s", d.Get("project_id"), response["Data"]))
 	return nil
 }
 
@@ -73,41 +74,47 @@ func resourceAlibabacloudStackDataWorksFolderRead(d *schema.ResourceData, meta i
 		}
 		return errmsgs.WrapError(err)
 	}
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
+	parts, _ := ParseResourceId(d.Id(), 2)
+	d.Set("project_id", parts[0])
+	d.Set("folder_id", parts[1])
+	parts = strings.SplitN(object["FolderPath"].(string), "/", 4)
+
+	if len(parts) != 4 {
+		return errmsgs.WrapError(fmt.Errorf("Invalid Folder Path %s.", object["FolderPath"].(string)))
 	}
-	d.Set("folder_id", parts[0])
-	d.Set("project_id", parts[1])
-	d.Set("folder_path", object["FolderPath"].(string))
+	d.Set("business_name", parts[1])
+	if strings.HasPrefix(parts[2], "folder") {
+		d.Set("engine_type", strings.TrimPrefix(parts[2], "folder"))
+	} else {
+		d.Set("engine_type", parts[2])
+	}
+	d.Set("folder_path", parts[3])
+
 	return nil
 }
 
 func resourceAlibabacloudStackDataWorksFolderUpdate(d *schema.ResourceData, meta interface{}) error {
+	if err := noUpdatesAllowedCheck(d, []string{"business_name", "engine_type", "folder_path"}); err != nil {
+		return err 
+	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	if d.IsNewResource() {
+		return nil
+	}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	request := map[string]interface{}{
-		"FolderId":   parts[0],
-		"ProjectId":  parts[1],
-	}
-	if d.HasChange("folder_path") {
-		folderPath := ConvertDataWorksFrontEndFolderPathToBackEndFolderPath(d.Get("folder_path").(string))
-		absolutePath := folderPath
-		_, lastDir := path.Split(absolutePath)
-		request["FolderName"] = lastDir
-	}
-	if v, ok := d.GetOk("project_identifier"); ok {
-		request["ProjectIdentifier"] = v
-	}
-	request["PageSize"] = 1
-	request["PageNumber"] = 1
-	action := "UpdateFolder"
-	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
-	if err != nil {
-		return err
+	if d.HasChanges("business_name", "engine_type", "folder_path") {
+		request := map[string]interface{}{
+			"ProjectId":  parts[0],
+			"FolderId":   parts[1],
+			"FolderName": getDataworksFolderPath(d),
+		}
+		_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "UpdateFolder", "", nil, nil, request)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -120,55 +127,12 @@ func resourceAlibabacloudStackDataWorksFolderDelete(d *schema.ResourceData, meta
 	}
 	action := "DeleteFolder"
 	request := map[string]interface{}{
-		"FolderId":   parts[0],
-		"ProjectId":  parts[1],
+		"FolderId":  parts[1],
+		"ProjectId": parts[0],
 	}
-	if v, ok := d.GetOk("project_identifier"); ok {
-		request["ProjectIdentifier"] = v
-	}
-	request["PageSize"] = 1
-	request["PageNumber"] = 1
 	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func getConvertMap() map[string]string {
-	convertMap := make(map[string]string)
-	convertMap["Business Flow"] = "业务流程"
-	convertMap["folderAlgm"] = "算法"
-	convertMap["folderCDH"] = "CDH"
-	convertMap["folderDi"] = "数据集成"
-	convertMap["folderFlink"] = "Flink"
-	convertMap["folderGeneral"] = "通用"
-	convertMap["folderHologres"] = "Hologres"
-	convertMap["folderMaxCompute"] = "MaxCompute"
-	convertMap["folderUserDefined"] = "自定义"
-	convertMap["folderEMR"] = "EMR"
-	convertMap["folderErd"] = "数据模型"
-	convertMap["folderADB"] = "AnalyticDB for PostgreSQL"
-	convertMap["folderJdbc"] = "数据库"
-	return convertMap
-}
-
-func ConvertDataWorksFrontEndFolderPathToBackEndFolderPath(source string) string {
-	result := source
-	convertMap := getConvertMap()
-
-	for convert := range convertMap {
-		result = strings.Replace(result, convert, convertMap[convert], 1)
-	}
-	return result
-}
-
-func ConvertDataWorksBackEndFolderPathToFrontEndFolderPath(source string) string {
-	result := source
-	convertMap := getConvertMap()
-
-	for convert := range convertMap {
-		result = strings.Replace(result, convertMap[convert], convert, 1)
-	}
-	return result
 }

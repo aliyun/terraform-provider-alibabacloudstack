@@ -24,8 +24,8 @@ func (s *DataworksService) DescribeDataWorksFolder(id string) (object map[string
 		return
 	}
 	request := map[string]interface{}{
-		"FolderId":  parts[0],
-		"ProjectId": parts[1],
+		"ProjectId": parts[0],
+		"FolderId":  parts[1],
 	}
 	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetFolder", "", nil, nil, request)
 	if err != nil {
