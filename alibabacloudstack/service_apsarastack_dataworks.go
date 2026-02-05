@@ -182,7 +182,7 @@ func (s *DataworksService) DescribeDataWorksProject(id string) (object map[strin
 	}
 	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetProjectDetail", "", nil, nil, request)
 	if err != nil {
-		if e , ok := err.(*errmsgs.ComplexError); ok{
+		if e, ok := err.(*errmsgs.ComplexError); ok {
 			err = e.Cause
 		}
 		if e, ok := err.(*tea.SDKError); ok {
@@ -225,4 +225,39 @@ func (s *DataworksService) ProjectStateRefreshFunc(id string, failStates []strin
 
 		return object, status, nil
 	}
+}
+
+func (s *DataworksService) DescribeDataWorksBusiness(id string) (object map[string]interface{}, err error) {
+	parts, err := ParseResourceId(id, 2)
+	if err != nil {
+		err = errmsgs.WrapError(err)
+		return
+	}
+	var response map[string]interface{}
+	request := map[string]interface{}{
+		"ProjectId":  parts[0],
+		"BusinessId": parts[1],
+	}
+	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetBusiness", "", nil, nil, request)
+	if err != nil {
+		if e, ok := err.(*errmsgs.ComplexError); ok {
+			err = e.Cause
+		}
+		if e, ok := err.(*tea.SDKError); ok {
+			if strings.Contains(*e.Message, "does not exist.") {
+				return object, errmsgs.GetNotFoundErrorFromString(*e.Message)
+			}
+		}
+		return object, err
+	}
+	v, err := jsonpath.Get("$.Data", response)
+	if err != nil {
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Data", response)
+	}
+
+	object = v.(map[string]interface{})
+	if _, existed := object["BusinessId"]; !existed {
+		return object, errmsgs.GetNotFoundErrorFromString("Business " + id + " not existed.")
+	}
+	return object, nil
 }

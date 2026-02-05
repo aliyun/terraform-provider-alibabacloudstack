@@ -941,6 +941,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_vswitch":                                         resourceAlibabacloudStackSwitch(),
 		"alibabacloudstack_vpc_vswitch":                                     resourceAlibabacloudStackSwitch(),
 		"alibabacloudstack_data_works_folder":                               resourceAlibabacloudStackDataWorksFolder(),
+		"alibabacloudstack_data_works_business":                             resourceAlibabacloudStackDataWorksBusiness(),
 		"alibabacloudstack_data_works_connection":                           resourceAlibabacloudStackDataWorksConnection(),
 		"alibabacloudstack_data_works_user":                                 resourceAlibabacloudStackDataWorksUser(),
 		"alibabacloudstack_data_works_project":                              resourceAlibabacloudStackDataWorksProject(),
