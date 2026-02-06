@@ -110,7 +110,7 @@ func resourceAlibabacloudStackEdasApplicationPackageAttachmentRead(d *schema.Res
 	d.Set("package_version", package_version)
 	d.Set("app_id", appId)
 	d.Set("group_id", groupId)
-	version, err := edasService.GetLastPackgeVersion(appId, groupId)
+	version, err := edasService.GetLastPackgeVersion(d.Id())
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}

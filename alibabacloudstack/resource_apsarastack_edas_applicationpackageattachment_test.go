@@ -19,7 +19,7 @@ func TestAccAlibabacloudStackEdasApplicationPackageAttachment_basic(t *testing.T
 	serviceFunc := func() interface{} {
 		return &EdasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "GetLastPackgeVersion")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)

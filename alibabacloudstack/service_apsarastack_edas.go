@@ -263,7 +263,10 @@ func (e *EdasService) CheckEcsStatus(instanceIds string, count int) error {
 	return nil
 }
 
-func (e *EdasService) GetLastPackgeVersion(appId, groupId string) (string, error) {
+func (e *EdasService) GetLastPackgeVersion(id string) (string, error) {
+	pastr := strings.Split(id, ":")
+	appId := pastr[0]
+	groupId := pastr[1]
 	var versionId string
 	request := edas.CreateQueryApplicationStatusRequest()
 	e.client.InitRoaRequest(*request.RoaRequest)
