@@ -1212,7 +1212,7 @@ func (s *EdasService) DescribeApplicationStatus(id string) (group *edas.AppInfo,
 	if response.Code != 200 {
 		return nil, errmsgs.WrapError(errmsgs.Error("QueryApplicationStatus failed for " + response.Message))
 	}
-	if response.AppInfo.Application.ApplicationId != "" {
+	if response.AppInfo.Application.ApplicationId == "" {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Edas application with id %s not found", id))
 	}
 
