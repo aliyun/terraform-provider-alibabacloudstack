@@ -19,7 +19,7 @@ func TestAccAlibabacloudStackDataWorksUserRoleBinding_basic0(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sdataworksuser%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf_userrole%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackDataWorksUserRoleBindingBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -31,15 +31,13 @@ func TestAccAlibabacloudStackDataWorksUserRoleBinding_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"project_id": "10023",
-					"user_id":    "5247087457099176824",
+					"project_id": "${alibabacloudstack_data_works_project.default.id}",
+					"user_id":    "${alibabacloudstack_data_works_user.default.user_id}",
 					"role_code":  "role_project_guest",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"project_id": "10023",
-						"user_id":    "5247087457099176824",
-						"role_code":  "role_project_guest",
+						"role_code": "role_project_guest",
 					}),
 				),
 			},
@@ -58,6 +56,29 @@ func AlibabacloudStackDataWorksUserRoleBindingBasicDependence0(name string) stri
 	return fmt.Sprintf(` 
 variable "name" {
   default = "%s"
+}
+data "alibabacloudstack_account" "current" {
+}
+
+data "alibabacloudstack_ascm_users" "default" {
+ organization_id = "${data.alibabacloudstack_account.current.organization_id}"
+}
+
+resource "alibabacloudstack_data_works_project" "default" {
+	name =           "${var.name}"
+	description =    "${var.name}_desc"
+	task_auth_type = "PROJECT"
+}
+
+resource "alibabacloudstack_data_works_user" "default" {
+	project_id= "${alibabacloudstack_data_works_project.default.id}"
+	user_id=    "${data.alibabacloudstack_ascm_users.default.users.0.primary_key}"
+	role_code = ["role_project_admin"]
+	lifecycle {
+	    ignore_changes = [
+	      role_code
+	    ]
+	}
 }
 `, name)
 }

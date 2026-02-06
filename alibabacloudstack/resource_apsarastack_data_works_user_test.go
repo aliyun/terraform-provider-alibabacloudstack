@@ -19,7 +19,7 @@ func TestAccAlibabacloudStackDataWorksUser_basic0(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sdataworksuser%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf_dataworksuser%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackDataWorksUserBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -31,13 +31,13 @@ func TestAccAlibabacloudStackDataWorksUser_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"project_id": "10023",
-					"user_id":    "5247087457099176824",
+					"project_id": "${alibabacloudstack_data_works_project.default.id}",
+					"user_id":    "${data.alibabacloudstack_ascm_users.default.users.0.primary_key}",
+					"role_code":  []string{"role_project_pe", "role_project_admin"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"project_id": "10023",
-						"user_id":    "5247087457099176824",
+						"role_code.#": "2",
 					}),
 				),
 			},
@@ -45,6 +45,16 @@ func TestAccAlibabacloudStackDataWorksUser_basic0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"role_code": []string{"role_project_admin", "role_project_dev"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_code.#": "2",
+					}),
+				),
 			},
 		},
 	})
@@ -57,5 +67,18 @@ func AlibabacloudStackDataWorksUserBasicDependence0(name string) string {
 variable "name" {
   default = "%s"
 }
+
+data "alibabacloudstack_account" "current" {
+}
+
+data "alibabacloudstack_ascm_users" "default" {
+ organization_id = "${data.alibabacloudstack_account.current.organization_id}"
+}
+
+resource "alibabacloudstack_data_works_project" "default" {
+	name =           "${var.name}"
+	description =    "${var.name}_desc"
+	task_auth_type = "PROJECT"
+	}
 `, name)
 }

@@ -97,13 +97,13 @@ func (s *DataworksService) DescribeDataWorksConnection(id string) (object map[st
 
 func (s *DataworksService) DescribeDataWorksUser(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	parts, err := ParseResourceId(id, 3)
+	parts, err := ParseResourceId(id, 2)
 	if err != nil {
 		err = errmsgs.WrapError(err)
 		return
 	}
 	request := map[string]interface{}{
-		"ProjectId": parts[1],
+		"ProjectId": parts[0],
 	}
 	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "ListProjectMembers", "", nil, nil, request)
 	if err != nil {
@@ -115,13 +115,14 @@ func (s *DataworksService) DescribeDataWorksUser(id string) (object map[string]i
 		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Data.ProjectMemberList", response)
 	}
 
-	if len(i) > 0 {
-		object = i[0].(map[string]interface{})
-	} else {
-		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("dataworks", id)), errmsgs.NotFoundWithResponse, response)
+	for _, o := range i {
+		object := o.(map[string]interface{})
+		if object["ProjectMemberId"].(string) == convertAscmUid2MemberUid(parts[1]) {
+			return object, nil
+		}
 	}
+	return object , errmsgs.GetNotFoundErrorFromString("User " + id + " not existed.")
 
-	return object, nil
 }
 
 func (s *DataworksService) DescribeDataWorksUserRoleBinding(id string) (object map[string]interface{}, err error) {

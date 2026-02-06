@@ -13,6 +13,7 @@ import (
 
 func resourceAlibabacloudStackDataWorksUserRoleBinding() *schema.Resource {
 	resource := &schema.Resource{
+		DeprecationMessage: "alibabacloudstack_data_works_user already includes corresponding functions, and is scheduled for removal in version 3.21.0",
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:     schema.TypeString,
