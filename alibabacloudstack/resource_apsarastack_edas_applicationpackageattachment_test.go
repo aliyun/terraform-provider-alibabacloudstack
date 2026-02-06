@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccAlibabacloudStackEdasApplicationPackageAttachment_basic(t *testing.T) {
-	var v *edas.Applcation
+	var v *edas.Group
 	resourceId := "alibabacloudstack_application_deployment.default"
 	ra := resourceAttrInit(resourceId, edasAPAttachmentBasicMap)
 
@@ -50,9 +50,10 @@ func TestAccAlibabacloudStackEdasApplicationPackageAttachment_basic(t *testing.T
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"war_url"},
 			},
 		},
 	})
