@@ -356,7 +356,6 @@ func (e *EdasService) DescribeEdasApplication(appId string) (*edas.Applcation, e
 	if v.AppId == "" {
 		return nil, errmsgs.GetNotFoundErrorFromString("Edas Ecs application not found!")
 	}
-
 	return &v, nil
 }
 
@@ -684,8 +683,40 @@ func (e *EdasService) DescribeEdasSlbAttachment(id string) (*edas.Applcation, er
 	if err != nil {
 		return application, errmsgs.WrapError(err)
 	}
-
+	if o.SlbId != v[1] {
+		return application, errmsgs.GetNotFoundErrorFromString("Edas ecs app slb_attachment not found!")
+	}
 	return o, nil
+}
+
+func (s *EdasService) DescribeEdasSlb(slbId string) (*edas.SlbEntity, error) {
+	request := edas.CreateListSlbRequest()
+	s.client.InitRoaRequest(*request.RoaRequest)
+	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	raw, err := s.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
+		return edasClient.ListSlb(request)
+	})
+
+	response, ok := raw.(*edas.ListSlbResponse)
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "AlibabacloudStack_edas_slb_attachment", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
+
+	if response.Code != 200 {
+		return nil, errmsgs.WrapError(errmsgs.Error("List Slb failed for " + response.Message))
+	}
+
+	for _, slb := range response.SlbList.SlbEntity {
+		if slb.SlbId == slbId {
+			return &slb, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString("Edas slb not found!")
 }
 
 type CommandArg struct {

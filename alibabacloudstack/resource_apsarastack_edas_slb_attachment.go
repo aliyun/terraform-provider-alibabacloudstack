@@ -48,12 +48,10 @@ func resourceAlibabacloudStackEdasSlbAttachment() *schema.Resource {
 			"slb_status": {
 				Type:     schema.TypeString,
 				Computed: true,
-				ForceNew: true,
 			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-				ForceNew: true,
 			},
 		},
 	}
@@ -74,12 +72,10 @@ func resourceAlibabacloudStackEdasSlbAttachmentCreate(d *schema.ResourceData, me
 	request.AppId = appId
 	request.SlbId = slbId
 	request.SlbIp = d.Get("slb_ip").(string)
+	request.VServerGroupId = d.Get("vserver_group_id").(string)
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	if v, ok := d.GetOk("listener_port"); ok {
 		request.ListenerPort = requests.NewInteger(v.(int))
-	}
-	if v, ok := d.GetOk("vserver_group_id"); ok {
-		request.VServerGroupId = v.(string)
 	}
 
 	if err := edasService.SyncResource("slb"); err != nil {
@@ -110,67 +106,27 @@ func resourceAlibabacloudStackEdasSlbAttachmentCreate(d *schema.ResourceData, me
 func resourceAlibabacloudStackEdasSlbAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
-
-	id := d.Id()
-	strs, err := ParseResourceId(id, 2)
+	appinfo, err := edasService.DescribeEdasSlbAttachment(d.Id())
+	strs, err := ParseResourceId(d.Id(), 2)
+	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
+		return errmsgs.WrapError(err)
+	}
+	d.Set("app_id", strs[0])
+	d.Set("slb_id", appinfo.SlbId)
+	// d.Set("vserver_group_id", appinfo.VServerGroupId)
+	slbInfo, err := edasService.DescribeEdasSlb(strs[1])
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	slbId := strs[1]
-	appId := strs[0]
-
-	rq := edas.CreateGetApplicationRequest()
-	client.InitRoaRequest(*rq.RoaRequest)
-	rq.AppId = appId
-	rq.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.GetApplication(rq)
-	})
-
-	response, ok := raw.(*edas.GetApplicationResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "AlibabacloudStack_edas_slb_attachment", rq.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(rq.GetActionName(), raw, rq.RoaRequest, rq)
-
-	if response.Application.AppId != appId {
-		return errmsgs.WrapError(errmsgs.Error("can not find appid:" + appId))
-	}
-
-	request := edas.CreateListSlbRequest()
-	client.InitRoaRequest(*request.RoaRequest)
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	raw, err = edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.ListSlb(request)
-	})
-
-	response1, ok := raw.(*edas.ListSlbResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response1.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "AlibabacloudStack_edas_slb_attachment", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-
-	if response1.Code != 200 {
-		return errmsgs.WrapError(errmsgs.Error("List Slb failed for " + response1.Message))
-	}
-
-	for _, slb := range response1.SlbList.SlbEntity {
-		if slb.SlbId == slbId {
-			d.Set("slb_status", slb.SlbStatus)
-			d.Set("vswitch_id", slb.VswitchId)
-			return nil
-		}
-	}
-
+	d.Set("type", slbInfo.AddressType)
+	d.Set("slb_ip", slbInfo.Address)
+	// d.Set("listener_port", appinfo.SlbPort)
+	d.Set("slb_status", slbInfo.SlbStatus)
+	d.Set("vswitch_id", slbInfo.VswitchId)
 	return nil
 }
 
