@@ -520,7 +520,9 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		//	"alibabacloudstack_polardb_databases":                      dataSourceAlibabacloudStackPolardbDatabases(),
 		"alibabacloudstack_polardb_dbinstances": dataSourceAlibabacloudStackPolardbDbInstances(),
 		"alibabacloudstack_polardb_instances":   dataSourceAlibabacloudStackPolardbDbInstances(),
-		"alibabacloudstack_acm_configurations":  dataSourceAlibabacloudStackAcmConfigurations(),
+
+		"alibabacloudstack_polardb_parameter_groups": dataSourceAlibabacloudStackPolardbParameterGroups(),
+		"alibabacloudstack_acm_configurations":       dataSourceAlibabacloudStackAcmConfigurations(),
 		//	"alibabacloudstack_polardb_accounts":                       dataSourceAlibabacloudStackPolardbAccounts(),
 		"alibabacloudstack_edas_k8s_application_scaling_rules": dataSourceAlibabacloudStackEdasScalingRules(),
 	}
@@ -848,6 +850,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardb_backuppolicy":                   resourceAlibabacloudStackPolardbBackuppolicy(),
 		"alibabacloudstack_polardb_dbconnection":                   resourceAlibabacloudStackPolardbConnection(),
 		"alibabacloudstack_polardb_dbinstance":                     resourceAlibabacloudStackPolardbInstance(),
+		"alibabacloudstack_polardb_parameter_group":                resourceAlibabacloudStackPolarDBParameterGroup(),
 		"alibabacloudstack_acm_configuration":                      resourceAlibabacloudStackAcmConfiguration(),
 		"alibabacloudstack_polardb_account_database_binding":       resourceAlibabacloudStackPolardbAccountDatabaseBinding(),
 		"alibabacloudstack_ascm_service_ram_role":                  resourceAlibabacloudStackAscmServiceRamRole(),

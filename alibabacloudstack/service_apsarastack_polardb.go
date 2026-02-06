@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
@@ -1443,4 +1444,66 @@ func (s *PolardbService) DescribeDBInstanceEncryptionKey(id string) string {
 		return ""
 	}
 	return encryptionKey.(string)
+}
+func (s *PolardbService) DescribeParameterGroup(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{"ParameterGroupId": id}
+
+	response, err := s.client.DoTeaRequest("GET", "polardb", "2024-01-30", "DescribeParameterGroup", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the parameter group exists
+	if paramGroup, ok := response["ParamGroup"]; ok {
+		if paramGroupList, ok := paramGroup.(map[string]interface{})["ParameterGroup"]; ok {
+			if paramGroupArray, ok := paramGroupList.([]interface{}); ok && len(paramGroupArray) > 0 {
+				paramGroupMap := paramGroupArray[0].(map[string]interface{})
+
+				result := make(map[string]interface{})
+				for k, v := range paramGroupMap {
+					result[k] = v
+				}
+
+				// Handle ParamDetail if it exists
+				if paramDetail, ok := paramGroupMap["ParamDetail"]; ok {
+					if detailMap, ok := paramDetail.(map[string]interface{}); ok {
+						result["ParamDetail"] = detailMap
+					}
+				}
+
+				return result, nil
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB parameter group %s not found", id))
+}
+
+func generateRandomString(length int) string {
+	if length < 4 {
+		panic("length must be at least 4 to include all required character types")
+	}
+
+	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+	lowerChar := "abcdefghijklmnopqrstuvwxyz"
+	upperChar := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	digitChar := "0123456789"
+	underscoreChar := "_"
+
+	rand.Seed(time.Now().UnixNano())
+
+	result := make([]byte, length)
+	result[0] = lowerChar[rand.Intn(len(lowerChar))]
+	result[1] = upperChar[rand.Intn(len(upperChar))]
+	result[2] = digitChar[rand.Intn(len(digitChar))]
+	result[3] = underscoreChar[0]
+
+	for i := 4; i < length; i++ {
+		result[i] = charset[rand.Intn(len(charset))]
+	}
+	rand.Shuffle(len(result), func(i, j int) {
+		result[i], result[j] = result[j], result[i]
+	})
+
+	return string(result)
 }

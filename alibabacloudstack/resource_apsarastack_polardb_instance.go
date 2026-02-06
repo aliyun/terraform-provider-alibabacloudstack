@@ -36,6 +36,10 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				ForceNew: true,
 				Required: true,
 			},
+			"param_group_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"zone_id_slave1": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -348,7 +352,6 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		ZoneId = Trim(zone.(string))
 	}
 	vswitchId := Trim(d.Get("vswitch_id").(string))
-
 	InstanceNetworkType = string(Classic)
 	if vswitchId != "" {
 		VSwitchId = vswitchId
@@ -412,6 +415,9 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	})
 	if v, ok := d.GetOk("cpu_type"); ok && v.(string) != "" {
 		request.QueryParams["CpuType"] = v.(string)
+	}
+	if v, ok := d.GetOk("param_group_id"); ok && v.(string) != "" {
+		request.QueryParams["DBParamGroupId"] = v.(string)
 	}
 	if tde := d.Get("tde_status"); tde.(bool) && engine != "MySQL" {
 		request.QueryParams["TdeStatus"] = "1"

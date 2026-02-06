@@ -243,7 +243,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 
 	DmsEnterpriseCode: PopEndpoint{"", ""},
-	OSSCode: PopEndpoint{"", ""},
+	OSSCode:           PopEndpoint{"", ""},
 	DataworkspublicCode: PopEndpoint{
 		"dataworks-public.{{.domain}}",
 		"dataworks-public.{{.region}}.{{.domain}}",

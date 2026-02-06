@@ -143,6 +143,75 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackPolardbInstanceMysqlParamsGroup(t *testing.T) {
+	var instance *PolardbDescribedbinstancesResponse
+
+	resourceId := "alibabacloudstack_polardb_dbinstance.default"
+	ra := resourceAttrInit(resourceId, PolardbinstanceBasicMap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
+		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "Describedbinstances")
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc-polardb-instance_mysql%d", rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceConfigDependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		// module name
+		IDRefreshName: resourceId,
+
+		Providers:    testAccProviders,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"engine":                   "MySQL",
+					"engine_version":           "8.0",
+					"param_group_id":           "${alibabacloudstack_polardb_parameter_group.default.id}",
+					"db_instance_class":        "rds.mysql.t1.small",
+					"db_instance_storage":      "5",
+					"instance_name":            "${var.name}",
+					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
+					"db_instance_storage_type": "local_ssd",
+					"parameters": []map[string]interface{}{{
+						"name":  "show_old_temporals",
+						"value": "ON",
+					}},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_name":       name,
+						"engine":              "MySQL",
+						"engine_version":      "8.0",
+						"db_instance_class":   CHECKSET,
+						"db_instance_storage": CHECKSET,
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceId,     // Resource address
+						"parameters.*", // TypeSet attribute path (wildcard `*` represents any element in the collection)
+						map[string]string{
+							"name":  "show_old_temporals",
+							"value": "ON",
+						},
+					),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_restart", "encryption", "period", "auto_renew", "param_group_id"},
+			},
+		},
+	})
+}
+
 func testPolardbAccCheckSecurityIpExists(n string, ips []map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -173,6 +242,7 @@ func testPolardbAccCheckSecurityIpExists(n string, ips []map[string]interface{})
 }
 
 func resourcePolardbInstanceConfigDependence(name string) string {
+	param_group_name := generateRandomString(10)
 	return fmt.Sprintf(`
 %s
 
@@ -184,7 +254,18 @@ resource "alibabacloudstack_security_group" "default" {
 	name   = "${var.name}"
 	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
 }
-`, VSwitchCommonTestCase, name)
+
+resource "alibabacloudstack_polardb_parameter_group" "default" {
+  engine = "mysql"
+  engine_version = "8.0"
+  parameter_group_name = "%s"
+  parameter_group_desc = var.name
+  parameters = {
+    loose_multi_blocks_ddl_count = "1"
+  }
+}
+
+`, VSwitchCommonTestCase, name, param_group_name)
 }
 
 func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
