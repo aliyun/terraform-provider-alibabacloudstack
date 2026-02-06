@@ -106,28 +106,20 @@ func dataSourceAlibabacloudStackEdasApplicationsRead(d *schema.ResourceData, met
 		return errmsgs.WrapError(errmsgs.Error(response.Message))
 	}
 	var filteredApps []edas.ApplicationInListApplication
-	nameRegex, ok := d.GetOk("name_regex")
-	if (ok && nameRegex.(string) != "") || (len(idsMap) > 0) {
-		var r *regexp.Regexp
-		if nameRegex != "" {
-			r, err = regexp.Compile(nameRegex.(string))
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
+	var nameRegex *regexp.Regexp
+	if v, ok := d.GetOk("name_regex"); ok {
+		nameRegex = regexp.MustCompile(v.(string))
+	}
+	for _, app := range response.ApplicationList.Application {
+		if nameRegex != nil && !nameRegex.MatchString(app.Name) {
+			continue
 		}
-		for _, app := range response.ApplicationList.Application {
-			if r != nil && !r.MatchString(app.Name) {
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[app.AppId]; !ok {
 				continue
 			}
-			if len(idsMap) > 0 {
-				if _, ok := idsMap[app.AppId]; !ok {
-					continue
-				}
-			}
-			filteredApps = append(filteredApps, app)
 		}
-	} else {
-		filteredApps = response.ApplicationList.Application
+		filteredApps = append(filteredApps, app)
 	}
 
 	return edasApplicationAttributes(d, filteredApps)
