@@ -1189,10 +1189,9 @@ func (s *EdasService) DescribeClusterMember(id string) ([]interface{}, error) {
 	return results.([]interface{}), nil
 }
 
-func (s *EdasService) DescribeApplicationDeployment(id string) (group *edas.Group, err error) {
+func (s *EdasService) DescribeApplicationStatus(id string) (group *edas.AppInfo, err error) {
 	pastr := strings.Split(id, ":")
 	appId := pastr[0]
-	groupId := pastr[1]
 	request := edas.CreateQueryApplicationStatusRequest()
 	s.client.InitRoaRequest(*request.RoaRequest)
 	request.AppId = appId
@@ -1210,10 +1209,9 @@ func (s *EdasService) DescribeApplicationDeployment(id string) (group *edas.Grou
 	if response.Code != 200 {
 		return nil, errmsgs.WrapError(errmsgs.Error("QueryApplicationStatus failed for " + response.Message))
 	}
-	for _, v := range response.AppInfo.GroupList.Group {
-		if v.GroupId == groupId {
-			return &v, nil
-		}
+	if response.AppInfo.Application.ApplicationId != "" {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Edas application with id %s not found", id))
 	}
-	return nil, errmsgs.GetNotFoundErrorFromString("QueryApplicationStatus failed for group not found!")
+
+	return &response.AppInfo, nil
 }

@@ -5,8 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
@@ -14,7 +12,7 @@ import (
 )
 
 func TestAccAlibabacloudStackEdasApplicationPackageAttachment_basic(t *testing.T) {
-	var v *edas.Group
+	var v string
 	resourceId := "alibabacloudstack_application_deployment.default"
 	ra := resourceAttrInit(resourceId, edasAPAttachmentBasicMap)
 
