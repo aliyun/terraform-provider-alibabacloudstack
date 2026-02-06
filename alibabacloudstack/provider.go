@@ -354,7 +354,6 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_edas_deploygroups":                                dataSourceAlibabacloudStackEdasDeployGroups(),
 		"alibabacloudstack_edas_clusters":                                    dataSourceAlibabacloudStackEdasClusters(),
 		"alibabacloudstack_edas_applications":                                dataSourceAlibabacloudStackEdasApplications(),
-		"alibabacloudstack_edas_slbattachments":                              dataSourceAlibabacloudStackEdasApplications(),
 		"alibabacloudstack_edas_namespaces":                                  dataSourceAlibabacloudStackEdasNamespaces(),
 		"alibabacloudstack_eips":                                             dataSourceAlibabacloudStackEips(),
 		"alibabacloudstack_eip_addresses":                                    dataSourceAlibabacloudStackEips(),

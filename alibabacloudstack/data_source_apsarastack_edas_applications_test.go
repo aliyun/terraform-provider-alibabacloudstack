@@ -8,7 +8,7 @@ import (
 func TestAccAlibabacloudStackEdasApplicationsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	resourceId := "data.alibabacloudstack_edas_applications.default"
-	name := fmt.Sprintf("tf-testacc-edas-applications%v", rand)
+	name := fmt.Sprintf("tfedasapp%v", rand)
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceEdasApplicationConfigDependence)
 
