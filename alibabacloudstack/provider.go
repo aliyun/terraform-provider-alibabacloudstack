@@ -347,6 +347,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_deploymentsets":                               dataSourceAlibabacloudStackEcsDeploymentSets(),
 		"alibabacloudstack_ecs_hpc_clusters":                                 dataSourceAlibabacloudStackEcsHpcClusters(),
 		"alibabacloudstack_ecs_hpcclusters":                                  dataSourceAlibabacloudStackEcsHpcClusters(),
+		"alibabacloudstack_ecs_dedicated_host_types":                         dataSourceAlibabacloudStackEcsDedicatedHostTypes(),
 		"alibabacloudstack_ecs_dedicated_hosts":                              dataSourceAlibabacloudStackEcsDedicatedHosts(),
 		"alibabacloudstack_ecs_dedicatedhosts":                               dataSourceAlibabacloudStackEcsDedicatedHosts(),
 		"alibabacloudstack_ecs_dedicated_host_cluster":                       dataSourceAlibabacloudStackEcsDedicatedHostClusters(),
