@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackEdasInstanceApplicationAttachment_basic(t *testing.T) {
+func TestAccAlibabacloudStackEdasInstanceApplicationScale_basic(t *testing.T) {
 	var v *edas.AppInfo
 	resourceId := "alibabacloudstack_edas_application_scale.default"
 
