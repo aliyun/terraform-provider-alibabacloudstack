@@ -48,32 +48,6 @@ func dataSourceAlibabacloudStackEcsDedicatedHosts() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"operation_locks": {
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"lock_reason": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-						},
-					},
-				},
-			},
-			"resource_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"status": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Available", "Creating", "PermanentFailure", "Released", "UnderAssessment"}, false),
-			},
-			"tags": tagsSchema(),
 			"zone_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -278,9 +252,12 @@ func dataSourceAlibabacloudStackEcsDedicatedHostsRead(d *schema.ResourceData, me
 	if v, ok := d.GetOk("dedicated_host_type"); ok {
 		request["DedicatedHostType"] = v
 	}
+	var filterId string
 	if v, ok := d.GetOk("dedicated_host_id"); ok {
 		request["DedicatedHostId"] = v
+		filterId = v.(string)
 	}
+
 	if v, ok := d.GetOk("operation_locks"); ok {
 		operationLocksMaps := make([]map[string]interface{}, 0)
 		for _, operationLocks := range v.([]interface{}) {
@@ -347,6 +324,9 @@ func dataSourceAlibabacloudStackEcsDedicatedHostsRead(d *schema.ResourceData, me
 				if _, ok := idsMap[fmt.Sprint(item["DedicatedHostId"])]; !ok {
 					continue
 				}
+			}
+			if filterId != "" && filterId != fmt.Sprint(item["DedicatedHostId"]) {
+				continue
 			}
 			objects = append(objects, item)
 		}
