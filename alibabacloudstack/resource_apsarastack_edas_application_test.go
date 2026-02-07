@@ -158,10 +158,12 @@ func TestAccAlibabacloudStackEdasApplication_basic(t *testing.T) {
 					"ecu_info":         []string{"${alibabacloudstack_edas_instance_cluster_attachment.default.ecu_map[alibabacloudstack_ecs_instance.default.id]}"},
 					"package_version":  "v1.0.0",
 					"war_url":          fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
+					"health_check_url": "http://127.0.0.1:8000/checkHealth",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"application_name": name,
+						"health_check_url": "http://127.0.0.1:8000/checkHealth",
 					}),
 				),
 			},
@@ -175,11 +177,14 @@ func TestAccAlibabacloudStackEdasApplication_basic(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"application_name": fmt.Sprintf("tf-testacc-edasappchange%v", rand),
+					"application_name": "${var.name}_update",
+					"health_check_url": REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"application_name": fmt.Sprintf("tf-testacc-edasappchange%v", rand)}),
+						"application_name": name + "_update",
+						"health_check_url": REMOVEKEY,
+					}),
 				),
 			},
 		},

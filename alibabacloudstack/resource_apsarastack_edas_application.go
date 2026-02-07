@@ -54,8 +54,9 @@ func resourceAlibabacloudStackEdasApplication() *schema.Resource {
 				Optional: true,
 			},
 			"logical_region_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The `logical_region_id` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"ecu_info": {
 				Type:     schema.TypeList,
@@ -107,14 +108,6 @@ func resourceAlibabacloudStackEdasApplicationCreate(d *schema.ResourceData, meta
 
 	if v, ok := d.GetOk("descriotion"); ok {
 		request.Description = v.(string)
-	}
-
-	if v, ok := d.GetOk("health_check_url"); ok {
-		request.HealthCheckUrl = v.(string)
-	}
-
-	if v, ok := d.GetOk("logical_region_id"); ok {
-		request.LogicalRegionId = v.(string)
 	}
 
 	if v, ok := d.GetOk("ecu_info"); ok {
@@ -221,8 +214,29 @@ func resourceAlibabacloudStackEdasApplicationCreate(d *schema.ResourceData, meta
 }
 
 func resourceAlibabacloudStackEdasApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
+	if err := noUpdatesAllowedCheck(d, []string{"cluster_id", "build_pack_id", "component_id",
+		"descriotion", "ecu_info", "group_id", "package_version", "war_url"}); err != nil {
+		return err
+	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
+	
+	if d.HasChange("health_check_url") {
+		reqQuery := map[string]interface{}{
+			"AppId" : d.Id(),
+			"hcURL": d.Get("health_check_url"),
+		}
+		
+		_, err := client.DoTeaRequest("POST", "Edas", "2017-08-01", "UpdateHealthCheckUrl", "/pop/v5/app/modify_hc_url", nil , reqQuery, nil)
+		if err != nil {
+			return err
+		}
+	}
+	
+	
+	if d.IsNewResource(){
+		return nil
+	}
 
 	if d.HasChanges("application_name", "descriotion") {
 		request := edas.CreateUpdateApplicationBaseInfoRequest()
