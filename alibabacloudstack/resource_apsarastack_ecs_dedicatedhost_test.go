@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -12,6 +13,7 @@ import (
 )
 
 func TestAccAlibabacloudStackEcsDedicatedHost_basic0(t *testing.T) {
+	time.Sleep(3 * time.Minute)
 	var v ecs.DedicatedHost
 
 	resourceId := "alibabacloudstack_ecs_dedicatedhost.default"
@@ -47,6 +49,7 @@ func TestAccAlibabacloudStackEcsDedicatedHost_basic0(t *testing.T) {
 						"Created": "TF",
 						"For":     "Test",
 					},
+					"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -60,7 +63,16 @@ func TestAccAlibabacloudStackEcsDedicatedHost_basic0(t *testing.T) {
 					}),
 				),
 			},
-
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"dedicated_host_name": "${var.name}_update",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"dedicated_host_name": name + "_update",
+					}),
+				),
+			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"action_on_maintenance": "Migrate",

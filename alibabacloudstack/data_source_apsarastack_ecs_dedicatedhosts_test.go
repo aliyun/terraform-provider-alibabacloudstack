@@ -3,9 +3,11 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestAccAlibabacloudStackEcsDedicatedHostsDataSource(t *testing.T) {
+	time.Sleep(3 * time.Minute)
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_ecs_dedicated_hosts.default"
 	name := fmt.Sprintf("tf_testAccEcsDedicatedHostsDataSource_%d", rand)

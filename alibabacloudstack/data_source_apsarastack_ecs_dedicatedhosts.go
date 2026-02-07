@@ -257,33 +257,6 @@ func dataSourceAlibabacloudStackEcsDedicatedHostsRead(d *schema.ResourceData, me
 		request["DedicatedHostId"] = v
 		filterId = v.(string)
 	}
-
-	if v, ok := d.GetOk("operation_locks"); ok {
-		operationLocksMaps := make([]map[string]interface{}, 0)
-		for _, operationLocks := range v.([]interface{}) {
-			operationLocksMap := make(map[string]interface{})
-			operationLocksArg := operationLocks.(map[string]interface{})
-			operationLocksMap["LockReason"] = operationLocksArg["lock_reason"]
-			operationLocksMaps = append(operationLocksMaps, operationLocksMap)
-		}
-		request["OperationLocks"] = operationLocksMaps
-	}
-	if v, ok := d.GetOk("resource_group_id"); ok {
-		request["ResourceGroupId"] = v
-	}
-	if v, ok := d.GetOk("status"); ok {
-		request["Status"] = v
-	}
-	if v, ok := d.GetOk("tags"); ok {
-		tags := make([]map[string]interface{}, 0)
-		for key, value := range v.(map[string]interface{}) {
-			tags = append(tags, map[string]interface{}{
-				"Key":   key,
-				"Value": value.(string),
-			})
-		}
-		request["Tag"] = tags
-	}
 	if v, ok := d.GetOk("zone_id"); ok {
 		request["ZoneId"] = v
 	}

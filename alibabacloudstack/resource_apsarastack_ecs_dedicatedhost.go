@@ -183,10 +183,6 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 		update = true
 		modifyDedicatedHostAttributeReq["DedicatedHostName"] = d.Get("dedicated_host_name")
 	}
-	if !d.IsNewResource() && d.HasChange("description") {
-		update = true
-		modifyDedicatedHostAttributeReq["Description"] = d.Get("description")
-	}
 	if update {
 		if _, ok := d.GetOk("dedicated_host_cluster_id"); ok {
 			modifyDedicatedHostAttributeReq["DedicatedHostClusterId"] = d.Get("dedicated_host_cluster_id")
