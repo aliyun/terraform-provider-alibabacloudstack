@@ -1429,6 +1429,48 @@ func (s *EcsService) DescribeSnapshotPolicy(id string) (*ecs.AutoSnapshotPolicy,
 	return &response.AutoSnapshotPolicies.AutoSnapshotPolicy[0], nil
 }
 
+func (s *EcsService) ListDisksForSnapshotPolicy(policyId string) (disks []ecs.Disk, err error) {
+	request := ecs.CreateDescribeDisksRequest()
+	s.client.InitRpcRequest(*request.RpcRequest)
+	request.EnableAutomatedSnapshotPolicy = requests.Boolean(strconv.FormatBool(true))
+	request.AutoSnapshotPolicyId = policyId
+	var response *ecs.DescribeDisksResponse
+	wait := incrementalWait(1*time.Second, 1*time.Second)
+	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+		raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.DescribeDisks(request)
+		})
+		if err != nil {
+			if errmsgs.IsThrottling(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		response, _ = raw.(*ecs.DescribeDisksResponse)
+		if len(response.Disks.Disk) < 1 {
+			return resource.RetryableError(err)
+		}
+		return nil
+	})
+	if err != nil {
+		return disks, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, policyId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if len(response.Disks.Disk) < 1 {
+		return disks, errmsgs.GetNotFoundErrorFromString("Enable Automated Snapshot Policy Disks notfound.")
+	}
+	for _, diskdata := range response.Disks.Disk {
+		if diskdata.AutoSnapshotPolicyId == policyId {
+			disks = append(disks, diskdata)
+		}
+	}
+	if len(disks) > 0 {
+		return disks, nil
+	}
+	return disks, errmsgs.GetNotFoundErrorFromString("Enable Automated Snapshot Policy Disks notfound.")
+}
+
 func (s *EcsService) DoEcsDescribereservedinstancesRequest(id string) (reservedInstance ecs.ReservedInstance, err error) {
 	return s.DescribeReservedInstance(id)
 }

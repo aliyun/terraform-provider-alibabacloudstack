@@ -46,6 +46,11 @@ func resourceAlibabacloudStackSnapshotPolicy() *schema.Resource {
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"disk_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackSnapshotPolicyCreate, resourceAlibabacloudStackSnapshotPolicyRead, resourceAlibabacloudStackSnapshotPolicyUpdate, resourceAlibabacloudStackSnapshotPolicyDelete)
@@ -112,7 +117,15 @@ func resourceAlibabacloudStackSnapshotPolicyRead(d *schema.ResourceData, meta in
 	}
 	d.Set("tags", ecsService.tagsToMap(object.Tags.Tag))
 	d.Set("time_points", timePoints)
-
+	disks, err := ecsService.ListDisksForSnapshotPolicy(d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	diskIds := []string{}
+	for _, disk := range disks {
+		diskIds = append(diskIds, disk.DiskId)
+	}
+	d.Set("disk_ids", diskIds)
 	return nil
 }
 
@@ -124,6 +137,39 @@ func resourceAlibabacloudStackSnapshotPolicyUpdate(d *schema.ResourceData, meta 
 		if err := ascmService.SetResourceTags(d, "auto_snapshot_policy"); err != nil {
 			return errmsgs.WrapError(err)
 		}
+	}
+
+	if d.HasChange("disk_ids") {
+		o, n := d.GetChange("disk_ids")
+		os := o.(*schema.Set)
+		ns := n.(*schema.Set)
+		removed := os.Difference(ns)
+		added := ns.Difference(os)
+		if len(removed.List()) > 0 {
+			request := map[string]interface{}{
+				"DiskIds": convertListToJsonString(removed.List()),
+			}
+			response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", "CancelAutoSnapshotPolicy", "", nil, request, nil)
+			if err != nil {
+				errmsg := ""
+				errmsg = errmsgs.GetAsapiErrorMessage(response)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_snapshot_policy", "CancelAutoSnapshotPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+
+		}
+		if len(added.List()) > 0 {
+			request := map[string]interface{}{
+				"DiskIds":              convertListToJsonString(added.List()),
+				"AutoSnapshotPolicyId": d.Id(),
+			}
+			response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", "ApplyAutoSnapshotPolicy", "", nil, request, nil)
+			if err != nil {
+				errmsg := ""
+				errmsg = errmsgs.GetAsapiErrorMessage(response)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_snapshot_policy", "ApplyAutoSnapshotPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+		}
+
 	}
 
 	request := ecs.CreateModifyAutoSnapshotPolicyExRequest()
