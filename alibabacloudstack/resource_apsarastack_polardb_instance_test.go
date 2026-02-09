@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc-polardb-instance_mysql%d", rand)
+	name := fmt.Sprintf("tf_polardb_mysql%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceClassicConfigDependence("MySQL"))
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -343,7 +343,7 @@ func resourcePolardbInstanceClassicConfigDependence(engine string) func(string) 
 		  parameter_group_name = var.name
 		  parameter_group_desc = var.name
 		  parameters = {
-		    loose_multi_blocks_ddl_count = "1"
+		    loose_multi_blocks_ddl_count = "10"
 		  }
 		}`
 	}
