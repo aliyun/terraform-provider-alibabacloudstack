@@ -63,7 +63,7 @@ func resourceAlibabacloudStackPolardbAccount() *schema.Resource {
 
 func resourceAlibabacloudStackPolardbAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
+	polardbaccountservice := PolardbService{client}
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "CreateAccount", "")
 	PolardbCreateaccountResponse := PolardbCreateaccountResponse{}
 
@@ -195,8 +195,7 @@ func resourceAlibabacloudStackPolardbAccountUpdate(d *schema.ResourceData, meta 
 
 func resourceAlibabacloudStackPolardbAccountRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbaccountservice :=
-		PolardbService{client}
+	polardbaccountservice := PolardbService{client}
 	response, err := polardbaccountservice.DescribeDBAccount(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_account", errmsgs.AlibabacloudStackSdkGoERROR)
