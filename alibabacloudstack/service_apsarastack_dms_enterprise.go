@@ -6,11 +6,11 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
-type Dms_enterpriseService struct {
+type DmsService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
-func (s *Dms_enterpriseService) DescribeDmsEnterpriseInstance(id string) (object map[string]interface{}, err error) {
+func (s *DmsService) DescribeDmsEnterpriseInstance(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
@@ -39,11 +39,11 @@ func (s *Dms_enterpriseService) DescribeDmsEnterpriseInstance(id string) (object
 	return object, nil
 }
 
-func (s *Dms_enterpriseService) DoDms_EnterpriseGetuserRequest(id string) (object map[string]interface{}, err error) {
+func (s *DmsService) DoDms_EnterpriseGetuserRequest(id string) (object map[string]interface{}, err error) {
 	return s.DescribeDmsEnterpriseUser(id)
 }
 
-func (s *Dms_enterpriseService) DescribeDmsEnterpriseUser(id string) (object map[string]interface{}, err error) {
+func (s *DmsService) DescribeDmsEnterpriseUser(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := map[string]interface{}{
 		"Uid":      id,

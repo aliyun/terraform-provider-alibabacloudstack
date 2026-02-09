@@ -828,7 +828,7 @@ locals {
 
 const DataAlibabacloudstackImages = `
 data "alibabacloudstack_images" "default" {
-  name_regex  = "^aliyun_3_x86_64_20G_pro_dengbao_alibase"
+  name_regex  = "^aliyun_.*"
   most_recent = true
   owners      = "system"
 }

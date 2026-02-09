@@ -30,6 +30,10 @@ func resourceAlibabacloudStackImageExport() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"oss_object": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackImageExportCreate, resourceAlibabacloudStackImageExportRead, nil, resourceAlibabacloudStackImageExportDelete)
@@ -72,32 +76,22 @@ func resourceAlibabacloudStackImageExportCreate(d *schema.ResourceData, meta int
 }
 
 func resourceAlibabacloudStackImageExportRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	ecsService := EcsService{client: client}
-
-	object, err := ecsService.DescribeImageById(d.Id())
-	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			d.SetId("")
-			return nil
-		}
-		return errmsgs.WrapError(err)
+	objectName := d.Get("image_id").(string) + "_system.raw.tar.gz"
+	if d.Get("oss_prefix").(string) != "" {
+		objectName = d.Get("oss_prefix").(string) + "_" + objectName
 	}
-	d.Set("image_id", object.ImageId)
+	d.Set("oss_object", objectName)
 	return nil
 }
 
 func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client: client}
-	bucket, err:=ossService.GetBucketClient(d.Get("oss_bucket").(string))
+	bucket, err := ossService.GetBucketClient(d.Get("oss_bucket").(string))
 	if err != nil {
 		return err
 	}
-	objectName := d.Id() + "_system.raw.tar.gz"
-	if d.Get("oss_prefix").(string) != "" {
-		objectName = d.Get("oss_prefix").(string) + "_" + objectName
-	}
+	objectName := d.Get("oss_object").(string)
 	err = bucket.DeleteObject(objectName)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"No Content", "Not Found"}) {

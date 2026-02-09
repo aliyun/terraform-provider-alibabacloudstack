@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -22,8 +21,9 @@ func resourceAlibabacloudStackDmsEnterpriseUser() *schema.Resource {
 				Optional: true,
 			},
 			"mobile": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The field `mobile` has been deprecated and is scheduled for removal in version 3.21.0.",
 			},
 			"role_names": {
 				Type:     schema.TypeSet,
@@ -31,16 +31,13 @@ func resourceAlibabacloudStackDmsEnterpriseUser() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				MinItems: 1,
 			},
 			"status": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"DISABLE", "NORMAL"}, false),
 				Default:      "NORMAL",
-			},
-			"tid": {
-				Type:     schema.TypeInt,
-				Optional: true,
 			},
 			"uid": {
 				Type:     schema.TypeString,
@@ -68,38 +65,42 @@ func resourceAlibabacloudStackDmsEnterpriseUser() *schema.Resource {
 
 func resourceAlibabacloudStackDmsEnterpriseUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	action := "RegisterUser"
-	request := make(map[string]interface{})
+	dmsService := DmsService{client}
+	d.SetId(d.Get("uid").(string))
+	object, err := dmsService.DescribeDmsEnterpriseUser(d.Id())
+	if object != nil && object["State"].(string) == "DELETE" {
+		request := map[string]interface{}{
+			"Uid": d.Id(),
+		}
+		action := "EnableUser"
+		_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
+		if err != nil {
+			return err
+		}
+	} else {
+		action := "RegisterUser"
+		request := make(map[string]interface{})
 
-	if v, ok := d.GetOk("mobile"); ok {
-		request["Mobile"] = v
+		if v, ok := d.GetOk("role_names"); ok && v != nil {
+			request["RoleNames"] = convertListToCommaSeparate(v.(*schema.Set).List())
+		}
+
+		request["Uid"] = d.Get("uid")
+		request["UserNick"] = connectivity.GetResourceData(d, "user_name", "nick_name").(string)
+
+		_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
+		if err != nil {
+			return err
+		}
 	}
-
-	if v, ok := d.GetOk("role_names"); ok && v != nil {
-		request["RoleNames"] = convertListToCommaSeparate(v.(*schema.Set).List())
-	}
-
-	if v, ok := d.GetOk("tid"); ok {
-		request["Tid"] = v
-	}
-
-	request["Uid"] = d.Get("uid")
-	request["UserNick"] = connectivity.GetResourceData(d, "user_name", "nick_name").(string)
-
-	_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
-	if err != nil {
-		return err
-	}
-
-	d.SetId(fmt.Sprint(request["Uid"]))
 
 	return nil
 }
 
 func resourceAlibabacloudStackDmsEnterpriseUserRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	dms_enterpriseService := Dms_enterpriseService{client}
-	object, err := dms_enterpriseService.DescribeDmsEnterpriseUser(d.Id())
+	dmsService := DmsService{client}
+	object, err := dmsService.DescribeDmsEnterpriseUser(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_dms_enterprise_user dms_enterpriseService.DescribeDmsEnterpriseUser Failed!!! %s", err)
@@ -110,43 +111,29 @@ func resourceAlibabacloudStackDmsEnterpriseUserRead(d *schema.ResourceData, meta
 	}
 
 	d.Set("uid", d.Id())
-	d.Set("mobile", object["Mobile"])
 	d.Set("role_names", object["RoleNameList"].(map[string]interface{})["RoleNames"])
 	d.Set("status", object["State"])
+	d.Set("max_execute_count", object["MaxExecuteCount"])
+	d.Set("max_result_count", object["MaxResultCount"])
 	connectivity.SetResourceData(d, object["NickName"], "user_name", "nick_name")
 	return nil
 }
 
 func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	dms_enterpriseService := Dms_enterpriseService{client}
-	d.Partial(true)
+	dmsService := DmsService{client}
 
-	update := false
-	request := map[string]interface{}{
-		"Uid": d.Id(),
-	}
-	if !d.IsNewResource() && d.HasChange("mobile") {
-		update = true
-		request["Mobile"] = d.Get("mobile")
-	}
-	if !d.IsNewResource() && d.HasChange("role_names") {
-		update = true
-		request["RoleNames"] = convertListToCommaSeparate(d.Get("role_names").(*schema.Set).List())
-	}
-	if !d.IsNewResource() && d.HasChanges("user_name", "nick_name") {
-		update = true
-		request["UserNick"] = connectivity.GetResourceData(d, "user_name", "nick_name").(string)
-	}
-	if update {
+	if d.HasChanges("role_names", "user_name", "nick_name", "max_execute_count", "max_result_count") {
+		request := map[string]interface{}{
+			"Uid":       d.Id(),
+			"RoleNames": convertListToCommaSeparate(d.Get("role_names").(*schema.Set).List()),
+			"UserNick":  connectivity.GetResourceData(d, "user_name", "nick_name").(string),
+		}
 		if _, ok := d.GetOk("max_execute_count"); ok {
 			request["MaxExecuteCount"] = d.Get("max_execute_count")
 		}
 		if _, ok := d.GetOk("max_result_count"); ok {
 			request["MaxResultCount"] = d.Get("max_result_count")
-		}
-		if _, ok := d.GetOk("tid"); ok {
-			request["Tid"] = d.Get("tid")
 		}
 		action := "UpdateUser"
 		_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
@@ -156,7 +143,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, me
 	}
 
 	if d.HasChange("status") {
-		object, err := dms_enterpriseService.DescribeDmsEnterpriseUser(d.Id())
+		object, err := dmsService.DescribeDmsEnterpriseUser(d.Id())
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -165,9 +152,6 @@ func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, me
 			if target == "DISABLE" {
 				request := map[string]interface{}{
 					"Uid": d.Id(),
-				}
-				if v, ok := d.GetOk("tid"); ok {
-					request["Tid"] = v
 				}
 				action := "DisableUser"
 				_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
@@ -179,9 +163,6 @@ func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, me
 				request := map[string]interface{}{
 					"Uid": d.Id(),
 				}
-				if v, ok := d.GetOk("tid"); ok {
-					request["Tid"] = v
-				}
 				action := "EnableUser"
 				_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 				if err != nil {
@@ -190,7 +171,6 @@ func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, me
 			}
 		}
 	}
-	d.Partial(false)
 	return nil
 }
 
@@ -201,9 +181,6 @@ func resourceAlibabacloudStackDmsEnterpriseUserDelete(d *schema.ResourceData, me
 		"Uid": d.Get("uid"),
 	}
 
-	if v, ok := d.GetOk("tid"); ok {
-		request["Tid"] = v
-	}
 	_, err := client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 	if err != nil {
 		return err

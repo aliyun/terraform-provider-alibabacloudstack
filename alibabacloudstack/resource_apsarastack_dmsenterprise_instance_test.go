@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
-	"os"
 	"strings"
 	"testing"
 
@@ -14,7 +13,7 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -102,13 +101,13 @@ func testSweepDMSEnterpriseInstances(region string) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackDmsEnterprise(t *testing.T) {
+func TestAccAlibabacloudStackDmsEnterpriseInstance(t *testing.T) {
 	resourceId := "alibabacloudstack_dms_enterprise_instance.default"
 	var v map[string]interface{}
 	ra := resourceAttrInit(resourceId, testAccCheckKeyValueInMapsForDMS)
 
 	serviceFunc := func() interface{} {
-		return &Dms_enterpriseService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &DmsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 
@@ -116,19 +115,20 @@ func TestAccAlibabacloudStackDmsEnterprise(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
-	name := fmt.Sprintf("tf-testAccDmsEnterpriseInstance%d", rand)
+	name := fmt.Sprintf("tf-DmsInstance%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDmsConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"dba_uid":           "${alibabacloudstack_dms_enterprise_user.default.uid}",
-					"host":              "${alibabacloudstack_db_instance.instance.connection_string}",
+					"host":              "${alibabacloudstack_db_instance.default.connection_string}",
 					"port":              "3306",
 					"network_type":      "CLASSIC",
 					"safe_rule":         "Free Operations",
@@ -141,7 +141,7 @@ func TestAccAlibabacloudStackDmsEnterprise(t *testing.T) {
 					"instance_alias":    name,
 					"query_timeout":     "70",
 					"export_timeout":    "2000",
-					"ecs_region":        os.Getenv("ALIBABACLOUDSTACK_REGION"),
+					"ecs_region":        "${data.alibabacloudstack_account.current.region}",
 					"ddl_online":        "0",
 					"use_dsql":          "0",
 					"data_link_name":    "",
@@ -161,7 +161,7 @@ func TestAccAlibabacloudStackDmsEnterprise(t *testing.T) {
 						"instance_alias":  name,
 						"query_timeout":   "70",
 						"export_timeout":  "2000",
-						"ecs_region":      os.Getenv("ALIBABACLOUDSTACK_REGION"),
+						"ecs_region":      CHECKSET,
 						"ddl_online":      "0",
 						"use_dsql":        "0",
 						"data_link_name":  "",
@@ -204,50 +204,6 @@ func TestAccAlibabacloudStackDmsEnterprise(t *testing.T) {
 					}),
 				),
 			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"dba_uid":           "${alibabacloudstack_dms_enterprise_user.default.uid}",
-					"host":              "${alibabacloudstack_db_instance.instance.connection_string}",
-					"port":              "3306",
-					"network_type":      "CLASSIC",
-					"safe_rule":         "Free Operations",
-					"tid":               "1",
-					"instance_type":     "mysql",
-					"instance_source":   "RDS",
-					"env_type":          "test",
-					"database_user":     "${alibabacloudstack_db_account.account.name}",
-					"database_password": "${alibabacloudstack_db_account.account.password}",
-					"instance_alias":    name,
-					"query_timeout":     "70",
-					"export_timeout":    "2000",
-					"ecs_region":        os.Getenv("ALIBABACLOUDSTACK_REGION"),
-					"ddl_online":        "0",
-					"use_dsql":          "0",
-					"data_link_name":    "",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"dba_uid":         CHECKSET,
-						"host":            CHECKSET,
-						"port":            "3306",
-						"network_type":    "CLASSIC",
-						"safe_rule":       "Free Operations",
-						"tid":             "1",
-						"instance_type":   "mysql",
-						"instance_source": "RDS",
-						"env_type":        "test",
-						"database_user":   CHECKSET,
-						"instance_alias":  name,
-						"query_timeout":   "70",
-						"export_timeout":  "2000",
-						"ecs_region":      os.Getenv("ALIBABACLOUDSTACK_REGION"),
-						"ddl_online":      "0",
-						"use_dsql":        "0",
-						"data_link_name":  "",
-					}),
-				),
-			},
 		},
 	})
 }
@@ -262,41 +218,36 @@ func resourceDmsConfigDependence(name string) string {
 	}
 	data "alibabacloudstack_account" "current" {
 	}
+	
+%s
+	
+%s
 
-	resource "alibabacloudstack_db_instance" "instance" {
-	engine           = "MySQL"
-	engine_version   = "5.6"
-	instance_type    = "rds.mysql.t1.small"
-	instance_storage = "10"
-	instance_name    = "${var.name}"
-	security_ips     = ["0.0.0.0/0"]
-	storage_type         = "local_ssd"
-	}
+%s
 	
 	resource "alibabacloudstack_db_account" "account" {
-	instance_id = "${alibabacloudstack_db_instance.instance.id}"
-	name        = "tftest123"
-	password    = "%s"
+	instance_id = "${alibabacloudstack_db_instance.default.id}"
+	name        = "dmstest"
+	password    = random_password.password.0.result
 	type        = "Normal"
 	}
-
+	
 	resource "alibabacloudstack_ascm_user" "user" {
 	 cellphone_number = "13900000000"
 	 email = "test@gmail.com"
-	 display_name = "C2C-DELTA"
-	 organization_id = 33
-	 mobile_nation_code = "91"
-	 login_name = "User_Dms_${var.name}"
+	 display_name = "${var.name}"
+	 organization_id = data.alibabacloudstack_account.current.organization_id
+	 mobile_nation_code = "86"
+	 login_name = "${var.name}"
 	 login_policy_id = 1
 	}
 
 	resource "alibabacloudstack_dms_enterprise_user" "default" {
 		  uid = alibabacloudstack_ascm_user.user.user_id
 		  user_name = alibabacloudstack_ascm_user.user.login_name
-		  mobile = "15910799999"
-		  role_names = ["ADMIN"]
+		  role_names = ["ADMIN", "DBA"]
 	}
 	
 
-	`, name, getAccTestPassword(12))
+	`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase(), RandomPasswordTestCase(12, 1))
 }

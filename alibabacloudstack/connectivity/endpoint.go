@@ -21,7 +21,7 @@ const (
 	AlidnsCode           = ServiceCode("ALIDNS")
 	ResourcemanagerCode  = ServiceCode("RESOURCEMANAGER")
 	WafOpenapiCode       = ServiceCode("WAFOPENAPI")
-	DmsEnterpriseCode    = ServiceCode("DMSENTERPRISE")
+	DmsEnterpriseCode    = ServiceCode("DMS_ENTERPRISE")
 	DnsCode              = ServiceCode("ALIDNS")
 	KmsCode              = ServiceCode("KMS")
 	CbnCode              = ServiceCode("CBN")
@@ -284,7 +284,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"{{.region}}.ots-internal.{{.domain}}",
 		"{{.region}}.ots-internal.{{.domain}}",
 	},
-	DmsEnterpriseCode: PopEndpoint{"", ""},
+	DmsEnterpriseCode: PopEndpoint{
+		"newdms-api.{{.domain}}", 
+		"newdms-api.{{.region}}.{{.domain}}", 
+	},
 	OSSCode:           PopEndpoint{"", ""},
 	DataworkspublicCode: PopEndpoint{
 		"dataworks-public.{{.domain}}",

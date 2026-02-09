@@ -26,21 +26,11 @@ func dataSourceAlibabacloudStackDmsEnterpriseUsers() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"search_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"status": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"DELETE", "DISABLE", "NORMAL"}, false),
-			},
-			"tid": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -121,14 +111,8 @@ func dataSourceAlibabacloudStackDmsEnterpriseUsersRead(d *schema.ResourceData, m
 	if v, ok := d.GetOk("role"); ok {
 		request["Role"] = v
 	}
-	if v, ok := d.GetOk("search_key"); ok {
-		request["SearchKey"] = v
-	}
 	if v, ok := d.GetOk("status"); ok {
 		request["UserState"] = v
-	}
-	if v, ok := d.GetOk("tid"); ok {
-		request["Tid"] = v
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1

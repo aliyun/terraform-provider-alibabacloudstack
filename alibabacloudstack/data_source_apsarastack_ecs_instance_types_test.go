@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -80,8 +79,8 @@ func TestAccAlibabacloudStackInstanceTypesDataSource(t *testing.T) {
 }
 
 func dataSourceInstanceTypesConfigDependence(name string) string {
-	return fmt.Sprintf(`
+	return `
 data "alibabacloudstack_instance_types" "anyone" {
 }
-`)
+`
 }

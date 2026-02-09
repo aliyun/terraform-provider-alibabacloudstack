@@ -219,7 +219,7 @@ func resourceAlibabacloudStackDmsEnterpriseInstanceCreate(d *schema.ResourceData
 
 func resourceAlibabacloudStackDmsEnterpriseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	dms_enterpriseService := Dms_enterpriseService{client}
+	dms_enterpriseService := DmsService{client}
 	object, err := dms_enterpriseService.DescribeDmsEnterpriseInstance(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {

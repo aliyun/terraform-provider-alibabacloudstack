@@ -5,103 +5,82 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackDmsEnterpriseUsersDataSource(t *testing.T) {
-	rand := getAccTestRandInt(1000000, 9999999)
-	resourceId := "data.alibabacloudstack_dms_enterprise_users.default"
-	name := fmt.Sprintf("tf_testAccDmsEnterpriseUsersDataSource_%d", rand)
-	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceDmsEnterpriseUsersConfigDependence)
+func TestAccAlibabacloudStackDmsenterpriseUsersDataSource(t *testing.T) {
+
+	rand := getAccTestRandInt(10000, 99999)
+	resourceId := AlibabacloudstackDmsenterpriseUsersCheckInfo.resourceId
+	name := fmt.Sprintf("tftestdomain%d", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccCheckAlibabacloudstackDmsenterpriseUsersSourceConfig)
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_dms_enterprise_user.default.uid}"},
+			"ids": []string{"${alibabacloudstack_dmsenterprise_user.default.uid}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_dms_enterprise_user.default.uid}-fake"},
+			"ids": []string{"${alibabacloudstack_dmsenterprise_user.default.uid}-fake"},
 		}),
 	}
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_dms_enterprise_user.default.user_name}",
+			"name_regex": "${alibabacloudstack_dmsenterprise_user.default.user_name}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_dms_enterprise_user.default.user_name}-fake",
+			"name_regex": "${alibabacloudstack_dmsenterprise_user.default.user_name}-fake",
 		}),
 	}
 	statusConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":    []string{"${alibabacloudstack_dms_enterprise_user.default.uid}"},
+			"ids":    []string{"${alibabacloudstack_dmsenterprise_user.default.uid}"},
 			"status": "NORMAL",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":    []string{"${alibabacloudstack_dms_enterprise_user.default.uid}"},
+			"ids":    []string{"${alibabacloudstack_dmsenterprise_user.default.uid}"},
 			"status": "DISABLE",
 		}),
 	}
 
 	roleConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":  []string{"${alibabacloudstack_dms_enterprise_user.default.uid}"},
-			"role": "DBA",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":  []string{"${alibabacloudstack_dms_enterprise_user.default.uid}"},
+			"ids":  []string{"${alibabacloudstack_dmsenterprise_user.default.uid}"},
 			"role": "USER",
 		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":  []string{"${alibabacloudstack_dmsenterprise_user.default.uid}"},
+			"role": "DBA",
+		}),
 	}
 
-	var existDmsEnterpriseUsersMapFunc = func(rand int) map[string]string {
-		return map[string]string{
-			"ids.#":                "1",
-			"ids.0":                CHECKSET,
-			"users.#":              "1",
-			"users.0.mobile":       "15910799999",
-			"users.0.nick_name":    name,
-			"users.0.parent_uid":   CHECKSET,
-			"users.0.role_ids.#":   "1",
-			"users.0.role_names.#": "1",
-			"users.0.status":       "NORMAL",
-			"users.0.id":           CHECKSET,
-			"users.0.user_id":      CHECKSET,
-		}
-	}
-
-	var fakeDmsEnterpriseUsersMapFunc = func(rand int) map[string]string {
-		return map[string]string{
-			"ids.#":   "0",
-			"users.#": "0",
-		}
-	}
-
-	var kmsKeysCheckInfo = dataSourceAttr{
-		resourceId:   resourceId,
-		existMapFunc: existDmsEnterpriseUsersMapFunc,
-		fakeMapFunc:  fakeDmsEnterpriseUsersMapFunc,
-	}
-
-	kmsKeysCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, statusConf, roleConf)
+	AlibabacloudstackDmsenterpriseUsersCheckInfo.dataSourceTestCheck(t, rand, idsConf, statusConf, nameRegexConf, roleConf)
 }
 
-func dataSourceDmsEnterpriseUsersConfigDependence(name string) string {
-	return fmt.Sprintf(`        
-		resource "alibabacloudstack_ascm_organization" "default" {
-		 name = "Test_binder"
-		 parent_id = "1"
-		}
-		
-		resource "alibabacloudstack_ascm_user" "user" {
-		 cellphone_number = "13900000000"
-		 email = "test@gmail.com"
-		 display_name = "C2C-DELTA"
-		 organization_id = alibabacloudstack_ascm_organization.default.org_id
-		 mobile_nation_code = "91"
-		 login_name = "%s"
-		 login_policy_id = 1
-		}
-		
-		resource "alibabacloudstack_dms_enterprise_user" "default" {
-		  uid = alibabacloudstack_ascm_user.user.user_id
-		  user_name = alibabacloudstack_ascm_user.user.login_name
-		  mobile = "15910799999"
-		  role_names = ["DBA"]
-	}`, name)
+var existAlibabacloudstackDmsenterpriseUsersMapFunc = func(rand int) map[string]string {
+	return map[string]string{
+		"users.#":    "1",
+		"users.0.id": CHECKSET,
+	}
+}
+
+var fakeAlibabacloudstackDmsenterpriseUsersMapFunc = func(rand int) map[string]string {
+	return map[string]string{
+		"users.#": "0",
+	}
+}
+
+var AlibabacloudstackDmsenterpriseUsersCheckInfo = dataSourceAttr{
+	resourceId:   "data.alibabacloudstack_dmsenterprise_users.default",
+	existMapFunc: existAlibabacloudstackDmsenterpriseUsersMapFunc,
+	fakeMapFunc:  fakeAlibabacloudstackDmsenterpriseUsersMapFunc,
+}
+
+func testAccCheckAlibabacloudstackDmsenterpriseUsersSourceConfig(name string) string {
+	return AlibabacloudTestAccDmsenterpriseUserBasicdependence0(name) + `
+resource "alibabacloudstack_dmsenterprise_user" "default" {
+	uid=               "${alibabacloudstack_ascm_user.user.user_uid}"
+	user_name=         "${alibabacloudstack_ascm_user.user.login_name}"
+	max_execute_count= 10
+	max_result_count=  10
+	role_names=        ["USER"]
+}
+`
 }
