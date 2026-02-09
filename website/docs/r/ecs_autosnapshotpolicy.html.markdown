@@ -38,6 +38,7 @@ The following arguments are supported:
   - `1` to `65535`: The number of days the snapshots are retained. After the retention period expires, the snapshots are automatically deleted.
   Default value: `-1`.
 * `time_points` - (Required) The time points at which the automatic snapshots are created. Valid values are `"0"` to `"23"`, representing the hours from `00:00` to `23:00`. You can specify up to 24 time points. The format is a JSON array, such as `["1", "22", "23"]`.
+* `disk_ids` - (Optional) The IDs of the disks for which you want to create automatic snapshots.
 
 ## Attributes Reference
 
