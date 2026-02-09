@@ -1449,26 +1449,17 @@ func (s *EcsService) ListDisksForSnapshotPolicy(policyId string) (disks []ecs.Di
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		response, _ = raw.(*ecs.DescribeDisksResponse)
-		if len(response.Disks.Disk) < 1 {
-			return resource.RetryableError(err)
-		}
 		return nil
 	})
 	if err != nil {
 		return disks, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, policyId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if len(response.Disks.Disk) < 1 {
-		return disks, errmsgs.GetNotFoundErrorFromString("Enable Automated Snapshot Policy Disks notfound.")
 	}
 	for _, diskdata := range response.Disks.Disk {
 		if diskdata.AutoSnapshotPolicyId == policyId {
 			disks = append(disks, diskdata)
 		}
 	}
-	if len(disks) > 0 {
-		return disks, nil
-	}
-	return disks, errmsgs.GetNotFoundErrorFromString("Enable Automated Snapshot Policy Disks notfound.")
+	return disks, nil
 }
 
 func (s *EcsService) DoEcsDescribereservedinstancesRequest(id string) (reservedInstance ecs.ReservedInstance, err error) {
