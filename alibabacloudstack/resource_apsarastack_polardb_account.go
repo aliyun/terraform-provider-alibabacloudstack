@@ -5,6 +5,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -62,7 +63,7 @@ func resourceAlibabacloudStackPolardbAccount() *schema.Resource {
 
 func resourceAlibabacloudStackPolardbAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
+	polardbService := PolardbService{client}
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "CreateAccount", "")
 	PolardbCreateaccountResponse := PolardbCreateaccountResponse{}
 
@@ -113,6 +114,10 @@ func resourceAlibabacloudStackPolardbAccountCreate(d *schema.ResourceData, meta 
 	data_base_instance_id := d.Get("data_base_instance_id").(string)
 
 	d.SetId(fmt.Sprintf("%s:%s", data_base_instance_id, account_name))
+	stateConf := BuildStateConf([]string{"UnAvailable"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, polardbService.PolardbAccountStateRefreshFunc(d.Id(), []string{"Failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
 	return nil
 
 }
@@ -193,9 +198,8 @@ func resourceAlibabacloudStackPolardbAccountUpdate(d *schema.ResourceData, meta 
 
 func resourceAlibabacloudStackPolardbAccountRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbaccountservice :=
-		PolardbService{client}
-	response, err := polardbaccountservice.DescribeDBAccount(d.Id())
+	polardbService := PolardbService{client}
+	response, err := polardbService.DescribeDBAccount(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")

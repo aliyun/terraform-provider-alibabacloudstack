@@ -2344,3 +2344,23 @@ func (s *PolardbService) DescribeParameterGroup(id string) (map[string]interface
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB parameter group %s not found", id))
 }
+
+func (s *PolardbService) PolardbAccountStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeDBAccount(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object.Accounts.DBInstanceAccount[0].AccountStatus == failState {
+				return object, object.Accounts.DBInstanceAccount[0].AccountStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Accounts.DBInstanceAccount[0].AccountStatus))
+			}
+		}
+		return object, object.Accounts.DBInstanceAccount[0].AccountStatus, nil
+	}
+}
