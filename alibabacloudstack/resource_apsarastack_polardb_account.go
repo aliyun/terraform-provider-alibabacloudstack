@@ -5,6 +5,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -112,6 +113,10 @@ func resourceAlibabacloudStackPolardbAccountCreate(d *schema.ResourceData, meta 
 	data_base_instance_id := d.Get("data_base_instance_id").(string)
 
 	d.SetId(fmt.Sprintf("%s", data_base_instance_id+":"+account_name))
+	stateConf := BuildStateConf([]string{"UnAvailable"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, polardbaccountservice.PolardbAccountStateRefreshFunc(d.Id(), []string{"Failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
 	return nil
 
 }
