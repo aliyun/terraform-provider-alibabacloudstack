@@ -2310,3 +2310,37 @@ func (s *PolardbService) DescribeDBReadWriteSplittingConnection(id string) (map[
 	response, err := s.client.DoTeaRequest("GET", "polardb", "2024-01-30", "DescribeDBProxyEndpoint", "", nil, reqQuery, nil)
 	return response, err
 }
+
+func (s *PolardbService) DescribeParameterGroup(id string) (map[string]interface{}, error) {
+	reqQuery := map[string]interface{}{"ParameterGroupId": id}
+
+	response, err := s.client.DoTeaRequest("GET", "polardb", "2024-01-30", "DescribeParameterGroup", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the parameter group exists
+	if paramGroup, ok := response["ParamGroup"]; ok {
+		if paramGroupList, ok := paramGroup.(map[string]interface{})["ParameterGroup"]; ok {
+			if paramGroupArray, ok := paramGroupList.([]interface{}); ok && len(paramGroupArray) > 0 {
+				paramGroupMap := paramGroupArray[0].(map[string]interface{})
+
+				result := make(map[string]interface{})
+				for k, v := range paramGroupMap {
+					result[k] = v
+				}
+
+				// Handle ParamDetail if it exists
+				if paramDetail, ok := paramGroupMap["ParamDetail"]; ok {
+					if detailMap, ok := paramDetail.(map[string]interface{}); ok {
+						result["ParamDetail"] = detailMap
+					}
+				}
+
+				return result, nil
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB parameter group %s not found", id))
+}
