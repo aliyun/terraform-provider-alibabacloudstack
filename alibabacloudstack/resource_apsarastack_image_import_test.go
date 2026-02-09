@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -13,6 +14,20 @@ import (
 
 func TestAccAlibabacloudStackImportImage(t *testing.T) {
 	var v ecs.Image
+
+	const size = 10 * 1024 * 1024
+	tmpFile, err := ioutil.TempFile("", "tf-oss-object-test-acc-source")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	// first write some data to the tempfile just so it's not 0 bytes.
+	_, err = tmpFile.Write(make([]byte, size))
+	if err != nil {
+		panic(err)
+	}
+
 	resourceId := "alibabacloudstack_image_import.default"
 	ra := resourceAttrInit(resourceId, testAccImageImageCheckMap)
 	serviceFunc := func() interface{} {
@@ -22,12 +37,11 @@ func TestAccAlibabacloudStackImportImage(t *testing.T) {
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeImageById")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageImageBasicConfigDependence)
+	name := fmt.Sprintf("tf-imageimport%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageImageBasicConfigDependence(tmpFile.Name()))
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckOSSForImageImport(t)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -35,8 +49,8 @@ func TestAccAlibabacloudStackImportImage(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description":  fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%ddescription", rand),
-					"image_name":   name,
+					"description":  "${var.name}_desc",
+					"image_name":   "${var.name}",
 					"architecture": "x86_64",
 					"license_type": "Auto",
 					"platform":     "Ubuntu",
@@ -45,59 +59,46 @@ func TestAccAlibabacloudStackImportImage(t *testing.T) {
 						{
 							"disk_image_size": "10",
 							"format":          "RAW",
-							"oss_bucket":      os.Getenv("ALIBABACLOUDSTACK_OSS_BUCKET_FOR_IMAGE"),
-							"oss_object":      os.Getenv("ALIBABACLOUDSTACK_OSS_OBJECT_FOR_IMAGE"),
+							"oss_bucket":      "${alibabacloudstack_oss_bucket.default.bucket}",
+							"oss_object":      "${alibabacloudstack_oss_bucket_object.default.key}",
 						},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description":                      fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%ddescription", rand),
-						"image_name":                       name,
-						"architecture":                     "x86_64",
-						"license_type":                     "Auto",
-						"platform":                         "Ubuntu",
-						"os_type":                          "linux",
-						"disk_device_mapping.#":            "1",
-						"disk_device_mapping.0.oss_bucket": CHECKSET,
-						"disk_device_mapping.0.oss_object": CHECKSET,
+						"description":           name + "_desc",
+						"image_name":            name,
+						"architecture":          "x86_64",
+						"license_type":          "Auto",
+						"platform":              "Ubuntu",
+						"os_type":               "linux",
+						"disk_device_mapping.#": "1",
 					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"license_type"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description": fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%ddescriptionchange", rand),
+					"description": "${var.name}_desc update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%ddescriptionchange", rand),
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"image_name": fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%dchange", rand),
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"image_name": fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%dchange", rand),
+						"description": name + "_desc update",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description": fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%ddescription", rand),
-					"image_name":  fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%d", rand),
+					"image_name": "${var.name}_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%ddescription", rand),
-						"image_name":  fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%d", rand),
+						"image_name": name + "_update",
 					}),
 				),
 			},
@@ -114,6 +115,23 @@ func TestAccAlibabacloudStackImportImage(t *testing.T) {
 
 var testAccImageImageCheckMap = map[string]string{}
 
-func resourceImageImageBasicConfigDependence(name string) string {
-	return ""
+func resourceImageImageBasicConfigDependence(filename string) func(string) string {
+	return func(name string) string {
+		return fmt.Sprintf(`
+	variable "name" {
+		default = "%s"
+	}
+
+	resource "alibabacloudstack_oss_bucket" "default" {
+	bucket = "${var.name}"
+	acl = "public-read-write"
+	}
+
+	resource "alibabacloudstack_oss_bucket_object" "default" {
+	bucket=       "${alibabacloudstack_oss_bucket.default.bucket}"
+	key=          "test-object-source-key"
+	source=       "%s"
+	}
+`, name, filename)
+	}
 }

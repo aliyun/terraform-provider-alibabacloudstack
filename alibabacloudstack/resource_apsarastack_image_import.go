@@ -14,7 +14,7 @@ import (
 func resourceAlibabacloudStackImageImport() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(120 * time.Minute),
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
@@ -106,7 +106,7 @@ func resourceAlibabacloudStackImageImportCreate(d *schema.ResourceData, meta int
 	request.Platform = d.Get("platform").(string)
 
 	diskDeviceMappings := d.Get("disk_device_mapping").([]interface{})
-	if diskDeviceMappings != nil && len(diskDeviceMappings) > 0 {
+	if len(diskDeviceMappings) > 0 {
 		mappings := make([]ecs.ImportImageDiskDeviceMapping, 0, len(diskDeviceMappings))
 		for _, diskDeviceMapping := range diskDeviceMappings {
 			mapping := diskDeviceMapping.(map[string]interface{})
