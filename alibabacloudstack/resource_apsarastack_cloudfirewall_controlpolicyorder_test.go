@@ -5,16 +5,16 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlicloudCloudFirewallControlPolicyOrder_basic0(t *testing.T) {
 	var v map[string]interface{}
-	resourceId := "alicloud_cloud_firewall_control_policy_order.default"
+	resourceId := "alibabacloudstack_cloud_firewall_control_policy_order.default"
 	ra := resourceAttrInit(resourceId, AlicloudCloudFirewallControlPolicyOrderMap0)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &CloudfwService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &CloudfwService{testYundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeCloudFirewallControlPolicy")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -24,15 +24,16 @@ func TestAccAlicloudCloudFirewallControlPolicyOrder_basic0(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreYunCheck(t)
 		},
 		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		Providers:     testYunDunProviders(),
 		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"acl_uuid":  "${alicloud_cloud_firewall_control_policy.default.acl_uuid}",
-					"direction": "${alicloud_cloud_firewall_control_policy.default.direction}",
+					"acl_uuid":  "${alibabacloudstack_cloud_firewall_control_policy.default.acl_uuid}",
+					"direction": "${alibabacloudstack_cloud_firewall_control_policy.default.direction}",
 					"order":     "3",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -69,7 +70,7 @@ var AlicloudCloudFirewallControlPolicyOrderMap0 = map[string]string{
 func AlicloudCloudFirewallControlPolicyOrderBasicDependence0(name string) string {
 	return fmt.Sprintf(` 
 
-resource "alicloud_cloud_firewall_control_policy" "default" {
+resource "alibabacloudstack_cloud_firewall_control_policy" "default" {
 	application_name =  "ANY"
 	acl_action       =  "accept"
 	description      =  "%s"

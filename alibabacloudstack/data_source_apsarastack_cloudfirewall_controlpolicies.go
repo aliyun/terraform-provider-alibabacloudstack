@@ -17,56 +17,37 @@ func dataSourceAlibabacloudStackCloudFirewallControlPolicies() *schema.Resource 
 			"acl_action": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"accept", "drop", "log"}, false),
 			},
 			"acl_uuid": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"destination": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"direction": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"in", "out"}, false),
-			},
-			"ip_version": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"lang": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"en", "zh"}, false),
 			},
 			"proto": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{" TCP", " UDP", "ANY", "ICMP"}, false),
 			},
 			"source": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"source_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -87,19 +68,11 @@ func dataSourceAlibabacloudStackCloudFirewallControlPolicies() *schema.Resource 
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"acl_action": {
-							Type:     schema.TypeString,
+						"order": {
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"acl_uuid": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"application_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"application_name": {
+						"destination": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -107,33 +80,19 @@ func dataSourceAlibabacloudStackCloudFirewallControlPolicies() *schema.Resource 
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"application_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"source_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"dest_port": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"dest_port_group": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"dest_port_group_ports": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"dest_port_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"destination": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"destination_group_cidrs": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"destination_group_type": {
+						"acl_action": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -145,44 +104,64 @@ func dataSourceAlibabacloudStackCloudFirewallControlPolicies() *schema.Resource 
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"dns_result": {
+						"source": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"dns_result_time": {
+						"dest_port_type": {
 							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"hit_times": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"order": {
-							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"proto": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"release": {
-							Type:     schema.TypeBool,
+						"hit_times": {
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"source": {
+						"destination_group_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"dest_port_group_ports": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"destination_group_cidrs": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"acl_uuid": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"source_group_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"application_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"release": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"source_group_cidrs": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
-						"source_group_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"source_type": {
+						"dest_port_group": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -211,20 +190,11 @@ func dataSourceAlibabacloudStackCloudFirewallControlPoliciesRead(d *schema.Resou
 		request["Destination"] = v
 	}
 	request["Direction"] = d.Get("direction")
-	if v, ok := d.GetOk("ip_version"); ok {
-		request["IpVersion"] = v
-	}
-	if v, ok := d.GetOk("lang"); ok {
-		request["Lang"] = v
-	}
 	if v, ok := d.GetOk("proto"); ok {
 		request["Proto"] = v
 	}
 	if v, ok := d.GetOk("source"); ok {
 		request["Source"] = v
-	}
-	if v, ok := d.GetOk("source_ip"); ok {
-		request["SourceIp"] = v
 	}
 	request["PageSize"] = PageSizeLarge
 	request["CurrentPage"] = 1
@@ -270,9 +240,7 @@ func dataSourceAlibabacloudStackCloudFirewallControlPoliciesRead(d *schema.Resou
 			"destination_group_type":  object["DestinationGroupType"],
 			"destination_type":        object["DestinationType"],
 			"direction":               object["Direction"],
-			"dns_result":              object["DnsResult"],
-			"dns_result_time":         fmt.Sprint(object["DnsResultTime"]),
-			"hit_times":               fmt.Sprint(object["HitTimes"]),
+			"hit_times":               object["HitTimes"],
 			"order":                   formatInt(object["Order"]),
 			"proto":                   object["Proto"],
 			"release":                 object["Release"],

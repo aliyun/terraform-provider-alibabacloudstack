@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -64,10 +65,6 @@ func resourceAlibabacloudStackCloudFirewallControlPolicy() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"in", "out"}, false),
 			},
-			"ip_version": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"lang": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -100,8 +97,8 @@ func resourceAlibabacloudStackCloudFirewallControlPolicy() *schema.Resource {
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackCloudFirewallControlPolicyCreate,
-		resourceAlibabacloudStackCloudFirewallControlPolicyRead, 
-		resourceAlibabacloudStackCloudFirewallControlPolicyUpdate, 
+		resourceAlibabacloudStackCloudFirewallControlPolicyRead,
+		resourceAlibabacloudStackCloudFirewallControlPolicyUpdate,
 		resourceAlibabacloudStackCloudFirewallControlPolicyDelete)
 	return resource
 }
@@ -140,18 +137,9 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyCreate(d *schema.Resourc
 	request["Destination"] = d.Get("destination")
 	request["DestinationType"] = d.Get("destination_type")
 	request["Direction"] = d.Get("direction")
-	if v, ok := d.GetOk("ip_version"); ok {
-		request["IpVersion"] = v
-	}
-	if v, ok := d.GetOk("lang"); ok {
-		request["Lang"] = v
-	}
 	request["NewOrder"] = "-1"
 	request["Proto"] = d.Get("proto")
 	request["Source"] = d.Get("source")
-	if v, ok := d.GetOk("source_ip"); ok {
-		request["SourceIp"] = v
-	}
 	request["SourceType"] = d.Get("source_type")
 
 	response, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
@@ -221,7 +209,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyUpdate(d *schema.Resourc
 	request["DestPort"] = d.Get("dest_port")
 	request["DestPortType"] = d.Get("dest_port_type")
 	request["Lang"] = d.Get("lang")
-	if d.HasChanges("acl_action","application_name","description","destination","destination_type","proto","source","dest_port","dest_port_type","lang") {
+	if d.HasChanges("acl_action", "application_name", "description", "destination", "destination_type", "proto", "source", "dest_port", "dest_port_type", "lang") {
 		update = true
 	}
 	if d.HasChange("dest_port_group") {
@@ -233,9 +221,6 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyUpdate(d *schema.Resourc
 		request["Release"] = d.Get("release")
 	}
 	if update {
-		if v, ok := d.GetOk("source_ip"); ok {
-			request["SourceIp"] = v
-		}
 		action := "ModifyControlPolicy"
 		_, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
 		if err != nil {
@@ -255,9 +240,6 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyDelete(d *schema.Resourc
 	request := map[string]interface{}{
 		"AclUuid":   parts[0],
 		"Direction": parts[1],
-	}
-	if v, ok := d.GetOk("source_ip"); ok {
-		request["SourceIp"] = v
 	}
 
 	_, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
