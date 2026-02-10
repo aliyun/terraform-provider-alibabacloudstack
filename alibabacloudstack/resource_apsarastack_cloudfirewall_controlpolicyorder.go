@@ -30,7 +30,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyOrder() *schema.Resource
 			},
 		},
 	}
-	setResourceFunc(resource, 
+	setResourceFunc(resource,
 		resourceAlibabacloudStackCloudFirewallControlPolicyOrderCreate,
 		resourceAlibabacloudStackCloudFirewallControlPolicyOrderRead,
 		resourceAlibabacloudStackCloudFirewallControlPolicyOrderUpdate,
@@ -40,49 +40,62 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyOrder() *schema.Resource
 
 func resourceAlibabacloudStackCloudFirewallControlPolicyOrderCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var response map[string]interface{}
-	action := "ModifyControlPolicyPriority"
+	action := "ModifyControlPolicyPosition"
 	request := make(map[string]interface{})
+	request["SourceCode"] = "yundun"
 	request["Direction"] = d.Get("direction")
-	request["Order"] = d.Get("order")
+	request["NewOrder"] = d.Get("order")
 	request["AclUuid"] = d.Get("acl_uuid")
 
-	response, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
-	addDebug(action, response, request)
+	cloudfwService := CloudfwService{client}
+	controlpolicy_id := fmt.Sprint(d.Get("acl_uuid"), ":", d.Get("direction"))
+	object, err := cloudfwService.DescribeCloudFirewallControlPolicy(controlpolicy_id)
+	oldorder, err := toInt(object["Order"])
+	if err != nil {
+		return err
+	}
+	request["OldOrder"] = oldorder
+
+	_, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
 
 	d.SetId(fmt.Sprint(request["AclUuid"], ":", request["Direction"]))
-
 	return nil
 }
 
 func resourceAlibabacloudStackCloudFirewallControlPolicyOrderUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	cloudfwService := CloudfwService{client}
 	var response map[string]interface{}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	action := "ModifyControlPolicyPriority"
+	action := "ModifyControlPolicyPosition"
 	request := map[string]interface{}{
-		"AclUuid":   parts[0],
-		"Direction": parts[1],
+		"AclUuid":    parts[0],
+		"Direction":  parts[1],
+		"SourceCode": "yundun",
 	}
 
 	if d.HasChange("order") {
-		request["Order"] = d.Get("order")
-	}
-
-	response, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
-	addDebug(action, response, request)
-	if err != nil {
-		return err
+		object, _ := cloudfwService.DescribeCloudFirewallControlPolicy(d.Id())
+		oldorder, err := toInt(object["Order"])
+		if err != nil {
+			return err
+		}
+		request["OldOrder"] = oldorder
+		request["NewOrder"] = d.Get("order")
+		response, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
+		addDebug(action, response, request)
+		if err != nil {
+			return err
+		}
 	}
 
 	d.SetId(fmt.Sprint(request["AclUuid"], ":", request["Direction"]))
-
 	return nil
 }
 
@@ -93,7 +106,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyOrderRead(d *schema.Reso
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_cloud_firewall_control_policy_order cloudfwService.DescribeCloudFirewallControlPolicy Failed!!! %s", err)
-			d.SetId("")
+			// d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
