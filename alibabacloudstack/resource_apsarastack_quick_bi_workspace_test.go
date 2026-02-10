@@ -9,7 +9,6 @@ import (
 )
 
 func TestAccAlicloudQuickBIWorkspace_basic0(t *testing.T) {
-	//t.Skip()
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_quick_bi_workspace.default"
 	ra := resourceAttrInit(resourceId, AlicloudQuickBIWorkspaceMap0)
@@ -19,7 +18,7 @@ func TestAccAlicloudQuickBIWorkspace_basic0(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%squickbiWorkspace%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-quickbi-workspace%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlicloudQuickBIWorkspaceBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

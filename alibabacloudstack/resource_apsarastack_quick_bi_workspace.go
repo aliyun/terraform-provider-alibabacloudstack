@@ -93,7 +93,7 @@ func resourceAlibabacloudStackQuickBiWorkspaceCreate(d *schema.ResourceData, met
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_quick_bi_Workspace", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		contentBytes := bresponse.GetHttpContentBytes()
-		if contentBytes == nil || len(contentBytes) == 0 {
+		if len(contentBytes) == 0 {
 			return resource.RetryableError(fmt.Errorf("received empty response content from API"))
 		}
 
