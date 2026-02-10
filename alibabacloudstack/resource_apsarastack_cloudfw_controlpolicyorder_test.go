@@ -32,8 +32,8 @@ func TestAccAlicloudCloudFirewallControlPolicyOrder_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"acl_uuid":  "${alibabacloudstack_cloud_firewall_control_policy.default.acl_uuid}",
-					"direction": "${alibabacloudstack_cloud_firewall_control_policy.default.direction}",
+					"acl_uuid":  "${alibabacloudstack_cloud_firewall_control_policy.default.0.acl_uuid}",
+					"direction": "${alibabacloudstack_cloud_firewall_control_policy.default.0.direction}",
 					"order":     "3",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -69,50 +69,26 @@ var AlicloudCloudFirewallControlPolicyOrderMap0 = map[string]string{
 
 func AlicloudCloudFirewallControlPolicyOrderBasicDependence0(name string) string {
 	return fmt.Sprintf(` 
+	
+variable name {
+	default = "%s"
+}
 
 resource "alibabacloudstack_cloud_firewall_control_policy" "default" {
+count            = 3
 application_name = "ANY"
 acl_action       = "accept"
-description      = "%s"
+description      = "${var.name}_${count.index}"
 destination_type = "net"
-destination      = "114.2.3.0/24"
+destination      = "114.2.${count.index}.0/24"
 direction        = "in"
 proto            = "ANY"
-source           = "192.1.1.0/24"
+source           = "192.1.${count.index}.0/24"
 source_type      = "net"
 dest_port  = "8080/8080"
 dest_port_type   = "port"
 release          = "true"
 }
 
-resource "alibabacloudstack_cloud_firewall_control_policy" "policy2" {
-application_name = "ANY"
-acl_action       = "accept"
-description      = "%s_v2"
-destination_type = "net"
-destination      = "115.2.3.0/24"
-direction        = "in"
-proto            = "ANY"
-source           = "193.1.1.0/24"
-source_type      = "net"
-dest_port  = "8080/8080"
-dest_port_type   = "port"
-release          = "true"
-}
-
-resource "alibabacloudstack_cloud_firewall_control_policy" "policy3" {
-application_name = "ANY"
-acl_action       = "accept"
-description      = "%s_v3"
-destination_type = "net"
-destination      = "116.2.3.0/24"
-direction        = "in"
-proto            = "ANY"
-source           = "194.1.1.0/24"
-source_type      = "net"
-dest_port  = "8080/8080"
-dest_port_type   = "port"
-release          = "true"
-}
-`, name, name, name)
+`, name)
 }

@@ -27,7 +27,7 @@ func (s *CloudfwService) DescribeCloudFirewallControlPolicy(id string) (object m
 	}
 	page := 1
 	request := map[string]interface{}{
-		"AclUuid":   parts[0], // XXX: unsupoort 
+		"AclUuid":   parts[0], // XXX: unsupported 
 		"Direction": parts[1],
 		"PageSize":  100,
 	}
