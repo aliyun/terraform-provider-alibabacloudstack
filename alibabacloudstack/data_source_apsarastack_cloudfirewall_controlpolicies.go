@@ -39,7 +39,7 @@ func dataSourceAlibabacloudStackCloudFirewallControlPolicies() *schema.Resource 
 			"proto": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{" TCP", " UDP", "ANY", "ICMP"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"TCP", "UDP", "ANY", "ICMP"}, false),
 			},
 			"source": {
 				Type:     schema.TypeString,
@@ -180,8 +180,10 @@ func dataSourceAlibabacloudStackCloudFirewallControlPoliciesRead(d *schema.Resou
 	if v, ok := d.GetOk("acl_action"); ok {
 		request["AclAction"] = v
 	}
+	var aclUuid string
 	if v, ok := d.GetOk("acl_uuid"); ok {
 		request["AclUuid"] = v
+		aclUuid = v.(string)
 	}
 	if v, ok := d.GetOk("description"); ok {
 		request["Description"] = v
@@ -224,6 +226,9 @@ func dataSourceAlibabacloudStackCloudFirewallControlPoliciesRead(d *schema.Resou
 	ids := make([]string, 0)
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
+		if aclUuid != "" && aclUuid != object["AclUuid"].(string) {
+			continue
+		}
 		mapping := map[string]interface{}{
 			"id":                      fmt.Sprint(object["AclUuid"], ":", object["Direction"]),
 			"acl_action":              object["AclAction"],

@@ -105,14 +105,14 @@ func resourceAlibabacloudStackCloudFirewallControlPolicy() *schema.Resource {
 
 func suppressIfDestPortTypeIsNotPort(k, old, new string, d *schema.ResourceData) bool {
 	if v, ok := d.GetOk("dest_port_type"); ok && v.(string) == "port" {
-		return false
+		return old == new
 	}
 	return true
 }
 
 func suppressIfDestPortTypeIsNotGroup(k, old, new string, d *schema.ResourceData) bool {
 	if v, ok := d.GetOk("dest_port_type"); ok && v.(string) == "group" {
-		return false
+		return old == new
 	}
 	return true
 }

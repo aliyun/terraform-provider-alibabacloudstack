@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackCloudfirewallControlpolicy0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%scloud_firewallcontrol_policy%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-cfw_policy%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCloudfirewallControlpolicyBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -155,6 +155,37 @@ func TestAccAlibabacloudStackCloudfirewallControlpolicy0(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackCloudfirewallControlpolicy1(t *testing.T) {
+	var v map[string]interface{}
+
+	resourceId := "alibabacloudstack_cloudfirewall_controlpolicy.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccCloudfirewallControlpolicyCheckmap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &CloudfwService{testYundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DoCloudfwDescribecontrolpolicyRequest")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-cfw_policy%d", rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCloudfirewallControlpolicyBasicdependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+			testAccPreCheck(t)
+			testAccPreYunCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testYunDunProviders(),
+
+		CheckDestroy: rac.checkResourceDestroy(),
+
+		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 

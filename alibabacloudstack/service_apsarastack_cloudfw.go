@@ -25,26 +25,40 @@ func (s *CloudfwService) DescribeCloudFirewallControlPolicy(id string) (object m
 		err = errmsgs.WrapError(err)
 		return
 	}
+	page := 1
 	request := map[string]interface{}{
-		"AclUuid":     parts[0],
-		"Direction":   parts[1],
-		"CurrentPage": 1,
-		"PageSize":    100,
+		"AclUuid":   parts[0], // XXX: unsupoort 
+		"Direction": parts[1],
+		"PageSize":  100,
+	}
+	for {
+		request["CurrentPage"] = page
+		response, err = s.client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
+		if err != nil {
+			return object, err
+		}
+		v, err := jsonpath.Get("$.Policys", response)
+		if err != nil {
+			return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Policys", response)
+		}
+		if len(v.([]interface{})) < 1 {
+			break
+		}
+
+		for _, vv := range v.([]interface{}) {
+			object := vv.(map[string]interface{})
+			if object["AclUuid"].(string) != parts[0] {
+				continue
+			}
+			if object["Direction"].(string) != parts[1] {
+				continue
+			}
+			return object, nil
+		}
+		page += 1
 	}
 
-	response, err = s.client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
-	if err != nil {
-		return object, err
-	}
-	v, err := jsonpath.Get("$.Policys", response)
-	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Policys", response)
-	}
-	if len(v.([]interface{})) < 1 {
-		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("CloudFirewall", id)), errmsgs.NotFoundWithResponse, response)
-	}
-	object = v.([]interface{})[0].(map[string]interface{})
-	return object, nil
+	return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("CloudFirewall", id)), errmsgs.NotFoundWithResponse, response)
 }
 
 func (s *CloudfwService) DescribeAddressBook(id string) (map[string]interface{}, error) {
