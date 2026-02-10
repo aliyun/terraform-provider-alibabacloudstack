@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"slices"
 	"errors"
 	"log"
 	"reflect"
@@ -227,11 +228,9 @@ func (s *YundunBastionhostService) BastionhostInstanceRefreshFunc(id string, fai
 			return nil, "", errmsgs.WrapError(err)
 		}
 
-		for _, failState := range failStates {
-			if fmt.Sprint(object["ClusterStatus"]) == failState {
+		if slices.Contains(failStates, fmt.Sprint(object["ClusterStatus"])) {
 				return object, fmt.Sprint(object["ClusterStatus"]), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(object["ClusterStatus"])))
 			}
-		}
 		return object, fmt.Sprint(object["ClusterStatus"]), nil
 	}
 }
@@ -309,7 +308,7 @@ func (s *YundunBastionhostService) ProcessRolePolicy() error {
 		}
 	}
 
-	if policyToAttach != nil && len(policyToAttach) > 0 {
+	if len(policyToAttach) > 0 {
 		return s.attachPolicy(policyToAttach)
 	}
 
@@ -369,7 +368,7 @@ func (s *YundunBastionhostService) DescribeTags(resourceId string, resourceTags 
 	request.RegionId = s.client.RegionId
 	request.ResourceType = strings.ToUpper(string(resourceType))
 	request.ResourceId = &[]string{resourceId}
-	if resourceTags != nil && len(resourceTags) > 0 {
+	if len(resourceTags) > 0 {
 		var reqTags []yundun_bastionhost.ListTagResourcesTag
 		for key, value := range resourceTags {
 			reqTags = append(reqTags, yundun_bastionhost.ListTagResourcesTag{

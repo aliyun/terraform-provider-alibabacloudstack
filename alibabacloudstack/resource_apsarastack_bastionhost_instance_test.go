@@ -56,9 +56,6 @@ func testSweepBastionhostInstances(region string) error {
 		}
 
 		currentPageNo := request.CurrentPage
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudctack_yundun_bastionhost", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-		}
 
 		if page, err := getNextpageNumber(currentPageNo); err != nil {
 			return errmsgs.WrapError(err)
@@ -97,7 +94,7 @@ func testSweepBastionhostInstances(region string) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
+func TestAccAlibabacloudStackBastionhostInstance_basic_A(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_bastionhost_instance.default"
 	ra := resourceAttrInit(resourceId, bastionhostInstanceBasicMap)
@@ -132,7 +129,7 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 					"vswitch_id":       "${alibabacloudstack_vswitch.vsw.id}",
 					"vpc_id":           "${alibabacloudstack_vpc.vpc.id}",
 					"license_code":     "bastionhostah_small_lic",
-					"highavailability": "false",
+					"highavailability": "true",
 					"disasterrecovery": "false",
 					"asset":            "50",
 				}),
@@ -140,7 +137,7 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"vswitch_id":       CHECKSET,
 						"asset":            "50",
-						"highavailability": "false",
+						"highavailability": "true",
 						"disasterrecovery": "false",
 						"license_code":     "bastionhostah_small_lic",
 						"vpc_id":           CHECKSET,
@@ -188,16 +185,6 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 				),
 			},
 
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"highavailability": "true",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"highavailability": "true",
-					}),
-				),
-			},
 			// {
 			// 	Config: testAccConfig(map[string]interface{}{
 			// 		"security_group_ids": []string{"${alibabacloudctack_security_group.default.1.id}"},

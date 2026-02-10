@@ -6,19 +6,13 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackBastionhostInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackBastionhostInstanceCreate,
-		Read:   resourceAlibabacloudStackBastionhostInstanceRead,
-		Update: resourceAlibabacloudStackBastionhostInstanceUpdate,
-		Delete: resourceAlibabacloudStackBastionhostInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(40 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
@@ -58,10 +52,11 @@ func resourceAlibabacloudStackBastionhostInstance() *schema.Resource {
 				Required: true,
 			},
 			"security_group_ids": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:       schema.TypeSet,
+				Computed:   true,
+				Optional:   true,
+				Elem:       &schema.Schema{Type: schema.TypeString},
+				Deprecated: "The `security_group_ids` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"tags": tagsSchema(),
 			"resource_group_id": {
@@ -70,15 +65,17 @@ func resourceAlibabacloudStackBastionhostInstance() *schema.Resource {
 				Computed: true,
 			},
 			"enable_public_access": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeBool,
+				Optional:   true,
+				Computed:   true,
+				Deprecated: "The `enable_public_access` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"ad_auth_server": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				MinItems: 1,
-				Computed: true,
+				Type:       schema.TypeSet,
+				Optional:   true,
+				MinItems:   1,
+				Computed:   true,
+				Deprecated: "The `ad_auth_server` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					d1, d2 := d.GetChange("ad_auth_server")
 					if len(d1.(*schema.Set).List()) == 0 || len(d2.(*schema.Set).List()) == 0 {
@@ -141,10 +138,11 @@ func resourceAlibabacloudStackBastionhostInstance() *schema.Resource {
 				},
 			},
 			"ldap_auth_server": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				MinItems: 1,
-				Computed: true,
+				Type:       schema.TypeSet,
+				Optional:   true,
+				MinItems:   1,
+				Computed:   true,
+				Deprecated: "The `ldap_auth_server` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					d1, d2 := d.GetChange("ldap_auth_server")
 					if len(d1.(*schema.Set).List()) == 0 || len(d2.(*schema.Set).List()) == 0 {
@@ -216,6 +214,7 @@ func resourceAlibabacloudStackBastionhostInstance() *schema.Resource {
 					}
 					return true
 				},
+				Deprecated: "The `renew_period` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"renewal_period_unit": {
 				Type:         schema.TypeString,
@@ -228,74 +227,53 @@ func resourceAlibabacloudStackBastionhostInstance() *schema.Resource {
 					}
 					return true
 				},
+				Deprecated: "The `renewal_period_unit` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 			"renewal_status": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"AutoRenewal", "ManualRenewal", "NotRenewal"}, false),
+				Deprecated:   "The `renewal_status` field is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackBastionhostInstanceCreate,
+		resourceAlibabacloudStackBastionhostInstanceRead,
+		resourceAlibabacloudStackBastionhostInstanceUpdate,
+		resourceAlibabacloudStackBastionhostInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateInstance"
-	request := make(map[string]interface{})
-	parameterMapList := make([]map[string]interface{}, 0)
-	// conn, err := client.NewBastionhostClient()
-	// if err != nil {
-	// 	return errmsgs.WrapError(err)
-	// }
-	parameterMapList = append(parameterMapList, map[string]interface{}{
-		"Code":  "NetworkType",
-		"Value": "vpc",
-	})
-	parameterMapList = append(parameterMapList, map[string]interface{}{
-		"Code":  "LicenseCode",
-		"Value": d.Get("license_code").(string),
-	})
-	// parameterMapList = append(parameterMapList, map[string]interface{}{
-	// 	"Code":  "PlanCode",
-	// 	"Value": d.Get("plan_code").(string),
-	// })
-	// parameterMapList = append(parameterMapList, map[string]interface{}{
-	// 	"Code":  "Storage",
-	// 	"Value": d.Get("storage").(string),
-	// })
-	// parameterMapList = append(parameterMapList, map[string]interface{}{
-	// 	"Code":  "Bandwidth",
-	// 	"Value": d.Get("bandwidth").(string),
-	// })
-	request["SubscriptionType"] = "Subscription"
-
-	if v, ok := d.GetOk("vpc_id"); ok {
-		request["VpcId"] = v
+	request := map[string]interface{}{
+		"HighAvailability": d.Get("highavailability"),
+		"DisasterRecovery": d.Get("disasterrecovery"),
+		"VpcId":            d.Get("vpc_id"),
+		"VswitchId":        d.Get("vswitch_id"),
+		"Asset":            d.Get("asset"),
+		"SubscriptionType": "Subscription",
+		"LicenseCode":      d.Get("license_code"),
+		"ProductCode":      "bastionhost",
+		"ProductType":      "bastionhost",
 	}
-	if v, ok := d.GetOk("vswitch_id"); ok {
-		request["VswitchId"] = v
+	parameterMapList := []map[string]interface{}{
+		map[string]interface{}{
+			"Code":  "NetworkType",
+			"Value": "vpc",
+		},
+		map[string]interface{}{
+			"Code":  "LicenseCode",
+			"Value": d.Get("license_code").(string),
+		},
+		map[string]interface{}{
+			"Code":  "RegionId",
+			"Value": client.RegionId,
+		},
 	}
-	if v, ok := d.GetOk("asset"); ok {
-		request["Asset"] = v
-	}
-	if v, ok := d.GetOk("highavailability"); ok {
-		request["HighAvailability"] = v
-	}
-	if v, ok := d.GetOk("disasterrecovery"); ok {
-		request["DisasterRecovery"] = v
-	}
-
-	if v, ok := d.GetOk("license_code"); ok {
-		request["LicenseCode"] = v
-	}
-	request["ProductCode"] = "bastionhost"
-	request["ProductType"] = "bastionhost"
-	parameterMapList = append(parameterMapList, map[string]interface{}{
-		"Code":  "RegionId",
-		"Value": client.RegionId,
-	})
 	request["Parameter"] = parameterMapList
 	// response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
 
@@ -340,7 +318,7 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	// if _, err := stateConf.WaitForState(); err != nil {
 	// 	return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	// }
-	return resourceAlibabacloudStackBastionhostInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackBastionhostInstanceRead(d *schema.ResourceData, meta interface{}) error {
@@ -359,7 +337,18 @@ func resourceAlibabacloudStackBastionhostInstanceRead(d *schema.ResourceData, me
 	d.Set("vswitch_id", instance["VswitchId"])
 	d.Set("vpc_id", instance["VpcId"])
 	d.Set("asset", instance["Asset"])
-	d.Set("highavailability", instance["HighAvailability"])
+	if v, existed := instance["HighAvailability"]; existed {
+		d.Set("highavailability", v)
+	} else {
+		if v, existed := instance["EcsDetails"]; existed && v != nil {
+			if len(v.([]interface{})) > 1 {
+				d.Set("highavailability", true)
+			} else {
+				d.Set("highavailability", false)
+			}
+		}
+	}
+
 	d.Set("disasterrecovery", instance["DisasterRecovery"])
 
 	if description, ok := instance["Description"].(string); ok {
@@ -430,70 +419,35 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 	// return resourceAlibabacloudStackBastionhostInstanceRead(d, meta)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	bastionhostService := YundunBastionhostService{client}
-	action := "UpgradeInstance"
-	request := make(map[string]interface{})
-	update := false
-	d.Partial(true)
-	object, _ := bastionhostService.DescribeBastionhostInstance(d.Id())
-	request["ProductSpec"] = object["ProductSpec"]
-	request["InstanceId"] = d.Id()
-	request["Asset"] = object["Asset"]
-	request["VswitchId"] = object["VswitchId"]
-	request["HighAvailability"] = object["HighAvailability"]
-	request["DisasterRecovery"] = object["DisasterRecovery"]
-	request["LicenseCode"] = object["LicenseCode"]
-	request["Description"] = object["Description"]
 
-	if d.HasChange("asset") {
-		update = true
-		request["Asset"] = d.Get("asset")
-	}
-	if d.HasChange("highavailability") {
-		update = true
-		request["HighAvailability"] = d.Get("highavailability")
-	}
-	// if d.HasChange("disasterrecovery") {
-	// 	update = true
-	// 	request["DisasterRecovery"] = d.Get("disasterrecovery")
-	// }
-	if d.HasChange("license_code") {
-		update = true
-		request["LicenseCode"] = d.Get("license_code")
-	}
-	if d.HasChange("description") {
-		update = true
-		request["Description"] = d.Get("description")
-	}
-	if update {
-		response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
-		addDebug(action, response, request)
-		if err != nil {
+	if d.HasChanges("asset", "highavailability", "license_code", "description") {
+		action := "UpgradeInstance"
+		request := map[string]interface{}{
+			"InstanceId":       d.Id(),
+			"Asset":            d.Get("asset"),
+			"VswitchId":        d.Get("vswitch_id"),
+			"HighAvailability": d.Get("highavailability"),
+			"DisasterRecovery": d.Get("disasterrecovery"),
+			"LicenseCode":      d.Get("license_code"),
+			"Description":      d.Get("description"),
+		}
+		if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+			_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
+			if err != nil {
+				if errmsgs.IsExpectedErrors(err, []string{"PartnerService.BizError.SendError", "PartnerService.validResponse.InvokeError"}) {
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			return nil
+		}); err != nil {
 			return err
 		}
-		stateConf := BuildStateConf([]string{}, []string{"UPGRADE_SUCCESS"}, d.Timeout(schema.TimeoutCreate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"UPGRADE_FAILD"}))
+		stateConf := BuildStateConf([]string{}, []string{"UPGRADE_SUCCESS", "PRODUCE_SUCCESS"}, d.Timeout(schema.TimeoutCreate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"UPGRADE_FAILD"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprint(d.Id()))
 		}
 	}
-
-	// if d.HasChange("resource_group_id") {
-	// 	if err := bastionhostService.UpdateResourceGroup(d.Id(), d.Get("resource_group_id").(string)); err != nil {
-	// 		return errmsgs.WrapError(err)
-	// 	}
-
-	// }
-
-	// if !d.IsNewResource() && d.HasChange("license_code") {
-	// 	params := map[string]string{
-	// 		"LicenseCode": "license_code",
-	// 	}
-	// 	if err := bastionhostService.UpdateInstanceSpec(params, d, meta); err != nil {
-	// 		return errmsgs.WrapError(err)
-	// 	}
-	// 	stateConf := BuildStateConf([]string{"UPGRADING"}, []string{"PENDING", "RUNNING"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"CREATING", "UPGRADE_FAILED", "CREATE_FAILED"}))
-	// 	if _, err := stateConf.WaitForState(); err != nil {
-	// 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	// 	}
 
 	// }
 
@@ -740,9 +694,8 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 
 	// }
 
-	d.Partial(false)
 	// wait for order complete
-	return resourceAlibabacloudStackBastionhostInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackBastionhostInstanceDelete(d *schema.ResourceData, meta interface{}) error {

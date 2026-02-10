@@ -988,7 +988,7 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 		}
 
 		// Auth or invalid action errors with retry budget
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable"}) && retryTimes > 0 {
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable", "UnknownError"}) && retryTimes > 0 {
 			retryTimes--
 			return resource.RetryableError(err), retryTimes
 		}
