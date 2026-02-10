@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackCenTransitCloudFirewallControlPoliciesDataSourceBasic(t *testing.T) {
+func TestAccAlibabacloudStackCloudfirewallControlpoliciesDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 2000)
 	resourceId := "data.alibabacloudstack_cloud_firewall_control_policies.default"
 	testDataSourceAttr := dataSourceAttr{
