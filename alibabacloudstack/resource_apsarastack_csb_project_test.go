@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
@@ -25,6 +26,7 @@ func TestAccAlibabacloudStackCSBProject_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckWithEnvVariable(t, "ALIBABACLOUDSTACK_TEST_EXISTED_CSB_ID")
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -32,15 +34,20 @@ func TestAccAlibabacloudStackCSBProject_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"data": "{\\\"projectName\\\":\\\"test3\\\",\\\"projectOwnerName\\\":\\\"test3\\\",\\\"projectOwnerEmail\\\":\\\"\\\",\\\"projectOwnerPhoneNum\\\":\\\"\\\",\\\"description\\\":\\\"\\\"}",
-					//					"data2":        "{\\\"projectName\\\":\\\"test15\\\",\\\"projectOwnerName\\\":\\\"test15\\\",\\\"projectOwnerEmail\\\":\\\"\\\",\\\"projectOwnerPhoneNum\\\":\\\"\\\",\\\"description\\\":\\\"\\\",\\\"gmtModified\\\":1672912101000,\\\"csbId\\\":134,\\\"gmtCreate\\\":1672912101000,\\\"ownerId\\\":\\\"1827872887260637\\\",\\\"apiNum\\\":0,\\\"userId\\\":\\\"1827872887260637\\\",\\\"srcType\\\":0,\\\"deleteFlag\\\":0,\\\"id\\\":259,\\\"status\\\":1}",
-					"csb_id":       "134",
-					"project_name": "${var.name}",
+					"csb_id":          "${var.csb_id}",
+					"project_name":    "${var.name}",
+					"owner_name":      "${var.name}_user",
+					"owner_email":     "${var.name}@aliyun.test",
+					"owner_phone_num": "13900000000",
+					"description":     "${var.name} desc",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"csb_id":       "134",
-						"project_name": name,
+						"project_name":    name,
+						"owner_name":      name + "_user",
+						"owner_email":     name + "@aliyun.test",
+						"owner_phone_num": "13900000000",
+						"description":     name + " desc",
 					}),
 				),
 			},
@@ -51,11 +58,19 @@ func TestAccAlibabacloudStackCSBProject_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"project_name": "${var.name}_update",
+					"project_name":    "${var.name}_update",
+					"owner_name":      "${var.name}_user1",
+					"owner_email":     "${var.name}_update@aliyun.test",
+					"owner_phone_num": "15000000000",
+					"description":     "${var.name} desc update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"project_name": name + "_update",
+						"project_name":    name + "_update",
+						"owner_name":      name + "_user1",
+						"owner_email":     name + "_update@aliyun.test",
+						"owner_phone_num": "15000000000",
+						"description":     name + " desc update",
 					}),
 				),
 			},
@@ -72,5 +87,11 @@ func AlibabacloudStackCSBProjectBasicDependence0(name string) string {
 	return fmt.Sprintf(`
 	variable name {
 		default = "%s"
-	}`, name)
+	}
+	
+	variable csb_id {
+		default = "%s"
+	}
+	
+	`, name, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_CSB_ID"))
 }

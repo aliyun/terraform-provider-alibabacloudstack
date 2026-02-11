@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -17,61 +18,47 @@ func resourceAlibabacloudStackCsbProject() *schema.Resource {
 			Update: schema.DefaultTimeout(5 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"data": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"csb_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringLenBetween(1, 128),
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"project_name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(1, 128),
 			},
-			"gmt_modified": {
+			"owner_name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"owner_email": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"gmt_create": {
+			"owner_phone_num": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"owner_id": {
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"api_num": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
-			"user_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+			"project_id": {
+				Type:     schema.TypeInt,
+				Computed: true,
 			},
-			"delete_flag": {
+			"owner_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"cs_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"status": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"project_owner_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackCsbProjectCreate, 
+	setResourceFunc(resource, resourceAlibabacloudStackCsbProjectCreate,
 		resourceAlibabacloudStackCsbProjectRead, resourceAlibabacloudStackCsbProjectUpdate, resourceAlibabacloudStackCsbProjectDelete)
 	return resource
 }
@@ -79,26 +66,43 @@ func resourceAlibabacloudStackCsbProject() *schema.Resource {
 func resourceAlibabacloudStackCsbProjectCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "CreateProject"
-	request := make(map[string]interface{})
-
-	if v, ok := d.GetOk("csb_id"); ok {
-		request["CsbId"] = v
+	reqQuery := map[string]interface{}{
+		"CsbId": d.Get("csb_id"),
 	}
 
-	if v, ok := d.GetOk("data"); ok {
-		request["Data"] = v
+	data := map[string]interface{}{
+		"projectName":          d.Get("project_name"),
+		"projectOwnerName":     d.Get("owner_name"),
+		"projectOwnerEmail":    d.Get("owner_email"),
+		"projectOwnerPhoneNum": d.Get("owner_phone_num"),
+		"description":          d.Get("description"),
 	}
-
-	_, err := client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, nil, request)
+	content, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 
-	request1 := make(map[string]interface{})
-	if v, ok := d.GetOk("project_name"); ok {
-		request1["ProjectName"] = v
+	body := map[string]interface{}{
+		"Data": string(content),
 	}
-	d.SetId(fmt.Sprint(request["CsbId"], ":", request1["ProjectName"]))
+
+	response, err := client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, reqQuery, body)
+	if err != nil {
+		return err
+	}
+
+	if v, existed := response["Data"]; !existed {
+		return errmsgs.Error("error CreateProject response %v", response)
+	} else {
+		data := v.(map[string]interface{})
+		if v, existed := data["Id"]; !existed {
+			return errmsgs.Error("error Id not in CreateProject response %v", data)
+		} else {
+			d.Set("project_id", v)
+		}
+	}
+
+	d.SetId(fmt.Sprint(d.Get("csb_id"), ":", d.Get("project_name")))
 	return nil
 }
 
@@ -114,34 +118,51 @@ func resourceAlibabacloudStackCsbProjectRead(d *schema.ResourceData, meta interf
 		}
 		return errmsgs.WrapError(err)
 	}
-	d.Set("project_name", fmt.Sprint(object["ProjectName"]))
-	d.Set("csb_id", fmt.Sprint(object["CsbId"]))
+	d.Set("csb_id", object["CsbId"])
+	d.Set("project_id", object["Id"])
+	d.Set("project_name", object["ProjectName"])
+	d.Set("owner_name", object["ProjectOwnerName"])
+	d.Set("owner_email", object["ProjectOwnerEmail"])
+	d.Set("owner_phone_num", object["ProjectOwnerPhoneNum"])
+	d.Set("description", object["Description"])
+	d.Set("owner_id", object["OwnerId"])
+	d.Set("api_num", object["ApiNum"])
 	return nil
 }
 
 func resourceAlibabacloudStackCsbProjectUpdate(d *schema.ResourceData, meta interface{}) error {
+	if d.IsNewResource() {
+		return nil
+	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	update := false
-	request := map[string]interface{}{}
-	if d.HasChange("project_name") {
-		update = true
-		if v, ok := d.GetOk("project_name"); ok {
-			request["ProjectName"] = v
+	if d.HasChanges("project_name", "owner_name", "owner_email", "owner_phone_num", "description") {
+		reqQuery := map[string]interface{}{
+			"CsbId": d.Get("csb_id"),
 		}
-	}
-	if d.HasChange("data") {
-		update = true
-		if v, ok := d.GetOk("data"); ok {
-			request["Data"] = v
-		}
-	}
 
-	if update {
-		action := "UpdateProject"
-		_, err := client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, nil, request)
+		data := map[string]interface{}{
+			"id":                   d.Get("project_id"),
+			"projectName":          d.Get("project_name"),
+			"projectOwnerName":     d.Get("owner_name"),
+			"projectOwnerEmail":    d.Get("owner_email"),
+			"projectOwnerPhoneNum": d.Get("owner_phone_num"),
+			"description":          d.Get("description"),
+		}
+		content, err := json.Marshal(data)
 		if err != nil {
 			return err
 		}
+
+		body := map[string]interface{}{
+			"Data": string(content),
+		}
+
+		action := "UpdateProject"
+		_, err = client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, reqQuery, body)
+		if err != nil {
+			return err
+		}
+		d.SetId(fmt.Sprint(d.Get("csb_id"), ":", d.Get("project_name")))
 	}
 	return nil
 }
@@ -152,8 +173,8 @@ func resourceAlibabacloudStackCsbProjectDelete(d *schema.ResourceData, meta inte
 	object, err := csbService.DescribeCsbProjectDetail(d.Id())
 	action := "DeleteProject"
 	request := map[string]interface{}{
-		"ProjectId":      object["Id"],
-		"CsbId":          object["CsbId"],
+		"ProjectId": object["Id"],
+		"CsbId":     object["CsbId"],
 	}
 
 	_, err = client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, nil, request)
