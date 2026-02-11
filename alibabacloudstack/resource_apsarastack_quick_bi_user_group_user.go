@@ -47,8 +47,8 @@ func resourceAlibabacloudStackQuickBiUserGroupUserCreate(d *schema.ResourceData,
 
 func resourceAlibabacloudStackQuickBiUserGroupUserRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	quickbiPublicService := QuickbiPublicService{client}
-	_, err:= quickbiPublicService.DescribeQuickBiUserGroupUser(d.Id())
+	QuickbiService := QuickbiService{client}
+	_, err:= QuickbiService.DescribeQuickBiUserGroupUser(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")

@@ -17,7 +17,7 @@ func TestAccAlicloudQuickBIUserGroupUser_basic0(t *testing.T) {
 		"account_id":    CHECKSET,
 	})
 	rc := resourceCheckInit(resourceId, &v, func() interface{} {
-		return &QuickbiPublicService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &QuickbiService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	})
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()

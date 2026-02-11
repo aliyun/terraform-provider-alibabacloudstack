@@ -147,8 +147,8 @@ func dataSourceAlibabacloudStackQuickBiUsersRead(d *schema.ResourceData, meta in
 			continue
 		}
 		id := fmt.Sprint(object["UserId"])
-		quickbiPublicService := QuickbiPublicService{client}
-		getResp, err := quickbiPublicService.DescribeQuickBiUser(id)
+		QuickbiService := QuickbiService{client}
+		getResp, err := QuickbiService.DescribeQuickBiUser(id)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_quick_bi_users", "DescribeQuickBiUser", errmsgs.AlibabacloudStackSdkGoERROR)
 		}

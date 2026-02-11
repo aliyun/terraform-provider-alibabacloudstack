@@ -8,11 +8,11 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
-type QuickbiPublicService struct {
+type QuickbiService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
-func (s *QuickbiPublicService) DescribeQuickBiUser(id string) (object map[string]interface{}, err error) {
+func (s *QuickbiService) DescribeQuickBiUser(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := map[string]interface{}{
 		"UserId": id,
@@ -33,7 +33,7 @@ func (s *QuickbiPublicService) DescribeQuickBiUser(id string) (object map[string
 	return object, nil
 }
 
-func (s *QuickbiPublicService) QueryUserInfoByUserId(id string) (object map[string]interface{}, err error) {
+func (s *QuickbiService) QueryUserInfoByUserId(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := map[string]interface{}{
 		"UserId": id,
@@ -54,7 +54,7 @@ func (s *QuickbiPublicService) QueryUserInfoByUserId(id string) (object map[stri
 	return object, nil
 }
 
-func (s *QuickbiPublicService) DescribeQuickBiUserGroup(id string) (object map[string]interface{}, err error) {
+func (s *QuickbiService) DescribeQuickBiUserGroup(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := map[string]interface{}{
 		"UserGroupIds": id,
@@ -75,7 +75,7 @@ func (s *QuickbiPublicService) DescribeQuickBiUserGroup(id string) (object map[s
 	return object, nil
 }
 
-func (s *QuickbiPublicService) DescribeQuickBiWorkspace(id string) (object map[string]interface{}, err error) {
+func (s *QuickbiService) DescribeQuickBiWorkspace(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := map[string]interface{}{
 		"UserId": id,
@@ -96,7 +96,7 @@ func (s *QuickbiPublicService) DescribeQuickBiWorkspace(id string) (object map[s
 	return object, nil
 }
 
-func (s *QuickbiPublicService) DescribeQuickBiUserGroupUser(id string) (object map[string]interface{}, err error) {
+func (s *QuickbiService) DescribeQuickBiUserGroupUser(id string) (object map[string]interface{}, err error) {
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)

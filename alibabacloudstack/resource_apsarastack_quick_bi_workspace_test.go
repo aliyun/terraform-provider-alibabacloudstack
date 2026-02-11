@@ -13,7 +13,7 @@ func TestAccAlicloudQuickBIWorkspace_basic0(t *testing.T) {
 	resourceId := "alibabacloudstack_quick_bi_workspace.default"
 	ra := resourceAttrInit(resourceId, AlicloudQuickBIWorkspaceMap0)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &QuickbiPublicService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &QuickbiService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeQuickBiWorkspace")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
