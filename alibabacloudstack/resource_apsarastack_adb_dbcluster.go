@@ -620,7 +620,7 @@ func resourceAlibabacloudStackAdbDbClusterDelete(d *schema.ResourceData, meta in
 	}
 	_, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBCluster.NotFound") {
 			return nil
 		}
 		return err

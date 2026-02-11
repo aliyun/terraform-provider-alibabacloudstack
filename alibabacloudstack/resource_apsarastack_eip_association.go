@@ -71,7 +71,7 @@ func resourceAlibabacloudStackEipAssociationCreate(d *schema.ResourceData, meta 
 		var response *vpc.AssociateEipAddressResponse
 		var ok bool
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, "TaskConflict") {
 				return resource.RetryableError(err)
 			}
 			if raw != nil {
@@ -160,8 +160,8 @@ func resourceAlibabacloudStackEipAssociationDelete(d *schema.ResourceData, meta 
 		var response *vpc.UnassociateEipAddressResponse
 		var ok bool
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"IncorrectInstanceStatus", "IncorrectHaVipStatus", "TaskConflict",
-				"InvalidIpStatus.HasBeenUsedBySnatTable", "InvalidIpStatus.HasBeenUsedByForwardEntry", "InvalidStatus.SnatOrDnat"}) {
+			if errmsgs.IsExpectedErrors(err, "IncorrectInstanceStatus", "IncorrectHaVipStatus", "TaskConflict",
+				"InvalidIpStatus.HasBeenUsedBySnatTable", "InvalidIpStatus.HasBeenUsedByForwardEntry", "InvalidStatus.SnatOrDnat") {
 				return resource.RetryableError(err)
 			}
 			if raw != nil {

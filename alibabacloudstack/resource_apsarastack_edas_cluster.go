@@ -158,7 +158,7 @@ func resourceAlibabacloudStackEdasClusterDelete(d *schema.ResourceData, meta int
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 				wait()
 				return resource.RetryableError(err)
 			}

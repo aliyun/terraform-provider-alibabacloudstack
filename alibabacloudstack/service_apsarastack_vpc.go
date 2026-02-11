@@ -96,7 +96,7 @@ func (s *VpcService) DescribeNatGateway(id string) (nat vpc.NatGateway, err erro
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidNatGatewayId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidNatGatewayId.NotFound") {
 				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_nat_gateway", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -127,7 +127,7 @@ func (s *VpcService) DescribeVpc(id string) (v vpc.Vpc, err error) {
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidVpcID.NotFound", "Forbidden.VpcNotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidVpcID.NotFound", "Forbidden.VpcNotFound") {
 				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_vpc", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -200,7 +200,7 @@ func (s *VpcService) DescribeVSwitch(id string) (v vpc.DescribeVSwitchAttributes
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidVswitchID.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidVswitchID.NotFound") {
 				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_vswitch", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -264,7 +264,7 @@ func (s *VpcService) DescribeSnatEntry(id string) (snat vpc.SnatTableEntry, err 
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidSnatTableId.NotFound", "InvalidSnatEntryId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidSnatTableId.NotFound", "InvalidSnatEntryId.NotFound") {
 				return snat, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
 			return snat, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_snat_entry", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -316,7 +316,7 @@ func (s *VpcService) DescribeForwardEntry(id string) (entry vpc.ForwardTableEntr
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidForwardEntryId.NotFound", "InvalidForwardTableId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidForwardEntryId.NotFound", "InvalidForwardTableId.NotFound") {
 				return errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ForwardEntry", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_forward_entry", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -1056,7 +1056,7 @@ func (s *VpcService) DescribeNetworkAcl(id string) (object map[string]interface{
 	}
 	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeNetworkAclAttributes", "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidNetworkAcl.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidNetworkAcl.NotFound") {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("VPC:NetworkAcl", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
 		return object, err
@@ -1188,7 +1188,7 @@ func (s *VpcService) DescribeTags(resourceId string, resourceTags map[string]int
 			return vpcClient.ListTagResources(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.Throttling) {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -1363,7 +1363,7 @@ func (s *VpcService) DescribeVSwitchWithTeadsl(id string) (object map[string]int
 	}
 	response, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeVSwitchAttributes", "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidVswitchID.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidVswitchID.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return nil, err

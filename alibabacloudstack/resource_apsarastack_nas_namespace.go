@@ -121,7 +121,7 @@ func resourceAlibabacloudStackNasNamespaceDelete(d *schema.ResourceData, meta in
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		_, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", "DeleteNamespace", "", nil, reqQuery, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"NamespaceNotFound", "Forbidden.NasNamespaceNotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "NamespaceNotFound", "Forbidden.NasNamespaceNotFound") {
 				return resource.NonRetryableError(err)
 			}
 			err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteNamespace", errmsgs.AlibabacloudStackSdkGoERROR, err.Error())
@@ -131,7 +131,7 @@ func resourceAlibabacloudStackNasNamespaceDelete(d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"NamespaceNotFound", "Forbidden.NasNamespaceNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "NamespaceNotFound", "Forbidden.NasNamespaceNotFound") {
 			return nil
 		}
 		return errmsgs.WrapError(err)

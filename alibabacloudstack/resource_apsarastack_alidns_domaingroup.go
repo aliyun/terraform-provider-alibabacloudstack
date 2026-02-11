@@ -104,7 +104,7 @@ func resourceAlibabacloudStackDnsGroupDelete(d *schema.ResourceData, meta interf
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"Fobidden.NotEmptyGroup"}) {
+			if errmsgs.IsExpectedErrors(err, "Fobidden.NotEmptyGroup") {
 				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultTimeoutMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))

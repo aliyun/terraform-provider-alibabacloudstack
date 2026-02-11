@@ -209,7 +209,7 @@ func resourceAlibabacloudStackEcsDedicatedHostDelete(d *schema.ResourceData, met
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, nil, request)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"IncorrectHostStatus.Initializing"}) {
+			if errmsgs.IsExpectedErrors(err, "IncorrectHostStatus.Initializing") {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)

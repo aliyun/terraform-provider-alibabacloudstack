@@ -247,7 +247,7 @@ func resourceAlibabacloudStackKmsSecretDelete(d *schema.ResourceData, meta inter
 	})
 	addDebug(request.GetActionName(), raw)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.errmsgs.ResourceNotfound"}) {
+		if errmsgs.IsExpectedErrors(err, "Forbidden.errmsgs.ResourceNotfound") {
 			return nil
 		}
 		errmsg := ""

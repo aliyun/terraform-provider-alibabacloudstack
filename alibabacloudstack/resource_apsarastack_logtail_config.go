@@ -236,7 +236,7 @@ func resourceAlibabacloudStackLogtailConfigDelete(d *schema.ResourceData, meta i
 			return nil, slsClient.DeleteConfig(parts[0], parts[2])
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -252,7 +252,7 @@ func resourceAlibabacloudStackLogtailConfigDelete(d *schema.ResourceData, meta i
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist", "LogStoreNotExist", "ConfigNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ProjectNotExist", "LogStoreNotExist", "ConfigNotExist") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteConfig", errmsgs.AlibabacloudStackLogGoSdkERROR)

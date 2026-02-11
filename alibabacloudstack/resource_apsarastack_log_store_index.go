@@ -145,11 +145,11 @@ func resourceAlibabacloudStackLogStoreIndexCreate(d *schema.ResourceData, meta i
 	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
 		raw, err := store.GetIndex()
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
-			if !errmsgs.IsExpectedErrors(err, []string{"IndexConfigNotExist"}) {
+			if !errmsgs.IsExpectedErrors(err, "IndexConfigNotExist") {
 				return resource.NonRetryableError(err)
 			}
 		}
@@ -173,7 +173,7 @@ func resourceAlibabacloudStackLogStoreIndexCreate(d *schema.ResourceData, meta i
 
 	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
 		if e := store.CreateIndex(index); e != nil {
-			if errmsgs.IsExpectedErrors(e, []string{"InternalServerError", errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(e, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(e)
 			}
 			return resource.NonRetryableError(err)
@@ -283,7 +283,7 @@ func resourceAlibabacloudStackLogStoreIndexUpdate(d *schema.ResourceData, meta i
 				return nil, slsClient.UpdateIndex(parts[0], parts[1], *index)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 					time.Sleep(5 * time.Second)
 					return resource.RetryableError(err)
 				}
@@ -327,7 +327,7 @@ func resourceAlibabacloudStackLogStoreIndexDelete(d *schema.ResourceData, meta i
 			return nil, slsClient.DeleteIndex(parts[0], parts[1])
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}

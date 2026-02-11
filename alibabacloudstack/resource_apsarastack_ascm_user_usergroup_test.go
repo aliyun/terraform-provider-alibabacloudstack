@@ -82,7 +82,7 @@ func testAccCheckAscmUserGroupUserDestroy(s *terraform.State) error {
 			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"ascm.manage.EntityNotExisted.AscmUserGroup"}) {
+			if errmsgs.IsExpectedErrors(err, "ascm.manage.EntityNotExisted.AscmUserGroup") {
 				continue
 			}
 			return errmsgs.WrapError(err)

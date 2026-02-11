@@ -90,7 +90,7 @@ func resourceAlibabacloudStackForwardEntryCreate(d *schema.ResourceData, meta in
 			return vpcClient.CreateForwardEntry(ar)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidIp.NotInNatgw"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidIp.NotInNatgw") {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -222,7 +222,7 @@ func resourceAlibabacloudStackForwardEntryDelete(d *schema.ResourceData, meta in
 			return vpcClient.DeleteForwardEntry(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"IncorretForwardEntryStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "IncorretForwardEntryStatus") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -239,7 +239,7 @@ func resourceAlibabacloudStackForwardEntryDelete(d *schema.ResourceData, meta in
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidForwardEntryId.NotFound", "InvalidForwardTableId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidForwardEntryId.NotFound", "InvalidForwardTableId.NotFound") {
 			return nil
 		}
 		return err

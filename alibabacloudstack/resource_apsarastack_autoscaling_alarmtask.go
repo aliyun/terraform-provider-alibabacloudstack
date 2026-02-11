@@ -146,7 +146,7 @@ func resourceAlibabacloudStackEssAlarmCreate(d *schema.ResourceData, meta interf
 			return essClient.CreateAlarm(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.Throttling) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -377,7 +377,7 @@ func resourceAlibabacloudStackEssAlarmDelete(d *schema.ResourceData, meta interf
 		return essClient.DeleteAlarm(request)
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"404"}) {
+		if errmsgs.IsExpectedErrors(err, "404") {
 			return nil
 		}
 		errmsg := ""

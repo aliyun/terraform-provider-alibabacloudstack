@@ -177,11 +177,11 @@ func resourceAlibabacloudStackPolardbConnectionDelete(d *schema.ResourceData, me
 		rsp, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), rsp, request, request.QueryParams)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "OperationDenied.DBInstanceStatus") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
-			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidCurrentConnectionString.NotFound", "AtLeastOneNetTypeExists"}) {
+			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, "InvalidCurrentConnectionString.NotFound", "AtLeastOneNetTypeExists") {
 				return nil
 			}
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)

@@ -236,7 +236,7 @@ func resourceAlibabacloudStackHsmInstanceDelete(d *schema.ResourceData, meta int
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 		raw, err := client.DoTeaRequest("POST", "hsm-private", "2018-06-30", "ReleaseInstance", "", nil, reqQuery, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"ResourceNotExist"}) {
+			if errmsgs.IsExpectedErrors(err, "ResourceNotExist") {
 				return resource.NonRetryableError(err)
 			}
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "ReleaseInstance", errmsgs.AlibabacloudStackSdkGoERROR, "")
@@ -246,7 +246,7 @@ func resourceAlibabacloudStackHsmInstanceDelete(d *schema.ResourceData, meta int
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ResourceNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ResourceNotExist") {
 			return nil
 		}
 		return errmsgs.WrapError(err)

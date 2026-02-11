@@ -227,7 +227,7 @@ func resourceAlibabacloudStackNetworkAclEntriesUpdate(d *schema.ResourceData, me
 			return vpcClient.UpdateNetworkAclEntries(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, "TaskConflict") {
 				return resource.RetryableError(err)
 			}
 		}
@@ -271,7 +271,7 @@ func resourceAlibabacloudStackNetworkAclEntriesDelete(d *schema.ResourceData, me
 			return vpcClient.UpdateNetworkAclEntries(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, "TaskConflict") {
 				return resource.RetryableError(err)
 			}
 		}

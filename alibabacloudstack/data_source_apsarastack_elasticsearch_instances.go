@@ -174,7 +174,7 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 		response, err = client.DoTeaRequest("GET", "elasticsearch-k8s", "2017-06-13", "ListInstance", "/openapi/instances", nil, request, nil)
 		addDebug("ListInstance", response, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InstanceNotFound") {
 				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListInstance", errmsgs.AlibabacloudStackSdkGoERROR)

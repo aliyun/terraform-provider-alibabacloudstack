@@ -20,7 +20,7 @@ func (s *QuickbiService) DescribeQuickBiUser(id string) (object map[string]inter
 	response, err = s.client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", "QueryUserInfoByUserId", "", nil, nil, request)
 	addDebug("QueryUserInfoByUserId", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
+		if errmsgs.IsExpectedErrors(err, "User.Not.In.Organization") {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("QuickBI:User", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
 		return object, err
@@ -41,7 +41,7 @@ func (s *QuickbiService) QueryUserInfoByUserId(id string) (object map[string]int
 	response, err = s.client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", "QueryUserInfoByUserId", "", nil, nil, request)
 	addDebug("QueryUserInfoByUserId", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
+		if errmsgs.IsExpectedErrors(err, "User.Not.In.Organization") {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("QuickBI:User", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
 		return object, err
@@ -62,7 +62,7 @@ func (s *QuickbiService) DescribeQuickBiUserGroup(id string) (object map[string]
 	response, err = s.client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", "ListByUserGroupId", "", nil, nil, request)
 	addDebug("ListByUserGroupId", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
+		if errmsgs.IsExpectedErrors(err, "User.Not.In.Organization") {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("QuickBI:User", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		}
 		return object, err
@@ -83,7 +83,7 @@ func (s *QuickbiService) DescribeQuickBiWorkspace(id string) (object map[string]
 	response, err = s.client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", "QueryWorkspaceUserList", "", nil, nil, request)
 	addDebug("QueryWorkspaceUserList", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
+		if errmsgs.IsExpectedErrors(err, "User.Not.In.Organization") {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("QuickBI:User", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		}
 		return object, err

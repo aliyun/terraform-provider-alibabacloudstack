@@ -82,7 +82,7 @@ func dataSourceAlibabacloudStackAscmRamPoliciesForUserRead(d *schema.ResourceDat
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ascm.auth.EntityNotExist.User"}) {
+		if errmsgs.IsExpectedErrors(err, "ascm.auth.EntityNotExist.User") {
 			if err := d.Set("policies", []map[string]interface{}{}); err != nil {
 				return errmsgs.WrapError(err)
 			}

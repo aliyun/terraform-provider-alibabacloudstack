@@ -287,7 +287,7 @@ func resourceAlibabacloudStackEdasApplicationRead(d *schema.ResourceData, meta i
 		})
 		bresponse, ok := raw.(*edas.GetApplicationResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -372,7 +372,7 @@ func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta
 		})
 		bresponse, ok := raw.(*edas.DeleteApplicationResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 				wait()
 				return resource.RetryableError(err)
 			}

@@ -264,7 +264,7 @@ func resourceAlibabacloudStackHsmClusterDelete(d *schema.ResourceData, meta inte
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 		raw, err := client.DoTeaRequest("POST", "hsm-private", "2018-06-30", "DeleteCluster", "", nil, reqQuery, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"ResourceNotExist"}) {
+			if errmsgs.IsExpectedErrors(err, "ResourceNotExist") {
 				return resource.NonRetryableError(err)
 			}
 			err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteCluster", errmsgs.AlibabacloudStackSdkGoERROR)

@@ -147,7 +147,7 @@ func resourceAlibabacloudStackKvstoreConnectionDelete(d *schema.ResourceData, me
 	response, ok := raw.(*r_kvstore.ReleaseInstancePublicConnectionResponse)
 	addDebug(request.GetActionName(), raw)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
 			return nil
 		}
 		errmsg := ""

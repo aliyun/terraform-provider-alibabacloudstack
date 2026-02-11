@@ -220,7 +220,7 @@ func resourceAlibabacloudStackSnapshotPolicyDelete(d *schema.ResourceData, meta 
 		})
 		bresponse, ok := raw.(*ecs.DeleteAutoSnapshotPolicyResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.SnapshotPolicyInvalidOperations) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.SnapshotPolicyInvalidOperations...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

@@ -617,7 +617,7 @@ func resourceAlibabacloudStackApigatewayApiDelete(d *schema.ResourceData, meta i
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 			err := cloudApiService.AbolishApi(d.Id(), stageName)
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"ConcurrencyLockTimeout"}) {
+				if errmsgs.IsExpectedErrors(err, "ConcurrencyLockTimeout") {
 					time.Sleep(3 * time.Second)
 					return resource.RetryableError(err)
 				}
@@ -641,7 +641,7 @@ func resourceAlibabacloudStackApigatewayApiDelete(d *schema.ResourceData, meta i
 	})
 	response, ok := raw.(*cloudapi.DeleteApiResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApi"}) {
+		if errmsgs.IsExpectedErrors(err, "NotFoundApi") {
 			return nil
 		}
 		errmsg := ""

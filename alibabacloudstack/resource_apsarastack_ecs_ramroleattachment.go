@@ -60,7 +60,7 @@ func resourceAlibabacloudStackInstanceRoleAttachmentCreate(d *schema.ResourceDat
 		})
 		addDebug("AttachInstanceRamRole", raw, request, request.QueryParams)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"unexpected end of JSON input"}) {
+			if errmsgs.IsExpectedErrors(err, "unexpected end of JSON input") {
 				return resource.RetryableError(errmsgs.WrapError(errmsgs.Error("Please trying again.")))
 			}
 			errmsg := ""
@@ -131,7 +131,7 @@ func resourceAlibabacloudStackInstanceRoleAttachmentDelete(d *schema.ResourceDat
 			return ecsClient.DetachInstanceRamRole(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"unexpected end of JSON input"}) {
+			if errmsgs.IsExpectedErrors(err, "unexpected end of JSON input") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

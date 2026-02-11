@@ -263,7 +263,7 @@ func resourceAlibabacloudStackGpdbInstanceCreate(d *schema.ResourceData, meta in
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		response, err = client.DoTeaRequest("POST", "gpdb", "2016-05-03", "CreateDBInstance", "", nil, reqQuery, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"SYSTEM.CONCURRENT_OPERATE"}) {
+			if errmsgs.IsExpectedErrors(err, "SYSTEM.CONCURRENT_OPERATE") {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -350,7 +350,7 @@ func resourceAlibabacloudStackGpdbInstanceDelete(d *schema.ResourceData, meta in
 		})
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "OperationDenied.DBInstanceStatus") {
 				return resource.RetryableError(err)
 			}
 			response, ok := raw.(*gpdb.DeleteDBInstanceResponse)
@@ -366,7 +366,7 @@ func resourceAlibabacloudStackGpdbInstanceDelete(d *schema.ResourceData, meta in
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return nil
 		}
 		return err

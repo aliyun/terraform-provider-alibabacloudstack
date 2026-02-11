@@ -118,7 +118,7 @@ func dataSourceAlibabacloudStackNasNamespaceGroupsRead(d *schema.ResourceData, m
 		request["PageNumber"] = pageNumber
 		response, err := client.DoTeaRequest("POST", "nas", "2017-06-26", action, "", nil, nil, request)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidParameter.MountTargetDomain"}){
+			if errmsgs.IsExpectedErrors(err, "InvalidParameter.MountTargetDomain"){
 				break
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_nas_namespace_groups", action, errmsgs.AlibabacloudStackSdkGoERROR, "")

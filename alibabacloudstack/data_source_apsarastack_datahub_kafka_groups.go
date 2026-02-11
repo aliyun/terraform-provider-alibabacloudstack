@@ -97,7 +97,7 @@ func dataSourceAlibabacloudStackDatahubKafkaGroupsRead(d *schema.ResourceData, m
 		// Call ListKafkaGroup API
 		resp, err := client.DoTeaRequest("GET", "datahub", "2019-11-20", "ListKafkaGroup", "", nil, query, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"ResourceNotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "ResourceNotFound") {
 				break
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_datahub_kafka_groups", "ListKafkaGroup", errmsgs.AlibabacloudStackSdkGoERROR)

@@ -49,7 +49,7 @@ func (s *CsService) GetCsK8sNodesCount(id string) (node_count int, err error) {
 		if clusterdetails == nil {
 			return node_count, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorClusterNotFound") {
 			return node_count, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
@@ -92,7 +92,7 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail
 		if clusterdetails == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorClusterNotFound") {
 			return cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
@@ -153,7 +153,7 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 		if response == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNodePoolNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorClusterNodePoolNotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
@@ -244,7 +244,7 @@ func (s *CsService) DescribeCsKubernetesNodePool(id, clusterid string) (*NodePoo
 		if response == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"<QuerySeter> no row found"}) {
+		if errmsgs.IsExpectedErrors(err, "<QuerySeter> no row found") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)

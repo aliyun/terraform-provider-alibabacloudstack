@@ -214,7 +214,7 @@ func dataSourceAlicloudAlikafkaInstancesRead(d *schema.ResourceData, meta interf
 		bresponse, err = client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, "ONS_SYSTEM_FLOW_CONTROL") {
 				wait()
 				return resource.RetryableError(err)
 			}

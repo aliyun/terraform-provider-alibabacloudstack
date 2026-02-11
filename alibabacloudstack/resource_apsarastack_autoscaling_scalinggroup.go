@@ -99,7 +99,7 @@ func resourceAlibabacloudStackEssScalingGroupCreate(d *schema.ResourceData, meta
 					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 				}
 			}
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling, "IncorrectLoadBalancerHealthCheck", "IncorrectLoadBalancerStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "IncorrectLoadBalancerHealthCheck", "IncorrectLoadBalancerStatus") {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ess_scalinggroup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
@@ -331,7 +331,7 @@ func resourceAlibabacloudStackEssScalingGroupDelete(d *schema.ResourceData, meta
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			}
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidScalingGroupId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidScalingGroupId.NotFound") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)

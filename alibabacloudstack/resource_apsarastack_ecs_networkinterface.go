@@ -240,7 +240,7 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 				})
 				bresponse, ok := raw.(*ecs.UnassignPrivateIpAddressesResponse)
 				if err != nil {
-					if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations) {
+					if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations...) {
 						return resource.RetryableError(err)
 					}
 					errmsg := ""
@@ -306,7 +306,7 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 					})
 					bresponse, ok := raw.(*ecs.AssignPrivateIpAddressesResponse)
 					if err != nil {
-						if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations) {
+						if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations...) {
 							errmsg := ""
 							if ok {
 								errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
@@ -339,7 +339,7 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 						return ecsClient.UnassignPrivateIpAddresses(unAssignPrivateIpAddressesRequest)
 					})
 					if err != nil {
-						if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations) {
+						if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations...) {
 							return resource.RetryableError(err)
 						}
 						return resource.NonRetryableError(err)
@@ -381,7 +381,7 @@ func resourceNetworkInterfaceDelete(d *schema.ResourceData, meta interface{}) er
 		})
 		bresponse, ok := raw.(*ecs.DeleteNetworkInterfaceResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

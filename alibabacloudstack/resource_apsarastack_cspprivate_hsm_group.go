@@ -186,7 +186,7 @@ func resourceAlibabacloudStackCspprivateHsmGroupDelete(d *schema.ResourceData, m
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 		_, err := client.DoTeaRequest("POST", "Cspprivate", "2022-02-17", "DeleteHsmGroup", "", nil, reqQuery, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"HsmGroup.NotFound", "InvalidGroupName.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "HsmGroup.NotFound", "InvalidGroupName.NotFound") {
 				return resource.NonRetryableError(err)
 			}
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteHsmGroup", errmsgs.AlibabacloudStackSdkGoERROR, err.Error())
@@ -195,7 +195,7 @@ func resourceAlibabacloudStackCspprivateHsmGroupDelete(d *schema.ResourceData, m
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"HsmGroup.NotFound", "InvalidGroupName.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "HsmGroup.NotFound", "InvalidGroupName.NotFound") {
 			return nil
 		}
 		return errmsgs.WrapError(err)

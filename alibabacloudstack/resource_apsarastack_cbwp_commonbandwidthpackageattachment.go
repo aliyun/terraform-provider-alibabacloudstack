@@ -115,7 +115,7 @@ func resourceAlibabacloudStackCommonBandwidthPackageAttachmentDelete(d *schema.R
 		}
 		//Waiting for unassociate the common bandwidth package
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, "TaskConflict") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

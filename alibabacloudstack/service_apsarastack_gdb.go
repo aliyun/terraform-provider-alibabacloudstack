@@ -27,7 +27,7 @@ func (s *GdbService) DescribeGraphDatabaseDbInstance(id string) (object map[stri
 	response, err = s.client.DoTeaRequest("POST", "gdb", "2019-09-03", "DescribeDBInstanceAttribute", "", nil, nil, request)
 	addDebug("DescribeDBInstanceAttribute", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound", "InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstance.NotFound", "InvalidDBInstanceId.NotFound") {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GraphDatabase:DbInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
 		return object, err
@@ -64,7 +64,7 @@ func (s *GdbService) GetDBInstanceAccessWhiteList(id string) (object map[string]
 	response, err = s.client.DoTeaRequest("POST", "gdb", "2019-09-03", "DescribeDBInstanceAccessWhiteList", "", nil, nil, request)
 	addDebug("DescribeDBInstanceAccessWhiteList", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound", "InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstance.NotFound", "InvalidDBInstanceId.NotFound") {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GraphDatabase:DbInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
 		return object, err
@@ -106,7 +106,7 @@ func (s *GdbService) DescribeDBInstanceAttribute(id string) (object map[string]i
 	request["PageNumber"] = 1
 	response, err = s.client.DoTeaRequest("POST", "gdb", "2019-09-03", "DescribeDBInstanceAttribute", "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstance.NotFound") {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GraphDatabase:DbInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
 		return object, err

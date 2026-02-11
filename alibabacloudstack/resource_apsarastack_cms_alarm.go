@@ -481,7 +481,7 @@ func resourceAlibabacloudStackCmsAlarmUpdate(d *schema.ResourceData, meta interf
 					if ok {
 						errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 					}
-					if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+					if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 						wait()
 						return resource.RetryableError(err)
 					}
@@ -507,7 +507,7 @@ func resourceAlibabacloudStackCmsAlarmUpdate(d *schema.ResourceData, meta interf
 					if ok {
 						errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 					}
-					if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+					if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 						wait()
 						return resource.RetryableError(err)
 					}
@@ -547,7 +547,7 @@ func resourceAlibabacloudStackCmsAlarmDelete(d *schema.ResourceData, meta interf
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 				wait()
 				return resource.RetryableError(err)
 			}

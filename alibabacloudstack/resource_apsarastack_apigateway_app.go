@@ -54,7 +54,7 @@ func resourceAlibabacloudStackApigatewayAppCreate(d *schema.ResourceData, meta i
 		})
 		bresponse, ok := raw.(*cloudapi.CreateAppResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"RepeatedCommit"}) {
+			if errmsgs.IsExpectedErrors(err, "RepeatedCommit") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -80,7 +80,7 @@ func resourceAlibabacloudStackApigatewayAppRead(d *schema.ResourceData, meta int
 //	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 //		tags, err := cloudApiService.DescribeTags(d.Id(), nil, TagResourceApp)
 //		if err != nil {
-//			if errmsgs.IsExpectedErrors(err, []string{"NotFoundResourceId"}) {
+//			if errmsgs.IsExpectedErrors(err, "NotFoundResourceId") {
 //				wait()
 //				return resource.RetryableError(err)
 //			}
@@ -164,7 +164,7 @@ func resourceAlibabacloudStackApigatewayAppDelete(d *schema.ResourceData, meta i
 	})
 	bresponse, ok := raw.(*cloudapi.DeleteAppResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApp"}) {
+		if errmsgs.IsExpectedErrors(err, "NotFoundApp") {
 			return nil
 		}
 		errmsg := ""

@@ -249,7 +249,7 @@ func resourceAlibabacloudStackNetworkAclAttachmentDelete(d *schema.ResourceData,
 		bresponse, ok := raw.(*vpc.UnassociateNetworkAclResponse)
 		//Waiting for unassociate the network acl
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, "TaskConflict") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

@@ -750,7 +750,7 @@ func resourceAlibabacloudStackHBaseInstanceDelete(d *schema.ResourceData, meta i
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Instance.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "Instance.NotFound") {
 			return nil
 		}
 		errmsg := ""

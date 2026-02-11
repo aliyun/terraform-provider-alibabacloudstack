@@ -630,7 +630,7 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 				return ecsClient.StartInstance(startRequest)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"IncorrectInstanceStatus"}) {
+				if errmsgs.IsExpectedErrors(err, "IncorrectInstanceStatus") {
 					time.Sleep(time.Second)
 					return resource.RetryableError(err)
 				}
@@ -733,10 +733,10 @@ func resourceAlibabacloudStackInstanceDelete(d *schema.ResourceData, meta interf
 			return ecsClient.DeleteInstance(deleteRequest)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"IncorrectInstanceStatus", "DependencyViolation.RouteEntry", "IncorrectInstanceStatus.Initializing"}) {
+			if errmsgs.IsExpectedErrors(err, "IncorrectInstanceStatus", "DependencyViolation.RouteEntry", "IncorrectInstanceStatus.Initializing") {
 				return resource.RetryableError(err)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling, "LastTokenProcessing"}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.Throttling, "LastTokenProcessing") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -751,7 +751,7 @@ func resourceAlibabacloudStackInstanceDelete(d *schema.ResourceData, meta interf
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, errmsgs.EcsNotFound) {
+		if errmsgs.IsExpectedErrors(err, errmsgs.EcsNotFound...) {
 			return nil
 		}
 		return err
@@ -1087,7 +1087,7 @@ func modifyInstanceAttribute(d *schema.ResourceData, meta interface{}) (bool, er
 				return ecsClient.ModifyInstanceAttribute(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"InvalidChargeType.ValueNotSupported"}) {
+				if errmsgs.IsExpectedErrors(err, "InvalidChargeType.ValueNotSupported") {
 					time.Sleep(time.Minute)
 					return resource.RetryableError(err)
 				}
@@ -1150,7 +1150,7 @@ func modifyVpcAttribute(d *schema.ResourceData, meta interface{}, run bool) (boo
 				return ecsClient.ModifyInstanceVpcAttribute(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"OperationConflict"}) {
+				if errmsgs.IsExpectedErrors(err, "OperationConflict") {
 					time.Sleep(1 * time.Second)
 					return resource.RetryableError(err)
 				}
@@ -1198,7 +1198,7 @@ func modifyInstanceType(d *schema.ResourceData, meta interface{}, run bool) (boo
 				return ecsClient.ModifyInstanceSpec(&args)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.Throttling) {
 					time.Sleep(10 * time.Second)
 					return resource.RetryableError(err)
 				}
@@ -1275,11 +1275,11 @@ func modifyInstanceNetworkSpec(d *schema.ResourceData, meta interface{}) error {
 				return ecsClient.ModifyInstanceNetworkSpec(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling, "LastOrderProcessing", "LastRequestProcessing", "LastTokenProcessing"}) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.Throttling, "LastOrderProcessing", "LastRequestProcessing", "LastTokenProcessing") {
 					wait()
 					return resource.RetryableError(err)
 				}
-				if errmsgs.IsExpectedErrors(err, []string{"InternalError"}) {
+				if errmsgs.IsExpectedErrors(err, "InternalError") {
 					return resource.RetryableError(err)
 				}
 				return resource.NonRetryableError(err)

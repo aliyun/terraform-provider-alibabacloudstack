@@ -259,7 +259,7 @@ func testAccCheckOssBucketObjectDestroyWithProvider(s *terraform.State, provider
 		// Try to find the resource
 		exist, err := bucket.IsObjectExist(rs.Primary.ID)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"NoSuchBucket"}) {
+			if errmsgs.IsExpectedErrors(err, "NoSuchBucket") {
 				return nil
 			}
 			return fmt.Errorf("IsObjectExist got an error: %#v", err)

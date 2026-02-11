@@ -89,7 +89,7 @@ func resourceAlibabacloudStackSlbDomainExtensionCreate(d *schema.ResourceData, m
 			return slbClient.CreateDomainExtension(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"DomainExtensionProcessing"}) {
+			if errmsgs.IsExpectedErrors(err, "DomainExtensionProcessing") {
 				return resource.RetryableError(err)
 			}
 			bresponse, ok := raw.(*slb.CreateDomainExtensionResponse)
@@ -145,7 +145,7 @@ func resourceAlibabacloudStackSlbDomainExtensionUpdate(d *schema.ResourceData, m
 				return slbClient.SetDomainExtensionAttribute(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"BackendServer.configuring", "DomainExtensionProcessing"}) {
+				if errmsgs.IsExpectedErrors(err, "BackendServer.configuring", "DomainExtensionProcessing") {
 					return resource.RetryableError(err)
 				}
 				bresponse, ok := raw.(*slb.SetDomainExtensionAttributeResponse)
@@ -192,7 +192,7 @@ func resourceAlibabacloudStackSlbDomainExtensionDelete(d *schema.ResourceData, m
 			return slbClient.DeleteDomainExtension(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"DomainExtensionProcessing", "InternalError"}) {
+			if errmsgs.IsExpectedErrors(err, "DomainExtensionProcessing", "InternalError") {
 				return resource.RetryableError(err)
 			}
 			bresponse, ok := raw.(*slb.DeleteDomainExtensionResponse)
@@ -206,7 +206,7 @@ func resourceAlibabacloudStackSlbDomainExtensionDelete(d *schema.ResourceData, m
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidParameter.DomainExtensionId"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidParameter.DomainExtensionId") {
 			return nil
 		}
 		return err

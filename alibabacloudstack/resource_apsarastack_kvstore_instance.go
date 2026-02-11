@@ -560,7 +560,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 				return rkvClient.ModifyInstanceSpec(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"MissingRedisUsedmemoryUnsupportPerfItem"}) {
+				if errmsgs.IsExpectedErrors(err, "MissingRedisUsedmemoryUnsupportPerfItem") {
 					time.Sleep(time.Duration(5) * time.Second)
 					return resource.RetryableError(err)
 				}
@@ -782,7 +782,7 @@ func resourceAlibabacloudStackKVStoreInstanceDelete(d *schema.ResourceData, meta
 	})
 
 	if err != nil {
-		if !errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+		if !errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
 			errmsg := ""
 			if raw != nil {
 				baseResponse := &responses.BaseResponse{}

@@ -6,7 +6,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"strings"
@@ -1482,39 +1481,28 @@ func resourceAlibabacloudStackEdasK8sApplicationDelete(d *schema.ResourceData, m
 	request.QueryParams["AppId"] = d.Id()
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	wait := incrementalWait(1*time.Second, 2*time.Second)
-	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			errmsg := ""
-			if bresponse != nil {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-
-			return resource.NonRetryableError(err)
-		}
-		response := make(map[string]interface{})
-		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if fmt.Sprint(response["Code"]) != "200" {
-			return resource.NonRetryableError(errmsgs.Error("Delete k8s application failed for " + response["Message"].(string)))
-		}
-		changeOrderId := response["ChangeOrderId"].(string)
-		if changeOrderId != "" {
-			stateConf := BuildStateConf([]string{"0", "1"}, []string{"3"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"2", "6", "10"}))
-			if _, err := stateConf.WaitForState(); err != nil {
-				return nil
-			}
-		}
-		return nil
-	})
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
+		errmsg := ""
+		if bresponse != nil {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 		return err
+	}
+	response := make(map[string]interface{})
+	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if fmt.Sprint(response["Code"]) != "200" {
+		return errmsgs.Error("Delete k8s application failed for " + response["Message"].(string))
+	}
+	changeOrderId := response["ChangeOrderId"].(string)
+	if changeOrderId != "" {
+		stateConf := BuildStateConf([]string{"0", "1"}, []string{"3"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"2", "6", "10"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return nil
+		}
 	}
 	return nil
 }

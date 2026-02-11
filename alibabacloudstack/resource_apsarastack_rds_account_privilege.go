@@ -79,7 +79,7 @@ func resourceAlibabacloudStackDBAccountPrivilegeCreate(d *schema.ResourceData, m
 		for _, db := range dbList {
 			if err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 				if err := rdsService.GrantAccountPrivilege(d.Id(), db.(string)); err != nil {
-					if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+					if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
 						return resource.RetryableError(err)
 					}
 					return resource.NonRetryableError(err)
@@ -131,7 +131,7 @@ func resourceAlibabacloudStackDBAccountPrivilegeRead(d *schema.ResourceData, met
 				return rdsClient.DescribeDatabases(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
+				if errmsgs.IsExpectedErrors(err, "InternalError", "OperationDenied.DBInstanceStatus") {
 					return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, object.DBInstanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 				}
 				errmsg := ""

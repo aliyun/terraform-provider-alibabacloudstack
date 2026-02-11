@@ -70,7 +70,7 @@ func resourceAlibabacloudStackAdbConnectionCreate(d *schema.ResourceData, meta i
 			return adbClient.AllocateClusterPublicConnection(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus...) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -141,7 +141,7 @@ func resourceAlibabacloudStackAdbConnectionDelete(d *schema.ResourceData, meta i
 		})
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus...) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -152,7 +152,7 @@ func resourceAlibabacloudStackAdbConnectionDelete(d *schema.ResourceData, meta i
 
 	if err != nil {
 		errmsg := ""
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBClusterId.NotFound") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)

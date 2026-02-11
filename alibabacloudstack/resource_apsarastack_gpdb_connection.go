@@ -75,7 +75,7 @@ func resourceAlibabacloudStackGpdbConnectionCreate(d *schema.ResourceData, meta 
 			return gpdbClient.AllocateInstancePublicConnection(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -170,7 +170,7 @@ func resourceAlibabacloudStackGpdbConnectionUpdate(d *schema.ResourceData, meta 
 			_, err := client.DoTeaRequest("POST", "gpdb", "2016-05-03", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil)
 
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
 					return resource.RetryableError(err)
 				}
 				return resource.NonRetryableError(err)
@@ -216,7 +216,7 @@ func resourceAlibabacloudStackGpdbConnectionDelete(d *schema.ResourceData, meta 
 			return gpdbClient.ReleaseInstancePublicConnection(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "OperationDenied.DBInstanceStatus") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -229,7 +229,7 @@ func resourceAlibabacloudStackGpdbConnectionDelete(d *schema.ResourceData, meta 
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound", "InvalidCurrentConnectionString.NotFound", "AtLeastOneNetTypeExists"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound", "InvalidCurrentConnectionString.NotFound", "AtLeastOneNetTypeExists") {
 			return nil
 		}
 		return err

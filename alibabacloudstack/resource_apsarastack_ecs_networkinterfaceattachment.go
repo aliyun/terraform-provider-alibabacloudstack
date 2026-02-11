@@ -46,7 +46,7 @@ func resourceAlibabacloudStackNetworkInterfaceAttachmentCreate(d *schema.Resourc
 			return ecsClient.AttachNetworkInterface(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -117,7 +117,7 @@ func resourceAlibabacloudStackNetworkInterfaceAttachmentDelete(d *schema.Resourc
 			return ecsClient.DetachNetworkInterface(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.NetworkInterfaceInvalidOperations...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

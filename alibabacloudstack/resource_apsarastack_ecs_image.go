@@ -151,7 +151,7 @@ func resourceAlibabacloudStackImageCreate(d *schema.ResourceData, meta interface
 			return ecsClient.CreateImage(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"IncorrectInstanceStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "IncorrectInstanceStatus") {
 				time.Sleep(time.Second)
 				return resource.RetryableError(err)
 			}

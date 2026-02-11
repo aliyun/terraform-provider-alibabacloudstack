@@ -410,7 +410,7 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterDelete(d *schema.
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		log.Printf(" response of raw DeleteVirtualBorderRouter : %s", bresponse)
 		if err != nil {
-			if errmsgs.NeedRetry(err) || errmsgs.IsExpectedErrors(err, []string{"DependencyViolation.BgpGroup"}) {
+			if errmsgs.NeedRetry(err) || errmsgs.IsExpectedErrors(err, "DependencyViolation.BgpGroup") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -419,7 +419,7 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterDelete(d *schema.
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidVbrId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidVbrId.NotFound") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)

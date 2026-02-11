@@ -100,7 +100,7 @@ func dataSourceAlibabacloudStackAscmResourceGroupsRead(d *schema.ResourceData, m
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ascm.auth.EntityNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ascm.auth.EntityNotExist") {
 			ids := []string{}
 			d.SetId(dataResourceIdHash(ids))
 			if err := d.Set("groups", []map[string]interface{}{}); err != nil {

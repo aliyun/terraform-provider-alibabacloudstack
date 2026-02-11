@@ -46,7 +46,7 @@ func dataSourceAlibabacloudStackApigatewayServiceRead(d *schema.ResourceData, me
 	response, err := client.DoTeaRequest("POST", "CloudAPI", "2016-07-14", "OpenApiGatewayService", "", nil, nil, request)
 	addDebug("OpenApiGatewayService", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ORDER.OPEND"}) {
+		if errmsgs.IsExpectedErrors(err, "ORDER.OPEND") {
 			d.SetId("ApiGatewayServicHasBeenOpened")
 			d.Set("status", "Opened")
 			return nil

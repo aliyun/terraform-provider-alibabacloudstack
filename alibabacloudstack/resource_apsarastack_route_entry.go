@@ -84,7 +84,7 @@ func resourceAlibabacloudStackRouteEntryCreate(d *schema.ResourceData, meta inte
 			return vpcClient.CreateRouteEntry(&args)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict", "IncorrectRouteEntryStatus", errmsgs.Throttling, "IncorrectVpcStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "TaskConflict", "IncorrectRouteEntryStatus", errmsgs.Throttling, "IncorrectVpcStatus") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -97,7 +97,7 @@ func resourceAlibabacloudStackRouteEntryCreate(d *schema.ResourceData, meta inte
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"RouterEntryConflict.Duplicated"}) {
+		if errmsgs.IsExpectedErrors(err, "RouterEntryConflict.Duplicated") {
 			en, err := vpcService.DescribeRouteEntry(rtId + ":" + table.VRouterId + ":" + cidr + ":" + nt + ":" + ni)
 			if err != nil {
 				return errmsgs.WrapError(err)
@@ -161,7 +161,7 @@ func resourceAlibabacloudStackRouteEntryDelete(d *schema.ResourceData, meta inte
 			return vpcClient.DeleteRouteEntry(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"IncorrectVpcStatus", "TaskConflict", "IncorrectRouteEntryStatus", "Forbbiden", "UnknownError"}) {
+			if errmsgs.IsExpectedErrors(err, "IncorrectVpcStatus", "TaskConflict", "IncorrectRouteEntryStatus", "Forbbiden", "UnknownError") {
 				time.Sleep(time.Duration(retryTimes) * time.Second)
 				retryTimes += 7
 				return resource.RetryableError(err)
@@ -176,7 +176,7 @@ func resourceAlibabacloudStackRouteEntryDelete(d *schema.ResourceData, meta inte
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidRouteEntry.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidRouteEntry.NotFound") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)

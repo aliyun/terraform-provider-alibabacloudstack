@@ -118,7 +118,7 @@ func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta inte
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ProjectNotExist") {
 			return nil
 		}
 		if bresponse == nil {

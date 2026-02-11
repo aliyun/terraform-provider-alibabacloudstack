@@ -216,7 +216,7 @@ func resourceAlibabacloudStackLogAlertCreate(d *schema.ResourceData, meta interf
 			return nil, slsClient.CreateAlert(project_name, alert)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -319,7 +319,7 @@ func resourceAlibabacloudStackLogAlertUpdate(d *schema.ResourceData, meta interf
 			return nil, slsClient.UpdateAlert(parts[0], params)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -347,7 +347,7 @@ func resourceAlibabacloudStackLogAlertDelete(d *schema.ResourceData, meta interf
 			return nil, slsClient.DeleteAlert(parts[0], parts[1])
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}

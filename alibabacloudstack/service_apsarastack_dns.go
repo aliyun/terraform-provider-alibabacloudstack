@@ -34,7 +34,7 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug("DescribeGlobalZoneRecords", bresponse, request, request.QueryParams)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorRecordNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorRecordNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if bresponse == nil {
@@ -139,7 +139,7 @@ func (s *DnsService) DescribeDnsDomainAttachment(id string) (object alidns.Descr
 	})
 	bresponse, ok := raw.(*alidns.DescribeInstanceDomainsResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDnsProduct"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDnsProduct") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DnsDomainAttachment", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
@@ -259,7 +259,7 @@ func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err err
 	resp := &DnsDomains{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorDomainNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorDomainNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if bresponse == nil {

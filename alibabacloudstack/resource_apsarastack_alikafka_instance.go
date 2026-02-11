@@ -278,7 +278,7 @@ func resourceAlibabacloudStackAlikafkaInstanceCreate(d *schema.ResourceData, met
 	err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutCreate)), func() *resource.RetryError {
 		createInstanceResponse, err = client.DoTeaRequest("POST", "alikafka", "2019-09-16", "CreateInstance", "", nil, createInstanceRequest, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) || errmsgs.NeedRetry(err) {
+			if errmsgs.IsExpectedErrors(err, "ONS_SYSTEM_FLOW_CONTROL") || errmsgs.NeedRetry(err) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -463,7 +463,7 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 			if err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
 				response, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", action, "", nil, request, nil)
 				if err != nil {
-					if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "already exist task "}) || errmsgs.NeedRetry(err) {
+					if errmsgs.IsExpectedErrors(err, "already exist task", "A task is being queued for scheduling.") {
 						return resource.RetryableError(err)
 					}
 					return resource.NonRetryableError(err)

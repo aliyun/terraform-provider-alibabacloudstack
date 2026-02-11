@@ -85,7 +85,7 @@ func dataSourceAlibabacloudStackDatahubTopicsRead(d *schema.ResourceData, meta i
 	var filteredTopics []map[string]interface{}
 	listResp, err := client.ProcessCommonRequest(listReq)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ResourceNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ResourceNotFound") {
 			d.Set("names", topicNames)
 			d.SetId(dataResourceIdHash(topicNames))
 			if err := d.Set("topics", filteredTopics); err != nil {

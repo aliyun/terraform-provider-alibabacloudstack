@@ -94,7 +94,7 @@ func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta int
 	objectName := d.Get("oss_object").(string)
 	err = bucket.DeleteObject(objectName)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"No Content", "Not Found"}) {
+		if errmsgs.IsExpectedErrors(err, "No Content", "Not Found") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, objectName, "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR)

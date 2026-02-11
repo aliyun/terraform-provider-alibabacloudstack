@@ -151,7 +151,7 @@ func resourceAlibabacloudStackRosTemplateDelete(d *schema.ResourceData, meta int
 	}
 	response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ChangeSetNotFound", "StackNotFound", "TemplateNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ChangeSetNotFound", "StackNotFound", "TemplateNotFound") {
 			return nil
 		}
 		errmsg := ""

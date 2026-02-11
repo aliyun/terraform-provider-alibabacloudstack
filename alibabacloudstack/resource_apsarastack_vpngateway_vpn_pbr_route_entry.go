@@ -101,7 +101,7 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryCreate(d *schema.Resourc
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"VpnGateway.Configuring"}) {
+			if errmsgs.IsExpectedErrors(err, "VpnGateway.Configuring") {
 				time.Sleep(10 * time.Second)
 				continue
 			}

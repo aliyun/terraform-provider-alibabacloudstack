@@ -133,7 +133,7 @@ func resourceAlibabacloudStackVpcCreate(d *schema.ResourceData, meta interface{}
 		})
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict", "UnknownError", errmsgs.Throttling}) {
+			if errmsgs.IsExpectedErrors(err, "TaskConflict", "UnknownError", errmsgs.Throttling) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -210,7 +210,7 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 				return vpcClient.DescribeRouteTables(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.Throttling) {
 					time.Sleep(10 * time.Second)
 					return resource.RetryableError(err)
 				} else {
@@ -348,7 +348,7 @@ func resourceAlibabacloudStackVpcDelete(d *schema.ResourceData, meta interface{}
 			return vpcClient.DeleteVpc(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidVpcID.NotFound", "Forbidden.VpcNotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidVpcID.NotFound", "Forbidden.VpcNotFound") {
 				return nil
 			}
 			errmsg := ""

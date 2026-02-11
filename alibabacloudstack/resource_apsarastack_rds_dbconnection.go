@@ -79,7 +79,7 @@ func resourceAlibabacloudStackDBConnectionCreate(d *schema.ResourceData, meta in
 			return rdsClient.AllocateInstancePublicConnection(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus...) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -182,7 +182,7 @@ func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta in
 				return rdsClient.ModifyDBInstanceConnectionString(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus...) {
 					return resource.RetryableError(err)
 				}
 				errmsg := ""
@@ -235,7 +235,7 @@ func resourceAlibabacloudStackDBConnectionDelete(d *schema.ResourceData, meta in
 		})
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "OperationDenied.DBInstanceStatus") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -245,7 +245,7 @@ func resourceAlibabacloudStackDBConnectionDelete(d *schema.ResourceData, meta in
 					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 				}
 			}
-			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidCurrentConnectionString.NotFound", "AtLeastOneNetTypeExists"}) {
+			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, "InvalidCurrentConnectionString.NotFound", "AtLeastOneNetTypeExists") {
 				return nil
 			}
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)

@@ -216,7 +216,7 @@ func resourceAlibabacloudStackSecurityGroupDelete(d *schema.ResourceData, meta i
 		})
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"DependencyViolation"}) {
+			if errmsgs.IsExpectedErrors(err, "DependencyViolation") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

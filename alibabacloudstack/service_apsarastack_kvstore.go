@@ -38,7 +38,7 @@ func (s *KvstoreService) DescribeKVstoreInstance(id string) (*r_kvstore.DBInstan
 	})
 	bresponse, ok := raw.(*r_kvstore.DescribeInstanceAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
 			return instance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KVstoreInstance", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -65,7 +65,7 @@ func (s *KvstoreService) DescribeKVstoreBackupPolicy(id string) (*r_kvstore.Desc
 	})
 	bresponse, ok := raw.(*r_kvstore.DescribeBackupPolicyResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
 			return response, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KVstoreBackupPolicy", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -149,7 +149,7 @@ func (s *KvstoreService) DescribeParameters(id string) (*r_kvstore.DescribeParam
 	})
 	bresponse, ok := raw.(*r_kvstore.DescribeParametersResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return response, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Parameters", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		}
 		errmsg := ""
@@ -369,7 +369,7 @@ func (s *KvstoreService) DescribeKVstoreAccount(id string) (*r_kvstore.Account, 
 	})
 	response, ok := raw.(*r_kvstore.DescribeAccountsResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
 			return ds, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -441,7 +441,7 @@ func (s *KvstoreService) DescribeKvstoreConnection(id string) (object r_kvstore.
 	})
 	bresponse, ok := raw.(*r_kvstore.DescribeDBInstanceNetInfoResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KvstoreConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}

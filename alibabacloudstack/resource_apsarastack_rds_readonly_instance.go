@@ -228,7 +228,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 				return rdsClient.ModifyDBInstanceDescription(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState"}) {
+				if errmsgs.IsExpectedErrors(err, "OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState") {
 					return resource.RetryableError(err)
 				}
 				errmsg := ""
@@ -276,7 +276,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 				return rdsClient.ModifyDBInstanceSpec(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"InvalidOrderTask.NotSupport", "OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState"}) {
+				if errmsgs.IsExpectedErrors(err, "InvalidOrderTask.NotSupport", "OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState") {
 					return resource.RetryableError(err)
 				}
 				errmsg := ""
@@ -378,7 +378,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceDelete(d *schema.ResourceData, m
 		})
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"RwSplitNetType.Exist", "OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState"}) {
+			if errmsgs.IsExpectedErrors(err, "RwSplitNetType.Exist", "OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

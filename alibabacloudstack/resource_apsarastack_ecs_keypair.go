@@ -148,7 +148,7 @@ func resourceAlibabacloudStackKeyPairRead(d *schema.ResourceData, meta interface
 
 	keyPair, err := ecsService.DescribeKeyPair(d.Id())
 	if err != nil {
-		if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidKeyPair.NotFound"}) {
+		if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, "InvalidKeyPair.NotFound") {
 			d.SetId("")
 			return nil
 		}
@@ -178,7 +178,7 @@ func resourceAlibabacloudStackKeyPairDelete(d *schema.ResourceData, meta interfa
 		response, ok := raw.(*ecs.DeleteKeyPairsResponse)
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidKeyPair.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidKeyPair.NotFound") {
 				return nil
 			}
 			errmsg := ""

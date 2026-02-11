@@ -158,7 +158,7 @@ func resourceAlibabacloudStackCmsAlarmContactGroupDelete(d *schema.ResourceData,
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"400", "403", "404", "ContactNotExists"}) {
+		if errmsgs.IsExpectedErrors(err, "400", "403", "404", "ContactNotExists") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)

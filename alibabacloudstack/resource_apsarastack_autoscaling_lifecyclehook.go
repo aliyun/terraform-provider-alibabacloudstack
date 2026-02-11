@@ -81,7 +81,7 @@ func resourceAlibabacloudStackEssLifeCycleHookCreate(d *schema.ResourceData, met
 			return essClient.CreateLifecycleHook(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.Throttling) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -177,7 +177,7 @@ func resourceAlibabacloudStackEssLifeCycleHookDelete(d *schema.ResourceData, met
 		return essClient.DeleteLifecycleHook(request)
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidLifecycleHookId.NotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidLifecycleHookId.NotExist") {
 			return nil
 		}
 		errmsg := ""

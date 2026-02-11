@@ -247,7 +247,7 @@ func (s *EcsService) JoinSecurityGroups(instanceId string, securityGroupIds []st
 			return ecsClient.JoinSecurityGroup(request)
 		})
 		response, ok := raw.(*ecs.JoinSecurityGroupResponse)
-		if err != nil && errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.AlreadyExists"}) {
+		if err != nil && errmsgs.IsExpectedErrors(err, "InvalidInstanceId.AlreadyExists") {
 			errmsg := ""
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
@@ -270,7 +270,7 @@ func (s *EcsService) LeaveSecurityGroups(instanceId string, securityGroupIds []s
 			return ecsClient.LeaveSecurityGroup(request)
 		})
 		response, ok := raw.(*ecs.LeaveSecurityGroupResponse)
-		if err != nil && errmsgs.IsExpectedErrors(err, []string{"InvalidSecurityGroupId.NotFound"}) {
+		if err != nil && errmsgs.IsExpectedErrors(err, "InvalidSecurityGroupId.NotFound") {
 			errmsg := ""
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
@@ -294,7 +294,7 @@ func (s *EcsService) DescribeSecurityGroup(id string) (group ecs.DescribeSecurit
 		return ecsClient.DescribeSecurityGroupAttribute(request)
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidSecurityGroupId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidSecurityGroupId.NotFound") {
 			err = errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return
@@ -328,7 +328,7 @@ func (s *EcsService) DescribeSecurityGroupRule(id string) (rule ecs.Permission, 
 		return ecsClient.DescribeSecurityGroupAttribute(request)
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidSecurityGroupId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidSecurityGroupId.NotFound") {
 			err = errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return
@@ -549,7 +549,7 @@ func (s *EcsService) DescribeKeyPair(id string) (keyPair ecs.KeyPair, err error)
 func (s *EcsService) DescribeKeyPairAttachment(id string) (keyPair ecs.KeyPair, err error) {
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidKeyPair.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidKeyPair.NotFound") {
 			err = errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return
@@ -1263,7 +1263,7 @@ func (s *EcsService) AttachKeyPair(keyName string, instanceIds []interface{}) (e
 			return ecsClient.AttachKeyPair(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"ServiceUnavailable"}) {
+			if errmsgs.IsExpectedErrors(err, "ServiceUnavailable") {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -1581,7 +1581,7 @@ func (s *EcsService) DescribeLaunchTemplateVersion(id string, version int) (set 
 	response, ok := raw.(*ecs.DescribeLaunchTemplateVersionsResponse)
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidLaunchTemplate.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidLaunchTemplate.NotFound") {
 			err = errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			return set, err
 		}
@@ -1639,7 +1639,7 @@ func (s *EcsService) DescribeImageShareByImageId(id string) (imageShare *ecs.Des
 	})
 	resp, ok := raw.(*ecs.DescribeImageSharePermissionResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidImageId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidImageId.NotFound") {
 			return imageShare, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -1756,7 +1756,7 @@ func (s *EcsService) SetResourceTags(d *schema.ResourceData, resourceType string
 		addDebug(request.GetActionName(), raw)
 		response, ok := raw.(*ecs.UntagResourcesResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidRegionId.NotFound", "InvalidResourceId.NotFound", "InvalidResourceType.NotFound", "MissingParameter.RegionId", "MissingParameter.ResourceIds", "MissingParameter.ResourceType", "MissingParameter.TagOwnerBid", "MissingParameter.TagOwnerUid", "MissingParameter.Tags"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidRegionId.NotFound", "InvalidResourceId.NotFound", "InvalidResourceType.NotFound", "MissingParameter.RegionId", "MissingParameter.ResourceIds", "MissingParameter.ResourceType", "MissingParameter.TagOwnerBid", "MissingParameter.TagOwnerUid", "MissingParameter.Tags") {
 				return nil
 			}
 			errmsg := ""
@@ -1779,7 +1779,7 @@ func (s *EcsService) SetResourceTags(d *schema.ResourceData, resourceType string
 		addDebug(request.GetActionName(), raw)
 		response, ok := raw.(*ecs.TagResourcesResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidRegionId.NotFound", "InvalidResourceId.NotFound", "InvalidResourceType.NotFound", "MissingParameter.RegionId", "MissingParameter.ResourceIds", "MissingParameter.ResourceType", "MissingParameter.TagOwnerBid", "MissingParameter.TagOwnerUid", "MissingParameter.Tags"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidRegionId.NotFound", "InvalidResourceId.NotFound", "InvalidResourceType.NotFound", "MissingParameter.RegionId", "MissingParameter.ResourceIds", "MissingParameter.ResourceType", "MissingParameter.TagOwnerBid", "MissingParameter.TagOwnerUid", "MissingParameter.Tags") {
 				return nil
 			}
 			errmsg := ""
@@ -1808,7 +1808,7 @@ func (s *EcsService) DescribeEcsDedicatedHost(id string) (object ecs.DedicatedHo
 		})
 		response, ok := raw.(*ecs.DescribeDedicatedHostsResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidLockReason.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidLockReason.NotFound") {
 				err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("EcsDedicatedHost", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 				return object, err
 			}
@@ -1876,7 +1876,7 @@ func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub_patch.
 	//response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidRegionId.NotFound", "Operation.Forbidden"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidRegionId.NotFound", "Operation.Forbidden") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("EcsEbsStorageSet", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return resp, err
 		}
@@ -1921,7 +1921,7 @@ func (s *EcsService) DescribeEcsCommand(id string) (result *datahub_patch.EcsDes
 	//response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidRegionId.NotFound", "Operation.Forbidden"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidRegionId.NotFound", "Operation.Forbidden") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("EcsCommand", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return resp, err
 		}

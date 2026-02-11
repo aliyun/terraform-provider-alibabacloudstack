@@ -48,7 +48,7 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ProjectNotExist") {
 			return logProject, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
 		if bresponse == nil {
@@ -109,7 +109,7 @@ func (s *LogService) DescribeLogStore(id string) (*sls.LogStore, error) {
 			return slsClient.GetLogStore(projectName, name)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError", errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -124,7 +124,7 @@ func (s *LogService) DescribeLogStore(id string) (*sls.LogStore, error) {
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist", "LogStoreNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ProjectNotExist", "LogStoreNotExist") {
 			return store, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
 		return store, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "GetLogStore", errmsgs.AlibabacloudStackLogGoSdkERROR)
@@ -176,7 +176,7 @@ func (s *LogService) DescribeLogStoreIndex(id string) (*sls.Index, error) {
 			return slsClient.GetIndex(projectName, name)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError", errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -192,7 +192,7 @@ func (s *LogService) DescribeLogStoreIndex(id string) (*sls.Index, error) {
 	})
 
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist", "LogStoreNotExist", "IndexConfigNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ProjectNotExist", "LogStoreNotExist", "IndexConfigNotExist") {
 			return index, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
 		return index, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "GetIndex", errmsgs.AlibabacloudStackLogGoSdkERROR)
@@ -218,7 +218,7 @@ func (s *LogService) DescribeLogMachineGroup(id string) (*sls.MachineGroup, erro
 			return slsClient.GetMachineGroup(projectName, groupName)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError", errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -234,7 +234,7 @@ func (s *LogService) DescribeLogMachineGroup(id string) (*sls.MachineGroup, erro
 	})
 
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist", "GroupNotExist", "MachineGroupNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ProjectNotExist", "GroupNotExist", "MachineGroupNotExist") {
 			return group, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
 		return group, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "GetMachineGroup", errmsgs.AlibabacloudStackLogGoSdkERROR)
@@ -287,7 +287,7 @@ func (s *LogService) DescribeLogtailConfig(id string) (*sls.LogConfig, error) {
 			return slsClient.GetConfig(projectName, configName)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError"}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError") {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -302,7 +302,7 @@ func (s *LogService) DescribeLogtailConfig(id string) (*sls.LogConfig, error) {
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist", "LogStoreNotExist", "ConfigNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ProjectNotExist", "LogStoreNotExist", "ConfigNotExist") {
 			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
 		return response, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "GetConfig", errmsgs.AlibabacloudStackLogGoSdkERROR)
@@ -355,7 +355,7 @@ func (s *LogService) DescribeLogtailAttachment(id string) (groupName string, err
 			return slsClient.GetAppliedMachineGroups(projectName, configName)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError"}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError") {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -370,7 +370,7 @@ func (s *LogService) DescribeLogtailAttachment(id string) (groupName string, err
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist", "ConfigNotExist", "MachineGroupNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ProjectNotExist", "ConfigNotExist", "MachineGroupNotExist") {
 			return groupName, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
 		return groupName, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "GetAppliedMachineGroups", errmsgs.AlibabacloudStackLogGoSdkERROR)
@@ -427,7 +427,7 @@ func (s *LogService) DescribeLogAlert(id string) (*sls.Alert, error) {
 			return slsClient.GetAlert(projectName, alertName)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError", errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -443,7 +443,7 @@ func (s *LogService) DescribeLogAlert(id string) (*sls.Alert, error) {
 	})
 
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist", "JobNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ProjectNotExist", "JobNotExist") {
 			return alert, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
 		return alert, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "GetLogstoreAlert", errmsgs.AlibabacloudStackLogGoSdkERROR)
@@ -492,7 +492,7 @@ func (s *LogService) CreateLogDashboard(project, name string) error {
 			return nil, slsClient.CreateDashboard(project, dashboard)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError", errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
 			}
 			if err.(*sls.Error).Message == "specified dashboard already exists" {
@@ -526,7 +526,7 @@ func CreateDashboard(project, name string, client *sls.Client) error {
 			if err.(*sls.Error).Message == "specified dashboard already exists" {
 				return nil
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError", errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
 			}
 
@@ -573,7 +573,7 @@ func (s *LogService) DescribeLogDashboard(id string) (*sls.Dashboard, error) {
 			return slsClient.GetDashboard(projectName, dashboardName)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError", errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -589,7 +589,7 @@ func (s *LogService) DescribeLogDashboard(id string) (*sls.Dashboard, error) {
 	})
 
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist", "DashboardNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "ProjectNotExist", "DashboardNotExist") {
 			return dashboard, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
 		return dashboard, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "GetLogstoreDashboard", errmsgs.AlibabacloudStackLogGoSdkERROR)

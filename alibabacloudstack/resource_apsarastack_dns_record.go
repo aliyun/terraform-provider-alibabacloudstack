@@ -248,10 +248,10 @@ func resourceAlibabacloudStackDnsRecordDelete(d *schema.ResourceData, meta inter
 	request.QueryParams["ZoneId"] = ZoneId
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"DomainRecordNotBelongToUser"}) {
+		if errmsgs.IsExpectedErrors(err, "DomainRecordNotBelongToUser") {
 			return nil
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"RecordForbidden.DNSChange", "InternalError"}) {
+		if errmsgs.IsExpectedErrors(err, "RecordForbidden.DNSChange", "InternalError") {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if bresponse == nil {

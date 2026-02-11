@@ -172,7 +172,7 @@ func resourceAlibabacloudStackDatahubKafkaGroupDelete(d *schema.ResourceData, me
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		_, err := client.DoTeaRequest("POST", "datahub", "2019-11-20", "DeleteKafkaGroup", "", nil, reqQuery, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"ResourceNotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "ResourceNotFound") {
 				return resource.NonRetryableError(err)
 			}
 			return resource.RetryableError(err)
@@ -180,7 +180,7 @@ func resourceAlibabacloudStackDatahubKafkaGroupDelete(d *schema.ResourceData, me
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ResourceNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ResourceNotFound") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteKafkaGroup", errmsgs.AlibabacloudStackSdkGoERROR)

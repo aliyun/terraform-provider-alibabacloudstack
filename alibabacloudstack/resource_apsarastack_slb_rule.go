@@ -219,7 +219,7 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 			return slbClient.CreateRules(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"BackendServer.configuring", "OperationFailed.ListenerStatusNotSupport"}) {
+			if errmsgs.IsExpectedErrors(err, "BackendServer.configuring", "OperationFailed.ListenerStatusNotSupport") {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -414,7 +414,7 @@ func resourceAlibabacloudStackSlbRuleDelete(d *schema.ResourceData, meta interfa
 		})
 		response, ok := raw.(*slb.DeleteRulesResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"OperationFailed.ListenerStatusNotSupport"}) {
+			if errmsgs.IsExpectedErrors(err, "OperationFailed.ListenerStatusNotSupport") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -431,7 +431,7 @@ func resourceAlibabacloudStackSlbRuleDelete(d *schema.ResourceData, meta interfa
 	})
 
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidRuleId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidRuleId.NotFound") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, "")

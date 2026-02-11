@@ -86,7 +86,7 @@ func (s *OtsService) DescribeOtsTable(id string) (*tablestore.DescribeTableRespo
 			return tableStoreClient.DescribeTable(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OtsTableIsTemporarilyUnavailable) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OtsTableIsTemporarilyUnavailable ...) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -354,7 +354,7 @@ func (s *OtsService) DescribeOtsInstance(id string) (map[string]interface{}, err
 
 	response, err := s.client.DoTeaRequest("GET", "Tablestore", "2020-12-09", "GetInstance", "/v2/openapi/getinstance", nil, reqQuery, nil)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "NotFound") {
 			return nil, errmsgs.GetNotFoundErrorFromString("Tablestore " + id + " Not Found")
 		}
 		return nil, err

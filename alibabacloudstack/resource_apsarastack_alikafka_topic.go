@@ -100,7 +100,7 @@ func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta i
 		})
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 				time.Sleep(10 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -147,7 +147,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 	//				return alikafkaClient.ModifyTopicRemark(modifyRemarkRequest)
 	//			})
 	//			if err != nil {
-	//				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+	//				if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 	//					time.Sleep(10 * time.Second)
 	//					return resource.RetryableError(err)
 	//				}
@@ -182,7 +182,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 					return alikafkaClient.ModifyPartitionNum(modifyPartitionReq)
 				})
 				if err != nil {
-					if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+					if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 						time.Sleep(10 * time.Second)
 						return resource.RetryableError(err)
 					}
@@ -250,7 +250,7 @@ func resourceAlibabacloudStackAlikafkaTopicDelete(d *schema.ResourceData, meta i
 			return alikafkaClient.DeleteTopic(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 				time.Sleep(10 * time.Second)
 				return resource.RetryableError(err)
 			}

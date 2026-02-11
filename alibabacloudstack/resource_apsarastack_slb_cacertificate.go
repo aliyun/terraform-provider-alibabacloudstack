@@ -133,7 +133,7 @@ func resourceAlibabacloudStackSlbCACertificateDelete(d *schema.ResourceData, met
 		})
 		response, ok := raw.(*slb.DeleteCACertificateResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy ...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -146,7 +146,7 @@ func resourceAlibabacloudStackSlbCACertificateDelete(d *schema.ResourceData, met
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"CACertificateId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "CACertificateId.NotFound") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)

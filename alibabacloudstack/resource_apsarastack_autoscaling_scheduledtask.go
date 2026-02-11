@@ -182,7 +182,7 @@ func resourceAlibabacloudStackEssScheduledTaskDelete(d *schema.ResourceData, met
 	})
 	bresponse, ok := raw.(*ess.DeleteScheduledTaskResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidScheduledTaskId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidScheduledTaskId.NotFound") {
 			return nil
 		}
 		errmsg := ""

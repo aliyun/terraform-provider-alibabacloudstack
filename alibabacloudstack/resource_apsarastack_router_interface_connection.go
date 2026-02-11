@@ -155,7 +155,7 @@ func resourceAlibabacloudStackRouterInterfaceConnectionCreate(d *schema.Resource
 			})
 			bresponse, ok := raw.(*vpc.ConnectRouterInterfaceResponse)
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"IncorrectOppositeInterfaceInfo.NotSet"}) {
+				if errmsgs.IsExpectedErrors(err, "IncorrectOppositeInterfaceInfo.NotSet") {
 					return resource.RetryableError(err)
 				}
 				errmsg := ""

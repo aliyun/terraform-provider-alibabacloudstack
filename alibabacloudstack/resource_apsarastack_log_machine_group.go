@@ -66,7 +66,7 @@ func resourceAlibabacloudStackLogMachineGroupCreate(d *schema.ResourceData, meta
 			return nil, slsClient.CreateMachineGroup(d.Get("project").(string), params)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -136,7 +136,7 @@ func resourceAlibabacloudStackLogMachineGroupUpdate(d *schema.ResourceData, meta
 				return nil, slsClient.UpdateMachineGroup(parts[0], params)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 					time.Sleep(5 * time.Second)
 					return resource.RetryableError(err)
 				}
@@ -171,7 +171,7 @@ func resourceAlibabacloudStackLogMachineGroupDelete(d *schema.ResourceData, meta
 			return nil, slsClient.DeleteMachineGroup(parts[0], parts[1])
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}

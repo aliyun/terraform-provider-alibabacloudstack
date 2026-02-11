@@ -172,9 +172,16 @@ func IsExpectedErrorCodes(code string, errorCodes []string) bool {
 	return false
 }
 
-func IsExpectedErrors(err error, expectCodes []string) bool {
+func IsExpectedErrors(err error, expectCodes ...string) bool {
 	if err == nil {
 		return false
+	}
+	for {
+		if e, ok := err.(*ComplexError); ok {
+			err = e.Cause
+			continue
+		}
+		break
 	}
 
 	if e, ok := err.(*tea.SDKError); ok {
@@ -184,10 +191,6 @@ func IsExpectedErrors(err error, expectCodes []string) bool {
 			}
 		}
 		return false
-	}
-
-	if e, ok := err.(*ComplexError); ok {
-		return IsExpectedErrors(e.Cause, expectCodes)
 	}
 
 	if e, ok := err.(*sdkerrors.ServerError); ok {

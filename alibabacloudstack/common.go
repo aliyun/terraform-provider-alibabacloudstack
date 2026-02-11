@@ -644,7 +644,7 @@ func (a *Invoker) Run(f func() error) error {
 	}
 
 	for _, catcher := range a.catchers {
-		if errmsgs.IsExpectedErrors(err, []string{catcher.Reason}) {
+		if errmsgs.IsExpectedErrors(err, catcher.Reason) {
 			catcher.RetryCount--
 
 			if catcher.RetryCount <= 0 {

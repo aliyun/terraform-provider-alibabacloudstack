@@ -42,11 +42,11 @@ func (s *CmsService) DescribeCmsAlarm(id string) (alarm cms.AlarmInDescribeMetri
 			return cmsClient.DescribeMetricRuleList(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.Throttling) {
 				time.Sleep(10 * time.Second)
 				return resource.RetryableError(err)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -186,7 +186,7 @@ func (s *CmsService) DescribeCmsAlarmContact(id string) (object cms.Contact, err
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ContactNotExists", "errmsgs.ResourceNotfound"}) {
+		if errmsgs.IsExpectedErrors(err, "ContactNotExists", "errmsgs.ResourceNotfound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("CmsAlarmContact", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
@@ -227,7 +227,7 @@ func (s *CmsService) DescribeCmsAlarmContactGroup(id string) (object cms.Contact
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"ContactGroupNotExists", "errmsgs.ResourceNotfound"}) {
+			if errmsgs.IsExpectedErrors(err, "ContactGroupNotExists", "errmsgs.ResourceNotfound") {
 				err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("CmsAlarmContactGroup", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 				return object, err
 			}

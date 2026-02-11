@@ -75,7 +75,7 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return instance, err
 		}
 		return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -434,7 +434,7 @@ func (s *MongoDBService) DescribeDBInstanceSSL(id string) (*dds.DescribeDBInstan
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 		instance, err := s.DescribeMongoDBInstance(id)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 				return resource.NonRetryableError(err)
 			}
 			return resource.RetryableError(err)

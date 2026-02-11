@@ -248,7 +248,7 @@ func (e *EdasService) CheckEcsStatus(instanceIds string, count int) error {
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(rsp.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.InvalidDBClusterIdNotFound", "OperationDenied.InvalidDBClusterNameNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "OperationDenied.InvalidDBClusterIdNotFound", "OperationDenied.InvalidDBClusterNameNotFound") {
 			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceIds, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)

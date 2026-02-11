@@ -133,7 +133,7 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 			"logstore": logstore,
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError", errmsgs.LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -172,7 +172,7 @@ func resourceAlibabacloudStackLogStoreRead(d *schema.ResourceData, meta interfac
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 		shards, err = object.ListShards()
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalServerError"}) {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

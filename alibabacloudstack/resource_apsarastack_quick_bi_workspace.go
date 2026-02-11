@@ -154,7 +154,7 @@ func resourceAlibabacloudStackQuickBiWorkspaceDelete(d *schema.ResourceData, met
 
 	_, err = client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", "DeleteWorkSpace", "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Workspace.Not.In.Organization"}) {
+		if errmsgs.IsExpectedErrors(err, "Workspace.Not.In.Organization") {
 			return nil
 		}
 		return err

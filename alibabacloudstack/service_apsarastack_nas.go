@@ -36,7 +36,7 @@ func (s *NasService) DescribeNasFileSystem(id string) (object map[string]interfa
 	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeFileSystems", "", nil, nil, request)
 	addDebug("DescribeFileSystems", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidFileSystem.NotFound", "Forbidden.NasNotFound", "Resource.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidFileSystem.NotFound", "Forbidden.NasNotFound", "Resource.NotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("NasFileSystem", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
@@ -68,7 +68,7 @@ func (s *NasService) DescribeNasMountTarget(id string) (object map[string]interf
 	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeMountTargets", "", nil, nil, request)
 	addDebug("DescribeMountTargets", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.NasNotFound", "InvalidFileSystem.NotFound", "InvalidLBid.NotFound", "InvalidMountTarget.NotFound", "VolumeUnavailable"}) {
+		if errmsgs.IsExpectedErrors(err, "Forbidden.NasNotFound", "InvalidFileSystem.NotFound", "InvalidLBid.NotFound", "InvalidMountTarget.NotFound", "VolumeUnavailable") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("NasMountTarget", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
@@ -104,7 +104,7 @@ func (s *NasService) DescribeNasAccessGroup(id string) (object map[string]interf
 	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeAccessGroups", "", nil, nil, request)
 	addDebug("DescribeAccessGroups", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.NasNotFound", "InvalidAccessGroup.NotFound", "Resource.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "Forbidden.NasNotFound", "InvalidAccessGroup.NotFound", "Resource.NotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("NasAccessGroup", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
@@ -136,7 +136,7 @@ func (s *NasService) DescribeNasAccessRule(id string) (object map[string]interfa
 	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeAccessRules", "", nil, nil, request)
 	addDebug("DescribeAccessRules", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidAccessGroup.NotFound", "Forbidden.NasNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidAccessGroup.NotFound", "Forbidden.NasNotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AccessRule", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
@@ -181,7 +181,7 @@ func (s *NasService) DescribeNasFileSystemStateRefreshFunc(id string, defaultRet
 				return nil, "", nil
 			}
 
-			if errmsgs.NeedRetry(err) && errmsgs.IsExpectedErrors(err, []string{errmsgs.InvalidFileSystemStatus_Ordering}) {
+			if errmsgs.NeedRetry(err) && errmsgs.IsExpectedErrors(err, errmsgs.InvalidFileSystemStatus_Ordering) {
 				return nil, defaultRetryState, nil
 			}
 			return nil, "", errmsgs.WrapError(err)
@@ -295,7 +295,7 @@ func (s *NasService) DescribeNasNamespace(id string) (map[string]interface{}, er
 	response, err := s.client.DoTeaRequest("GET", "Nas", "2017-06-26", "DescribeNamespaces", "", nil, request, nil)
 	addDebug("DescribeNamespaces", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidNasNamespace.NotFound", "Forbidden.NasNotFound", "Resource.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidNasNamespace.NotFound", "Forbidden.NasNotFound", "Resource.NotFound") {
 			err = errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespace:%s Not found!", id))
 			return nil, err
 		}
@@ -359,7 +359,7 @@ func (s *NasService) DescribeNasNamespaceMountTarget(id string) (map[string]inte
 	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeNamespaceMountTargets", "", nil, nil, request)
 	addDebug("DescribeNamespaceMountTargets", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.NasNotFound", "InvalidNasNamespace.NotFound", "InvalidMountTarget.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "Forbidden.NasNotFound", "InvalidNasNamespace.NotFound", "InvalidMountTarget.NotFound") {
 			err = errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespaceMountTarget:%s Not found!", id))
 			return nil, err
 		}
@@ -405,7 +405,7 @@ func (s *NasService) DescribeNasNamespaceGroup(id string) (map[string]interface{
 	response, err := s.client.DoTeaRequest("GET", "Nas", "2017-06-26", "DescribeNamespaceGroup", "", nil, request, nil)
 	addDebug("DescribeNamespaceGroup", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidNasNamespace.NotFound", "Forbidden.NasNotFound", "Resource.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidNasNamespace.NotFound", "Forbidden.NasNotFound", "Resource.NotFound") {
 			err = errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("NasNamespaceGroup:%s Not found!", id))
 			return nil, err
 		}

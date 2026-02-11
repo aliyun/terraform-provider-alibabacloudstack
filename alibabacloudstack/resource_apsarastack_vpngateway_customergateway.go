@@ -72,7 +72,7 @@ func resourceAlibabacloudStackVpnCustomerGatewayCreate(d *schema.ResourceData, m
 			return vpcClient.CreateCustomerGateway(&args)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling, "OperationConflict"}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.Throttling, "OperationConflict") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -175,7 +175,7 @@ func resourceAlibabacloudStackVpnCustomerGatewayDelete(d *schema.ResourceData, m
 		})
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"VpnGateway.Configuring"}) {
+			if errmsgs.IsExpectedErrors(err, "VpnGateway.Configuring") {
 				time.Sleep(10 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -194,7 +194,7 @@ func resourceAlibabacloudStackVpnCustomerGatewayDelete(d *schema.ResourceData, m
 	})
 
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidCustomerGatewayInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidCustomerGatewayInstanceId.NotFound") {
 			return nil
 		}
 		return err

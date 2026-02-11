@@ -365,7 +365,7 @@ func resourceAlibabacloudStackSlbServerGroupDelete(d *schema.ResourceData, meta 
 			return slbClient.DeleteVServerGroup(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"RspoolVipExist"}) {
+			if errmsgs.IsExpectedErrors(err, "RspoolVipExist") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -378,7 +378,7 @@ func resourceAlibabacloudStackSlbServerGroupDelete(d *schema.ResourceData, meta 
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"The specified VServerGroupId does not exist", "InvalidParameter"}) {
+		if errmsgs.IsExpectedErrors(err, "The specified VServerGroupId does not exist", "InvalidParameter") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)

@@ -86,7 +86,7 @@ func dataSourceAlibabacloudStackOtsInstanceAttachmentsRead(d *schema.ResourceDat
 	otsService := OtsService{client}
 	instanceName := d.Get("instance_name").(string)
 	allVpcs, err := otsService.ListOtsInstanceVpc(instanceName)
-	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"NotFound"}) {
+	if err != nil && !errmsgs.IsExpectedErrors(err, "NotFound") {
 		return errmsgs.WrapError(err)
 	}
 

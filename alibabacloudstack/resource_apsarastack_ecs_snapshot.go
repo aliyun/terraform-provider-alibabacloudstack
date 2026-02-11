@@ -147,7 +147,7 @@ func resourceAlibabacloudStackSnapshotDelete(d *schema.ResourceData, meta interf
 			return ecsClient.DeleteSnapshot(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.SnapshotInvalidOperations) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.SnapshotInvalidOperations ...) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -156,7 +156,7 @@ func resourceAlibabacloudStackSnapshotDelete(d *schema.ResourceData, meta interf
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidSnapshotId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidSnapshotId.NotFound") {
 			return nil
 		}
 		errmsg := ""

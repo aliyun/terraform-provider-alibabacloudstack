@@ -182,7 +182,7 @@ func resourceAlibabacloudStackApfsFileSystemDelete(d *schema.ResourceData, meta 
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 		raw, err := client.DoTeaRequest("POST", "EFS", "2017-06-26", "DeleteFileSystem", "", nil, requestQuery, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidFileSystemId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidFileSystemId.NotFound") {
 				return resource.NonRetryableError(err)
 			}
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteFileSystem", errmsgs.AlibabacloudStackSdkGoERROR, "")
@@ -192,7 +192,7 @@ func resourceAlibabacloudStackApfsFileSystemDelete(d *schema.ResourceData, meta 
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidFileSystemId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidFileSystemId.NotFound") {
 			return nil
 		}
 		return errmsgs.WrapError(err)

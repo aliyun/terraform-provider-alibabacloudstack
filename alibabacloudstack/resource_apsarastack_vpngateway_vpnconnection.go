@@ -198,7 +198,7 @@ func resourceAlibabacloudStackVpnConnectionCreate(d *schema.ResourceData, meta i
 		})
 		response, ok = raw.(*vpc.CreateVpnConnectionResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"VpnGateway.Configuring"}) {
+			if errmsgs.IsExpectedErrors(err, "VpnGateway.Configuring") {
 				time.Sleep(10 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -335,7 +335,7 @@ func resourceAlibabacloudStackVpnConnectionDelete(d *schema.ResourceData, meta i
 		})
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"VpnGateway.Configuring"}) {
+			if errmsgs.IsExpectedErrors(err, "VpnGateway.Configuring") {
 				time.Sleep(10 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -350,7 +350,7 @@ func resourceAlibabacloudStackVpnConnectionDelete(d *schema.ResourceData, meta i
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidVpnConnectionInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidVpnConnectionInstanceId.NotFound") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)

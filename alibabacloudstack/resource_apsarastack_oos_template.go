@@ -196,7 +196,7 @@ func resourceAlibabacloudStackOosTemplateDelete(d *schema.ResourceData, meta int
 	request["PageNumber"] = 1
 	_, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"EntityNotExists.Template"}) {
+		if errmsgs.IsExpectedErrors(err, "EntityNotExists.Template") {
 			return nil
 		}
 		return err

@@ -289,7 +289,7 @@ func resourceAlibabacloudStackSecurityGroupRuleDelete(d *schema.ResourceData, me
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		err := deleteSecurityGroupRule(d, meta)
 		if err != nil {
-			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidSecurityGroupId.NotFound"}) {
+			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, "InvalidSecurityGroupId.NotFound") {
 				return nil
 			}
 			return resource.RetryableError(err)

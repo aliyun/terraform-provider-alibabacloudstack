@@ -120,7 +120,7 @@ func resourceAlibabacloudStackOtsTableCreate(d *schema.ResourceData, meta interf
 		log.Printf("====================  CreateTable Response err  ===================  \n%v\n", err)
 		if err != nil {
 			errmsg := ""
-			if errmsgs.IsExpectedErrors(err, errmsgs.OtsTableIsTemporarilyUnavailable) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OtsTableIsTemporarilyUnavailable ...) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ots_table", "CreateTable", errmsgs.AliyunTablestoreGoSdk, errmsg))
@@ -196,7 +196,7 @@ func resourceAlibabacloudStackOtsTableUpdate(d *schema.ResourceData, meta interf
 			})
 			if err != nil {
 				errmsg := ""
-				if errmsgs.IsExpectedErrors(err, errmsgs.OtsTableIsTemporarilyUnavailable) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.OtsTableIsTemporarilyUnavailable ...) {
 					return resource.RetryableError(err)
 				}
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateTable", errmsgs.AliyunTablestoreGoSdk, errmsg))
@@ -226,7 +226,7 @@ func resourceAlibabacloudStackOtsTableDelete(d *schema.ResourceData, meta interf
 		})
 		if err != nil {
 			errmsg := ""
-			if errmsgs.IsExpectedErrors(err, errmsgs.OtsTableIsTemporarilyUnavailable) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OtsTableIsTemporarilyUnavailable ...) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteTable", errmsgs.AliyunTablestoreGoSdk, errmsg))

@@ -297,7 +297,7 @@ func resourceAlibabacloudStackSlbBackendServersDelete(d *schema.ResourceData, me
 				})
 				bresponse, ok := raw.(*slb.RemoveBackendServersResponse)
 				if err != nil {
-					if errmsgs.IsExpectedErrors(err, []string{"RspoolVipExist", "ObtainIpFail"}) {
+					if errmsgs.IsExpectedErrors(err, "RspoolVipExist", "ObtainIpFail") {
 						return resource.RetryableError(err)
 					}
 					errmsg := ""

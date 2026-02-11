@@ -25,7 +25,7 @@ func (s *DmsService) DescribeDmsEnterpriseInstance(id string) (object map[string
 	}
 	response, err = s.client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", "GetInstance", "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InstanceNoEnoughNumber"}) {
+		if errmsgs.IsExpectedErrors(err, "InstanceNoEnoughNumber") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DmsEnterpriseInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}

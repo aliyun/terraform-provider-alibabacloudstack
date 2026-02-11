@@ -628,7 +628,7 @@ func resourceAlibabacloudStackPolardbxInstanceUpdate(d *schema.ResourceData, met
 		wait := incrementalWait(1*time.Second, 2*time.Minute)
 		if err := resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
 			if _, err := client.DoTeaRequest("POST", "polardbx", "2020-02-02", "ModifyDBInstanceClass", "", nil, reqQuery, nil); err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "DBInstance.InOrder"}) {
+				if errmsgs.IsExpectedErrors(err, "DBInstance.InOrder") {
 					wait()
 					return resource.RetryableError(err)
 				}
@@ -676,7 +676,7 @@ func resourceAlibabacloudStackPolardbxInstanceUpdate(d *schema.ResourceData, met
 				bresponse, err := client.ProcessCommonRequest(request)
 				addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 				if err != nil {
-					if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "DBInstance.InOrder"}) {
+					if errmsgs.IsExpectedErrors(err, "DBInstance.InOrder") {
 						wait()
 						return resource.RetryableError(err)
 					}
@@ -727,7 +727,7 @@ func resourceAlibabacloudStackPolardbxInstanceUpdate(d *schema.ResourceData, met
 		wait := incrementalWait(1*time.Second, 2*time.Minute)
 		if err := resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
 			if _, err := client.DoTeaRequest("POST", "polardbx", "2020-02-02", "ModifyDBInstanceClass", "", nil, reqQuery, nil); err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "DBInstance.InOrder"}) {
+				if errmsgs.IsExpectedErrors(err, "DBInstance.InOrder") {
 					wait()
 					return resource.RetryableError(err)
 				}
@@ -885,7 +885,7 @@ func resourceAlibabacloudStackPolardbxInstanceDelete(d *schema.ResourceData, met
 			raw_data := make(map[string]interface{})
 			_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &raw_data)
 			code, ok := raw_data["Code"]
-			if ok && errmsgs.IsExpectedErrorCodes(code.(string), []string{errmsgs.ThrottlingUser, "DBInstance.InOrder", "UnsupportedReadOrBakReadState"}) {
+			if ok && errmsgs.IsExpectedErrorCodes(code.(string), []string{ "DBInstance.InOrder", "UnsupportedReadOrBakReadState"}) {
 				wait()
 				return resource.RetryableError(err)
 			} else {

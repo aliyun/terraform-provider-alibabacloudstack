@@ -245,7 +245,7 @@ func resourceAlibabacloudStackRouterInterfaceDelete(d *schema.ResourceData, meta
 			return vpcClient.DeleteRouterInterface(&args)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"IncorrectStatus", "DependencyViolation.RouterInterfaceReferedByRouteEntry"}) {
+			if errmsgs.IsExpectedErrors(err, "IncorrectStatus", "DependencyViolation.RouterInterfaceReferedByRouteEntry") {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -262,7 +262,7 @@ func resourceAlibabacloudStackRouterInterfaceDelete(d *schema.ResourceData, meta
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
 			return nil
 		}
 		errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)

@@ -971,17 +971,12 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 		}
 
 		// Timeout or transient errors
-		if errmsgs.IsExpectedErrors(err, []string{
-			errmsgs.LogClientTimeout,
-			"LockTimeout",
-			"RequestTimeout",
-			"asapi.server.timeout.socket",
-		}) {
+		if errmsgs.IsExpectedErrors(err,  errmsgs.ThrottlingUser, errmsgs.Throttling, errmsgs.LogClientTimeout, "LockTimeout", "RequestTimeout", "asapi.server.timeout.socket") {
 			return resource.RetryableError(err), retryTimes
 		}
 
 		// Auth or invalid action errors with retry budget
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable", "UnknownError"}) && retryTimes > 0 {
+		if errmsgs.IsExpectedErrors(err, "Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable", "UnknownError") && retryTimes > 0 {
 			retryTimes--
 			return resource.RetryableError(err), retryTimes
 		}

@@ -99,7 +99,7 @@ func (s *SlbService) DescribeSlb(id string) (*slb.DescribeLoadBalancerAttributeR
 	})
 	bresponse, ok := raw.(*slb.DescribeLoadBalancerAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidLoadBalancerId.NotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Slb", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		} else {
 			errmsg := ""
@@ -127,7 +127,7 @@ func (s *SlbService) DescribeSlbRule(id string) (*slb.DescribeRuleAttributeRespo
 	})
 	bresponse, ok := raw.(*slb.DescribeRuleAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidRuleId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidRuleId.NotFound") {
 			return response, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbRule", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -153,7 +153,7 @@ func (s *SlbService) DescribeSlbServerGroup(id string) (*slb.DescribeVServerGrou
 	})
 	bresponse, ok := raw.(*slb.DescribeVServerGroupAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"The specified VServerGroupId does not exist", "InvalidParameter"}) {
+		if errmsgs.IsExpectedErrors(err, "The specified VServerGroupId does not exist", "InvalidParameter") {
 			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -179,7 +179,7 @@ func (s *SlbService) DescribeSlbMasterSlaveServerGroup(id string) (*slb.Describe
 	})
 	bresponse, ok := raw.(*slb.DescribeMasterSlaveServerGroupAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"The specified MasterSlaveGroupId does not exist", "InvalidParameter"}) {
+		if errmsgs.IsExpectedErrors(err, "The specified MasterSlaveGroupId does not exist", "InvalidParameter") {
 			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -205,7 +205,7 @@ func (s *SlbService) DescribeSlbBackendServer(id string) (*slb.DescribeLoadBalan
 	})
 	bresponse, ok := raw.(*slb.DescribeLoadBalancerAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidLoadBalancerId.NotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbBackendServers", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		} else {
 			errmsg := ""
@@ -239,9 +239,9 @@ func (s *SlbService) DescribeSlbListener(id string) (listener map[string]interfa
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		log.Printf(" response of raw DescribeProjectMeta : %s", bresponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"The specified resource does not exist"}) {
+			if errmsgs.IsExpectedErrors(err, "The specified resource does not exist") {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR))
-			} else if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy) {
+			} else if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy ...) {
 				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 			}
 		}
@@ -272,7 +272,7 @@ func (s *SlbService) DescribeSlbAcl(id string) (*slb.DescribeAccessControlListAt
 	})
 	bresponse, ok := raw.(*slb.DescribeAccessControlListAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"AclNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, "AclNotExist") {
 			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -337,7 +337,7 @@ func (s *SlbService) WaitForSlbListener(id string, status Status, timeout int) e
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
 		object, err := s.DescribeSlbListener(id)
-		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
+		if err != nil && !errmsgs.IsExpectedErrors(err, "InvalidLoadBalancerId.NotFound") {
 			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
@@ -475,7 +475,7 @@ func (s *SlbService) slbRemoveAccessControlListEntryPerTime(list []interface{}, 
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if !errmsgs.IsExpectedErrors(err, []string{"AclEntryEmpty"}) {
+		if !errmsgs.IsExpectedErrors(err, "AclEntryEmpty") {
 			errmsg := ""
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
@@ -724,7 +724,7 @@ func (s *SlbService) DescribeDomainExtensionAttribute(domainExtensionId string) 
 			return slbClient.DescribeDomainExtensionAttribute(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.AlibabacloudStackGoClientFailure, "ServiceUnavailable", errmsgs.Throttling}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.AlibabacloudStackGoClientFailure, "ServiceUnavailable", errmsgs.Throttling) {
 				time.Sleep(10 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -735,7 +735,7 @@ func (s *SlbService) DescribeDomainExtensionAttribute(domainExtensionId string) 
 	})
 	bresponse, ok := raw.(*slb.DescribeDomainExtensionAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidParameter.DomainExtensionId", "InvalidParameter"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidParameter.DomainExtensionId", "InvalidParameter") {
 			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -929,7 +929,7 @@ func (s *SlbService) DescribeTags(resourceId string, resourceTags map[string]int
 		})
 		bresponse, ok := raw.(*slb.DescribeTagsResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.Throttling) {
 				time.Sleep(2 * time.Second)
 				return resource.RetryableError(err)
 			}

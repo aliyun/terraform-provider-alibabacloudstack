@@ -251,7 +251,7 @@ func resourceAlibabacloudStackDRDSInstanceDelete(d *schema.ResourceData, meta in
 	})
 	bresponse, ok := raw.(*drds.RemoveDrdsInstanceResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDrdsInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDrdsInstanceId.NotFound") {
 			return nil
 		}
 		errmsg := ""

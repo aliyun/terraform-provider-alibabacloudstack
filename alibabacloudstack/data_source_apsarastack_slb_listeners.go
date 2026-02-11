@@ -199,7 +199,7 @@ func dataSourceAlibabacloudStackSlbListenersRead(d *schema.ResourceData, meta in
 	})
 	var filteredListenersTemp []slb.ListenerPortAndProtocol
 	response, ok := raw.(*slb.DescribeLoadBalancerAttributeResponse)
-	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
+	if err != nil && !errmsgs.IsExpectedErrors(err, "InvalidLoadBalancerId.NotFound") {
 		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)

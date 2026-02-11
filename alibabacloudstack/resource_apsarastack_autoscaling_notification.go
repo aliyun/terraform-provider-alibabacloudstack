@@ -148,7 +148,7 @@ func resourceAlibabacloudStackEssNotificationDelete(d *schema.ResourceData, meta
 	response, ok := raw.(*ess.DeleteNotificationConfigurationResponse)
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"NotificationConfigurationNotExist", "InvalidScalingGroupId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "NotificationConfigurationNotExist", "InvalidScalingGroupId.NotFound") {
 			return nil
 		}
 		errmsg := ""

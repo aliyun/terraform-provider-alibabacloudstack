@@ -3,12 +3,10 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"regexp"
-	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -128,21 +126,10 @@ func dataSourceAlibabacloudStackPolardbParameterGroupsRead(d *schema.ResourceDat
 	action := "DescribeParameterGroups"
 
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", action, "")
-	wait := incrementalWait(3*time.Second, 5*time.Second)
 	var bresponse *responses.CommonResponse
 	var err error
 
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		bresponse, err = client.ProcessCommonRequest(request)
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
+	bresponse, err = client.ProcessCommonRequest(request)
 
 	if err != nil {
 		if bresponse == nil {

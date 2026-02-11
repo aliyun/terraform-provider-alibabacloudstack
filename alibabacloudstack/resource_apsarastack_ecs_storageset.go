@@ -137,7 +137,7 @@ func resourceAlibabacloudStackEcsEbsStorageSetsDelete(d *schema.ResourceData, me
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidCmdId.NotFound", "InvalidRegionId.NotFound", "Operation.Forbidden"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidCmdId.NotFound", "InvalidRegionId.NotFound", "Operation.Forbidden") {
 			return nil
 		}
 		return err

@@ -305,7 +305,7 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceDelete(d *schema.ResourceDa
 
 	_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstance.NotFound") {
 			return nil
 		}
 		return err

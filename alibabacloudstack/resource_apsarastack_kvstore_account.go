@@ -117,7 +117,7 @@ func resourceAlibabacloudStackKVStoreAccountCreate(d *schema.ResourceData, meta 
 			return rkvClient.CreateAccount(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -258,7 +258,7 @@ func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta 
 				return rkvClient.ResetAccountPassword(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"TaskExists"}) {
+				if errmsgs.IsExpectedErrors(err, "TaskExists") {
 					return resource.RetryableError(err)
 				}
 				errmsg := ""
@@ -297,7 +297,7 @@ func resourceAlibabacloudStackKVStoreAccountDelete(d *schema.ResourceData, meta 
 		return rkvClient.DeleteAccount(request)
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidAccountName.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidAccountName.NotFound") {
 			return nil
 		} else {
 			errmsg := ""

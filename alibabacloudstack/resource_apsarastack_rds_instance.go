@@ -668,7 +668,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 				return rdsClient.ModifyDBInstanceSpec(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
+				if errmsgs.IsExpectedErrors(err, "InternalError", "OperationDenied.DBInstanceStatus") {
 					return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 				}
 				errmsg := ""

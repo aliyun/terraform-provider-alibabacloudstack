@@ -107,7 +107,7 @@ func resourceAlibabacloudStackDBDatabaseCreate(d *schema.ResourceData, meta inte
 			return rdsClient.CreateDatabase(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -203,7 +203,7 @@ func resourceAlibabacloudStackDBDatabaseDelete(d *schema.ResourceData, meta inte
 		return rdsClient.DeleteDatabase(request)
 	})
 	if err != nil {
-		if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidDBName.NotFound"}) {
+		if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, "InvalidDBName.NotFound") {
 			return nil
 		}
 		errmsg := ""

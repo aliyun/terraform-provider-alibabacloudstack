@@ -95,7 +95,7 @@ func resourceAlibabacloudStackAlikafkaSaslUserCreate(d *schema.ResourceData, met
 		})
 		bresponse, ok := raw.(*alikafka.CreateSaslUserResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err,errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 				time.Sleep(2 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -187,7 +187,7 @@ func resourceAlibabacloudStackAlikafkaSaslUserUpdate(d *schema.ResourceData, met
 			})
 			bresponse, ok := raw.(*alikafka.CreateSaslUserResponse)
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 					time.Sleep(2 * time.Second)
 					return resource.RetryableError(err)
 				}
@@ -234,7 +234,7 @@ func resourceAlibabacloudStackAlikafkaSaslUserDelete(d *schema.ResourceData, met
 		})
 		bresponse, ok := raw.(*alikafka.DeleteSaslUserResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 				time.Sleep(10 * time.Second)
 				return resource.RetryableError(err)
 			}

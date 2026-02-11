@@ -133,7 +133,7 @@ func resourceAlibabacloudStackApigatewayAppAttachmentDelete(d *schema.ResourceDa
 	var response *cloudapi.RemoveAppsAuthoritiesResponse
 	var ok bool
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"NotFoundAuthorization"}) {
+		if errmsgs.IsExpectedErrors(err, "NotFoundAuthorization") {
 			return nil
 		}
 		if raw != nil {

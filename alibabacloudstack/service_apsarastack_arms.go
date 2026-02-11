@@ -78,7 +78,7 @@ func (s *ArmsService) DescribeArmsDispatchRule(id string) (object map[string]int
 	request["PageNumber"] = 1
 	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "DescribeDispatchRule", "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"50003"}) {
+		if errmsgs.IsExpectedErrors(err, "50003") {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ARMS", id)), errmsgs.NotFoundWithResponse, response)
 		}
 		return object, err

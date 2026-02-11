@@ -76,7 +76,7 @@ func testAccCheckEssNotificationDestroy(s *terraform.State) error {
 			continue
 		}
 		if _, err := essService.DescribeEssNotification(rs.Primary.ID); err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"NotificationConfigurationNotExist", "InvalidScalingGroupId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "NotificationConfigurationNotExist", "InvalidScalingGroupId.NotFound") {
 				return nil
 			}
 			if errmsgs.NotFoundError(err) {

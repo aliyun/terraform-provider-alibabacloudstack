@@ -67,7 +67,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstance(instanceId stri
 		bresponse, err = alikafkaService.client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err,  "ONS_SYSTEM_FLOW_CONTROL") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -106,7 +106,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceConfigMap(instan
 		bresponse, err = alikafkaService.client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err,  "ONS_SYSTEM_FLOW_CONTROL") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -144,7 +144,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceByOrderId(orderI
 				return client.GetInstanceList(instanceListReq)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+				if errmsgs.IsExpectedErrors(err,  "ONS_SYSTEM_FLOW_CONTROL") {
 					wait()
 					return resource.RetryableError(err)
 				}
@@ -195,7 +195,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaConsumerGroup(id string)
 			return client.GetConsumerList(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -247,7 +247,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopicStatus(id string) (
 			return alikafkaClient.GetTopicStatus(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -296,7 +296,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*AliKa
 		bresponse, err = alikafkaService.client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err,  "ONS_SYSTEM_FLOW_CONTROL") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -344,7 +344,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaSaslUser(id string) (*al
 			return alikafkaClient.DescribeSaslUsers(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -401,7 +401,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaSaslAcl(id string) (*ali
 			return alikafkaClient.DescribeAcls(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -417,7 +417,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaSaslAcl(id string) (*ali
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(aclListResp.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"BIZ_SUBSCRIPTION_NOT_FOUND", "BIZ_TOPIC_NOT_FOUND"}) {
+		if errmsgs.IsExpectedErrors(err, "BIZ_SUBSCRIPTION_NOT_FOUND", "BIZ_TOPIC_NOT_FOUND") {
 			return alikafkaSaslAcl, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return alikafkaSaslAcl, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -514,7 +514,7 @@ func (s *AlikafkaService) KafkaTopicListRefreshFunc(id string) resource.StateRef
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeAlikafkaTopic(id)
 		if err != nil {
-			if !errmsgs.IsExpectedErrors(err, []string{errmsgs.ResourceNotfound}) {
+			if !errmsgs.IsExpectedErrors(err, errmsgs.ResourceNotfound) {
 				return nil, "", errmsgs.WrapError(err)
 			}
 		}
@@ -527,7 +527,7 @@ func (s *AlikafkaService) KafkaTopicStatusRefreshFunc(id string) resource.StateR
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeAlikafkaTopicStatus(id)
 		if err != nil {
-			if !errmsgs.IsExpectedErrors(err, []string{errmsgs.ResourceNotfound}) {
+			if !errmsgs.IsExpectedErrors(err, errmsgs.ResourceNotfound) {
 				return nil, "", errmsgs.WrapError(err)
 			}
 		}
@@ -649,7 +649,7 @@ func (s *AlikafkaService) DescribeTags(resourceId string, resourceTags map[strin
 			return alikafkaClient.ListTagResources(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.Throttling, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -697,7 +697,7 @@ func (s *AlikafkaService) setInstanceTags(d *schema.ResourceData, resourceType T
 					return client.UntagResources(request)
 				})
 				if err != nil {
-					if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+					if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 						wait()
 						return resource.RetryableError(err)
 					}
@@ -731,7 +731,7 @@ func (s *AlikafkaService) setInstanceTags(d *schema.ResourceData, resourceType T
 					return client.TagResources(request)
 				})
 				if err != nil {
-					if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+					if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 						wait()
 						return resource.RetryableError(err)
 					}

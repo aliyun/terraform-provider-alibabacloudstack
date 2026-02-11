@@ -877,7 +877,7 @@ func resourceAlibabacloudStackMongoDBInstanceDelete(d *schema.ResourceData, meta
 		})
 		bresponse, ok := raw.(*dds.DeleteDBInstanceResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 				return resource.NonRetryableError(err)
 			}
 			errmsg := ""
@@ -892,7 +892,7 @@ func resourceAlibabacloudStackMongoDBInstanceDelete(d *schema.ResourceData, meta
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return nil
 		}
 	}

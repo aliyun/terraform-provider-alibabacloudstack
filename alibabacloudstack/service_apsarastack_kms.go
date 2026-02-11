@@ -27,7 +27,7 @@ func (s *KmsService) DescribeKmsKey(id string) (object kms.KeyMetadata, err erro
 	})
 	bresponse, ok := raw.(*kms.DescribeKeyResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.AliasNotFound", "Forbidden.KeyNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "Forbidden.AliasNotFound", "Forbidden.KeyNotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KmsKey", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
@@ -107,7 +107,7 @@ func (s *KmsService) DescribeKmsSecret(id string) (object kms.DescribeSecretResp
 	})
 	bresponse, ok := raw.(*kms.DescribeSecretResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.errmsgs.ResourceNotfound"}) {
+		if errmsgs.IsExpectedErrors(err, "Forbidden.errmsgs.ResourceNotfound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KmsSecret", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
@@ -132,7 +132,7 @@ func (s *KmsService) GetSecretValue(id string) (object kms.GetSecretValueRespons
 	})
 	bresponse, ok := raw.(*kms.GetSecretValueResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.errmsgs.ResourceNotfound"}) {
+		if errmsgs.IsExpectedErrors(err, "Forbidden.errmsgs.ResourceNotfound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("kmssecret", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
@@ -227,7 +227,7 @@ func (s *KmsService) DescribeKmsAlias(id string) (object kms.KeyMetadata, err er
 	})
 	bresponse, ok := raw.(*kms.DescribeKeyResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.AliasNotFound", "Forbidden.KeyNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "Forbidden.AliasNotFound", "Forbidden.KeyNotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KmsAlias", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}

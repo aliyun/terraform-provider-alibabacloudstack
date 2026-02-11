@@ -149,7 +149,7 @@ func (s *HBaseService) DescribeHBaseInstance(id string) (object map[string]inter
 	}
 	response, err = s.client.DoTeaRequest("POST", "HBase", "2019-01-01", "DescribeInstance", "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Instance.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "Instance.NotFound") {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Hbase:Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
 		return object, err
@@ -175,7 +175,7 @@ func (s *HBaseService) DescribeIpWhitelist(id string) (instance hbase.DescribeIp
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"Instance.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "Instance.NotFound") {
 			return instance, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)

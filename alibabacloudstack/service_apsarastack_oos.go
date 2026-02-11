@@ -24,7 +24,7 @@ func (s *OosService) DescribeOosTemplate(id string) (object map[string]interface
 	response, err = s.client.DoTeaRequest("POST", "Oos", "2019-06-01", "GetTemplate", "", nil, nil, request)
 	addDebug("GetTemplate", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"EntityNotExists.Template"}) {
+		if errmsgs.IsExpectedErrors(err, "EntityNotExists.Template") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OosTemplate", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}

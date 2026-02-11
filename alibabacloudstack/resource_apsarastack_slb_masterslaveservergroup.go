@@ -188,7 +188,7 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupDelete(d *schema.Resource
 			if response, ok := raw.(*slb.DeleteMasterSlaveServerGroupResponse); ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"RspoolVipExist"}) {
+			if errmsgs.IsExpectedErrors(err, "RspoolVipExist") {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
@@ -197,7 +197,7 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupDelete(d *schema.Resource
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"The specified MasterSlaveGroupId does not exist", "InvalidParameter"}) {
+		if errmsgs.IsExpectedErrors(err, "The specified MasterSlaveGroupId does not exist", "InvalidParameter") {
 			return nil
 		}
 		return err

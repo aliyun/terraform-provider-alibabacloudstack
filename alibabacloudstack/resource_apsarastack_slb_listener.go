@@ -400,7 +400,7 @@ func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta int
 			return slbClient.StartLoadBalancerListener(startLoadBalancerListenerRequest)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"ServiceIsConfiguring"}) {
+			if errmsgs.IsExpectedErrors(err, "ServiceIsConfiguring") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -467,7 +467,7 @@ func resourceAlibabacloudStackSlbListenerRead(d *schema.ResourceData, meta inter
 				d.SetId("")
 				return nil
 			}
-			if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy ...) {
 				return resource.RetryableError(errmsgs.WrapError(err))
 			}
 			return resource.NonRetryableError(errmsgs.WrapError(err))
@@ -805,7 +805,7 @@ func resourceAlibabacloudStackSlbListenerDelete(d *schema.ResourceData, meta int
 		})
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy ...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

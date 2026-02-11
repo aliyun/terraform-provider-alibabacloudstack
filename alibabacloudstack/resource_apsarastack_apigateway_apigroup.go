@@ -61,7 +61,7 @@ func resourceAlibabacloudStackApigatewayGroupCreate(d *schema.ResourceData, meta
 			return cloudApiClient.CreateApiGroup(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"RepeatedCommit"}) {
+			if errmsgs.IsExpectedErrors(err, "RepeatedCommit") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

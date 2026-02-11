@@ -210,7 +210,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 				return rdsClient.DescribeRegions(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.Throttling) {
 					time.Sleep(time.Duration(5) * time.Second)
 					return resource.RetryableError(err)
 				}

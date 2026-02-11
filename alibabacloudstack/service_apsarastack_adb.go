@@ -31,7 +31,7 @@ func (s *AdbService) DescribeAdbCluster(id string) (instance *adb.DBClusterInDes
 	})
 	bresponse, ok := raw.(*adb.DescribeDBClustersResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBClusterId.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -58,7 +58,7 @@ func (s *AdbService) DescribeAdbClusterAttribute(id string) (instance *adb.DBClu
 	})
 	bresponse, ok := raw.(*adb.DescribeDBClusterAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBClusterId.NotFound") {
 			return instance, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -86,7 +86,7 @@ func (s *AdbService) DescribeAdbAutoRenewAttribute(id string) (instance *adb.Aut
 	})
 	bresponse, ok := raw.(*adb.DescribeAutoRenewAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBClusterId.NotFound") {
 			return instance, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -173,7 +173,7 @@ func (s *AdbService) DescribeAdbClusterNetInfo(id string) ([]adb.Address, error)
 	})
 	bresponse, ok := raw.(*adb.DescribeDBClusterNetInfoResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBClusterId.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -202,7 +202,7 @@ func (s *AdbService) DescribeAdbClusterNetInfo2(id string) (address adb.Address,
 	})
 	bresponse, ok := raw.(*adb.DescribeDBClusterNetInfoResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBClusterId.NotFound") {
 			return address, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -274,7 +274,7 @@ func (s *AdbService) DescribeAdbAccount(id string) (ds *adb.DBAccount, err error
 	})
 	bresponse, ok := raw.(*adb.DescribeAccountsResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBClusterId.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -540,7 +540,7 @@ func (s *AdbService) DescribeAdbBackupPolicy(id string) (policy *adb.DescribeBac
 	})
 	bresponse, ok := raw.(*adb.DescribeBackupPolicyResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBClusterId.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -611,7 +611,7 @@ func (s *AdbService) DescribeTask(id, taskId string) (*adb.DescribeTaskInfoRespo
 	})
 	bresponse, ok := raw.(*adb.DescribeTaskInfoResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBClusterId.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -646,7 +646,7 @@ func (s *AdbService) DescribeAutoRenewAttribute(id string) (object map[string]in
 	request["DBClusterIds"] = id
 	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeAutoRenewAttribute", "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBCluster.NotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AnalyticDBForMySQL3.0", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
@@ -672,7 +672,7 @@ func (s *AdbService) DescribeDBClusterAccessWhiteList(id string) (object map[str
 	request["DBClusterId"] = id
 	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeDBClusterAccessWhiteList", "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBCluster.NotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AnalyticdbForMysql3.0DbCluster", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
@@ -741,7 +741,7 @@ func (s *AdbService) DescribeAdbDbCluster(id string) (object map[string]interfac
 	request["DBClusterId"] = id
 	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeDBClusterAttribute", "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound", "InvalidDBClusterId.NotFoundError"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBCluster.NotFound", "InvalidDBClusterId.NotFoundError") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AdbDbCluster", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}

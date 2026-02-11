@@ -206,7 +206,7 @@ func resourceAlibabacloudStackDBBackupPolicyUpdate(d *schema.ResourceData, meta 
 		}
 		if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 			if err := rdsService.ModifyDBBackupPolicy(d, updateForData, updateForLog); err != nil {
-				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
 					return resource.RetryableError(err)
 				}
 				return resource.NonRetryableError(err)

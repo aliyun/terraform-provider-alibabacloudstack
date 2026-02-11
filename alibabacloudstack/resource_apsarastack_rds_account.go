@@ -151,7 +151,7 @@ func resourceAlibabacloudStackDBAccountCreate(d *schema.ResourceData, meta inter
 		})
 		bresponse, ok := raw.(*rds.CreateAccountResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -290,7 +290,7 @@ func resourceAlibabacloudStackDBAccountDelete(d *schema.ResourceData, meta inter
 		return rdsClient.DeleteAccount(request)
 	})
 	bresponse, ok := raw.(*rds.DeleteAccountResponse)
-	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidAccountName.NotFound"}) {
+	if err != nil && !errmsgs.IsExpectedErrors(err, "InvalidAccountName.NotFound") {
 		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)

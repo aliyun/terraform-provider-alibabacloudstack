@@ -549,7 +549,7 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 	action := "GetElasticsearchSettings"
 	response, err = client.DoTeaRequest("GET", "elasticsearch-k8s", "2017-06-13", action, fmt.Sprintf("/openapi/instances/%s/actions/es-settings", d.Id()), nil, nil, nil)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InstanceNotFound") {
 			return nil
 		}
 		return err
@@ -657,7 +657,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 				}
 				_, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "ModifyAclWhiteIps", fmt.Sprintf("/openapi/instances/%s/actions/modify-acl-white-ips", d.Id()), nil, nil, request)
 				if err != nil {
-					if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+					if errmsgs.IsExpectedErrors(err, "InstanceNotFound") {
 						return nil
 					}
 					return err
@@ -679,7 +679,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 			}
 			_, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "ModifyAclWhiteIps", fmt.Sprintf("/openapi/instances/%s/actions/modify-acl-white-ips", d.Id()), nil, nil, request)
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+				if errmsgs.IsExpectedErrors(err, "InstanceNotFound") {
 					return nil
 				}
 				return err
@@ -698,7 +698,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 			https = closeHttps
 		}
 		if nil != https {
-			if err := https(d, meta); err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidAction.NotFound"}) {
+			if err := https(d, meta); err != nil && !errmsgs.IsExpectedErrors(err, "InvalidAction.NotFound") {
 				// 3162 old version does not support HTTPS -> HTTP
 				return errmsgs.WrapError(err)
 			}
@@ -716,7 +716,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 
 		_, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", action, fmt.Sprintf("/openapi/instances/%s/instance-settings", d.Id()), nil, nil, content)
 
-		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
+		if err != nil && !errmsgs.IsExpectedErrors(err, "MustChangeOneResource", "CssCheckUpdowngradeError") {
 			return err
 		}
 		if _, err := stateConf.WaitForState(); err != nil {
@@ -737,7 +737,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 		_, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateElasticsearchSettings", fmt.Sprintf("/openapi/instances/%s/actions/es-settings", d.Id()), nil, nil, request)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InstanceNotFound") {
 				return nil
 			}
 			return err
@@ -793,7 +793,7 @@ func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta i
 	}
 	_, err := client.DoTeaRequest("DELETE", "elasticsearch-k8s", "2017-06-13", action, fmt.Sprintf("/openapi/instances/%s", d.Id()), nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InstanceNotFound") {
 			return nil
 		}
 		return err

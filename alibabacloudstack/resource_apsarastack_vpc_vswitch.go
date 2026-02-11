@@ -110,7 +110,7 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 		})
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict", "UnknownError", "InvalidStatus.RouteEntry", errmsgs.Throttling, "OperationFailed.IdempotentTokenProcessing"}) {
+			if errmsgs.IsExpectedErrors(err, "TaskConflict", "UnknownError", "InvalidStatus.RouteEntry", errmsgs.Throttling, "OperationFailed.IdempotentTokenProcessing") {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -232,10 +232,10 @@ func resourceAlibabacloudStackSwitchDelete(d *schema.ResourceData, meta interfac
 			return vpcClient.DeleteVSwitch(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidRegionId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidRegionId.NotFound") {
 				return resource.NonRetryableError(err)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidVswitchID.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidVswitchID.NotFound") {
 				return nil
 			}
 

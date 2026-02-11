@@ -55,7 +55,7 @@ func resourceAlibabacloudStackDiskAttachmentCreate(d *schema.ResourceData, meta 
 		})
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.DiskInvalidOperation) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.DiskInvalidOperation...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -122,7 +122,7 @@ func resourceAlibabacloudStackDiskAttachmentDelete(d *schema.ResourceData, meta 
 			return ecsClient.DetachDisk(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.DiskInvalidOperation) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.DiskInvalidOperation...) {
 				time.Sleep(3 * time.Second)
 				return resource.RetryableError(err)
 			}

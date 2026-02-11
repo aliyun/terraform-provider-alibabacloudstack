@@ -292,7 +292,7 @@ func (c *CrService) DescribeCrRepo(id string) (GetRepoResponse, error) {
 	}
 	err = json.Unmarshal(response.GetHttpContentBytes(), &resp)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"REPO_NOT_EXIST"}) {
+		if errmsgs.IsExpectedErrors(err, "REPO_NOT_EXIST") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
@@ -344,7 +344,7 @@ func (c *CrService) DescribeCrEeInstance(instanceId string) (*cr_ee.GetInstanceR
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
+		if errmsgs.IsExpectedErrors(err, "INSTANCE_NOT_EXIST") {
 			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -367,7 +367,7 @@ func (c *CrService) GetCrEeInstanceUsage(instanceId string) (map[string]interfac
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
+		if errmsgs.IsExpectedErrors(err, "INSTANCE_NOT_EXIST") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
@@ -398,7 +398,7 @@ func (c *CrService) ListCrEeInstanceEndpoint(instanceId string) (map[string]inte
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
+		if errmsgs.IsExpectedErrors(err, "INSTANCE_NOT_EXIST") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)

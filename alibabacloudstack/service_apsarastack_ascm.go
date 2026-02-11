@@ -30,7 +30,7 @@ func (s *AscmService) DescribeAscmLogonPolicy(id string) (response *LoginPolicy,
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorLoginPolicyNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorLoginPolicyNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListLoginPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -67,7 +67,7 @@ func (s *AscmService) DescribeAscmResourceGroup(id string) (result *ResourceGrou
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorResourceGroupNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorResourceGroupNotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "ListResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -106,7 +106,7 @@ func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRol
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorRoleNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorRoleNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -140,7 +140,7 @@ func (s *AscmService) DescribeAscmRamRole(id string) (response *ListAscmRolesRes
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorRamRoleNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorRamRoleNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -172,7 +172,7 @@ func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, 
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorRamServiceRoleNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorRamServiceRoleNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMServiceRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -352,7 +352,7 @@ func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *Lis
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorResourceGroupNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorResourceGroupNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "ListResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -399,7 +399,7 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*Membe
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserGroupNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorUserGroupNotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUserGroups", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -447,7 +447,7 @@ func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorUserNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -483,7 +483,7 @@ func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserGroupNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorUserGroupNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUserGroups", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -515,7 +515,7 @@ func (s *AscmService) DescribeAscmUserGroupRoleBinding(id string) (response *Use
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserGroupNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorUserGroupNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUserGroups", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -555,7 +555,7 @@ func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, er
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorUserNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -587,7 +587,7 @@ func (s *AscmService) DescribeAscmDeletedUser(id string) (response *DeletedUser,
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorUserNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListDeletedUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -618,7 +618,7 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorOrganizationNotFound", "EntityNotExist.Organization"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorOrganizationNotFound", "EntityNotExist.Organization") {
 			return nil, errmsgs.ResourceNotFoundError("Organization", id)
 		}
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -643,7 +643,7 @@ func (s *AscmService) DescribeAscmOrganizationByName(name string) (response *Org
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorOrganizationNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorOrganizationNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, name, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -672,7 +672,7 @@ func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, e
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorRamPolicyNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorRamPolicyNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -705,7 +705,7 @@ func (s *AscmService) DescribeAscmRamPolicyForRole(id string) (response *RamPoli
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorRamPolicyNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorRamPolicyNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -754,7 +754,7 @@ func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err err
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorQuotaNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorQuotaNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "GetQuota", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -785,7 +785,7 @@ func (s *AscmService) DescribeAscmPasswordPolicy(id string) (response *PasswordP
 		} else {
 			return nil, err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorOrganizationNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorOrganizationNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetPasswordPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -827,7 +827,7 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 		if bresponse != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "ErrorUserNotFound") {
 			return resp, errmsgs.GetNotFoundErrorFromString("ascm usergroup user not found!")
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsersInUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)

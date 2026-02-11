@@ -62,7 +62,7 @@ func (s *RdsService) DescribeTasks(id string) (task *rds.DescribeTasksResponse, 
 	})
 	response, ok := raw.(*rds.DescribeTasksResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return task, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		}
 		errmsg := ""
@@ -86,7 +86,7 @@ func (s *RdsService) DescribeDBReadonlyInstance(id string) (*rds.DBInstanceAttri
 	})
 	response, ok := raw.(*rds.DescribeDBInstanceAttributeResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return instance, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -132,7 +132,7 @@ func (s *RdsService) DescribeDBAccount(id string) (*rds.DBInstanceAccount, error
 	})
 	response, ok := raw.(*rds.DescribeAccountsResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return ds, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -174,7 +174,7 @@ func (s *RdsService) DescribeDBAccountPrivilege(id string) (*rds.DBInstanceAccou
 	})
 	response, ok := raw.(*rds.DescribeAccountsResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return ds, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -211,10 +211,10 @@ func (s *RdsService) DescribeDBDatabase(id string) (*rds.Database, error) {
 		})
 		response, ok := raw.(*rds.DescribeDatabasesResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "InternalError", "OperationDenied.DBInstanceStatus") {
 				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 			}
-			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidDBName.NotFound"}) {
+			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, "InvalidDBName.NotFound") {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR))
 			}
 			errmsg := ""
@@ -245,7 +245,7 @@ func (s *RdsService) DescribeParameters(id string) (*rds.DescribeParametersRespo
 	})
 	response, ok := raw.(*rds.DescribeParametersResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return ds, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -403,7 +403,7 @@ func (s *RdsService) DescribeDBInstanceNetInfo(id string) ([]rds.DBInstanceNetIn
 
 	response, ok := raw.(*rds.DescribeDBInstanceNetInfoResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -431,7 +431,7 @@ func (s *RdsService) DescribeDBConnection(id string) (*rds.DBInstanceNetInfo, er
 	object, err := s.DescribeDBInstanceNetInfo(parts[0])
 
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidCurrentConnectionString.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidCurrentConnectionString.NotFound") {
 			return info, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return info, errmsgs.WrapError(err)
@@ -472,7 +472,7 @@ func (s *RdsService) GrantAccountPrivilege(id, dbName string) error {
 		})
 		response, ok := raw.(*rds.GrantAccountPrivilegeResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -515,7 +515,7 @@ func (s *RdsService) RevokeAccountPrivilege(id, dbName string) error {
 		})
 		response, ok := raw.(*rds.RevokeAccountPrivilegeResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -924,7 +924,7 @@ func (s *RdsService) DescribeBackupPolicy(id string) (*rds.DescribeBackupPolicyR
 
 	response, ok := raw.(*rds.DescribeBackupPolicyResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return policy, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -972,7 +972,7 @@ func (s *RdsService) DescribeSQLCollectorPolicy(id string) (collectorPolicy *rds
 	})
 	response, ok := raw.(*rds.DescribeSQLCollectorPolicyResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return collectorPolicy, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -995,7 +995,7 @@ func (s *RdsService) DescribeSQLCollectorRetention(id string) (collectorRetentio
 	})
 	response, ok := raw.(*rds.DescribeSQLCollectorRetentionResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return collectorRetention, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
@@ -1160,7 +1160,7 @@ func (s *RdsService) WaitForAccount(id string, status Status, timeout int) error
 				_, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 					return rdsClient.DeleteAccount(request)
 				})
-				if err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidAccountName.NotFound"}) {
+				if err != nil && !errmsgs.IsExpectedErrors(err, "InvalidAccountName.NotFound") {
 					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 				}
 			}

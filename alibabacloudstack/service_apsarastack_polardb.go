@@ -92,10 +92,10 @@ func (s *PolardbService) DescribeDBAccount(id string) (*PolardbDescribeaccountsR
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
+		if errmsgs.IsExpectedErrors(err, "InternalError", "OperationDenied.DBInstanceStatus") {
 			return nil, nil
 		}
-		if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidDBName.NotFound"}) {
+		if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, "InvalidDBName.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if bresponse == nil {
@@ -205,10 +205,10 @@ func (s *PolardbService) DescribeDBDatabase(id string) (*PolardbDescribedatabase
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
+		if errmsgs.IsExpectedErrors(err, "InternalError", "OperationDenied.DBInstanceStatus") {
 			return nil, nil
 		}
-		if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidDBName.NotFound"}) {
+		if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, "InvalidDBName.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if bresponse == nil {
@@ -568,7 +568,7 @@ func (s *PolardbService) DoPolardbDescribedbinstanceattributeRequest(id string) 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if bresponse == nil {
@@ -1047,7 +1047,7 @@ func (s *PolardbService) PolardbDBInstanceStateRefreshFunc(d *schema.ResourceDat
 	return func() (interface{}, string, error) {
 		object, err := s.DoPolardbDescribedbinstancesRequest(id)
 		if err != nil {
-			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"ServiceUnavailable"}) {
+			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, "ServiceUnavailable") {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
@@ -1191,7 +1191,7 @@ func (s *PolardbService) DoPolardbDescribedbinstancesRequest(id string) (*Polard
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return PolardbDescribedbinstancesResponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if bresponse == nil {
@@ -1218,7 +1218,7 @@ func (s *PolardbService) Describedbinstances(id string) (*PolardbDescribedbinsta
 	request.QueryParams["DBInstanceId"] = id
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
 			return PolardbDescribedbinstancesResponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if bresponse == nil {
@@ -1288,7 +1288,7 @@ func (s *PolardbService) DescribeDBConnection(id string) (*DBInstanceNetInfo, er
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidCurrentConnectionString.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidCurrentConnectionString.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return nil, errmsgs.WrapError(err)
@@ -1769,7 +1769,7 @@ func (s *PolardbService) DescribePolardbClusterInstance(id string) (map[string]i
 		response, err = s.client.DoTeaRequest("GET", "polardb", "2017-08-01", "DescribeDBClusterAttribute", "", nil, reqQuery, nil)
 		if err == nil {
 			break
-		} else if errmsgs.IsExpectedErrors(err, []string{"Forbidden.RAM"}) {
+		} else if errmsgs.IsExpectedErrors(err, "Forbidden.RAM") {
 			time.Sleep(time.Duration(5) * time.Second)
 			retry++
 		} else {

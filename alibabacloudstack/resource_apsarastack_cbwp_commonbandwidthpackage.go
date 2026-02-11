@@ -90,7 +90,7 @@ func resourceAlibabacloudStackCommonBandwidthPackageCreate(d *schema.ResourceDat
 			return vpcClient.CreateCommonBandwidthPackage(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"BandwidthPackageOperation.conflict", errmsgs.Throttling}) {
+			if errmsgs.IsExpectedErrors(err, "BandwidthPackageOperation.conflict", errmsgs.Throttling) {
 				wait()
 				return resource.RetryableError(err)
 			}

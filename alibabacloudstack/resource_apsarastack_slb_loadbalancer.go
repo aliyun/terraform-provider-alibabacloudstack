@@ -235,7 +235,7 @@ func resourceAlibabacloudStackSlbDelete(d *schema.ResourceData, meta interface{}
 		return slbClient.DeleteLoadBalancer(request)
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidLoadBalancerId.NotFound") {
 			return nil
 		}
 		errmsg := ""

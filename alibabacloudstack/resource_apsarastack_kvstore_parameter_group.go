@@ -171,7 +171,7 @@ func resourceAlibabacloudStackKvstoreParameterGroupDelete(d *schema.ResourceData
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		_, err := client.DoTeaRequest("POST", "R-kvstore", "2015-01-01", "DeleteParameterGroup", "", nil, reqQuery, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidParameterGroupId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidParameterGroupId.NotFound") {
 				return resource.NonRetryableError(err)
 			}
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteParameterGroup", errmsgs.AlibabacloudStackSdkGoERROR, err.Error())
@@ -180,7 +180,7 @@ func resourceAlibabacloudStackKvstoreParameterGroupDelete(d *schema.ResourceData
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidParameterGroupId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidParameterGroupId.NotFound") {
 			return nil
 		}
 		return errmsgs.WrapError(err)

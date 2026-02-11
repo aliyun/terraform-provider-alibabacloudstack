@@ -201,7 +201,7 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 
 	object, err := bucket.GetObjectDetailedMeta(key, options...)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"404 Not Found"}) {
+		if errmsgs.IsExpectedErrors(err, "404 Not Found") {
 			d.SetId("")
 			return errmsgs.WrapError(errmsgs.Error("To get the Object: %#v but it is not exist in the specified bucket %s.", key, bucketName))
 		}
@@ -246,7 +246,7 @@ func resourceAlibabacloudStackOssBucketObjectDelete(d *schema.ResourceData, meta
 
 	err = bucket.DeleteObject(d.Get("key").(string))
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"No Content", "Not Found"}) {
+		if errmsgs.IsExpectedErrors(err, "No Content", "Not Found") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR)

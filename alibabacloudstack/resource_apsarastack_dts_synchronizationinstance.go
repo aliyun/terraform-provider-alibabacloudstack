@@ -221,7 +221,7 @@ func resourceAlibabacloudStackDtsSynchronizationInstanceDelete(d *schema.Resourc
 	request["SynchronizationJobId"] = d.Id()
 	_, err := client.DoTeaRequest("POST", "Dts", "2020-01-01", action, "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidJobId"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidJobId") {
 			return nil
 		}
 		return err

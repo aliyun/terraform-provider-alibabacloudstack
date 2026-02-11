@@ -129,7 +129,7 @@ func resourceAlibabacloudStackEssScalingRuleDelete(d *schema.ResourceData, meta 
 	})
 	bresponse, ok := raw.(*ess.DeleteScalingRuleResponse)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidScalingRuleId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidScalingRuleId.NotFound") {
 			return nil
 		}
 		errmsg := ""

@@ -42,7 +42,7 @@ func (s *ElasticsearchService) DescribeElasticsearchInstance(id string) (object 
 	response, err = s.client.DoTeaRequest("GET", "elasticsearch-k8s", "2017-06-13", "DescribeInstance", fmt.Sprintf("/openapi/instances/%s", id), nil, nil, request)
 	addDebug("DescribeInstance", response, nil)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InstanceNotFound") {
 			return object, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return object, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "DescribeInstance", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -90,7 +90,7 @@ func (s *ElasticsearchService) ElasticsearchRetryFunc(wait func(), errorCodeList
 		raw, err = s.client.WithElasticsearchClient(do)
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errorCodeList) {
+			if errmsgs.IsExpectedErrors(err, errorCodeList ...) {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -111,7 +111,7 @@ func (s *ElasticsearchService) TriggerNetwork(d *schema.ResourceData, content ma
 	response, err := s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "TriggerNetwork", "", nil, nil, request)
 	addDebug("TriggerNetwork", response, content)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"RepetitionOperationError"}) {
+		if errmsgs.IsExpectedErrors(err, "RepetitionOperationError") {
 			return nil
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "TriggerNetwork", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -133,16 +133,16 @@ func (s *ElasticsearchService) ModifyWhiteIps(d *schema.ResourceData, content ma
 	response, err := s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "ModifyAclWhiteIps", fmt.Sprintf("/openapi/instances/%s/actions/modify-acl-white-ips", d.Id()), nil, nil, request)
 	addDebug("ModifyWhiteIps", response, nil)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"ConcurrencyUpdateInstanceConflict", "InstanceStatusNotSupportCurrentAction", "InternalServerError"}) || errmsgs.NeedRetry(err) {
+		if errmsgs.IsExpectedErrors(err, "ConcurrencyUpdateInstanceConflict", "InstanceStatusNotSupportCurrentAction", "InternalServerError") || errmsgs.NeedRetry(err) {
 			wait := incrementalWait(3*time.Second, 5*time.Second)
 			err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 				response, err = s.client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "ModifyWhiteIps", "", nil, nil, request)
 				if err != nil {
-					if errmsgs.IsExpectedErrors(err, []string{"InvalidAction.NotFound"}) {
+					if errmsgs.IsExpectedErrors(err, "InvalidAction.NotFound") {
 						// Old version 3.16.2 does not support modification
 						return nil
 					}
-					if errmsgs.IsExpectedErrors(err, []string{"ConcurrencyUpdateInstanceConflict", "InstanceStatusNotSupportCurrentAction", "InternalServerError"}) || errmsgs.NeedRetry(err) {
+					if errmsgs.IsExpectedErrors(err, "ConcurrencyUpdateInstanceConflict", "InstanceStatusNotSupportCurrentAction", "InternalServerError") || errmsgs.NeedRetry(err) {
 						wait()
 						return resource.RetryableError(err)
 					}
@@ -237,7 +237,7 @@ func updateDescription(d *schema.ResourceData, meta interface{}) error {
 	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateDescription", fmt.Sprintf("/openapi/instances/%s/description", d.Id()), nil, nil, request)
 	addDebug("UpdateDescription", response, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"UpdateDescriptionFailed"}) {
+		if errmsgs.IsExpectedErrors(err, "UpdateDescriptionFailed") {
 			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Get("description").(string), "UpdateDescription", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -449,11 +449,11 @@ func updateNodes(d *schema.ResourceData, meta interface{}) error {
 	for _, content := range []map[string]interface{}{downgradeContent, upgradeContent} {
 		response, err := client.DoTeaRequest("PUT", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", fmt.Sprintf("/openapi/instances/%s", d.Id()), nil, nil, content)
 		addDebug("UpdateInstance", response, content)
-		if err != nil && errmsgs.IsExpectedErrors(err, []string{"UpdateInstanceNoChange"}) {
+		if err != nil && errmsgs.IsExpectedErrors(err, "UpdateInstanceNoChange") {
 			// Current configuration has not changed, ignore the error
 			continue
 		}
-		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
+		if err != nil && !errmsgs.IsExpectedErrors(err, "MustChangeOneResource", "CssCheckUpdowngradeError") {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 

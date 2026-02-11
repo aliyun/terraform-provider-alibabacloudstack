@@ -45,7 +45,7 @@ func resourceAliyunRouteTableAttachmentCreate(d *schema.ResourceData, meta inter
 			return vpcClient.AssociateRouteTable(&args)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, "TaskConflict") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -114,7 +114,7 @@ func resourceAliyunRouteTableAttachmentDelete(d *schema.ResourceData, meta inter
 		})
 
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, "TaskConflict") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

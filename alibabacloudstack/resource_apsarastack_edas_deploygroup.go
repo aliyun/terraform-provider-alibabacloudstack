@@ -59,7 +59,7 @@ func resourceAlibabacloudStackEdasDeployGroupCreate(d *schema.ResourceData, meta
 		})
 		bresponse, ok := raw.(*edas.InsertDeployGroupResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -127,7 +127,7 @@ func resourceAlibabacloudStackEdasDeployGroupDelete(d *schema.ResourceData, meta
 		})
 		bresponse, ok := raw.(*edas.DeleteDeployGroupResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 				wait()
 				return resource.RetryableError(err)
 			}

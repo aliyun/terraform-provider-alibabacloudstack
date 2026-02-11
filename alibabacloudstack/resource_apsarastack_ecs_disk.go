@@ -337,7 +337,7 @@ func resourceAlibabacloudStackDiskUpdate(d *schema.ResourceData, meta interface{
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ResizeDisk(request)
 		})
-		if errmsgs.IsExpectedErrors(err, errmsgs.DiskNotSupportOnlineChangeErrors) {
+		if errmsgs.IsExpectedErrors(err, errmsgs.DiskNotSupportOnlineChangeErrors...) {
 			request.Type = string(DiskResizeTypeOffline)
 			raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 				return ecsClient.ResizeDisk(request)
@@ -374,7 +374,7 @@ func resourceAlibabacloudStackDiskDelete(d *schema.ResourceData, meta interface{
 			return ecsClient.DeleteDisk(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.DiskInvalidOperation) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.DiskInvalidOperation...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""

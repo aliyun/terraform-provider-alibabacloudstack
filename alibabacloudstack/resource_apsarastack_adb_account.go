@@ -118,7 +118,7 @@ func resourceAlibabacloudStackAdbAccountCreate(d *schema.ResourceData, meta inte
 		})
 		response, ok := raw.(*adb.CreateAccountResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus...) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -239,7 +239,7 @@ func resourceAlibabacloudStackAdbAccountDelete(d *schema.ResourceData, meta inte
 		return adbClient.DeleteAccount(request)
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidAccountName.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidAccountName.NotFound") {
 			return nil
 		}
 		errmsg := ""

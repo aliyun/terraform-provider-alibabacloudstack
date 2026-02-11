@@ -72,7 +72,7 @@ func resourceAlibabacloudStackSnatEntryCreate(d *schema.ResourceData, meta inter
 		})
 		bresponse, ok := raw.(*vpc.CreateSnatEntryResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"EIP_NOT_IN_GATEWAY", "OperationUnsupported.EipNatBWPCheck", "OperationUnsupported.EipInBinding"}) {
+			if errmsgs.IsExpectedErrors(err, "EIP_NOT_IN_GATEWAY", "OperationUnsupported.EipNatBWPCheck", "OperationUnsupported.EipInBinding") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -185,7 +185,7 @@ func resourceAlibabacloudStackSnatEntryDelete(d *schema.ResourceData, meta inter
 		})
 		bresponse, ok := raw.(*vpc.DeleteSnatEntryResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"IncorretSnatEntryStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "IncorretSnatEntryStatus") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -198,7 +198,7 @@ func resourceAlibabacloudStackSnatEntryDelete(d *schema.ResourceData, meta inter
 		return nil
 	})
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidSnatTableId.NotFound", "InvalidSnatEntryId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidSnatTableId.NotFound", "InvalidSnatEntryId.NotFound") {
 			return nil
 		}
 		return err

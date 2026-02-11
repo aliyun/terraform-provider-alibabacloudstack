@@ -203,7 +203,7 @@ func resourceAlibabacloudStackPolarDBParameterGroupDelete(d *schema.ResourceData
 	err := resource.Retry(10*time.Second, func() *resource.RetryError {
 		_, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "DeleteParameterGroup", "", nil, reqQuery, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"ParameterGroup.NotFound", "InvalidParameterGroupId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "ParameterGroup.NotFound", "InvalidParameterGroupId.NotFound") {
 				return resource.NonRetryableError(err)
 			}
 			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteParameterGroup", errmsgs.AlibabacloudStackSdkGoERROR, err.Error())

@@ -69,7 +69,7 @@ func resourceAlibabacloudStackVpnRouteEntryCreate(d *schema.ResourceData, meta i
 			return vpcClient.CreateVpnRouteEntry(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"VpnGateway.Configuring"}) {
+			if errmsgs.IsExpectedErrors(err, "VpnGateway.Configuring") {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -210,7 +210,7 @@ func resourceAlibabacloudStackVpnRouteEntryDelete(d *schema.ResourceData, meta i
 			return vpcClient.DeleteVpnRouteEntry(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"VpnGateway.Configuring"}) {
+			if errmsgs.IsExpectedErrors(err, "VpnGateway.Configuring") {
 				wait()
 				return resource.RetryableError(err)
 			}

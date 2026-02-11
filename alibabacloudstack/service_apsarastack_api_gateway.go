@@ -37,7 +37,7 @@ func (s *CloudApiService) DescribeApiGatewayGroup(id string) (*cloudapi.Describe
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApiGroup"}) {
+		if errmsgs.IsExpectedErrors(err, "NotFoundApiGroup") {
 			return bresponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return bresponse, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -85,7 +85,7 @@ func (s *CloudApiService) DescribeApiGatewayApp(id string) (*cloudapi.DescribeAp
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApp"}) {
+		if errmsgs.IsExpectedErrors(err, "NotFoundApp") {
 			return bresponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return bresponse, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -135,7 +135,7 @@ func (s *CloudApiService) DescribeApiGatewayApi(id string) (*cloudapi.DescribeAp
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi"}) {
+		if errmsgs.IsExpectedErrors(err, "NotFoundApiGroup", "NotFoundApi") {
 			return bresponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return bresponse, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -194,7 +194,7 @@ func (s *CloudApiService) DescribeApiGatewayAppAttachment(id string) (*cloudapi.
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi"}) {
+			if errmsgs.IsExpectedErrors(err, "NotFoundApiGroup", "NotFoundApi") {
 				return app, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
 			return app, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -325,7 +325,7 @@ func (s *CloudApiService) DescribeDeployedApi(id string, stageName string) (*clo
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi", "NotFoundStage"}) {
+		if errmsgs.IsExpectedErrors(err, "NotFoundApiGroup", "NotFoundApi", "NotFoundStage") {
 			return bresponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return bresponse, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -381,7 +381,7 @@ func (s *CloudApiService) AbolishApi(id string, stageName string) (err error) {
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi", "NotFoundStage"}) {
+		if errmsgs.IsExpectedErrors(err, "NotFoundApiGroup", "NotFoundApi", "NotFoundStage") {
 			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)

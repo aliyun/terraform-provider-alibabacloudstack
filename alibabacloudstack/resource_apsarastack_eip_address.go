@@ -164,9 +164,9 @@ func resourceAlibabacloudStackEipDelete(d *schema.ResourceData, meta interface{}
 			return vpcClient.ReleaseEipAddress(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"IncorrectEipStatus"}) {
+			if errmsgs.IsExpectedErrors(err, "IncorrectEipStatus") {
 				return resource.RetryableError(err)
-			} else if errmsgs.IsExpectedErrors(err, []string{"InvalidAllocationId.NotFound"}) {
+			} else if errmsgs.IsExpectedErrors(err, "InvalidAllocationId.NotFound") {
 				return nil
 			}
 			errmsg := ""

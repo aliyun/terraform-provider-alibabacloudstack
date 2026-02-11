@@ -250,7 +250,7 @@ const (
 )
 
 func isDatahubNotExistError(err error) bool {
-	return errmsgs.IsExpectedErrors(err, []string{datahub.NoSuchProject, datahub.NoSuchTopic, datahub.NoSuchShard, datahub.NoSuchSubscription, DoesNotExist})
+	return errmsgs.IsExpectedErrors(err, datahub.NoSuchProject, datahub.NoSuchTopic, datahub.NoSuchShard, datahub.NoSuchSubscription, DoesNotExist)
 }
 
 func isTerraformTestingDatahubObject(name string) bool {

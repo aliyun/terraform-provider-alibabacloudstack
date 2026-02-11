@@ -146,7 +146,7 @@ func resourceAlibabacloudStackNatGatewayCreate(d *schema.ResourceData, meta inte
 			return vpcClient.CreateNatGateway(&args)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"VswitchStatusError", "TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, "VswitchStatusError", "TaskConflict") {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -304,10 +304,10 @@ func resourceAlibabacloudStackNatGatewayDelete(d *schema.ResourceData, meta inte
 			return vpcClient.DeleteNatGateway(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"DependencyViolation.BandwidthPackages"}) {
+			if errmsgs.IsExpectedErrors(err, "DependencyViolation.BandwidthPackages") {
 				return resource.RetryableError(err)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidNatGatewayId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, "InvalidNatGatewayId.NotFound") {
 				return nil
 			}
 			errmsg := ""

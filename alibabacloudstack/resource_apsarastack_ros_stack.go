@@ -371,7 +371,7 @@ func resourceAlibabacloudStackRosStackDelete(d *schema.ResourceData, meta interf
 
 	_, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"StackNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "StackNotFound") {
 			return nil
 		}
 		return err

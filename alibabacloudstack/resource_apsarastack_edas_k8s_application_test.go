@@ -100,7 +100,7 @@ func testSweepEdasK8sApplication(region string) error {
 				return edasClient.DeleteApplication(deleteApplicationRequest)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 					wait()
 					return resource.RetryableError(err)
 				}

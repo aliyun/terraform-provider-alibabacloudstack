@@ -434,7 +434,7 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 		if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 			_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"PartnerService.BizError.SendError", "PartnerService.validResponse.InvokeError"}) {
+				if errmsgs.IsExpectedErrors(err, "PartnerService.BizError.SendError", "PartnerService.validResponse.InvokeError") {
 					return resource.RetryableError(err)
 				}
 				return resource.NonRetryableError(err)
@@ -706,7 +706,7 @@ func resourceAlibabacloudStackBastionhostInstanceDelete(d *schema.ResourceData, 
 	}
 	_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidBastionhost.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidBastionhost.NotFound") {
 			return nil
 		}
 		return err

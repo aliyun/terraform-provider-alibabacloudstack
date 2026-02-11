@@ -79,7 +79,7 @@ func testSweepEdasK8sCluster(region string) error {
 				return edasClient.DeleteCluster(deleteClusterRq)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 					wait()
 					return resource.RetryableError(err)
 				}

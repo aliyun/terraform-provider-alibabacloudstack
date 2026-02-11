@@ -188,7 +188,7 @@ func resourceAlibabacloudStackNasFileSystemDelete(d *schema.ResourceData, meta i
 	}
 	_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidFileSystem.NotFound", "Forbidden.NasNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, "InvalidFileSystem.NotFound", "Forbidden.NasNotFound") {
 			return nil
 		}
 		return err
