@@ -2,76 +2,82 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlicloudQuickBIUsersDataSource(t *testing.T) {
-	//t.Skip()
 	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_quick_bi_users.default"
+	name := fmt.Sprintf("tf-testAccQuickBIUser%d", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceQuickBIUsersConfigDependence)
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlicloudQuickBIUserDataSourceName(rand, map[string]string{
-			"ids": `["${alibabacloudstack_quick_bi_user.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":            []string{"${alibabacloudstack_quick_bi_user.default.id}"},
+			"enable_details": true,
 		}),
-		fakeConfig: testAccCheckAlicloudQuickBIUserDataSourceName(rand, map[string]string{
-			"ids": `["${alibabacloudstack_quick_bi_user.default.id}_fakeid"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":            []string{"${alibabacloudstack_quick_bi_user.default.id}_fakeid"},
+			"enable_details": true,
 		}),
 	}
 
 	keywordConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlicloudQuickBIUserDataSourceName(rand, map[string]string{
-			"keyword": `"${alibabacloudstack_quick_bi_user.default.nick_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"keyword":        "${alibabacloudstack_quick_bi_user.default.nick_name}",
+			"enable_details": true,
 		}),
-		fakeConfig: testAccCheckAlicloudQuickBIUserDataSourceName(rand, map[string]string{
-			"keyword": `"${alibabacloudstack_quick_bi_user.default.nick_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"keyword":        "${alibabacloudstack_quick_bi_user.default.nick_name}_fake",
+			"enable_details": true,
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlicloudQuickBIUserDataSourceName(rand, map[string]string{
-			"ids":     `["${alibabacloudstack_quick_bi_user.default.id}"]`,
-			"keyword": `"${alibabacloudstack_quick_bi_user.default.nick_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":            []string{"${alibabacloudstack_quick_bi_user.default.id}"},
+			"keyword":        "${alibabacloudstack_quick_bi_user.default.nick_name}",
+			"enable_details": true,
 		}),
-		fakeConfig: testAccCheckAlicloudQuickBIUserDataSourceName(rand, map[string]string{
-			"ids":     `["${alibabacloudstack_quick_bi_user.default.id}_fake"]`,
-			"keyword": `"${alibabacloudstack_quick_bi_user.default.nick_name}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":            []string{"${alibabacloudstack_quick_bi_user.default.id}_fake"},
+			"keyword":        "${alibabacloudstack_quick_bi_user.default.nick_name}",
+			"enable_details": true,
 		}),
 	}
 
-	var existDataAlicloudQuickBIUsersSourceNameMapFunc = func(rand int) map[string]string {
+	var existQuickBIUsersMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                   "1",
 			"users.#":                 "1",
+			"users.0.id":              CHECKSET,
 			"users.0.nick_name":       fmt.Sprintf("tf-testAccQuickBIUser%d", rand),
 			"users.0.admin_user":      "false",
 			"users.0.auth_admin_user": "false",
 			"users.0.user_type":       "Developer",
 		}
 	}
-	var fakeDataAlicloudQuickBIUsersSourceNameMapFunc = func(rand int) map[string]string {
+
+	var fakeQuickBIUsersMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":   "0",
 			"users.#": "0",
 		}
 	}
-	var alibabacloudstackQuickBIUserCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_quick_bi_users.default",
-		existMapFunc: existDataAlicloudQuickBIUsersSourceNameMapFunc,
-		fakeMapFunc:  fakeDataAlicloudQuickBIUsersSourceNameMapFunc,
+
+	var quickBIUsersCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existQuickBIUsersMapFunc,
+		fakeMapFunc:  fakeQuickBIUsersMapFunc,
 	}
-	alibabacloudstackQuickBIUserCheckInfo.dataSourceTestCheck(t, rand, idsConf, keywordConf, allConf)
+	quickBIUsersCheckInfo.dataSourceTestCheck(t, rand, idsConf, keywordConf, allConf)
 }
-func testAccCheckAlicloudQuickBIUserDataSourceName(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
 
-	config := fmt.Sprintf(`
-
-variable "name" {	
-	default = "tf-testAccQuickBIUser%d"
+func dataSourceQuickBIUsersConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
 }
 
 resource "alibabacloudstack_quick_bi_user" "default" {
@@ -81,10 +87,5 @@ resource "alibabacloudstack_quick_bi_user" "default" {
   auth_admin_user = "false"
   user_type       = "Developer"
 }
-
-data "alibabacloudstack_quick_bi_users" "default" {	
-	%s
-}
-`, rand, strings.Join(pairs, " \n "))
-	return config
+`, name)
 }

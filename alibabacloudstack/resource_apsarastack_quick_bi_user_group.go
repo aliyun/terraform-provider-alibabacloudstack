@@ -11,7 +11,6 @@ func resourceAlibabacloudStackQuickBiUserGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"user_group_id": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"user_group_name": {
@@ -62,10 +61,6 @@ func resourceAlibabacloudStackQuickBiUserGroupCreate(d *schema.ResourceData, met
 		"UserGroupName":        d.Get("user_group_name").(string),
 		"UserGroupDescription": d.Get("user_group_description").(string),
 		"ParentUserGroupId":    ParentUserGroupId,
-	}
-
-	if v, ok := d.GetOk("user_group_id"); ok {
-		request["UserGroupId"] = v
 	}
 
 	response, err = client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", action, "", nil, nil, request)

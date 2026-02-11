@@ -101,7 +101,7 @@ func dataSourceAlibabacloudStackQuickBiUsersRead(d *schema.ResourceData, meta in
 
 	idsMap := getIdsStringFilter(d)
 	for {
-		response, err := client.DoTeaRequest("GET", "quickbi-public", "2022-03-01", action, "", nil, nil, request)
+		response, err := client.DoTeaRequest("GET", "quickbi-public", "2022-03-01", action, "", nil, request, nil)
 		if err != nil {
 			errmsg := ""
 			if response != nil {

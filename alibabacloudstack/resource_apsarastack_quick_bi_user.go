@@ -16,8 +16,7 @@ func resourceAlibabacloudStackQuickBiUser() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"account_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"account_name": {
 				Type:     schema.TypeString,
@@ -59,16 +58,13 @@ func resourceAlibabacloudStackQuickBiUserCreate(d *schema.ResourceData, meta int
 	var response map[string]interface{}
 	action := "AddUser"
 	request := make(map[string]interface{})
-	if v, ok := d.GetOk("account_id"); ok {
-		request["AccountId"] = v
-	}
 	request["AccountName"] = d.Get("account_name")
 	request["AdminUser"] = d.Get("admin_user")
 	request["AuthAdminUser"] = d.Get("auth_admin_user")
 	request["NickName"] = d.Get("nick_name")
 	request["UserType"] = convertQuickBiUserUserTypeRequest(d.Get("user_type").(string))
 
-	response, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, nil, request)
+	response, err = client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -122,7 +118,7 @@ func resourceAlibabacloudStackQuickBiUserUpdate(d *schema.ResourceData, meta int
 	request["UserType"] = convertQuickBiUserUserTypeRequest(d.Get("user_type").(string))
 	if update {
 		action := "UpdateUser"
-		_, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, nil, request)
+		_, err = client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -137,7 +133,7 @@ func resourceAlibabacloudStackQuickBiUserDelete(d *schema.ResourceData, meta int
 		"UserId": d.Id(),
 	}
 
-	_, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, nil, request)
+	_, err = client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
 			return nil
