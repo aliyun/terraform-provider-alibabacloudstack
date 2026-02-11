@@ -14,6 +14,7 @@ import (
 
 func resourceAlibabacloudStackQuickBiWorkspace() *schema.Resource {
 	resource := &schema.Resource{
+		DeprecationMessage: "The 'alibabacloudstack_quick_bi_workspace' resource is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 		Schema: map[string]*schema.Schema{
 			"workspace_id": {
 				Type:     schema.TypeString,
