@@ -2,111 +2,11 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"log"
-	"strings"
 	"testing"
-	"time"
-
-	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
-
-func init() {
-	resource.AddTestSweepers(
-		"alibabacloudstack_quick_bi_user",
-		&resource.Sweeper{
-			Name: "alibabacloudstack_quick_bi_user",
-			F:    testSweepQuickBIUser,
-		})
-}
-
-func testSweepQuickBIUser(region string) error {
-	rawClient, err := sharedClientForRegion(region)
-	if err != nil {
-		return fmt.Errorf("error getting Alicloud client: %s", err)
-	}
-	client := rawClient.(*connectivity.AlibabacloudStackClient)
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
-
-	action := "QueryUserList"
-	request := make(map[string]interface{})
-	request["PageSize"] = PageSizeLarge
-	request["PageNum"] = 1
-
-	var response map[string]interface{}
-	conn, err := client.NewQuickbiClient()
-	if err != nil {
-		log.Printf("[ERROR] %s get an error: %#v", action, err)
-	}
-	for {
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("GET"), StringPointer("2020-08-01"), StringPointer("AK"), request, nil, &runtime)
-			if err != nil {
-				if errmsgs.NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		addDebug(action, response, request)
-		if err != nil {
-			log.Printf("[ERROR] %s get an error: %#v", action, err)
-			return nil
-		}
-
-		resp, err := jsonpath.Get("$.Result.Data", response)
-		if err != nil {
-			log.Printf("[ERROR] Getting resource %s attribute by path %s failed!!! Body: %v.", "$.Result.Data", action, err)
-		}
-		result, _ := resp.([]interface{})
-		for _, v := range result {
-			item := v.(map[string]interface{})
-
-			if _, ok := item["NickName"]; !ok {
-				continue
-			}
-			skip := true
-			for _, prefix := range prefixes {
-				if strings.HasPrefix(strings.ToLower(item["NickName"].(string)), strings.ToLower(prefix)) {
-					skip = false
-				}
-			}
-			if skip {
-				log.Printf("[INFO] Skipping QuickBI User: %s", item["NickName"].(string))
-				continue
-			}
-
-			action := "DeleteUser"
-			request := map[string]interface{}{
-				"UserId": item["UserId"],
-			}
-			_, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-08-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-			if err != nil {
-				log.Printf("[ERROR] Failed to delete QuickBI User (%s): %s", item["UserId"].(string), err)
-			}
-			log.Printf("[INFO] Delete QuickBI User success: %s ", item["UserId"].(string))
-		}
-		if len(result) < PageSizeLarge {
-			break
-		}
-		request["PageNum"] = request["PageNum"].(int) + 1
-	}
-	return nil
-}
 
 func TestAccAlicloudQuickBIUser_basic0(t *testing.T) {
 	//t.Skip()

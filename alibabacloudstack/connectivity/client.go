@@ -828,10 +828,6 @@ func (client *AlibabacloudStackClient) WithDrdsClient(do func(*drds.Client) (int
 	return do(client.drdsconn)
 }
 
-func (client *AlibabacloudStackClient) NewQuickbiClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("quickbi", client.Config.Endpoints[QuickbiCode])
-}
-
 func (client *AlibabacloudStackClient) NewArmsClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("arms", client.Config.Endpoints[ARMSCode])
 }
@@ -922,9 +918,6 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 
 func buildClientToken(popcode, version, action string) string {
 	token := strings.TrimSpace(fmt.Sprintf("TF_%s_%s_%s_%s", popcode, version, action, uuid.Must(uuid.NewV7()).String()))
-	if len(token) > 64 {
-		token = token[0:64]
-	}
 	return token
 }
 

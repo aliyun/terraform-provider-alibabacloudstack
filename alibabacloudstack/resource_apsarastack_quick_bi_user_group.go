@@ -29,7 +29,7 @@ func resourceAlibabacloudStackQuickBiUserGroup() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackQuickBiUserGroupCreate, 
+	setResourceFunc(resource, resourceAlibabacloudStackQuickBiUserGroupCreate,
 		resourceAlibabacloudStackQuickBiUserGroupRead, resourceAlibabacloudStackQuickBiUserGroupUpdate, resourceAlibabacloudStackQuickBiUserGroupDelete)
 	return resource
 }
@@ -42,22 +42,33 @@ var UserGroupId string
 func resourceAlibabacloudStackQuickBiUserGroupCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
+
+	ParentUserGroupId = d.Get("parent_user_group_id").(string)
+	if ParentUserGroupId == "-1" {
+		reqQuery := map[string]interface{}{"Keyword":"所有组"}  // XXXX: HARD CODE
+		response, err = client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", "GetUserGroupInfo", "", nil, reqQuery,nil)
+			if err != nil {
+				return err
+			}
+			groups := response["Result"].([]interface{})
+			if len(groups) < 1 {
+				return errmsgs.Error("Not Found All Groups")
+			}
+			ParentUserGroupId= groups[0].(map[string]interface{})["UsergroupId"].(string)
+	}
+
 	action := "CreateUserGroup"
-	request := make(map[string]interface{})
+	request := map[string]interface{}{
+		"UserGroupName":        d.Get("user_group_name").(string),
+		"UserGroupDescription": d.Get("user_group_description").(string),
+		"ParentUserGroupId":    ParentUserGroupId,
+	}
 
 	if v, ok := d.GetOk("user_group_id"); ok {
 		request["UserGroupId"] = v
 	}
 
-	UserGroupName = d.Get("user_group_name").(string)
-	UserGroupDescription = d.Get("user_group_description").(string)
-	ParentUserGroupId = d.Get("parent_user_group_id").(string)
-
-	request["UserGroupName"] = UserGroupName
-	request["UserGroupDescription"] = UserGroupDescription
-	request["ParentUserGroupId"] = ParentUserGroupId
-
-	response, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, nil, request)
+	response, err = client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -101,7 +112,7 @@ func resourceAlibabacloudStackQuickBiUserGroupUpdate(d *schema.ResourceData, met
 		request["UserGroupDescription"] = UserGroupDescription
 		request["ParentUserGroupId"] = ParentUserGroupId
 
-		_, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, nil, request)
+		_, err = client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -117,7 +128,7 @@ func resourceAlibabacloudStackQuickBiUserGroupDelete(d *schema.ResourceData, met
 		"UserGroupId": d.Id(),
 	}
 
-	_, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, nil, request)
+	_, err = client.DoTeaRequest("POST", "UpdateUserGroup", "2022-03-01", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
 			return nil

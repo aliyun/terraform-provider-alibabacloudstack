@@ -19,7 +19,7 @@ func TestAccAlicloudQuickBIUserGroup_basic0(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%squickbiusergroup%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-quickbiusergroup%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlicloudQuickBIUserGroupBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
