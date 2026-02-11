@@ -128,7 +128,7 @@ func resourceAlibabacloudStackQuickBiUserGroupDelete(d *schema.ResourceData, met
 		"UserGroupId": d.Id(),
 	}
 
-	_, err = client.DoTeaRequest("POST", "UpdateUserGroup", "2022-03-01", action, "", nil, nil, request)
+	_, err = client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
 			return nil
