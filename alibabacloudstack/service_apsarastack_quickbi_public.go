@@ -95,3 +95,26 @@ func (s *QuickbiPublicService) DescribeQuickBiWorkspace(id string) (object map[s
 	object = v.(map[string]interface{})
 	return object, nil
 }
+
+func (s *QuickbiPublicService) DescribeQuickBiUserGroupUser(id string) (object map[string]interface{}, err error) {
+	parts, err := ParseResourceId(id, 2)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	action := "QueryUserGroupMember"
+	request := map[string]interface{}{
+		"UserGroupId": parts[0],
+	}
+
+	response, err := s.client.DoTeaRequest("POST", "quickbi-public", "2022-03-01", action, "", nil, request, nil)
+	if err != nil {
+		return object, err
+	}
+	for _, v := range response["Result"].([]interface{}) {
+		user := v.(map[string]interface{})
+		if user["Id"].(string) == parts[1] {
+			return user, nil
+		}
+	}
+	return object, errmsgs.GetNotFoundErrorFromString("Not found UserGroupUser " + id)
+}

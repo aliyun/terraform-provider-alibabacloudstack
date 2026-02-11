@@ -875,6 +875,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ots_table":                                       resourceAlibabacloudStackOtsTable(),
 		"alibabacloudstack_quick_bi_user":                                   resourceAlibabacloudStackQuickBiUser(),
 		"alibabacloudstack_quick_bi_user_group":                             resourceAlibabacloudStackQuickBiUserGroup(),
+		"alibabacloudstack_quick_bi_user_group_user":                        resourceAlibabacloudStackQuickBiUserGroupUser(),
 		"alibabacloudstack_quick_bi_workspace":                              resourceAlibabacloudStackQuickBiWorkspace(),
 		"alibabacloudstack_ram_role_attachment":                             resourceAlibabacloudStackRamRoleAttachment(),
 		"alibabacloudstack_ecs_ramroleattachment":                           resourceAlibabacloudStackRamRoleAttachment(),
