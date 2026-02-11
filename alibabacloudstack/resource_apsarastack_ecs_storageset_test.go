@@ -56,7 +56,7 @@ func TestAccAlibabacloudStackEcsEbsStorageSets_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckEbsDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: providerCommon + testAccConfig(map[string]interface{}{
+				Config: testAccConfig(map[string]interface{}{
 					"storage_set_name":    name,
 					"maxpartition_number": "2",
 					"zone_id":             "${data.alibabacloudstack_zones.default.zones.0.id}",
