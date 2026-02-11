@@ -323,54 +323,47 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*AliKa
 	return alikafkaTopic, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AlikafkaTopic", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
-func (alikafkaService *AlikafkaService) DescribeAlikafkaSaslUser(id string) (*alikafka.SaslUserVO, error) {
-	alikafkaSaslUser := &alikafka.SaslUserVO{}
-
+func (alikafkaService *AlikafkaService) DescribeAlikafkaSaslUser(id string) (object map[string]interface{}, err error) {
 	parts, err := ParseResourceId(id, 3)
 	if err != nil {
-		return alikafkaSaslUser, errmsgs.WrapError(err)
+		return object, errmsgs.WrapError(err)
 	}
 	instanceId := parts[0]
 	username := parts[1]
 
-	request := alikafka.CreateDescribeSaslUsersRequest()
-	alikafkaService.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = instanceId
 	wait := incrementalWait(3*time.Second, 5*time.Second)
-	var raw interface{}
+	
+	reqQuery := map[string]interface{}{
+		"InstanceId" : instanceId,
+	}
 
+	var response map[string]interface{}
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		raw, err = alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
-			return alikafkaClient.DescribeSaslUsers(request)
-		})
+		response, err = alikafkaService.client.DoTeaRequest("POST", "alikafka", "2019-09-16", "DescribeSaslUsers", "", nil , reqQuery, nil)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
+			if errmsgs.IsExpectedErrors(err,  "ONS_SYSTEM_FLOW_CONTROL") {
 				wait()
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 
-	userListResp, ok := raw.(*alikafka.DescribeSaslUsersResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(userListResp.BaseResponse)
-		}
-		return alikafkaSaslUser, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	data, ok := response["Data"]
+	if !ok || data == nil {
+		return  object , errmsgs.GetNotFoundErrorFromString("Not Found User " + id)
 	}
+	
+	
 
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-
-	for _, v := range userListResp.SaslUserList.SaslUserVO {
-		if v.Username == username {
-			return &v, nil
+	for _, v := range data.([]interface{}) {
+		object := v.(map[string]interface{})
+		if object["username"] == username {
+			return object, nil
 		}
 	}
-	return alikafkaSaslUser, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AlikafkaSaslUser", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+	return  object , errmsgs.GetNotFoundErrorFromString("Not Found User " + id)
 }
 
 func (alikafkaService *AlikafkaService) DescribeAlikafkaSaslAcl(id string) (*alikafka.KafkaAclVO, error) {
@@ -532,7 +525,7 @@ func (s *AlikafkaService) KafkaTopicStatusRefreshFunc(id string) resource.StateR
 			}
 		}
 
-		if object.OffsetTable.OffsetTableItem != nil && len(object.OffsetTable.OffsetTableItem) > 0 {
+		if len(object.OffsetTable.OffsetTableItem) > 0 {
 			return object, "Running", errmsgs.WrapError(err)
 		}
 
@@ -567,13 +560,8 @@ func (s *AlikafkaService) WaitForAlikafkaTopic(id string, status Status, timeout
 
 func (s *AlikafkaService) WaitForAlikafkaSaslUser(id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	parts, err := ParseResourceId(id, 3)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	instanceId := parts[0]
 	for {
-		object, err := s.DescribeAlikafkaSaslUser(id)
+		_, err := s.DescribeAlikafkaSaslUser(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
@@ -584,12 +572,12 @@ func (s *AlikafkaService) WaitForAlikafkaSaslUser(id string, status Status, time
 			}
 		}
 
-		if instanceId+":"+object.Username == id && status != Deleted {
+		if status != Deleted {
 			return nil
 		}
 
 		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, instanceId+":"+object.Username, id, errmsgs.ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, id, errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
@@ -630,7 +618,7 @@ func (s *AlikafkaService) DescribeTags(resourceId string, resourceTags map[strin
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.ResourceType = string(resourceType)
 	request.ResourceId = &[]string{resourceId}
-	if resourceTags != nil && len(resourceTags) > 0 {
+	if len(resourceTags) > 0 {
 		var reqTags []alikafka.ListTagResourcesTag
 		for key, value := range resourceTags {
 			reqTags = append(reqTags, alikafka.ListTagResourcesTag{

@@ -35,6 +35,7 @@ func resourceAlibabacloudStackAlikafkaSaslUser() *schema.Resource {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
+				ForceNew:  true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"plain",
 					"scram",
@@ -95,7 +96,7 @@ func resourceAlibabacloudStackAlikafkaSaslUserCreate(d *schema.ResourceData, met
 		})
 		bresponse, ok := raw.(*alikafka.CreateSaslUserResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err,errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
 				time.Sleep(2 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -105,7 +106,6 @@ func resourceAlibabacloudStackAlikafkaSaslUserCreate(d *schema.ResourceData, met
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "AlibabacloudStack_alikafka_sasl_user", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 
@@ -113,8 +113,6 @@ func resourceAlibabacloudStackAlikafkaSaslUserCreate(d *schema.ResourceData, met
 		return err
 	}
 
-	// Server may have cache, sleep a while.
-	time.Sleep(2 * time.Second)
 	d.SetId(instanceId + ":" + username + ":" + usertype)
 	return nil
 }
@@ -123,10 +121,6 @@ func resourceAlibabacloudStackAlikafkaSaslUserRead(d *schema.ResourceData, meta 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
 
-	parts, err := ParseResourceId(d.Id(), 3)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 	object, err := alikafkaService.DescribeAlikafkaSaslUser(d.Id())
 	if err != nil {
 		// Handle exceptions
@@ -137,15 +131,18 @@ func resourceAlibabacloudStackAlikafkaSaslUserRead(d *schema.ResourceData, meta 
 		return errmsgs.WrapError(err)
 	}
 
-	d.Set("instance_id", parts[0])
-	d.Set("username", object.Username)
-	d.Set("password", object.Password)
-	d.Set("type", object.Type)
+	d.Set("instance_id", object["instanceId"])
+	d.Set("username", object["username"])
+	d.Set("password", object["password"])
+	d.Set("type", object["type"])
 
 	return nil
 }
 
 func resourceAlibabacloudStackAlikafkaSaslUserUpdate(d *schema.ResourceData, meta interface{}) error {
+	if d.IsNewResource() {
+		return nil
+	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
 

@@ -1226,7 +1226,7 @@ func KafkaCommonTestCase() string {
 	if instanceid == "" {
 		instanceid = "cluster-private-paas-default"
 	}
-	return `
+	return fmt.Sprintf(`
 variable "existed_kafka_instance_id" {
 	default = "%s"
 }
@@ -1252,7 +1252,8 @@ resource "alibabacloudstack_alikafka_instance" "default" {
 locals{
 alikafka_instnace_id = length(data.alibabacloudstack_alikafka_instances.default.instances) > 0 ? data.alibabacloudstack_alikafka_instances.default.instances.0.id : alibabacloudstack_alikafka_instance.default.0.id
 }
-`}
+`, instanceid)
+}
 
 const NasCommonTestCase = `
 data "alibabacloudstack_nas_zones" "default" {
