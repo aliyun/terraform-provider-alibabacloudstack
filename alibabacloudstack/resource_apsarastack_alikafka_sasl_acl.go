@@ -88,7 +88,7 @@ func resourceAlibabacloudStackAlikafkaSaslAclCreate(d *schema.ResourceData, meta
 		})
 		bresponse, ok := raw.(*alikafka.CreateAclResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL") {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL", "please try again later") {
 				time.Sleep(2 * time.Second)
 				return resource.RetryableError(err)
 			}

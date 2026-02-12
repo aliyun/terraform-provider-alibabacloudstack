@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"slices"
 
 	"github.com/PaesslerAG/jsonpath"
 
@@ -171,23 +172,8 @@ func testAccPreCheckWithAPIIsNotSupport(t *testing.T) {
 }
 
 func testAccPreCheckWithTime2(t *testing.T, days []int) {
-	skipped := true
-	for _, d := range days {
-		if time.Now().Day() == d {
-			skipped = false
-			break
-		}
-	}
-	if skipped {
+	if !slices.Contains(days, time.Now().Day()) {
 		t.Skipf("Skipping the test case when not in specified days %#v of every month", days)
-		t.Skipped()
-	}
-}
-func testAccPreCheckWithAlikafkaAclEnable(t *testing.T) {
-	aclEnable := os.Getenv("ALIBABACLOUDSTACK_ALIKAFKA_ACL_ENABLE")
-
-	if aclEnable != "true" && aclEnable != "TRUE" {
-		t.Skipf("Skipping the test case because the acl is not enabled.")
 		t.Skipped()
 	}
 }

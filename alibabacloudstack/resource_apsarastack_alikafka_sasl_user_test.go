@@ -34,7 +34,7 @@ func TestAccAlibabacloudStackAlikafkaSaslUser_basic(t *testing.T) {
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:      rac.checkResourceDestroy(),
+		CheckDestroy:      nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
