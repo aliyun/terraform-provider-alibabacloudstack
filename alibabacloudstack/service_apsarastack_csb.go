@@ -37,3 +37,25 @@ func (s *CsbService) DescribeCsbProjectDetail(id string) (object map[string]inte
 	}
 	return object, nil
 }
+
+func (s *CsbService) DescribeCsbServiceDetail(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	parts, err := ParseResourceId(id, 2)
+	if err != nil {
+		return nil, err
+	}
+	request := map[string]interface{}{
+		"CsbId":     parts[0],
+		"ServiceId": parts[1],
+	}
+	response, err = s.client.DoTeaRequest("GET", "CSB", "2017-11-18", "GetService", "", nil, request, nil)
+	if err != nil {
+		return object, err
+	}
+
+	v, err := jsonpath.Get("$.Data.Service", response)
+	if err != nil {
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Data.ProjectList", response)
+	}
+	return v.(map[string]interface{}), nil
+}

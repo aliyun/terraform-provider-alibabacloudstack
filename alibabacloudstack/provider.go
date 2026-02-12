@@ -972,6 +972,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cloud_firewall_control_policy_order":             resourceAlibabacloudStackCloudFirewallControlPolicyOrder(),
 		"alibabacloudstack_cloudfirewall_controlpolicyorder":                resourceAlibabacloudStackCloudFirewallControlPolicyOrder(),
 		"alibabacloudstack_csb_project":                                     resourceAlibabacloudStackCsbProject(),
+		"alibabacloudstack_csb_service":                                     resourceAlibabacloudStackCsbService(),
 		"alibabacloudstack_graph_database_db_instance":                      resourceAlibabacloudStackGraphDatabaseDbInstance(),
 		"alibabacloudstack_graphdatabase_dbinstance":                        resourceAlibabacloudStackGraphDatabaseDbInstance(),
 		"alibabacloudstack_acm_configuration":                               resourceAlibabacloudStackAcmConfiguration(),
