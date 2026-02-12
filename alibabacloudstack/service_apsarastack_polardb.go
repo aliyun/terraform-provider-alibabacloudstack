@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"slices"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -1506,6 +1507,7 @@ func generateRandomString(length int) string {
 	})
 
 	return string(result)
+}
 
 func (s *PolardbService) PolardbAccountStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
@@ -1518,12 +1520,9 @@ func (s *PolardbService) PolardbAccountStateRefreshFunc(id string, failStates []
 			return nil, "", errmsgs.WrapError(err)
 		}
 
-		for _, failState := range failStates {
-			if object.Accounts.DBInstanceAccount[0].AccountStatus == failState {
+		if slices.Contains(failStates, object.Accounts.DBInstanceAccount[0].AccountStatus) {
 				return object, object.Accounts.DBInstanceAccount[0].AccountStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Accounts.DBInstanceAccount[0].AccountStatus))
 			}
-		}
 		return object, object.Accounts.DBInstanceAccount[0].AccountStatus, nil
 	}
->>>>>>> ea21f90 polardb_database_account fix
 }
