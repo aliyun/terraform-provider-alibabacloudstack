@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -82,26 +83,21 @@ func resourceAlibabacloudStackAlikafkaInstance() *schema.Resource {
 			"vpc_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 				Computed: true,
 			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
-				Computed: true,
 			},
 			"sasl": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:         schema.TypeBool,
+				Optional:     true,
+				AtLeastOneOf: []string{"plaintext"},
 			},
 			"plaintext": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:         schema.TypeBool,
+				Optional:     true,
+				AtLeastOneOf: []string{"sasl"},
 			},
 			"vip_type": {
 				Type:     schema.TypeString,
@@ -121,6 +117,36 @@ func resourceAlibabacloudStackAlikafkaInstance() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
+			},
+			"plaintext_port": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  8080,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					if !d.Get("plaintext").(bool) {
+						return true
+					}
+					return oldValue == newValue
+				},
+				DiffSuppressOnRefresh: true,
+				ValidateFunc:          validation.IntBetween(1, 65535),
+			},
+			"sasl_ssl_port": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      8081,
+				ValidateFunc: validation.IntBetween(1, 65535),
+			},
+			"sasl_plain_port": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      8088,
+				ValidateFunc: validation.IntBetween(1, 65535),
+			},
+			"domain_refiex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9-]{3,20}$"), "Must be 3–20 characters long and contain only letters, numbers, or hyphens (-)."),
 			},
 			"num_partitions": {
 				Type:     schema.TypeInt,
@@ -208,47 +234,50 @@ func resourceAlibabacloudStackAlikafkaInstanceCreate(d *schema.ResourceData, met
 	alikafkaService := AlikafkaService{client}
 	var err error
 
-	createInstanceAction := "CreateInstance"
-	createInstanceResponse := make(map[string]interface{})
-	createInstanceRequest := make(map[string]interface{})
-
-	createInstanceRequest["InstanceName"] = d.Get("name").(string)
-	createInstanceRequest["ZoneId"] = d.Get("zone_id").(string)
+	action := "CreateInstance"
+	response := make(map[string]interface{})
+	requestQuery := map[string]interface{}{
+		"SaslSslPort":   d.Get("sasl_ssl_port"),
+		"SaslPlainPort": d.Get("sasl_plain_port"),
+		"DomainPrefix":  d.Get("domain_refiex"),
+		"InstanceName":  d.Get("name"),
+		"ZoneId":        d.Get("zone_id"),
+	}
 
 	if v, ok := d.GetOk("selected_zones"); ok {
 		zones := v.([]string)
 		if zones[0] == zones[1] {
 			return errmsgs.WrapError(fmt.Errorf("Please select two differencent zones"))
 		}
-		createInstanceRequest["ZoneLength"] = 3
-		createInstanceRequest["InstanceType"] = 3
-		createInstanceRequest["zoneB"] = zones[0]
-		createInstanceRequest["zoneC"] = zones[1]
+		requestQuery["ZoneLength"] = 3
+		requestQuery["InstanceType"] = 3
+		requestQuery["zoneB"] = zones[0]
+		requestQuery["zoneC"] = zones[1]
 	} else {
-		createInstanceRequest["ZoneLength"] = 1
-		createInstanceRequest["InstanceType"] = 1
+		requestQuery["ZoneLength"] = 1
+		requestQuery["InstanceType"] = 1
 	}
 
 	if v, ok := d.GetOk("cup_type"); ok {
-		createInstanceRequest["CpuType"] = v.(string)
+		requestQuery["CpuType"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("spec"); ok {
-		createInstanceRequest["Spec"] = AlikafkaInstanceSpecMap[v.(string)]
+		requestQuery["Spec"] = AlikafkaInstanceSpecMap[v.(string)]
 	}
 
 	if v, ok := d.GetOk("replicas"); ok {
-		createInstanceRequest["Replicas"] = v.(int)
+		requestQuery["Replicas"] = v.(int)
 	}
 
 	if v, ok := d.GetOk("disk_num"); ok {
-		createInstanceRequest["DiskNum"] = v.(int)
+		requestQuery["DiskNum"] = v.(int)
 	}
 
 	if v, ok := d.GetOk("vswitch_id"); ok {
-		createInstanceRequest["VipType"] = "SingleTunnel"
+		requestQuery["VipType"] = "SingleTunnel"
 		if v, ok := d.GetOk("vpc_id"); ok {
-			createInstanceRequest["VpcId"] = v.(string)
+			requestQuery["VpcId"] = v.(string)
 		} else {
 			vpcService := VpcService{client}
 			vswitch, err := vpcService.DescribeVSwitch(d.Get("vswitch_id").(string))
@@ -258,11 +287,11 @@ func resourceAlibabacloudStackAlikafkaInstanceCreate(d *schema.ResourceData, met
 				}
 				return errmsgs.WrapError(err)
 			}
-			createInstanceRequest["VpcId"] = vswitch.VpcId
+			requestQuery["VpcId"] = vswitch.VpcId
 		}
-		createInstanceRequest["VSwitchId"] = v.(string)
+		requestQuery["VSwitchId"] = v.(string)
 	} else {
-		createInstanceRequest["VipType"] = "AnyTunnel"
+		requestQuery["VipType"] = "AnyTunnel"
 	}
 
 	endpointTypes := make([]string, 0)
@@ -271,20 +300,21 @@ func resourceAlibabacloudStackAlikafkaInstanceCreate(d *schema.ResourceData, met
 	}
 	if v, ok := d.GetOk("plaintext"); ok && v.(bool) {
 		endpointTypes = append(endpointTypes, "PLAINTEXT")
+		requestQuery["PlaintextPort"] = d.Get("plaintext_port")
 	}
-	createInstanceRequest["EndpointTypes"] = strings.Join(endpointTypes, ",")
+	requestQuery["EndpointTypes"] = strings.Join(endpointTypes, ",")
 
-	createInstanceResponse, err = client.DoTeaRequest("POST", "alikafka", "2019-09-16", "CreateInstance", "", nil, createInstanceRequest, nil)
+	response, err = client.DoTeaRequest("POST", "alikafka", "2019-09-16", "CreateInstance", "", nil, requestQuery, nil)
 
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alicloud_alikafka_instance", createInstanceAction, errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alicloud_alikafka_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	if fmt.Sprint(createInstanceResponse["Success"]) == "false" {
-		return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", createInstanceAction, createInstanceResponse))
+	if fmt.Sprint(response["Success"]) == "false" {
+		return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
 	}
 
-	d.SetId(fmt.Sprint(createInstanceResponse["instanceId"]))
+	d.SetId(fmt.Sprint(response["instanceId"]))
 
 	// 3. wait until running
 	stateConf := BuildStateConf([]string{}, []string{"5"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, alikafkaService.AliKafkaInstanceStateRefreshFunc(d.Id(), "ServiceStatus", []string{}))
@@ -292,11 +322,13 @@ func resourceAlibabacloudStackAlikafkaInstanceCreate(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	if _, ok := d.GetOk("vswitch_id"); ok {
-		stateConf := BuildStateConf([]string{}, []string{"success"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, alikafkaService.AliKafkaInstanceVipStateRefreshFunc(d.Id(), []string{}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
+	stateConf = BuildStateConf([]string{}, []string{"success"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, alikafkaService.AliKafkaInstanceVipStateRefreshFunc(d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+
+	if err := waitTaskFinished(client, d); err != nil {
+		return err
 	}
 
 	return nil
@@ -345,9 +377,10 @@ func resourceAlibabacloudStackAlikafkaInstanceRead(d *schema.ResourceData, meta 
 	}
 	enabledProtocols := object.VipInfo.EnabledProtocols
 	for _, proto := range enabledProtocols {
-		if proto == "SASL_SSL" {
+		switch proto {
+		case "SASL_SSL":
 			d.Set("sasl", true)
-		} else if proto == "VPC_MODE" {
+		case "VPC_MODE":
 			d.Set("plaintext", true)
 		}
 	}
@@ -368,6 +401,18 @@ func resourceAlibabacloudStackAlikafkaInstanceRead(d *schema.ResourceData, meta 
 	} else {
 		d.Set("plaintext_endpoint", []string{})
 	}
+
+	if v, err := toInt(object.VipInfo.PlaintextPort); err == nil && v != 0 {
+		d.Set("plaintext_port", v)
+	}
+	if v, err := toInt(object.VipInfo.SaslSslPort); err == nil && v != 0 {
+		d.Set("sasl_ssl_port", v)
+	}
+	if v, err := toInt(object.VipInfo.SaslPlainPort); err == nil && v != 0 {
+		d.Set("sasl_plain_port", v)
+	}
+
+	d.Set("domain_refiex", object.VipInfo.DomainPrefix)
 
 	d.Set("status", object.ServiceStatus)
 
@@ -435,72 +480,94 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 		"log.retention.bytes", "replica.fetch.max.bytes", "num.replica.fetchers",
 		"default.replication.factor", "offsets.retention.minutes", "background.threads",
 	}
-	var last_updated_value interface{}
-	last_updated_key := ""
 	for _, configKey := range configKeys {
-		schemaName := strings.Replace(configKey, ".", "_", -1)
+		schemaName := strings.ReplaceAll(configKey, ".", "_")
 		if value, ok := d.GetOk(schemaName); ok && d.HasChange(schemaName) {
-			last_updated_key = schemaName
-			last_updated_value = value
 			log.Printf("[DEBUG] alikafka instance %s config %s changed!!!", d.Id(), schemaName)
-			v := fmt.Sprintf("%v", value)
 			action := "UpdateInstanceConfig"
-			request := make(map[string]interface{}, 0)
-			request["InstanceId"] = d.Id()
-			request["Config"] = configKey
-			request["Value"] = v
+			request := map[string]interface{}{
+				"InstanceId": d.Id(),
+				"Config":     configKey,
+				"Value":      fmt.Sprintf("%v", value),
+			}
 			// Wait for the task to complete if there is a change task
-			if err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
-				response, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", action, "", nil, request, nil)
-				if err != nil {
-					if errmsgs.IsExpectedErrors(err, "already exist task", "A task is being queued for scheduling.") {
-						return resource.RetryableError(err)
-					}
-					return resource.NonRetryableError(err)
-				}
-				if response["Success"].(bool) == false && response["errorType"].(string) == "Business" {
-					return resource.RetryableError(fmt.Errorf("Task Business, retry!"))
-				}
-				return nil
-			}); err != nil {
+			if _, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", action, "", nil, request, nil); err != nil {
 				return err
 			}
-			// Wait for the task to be queryable
-			if err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
-				_, err := alikafkaService.DescribeAlikafkaInstanceConfigMap(d.Id())
-				if err != nil {
-					// Handle exceptions
-					if errmsgs.NotFoundError(err) {
-						return resource.NonRetryableError(err)
-					}
-					return resource.RetryableError(err)
-				}
-				return nil
-			}); err != nil {
+			if err := waitTaskFinished(client, d); err != nil {
 				return err
 			}
 		}
 	}
 
-	if last_updated_key != "" {
-		// Wait for the final state of the change
-		if err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
-			err := resourceAlibabacloudStackAlikafkaInstanceRead(d, meta)
-			if err != nil {
-				// Handle exceptions
-				if errmsgs.NotFoundError(err) || !errmsgs.NeedRetry(err) {
-					return resource.NonRetryableError(err)
+	if d.IsNewResource() {
+		return nil
+	}
+
+	if d.HasChanges("vswitch_id", "sasl", "plaintext", "plaintext_port", "sasl_ssl_port", "sasl_plain_port", "domain_refiex") {
+		stateConf := BuildStateConf([]string{}, []string{"success"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, alikafkaService.AliKafkaInstanceVipStateRefreshFunc(d.Id(), []string{}))
+		requestQuery := map[string]interface{}{
+			"VipAction":  "delete",
+			"InstanceId": d.Id(),
+			"VipType":    d.Get("vip_type"),
+		}
+		if _, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", "ApplyVipInfo", "", nil, requestQuery, nil); err != nil {
+			return err
+		}
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+		if err := waitTaskFinished(client, d); err != nil {
+			return err
+		}
+
+		requestQuery = map[string]interface{}{
+			"SaslSslPort":   d.Get("sasl_ssl_port"),
+			"SaslPlainPort": d.Get("sasl_plain_port"),
+			"DomainPrefix":  d.Get("domain_refiex"),
+			"VipAction":     "create",
+			"InstanceId":    d.Id(),
+		}
+		if v, ok := d.GetOk("vswitch_id"); ok {
+			requestQuery["VipType"] = "SingleTunnel"
+			if v, ok := d.GetOk("vpc_id"); ok {
+				requestQuery["VpcId"] = v.(string)
+			} else {
+				vpcService := VpcService{client}
+				vswitch, err := vpcService.DescribeVSwitch(d.Get("vswitch_id").(string))
+				if err != nil {
+					if errmsgs.NotFoundError(err) {
+						return nil
+					}
+					return errmsgs.WrapError(err)
 				}
-				return resource.RetryableError(err)
+				requestQuery["VpcId"] = vswitch.VpcId
 			}
-			if d.Get(last_updated_key) != last_updated_value {
-				return resource.RetryableError(fmt.Errorf("alikafka_instance updating, retry!"))
-			}
-			return nil
-		}); err != nil {
+			requestQuery["VSwitchId"] = v.(string)
+		} else {
+			requestQuery["VipType"] = "AnyTunnel"
+		}
+
+		endpointTypes := make([]string, 0)
+		if v, ok := d.GetOk("sasl"); ok && v.(bool) {
+			endpointTypes = append(endpointTypes, "SASL")
+		}
+		if v, ok := d.GetOk("plaintext"); ok && v.(bool) {
+			endpointTypes = append(endpointTypes, "PLAINTEXT")
+			requestQuery["PlaintextPort"] = d.Get("plaintext_port")
+		}
+		requestQuery["EndpointTypes"] = strings.Join(endpointTypes, ",")
+		if _, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", "ApplyVipInfo", "", nil, requestQuery, nil); err != nil {
+			return err
+		}
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+		if err := waitTaskFinished(client, d); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -541,4 +608,33 @@ func resourceAlibabacloudStackAlikafkaInstanceDelete(d *schema.ResourceData, met
 	}
 
 	return nil
+}
+
+func waitTaskFinished(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) error {
+	requestQuery := map[string]interface{}{
+		"InstanceId":  d.Id(),
+		"CurrentPage": 1,
+		"PageSize":    10,
+	}
+	err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+		if response, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", "GetScheduledTaskList", "", nil, requestQuery, nil); err != nil {
+			return resource.NonRetryableError(err)
+		} else {
+			data, ok := response["Data"]
+			if !ok || data == nil {
+				return resource.RetryableError(fmt.Errorf("Not Found Instance " + d.Id()))
+			}
+
+			for _, v := range data.([]interface{}) {
+				object := v.(map[string]interface{})
+				if object["taskStatus"].(string) != "SCHEDULED" {
+					return resource.RetryableError(fmt.Errorf(d.Id() + ":A task is being queued for scheduling."))
+				}
+
+			}
+			return nil
+		}
+	})
+
+	return err
 }

@@ -59,7 +59,7 @@ type AlikafkaService struct {
 func (alikafkaService *AlikafkaService) DescribeAlikafkaInstance(instanceId string) (*InstanceVO, error) {
 	alikafkaInstance := &InstanceVO{}
 	action := "GetInstanceList"
-	request := alikafkaService.client.NewCommonRequest("POST", "alikafka", "2019-09-16", action, "")
+	request := alikafkaService.client.NewCommonRequest("GET", "alikafka", "2019-09-16", action, "")
 	request.QueryParams["InstanceId"] = instanceId
 	var bresponse *responses.CommonResponse
 
@@ -88,7 +88,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstance(instanceId stri
 
 func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceConfigMap(instanceId string) (*InstanceConfigMap, error) {
 	action := "GetInstanceConfig"
-	request := alikafkaService.client.NewCommonRequest("POST", "alikafka", "2019-09-16", action, "")
+	request := alikafkaService.client.NewCommonRequest("GET", "alikafka", "2019-09-16", action, "")
 	request.QueryParams["InstanceId"] = instanceId
 	var bresponse *responses.CommonResponse
 	var err error
@@ -270,7 +270,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*AliKa
 	topic := parts[1]
 
 	// request := alikafka.CreateGetTopicListRequest()
-	request := alikafkaService.client.NewCommonRequest("POST", "alikafka", "2019-09-16", "GetTopicList", "")
+	request := alikafkaService.client.NewCommonRequest("GET", "alikafka", "2019-09-16", "GetTopicList", "")
 	request.QueryParams["InstanceId"] = instanceId
 	var bresponse *responses.CommonResponse
 
@@ -310,7 +310,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaSaslUser(id string) (obj
 	}
 
 	var response map[string]interface{}
-	response, err = alikafkaService.client.DoTeaRequest("POST", "alikafka", "2019-09-16", "DescribeSaslUsers", "", nil, reqQuery, nil)
+	response, err = alikafkaService.client.DoTeaRequest("GET", "alikafka", "2019-09-16", "DescribeSaslUsers", "", nil, reqQuery, nil)
 	if err != nil {
 		return object, nil
 	}
@@ -322,7 +322,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaSaslUser(id string) (obj
 
 	for _, v := range data.([]interface{}) {
 		object := v.(map[string]interface{})
-		if object["username"] == username {
+		if object["username"].(string) == username {
 			return object, nil
 		}
 	}
@@ -795,7 +795,7 @@ func (s *AlikafkaService) GetQuotaTip(instanceId string) (object map[string]inte
 	}
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
-		response, err = client.DoTeaRequest("POST", "alikafka", "2019-09-16", action, "", nil, nil, request)
+		response, err = client.DoTeaRequest("GET", "alikafka", "2019-09-16", action, "", nil, nil, request)
 		if err != nil {
 			if errmsgs.NeedRetry(err) {
 				wait()
@@ -875,6 +875,10 @@ type InstanceVO struct {
 		VipMap           map[string]string `json:"VipMap" xml:"VipMap"`
 		VpcId            string            `json:"VpcId" xml:"VpcId"`
 		VswId            string            `json:"VswId" xml:"VswId"`
+		PlaintextPort    string            `json:"plaintextPort" xml:"plaintextPort"`
+		SaslPlainPort    string            `json:"saslPlainPort" xml:"saslPlainPort"`
+		SaslSslPort      string            `json:"saslSslPort" xml:"saslSslPort"`
+		DomainPrefix     string            `json:"domainPrefix" xml:"domainPrefix"`
 	} `json:"VipInfo" xml:"VipInfo"`
 }
 
