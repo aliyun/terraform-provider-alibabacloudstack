@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"errors"
-	"log"
 	"strconv"
 	"time"
 
@@ -36,8 +35,7 @@ func resourceAlibabacloudStackAlikafkaTopic() *schema.Resource {
 			"local_topic": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				ForceNew:    true,
-				Default:     false,
+				Computed:    true,
 				Description: "The 'local_topic' field has been deprecated and is scheduled for removal in version 3.21.0.",
 			},
 			"compact_topic": {
@@ -77,19 +75,9 @@ func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta i
 	client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	request.Topic = topic
-	request.LocalTopic = requests.NewBoolean(d.Get("local_topic").(bool))
+	//	request.LocalTopic = requests.NewBoolean(d.Get("local_topic").(bool))
 	request.CompactTopic = requests.NewBoolean(d.Get("compact_topic").(bool))
 	request.PartitionNum = strconv.Itoa(d.Get("partition_num").(int))
-	log.Printf("------------------ LocalTopic:%t CompactTopic:%t PartitionNum:%d", d.Get("local_topic").(bool), d.Get("local_topic").(bool), d.Get("partition_num").(int))
-	// if v, ok := d.GetOk("local_topic"); ok {
-	// 	request.LocalTopic = requests.NewBoolean(v.(bool))
-	// }
-	// if v, ok := d.GetOk("compact_topic"); ok {
-	// 	request.CompactTopic = requests.NewBoolean(v.(bool))
-	// }
-	// if v, ok := d.GetOk("partition_num"); ok {
-	// 	request.PartitionNum = strconv.Itoa(v.(int))
-	// }
 	if v, ok := d.GetOk("remark"); ok {
 		request.Remark = v.(string)
 	}

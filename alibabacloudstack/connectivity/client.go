@@ -971,7 +971,7 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 		}
 
 		// Timeout or transient errors
-		if errmsgs.IsExpectedErrors(err,  errmsgs.ThrottlingUser, errmsgs.Throttling, errmsgs.LogClientTimeout, "LockTimeout", "RequestTimeout", "asapi.server.timeout.socket") {
+		if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, errmsgs.Throttling, errmsgs.LogClientTimeout, "ONS_SYSTEM_FLOW_CONTROL", "LockTimeout", "RequestTimeout", "asapi.server.timeout.socket") {
 			return resource.RetryableError(err), retryTimes
 		}
 

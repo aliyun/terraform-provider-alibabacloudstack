@@ -92,11 +92,10 @@ func resourceAlibabacloudStackAlikafkaInstance() *schema.Resource {
 				Computed: true,
 			},
 			"sasl": {
-				Type:         schema.TypeBool,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				AtLeastOneOf: []string{"sasl", "plaintext"},
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 			"plaintext": {
 				Type:     schema.TypeBool,
@@ -275,16 +274,7 @@ func resourceAlibabacloudStackAlikafkaInstanceCreate(d *schema.ResourceData, met
 	}
 	createInstanceRequest["EndpointTypes"] = strings.Join(endpointTypes, ",")
 
-	err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutCreate)), func() *resource.RetryError {
-		createInstanceResponse, err = client.DoTeaRequest("POST", "alikafka", "2019-09-16", "CreateInstance", "", nil, createInstanceRequest, nil)
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, "ONS_SYSTEM_FLOW_CONTROL") || errmsgs.NeedRetry(err) {
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
+	createInstanceResponse, err = client.DoTeaRequest("POST", "alikafka", "2019-09-16", "CreateInstance", "", nil, createInstanceRequest, nil)
 
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alicloud_alikafka_instance", createInstanceAction, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -303,7 +293,7 @@ func resourceAlibabacloudStackAlikafkaInstanceCreate(d *schema.ResourceData, met
 	}
 
 	if _, ok := d.GetOk("vswitch_id"); ok {
-		stateConf := BuildStateConf([]string{}, []string{"create"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, alikafkaService.AliKafkaInstanceVipStateRefreshFunc(d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{}, []string{"success"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, alikafkaService.AliKafkaInstanceVipStateRefreshFunc(d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}

@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/alikafka"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAlikafkaSaslAcl_basic(t *testing.T) {
-
-	var v *alikafka.KafkaAclList
+	var v map[string]interface{}
 	resourceId := "alibabacloudstack_alikafka_sasl_acl.default"
 	ra := resourceAttrInit(resourceId, alikafkaSaslAclBasicMap)
 	serviceFunc := func() interface{} {
@@ -43,7 +41,7 @@ func TestAccAlibabacloudStackAlikafkaSaslAcl_basic(t *testing.T) {
 					"acl_resource_type":         "Topic",
 					"acl_resource_name":         "${alibabacloudstack_alikafka_topic.default.topic}",
 					"acl_resource_pattern_type": "LITERAL",
-					"acl_operation_type":        "Write",
+					"acl_operation_type":        "WRITE",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -72,11 +70,11 @@ func TestAccAlibabacloudStackAlikafkaSaslAcl_basic(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"acl_operation_type": "Read",
+					"acl_operation_type": "READ",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"acl_operation_type": "Read",
+						"acl_operation_type": "READ",
 					}),
 				),
 			},
@@ -127,5 +125,5 @@ var alikafkaSaslAclBasicMap = map[string]string{
 	"acl_resource_type":         "Topic",
 	"acl_resource_name":         "${var.name}",
 	"acl_resource_pattern_type": "LITERAL",
-	"acl_operation_type":        "Write",
+	"acl_operation_type":        "WRITE",
 }
