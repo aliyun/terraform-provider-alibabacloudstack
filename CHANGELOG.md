@@ -1,3 +1,11 @@
+# 3.16.23
+
+## New
+
+1. Support configuring parameter templates when creating PolarDB.
+
+---
+
 # 3.16.22
 
 ## Fixes
