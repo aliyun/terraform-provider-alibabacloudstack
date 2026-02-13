@@ -86,8 +86,6 @@ func TestAccAlibabacloudStackCSBService_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"project_id":    "${alibabacloudstack_csb_project.default.1.project_id}",
 					"alias":         "${var.name}_alias",
-					"service_name":         "${var.name}_update",
-					"all_visiable":  false,
 					"scope":         "0",
 					"consume_types": []string{"Restful"},
 					"provide_type":  "Restful",
@@ -116,8 +114,7 @@ func TestAccAlibabacloudStackCSBService_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"alias":        name + "_alias",
-						"service_name": name + "_update",
+						"alias": name + "_alias",
 					}),
 				),
 			},

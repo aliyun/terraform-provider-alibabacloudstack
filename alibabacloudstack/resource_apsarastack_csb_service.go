@@ -399,6 +399,13 @@ func convertDataString(d *schema.ResourceData) (string, error) {
 	data := make(map[string]interface{})
 
 	data["serviceVersion"] = d.Get("service_version").(string)
+
+	if v, ok := d.GetOk("service_id"); ok && v.(string) != "" {
+		if id, err := toInt(v); err == nil {
+			data["id"] = id
+		}
+	}
+
 	data["serviceName"] = d.Get("service_name").(string)
 	data["projectId"] = d.Get("project_id").(string)
 
