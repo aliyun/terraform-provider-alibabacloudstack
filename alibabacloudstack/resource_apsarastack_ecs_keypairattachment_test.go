@@ -65,7 +65,7 @@ func TestAccAlibabacloudStackKeyPairAttachmentBasic(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccKeyPairAttachment%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccKeyPairAttachmentConfigBasic)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

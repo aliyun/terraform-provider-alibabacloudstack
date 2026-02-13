@@ -948,6 +948,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_data_works_user":                                 resourceAlibabacloudStackDataWorksUser(),
 		"alibabacloudstack_data_works_project":                              resourceAlibabacloudStackDataWorksProject(),
 		"alibabacloudstack_data_works_user_role_binding":                    resourceAlibabacloudStackDataWorksUserRoleBinding(),
+		"alibabacloudstack_data_works_baseline":                             resourceAlibabacloudStackDataWorksBaseline(),
 		"alibabacloudstack_data_works_remind":                               resourceAlibabacloudStackDataWorksRemind(),
 		"alibabacloudstack_elasticsearch_instance":                          resourceAlibabacloudStackElasticsearch(),
 		"alibabacloudstack_dbs_backup_plan":                                 resourceAlibabacloudStackDbsBackupPlan(),

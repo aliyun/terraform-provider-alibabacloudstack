@@ -319,3 +319,37 @@ func (s *DataworksService) GetFolderPath(id string) (path string, err error) {
 	parts[2] = strings.TrimPrefix(parts[2], "folder")
 	return strings.Join(parts, "/"), nil
 }
+
+
+func (s *DataworksService) DescribeDataWorksBaseline(id string) (object map[string]interface{}, err error) {
+	parts, err := ParseResourceId(id, 2)
+	if err != nil {
+		return object, err
+	}
+
+	request := map[string]interface{}{
+		"BaselineId": parts[1],
+		"ProjectId":  parts[0],
+	}
+
+
+	response, err := s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetBaseline", "", nil, nil, request)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "The baseline does not exist.") {
+			return object, errmsgs.GetNotFoundErrorFromString("Not Found Baseline "+ id)
+		}
+		return object, errmsgs.WrapError(err)
+	}
+
+	data, exists := response["Data"]
+	if !exists {
+		return object, errmsgs.GetNotFoundErrorFromString("Not Found Baseline "+ id)
+	}
+
+	dataMap, ok := data.(map[string]interface{})
+	if !ok {
+		return object, errmsgs.GetNotFoundErrorFromString("Not Found Baseline "+ id)
+	}
+	
+	return dataMap, nil
+}
