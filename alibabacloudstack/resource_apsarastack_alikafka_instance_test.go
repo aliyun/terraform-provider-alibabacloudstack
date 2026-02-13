@@ -85,6 +85,18 @@ func TestAccAlibabacloudStackAlikafkaInstance_basic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
+					"plaintext":  true,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vpc_id":    CHECKSET,
+						"plaintext": "true",
+					}),
+				),
+			},
 		},
 	})
 }
