@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"slices"
 	"strconv"
 	"strings"
@@ -121,7 +122,7 @@ func (s *DataworksService) DescribeDataWorksUser(id string) (object map[string]i
 			return object, nil
 		}
 	}
-	return object , errmsgs.GetNotFoundErrorFromString("User " + id + " not existed.")
+	return object, errmsgs.GetNotFoundErrorFromString("User " + id + " not existed.")
 
 }
 
@@ -261,4 +262,60 @@ func (s *DataworksService) DescribeDataWorksBusiness(id string) (object map[stri
 		return object, errmsgs.GetNotFoundErrorFromString("Business " + id + " not existed.")
 	}
 	return object, nil
+}
+
+func (s *DataworksService) DescribeDataWorksFile(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	parts, err := ParseResourceId(id, 2)
+	if err != nil {
+		err = errmsgs.WrapError(err)
+		return
+	}
+	request := map[string]interface{}{
+		"ProjectId": parts[0],
+		"FileId":    parts[1],
+	}
+	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetFile", "", nil, nil, request)
+	if err != nil {
+		return object, err
+	}
+	v, err := jsonpath.Get("$.Data", response)
+	if err != nil {
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Data", response)
+	}
+	object = v.(map[string]interface{})
+	if len(object) < 1 {
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("dataworks", id)), errmsgs.NotFoundWithResponse, response)
+	}
+	return object, nil
+}
+
+func (s *DataworksService) GetFolderPath(id string) (path string, err error) {
+	var response map[string]interface{}
+	parts, err := ParseResourceId(id, 2)
+	if err != nil {
+		err = errmsgs.WrapError(err)
+		return
+	}
+	request := map[string]interface{}{
+		"FolderId":  parts[1],
+		"ProjectId": parts[0],
+	}
+	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetFolder", "", nil, nil, request)
+	if err != nil {
+		return
+	}
+	v, err := jsonpath.Get("$.Data", response)
+	if err != nil {
+		return
+	}
+	object := v.(map[string]interface{})
+	parts = strings.SplitN(object["FolderPath"].(string), "/", 3)
+
+	if len(parts) != 3 {
+		return "", errmsgs.WrapError(fmt.Errorf("Invalid Folder Path %s.", object["FolderPath"].(string)))
+	}
+	parts[0] = "业务流程"
+	parts[2] = strings.TrimPrefix(parts[2], "folder")
+	return strings.Join(parts, "/"), nil
 }

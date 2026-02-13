@@ -36,7 +36,7 @@ func resourceAlibabacloudStackDataWorksFolder() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"full_path" : {
+			"full_path": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -68,11 +68,11 @@ func resourceAlibabacloudStackDataWorksFolderCreate(d *schema.ResourceData, meta
 
 func resourceAlibabacloudStackDataWorksFolderRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	dataworksPublicService := DataworksService{client}
-	object, err := dataworksPublicService.DescribeDataWorksFolder(d.Id())
+	dataworksService := DataworksService{client}
+	_, err := dataworksService.DescribeDataWorksFolder(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
-			log.Printf("[DEBUG] Resource alibabacloudstack_data_works_folder dataworksPublicService.DescribeDataWorksFolder Failed!!! %s", err)
+			log.Printf("[DEBUG] Resource alibabacloudstack_data_works_folder Not Found %s", err)
 			d.SetId("")
 			return nil
 		}
@@ -81,26 +81,27 @@ func resourceAlibabacloudStackDataWorksFolderRead(d *schema.ResourceData, meta i
 	parts, _ := ParseResourceId(d.Id(), 2)
 	d.Set("project_id", parts[0])
 	d.Set("folder_id", parts[1])
-	parts = strings.SplitN(object["FolderPath"].(string), "/", 4)
+
+	path, err := dataworksService.GetFolderPath(d.Id())
+	if err != nil {
+		return err
+	}
+	parts = strings.SplitN(path, "/", 4)
 
 	if len(parts) != 4 {
-		return errmsgs.WrapError(fmt.Errorf("Invalid Folder Path %s.", object["FolderPath"].(string)))
+		return errmsgs.WrapError(fmt.Errorf("Invalid Folder Path %s.", parts))
 	}
 	d.Set("business_name", parts[1])
-	if strings.HasPrefix(parts[2], "folder") {
-		d.Set("engine_type", strings.TrimPrefix(parts[2], "folder"))
-	} else {
-		d.Set("engine_type", parts[2])
-	}
+	d.Set("engine_type", parts[2])
 	d.Set("folder_path", parts[3])
-	d.Set("full_path", getDataworksFolderPath(d))
+	d.Set("full_path", path)
 
 	return nil
 }
 
 func resourceAlibabacloudStackDataWorksFolderUpdate(d *schema.ResourceData, meta interface{}) error {
 	if err := noUpdatesAllowedCheck(d, []string{"business_name", "engine_type", "folder_path"}); err != nil {
-		return err 
+		return err
 	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	if d.IsNewResource() {

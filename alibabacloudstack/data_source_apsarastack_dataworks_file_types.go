@@ -81,7 +81,7 @@ func dataSourceAlibabacloudStackDataWorksFileTypesRead(d *schema.ResourceData, m
 
 	for {
 		reqQuery["PageNumber"] = pageNum
-		response, err := client.DoTeaRequest("GET", "dataworks-public", "2020-05-18", "ListFileType", "", nil, reqQuery, nil)
+		response, err := client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "ListFileType", "", nil, reqQuery, nil)
 		if err != nil {
 			return err
 		}
