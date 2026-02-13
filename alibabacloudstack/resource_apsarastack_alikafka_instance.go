@@ -322,11 +322,6 @@ func resourceAlibabacloudStackAlikafkaInstanceCreate(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	stateConf = BuildStateConf([]string{}, []string{"success"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, alikafkaService.AliKafkaInstanceVipStateRefreshFunc(d.Id(), []string{}))
-	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
-
 	if err := waitTaskFinished(client, d); err != nil {
 		return err
 	}
@@ -472,7 +467,6 @@ func resourceAlibabacloudStackAlikafkaInstanceRead(d *schema.ResourceData, meta 
 
 func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	alikafkaService := AlikafkaService{client}
 
 	var configKeys = []string{"message.max.bytes", "num.partitions",
 		"auto.create.topics.enable", "num.io.threads", "queued.max.requests",
@@ -505,7 +499,6 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 	}
 
 	if d.HasChanges("vswitch_id", "sasl", "plaintext", "plaintext_port", "sasl_ssl_port", "sasl_plain_port", "domain_refiex") {
-		stateConf := BuildStateConf([]string{}, []string{"success"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, alikafkaService.AliKafkaInstanceVipStateRefreshFunc(d.Id(), []string{}))
 		requestQuery := map[string]interface{}{
 			"VipAction":  "delete",
 			"InstanceId": d.Id(),
@@ -513,9 +506,6 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 		}
 		if _, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", "ApplyVipInfo", "", nil, requestQuery, nil); err != nil {
 			return err
-		}
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 		if err := waitTaskFinished(client, d); err != nil {
 			return err
@@ -559,9 +549,6 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 		requestQuery["EndpointTypes"] = strings.Join(endpointTypes, ",")
 		if _, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", "ApplyVipInfo", "", nil, requestQuery, nil); err != nil {
 			return err
-		}
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 		if err := waitTaskFinished(client, d); err != nil {
 			return err
@@ -611,6 +598,7 @@ func resourceAlibabacloudStackAlikafkaInstanceDelete(d *schema.ResourceData, met
 }
 
 func waitTaskFinished(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) error {
+	time.Sleep(30 * time.Second)
 	requestQuery := map[string]interface{}{
 		"InstanceId":  d.Id(),
 		"CurrentPage": 1,

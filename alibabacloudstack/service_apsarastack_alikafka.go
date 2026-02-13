@@ -765,26 +765,6 @@ func (s *AlikafkaService) AliKafkaInstanceStateRefreshFunc(id, attribute string,
 	}
 }
 
-func (s *AlikafkaService) AliKafkaInstanceVipStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DescribeAlikafkaInstance(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		state := object.VipInfo.ActionStatus
-
-		if slices.Contains(failStates, state) {
-			return object, state, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(state)))
-		}
-		return object, state, nil
-	}
-}
-
 func (s *AlikafkaService) GetQuotaTip(instanceId string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	client := s.client
