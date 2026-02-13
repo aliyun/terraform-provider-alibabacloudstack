@@ -36,6 +36,10 @@ func resourceAlibabacloudStackDataWorksFolder() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"full_path" : {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackDataWorksFolderCreate, resourceAlibabacloudStackDataWorksFolderRead, resourceAlibabacloudStackDataWorksFolderUpdate, resourceAlibabacloudStackDataWorksFolderDelete)
@@ -89,6 +93,7 @@ func resourceAlibabacloudStackDataWorksFolderRead(d *schema.ResourceData, meta i
 		d.Set("engine_type", parts[2])
 	}
 	d.Set("folder_path", parts[3])
+	d.Set("full_path", getDataworksFolderPath(d))
 
 	return nil
 }
