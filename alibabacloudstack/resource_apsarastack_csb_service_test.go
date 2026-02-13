@@ -47,14 +47,12 @@ func TestAccAlibabacloudStackCSBService_basic(t *testing.T) {
 					    importConf = {
 					      provideType         = "Restful"
 					      accessEndpointJSON  = jsonencode({
-							maxCountScan   = null
 					        endpoint         = "http://127.0.0.1:8086/monitor/status.1688"
 					        method           = "POST"
 					        requestFormat    = "JSON"
 					        requestTimeout   = 30000
 					        responseFormat   = "passThrough"
 					        traceEnabled     = false
-					        maxCountScan     = null
 					      })
 					      inputParameterMap  = []
 					      outputParameterMap = []
@@ -88,8 +86,7 @@ func TestAccAlibabacloudStackCSBService_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"project_id":    "${alibabacloudstack_csb_project.default.1.project_id}",
 					"alias":         "${var.name}_alias",
-					"service_name":  "${var.name}_update",
-					"skip_auth":     true,
+					"service_name":         "${var.name}_update",
 					"all_visiable":  false,
 					"scope":         "0",
 					"consume_types": []string{"Restful"},
@@ -99,7 +96,6 @@ func TestAccAlibabacloudStackCSBService_basic(t *testing.T) {
 					    importConf = {
 					      provideType = "Restful"
 					      accessEndpointJSON = jsonencode({
-							maxCountScan   = null
 					        endpoint       = "http://127.0.0.1:8087/monitor/status.1688"
 					        method         = "POST"
 					        requestFormat  = "JSON"

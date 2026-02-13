@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html"
@@ -77,17 +78,21 @@ func resourceAlibabacloudStackCsbService() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: validation.StringInSlice([]string{"Restful", "WebService"}, false),
+					ValidateFunc: validation.StringInSlice([]string{"Restful", "WebService"}, true),
 				},
-				Description: "List of consume types, e.g., ['Restful'].",
-				MinItems:    1,
+				Description:           "List of consume types, e.g., ['Restful'].",
+				MinItems:              1,
+				DiffSuppressFunc:      ignoreCaseDiffSuppressFunc,
+				DiffSuppressOnRefresh: true,
 			},
 			"provide_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "Restful",
-				ValidateFunc: validation.StringInSlice([]string{"RESTful", "SpringCloud", "HSF", "WebService", "DUBBO", "JDBC"}, false),
-				Description:  "The provide type of the service.",
+				Type:                  schema.TypeString,
+				Optional:              true,
+				Default:               "Restful",
+				ValidateFunc:          validation.StringInSlice([]string{"RESTful", "SpringCloud", "HSF", "WebService", "DUBBO", "JDBC"}, true),
+				Description:           "The provide type of the service.",
+				DiffSuppressFunc:      ignoreCaseDiffSuppressFunc,
+				DiffSuppressOnRefresh: true,
 			},
 			"cas_serv_targets": {
 				Type:        schema.TypeList,
@@ -172,11 +177,64 @@ func resourceAlibabacloudStackCsbService() *schema.Resource {
 					if oldValue == newValue {
 						return true
 					}
-					if v, err := compareJsonTemplateAreEquivalent(oldValue, newValue); err != nil {
+
+					var oldObj, newObj map[string]interface{}
+					if err := json.Unmarshal([]byte(oldValue), &oldObj); err != nil {
 						return false
-					} else {
-						return v
 					}
+					if err := json.Unmarshal([]byte(newValue), &newObj); err != nil {
+						return false
+					}
+
+					// Helper to safely get accessEndpointJSON string from importConf
+					getAccessJSON := func(obj map[string]interface{}) (string, bool) {
+						if imp, ok := obj["importConf"].(map[string]interface{}); ok {
+							if val, exists := imp["accessEndpointJSON"]; exists {
+								if s, ok := val.(string); ok {
+									return s, true
+								}
+							}
+						}
+						return "", false
+					}
+
+					oldAccessStr, hasOld := getAccessJSON(oldObj)
+					newAccessStr, hasNew := getAccessJSON(newObj)
+
+					// If both have accessEndpointJSON, compare as JSON
+					if hasOld && hasNew {
+						var oldAccess, newAccess interface{}
+						if err := json.Unmarshal([]byte(oldAccessStr), &oldAccess); err != nil {
+							return false
+						}
+						if err := json.Unmarshal([]byte(newAccessStr), &newAccess); err != nil {
+							return false
+						}
+						b1, _ := json.Marshal(oldAccess)
+						b2, _ := json.Marshal(newAccess)
+						if !bytes.Equal(b1, b2) {
+							return false
+						}
+					} else if hasOld != hasNew {
+						// One has it, the other doesn't
+						return false
+					}
+
+					// Remove accessEndpointJSON from both for outer comparison
+					if imp, ok := oldObj["importConf"].(map[string]interface{}); ok {
+						delete(imp, "accessEndpointJSON")
+					}
+					if imp, ok := newObj["importConf"].(map[string]interface{}); ok {
+						delete(imp, "accessEndpointJSON")
+					}
+
+					// Compare the rest of the structure
+					b1, err1 := json.Marshal(oldObj)
+					b2, err2 := json.Marshal(newObj)
+					if err1 != nil || err2 != nil {
+						return false
+					}
+					return bytes.Equal(b1, b2)
 				},
 				DiffSuppressOnRefresh: true,
 			},

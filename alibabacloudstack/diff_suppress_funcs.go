@@ -407,3 +407,7 @@ func rdsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	}
 	return true
 }
+
+func ignoreCaseDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	return strings.EqualFold(old, new)
+}
