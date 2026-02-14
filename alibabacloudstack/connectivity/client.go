@@ -395,7 +395,7 @@ func (client *AlibabacloudStackClient) getSdkConfig() *sdk.Config {
 	return sdk.NewConfig().
 		WithMaxRetryTime(DefaultClientRetryCountSmall).
 		WithTimeout(time.Duration(30) * time.Second).
-		WithEnableAsync(false).
+		WithEnableAsync(true).
 		WithGoRoutinePoolSize(100).
 		WithMaxTaskQueueSize(10000).
 		WithDebug(false).
