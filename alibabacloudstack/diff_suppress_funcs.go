@@ -408,6 +408,15 @@ func rdsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	return true
 }
 
+func remindTypeDiffSuppressFunc (remindType string) func(string,string, string,  *schema.ResourceData) bool {
+	return func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		if d.Get("remind_unit").(string) != remindType {
+			return true
+		}
+		return oldValue == newValue
+	}
+}
+
 func ignoreCaseDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	return strings.EqualFold(old, new)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -46,20 +47,42 @@ func resourceAlibabacloudStackDataWorksRemind() *schema.Resource {
 				Default:  "00:00",
 			},
 			"node_ids": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:                  schema.TypeSet,
+				Elem:                  &schema.Schema{Type: schema.TypeString},
+				MinItems:              1,
+				Optional:              true,
+				ConflictsWith:         []string{"baseline_ids", "project_id", "biz_process_ids"},
+				AtLeastOneOf:          []string{"baseline_ids", "project_id", "biz_process_ids"},
+				DiffSuppressFunc:      remindTypeDiffSuppressFunc("NODE"),
+				DiffSuppressOnRefresh: true,
 			},
 			"baseline_ids": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:                  schema.TypeSet,
+				Elem:                  &schema.Schema{Type: schema.TypeString},
+				MinItems:              1,
+				Optional:              true,
+				ConflictsWith:         []string{"node_ids", "project_id", "biz_process_ids"},
+				AtLeastOneOf:          []string{"node_ids", "project_id", "biz_process_ids"},
+				DiffSuppressFunc:      remindTypeDiffSuppressFunc("BASELINE"),
+				DiffSuppressOnRefresh: true,
 			},
 			"project_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:                  schema.TypeString,
+				Optional:              true,
+				ConflictsWith:         []string{"node_ids", "baseline_ids", "biz_process_ids"},
+				AtLeastOneOf:          []string{"node_ids", "baseline_ids", "biz_process_ids"},
+				DiffSuppressFunc:      remindTypeDiffSuppressFunc("PROJECT"),
+				DiffSuppressOnRefresh: true,
 			},
 			"biz_process_ids": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:                  schema.TypeSet,
+				Elem:                  &schema.Schema{Type: schema.TypeString},
+				MinItems:              1,
+				Optional:              true,
+				ConflictsWith:         []string{"node_ids", "baseline_ids", "project_id"},
+				AtLeastOneOf:          []string{"node_ids", "baseline_ids", "project_id"},
+				DiffSuppressFunc:      remindTypeDiffSuppressFunc("BIZPROCESS"),
+				DiffSuppressOnRefresh: true,
 			},
 			"max_alert_times": {
 				Type:         schema.TypeInt,
@@ -79,16 +102,21 @@ func resourceAlibabacloudStackDataWorksRemind() *schema.Resource {
 				Default:  "",
 			},
 			"alert_methods": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				MinItems: 1,
 				Optional: true,
 			},
 			"alert_targets": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				MinItems: 1,
 				Optional: true,
-				Default:  "",
 			},
 			"robot_urls": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				MinItems: 1,
 				Optional: true,
 			},
 			"use_flag": {
@@ -108,7 +136,63 @@ var RemindType string
 func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "CreateRemind"
-	request := buildRemindArgs(d)
+	request := make(map[string]interface{})
+	if v, ok := d.GetOk("alert_unit"); ok {
+		request["AlertUnit"] = v.(string)
+		var list []string
+		for _, vv := range d.Get("alert_targets").(*schema.Set).List() {
+			list = append(list, vv.(string))
+		}
+		request["AlertTargets"] = strings.Join(list, ",")
+	}
+
+	if v, ok := d.GetOk("remind_name"); ok {
+		request["RemindName"] = v.(string)
+	}
+
+	if v, ok := d.GetOk("remind_type"); ok {
+		RemindType = v.(string)
+		request["RemindType"] = RemindType
+	}
+
+	if v, ok := d.GetOk("remind_unit"); ok {
+		RemindUnit = v.(string)
+		request["RemindUnit"] = RemindUnit
+	}
+
+	if v, ok := d.GetOk("dnd_end"); ok {
+		request["DndEnd"] = v.(string)
+	}
+
+	buildRemindUnitArgs(d, request)
+
+	if v, ok := d.GetOk("max_alert_times"); ok {
+		request["MaxAlertTimes"] = v.(int)
+	}
+
+	if v, ok := d.GetOk("alert_interval"); ok {
+		request["AlertInterval"] = v.(int)
+	}
+
+	if v, ok := d.GetOk("detail"); ok {
+		request["Detail"] = v.(string)
+	}
+
+	if v, ok := d.GetOk("alert_methods"); ok {
+		var list []string
+		for _, vv := range v.(*schema.Set).List() {
+			list = append(list, vv.(string))
+		}
+		request["AlertMethods"] = strings.Join(list, ",")
+	}
+
+	if v, ok := d.GetOk("robot_urls"); ok {
+		var list []string
+		for _, vv := range v.(*schema.Set).List() {
+			list = append(list, vv.(string))
+		}
+		request["RobotUrls"] = strings.Join(list, ",")
+	}
 
 	response, err := client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
@@ -138,7 +222,7 @@ func resourceAlibabacloudStackDataWorksRemindRead(d *schema.ResourceData, meta i
 	}
 
 	for key, value := range object {
-		fmt.Println(key, value)
+		log.Println(key, value)
 	}
 
 	d.Set("remind_id", d.Id())
@@ -148,13 +232,40 @@ func resourceAlibabacloudStackDataWorksRemindRead(d *schema.ResourceData, meta i
 	d.Set("remind_unit", object["RemindUnit"].(string))
 	d.Set("dnd_end", object["DndEnd"].(string))
 
-	d.Set("baseline_ids", getObjectListToString(object, "Baselines", "BaselineId"))
-	d.Set("node_ids", getObjectListToString(object, "Nodes", "NodeId"))
-	d.Set("biz_process_ids", getObjectListToString(object, "BizProcesses", "BizId"))
+	d.Set("node_ids", nil)
+	d.Set("baseline_ids", nil)
+	d.Set("project_id", nil)
+	d.Set("biz_process_ids", nil)
+	switch object["RemindUnit"].(string) {
+	case "NODE":
+		var nodes []string
+		for _, v := range object["Nodes"].([]interface{}) {
+			item := v.(map[string]interface{})
+			nodes = append(nodes, item["NodeId"].(string))
+		}
+		d.Set("node_ids", nodes)
+	case "BASELINE":
+		var baselines []string
+		for _, v := range object["Baselines"].([]interface{}) {
+			item := v.(map[string]interface{})
+			if id, err := toInt(item["BaselineId"]); err == nil {
+				baselines = append(baselines, strconv.Itoa(id))
 
-	if len(object["Projects"].([]interface{})) > 0 {
-		projectId := object["Projects"].([]interface{})[0].(map[string]interface{})["ProjectId"].(json.Number)
-		d.Set("project_id", fmt.Sprint(projectId))
+			}
+		}
+		d.Set("baseline_ids", baselines)
+	case "PROJECT":
+		if len(object["Projects"].([]interface{})) > 0 {
+			projectId := object["Projects"].([]interface{})[0].(map[string]interface{})["ProjectId"].(json.Number)
+			d.Set("project_id", fmt.Sprint(projectId))
+		}
+	case "BIZPROCESS":
+		var bizIds []string
+		for _, v := range object["BizProcesses"].([]interface{}) {
+			item := v.(map[string]interface{})
+			bizIds = append(bizIds, item["BizId"].(string))
+		}
+		d.Set("biz_process_ids", bizIds)
 	}
 
 	d.Set("max_alert_times", object["MaxAlertTimes"].(json.Number))
@@ -166,9 +277,14 @@ func resourceAlibabacloudStackDataWorksRemindRead(d *schema.ResourceData, meta i
 		d.Set("detail", object["Detail"].(string))
 	}
 
-	d.Set("alert_methods", getObjectListToString(object, "AlertMethods", ""))
-	d.Set("alert_targets", getObjectListToString(object, "AlertTargets", ""))
-	d.Set("robot_urls", getObjectListToString(object, "Robots", "WebUrl"))
+	d.Set("alert_methods", object["AlertMethods"])
+	d.Set("alert_targets", object["AlertTargets"])
+	var ruls []string
+	for _, v := range object["Robots"].([]interface{}) {
+		item := v.(map[string]interface{})
+		ruls = append(ruls, item["WebUrl"].(string))
+	}
+	d.Set("robot_urls", ruls)
 	d.Set("use_flag", object["Useflag"].(bool))
 
 	return nil
@@ -211,11 +327,19 @@ func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta
 
 	if d.HasChange("alert_unit") {
 		request["AlertUnit"] = d.Get("alert_unit").(string)
-		request["AlertTargets"] = d.Get("alert_targets").(string)
+		var list []string
+		for _, vv := range d.Get("alert_targets").(*schema.Set).List() {
+			list = append(list, vv.(string))
+		}
+		request["AlertTargets"] = strings.Join(list, ",")
 	}
 
 	if d.HasChange("alert_methods") {
-		request["AlertMethods"] = d.Get("alert_methods").(string)
+		var list []string
+		for _, vv := range d.Get("alert_methods").(*schema.Set).List() {
+			list = append(list, vv.(string))
+		}
+		request["AlertMethods"] = strings.Join(list, ",")
 	}
 
 	if d.HasChange("use_flag") {
@@ -223,7 +347,11 @@ func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta
 	}
 
 	if d.HasChange("robot_urls") {
-		request["RobotUrls"] = d.Get("robot_urls").(string)
+		var list []string
+		for _, vv := range d.Get("robot_urls").(*schema.Set).List() {
+			list = append(list, vv.(string))
+		}
+		request["RobotUrls"] = strings.Join(list, ",")
 	}
 
 	action := "UpdateRemind"
@@ -249,87 +377,27 @@ func resourceAlibabacloudStackDataWorksRemindDelete(d *schema.ResourceData, meta
 	return nil
 }
 
-func buildRemindArgs(d *schema.ResourceData) map[string]interface{} {
-	request := make(map[string]interface{})
-	if v, ok := d.GetOk("alert_unit"); ok {
-		request["AlertUnit"] = v.(string)
-		request["AlertTargets"] = d.Get("alert_targets").(string)
-	}
-
-	if v, ok := d.GetOk("remind_name"); ok {
-		request["RemindName"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("remind_type"); ok {
-		RemindType = v.(string)
-		request["RemindType"] = RemindType
-	}
-
-	if v, ok := d.GetOk("remind_unit"); ok {
-		RemindUnit = v.(string)
-		request["RemindUnit"] = RemindUnit
-	}
-
-	if v, ok := d.GetOk("dnd_end"); ok {
-		request["DndEnd"] = v.(string)
-	}
-
-	buildRemindUnitArgs(d, request)
-
-	if v, ok := d.GetOk("max_alert_times"); ok {
-		request["MaxAlertTimes"] = v.(int)
-	}
-
-	if v, ok := d.GetOk("alert_interval"); ok {
-		request["AlertInterval"] = v.(int)
-	}
-
-	if v, ok := d.GetOk("detail"); ok {
-		request["Detail"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("alert_methods"); ok {
-		request["AlertMethods"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("robot_urls"); ok {
-		request["RobotUrls"] = v.(string)
-	}
-
-	return request
-}
-
 func buildRemindUnitArgs(d *schema.ResourceData, request map[string]interface{}) {
-	if RemindUnit == "NODE" {
-		request["NodeIds"] = d.Get("node_ids").(string)
-	} else if RemindUnit == "BASELINE" {
-		request["BaselineIds"] = d.Get("baseline_ids").(string)
-	} else if RemindUnit == "PROJECT" {
+	switch RemindUnit {
+	case "NODE":
+		var list []string
+		for _, v := range d.Get("node_ids").(*schema.Set).List() {
+			list = append(list, v.(string))
+		}
+		request["NodeIds"] = strings.Join(list, ",")
+	case "BASELINE":
+		var list []string
+		for _, v := range d.Get("baseline_ids").(*schema.Set).List() {
+			list = append(list, v.(string))
+		}
+		request["BaselineIds"] = strings.Join(list, ",")
+	case "PROJECT":
 		request["ProjectId"] = d.Get("project_id").(string)
-	} else if RemindUnit == "BIZPROCESS" {
-		request["BizProcessIds"] = d.Get("biz_process_ids").(string)
-	}
-}
-
-func getObjectListToString(object map[string]interface{}, listName string, mapKey string) string {
-	var s string
-	if len(mapKey) == 0 {
-		for i, k := range object[listName].([]interface{}) {
-			if i == 0 {
-				s = fmt.Sprintf("%s", k)
-			} else {
-				s = fmt.Sprintf("%s,%s", s, k)
-			}
+	case "BIZPROCESS":
+		var list []string
+		for _, v := range d.Get("biz_process_ids").(*schema.Set).List() {
+			list = append(list, v.(string))
 		}
-	} else {
-		for i, k := range object[listName].([]interface{}) {
-			if i == 0 {
-				s = fmt.Sprintf("%s", k.(map[string]interface{})[mapKey])
-			} else {
-				s = fmt.Sprintf("%s,%s", s, k.(map[string]interface{})[mapKey])
-			}
-		}
+		request["BizProcessIds"] = strings.Join(list, ",")
 	}
-
-	return s
 }
