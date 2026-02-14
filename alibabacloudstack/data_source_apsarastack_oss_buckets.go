@@ -113,6 +113,13 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 
 	buckets, err := getBucketListResponseBuckets(bresponse)
 	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			d.SetId(dataResourceIdHash([]string{}))
+			d.Set("buckets", []interface{}{})
+			d.Set("names", []string{})
+			d.Set("ids", []string{})
+			return nil
+		}
 		return errmsgs.WrapError(err)
 	}
 

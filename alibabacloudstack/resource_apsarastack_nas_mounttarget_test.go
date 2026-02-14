@@ -12,7 +12,7 @@ import (
 func TestAccAlibabacloudStackNasMountTarget0(t *testing.T) {
 	var v map[string]interface{}
 
-	resourceId := "alibabacloudstack_nas_mounttarget.default"
+	resourceId := "alibabacloudstack_ .default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccNasMounttargetCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &NasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -61,8 +61,7 @@ func TestAccAlibabacloudStackNasMountTarget0(t *testing.T) {
 					"access_group_name": "${alibabacloudstack_nas_access_group.default.1.access_group_name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
@@ -80,10 +79,10 @@ func TestAccAlibabacloudStackNasMountTarget0(t *testing.T) {
 }
 
 var AlibabacloudTestAccNasMounttargetCheckmap = map[string]string{
-	"status": CHECKSET,
+	"status":            CHECKSET,
 	"access_group_name": CHECKSET,
-	"vswitch_id": CHECKSET,
-	"file_system_id": CHECKSET,
+	"vswitch_id":        CHECKSET,
+	"file_system_id":    CHECKSET,
 }
 
 func AlibabacloudTestAccNasMounttargetBasicdependence(name string) string {
