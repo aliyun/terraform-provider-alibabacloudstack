@@ -1,3 +1,38 @@
+# 3.18.24
+
+## Added
+
+1. Query capability for OTS clusters (`alibabacloudstack_ots_clusters`)
+2. Configuration capability for PolarDB read/write splitting connections (`alibabacloudstack_polardb_readwrite_splitting_connection`)
+3. Orchestration capability for DataWorks workflows (`alibabacloudstack_data_works_business`)
+4. Query capability for ECS dedicated host types (`alibabacloudstack_ecs_dedicated_host_types`)
+5. Configuration capability for PolarDB parameter groups (`alibabacloudstack_polardb_parameter_group`)
+6. Binding capability for Quick BI user group members (`alibabacloudstack_quick_bi_user_group_user`)
+7. Creation capability for CSB services (`alibabacloudstack_csb_service`)
+8. Query capability for DataWorks file types (`alibabacloudstack_dataworks_file_types`)
+9. Orchestration capability for DataWorks files (`alibabacloudstack_data_works_file`)
+10. Orchestration capability for DataWorks intelligent baselines (`alibabacloudstack_data_works_baseline`)
+11. Custom port support added for ALIKafka instances
+12. Capability to bind ECS snapshot policies to disk IDs
+
+## Fixed
+
+1. Refactored orchestration capabilities for OTS-related resources  
+2. Resolved issue where DataWorks resources were not orchestratable
+
+## Deprecated
+
+1. Deprecate orchestration capability for ARMS Prometheus alert rules (`alibabacloudstack_arms_prometheus_alert_rule`)
+2. Deprecate orchestration capability for ARMS dispatch rules (`alibabacloudstack_arms_dispatch_rule`)
+3. Deprecate orchestration capability for CMS site monitoring (`alibabacloudstack_cms_site_monitor`)
+4. Deprecate orchestration capability for CMS alarm contacts (`alibabacloudstack_cms_alarm_contact`)
+5. Deprecate orchestration capability for CMS alarm contact groups (`alibabacloudstack_cms_alarm_contact_group`)
+6. Deprecate orchestration capability for MongoDB backup plans (`alibabacloudstack_dbs_backup_plan`)
+7. Deprecate orchestration capability for Quick BI workspaces (`alibabacloudstack_quick_bi_workspace`)
+8. Deprecate query capability for OTS services (`alibabacloudstack_ots_service`)
+
+---
+
 # 3.18.23
 
 ## New

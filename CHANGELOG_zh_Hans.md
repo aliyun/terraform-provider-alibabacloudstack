@@ -1,3 +1,38 @@
+# 3.18.24
+
+## 新增
+
+1. ots集群的查询能力（`alibabacloudstack_ots_clusters`）
+2. polardb读写分析的配置能力（`alibabacloudstack_polardb_readwrite_splitting_connection`）
+3. datawrok流程的编排能力（`alibabacloudstack_data_works_business`）
+3. ecs宿主机类型的查询能力（`alibabacloudstack_ecs_dedicated_host_types`）
+4. polardb的参数组的配置能力（`alibabacloudstack_polardb_parameter_group`）
+5. quickbi用户组用户的绑定能力（`alibabacloudstack_quick_bi_user_group_user`）
+6. csb服务的创建能力（`alibabacloudstack_csb_service`）
+7. datawork文件类型的查询能力（`alibabacloudstack_dataworks_file_types`)
+8. datawork文件的编排能力（`alibabacloudstack_data_works_file`）
+9. datawork智能基线的编排能力（`alibabacloudstack_data_works_baseline`）
+10. alikafka实力增加自定义端口能力
+11. 增加ecs快照策略绑定磁盘Id的能力
+
+## 修复
+1. Ots相关资源编排能力的重构
+2. Datawork资源不可编排的问题
+
+
+## 废弃
+
+1. 废弃arms的告警规则的编排能力（`alibabacloudstack_arms_prometheus_alert_rule`)
+2. 废弃arms的派遣规则的编排能力（`alibabacloudstack_arms_dispatch_rule`）
+3. 废弃cms站点监控的编排能力（`alibabacloudstack_cms_site_monitor`）
+4. 废弃cms告警联系人的编排能力（`alibabacloudstack_cms_alarm_contact`）
+5. 废弃cms告警联系人组的编排能力（`alibabacloudstack_cms_alarm_contact_group`）
+6. 废弃mongodb备份计划的编排能力（`alibabacloudstack_dbs_backup_plan`）
+7. 废弃quickbi的工作空间的编排能力（`alibabacloudstack_quick_bi_workspace`）
+8. 废弃ots服务的查询能力（`alibabacloudstack_ots_service`）
+
+---
+
 # 3.18.23
 
 ## 新增

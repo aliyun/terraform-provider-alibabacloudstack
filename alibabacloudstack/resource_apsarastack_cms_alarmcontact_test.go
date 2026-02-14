@@ -45,7 +45,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceAlarmcontact0(t *testing.T) {
 
 					"channels_ali_im": "leo",
 
-					"channels_ding_web_hook": "https://oapi.dingtalk.com/robot/send?access_token=7d49515e8ebf21106a80a9cc4bb3d2",
+					"channels_ding_web_hook": "https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxx",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -56,7 +56,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceAlarmcontact0(t *testing.T) {
 
 						"channels_ali_im": "leo",
 
-						"channels_ding_web_hook": "https://oapi.dingtalk.com/robot/send?access_token=7d49515e8ebf21106a80a9cc4bb3d2",
+						"channels_ding_web_hook": "https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxx",
 					}),
 				),
 			},
