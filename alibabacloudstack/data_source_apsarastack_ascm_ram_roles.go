@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -15,9 +16,9 @@ func dataSourceAlibabacloudStackAscmRoles() *schema.Resource {
 		Read: dataSourceAlibabacloudStackAscmRolesRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
+				Type:       schema.TypeInt,
+				Optional:   true,
+				ForceNew:   true,
 				Deprecated: "In future versions, searching by `id` is not supported, Please use `ids` instead. and is scheduled for removal in version 3.21.0",
 			},
 			"ids": {
@@ -115,12 +116,18 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 	roleType := d.Get("role_type").(string)
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "/ascm/auth/role/listRoles")
-	request.QueryParams["pageSize"] = "100000"
+	pageSize := 100
+	request.QueryParams["pageSize"] = strconv.Itoa(pageSize)
+	currentPage := 1
+
 	//request.QueryParams["roleType"] = roleType
 
 	response := ListAscmRolesResponse{}
+	
+	data := []AscmRoleData{}
 
 	for {
+		request.QueryParams["currentPage"] = strconv.Itoa(currentPage)
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			if bresponse == nil {
@@ -134,9 +141,11 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		if response.AsapiErrorCode == "" || len(response.Data) < 1 {
+		if response.AsapiErrorCode != "" || response.PageInfo.TotalPage <= currentPage || len(response.Data) < pageSize {
 			break
 		}
+		data = append(data, response.Data ...)
+		currentPage += 1
 	}
 
 	var r *regexp.Regexp
@@ -147,7 +156,7 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 	var ids []string
 	var s []map[string]interface{}
 
-	for _, rg := range response.Data {
+	for _, rg := range data {
 		if r != nil && !r.MatchString(rg.RoleName) {
 			continue
 		}
