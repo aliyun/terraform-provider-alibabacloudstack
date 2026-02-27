@@ -58,7 +58,7 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 	assumeRolePolicyDocument := d.Get("assume_role_policy_document").(string)
 
 	check, err := ascmService.DescribeAscmRamRole(name)
-	if err != nil && ! errmsgs.NotFoundError(err){
+	if err != nil && !errmsgs.NotFoundError(err) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "check role failed", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if check != nil {
@@ -129,9 +129,28 @@ func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackAscmRamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
-	noUpdateAllowedFields := []string{"role_name", "description", "organization_visibility", "role_range"}
+	if d.IsNewResource() {
+		return nil
+	}
 
-	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
+	noUpdateAllowedFields := []string{"organization_visibility", "role_range"}
+	if err := noUpdatesAllowedCheck(d, noUpdateAllowedFields); err != nil {
+		return err
+	}
+
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	if d.HasChanges("role_name", "description") {
+		requestBody := map[string]interface{}{
+			"newRoleName":    d.Get("role_name"),
+			"roleId":         d.Get("role_id"),
+			"newDescription": d.Get("description"),
+		}
+		if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "UpdateRoleInfo", "/ascm/auth/role/updateRoleInfo", nil, nil, requestBody); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", "UpdateRoleInfo", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		d.SetId(fmt.Sprintf("%s:%s", d.Get("role_name"), d.Get("role_id")))
+	}
+	return nil
 }
 
 func resourceAlibabacloudStackAscmRamRoleDelete(d *schema.ResourceData, meta interface{}) error {

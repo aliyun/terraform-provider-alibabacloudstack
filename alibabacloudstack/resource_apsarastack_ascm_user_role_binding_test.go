@@ -18,7 +18,7 @@ func TestAccAlibabacloudStackAscmUserRoleBinding_roleIds(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-ascmuserrole%v", rand)
+	name := fmt.Sprintf("tf-ascmuserrole1%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCheckAscm_UserRoleBinding)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
@@ -29,17 +29,16 @@ func TestAccAlibabacloudStackAscmUserRoleBinding_roleIds(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy: nil,
+		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"role_ids":   []int{5},
+					"role_ids":   []int{4, 5, 6, 8, 9, 10, 11, 12, 13, 14},
 					"login_name": "${alibabacloudstack_ascm_user.default.login_name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"role_ids.#": "1",
-						"role_ids.0": "5",
+						"role_ids.#": "10",
 					}),
 				),
 			},
@@ -50,13 +49,25 @@ func TestAccAlibabacloudStackAscmUserRoleBinding_roleIds(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"role_ids":   []int{6},
+					"role_ids":   []int{2},
 					"login_name": "${alibabacloudstack_ascm_user.default.login_name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"role_ids.#": "1",
-						"role_ids.0": "6",
+						"role_ids.0": "2",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"role_ids":   []int{2, 4, 5},
+					"login_name": "${alibabacloudstack_ascm_user.default.login_name}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_ids.#": "3",
+						"role_ids.0": REMOVEKEY,
 					}),
 				),
 			},
@@ -75,7 +86,7 @@ func TestAccAlibabacloudStackAscmUserRoleBinding_roleId(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-ascmuserrole%v", rand)
+	name := fmt.Sprintf("tf-ascmuserrole2%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCheckAscm_UserRoleBinding)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{

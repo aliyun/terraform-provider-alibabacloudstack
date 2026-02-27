@@ -35,15 +35,15 @@ func TestAccAlibabacloudStackAscmRamRoleBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"role_name":               name,
-					"description":             "TestRole",
+					"role_name":               "${var.name}",
+					"description":             "${var.name} desc",
 					"organization_visibility": "global",
 					"role_range":              "roleRange.userGroup",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"role_name":               name,
-						"description":             "TestRole",
+						"description":             name + " desc",
 						"organization_visibility": "global",
 						"role_range":              "roleRange.userGroup",
 					}),
@@ -53,6 +53,22 @@ func TestAccAlibabacloudStackAscmRamRoleBasic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"role_name":               "${var.name}new",
+					"description":             "${var.name} desc update",
+					"organization_visibility": "global",
+					"role_range":              "roleRange.userGroup",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_name":               name + "new",
+						"description":             name + " desc update",
+						"organization_visibility": "global",
+						"role_range":              "roleRange.userGroup",
+					}),
+				),
 			},
 		},
 	})
