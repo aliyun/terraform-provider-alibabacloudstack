@@ -579,9 +579,9 @@ func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, er
 		return resp, errmsgs.WrapError(err)
 	}
 
-	if len(resp.Data) < 1 && resp.Code == "200" {
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Found bingding for user %s", parts[0]))
-	}
+ if len(resp.Data) < 1 {
+ 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Found binding for user %s", parts[0]))
+ 	}
 
 	if len(parts) == 2 {
 		roleId, err := strconv.Atoi(parts[1])
