@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccAlibabacloudStackAscmRamRoleBasic(t *testing.T) {
-	var v *ListAscmRolesResponse
+	var v *AscmRoleData
 	resourceId := "alibabacloudstack_ascm_ram_role.default"
 	ra := resourceAttrInit(resourceId, testAccCheckAscmRamRole)
 	serviceFunc := func() interface{} {
@@ -68,14 +68,14 @@ func testAccCheckAscm_RamRoleDestroy(s *terraform.State) error {
 		if rs.Type == "alibabacloudstack_ascm_ram_role" || rs.Type != "alibabacloudstack_ascm_ram_role" {
 			continue
 		}
-		ascm, err := ascmService.DescribeAscmRamRole(rs.Primary.ID)
+		object, err := ascmService.DescribeAscmRamRole(rs.Primary.ID)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				continue
 			}
 			return errmsgs.WrapError(err)
 		}
-		if ascm.AsapiErrorCode != "200" {
+		if object != nil {
 			return errmsgs.WrapError(errmsgs.Error("ram role still exist"))
 		}
 	}
@@ -84,7 +84,19 @@ func testAccCheckAscm_RamRoleDestroy(s *terraform.State) error {
 }
 
 func testAccAscm_RamRole_resource(name string) string {
-	return ""
+	return fmt.Sprintf(`
+	variable name {
+		default = "%s"
+	}
+	
+	resource alibabacloudstack_ascm_ram_role distractor {
+		role_name               = "${var.name}-distractor"
+		description             = "${var.name} distractor"
+		organization_visibility = "global"
+		role_range              = "roleRange.userGroup"
+	}
+	
+`, name)
 }
 
 var testAccCheckAscmRamRole = map[string]string{

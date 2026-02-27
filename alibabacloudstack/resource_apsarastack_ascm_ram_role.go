@@ -58,10 +58,10 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 	assumeRolePolicyDocument := d.Get("assume_role_policy_document").(string)
 
 	check, err := ascmService.DescribeAscmRamRole(name)
-	if err != nil {
+	if err != nil && ! errmsgs.NotFoundError(err){
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "check role failed", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	if len(check.Data) > 0 {
+	if check != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "role alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
@@ -111,18 +111,18 @@ func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta inter
 		}
 		return errmsgs.WrapError(err)
 	}
-	if strings.Contains(object.Data[0].OrganizationVisibility, "organizationVisibility.") {
-		object.Data[0].OrganizationVisibility = strings.TrimPrefix(object.Data[0].OrganizationVisibility, "organizationVisibility.")
+	if strings.Contains(object.OrganizationVisibility, "organizationVisibility.") {
+		object.OrganizationVisibility = strings.TrimPrefix(object.OrganizationVisibility, "organizationVisibility.")
 	}
 	d.Set("role_name", did[0])
-	d.Set("organization_visibility", object.Data[0].OrganizationVisibility)
-	d.Set("role_id", object.Data[0].ID)
-	d.Set("description", object.Data[0].Description)
-	if object.Data[0].assumeRolePolicyDocument != "" {
-		d.Set("assume_role_policy_document", object.Data[0].assumeRolePolicyDocument)
+	d.Set("organization_visibility", object.OrganizationVisibility)
+	d.Set("role_id", object.ID)
+	d.Set("description", object.Description)
+	if object.assumeRolePolicyDocument != "" {
+		d.Set("assume_role_policy_document", object.assumeRolePolicyDocument)
 	}
-	if object.Data[0].RoleRange != "-" {
-		d.Set("role_range", object.Data[0].RoleRange)
+	if object.RoleRange != "-" {
+		d.Set("role_range", object.RoleRange)
 	}
 
 	return nil

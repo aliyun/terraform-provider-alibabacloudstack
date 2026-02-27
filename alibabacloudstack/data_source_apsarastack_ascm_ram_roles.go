@@ -141,10 +141,10 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
+		data = append(data, response.Data ...)
 		if response.AsapiErrorCode != "" || response.PageInfo.TotalPage <= currentPage || len(response.Data) < pageSize {
 			break
 		}
-		data = append(data, response.Data ...)
 		currentPage += 1
 	}
 

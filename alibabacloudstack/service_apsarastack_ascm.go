@@ -125,37 +125,45 @@ func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRol
 	return resp, nil
 }
 
-func (s *AscmService) DescribeAscmRamRole(id string) (response *ListAscmRolesResponse, err error) {
+func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleData, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "/ascm/auth/role/listRoles")
 	request.QueryParams["roleName"] = did[0]
-	var resp = &ListAscmRolesResponse{}
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("ListRoles", bresponse, request, request.QueryParams)
+	pageSize := 100
+	request.QueryParams["pageSize"] = strconv.Itoa(pageSize)
+	currentPage := 1
+	data := []AscmRoleData{}
+	response := ListAscmRolesResponse{}
 
-	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		} else {
-			return nil, err
+	for {
+		request.QueryParams["currentPage"] = strconv.Itoa(currentPage)
+		bresponse, err := s.client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		if errmsgs.IsExpectedErrors(err, "ErrorRamRoleNotFound") {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if err != nil {
+			return nil, errmsgs.WrapError(err)
 		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		data = append(data, response.Data...)
+		if response.AsapiErrorCode != "" || response.PageInfo.TotalPage <= currentPage || len(response.Data) < pageSize {
+			break
+		}
+		currentPage += 1
 	}
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
-	if err != nil {
-		return resp, errmsgs.WrapError(err)
+	for _, rg := range data {
+		if rg.RoleName == did[0] {
+			return &rg, nil
+		}
 	}
 
-	if resp.AsapiErrorCode == "200" {
-		return resp, errmsgs.WrapError(err)
-	}
-
-	return resp, nil
+	return nil, errmsgs.GetNotFoundErrorFromString("role "+ did[0] + " not found")
 }
 
 func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, err error) {
