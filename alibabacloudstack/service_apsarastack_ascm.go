@@ -593,7 +593,7 @@ func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, er
 				return resp, nil
 			}
 		}
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Found role %d bingding for user %s", roleId, parts[0]))
+  return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Found role %d binding for user %s", roleId, parts[0]))
 	}
 
 	return resp, nil
