@@ -163,7 +163,7 @@ func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleData, err er
 		}
 	}
 
-	return nil, errmsgs.GetNotFoundErrorFromString("role "+ did[0] + " not found")
+	return nil, errmsgs.GetNotFoundErrorFromString("role " + did[0] + " not found")
 }
 
 func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, err error) {
@@ -551,8 +551,12 @@ func (s *AscmService) DescribeAscmUserGroupRoleBinding(id string) (response *Use
 }
 
 func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, err error) {
+	parts := strings.Split(id, ":")
+	if len(parts) > 2 {
+		return nil, fmt.Errorf("Error id format")
+	}
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUsers", "/ascm/auth/user/listUsers")
-	request.QueryParams["loginName"] = id
+	request.QueryParams["loginName"] = parts[0]
 	var resp = &User{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 
@@ -575,8 +579,21 @@ func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, er
 		return resp, errmsgs.WrapError(err)
 	}
 
-	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, errmsgs.WrapError(err)
+	if len(resp.Data) < 1 && resp.Code == "200" {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Found bingding for user %s", parts[0]))
+	}
+
+	if len(parts) == 2 {
+		roleId, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return nil, err
+		}
+		for _, role := range resp.Data[0].Roles {
+			if roleId == role.ID {
+				return resp, nil
+			}
+		}
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Found role %d bingding for user %s", roleId, parts[0]))
 	}
 
 	return resp, nil

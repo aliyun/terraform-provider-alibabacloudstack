@@ -42,9 +42,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBinding() *schema.Resource {
 func resourceAlibabacloudStackAscmUserGroupRoleBindingImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	id := d.Id()
 
-	if strings.HasPrefix(id, "group:") {
-		id = strings.TrimPrefix(id, "group:")
-	}
+	id = strings.TrimPrefix(id, "group:")
 
 	userGroupId, err := strconv.Atoi(id)
 	if err != nil {

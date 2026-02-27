@@ -1,8 +1,11 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -18,11 +21,28 @@ func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
 				ForceNew: true,
 			},
 			"role_ids": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Type:          schema.TypeSet,
+				Computed:      true,
+				Optional:      true,
+				Elem:          &schema.Schema{Type: schema.TypeInt},
+				MinItems:      1,
+				MaxItems:      10,
+				ConflictsWith: []string{"role_id"},
+				Deprecated:    "Starting from version 3.21.0, the role_ids parameter is no longer supported for configuration.",
 			},
+			"role_id": {
+				Type:          schema.TypeInt,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"role_ids"},
+			},
+		},
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+			if d.Id() == "" && d.Get("role_ids").(*schema.Set).Len() > 0 {
+				log.Printf("[WARN] Resource created with 'role_ids' will not support deletion. " +
+					"Consider using 'role_id' or 'ascm_user' instead.")
+			}
+			return nil
 		},
 		DeprecationMessage: "ascm_user already includes corresponding functions. This resource may be removed in future versions.",
 	}
@@ -33,37 +53,28 @@ func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
 
 func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	ascmService := AscmService{client}
 	lname := d.Get("login_name").(string)
-	flag := false
 	var roleids []int
 	if v, ok := d.GetOk("role_ids"); ok {
 		for _, id := range v.(*schema.Set).List() {
 			roleids = append(roleids, id.(int))
 		}
+	} else if v, ok := d.GetOk("role_id"); ok {
+		roleids = append(roleids, v.(int))
 	}
 	log.Printf("roleids is %v", roleids)
-	flag = true
-	if flag {
-		for i := range roleids {
-			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddRoleToUser", "/ascm/auth/role/addRoleToUser")
-			request.QueryParams["loginName"] = lname
-			request.QueryParams["roleId"] = fmt.Sprint(roleids[i])
-
-			bresponse, err := client.ProcessCommonRequest(request)
-			if err != nil || bresponse.GetHttpStatus() != 200 {
-				errmsg := ""
-				if bresponse != nil {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_role_binding", "AddRoleToUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-
-			addDebug("AddRoleToUser", bresponse, request, request.QueryParams)
-			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
+	for _, roleId := range roleids {
+		if err := ascmService.AscmUserRoleBinding(lname, roleId); err != nil {
+			return err
 		}
 	}
 
-	d.SetId(lname)
+	if v, ok := d.GetOk("role_id"); ok {
+		d.SetId(fmt.Sprintf("%s:%d", lname, v.(int)))
+	} else {
+		d.SetId(lname)
+	}
 	return nil
 }
 
@@ -84,18 +95,26 @@ func resourceAlibabacloudStackAscmUserRoleBindingRead(d *schema.ResourceData, me
 	}
 
 	loginName := object.Data[0].LoginName
-	d.SetId(loginName)
 	d.Set("login_name", loginName)
 
-	role_ids := make([]int, 0)
+	roleIds := make([]int, 0)
 	for _, role := range object.Data[0].Roles {
-		role_ids = append(role_ids, role.ID)
+		roleIds = append(roleIds, role.ID)
 	}
-	d.Set("role_ids", role_ids)
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) == 2 {
+		roleId, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return err
+		}
+		d.Set("role_id", roleId)
+	}
+	d.Set("role_ids", roleIds)
 	return nil
 }
 
 func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, meta interface{}) error {
+
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 
@@ -118,26 +137,41 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 		for _, v := range n.(*schema.Set).List() {
 			newValue[v.(int)] = struct{}{}
 		}
+		toRemove := []int{}
+		toAdd := []int{}
 		for key := range newValue {
 			if _, exist := oldValue[key]; !exist {
-				requestBody := map[string]interface{}{
-					"loginName": lname,
-					"roleId":    key,
-				}
-				if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "AddRoleToUser", "/ascm/auth/role/addRoleToUser", nil, nil, requestBody); err != nil {
-					return err
-				}
+				toAdd = append(toAdd, key)
 			}
 		}
 		for key := range oldValue {
 			if _, exist := newValue[key]; !exist {
-				requestBody := map[string]interface{}{
-					"loginName": lname,
-					"roleId":    key,
-				}
-				if _, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUser", "/ascm/auth/role/removeRoleFromUser", nil, nil, requestBody); err != nil {
-					return err
-				}
+				toRemove = append(toRemove, key)
+			}
+		}
+		if len(oldValue) == 10 && len(toAdd) > 0 && len(toRemove) > 0 {
+			if err := ascmService.AscmUserRoleUnbinding(lname, toRemove[0]); err != nil {
+				return err
+			}
+			toRemove = toRemove[1:]
+		}
+		minLen := min(len(toAdd), len(toRemove))
+		for i := 0; i < minLen; i++ {
+			if err := ascmService.AscmUserRoleBinding(lname, toAdd[i]); err != nil {
+				return err
+			}
+			if err := ascmService.AscmUserRoleUnbinding(lname, toRemove[i]); err != nil {
+				return err
+			}
+		}
+		for i := minLen; i < len(toAdd); i++ {
+			if err := ascmService.AscmUserRoleBinding(lname, toAdd[i]); err != nil {
+				return err
+			}
+		}
+		for i := minLen; i < len(toRemove); i++ {
+			if err := ascmService.AscmUserRoleUnbinding(lname, toRemove[i]); err != nil {
+				return err
 			}
 		}
 	}
@@ -145,5 +179,38 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 }
 
 func resourceAlibabacloudStackAscmUserRoleBindingDelete(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	ascmService := AscmService{client}
+	parts := strings.Split(d.Id(), ":")
+
+	if len(parts) == 2 {
+		roleId, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return fmt.Errorf("invalid role ID in resource ID: %s", d.Id())
+		}
+		return ascmService.AscmUserRoleUnbinding(parts[0], roleId)
+	}
+	return nil
+}
+
+func (s *AscmService) AscmUserRoleBinding(userName string, roleId int) error {
+	requestBody := map[string]interface{}{
+		"loginName": userName,
+		"roleId":    roleId,
+	}
+	if _, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "AddRoleToUser", "/ascm/auth/role/addRoleToUser", nil, nil, requestBody); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_role_binding", "AddRoleToUser", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return nil
+}
+
+func (s *AscmService) AscmUserRoleUnbinding(userName string, roleId int) error {
+	requestBody := map[string]interface{}{
+		"loginName": userName,
+		"roleId":    roleId,
+	}
+	if _, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUser", "/ascm/auth/role/removeRoleFromUser", nil, nil, requestBody); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_role_binding", "RemoveRoleFromUser", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
 	return nil
 }
