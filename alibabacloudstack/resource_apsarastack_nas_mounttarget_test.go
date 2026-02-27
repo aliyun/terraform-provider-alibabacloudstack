@@ -12,7 +12,7 @@ import (
 func TestAccAlibabacloudStackNasMountTarget0(t *testing.T) {
 	var v map[string]interface{}
 
-	resourceId := "alibabacloudstack_ .default"
+	resourceId := "alibabacloudstack_nas_mounttarget.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccNasMounttargetCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &NasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
