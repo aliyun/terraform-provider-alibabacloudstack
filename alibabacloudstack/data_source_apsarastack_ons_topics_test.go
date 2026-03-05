@@ -8,7 +8,7 @@ import (
 func TestAccAlibabacloudStackOnsTopicsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_ons_topics.default"
-	name := fmt.Sprintf("tf-testacc%sonstopic%v", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-onstopicdata%v", rand)
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOnsTopicsConfigDependence)
 
@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackOnsTopicsDataSource(t *testing.T) {
 	var existOnsTopicsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"topics.#":                    "1",
-			"topics.0.topic":              fmt.Sprintf("tf-testacc%sonstopic%v", defaultRegionToTest, rand),
+			"topics.0.topic":              name,
 			"topics.0.message_type":       "0",
 			"topics.0.independent_naming": "true",
 			"topics.0.remark":             "alibabacloudstack_ons_topic_remark",
@@ -50,25 +50,17 @@ func TestAccAlibabacloudStackOnsTopicsDataSource(t *testing.T) {
 
 func dataSourceOnsTopicsConfigDependence(name string) string {
 	return fmt.Sprintf(`
-variable "topic" {
+variable "name" {
  default = "%v"
 }
 
-resource "alibabacloudstack_ons_instance" "default" {
-  name = "${var.topic}"
-  remark = "default-remark"
-  tps_receive_max = 500
-  tps_send_max = 500
-  topic_capacity = 50
-  cluster = "cluster1"
-  independent_naming = "true"
-}
+%s
 
 resource "alibabacloudstack_ons_topic" "default" {
   instance_id = "${alibabacloudstack_ons_instance.default.id}"
-  topic = "${var.topic}"
+  topic = "${var.name}"
   message_type = "0"
   remark = "alibabacloudstack_ons_topic_remark"
 }
-`, name)
+`, name, OnsCommonTestCase)
 }

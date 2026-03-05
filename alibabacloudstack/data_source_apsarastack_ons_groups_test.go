@@ -8,7 +8,7 @@ import (
 func TestAccAlibabacloudStackOnsGroupsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_ons_groups.default"
-	name := fmt.Sprintf("GID-tf-testacconsgroup%v", rand)
+	name := fmt.Sprintf("tf-groupdata%v", rand)
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOnsGroupsConfigDependence)
 
@@ -48,24 +48,16 @@ func TestAccAlibabacloudStackOnsGroupsDataSource(t *testing.T) {
 
 func dataSourceOnsGroupsConfigDependence(name string) string {
 	return fmt.Sprintf(`
-variable "group_id" {
+variable "name" {
  default = "%v"
 }
 
-resource "alibabacloudstack_ons_instance" "default" {
-  name = var.group_id
-  remark = "default-remark"
-  tps_receive_max = 500
-  tps_send_max = 500
-  topic_capacity = 50
-  cluster = "cluster1"
-  independent_naming = "true"
-}
+%s
 
 resource "alibabacloudstack_ons_group" "default" {
   instance_id = "${alibabacloudstack_ons_instance.default.id}"
-  group_id = "${var.group_id}"
+  group_id = "GID-${var.name}"
   remark = "alibabacloudstack_ons_group_remark"
 }
-`, name)
+`, name, OnsCommonTestCase)
 }

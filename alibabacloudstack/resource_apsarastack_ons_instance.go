@@ -93,6 +93,10 @@ func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta int
 		"Cluster":           cluster,
 		"IndependentNaming": independentname,
 	})
+	
+	if v, ok := d.GetOk("remark"); ok {
+		request.QueryParams["Remark"] = v.(string)
+	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -149,6 +153,11 @@ func resourceAlibabacloudStackOnsInstanceRead(d *schema.ResourceData, meta inter
 func resourceAlibabacloudStackOnsInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	onsService := OnsService{client}
+	
+	if d.IsNewResource() {
+		return nil
+	}
+	
 	independentname := d.Get("independent_naming").(string)
 	cluster := d.Get("cluster").(string)
 	_, err := onsService.DescribeOnsInstance(d.Id())

@@ -1539,6 +1539,20 @@ resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
 `, ECSInstanceCommonTestCase)
 }
 
+const OnsCommonTestCase = `
+data "alibabacloudstack_ons_clusters" "anyone" {
+}
+
+resource "alibabacloudstack_ons_instance" "default" {
+  tps_receive_max = 500
+  tps_send_max = 500
+  topic_capacity = 50
+  cluster = data.alibabacloudstack_ons_clusters.anyone.clusters.0.id
+  independent_naming = "true"
+  name = "${var.name}"
+}
+`
+
 const ExpressconnectPhysicalConnectionsCommonTestCase = `
 data "alibabacloudstack_expressconnect_physical_connections" "anyone" {
 }

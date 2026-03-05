@@ -2,52 +2,12 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-
-func (rc *resourceCheck) checkResourceOnsGroupDestroy() resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		strs := strings.Split(rc.resourceId, ":")
-		var resourceType string
-		for _, str := range strs {
-			if strings.Contains(str, "alibabacloudstack_") {
-				resourceType = strings.Trim(str, " ")
-				break
-			}
-		}
-
-		if resourceType == "" {
-			return errmsgs.WrapError(errmsgs.Error("The resourceId %s is not correct and it should prefix with alibabacloudstack_", rc.resourceId))
-		}
-
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != resourceType {
-				continue
-			}
-			outValue, err := rc.callDescribeMethod(rs)
-			errorValue := outValue[1]
-			if !errorValue.IsNil() {
-				err = errorValue.Interface().(error)
-				if err != nil {
-					if errmsgs.NotFoundError(err) {
-						continue
-					}
-					return errmsgs.WrapError(err)
-				}
-			} else {
-				return errmsgs.WrapError(errmsgs.Error("the resource %s %s was not destroyed ! ", rc.resourceId, rs.Primary.ID))
-			}
-		}
-		return nil
-	}
-}
 
 func TestAccAlibabacloudStackOnsGroup_basic(t *testing.T) {
 	var v *OnsGroup
@@ -61,7 +21,7 @@ func TestAccAlibabacloudStackOnsGroup_basic(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("GID-tf-testacconsgroupbasic%v", rand)
+	name := fmt.Sprintf("tf-groupbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccOnsGroupConfigBasic)
 
 	ResourceTest(t, resource.TestCase{
@@ -71,16 +31,19 @@ func TestAccAlibabacloudStackOnsGroup_basic(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceOnsGroupDestroy(),
+		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id": "${alibabacloudstack_ons_instance.default.id}",
-					"group_id":    name,
+					"group_id":    "GID-${var.name}",
 					"remark":      "Ons_Group",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"group_id": "GID-" + name,
+						"remark":   "Ons_Group",
+					}),
 				),
 			},
 			{
@@ -96,21 +59,13 @@ func TestAccAlibabacloudStackOnsGroup_basic(t *testing.T) {
 func testAccOnsGroupConfigBasic(name string) string {
 	return fmt.Sprintf(`
 
-variable "group_id" {
+variable "name" {
  default = "%s"
 }
 
-resource "alibabacloudstack_ons_instance" "default" {
-  tps_receive_max = 500
-  tps_send_max = 500
-  topic_capacity = 50
-  cluster = "cluster1"
-  independent_naming = "true"
-  name = "${var.group_id}"
-  remark = "Ons_instance"
-}
+%s
 
-`, name)
+`, name, OnsCommonTestCase)
 }
 
 var onsGroupBasicMap = map[string]string{

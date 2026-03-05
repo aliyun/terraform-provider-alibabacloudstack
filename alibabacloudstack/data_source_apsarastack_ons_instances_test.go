@@ -8,7 +8,7 @@ import (
 func TestAccAlibabacloudStackOnsInstancesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_ons_instances.default"
-	name := fmt.Sprintf("Tf-OnsInstanceDataSource%d", rand)
+	name := fmt.Sprintf("tf-instancedata%d", rand)
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOnsInstancesConfigDependence)
 
@@ -73,15 +73,7 @@ variable "name" {
 
 %s
 
-resource "alibabacloudstack_ons_instance" "default" {
-  name                = var.name
-  remark              = "default-remark"
-  tps_receive_max     = 500
-  tps_send_max        = 500
-  topic_capacity      = 50
-  cluster             = "cluster1"
-  independent_naming  = "true"
-}
+%s
 
-`, name, DataZoneCommonTestCase)
+`, name, DataZoneCommonTestCase, OnsCommonTestCase)
 }

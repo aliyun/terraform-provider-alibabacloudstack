@@ -38,22 +38,29 @@ func TestAccAlibabacloudStackOnsInstance_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name":               name,
+					"name":               "${var.name}",
 					"remark":             "Ons_Instance",
 					"tps_receive_max":    "400",
 					"tps_send_max":       "500",
 					"topic_capacity":     "50",
-					"cluster":            "cluster1",
+					"cluster":            "${data.alibabacloudstack_ons_clusters.anyone.clusters.0.id}",
 					"independent_naming": "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"name":               name,
+						"remark":             "Ons_Instance",
+						"tps_receive_max":    "400",
+						"tps_send_max":       "500",
+						"topic_capacity":     "50",
+						"independent_naming": "true",
+					}),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -103,6 +110,10 @@ func testAccOnsInstanceConfigBasic(name string) string {
 variable "name" {
  default = "%s"
 }
+
+data "alibabacloudstack_ons_clusters" "anyone" {
+}
+
 `, name)
 }
 
