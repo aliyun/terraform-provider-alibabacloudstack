@@ -34,7 +34,7 @@ func TestAccAlibabacloudStackMqttInstance_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"max_sub":           "10000",
 					"instance_name":     "${var.name}",
-					"cluster_name":      "mqtt4Private",
+					"cluster_name":      "${data.alibabacloudstack_mqtt_clusters.anyone.clusters.0.id}",
 					"max_conn":          "1000",
 					"max_up_tps":        "500",
 					"max_down_tps":      "1000",
@@ -91,15 +91,10 @@ variable "name" {
 	default = "%v"
 }
 
-resource "alibabacloudstack_ons_instance" "default" {
-  tps_receive_max = 500
-  tps_send_max = 500
-  topic_capacity = 50
-  cluster = "cluster1"
-  independent_naming = "true"
-  name = "${var.name}MQ"
-  remark = "Ons_instance"
+%s
+
+data "alibabacloudstack_mqtt_clusters" "anyone" {
 }
 
-		`, name)
+`, name, OnsCommonTestCase)
 }

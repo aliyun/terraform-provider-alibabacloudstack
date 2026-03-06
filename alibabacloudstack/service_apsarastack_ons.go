@@ -131,6 +131,9 @@ func (s *OnsService) DescribeMqttInstance(id string) (map[string]interface{}, er
 
 	response, err := s.client.DoTeaRequest("POST", "Ons-inner", "2018-02-05", "ConsoleMqttInstanceBaseInfo", "", nil, reqQuery, nil)
 	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "No matched instances are found in this account") {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("MqttInstance %s not found", id))
+		}
 		return nil, err
 	}
 	if data, ok := response["Data"]; !ok || data == nil {
@@ -160,6 +163,9 @@ func (s *OnsService) DescribeOnsMqttTopic(id string) (map[string]interface{}, er
 
 	response, err := s.client.DoTeaRequest("GET", "Ons-inner", "2018-02-05", "ConsoleTopicListInPage", "", nil, reqQuery, nil)
 	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "The specified instance does not exist.") {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Mqtt Topic %s not found", id))
+		}
 		return nil, err
 	}
 	if data, ok := response["Data"].([]interface{}); ok {
@@ -196,6 +202,9 @@ func (s *OnsService) DescribeOnsMqttGroup(id string) (map[string]interface{}, er
 
 	resp, err := s.client.DoTeaRequest("POST", "Ons-inner", "2018-02-05", "ConsoleMqttListGroupIdInPage", "", nil, query, nil)
 	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "No matched instances are found in this account.") {
+			return nil, errmsgs.GetNotFoundErrorFromString("Resource Mqtt GroupId not found")
+		}
 		return nil, errmsgs.WrapError(err)
 	}
 

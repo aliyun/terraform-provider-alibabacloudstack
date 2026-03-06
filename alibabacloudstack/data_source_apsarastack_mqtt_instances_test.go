@@ -2,14 +2,17 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackMqttInstancesDataSource(t *testing.T) {
-	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_mqtt_instances.default"
+	rand := getAccTestRandInt(1000, 9999)
+	name := fmt.Sprintf("tf_instncedata%d", rand)
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccMqttInstancesConfigDependence)
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_mqtt_instances.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"ids.#":                            "1",
@@ -43,72 +46,44 @@ func TestAccAlibabacloudStackMqttInstancesDataSource(t *testing.T) {
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccMqttInstancesConfigDependence(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_mqtt_instance.default.instance_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_mqtt_instance.default.instance_name}",
 		}),
-		fakeConfig: testAccMqttInstancesConfigDependence(rand, map[string]string{
-			"name_regex": `"^test-fake.*"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^test-fake.*",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccMqttInstancesConfigDependence(rand, map[string]string{
-			"ids": `["${alibabacloudstack_mqtt_instance.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_mqtt_instance.default.id}"},
 		}),
-		fakeConfig: testAccMqttInstancesConfigDependence(rand, map[string]string{
-			"ids": `["MQTT-fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"MQTT-fake-id"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccMqttInstancesConfigDependence(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_mqtt_instance.default.instance_name}"`,
-			"ids":        `["${alibabacloudstack_mqtt_instance.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_mqtt_instance.default.instance_name}",
+			"ids":        []string{"${alibabacloudstack_mqtt_instance.default.id}"},
 		}),
-		fakeConfig: testAccMqttInstancesConfigDependence(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_mqtt_instance.default.instance_name}"`,
-			"ids":        `["MQTT-fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_mqtt_instance.default.instance_name}",
+			"ids":        []string{"MQTT-fake-id"},
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func testAccMqttInstancesConfigDependence(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func testAccMqttInstancesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
 	default = "%v"
 }
 
-resource "alibabacloudstack_ons_instance" "default" {
-  tps_receive_max = 500
-  tps_send_max = 500
-  topic_capacity = 50
-  cluster = "cluster1"
-  independent_naming = "true"
-  name = "${var.name}MQ"
-  remark = "Ons_instance"
-}
+%s
 
-resource "alibabacloudstack_mqtt_instance" "default" {
-  instance_name = "${var.name}"
-  remark = "Mqtt"
-  max_conn = 1000
-  max_sub = 1000
-  max_up_tps = 1000
-  max_down_tps = 1000
-  independent_naming = true
-  store_instance_id = "${alibabacloudstack_ons_instance.default.id}"
-}
-
-data "alibabacloudstack_mqtt_instances" "default" {
-	%s
-}
-
-`, rand, strings.Join(pairs, "\n   "))
-	return config
+`, name, MqttCommonTestCase)
 }

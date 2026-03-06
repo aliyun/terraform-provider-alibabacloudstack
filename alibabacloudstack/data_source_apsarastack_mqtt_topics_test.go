@@ -100,26 +100,7 @@ variable "name" {
 	default = "%s"
 }
 
-resource "alibabacloudstack_ons_instance" "default" {
-  tps_receive_max = 500
-  tps_send_max = 500
-  topic_capacity = 50
-  cluster = "cluster1"
-  independent_naming = "true"
-  name = "${var.name}MQ"
-  remark = "Ons_instance"
-}
-
-resource "alibabacloudstack_mqtt_instance" "default" {
-  instance_name = "${var.name}"
-  remark = "Mqtt"
-  max_conn = 1000
-  max_sub = 1000
-  max_up_tps = 1000
-  max_down_tps = 1000
-  independent_naming = true
-  store_instance_id = "${alibabacloudstack_ons_instance.default.id}"
-}
+%s
 
 resource "alibabacloudstack_mqtt_topic" "default" {
   topic = "${var.name}"
@@ -127,5 +108,5 @@ resource "alibabacloudstack_mqtt_topic" "default" {
   remark = "test"
   store_instance_id = "${alibabacloudstack_mqtt_instance.default.store_instance_id}"
 }
-`, name)
+`, name, MqttCommonTestCase)
 }

@@ -1553,6 +1553,23 @@ resource "alibabacloudstack_ons_instance" "default" {
 }
 `
 
+const MqttCommonTestCase = OnsCommonTestCase + `
+data "alibabacloudstack_mqtt_clusters" "anyone" {
+}
+
+resource "alibabacloudstack_mqtt_instance" "default" {
+  instance_name = "${var.name}"
+  remark = "Mqtt"
+  max_conn = 1000
+  max_sub = 1000
+  max_up_tps = 1000
+  max_down_tps = 1000
+  independent_naming = true
+  cluster_name = data.alibabacloudstack_mqtt_clusters.anyone.clusters.0.id
+  store_instance_id = "${alibabacloudstack_ons_instance.default.id}"
+}
+`
+
 const ExpressconnectPhysicalConnectionsCommonTestCase = `
 data "alibabacloudstack_expressconnect_physical_connections" "anyone" {
 }
