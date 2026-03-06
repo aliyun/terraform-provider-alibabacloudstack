@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -102,22 +103,37 @@ func resourceAlibabacloudStackDataWorksRemind() *schema.Resource {
 				Default:  "",
 			},
 			"alert_methods": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type: schema.TypeSet,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{"MAIL", "SMS", "PHONE", "WEBHOOKS", "DINGROBOTS"}, false),
+				},
 				MinItems: 1,
-				Optional: true,
+				Required: true,
 			},
 			"alert_targets": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				MinItems: 1,
-				Optional: true,
+				Type:                  schema.TypeSet,
+				Elem:                  &schema.Schema{Type: schema.TypeString},
+				Optional:              true,
+				Computed:              true,
+				DiffSuppressFunc:      diffWithRemindMethod([]string{"MAIL", "SMS", "PHONE"}),
+				DiffSuppressOnRefresh: true,
+			},
+			"webhooks": {
+				Type:                  schema.TypeSet,
+				Elem:                  &schema.Schema{Type: schema.TypeString},
+				MinItems:              1,
+				Optional:              true,
+				DiffSuppressFunc:      diffWithRemindMethod([]string{"WEBHOOKS"}),
+				DiffSuppressOnRefresh: true,
 			},
 			"robot_urls": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				MinItems: 1,
-				Optional: true,
+				Type:                  schema.TypeSet,
+				Elem:                  &schema.Schema{Type: schema.TypeString},
+				MinItems:              1,
+				Optional:              true,
+				DiffSuppressFunc:      diffWithRemindMethod([]string{"DINGROBOTS"}),
+				DiffSuppressOnRefresh: true,
 			},
 			"use_flag": {
 				Type:     schema.TypeBool,
@@ -130,8 +146,39 @@ func resourceAlibabacloudStackDataWorksRemind() *schema.Resource {
 	return resource
 }
 
-var RemindUnit string
-var RemindType string
+func diffWithRemindMethod(methods []string) func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	return func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		alertMethod := []string{}
+		hited := false
+		for _, v := range d.Get("alert_methods").(*schema.Set).List() {
+			alertMethod = append(alertMethod, v.(string))
+		}
+		for _, method := range methods {
+			if slices.Contains(alertMethod, method) {
+				hited = true
+				break
+			}
+		}
+
+		field := strings.Split(k, ".")[0]
+		if hited {
+			o, n := d.GetChange(field)
+			ov := []string{}
+			for _, v := range o.(*schema.Set).List() {
+				ov = append(ov, v.(string))
+			}
+			nv := []string{}
+			for _, v := range n.(*schema.Set).List() {
+				nv = append(nv, v.(string))
+			}
+			slices.Sort(ov)
+			slices.Sort(nv)
+			return slices.Equal(ov, nv)
+		} else {
+			return true
+		}
+	}
+}
 
 func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
@@ -139,11 +186,13 @@ func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta
 	request := make(map[string]interface{})
 	if v, ok := d.GetOk("alert_unit"); ok {
 		request["AlertUnit"] = v.(string)
-		var list []string
-		for _, vv := range d.Get("alert_targets").(*schema.Set).List() {
-			list = append(list, vv.(string))
+		if request["AlertUnit"] == "OTHER" {
+			var list []string
+			for _, vv := range d.Get("alert_targets").(*schema.Set).List() {
+				list = append(list, vv.(string))
+			}
+			request["AlertTargets"] = strings.Join(list, ",")
 		}
-		request["AlertTargets"] = strings.Join(list, ",")
 	}
 
 	if v, ok := d.GetOk("remind_name"); ok {
@@ -151,13 +200,11 @@ func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta
 	}
 
 	if v, ok := d.GetOk("remind_type"); ok {
-		RemindType = v.(string)
-		request["RemindType"] = RemindType
+		request["RemindType"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("remind_unit"); ok {
-		RemindUnit = v.(string)
-		request["RemindUnit"] = RemindUnit
+		request["RemindUnit"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("dnd_end"); ok {
@@ -192,6 +239,14 @@ func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta
 			list = append(list, vv.(string))
 		}
 		request["RobotUrls"] = strings.Join(list, ",")
+	}
+
+	if v, ok := d.GetOk("webhooks"); ok {
+		var list []string
+		for _, vv := range v.(*schema.Set).List() {
+			list = append(list, vv.(string))
+		}
+		request["Webhooks"] = strings.Join(list, ",")
 	}
 
 	response, err := client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
@@ -263,14 +318,18 @@ func resourceAlibabacloudStackDataWorksRemindRead(d *schema.ResourceData, meta i
 		var bizIds []string
 		for _, v := range object["BizProcesses"].([]interface{}) {
 			item := v.(map[string]interface{})
-			bizIds = append(bizIds, item["BizId"].(string))
+			bidId, err := toInt(item["BizId"])
+			if err != nil {
+				return err
+			}
+			bizIds = append(bizIds, strconv.Itoa(bidId))
 		}
 		d.Set("biz_process_ids", bizIds)
 	}
 
 	d.Set("max_alert_times", object["MaxAlertTimes"].(json.Number))
 	d.Set("alert_interval", object["AlertInterval"].(json.Number))
-	if RemindType == "TIMEOUT" {
+	if object["RemindType"].(string) == "TIMEOUT" {
 		n, _ := strconv.Atoi(object["Detail"].(string))
 		d.Set("detail", fmt.Sprintf("%d", n*60))
 	} else {
@@ -285,12 +344,18 @@ func resourceAlibabacloudStackDataWorksRemindRead(d *schema.ResourceData, meta i
 		ruls = append(ruls, item["WebUrl"].(string))
 	}
 	d.Set("robot_urls", ruls)
+	d.Set("webhooks", object["Webhooks"])
 	d.Set("use_flag", object["Useflag"].(bool))
 
 	return nil
 }
 
 func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+
+	if d.IsNewResource() {
+		return nil
+	}
+
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := make(map[string]interface{})
 
@@ -309,15 +374,13 @@ func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta
 	}
 
 	if d.HasChange("remind_unit") {
-		RemindUnit = d.Get("remind_unit").(string)
-		request["RemindUnit"] = RemindUnit
+		request["RemindUnit"] = d.Get("remind_unit").(string)
 
 		buildRemindUnitArgs(d, request)
 	}
 
 	if d.HasChange("remind_type") {
-		RemindType = d.Get("remind_type").(string)
-		request["RemindType"] = RemindType
+		request["RemindType"] = d.Get("remind_type").(string)
 		request["Detail"] = d.Get("detail").(string)
 	}
 
@@ -325,13 +388,15 @@ func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta
 		request["MaxAlertTimes"] = d.Get("max_alert_times").(int)
 	}
 
-	if d.HasChange("alert_unit") {
+	if d.HasChanges("alert_unit", "alert_targets") {
 		request["AlertUnit"] = d.Get("alert_unit").(string)
-		var list []string
-		for _, vv := range d.Get("alert_targets").(*schema.Set).List() {
-			list = append(list, vv.(string))
+		if request["AlertUnit"] == "OTHER" {
+			var list []string
+			for _, vv := range d.Get("alert_targets").(*schema.Set).List() {
+				list = append(list, vv.(string))
+			}
+			request["AlertTargets"] = strings.Join(list, ",")
 		}
-		request["AlertTargets"] = strings.Join(list, ",")
 	}
 
 	if d.HasChange("alert_methods") {
@@ -354,6 +419,14 @@ func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta
 		request["RobotUrls"] = strings.Join(list, ",")
 	}
 
+	if d.HasChange("webhooks") {
+		var list []string
+		for _, vv := range d.Get("webhooks").(*schema.Set).List() {
+			list = append(list, vv.(string))
+		}
+		request["Webhooks"] = strings.Join(list, ",")
+	}
+
 	action := "UpdateRemind"
 	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
@@ -368,7 +441,6 @@ func resourceAlibabacloudStackDataWorksRemindDelete(d *schema.ResourceData, meta
 	action := "DeleteRemind"
 	request := map[string]interface{}{
 		"RemindId": d.Id(),
-		"RegionId": "default",
 	}
 	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
@@ -378,7 +450,7 @@ func resourceAlibabacloudStackDataWorksRemindDelete(d *schema.ResourceData, meta
 }
 
 func buildRemindUnitArgs(d *schema.ResourceData, request map[string]interface{}) {
-	switch RemindUnit {
+	switch d.Get("remind_unit").(string) {
 	case "NODE":
 		var list []string
 		for _, v := range d.Get("node_ids").(*schema.Set).List() {

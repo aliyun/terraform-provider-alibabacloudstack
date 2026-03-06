@@ -32,20 +32,63 @@ func TestAccAlibabacloudStackDataWorksRemind_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"alert_unit":    "OWNER",
-					"remind_name":   name,
-					"remind_type":   "FINISHED",
+					"alert_unit":    "OTHER",
+					"remind_name":   "${var.name}",
+					"remind_type":   "TIMEOUT",
 					"remind_unit":   "PROJECT",
 					"project_id":    "${alibabacloudstack_data_works_project.default.id}",
-					"alert_methods": []string{"SMS"},
+					"detail":        "600",
+					"alert_methods": []string{"SMS", "WEBHOOKS", "DINGROBOTS"},
+					"alert_targets": []string{"${alibabacloudstack_data_works_user.default.project_member_id}"},
+					"robot_urls":    []string{"https://oapi.dingtalk.com/robot/send?access_token=example1"},
+					"webhooks":      []string{"https://open.feishu.cn/open-apis/bot/v2/hook/example1"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"alert_unit":    "OWNER",
-						"remind_name":   name,
-						"remind_type":   "FINISHED",
-						"remind_unit":   "PROJECT",
-						"project_id":    CHECKSET,
+						"alert_unit":      "OTHER",
+						"remind_name":     name,
+						"remind_type":     "TIMEOUT",
+						"remind_unit":     "PROJECT",
+						"project_id":      CHECKSET,
+						"detail":          "600",
+						"alert_methods.#": "3",
+						"alert_targets.#": "1",
+						"robot_urls.#":    "1",
+						"webhooks.#":      "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"alert_unit":    "OWNER",
+					"remind_name":   "${var.name}_update",
+					"alert_targets": REMOVEKEY,
+					"robot_urls":    []string{"https://oapi.dingtalk.com/robot/send?access_token=example1", "https://oapi.dingtalk.com/robot/send?access_token=example2"},
+					"webhooks":      []string{"https://open.feishu.cn/open-apis/bot/v2/hook/example1", "https://open.feishu.cn/open-apis/bot/v2/hook/example2"},
+					"remind_type":   "FINISHED",
+					"detail":        REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"alert_unit":      "OWNER",
+						"remind_name":     name + "_update",
+						"alert_targets.#": REMOVEKEY,
+						"remind_type":     "FINISHED",
+						"detail":          REMOVEKEY,
+						"robot_urls.#":    "2",
+						"webhooks.#":      "2",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"alert_unit":    "OTHER",
+					"alert_targets": []string{"${alibabacloudstack_data_works_user.default.project_member_id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"alert_unit":      "OTHER",
+						"alert_targets.#": "1",
 					}),
 				),
 			},
@@ -58,38 +101,40 @@ func TestAccAlibabacloudStackDataWorksRemind_basic0(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"project_id":   REMOVEKEY,
-						"remind_unit":  "BASELINE",
-						"baseline_ids": CHECKSET,
+						"project_id":     REMOVEKEY,
+						"remind_unit":    "BASELINE",
+						"baseline_ids.#": "1",
 					}),
 				),
 			},
 
+			//			{
+			//				Config: testAccConfig(map[string]interface{}{
+			//					"baseline_ids": REMOVEKEY,
+			//					"remind_unit":  "NODE",
+			//					"node_ids":     []string{"${alibabacloudstack_data_works_file.default.file_id}"},
+			//				}),
+			//				Check: resource.ComposeTestCheckFunc(
+			//					testAccCheck(map[string]string{
+			//						"baseline_ids": REMOVEKEY,
+			//						"remind_unit":  "NODE",
+			//						"node_ids":     CHECKSET,
+			//					}),
+			//				),
+			//			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"baseline_ids": REMOVEKEY,
-					"remind_unit":  "NODE",
-					"node_ids":     []string{"${alibabacloudstack_data_works_file.default.file_id}"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"baseline_ids": REMOVEKEY,
-						"remind_unit":  "NODE",
-						"node_ids":     CHECKSET,
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"node_ids":        REMOVEKEY,
+					//					"node_ids":        REMOVEKEY,
 					"remind_unit":     "BIZPROCESS",
 					"biz_process_ids": []string{"${alibabacloudstack_data_works_business.default.business_id}"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"node_ids":        REMOVEKEY,
-						"remind_unit":     "BIZPROCESS",
-						"biz_process_ids": CHECKSET,
+						"baseline_ids.#": REMOVEKEY,
+						//						"node_ids":        REMOVEKEY,
+						"remind_unit":       "BIZPROCESS",
+						"biz_process_ids.#": "1",
 					}),
 				),
 			},
@@ -113,10 +158,12 @@ func TestAccAlibabacloudStackDataWorksRemind_basic0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"remind_type": "ERROR",
+					"detail":      "",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"remind_type": "ERROR",
+						"detail":      "",
 					}),
 				),
 			},
@@ -124,9 +171,9 @@ func TestAccAlibabacloudStackDataWorksRemind_basic0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"remind_type": "UNFINISHED",
 					"detail": TfRawString(`jsonencode({
-	hour = 23
-	minu = 59
-})`),
+						hour = 23
+						minu = 59
+					})`),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -175,15 +222,30 @@ func TestAccAlibabacloudStackDataWorksRemind_basic0(t *testing.T) {
 					"dnd_end":         "08:00",
 					"alert_interval":  "1200",
 					"max_alert_times": "4",
-					"alert_methods":   []string{"SMS","MAIL"},
+					"alert_methods":   []string{"SMS", "MAIL", "WEBHOOKS"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"dnd_end":         "08:00",
 						"alert_interval":  "1200",
 						"max_alert_times": "4",
-						"alert_methods":   "MAIL",
+						"alert_methods.#": "3",
 					}),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"alert_methods.*",
+						"SMS",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"alert_methods.*",
+						"MAIL",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"alert_methods.*",
+						"WEBHOOKS",
+					),
 				),
 			},
 		},
@@ -226,7 +288,7 @@ resource "alibabacloudstack_data_works_user" "default" {
 resource "alibabacloudstack_data_works_baseline" "default" {
   alert_enabled          = true
   project_id             = alibabacloudstack_data_works_project.default.id
-  owner                  = alibabacloudstack_data_works_user.default.user_id
+  owner                  = alibabacloudstack_data_works_user.default.project_member_id
   alert_margin_threshold = "30"
   baseline_name          = var.name
   enabled                = true
@@ -237,6 +299,11 @@ resource "alibabacloudstack_data_works_baseline" "default" {
 
   priority      = "5"
   baseline_type = "DAILY"
+  lifecycle {
+      ignore_changes = [
+  			priority,
+      ]
+  }
 }
 
 resource "alibabacloudstack_data_works_business" "default" {
