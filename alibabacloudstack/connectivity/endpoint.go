@@ -271,8 +271,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"yaochiops.{{.region}}.{{.domain}}",
 	},
 	POLARDBCode: PopEndpoint{
-		"polardb.{{.domain}}",
-		"polardb.{{.region}}.{{.domain}}",
+		"polardb-vpc.{{.domain}}",
+		"polardb-vpc.{{.region}}.{{.domain}}",
 	},
 
 	SlSDataCode: PopEndpoint{
