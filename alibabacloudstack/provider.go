@@ -576,6 +576,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_api_gateway_v2_services":                          dataSourceAlibabacloudStackAPIGatewayV2Services(),
 		"alibabacloudstack_api_gateway_v2_routes":                            dataSourceAlibabacloudStackAPIGatewayV2Routes(),
 		"alibabacloudstack_api_gateway_v2_mcpservers":                        dataSourceAlibabacloudStackAPIGatewayV2McpServers(),
+		"alibabacloudstack_mqtt_clusters":                                    dataSourceAlibabacloudStackMqttClusters(),
 		"alibabacloudstack_mqtt_instances":                                   dataSourceAlibabacloudStackMqttInstances(),
 		"alibabacloudstack_mqtt_topics":                                      dataSourceAlibabacloudStackMqttTopics(),
 		"alibabacloudstack_mqtt_groups":                                      dataSourceAlibabacloudStackMqttGroups(),
