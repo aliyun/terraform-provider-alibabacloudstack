@@ -127,32 +127,23 @@ func (s *DataworksService) DescribeDataWorksUser(id string) (object map[string]i
 }
 
 func (s *DataworksService) DescribeDataWorksUserRoleBinding(id string) (object map[string]interface{}, err error) {
-	var response map[string]interface{}
 	parts, err := ParseResourceId(id, 3)
 	if err != nil {
 		err = errmsgs.WrapError(err)
 		return
 	}
-	request := map[string]interface{}{
-		"ProjectId": parts[1],
-	}
-	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "ListProjectRoles", "", nil, nil, request)
+	user, err := s.DescribeDataWorksUser(parts[1] + ":" + parts[2])
 	if err != nil {
 		return object, err
 	}
-	v, err := jsonpath.Get("$.ProjectRoleList", response)
-	if v == nil || err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.ProjectRoleList", response)
+	for _, i := range user["ProjectRoleList"].([]interface{}) {
+		item := i.(map[string]interface{})
+		if item["ProjectRoleCode"].(string) == parts[0] {
+			return item, nil
+		}
 	}
-	i := v.([]interface{})
-
-	if len(i) > 0 {
-		object = i[0].(map[string]interface{})
-	} else {
-		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("dataworks", id)), errmsgs.NotFoundWithResponse, response)
-	}
-
-	return object, nil
+	
+	return object, errmsgs.GetNotFoundErrorFromString("no binding found")
 }
 
 func (s *DataworksService) DescribeDataWorksRemind(id string) (object map[string]interface{}, err error) {

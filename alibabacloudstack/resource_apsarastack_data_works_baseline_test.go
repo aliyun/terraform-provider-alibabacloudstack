@@ -33,7 +33,7 @@ func TestAccAlibabacloudStackDataWorksBaseline_basic0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"baseline_name":          "${var.name}",
 					"project_id":             "${alibabacloudstack_data_works_project.default.id}",
-					"owner":                  "${alibabacloudstack_data_works_user.default.user_id}",
+					"owner":                  "${alibabacloudstack_data_works_user.default.project_member_id}",
 					"priority":               "5",
 					"baseline_type":          "DAILY",
 					"alert_margin_threshold": "30",

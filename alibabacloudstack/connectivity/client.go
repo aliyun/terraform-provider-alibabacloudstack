@@ -1040,10 +1040,10 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 	} else {
 		protocol = "http"
 	}
-	if popcode == "CloudDns" || popcode == "bms" {
-		// CloudDns / bms does not support HTTPS
+	switch popcode {
+	case "CloudDns", "bms":
 		protocol = "http"
-	} else if popcode == "CSB" {
+	case "CSB":
 		protocol = "https"
 	}
 	authType := "AK"

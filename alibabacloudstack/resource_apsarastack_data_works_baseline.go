@@ -97,7 +97,7 @@ func resourceAlibabacloudStackDataWorksBaselineCreate(d *schema.ResourceData, me
 	// Map parameters using tagName from Create API
 	request["BaselineName"] = d.Get("baseline_name").(string)
 	request["ProjectId"] = d.Get("project_id").(int)
-	request["Owner"] = convertAscmUid2MemberUid(d.Get("owner").(string))
+	request["Owner"] =d.Get("owner").(string)
 	request["Priority"] = d.Get("priority").(int)
 	request["BaselineType"] = d.Get("baseline_type").(string)
 
@@ -158,7 +158,7 @@ func resourceAlibabacloudStackDataWorksBaselineRead(d *schema.ResourceData, meta
 	d.Set("baseline_id", object["BaselineId"])
 	d.Set("baseline_name", object["BaselineName"])
 	d.Set("project_id", object["ProjectId"])
-	d.Set("owner", object["Owner"].(string)[1:])
+	d.Set("owner", object["Owner"].(string))
 	d.Set("priority", object["Priority"])
 	d.Set("baseline_type", object["BaselineType"])
 	d.Set("enabled", object["Enabled"])
@@ -218,7 +218,7 @@ func resourceAlibabacloudStackDataWorksBaselineUpdate(d *schema.ResourceData, me
 		request["BaselineName"] = d.Get("baseline_name").(string)
 	}
 	if d.HasChange("owner") {
-		request["Owner"] = convertAscmUid2MemberUid(d.Get("owner").(string))
+		request["Owner"] = d.Get("owner").(string)
 	}
 	if d.HasChange("priority") {
 		request["Priority"] = d.Get("priority").(int)

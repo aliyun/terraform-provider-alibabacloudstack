@@ -82,7 +82,7 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingRead(d *schema.ResourceDat
 	}
 	d.Set("user_id", parts[2])
 	d.Set("project_id", parts[1])
-	d.Set("role_code", parts[0])
+	d.Set("role_code", object["ProjectRoleCode"])
 
 	return nil
 }

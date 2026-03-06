@@ -32,7 +32,7 @@ func TestAccAlibabacloudStackDataWorksUserRoleBinding_basic0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"project_id": "${alibabacloudstack_data_works_project.default.id}",
-					"user_id":    "${alibabacloudstack_data_works_user.default.user_id}",
+					"user_id":    "${alibabacloudstack_data_works_user.default.project_member_id}",
 					"role_code":  "role_project_guest",
 				}),
 				Check: resource.ComposeTestCheckFunc(

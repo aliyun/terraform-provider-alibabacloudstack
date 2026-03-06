@@ -44,6 +44,9 @@ func resourceAlibabacloudStackDataWorksUser() *schema.Resource {
 }
 
 func convertAscmUid2MemberUid(uid string) string {
+	if uid[0] != '2' {
+		return uid
+	}
 	return "5" + uid
 }
 
