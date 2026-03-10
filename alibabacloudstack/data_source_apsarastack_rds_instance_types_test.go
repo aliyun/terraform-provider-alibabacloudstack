@@ -13,16 +13,6 @@ func TestAccAlibabacloudStackRdsInstanceTypesDataSource(t *testing.T) {
 		fmt.Sprintf("tf_testAccRdsInstanceTypesDataSource_%d", rand),
 		dataSourceRdsInstanceTypesConfigDependence)
 
-	baseConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"engine":         "MySQL",
-			"engine_version": "5.7",
-			"cpu_type":       "intel",
-			"series":         "dual_ha",
-			"sorted_by":      "CPU",
-		}),
-	}
-
 	testAccConfig = dataSourceTestAccConfigFunc(resourceId,
 		fmt.Sprintf("tf_testAccRdsInstanceTypesDataSource_%d", rand),
 		dataSourceRdsInstanceTypesPresetDependence)
@@ -86,7 +76,7 @@ func TestAccAlibabacloudStackRdsInstanceTypesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeRdsInstanceTypesMapFunc,
 	}
 
-	RdsInstanceTypesCheckInfo.dataSourceTestCheck(t, rand, baseConf, idsConf, cpuConf, memoryConf)
+	RdsInstanceTypesCheckInfo.dataSourceTestCheck(t, rand, idsConf, cpuConf, memoryConf)
 }
 
 func dataSourceRdsInstanceTypesConfigDependence(name string) string {
@@ -94,11 +84,10 @@ func dataSourceRdsInstanceTypesConfigDependence(name string) string {
 }
 
 func dataSourceRdsInstanceTypesPresetDependence(name string) string {
-	return fmt.Sprintf(`
+	return `
 	
 	data "alibabacloudstack_rds_instance_types" "preset" {
 		engine = "MySQL"
-		engine_version = "5.7"
 	}
-`)
+`
 }

@@ -858,7 +858,6 @@ data "alibabacloudstack_db_zones" "default" {
 data "alibabacloudstack_rds_instance_types" "default" {
   ids                  = var.rds_instance_type != "" ? [var.rds_instance_type] : null
   engine               = "MySQL"
-  engine_version       = "5.7"
   sorted_by            = "CPU"
   %s
   series               = "dual_ha"

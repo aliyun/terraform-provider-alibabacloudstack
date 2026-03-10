@@ -39,7 +39,7 @@ func dataSourceAlibabacloudStackRdsInstanceTypes() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"intel", "arm64", "hygon"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"intel", "arm64", "hygon", "kunpeng"}, false),
 			},
 			"memory": {
 				Type:     schema.TypeInt,
