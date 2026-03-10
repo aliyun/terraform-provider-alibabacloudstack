@@ -13,7 +13,7 @@ func TestAccAlibabacloudStackDBAccountPrivilege_mysql(t *testing.T) {
 
 	var v *rds.DBInstanceAccount
 	rand := getAccTestRandInt(10000,20000)
-	name := fmt.Sprintf("tf-testacc%sdnsrecordbasic%v.abc", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testdbprivilege%d", rand)
 	resourceId := "alibabacloudstack_db_account_privilege.default"
 	var basicMap = map[string]string{
 		"instance_id":  CHECKSET,
