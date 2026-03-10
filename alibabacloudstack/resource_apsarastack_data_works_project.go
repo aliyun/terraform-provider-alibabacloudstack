@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -26,6 +27,8 @@ func resourceAlibabacloudStackDataWorksProject() *schema.Resource {
 				Computed:      true,
 				ConflictsWith: []string{"name"},
 				AtLeastOneOf:  []string{"name"},
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]{2,26}$`),
+					"project_name must be 3-27 characters long, start with a letter, and contain only letters, numbers, and underscores"),
 			},
 			"identifier": {
 				Type:     schema.TypeString,
@@ -39,6 +42,8 @@ func resourceAlibabacloudStackDataWorksProject() *schema.Resource {
 				Computed:      true,
 				ConflictsWith: []string{"project_name"},
 				AtLeastOneOf:  []string{"project_name"},
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]{2,26}$`),
+					"project_name must be 3-27 characters long, start with a letter, and contain only letters, numbers, and underscores"),
 			},
 			"description": {
 				Type:     schema.TypeString,

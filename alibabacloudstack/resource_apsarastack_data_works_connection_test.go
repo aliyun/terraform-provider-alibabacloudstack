@@ -19,49 +19,63 @@ func TestAccAlibabacloudStackDataWorksConnection_basic0(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sdataworksconnection%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf_testconnection%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackDataWorksConnectionBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"project_id":      "10023",
+					"project_id":      "${alibabacloudstack_data_works_project.default.id}",
 					"connection_type": "rds",
-					"content":         AlibabacloudStackDataWorksRdsContentMap,
-					"env_type":        "1",
-					"sub_type":        "mysql",
-					"name":            name,
-					"description":     "description" + name,
+					"content": map[string]string{
+						"password":     "${random_password.password.0.result}",
+						"instanceName": "${alibabacloudstack_db_instance.default.id}",
+						"username":     "${alibabacloudstack_db_account.default.name}",
+						"database":     "${alibabacloudstack_db_database.default.0.name}",
+						"tag":          "rds",
+					},
+					"env_type":    "1",
+					"sub_type":    "mysql",
+					"name":        "${var.name}",
+					"description": "${var.name} description",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"project_id":      "10023",
 						"connection_type": "rds",
 						"env_type":        "1",
 						"sub_type":        "mysql",
 						"name":            name,
-						"description":     "description" + name,
+						"description":     name + " description",
 					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"content.password"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description": "description update" + name,
+					"description": "${var.name} description update",
+					"content": map[string]string{
+						"password":     "${random_password.password.0.result}",
+						"instanceName": "${alibabacloudstack_db_instance.default.id}",
+						"username":     "${alibabacloudstack_db_account.default.name}",
+						"database":     "${alibabacloudstack_db_database.default.1.name}",
+						"tag":          "rds",
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": "description update" + name,
+						"description": name + " description update",
 					}),
 				),
 			},
@@ -70,19 +84,48 @@ func TestAccAlibabacloudStackDataWorksConnection_basic0(t *testing.T) {
 }
 
 var AlibabacloudStackDataWorksConnectionMap0 = map[string]string{}
-var AlibabacloudStackDataWorksRdsContentMap = map[string]interface{}{
-	"password":     "inputYourCodeHere@ascm",
-	"instanceName": "rm-qd8ba0rn156zu20iu",
-	"rdsOwnerId":   "1640757090422435",
-	"username":     "cxt",
-	"database":     "cxt_test",
-	"tag":          "rds",
-}
 
 func AlibabacloudStackDataWorksConnectionBasicDependence0(name string) string {
 	return fmt.Sprintf(` 
 variable "name" {
   default = "%s"
 }
-`, name)
+
+%s
+
+%s
+
+
+%s
+
+resource "alibabacloudstack_db_database" "default" {
+  count  = 2
+  instance_id = "${alibabacloudstack_db_instance.default.id}"
+  name = "tfaccount${count.index}"
+  description = "from terraform"
+  character_set        = "utf8"
+}
+
+resource "alibabacloudstack_db_account" "default" {
+  instance_id = "${alibabacloudstack_db_instance.default.id}"
+  name = "tftest"
+  password = random_password.password.0.result
+  description = "from terraform"
+}
+
+resource "alibabacloudstack_db_account_privilege" "default" {
+	instance_id  = "${alibabacloudstack_db_instance.default.id}"
+	account_name = "${alibabacloudstack_db_account.default.name}"
+	privilege    = "ReadOnly"
+	db_names     = alibabacloudstack_db_database.default.*.name
+}
+
+
+resource "alibabacloudstack_data_works_project" "default" {
+	name =           "${var.name}"
+	description =    "${var.name}_desc"
+	task_auth_type = "PROJECT"
+}
+
+`, name, RandomPasswordTestCase(12, 1), VSwitchCommonTestCase, RdsMysqlCommonTestCase())
 }

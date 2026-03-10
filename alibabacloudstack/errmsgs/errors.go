@@ -1,6 +1,7 @@
 package errmsgs
 
 import (
+	"slices"
 	"encoding/json"
 	"errors"
 	"reflect"
@@ -164,12 +165,7 @@ func IsExpectedErrorCodes(code string, errorCodes []string) bool {
 	if code == "" {
 		return false
 	}
-	for _, v := range errorCodes {
-		if v == code {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(errorCodes, code)
 }
 
 func IsExpectedErrors(err error, expectCodes ...string) bool {

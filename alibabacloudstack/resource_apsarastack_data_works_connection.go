@@ -17,13 +17,13 @@ func resourceAlibabacloudStackDataWorksConnection() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"connection_id": {
 				Type:     schema.TypeString,
-				ForceNew: true,
 				Computed: true,
 			},
 			"connection_type": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"odps", "mysql", "rds", "oss", "sqlserver", "polardb", "oracle", "mongodb", "emr", "postgresql", "analyticdb_for_mysql", "hybriddb_for_postgresql", "holo"}, false),
+				ForceNew:     true,
 			},
 			"content": {
 				Type:     schema.TypeMap,
@@ -42,6 +42,7 @@ func resourceAlibabacloudStackDataWorksConnection() *schema.Resource {
 			"project_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -52,6 +53,7 @@ func resourceAlibabacloudStackDataWorksConnection() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: rdsDiffSuppressFunc,
 				ValidateFunc:     validation.StringInSlice([]string{"mysql", "sqlserver", "postgresql"}, false),
+				ForceNew:         true,
 			},
 		},
 	}
@@ -123,11 +125,33 @@ func resourceAlibabacloudStackDataWorksConnectionRead(d *schema.ResourceData, me
 	d.Set("project_id", parts[1])
 	d.Set("name", parts[2])
 	d.Set("connection_type", object["ConnectionType"].(string))
+	if v, err := toInt(object["EnvType"]); err == nil {
+		d.Set("env_type", v)
+	}
+	d.Set("sub_type", object["SubType"].(string))
+	d.Set("description", object["Description"].(string))
 
-	// Since the password is returned as *** which does not match the original, the following code is commented out
-	//var tempMap map[string]interface{}
-	//err = json.Unmarshal([]byte(object["Content"].(string)), &tempMap)
-	//d.Set("content", tempMap)
+	var tempMap map[string]interface{}
+	contentStr := object["Content"].(string)
+
+	if err := json.Unmarshal([]byte(contentStr), &tempMap); err != nil {
+		return fmt.Errorf("error unmarshaling content: %w", err)
+	}
+
+	if tempMap != nil {
+		if oldContent, ok := d.Get("content").(map[string]interface{}); ok && oldContent != nil {
+			for k, v := range tempMap {
+				if vStr, isString := v.(string); isString && vStr == "***" {
+					if oldVal, exists := oldContent[k]; exists {
+						tempMap[k] = oldVal
+					}
+				}
+			}
+		}
+	}
+	if err := d.Set("content", tempMap); err != nil {
+		return fmt.Errorf("error setting content: %w", err)
+	}
 	return nil
 }
 

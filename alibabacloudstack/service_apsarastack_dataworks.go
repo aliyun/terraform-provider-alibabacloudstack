@@ -77,9 +77,12 @@ func (s *DataworksService) DescribeDataWorksConnection(id string) (object map[st
 		"ProjectId": parts[1],
 		"Name":      parts[2],
 	}
-	response, err = s.client.DoTeaRequest("GET", "dataworks-public", "2020-05-18", "ListConnections", "", nil, nil, request)
+	response, err = s.client.DoTeaRequest("GET", "dataworks-public", "2020-05-18", "ListConnections", "", nil, request, nil)
 	addDebug("ListConnections", response, request)
 	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "Invalid.Tenant.UserNotInProject") {
+			return nil, errmsgs.GetNotFoundErrorFromString("UserNotInProject")
+		}
 		return object, err
 	}
 	v, err := jsonpath.Get("$.Data.Connections", response)
@@ -142,7 +145,7 @@ func (s *DataworksService) DescribeDataWorksUserRoleBinding(id string) (object m
 			return item, nil
 		}
 	}
-	
+
 	return object, errmsgs.GetNotFoundErrorFromString("no binding found")
 }
 
@@ -311,7 +314,6 @@ func (s *DataworksService) GetFolderPath(id string) (path string, err error) {
 	return strings.Join(parts, "/"), nil
 }
 
-
 func (s *DataworksService) DescribeDataWorksBaseline(id string) (object map[string]interface{}, err error) {
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
@@ -323,24 +325,23 @@ func (s *DataworksService) DescribeDataWorksBaseline(id string) (object map[stri
 		"ProjectId":  parts[0],
 	}
 
-
 	response, err := s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetBaseline", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "The baseline does not exist.") {
-			return object, errmsgs.GetNotFoundErrorFromString("Not Found Baseline "+ id)
+			return object, errmsgs.GetNotFoundErrorFromString("Not Found Baseline " + id)
 		}
 		return object, errmsgs.WrapError(err)
 	}
 
 	data, exists := response["Data"]
 	if !exists {
-		return object, errmsgs.GetNotFoundErrorFromString("Not Found Baseline "+ id)
+		return object, errmsgs.GetNotFoundErrorFromString("Not Found Baseline " + id)
 	}
 
 	dataMap, ok := data.(map[string]interface{})
 	if !ok {
-		return object, errmsgs.GetNotFoundErrorFromString("Not Found Baseline "+ id)
+		return object, errmsgs.GetNotFoundErrorFromString("Not Found Baseline " + id)
 	}
-	
+
 	return dataMap, nil
 }
