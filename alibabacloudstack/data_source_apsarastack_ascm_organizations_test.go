@@ -15,33 +15,33 @@ func TestAccAlibabacloudStackAscmOrganizationDataSource(t *testing.T) {
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "^${alibabacloudstack_ascm_organization.org.name}$",
-			"parent_id": "1",
+			"parent_id":  "1",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "fake-nonexistent-org",
-			"parent_id": "1",
+			"parent_id":  "1",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_ascm_organization.org.id}"},
+			"ids":       []string{"${alibabacloudstack_ascm_organization.org.id}"},
 			"parent_id": "1",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"fake-id-12345"},
+			"ids":       []string{"fake-id-12345"},
 			"parent_id": "1",
 		}),
 	}
-	
+
 	pkConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"primary_key": "${alibabacloudstack_ascm_organization.org.primary_key}",
-			"parent_id": "1",
+			"primary_keys": []string{"${alibabacloudstack_ascm_organization.org.primary_key}"},
+			"parent_id":    "1",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"primary_key": "fake-pk-12345",
-			"parent_id": "1",
+			"primary_keys": []string{"fake-pk-12345"},
+			"parent_id":    "1",
 		}),
 	}
 
@@ -58,24 +58,24 @@ func TestAccAlibabacloudStackAscmOrganizationDataSource(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"${alibabacloudstack_ascm_organization.org.id}"},
-			"primary_key": "${alibabacloudstack_ascm_organization.org.primary_key}",
-			"name_regex": "^" + name + "$",
-			"parent_id":  "1",
+			"ids":          []string{"${alibabacloudstack_ascm_organization.org.id}"},
+			"primary_keys": []string{"${alibabacloudstack_ascm_organization.org.primary_key}"},
+			"name_regex":   "^" + name + "$",
+			"parent_id":    "1",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"fake-id-12345"},
-			"primary_key": "fake-pk-12345",
-			"name_regex": "another-fake-org",
-			"parent_id":  "1",
+			"ids":          []string{"fake-id-12345"},
+			"primary_keys": []string{"fake-pk-12345"},
+			"name_regex":   "another-fake-org",
+			"parent_id":    "1",
 		}),
 	}
 
 	var existAscmOrganizationsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":                "1",
-			"organizations.#":      "1",
-			"organizations.0.name": name,
+			"ids.#":                       "1",
+			"organizations.#":             "1",
+			"organizations.0.name":        name,
 			"organizations.0.primary_key": CHECKSET,
 			// Note: The original test expected these attributes to be unset,
 			// but according to the schema they should be computed.

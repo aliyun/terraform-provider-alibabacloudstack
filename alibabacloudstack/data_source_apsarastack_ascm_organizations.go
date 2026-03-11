@@ -32,9 +32,13 @@ func dataSourceAlibabacloudStackAscmOrganizations() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"primary_key": {
-				Type:     schema.TypeString,
+			"primary_keys": {
+				Type:     schema.TypeList,
 				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+				ForceNew: true,
+				MinItems: 1,
 			},
 			"output_file": {
 				Type:       schema.TypeString,
@@ -98,11 +102,6 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 	} else {
 		parentId, _ = strconv.Atoi(client.Department)
 	}
-	
-	var primaryKeyFilter string
-	if v, ok := d.GetOk("primary_key"); ok {
-		primaryKeyFilter = v.(string)
-	}
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetOrganizationList", "/ascm/auth/organization/queryList")
 	request.QueryParams["id"] = fmt.Sprintf("%d", parentId)
@@ -133,6 +132,7 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 		r = regexp.MustCompile(nameRegex.(string))
 	}
 	idsMap := getIdsStringFilter(d)
+	primaryKeys := getStringListFilters(d, "primary_keys")
 
 	var ids []string
 	var s []map[string]interface{}
@@ -170,8 +170,10 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 			primaryKey = resp.Data.PrimaryKey
 		}
 		
-		if primaryKeyFilter != "" && primaryKeyFilter != primaryKey {
-			continue
+		if len(primaryKeys) > 0 {
+			if _, ok := primaryKeys[primaryKey]; !ok {
+				continue
+			}
 		}
 		mapping := map[string]interface{}{
 			"id":          fmt.Sprint(rg.ID),
