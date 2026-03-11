@@ -32,6 +32,10 @@ func dataSourceAlibabacloudStackAscmOrganizations() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"primary_key": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -70,6 +74,14 @@ func dataSourceAlibabacloudStackAscmOrganizations() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
+						"primary_key": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"aliyunid": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -85,6 +97,11 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 		parentId = v.(int)
 	} else {
 		parentId, _ = strconv.Atoi(client.Department)
+	}
+	
+	var primaryKeyFilter string
+	if v, ok := d.GetOk("primary_key"); ok {
+		primaryKeyFilter = v.(string)
 	}
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetOrganizationList", "/ascm/auth/organization/queryList")
@@ -131,14 +148,41 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 		if parentId != 0 && parentId != rg.ParentID {
 			continue
 		}
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetPrivateCloudAccountByOrganizationId", "/ascm/auth/user/getPrivateCloudAccountByOrganizationId")
+		request.QueryParams["organizationId"] = fmt.Sprint(rg.ID)
+		request.QueryParams["OrganizationId"] = fmt.Sprint(rg.ID)
+		bresponse, err := client.ProcessCommonRequest(request)
+
+		var aliyunid, primaryKey string
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organizations", "GetPrivateCloudAccountByOrganizationId", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		} else {
+			var resp OrganizationIdResponse
+			err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			aliyunid = resp.Data.AliyunId
+			primaryKey = resp.Data.PrimaryKey
+		}
+		
+		if primaryKeyFilter != "" && primaryKeyFilter != primaryKey {
+			continue
+		}
 		mapping := map[string]interface{}{
-			"id":        fmt.Sprint(rg.ID),
-			"name":      rg.Name,
-			"parent_id": rg.ParentID,
-			"muser_id":  rg.MuserID,
-			"cuser_id":  rg.CuserID,
-			"alias":     rg.Alias,
-			"internal":  rg.Internal,
+			"id":          fmt.Sprint(rg.ID),
+			"name":        rg.Name,
+			"parent_id":   rg.ParentID,
+			"muser_id":    rg.MuserID,
+			"cuser_id":    rg.CuserID,
+			"alias":       rg.Alias,
+			"internal":    rg.Internal,
+			"aliyunid":    aliyunid,
+			"primary_key": primaryKey,
 		}
 		ids = append(ids, fmt.Sprint(rg.ID))
 		s = append(s, mapping)

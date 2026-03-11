@@ -33,6 +33,17 @@ func TestAccAlibabacloudStackAscmOrganizationDataSource(t *testing.T) {
 			"parent_id": "1",
 		}),
 	}
+	
+	pkConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"primary_key": "${alibabacloudstack_ascm_organization.org.primary_key}",
+			"parent_id": "1",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"primary_key": "fake-pk-12345",
+			"parent_id": "1",
+		}),
+	}
 
 	parentConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -48,11 +59,13 @@ func TestAccAlibabacloudStackAscmOrganizationDataSource(t *testing.T) {
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids":        []string{"${alibabacloudstack_ascm_organization.org.id}"},
+			"primary_key": "${alibabacloudstack_ascm_organization.org.primary_key}",
 			"name_regex": "^" + name + "$",
 			"parent_id":  "1",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":        []string{"fake-id-12345"},
+			"primary_key": "fake-pk-12345",
 			"name_regex": "another-fake-org",
 			"parent_id":  "1",
 		}),
@@ -63,6 +76,7 @@ func TestAccAlibabacloudStackAscmOrganizationDataSource(t *testing.T) {
 			"ids.#":                "1",
 			"organizations.#":      "1",
 			"organizations.0.name": name,
+			"organizations.0.primary_key": CHECKSET,
 			// Note: The original test expected these attributes to be unset,
 			// but according to the schema they should be computed.
 			// However, if the actual API doesn't return them in list mode,
@@ -83,7 +97,7 @@ func TestAccAlibabacloudStackAscmOrganizationDataSource(t *testing.T) {
 		existMapFunc: existAscmOrganizationsMapFunc,
 		fakeMapFunc:  fakeAscmOrganizationsMapFunc,
 	}
-	ascmOrganizationsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, parentConf, allConf)
+	ascmOrganizationsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, pkConf, idsConf, parentConf, allConf)
 }
 
 func dataSourceAscmOrganizationsConfigDependence(name string) string {

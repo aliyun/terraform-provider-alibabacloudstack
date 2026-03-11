@@ -170,6 +170,7 @@ func resourceAlibabacloudStackAscmOrganizationRead(d *schema.ResourceData, meta 
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetPrivateCloudAccountByOrganizationId", "/ascm/auth/user/getPrivateCloudAccountByOrganizationId")
 	request.QueryParams["organizationId"] = d.Id()
+	request.QueryParams["OrganizationId"] = d.Id()
 	bresponse, err := client.ProcessCommonRequest(request)
 	log.Printf(" response of raw UpdateOrganization : %s", bresponse)
 
@@ -178,7 +179,7 @@ func resourceAlibabacloudStackAscmOrganizationRead(d *schema.ResourceData, meta 
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", "ConsoleInstanceCreate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organizations", "GetPrivateCloudAccountByOrganizationId", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	} else {
 		var resp OrganizationIdResponse
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
