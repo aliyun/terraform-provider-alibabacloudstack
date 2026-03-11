@@ -99,6 +99,8 @@ func testAccAscm_e_Organization_resource(name string) string {
 }
 
 var testAccCheckAscmOrg = map[string]string{
-	"name":      CHECKSET,
-	"parent_id": CHECKSET,
+	"name":        CHECKSET,
+	"parent_id":   CHECKSET,
+	"aliyunid":    CHECKSET,
+	"primary_key": CHECKSET,
 }

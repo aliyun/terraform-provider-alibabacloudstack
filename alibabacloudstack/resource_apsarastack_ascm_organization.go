@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -39,6 +40,14 @@ func resourceAlibabacloudStackAscmOrganization() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"primary_key": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"aliyunid": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackAscmOrganizationCreate, resourceAlibabacloudStackAscmOrganizationRead, resourceAlibabacloudStackAscmOrganizationUpdate, resourceAlibabacloudStackAscmOrganizationDelete)
@@ -57,16 +66,16 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 	}
 	parentid := d.Get("parent_id").(string)
 	const waitDuration = 15 * time.Second
-        err = resource.Retry(waitDuration, func() *resource.RetryError {
-            check, err = ascmService.DescribeAscmOrganizationByName(name)
-            if err != nil {
-                return resource.NonRetryableError(err)
-            }
-            if len(check.Data) > 0 {
-                return nil
-            }
-            return resource.RetryableError(fmt.Errorf("waiting for organization to be available"))
-        })
+	err = resource.Retry(waitDuration, func() *resource.RetryError {
+		check, err = ascmService.DescribeAscmOrganizationByName(name)
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+		if len(check.Data) > 0 {
+			return nil
+		}
+		return resource.RetryableError(fmt.Errorf("waiting for organization to be available"))
+	})
 	if len(check.Data) == 0 {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateOrganization", "/ascm/auth/organization/add")
 		request.QueryParams["parentId"] = parentid
@@ -158,6 +167,27 @@ func resourceAlibabacloudStackAscmOrganizationRead(d *schema.ResourceData, meta 
 	d.Set("org_id", object.Data.UUID)
 	d.Set("name", object.Data.Name)
 	d.Set("parent_id", strconv.Itoa(object.Data.ParentID))
+
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetPrivateCloudAccountByOrganizationId", "/ascm/auth/user/getPrivateCloudAccountByOrganizationId")
+	request.QueryParams["organizationId"] = d.Id()
+	bresponse, err := client.ProcessCommonRequest(request)
+	log.Printf(" response of raw UpdateOrganization : %s", bresponse)
+
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", "ConsoleInstanceCreate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	} else {
+		var resp OrganizationIdResponse
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		d.Set("aliyunid", resp.Data.AliyunId)
+		d.Set("primary_key", resp.Data.PrimaryKey)
+	}
 
 	return nil
 }
