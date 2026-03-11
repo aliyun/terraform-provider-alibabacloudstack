@@ -626,7 +626,7 @@ type AscmRoleData struct {
 	RoleRange                string `json:"roleRange"`
 	RoleType                 string `json:"roleType"`
 	UserCount                int    `json:"userCount"`
-	assumeRolePolicyDocument string `json:"assumeRolePolicyDocument"`
+	AssumeRolePolicyDocument string `json:"assumeRolePolicyDocument"`
 }
 type CreateAscmRolesResponse struct {
 	Code    string       `json:"code"`
@@ -1059,4 +1059,51 @@ type InitPasswordListResponse struct {
 		Id          int    `json:"id"`
 		LoginName   string `json:"loginName"`
 	} `json:"data"`
+}
+
+// RoleResponse 角色响应结构体
+type AscmGetRoleResponse struct {
+	SuccessResponse bool               `json:"successResponse"`
+	EagleEyeTraceId string             `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool               `json:"asapiSuccess"`
+	Code            string             `json:"code"`
+	Cost            int                `json:"cost"`
+	ResponseVersion string             `json:"responseVersion"`
+	Data            AscmRoleDataForGet `json:"data"`
+	Success         bool               `json:"success"`
+	DynamicMessages []interface{}      `json:"dynamicMessages"`
+	Message         string             `json:"message"`
+}
+
+// RoleData 角色数据详情
+type AscmRoleDataForGet struct {
+	RoleRange  string `json:"roleRange"`
+	ArId       string `json:"arId"`
+	Privileges []struct {
+		Code                string `json:"code"`
+		PrivilegeStructures []struct {
+			Code string `json:"code"`
+			Name string `json:"name"`
+		} `json:"privilegeStructures"`
+	} `json:"privileges"`
+	RAMRole                  bool   `json:"rAMRole"`
+	Code                     string `json:"code"`
+	AssumeRolePolicyDocument string `json:"assumeRolePolicyDocument"`
+	OwnerOrganizationName    string `json:"ownerOrganizationName"`
+	Active                   bool   `json:"active"`
+	IsActive                 bool   `json:"isActive"`
+	RoleType                 string `json:"roleType"`
+	Default                  bool   `json:"default"`
+	EntityCounts             struct {
+		RAMRole int `json:"RAM_ROLE"`
+	} `json:"entityCounts"`
+	IsDefault              bool   `json:"isDefault"`
+	OwnerOrganizationId    int    `json:"ownerOrganizationId"`
+	Enable                 bool   `json:"enable"`
+	IsLocked               bool   `json:"isLocked"`
+	RoleName               string `json:"roleName"`
+	Id                     int    `json:"id"`
+	RoleLevel              int    `json:"roleLevel"`
+	Locked                 bool   `json:"locked"`
+	OrganizationVisibility string `json:"organizationVisibility"`
 }

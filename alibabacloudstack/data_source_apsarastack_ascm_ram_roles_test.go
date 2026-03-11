@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackAscmRamRolesDataSource(t *testing.T) {
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_ascm_ram_role.default.role_name}",
+			"name_regex": "testtf",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "fake-nonexistent-role",
@@ -23,15 +23,15 @@ func TestAccAlibabacloudStackAscmRamRolesDataSource(t *testing.T) {
 
 	idConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"id": "${alibabacloudstack_ascm_ram_role.default.role_id}",
+			"id": "${alibabacloudstack_ascm_ram_role.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"id": "-1",
 		}),
-	}	
+	}
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_ascm_ram_role.default.role_id}"},
+			"ids": []string{"${alibabacloudstack_ascm_ram_role.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"fake-id-12345"},
@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackAscmRamRolesDataSource(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"${alibabacloudstack_ascm_ram_role.default.role_id}"},
+			"ids":        []string{"${alibabacloudstack_ascm_ram_role.default.id}"},
 			"name_regex": "${alibabacloudstack_ascm_ram_role.default.role_name}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
@@ -51,9 +51,9 @@ func TestAccAlibabacloudStackAscmRamRolesDataSource(t *testing.T) {
 
 	var existAscmRamRolesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":       "1",
-			"roles.#":     "1",
-			"roles.0.id":  CHECKSET,
+			"ids.#":        "1",
+			"roles.#":      "1",
+			"roles.0.id":   CHECKSET,
 			"roles.0.name": name,
 			// Note: The original test expected these attributes to be unset,
 			// but according to the schema they should be computed.

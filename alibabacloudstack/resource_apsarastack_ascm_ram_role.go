@@ -32,6 +32,17 @@ func resourceAlibabacloudStackAscmRamRole() *schema.Resource {
 			"organization_visibility": {
 				Type:     schema.TypeString,
 				Required: true,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					old := oldValue
+					new := newValue
+					if strings.Contains(oldValue, "organizationVisibility.") {
+						old = strings.TrimPrefix(oldValue, "organizationVisibility.")
+					}
+					if strings.Contains(newValue, "organizationVisibility.") {
+						new = strings.TrimPrefix(newValue, "organizationVisibility.")
+					}
+					return old == new
+				},
 			},
 			"role_id": {
 				Type:     schema.TypeInt,
@@ -111,20 +122,20 @@ func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta inter
 		}
 		return errmsgs.WrapError(err)
 	}
-	if strings.Contains(object.OrganizationVisibility, "organizationVisibility.") {
-		object.OrganizationVisibility = strings.TrimPrefix(object.OrganizationVisibility, "organizationVisibility.")
+	organizationVisibility := object.OrganizationVisibility
+	if strings.Contains(organizationVisibility, "organizationVisibility.") {
+		organizationVisibility = strings.TrimPrefix(organizationVisibility, "organizationVisibility.")
 	}
 	d.Set("role_name", did[0])
-	d.Set("organization_visibility", object.OrganizationVisibility)
-	d.Set("role_id", object.ID)
-	d.Set("description", object.Description)
-	if object.assumeRolePolicyDocument != "" {
-		d.Set("assume_role_policy_document", object.assumeRolePolicyDocument)
+	d.Set("organization_visibility", organizationVisibility)
+	d.Set("role_id", object.Id)
+	d.Set("assume_role_policy_document", object.AssumeRolePolicyDocument)
+	d.Set("role_range", object.RoleRange)
+	description, err := ascmService.DescribeAscmRamRoleDescription(d.Id())
+	if err != nil {
+		return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 	}
-	if object.RoleRange != "-" {
-		d.Set("role_range", object.RoleRange)
-	}
-
+	d.Set("description", description)
 	return nil
 }
 

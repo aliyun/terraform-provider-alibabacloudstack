@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 
@@ -52,7 +53,7 @@ func dataSourceAlibabacloudStackAscmRoles() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"name": {
@@ -99,6 +100,14 @@ func dataSourceAlibabacloudStackAscmRoles() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"assume_role_policy_document": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"organization_visibility": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"code": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -123,12 +132,13 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 	//request.QueryParams["roleType"] = roleType
 
 	response := ListAscmRolesResponse{}
-	
+
 	data := []AscmRoleData{}
 
 	for {
 		request.QueryParams["currentPage"] = strconv.Itoa(currentPage)
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -141,8 +151,8 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		data = append(data, response.Data ...)
-		if response.AsapiErrorCode != "" || response.PageInfo.TotalPage <= currentPage || len(response.Data) < pageSize {
+		data = append(data, response.Data...)
+		if response.PageInfo.TotalPage <= currentPage || len(response.Data) < pageSize {
 			break
 		}
 		currentPage += 1
@@ -155,7 +165,7 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 	idsMap := getIdsStringFilter(d)
 	var ids []string
 	var s []map[string]interface{}
-
+	ascmservice := AscmService{client}
 	for _, rg := range data {
 		if r != nil && !r.MatchString(rg.RoleName) {
 			continue
@@ -171,24 +181,33 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 		if roleType != "" && rg.RoleType != roleType {
 			continue
 		}
+		log.Printf("[DEBUG] alibabacloudstack_ascm_ram_role ------------------------------------------ role.assume_role_policy_document: %s", rg.AssumeRolePolicyDocument)
+		roleid := fmt.Sprintf("%s:%d", rg.RoleName, rg.ID)
 		mapping := map[string]interface{}{
-			"id":                    rg.ID,
-			"name":                  rg.RoleName,
-			"owner_organization_id": rg.OwnerOrganizationID,
-			"description":           rg.Description,
-			"user_count":            rg.UserCount,
-			"role_level":            rg.RoleLevel,
-			"role_type":             rg.RoleType,
-			"role_range":            rg.RoleRange,
-			"ram_role":              rg.RAMRole,
-			"enable":                rg.Enable,
-			"active":                rg.Active,
-			"default":               rg.Default,
-			"code":                  rg.Code,
+			"id":                          roleid,
+			"name":                        rg.RoleName,
+			"owner_organization_id":       rg.OwnerOrganizationID,
+			"description":                 rg.Description,
+			"user_count":                  rg.UserCount,
+			"role_level":                  rg.RoleLevel,
+			"role_type":                   rg.RoleType,
+			"role_range":                  rg.RoleRange,
+			"ram_role":                    rg.RAMRole,
+			"enable":                      rg.Enable,
+			"active":                      rg.Active,
+			"default":                     rg.Default,
+			"code":                        rg.Code,
+			"assume_role_policy_document": rg.AssumeRolePolicyDocument,
+			"organization_visibility":     rg.OrganizationVisibility,
 		}
-		ids = append(ids, fmt.Sprint(rg.ID))
+		if rg.RoleType == "ROLETYPE_RAMROLEAUTHORIZATION" {
+			ramRole, err := ascmservice.DescribeAscmRamRole(roleid)
+			if err == nil {
+				mapping["assume_role_policy_document"] = ramRole.AssumeRolePolicyDocument
+			}
+		}
+		ids = append(ids, roleid)
 		s = append(s, mapping)
-		break
 	}
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("roles", s); err != nil {

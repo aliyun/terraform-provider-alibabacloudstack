@@ -125,7 +125,29 @@ func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRol
 	return resp, nil
 }
 
-func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleData, err error) {
+func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleDataForGet, err error) {
+	did := strings.Split(id, COLON_SEPARATED)
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetRole", "/ascm/auth/role/getRole")
+	request.QueryParams["roleId"] = did[1]
+	response := AscmGetRoleResponse{}
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	return &response.Data, nil
+}
+
+func (s *AscmService) DescribeAscmRamRoleDescription(id string) (description string, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "/ascm/auth/role/listRoles")
 	request.QueryParams["roleName"] = did[0]
@@ -140,15 +162,15 @@ func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleData, err er
 		bresponse, err := s.client.ProcessCommonRequest(request)
 		if err != nil {
 			if bresponse == nil {
-				return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+				return "", errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return nil, errmsgs.WrapError(err)
+			return "", errmsgs.WrapError(err)
 		}
 		data = append(data, response.Data...)
 		if response.AsapiErrorCode != "" || response.PageInfo.TotalPage <= currentPage || len(response.Data) < pageSize {
@@ -159,11 +181,11 @@ func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleData, err er
 
 	for _, rg := range data {
 		if rg.RoleName == did[0] {
-			return &rg, nil
+			return rg.Description, nil
 		}
 	}
 
-	return nil, errmsgs.GetNotFoundErrorFromString("role " + did[0] + " not found")
+	return "", errmsgs.GetNotFoundErrorFromString("role " + did[0] + " description not found")
 }
 
 func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, err error) {
@@ -579,9 +601,9 @@ func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, er
 		return resp, errmsgs.WrapError(err)
 	}
 
- if len(resp.Data) < 1 {
- 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Found binding for user %s", parts[0]))
- 	}
+	if len(resp.Data) < 1 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Found binding for user %s", parts[0]))
+	}
 
 	if len(parts) == 2 {
 		roleId, err := strconv.Atoi(parts[1])
@@ -593,7 +615,7 @@ func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, er
 				return resp, nil
 			}
 		}
-  return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Found role %d binding for user %s", roleId, parts[0]))
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Found role %d binding for user %s", roleId, parts[0]))
 	}
 
 	return resp, nil
@@ -686,6 +708,38 @@ func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, e
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMPolicies", "/ascm/auth/role/listRAMPolicies")
 	request.QueryParams["policyName"] = did[0]
+	var resp = &RamPolicies{}
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("ListRAMPolicies", bresponse, request, request.QueryParams)
+
+	if err != nil {
+		errmsg := ""
+		if bresponse != nil {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		} else {
+			return nil, err
+		}
+		if errmsgs.IsExpectedErrors(err, "ErrorRamPolicyNotFound") {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+	if err != nil {
+		return resp, errmsgs.WrapError(err)
+	}
+
+	if resp.Code == "200" {
+		return resp, errmsgs.WrapError(err)
+	}
+
+	return resp, nil
+}
+
+func (s *AscmService) DescribeAscmRamPolicyForRoleId(id string) (response *RamPolicies, err error) {
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetRole", "")
+	request.QueryParams["roleId"] = id
 	var resp = &RamPolicies{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug("ListRAMPolicies", bresponse, request, request.QueryParams)
