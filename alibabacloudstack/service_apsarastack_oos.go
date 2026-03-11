@@ -21,7 +21,7 @@ func (s *OosService) DescribeOosTemplate(id string) (object map[string]interface
 	}
 	request["PageSize"] = 1
 	request["PageNumber"] = 1
-	response, err = s.client.DoTeaRequest("POST", "Oos", "2019-06-01", "GetTemplate", "", nil, nil, request)
+	response, err = s.client.DoTeaRequest("POST", "oos", "2019-06-01", "GetTemplate", "", nil, nil, request)
 	addDebug("GetTemplate", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "EntityNotExists.Template") {
@@ -35,6 +35,7 @@ func (s *OosService) DescribeOosTemplate(id string) (object map[string]interface
 		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Template", response)
 	}
 	object = v.(map[string]interface{})
+	object["Content"] = response["Content"]
 	return object, nil
 }
 

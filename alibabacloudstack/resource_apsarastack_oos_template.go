@@ -47,7 +47,6 @@ func resourceAlibabacloudStackOosTemplate() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"tags": tagsSchema(),
 			"template_format": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -93,20 +92,18 @@ func resourceAlibabacloudStackOosTemplateCreate(d *schema.ResourceData, meta int
 	action := "CreateTemplate"
 	request := make(map[string]interface{})
 	request["Content"] = d.Get("content")
-	if v, ok := d.GetOk("tags"); ok {
-		respJson, err := convertMaptoJsonString(v.(map[string]interface{}))
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		request["Tags"] = respJson
-	}
+//	if v, ok := d.GetOk("tags"); ok {
+//		respJson, err := convertMaptoJsonString(v.(map[string]interface{}))
+//		if err != nil {
+//			return errmsgs.WrapError(err)
+//		}
+//		request["Tags"] = respJson
+//	}
 	request["TemplateName"] = d.Get("template_name")
 	if v, ok := d.GetOk("version_name"); ok {
 		request["VersionName"] = v
 	}
-	request["PageSize"] = PageSizeLarge
-	request["PageNumber"] = 1
-	response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
+	response, err := client.DoTeaRequest("POST", "oos", "2019-06-01", action, "", nil, nil, request)
 	if err != nil {
 		errmsg := ""
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oos_template", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -130,14 +127,15 @@ func resourceAlibabacloudStackOosTemplateRead(d *schema.ResourceData, meta inter
 	}
 
 	d.Set("template_name", d.Id())
+	d.Set("content", object["Content"])
 	d.Set("created_by", object["CreatedBy"])
 	d.Set("created_date", object["CreatedDate"])
 	d.Set("description", object["Description"])
 	d.Set("has_trigger", object["HasTrigger"])
 	d.Set("share_type", object["ShareType"])
-	if v, ok := object["Tags"].(map[string]interface{}); ok {
-		d.Set("tags", tagsToMap(v))
-	}
+//	if v, ok := object["Tags"].(map[string]interface{}); ok {
+//		d.Set("tags", tagsToMap(v))
+//	}
 	d.Set("template_format", object["TemplateFormat"])
 	d.Set("template_id", object["TemplateId"])
 	d.Set("template_type", object["TemplateType"])
@@ -148,33 +146,23 @@ func resourceAlibabacloudStackOosTemplateRead(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackOosTemplateUpdate(d *schema.ResourceData, meta interface{}) error {
+	if d.IsNewResource() {
+		return nil
+	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	update := false
 	request := map[string]interface{}{
 		"TemplateName": d.Id(),
 	}
-	if d.HasChange("content") {
-		update = true
-	}
-	request["Content"] = d.Get("content")
-	if d.HasChange("tags") {
-		update = true
-		respJson, err := convertMaptoJsonString(d.Get("tags").(map[string]interface{}))
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oos_template", "UpdateTemplate", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		request["Tags"] = respJson
-	}
-	if d.HasChange("version_name") {
-		update = true
+	if d.HasChanges("content", "version_name") {
+		request["Content"] = d.Get("content")
+//		respJson, err := convertMaptoJsonString(d.Get("tags").(map[string]interface{}))
+//		if err != nil {
+//			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oos_template", "UpdateTemplate", errmsgs.AlibabacloudStackSdkGoERROR)
+//		}
+//		request["Tags"] = respJson
 		request["VersionName"] = d.Get("version_name")
-	}
-	if update {
 		action := "UpdateTemplate"
-		request["PageSize"] = PageSizeLarge
-		request["PageNumber"] = 1
-		_, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
-		if err != nil {
+		if _, err := client.DoTeaRequest("POST", "oos", "2019-06-01", action, "", nil, nil, request); err != nil {
 			errmsg := ""
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
@@ -194,7 +182,7 @@ func resourceAlibabacloudStackOosTemplateDelete(d *schema.ResourceData, meta int
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-	_, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
+	_, err := client.DoTeaRequest("POST", "oos", "2019-06-01", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "EntityNotExists.Template") {
 			return nil

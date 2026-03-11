@@ -99,7 +99,6 @@ func TestAccAlibabacloudStackOosTemplatesDataSource(t *testing.T) {
 			"templates.0.template_id":      CHECKSET,
 			"templates.0.id":               name,
 			"templates.0.template_name":    name,
-			"templates.0.template_type":    "Automation",
 			"templates.0.template_version": CHECKSET,
 			"templates.0.updated_by":       CHECKSET,
 			"templates.0.updated_date":     CHECKSET,

@@ -39,72 +39,74 @@ func TestAccAlibabacloudStackOosTemplate0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"content": "{\"FormatVersion\": \"OOS-2019-06-01\", \"Description\": \"test\", \"Parameters\": {\"Status\": {\"Type\": \"String\", \"Description\": \"test\"}}",
+					"content": TfRawString(`	jsonencode({
+    FormatVersion = "OOS-2019-06-01"
+    Description   = "Update Describe instances of given status"
+    
+    Parameters = {
+      Status = {
+        Type        = "String"
+        Description = "(Required) The status of the Ecs instance."
+      }
+    }
 
-					"template_name": "rdk-test",
+    Tasks = [
+      {
+        Name   = "foo"
+        Action = "ACS::ExecuteApi"
+        
+        Properties = {
+          API      = "DescribeInstances"
+          Service  = "Ecs"
+          Parameters = {
+            Status = "{{ Status }}"
+          }
+        }
+      }
+    ]
+  })`),
+					"template_name": "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"content": "{\"FormatVersion\": \"OOS-2019-06-01\", \"Description\": \"test\", \"Parameters\": {\"Status\": {\"Type\": \"String\", \"Description\": \"test\"}}",
-
-						"template_name": "rdk-test",
+						"content":       `{"Description":"Update Describe instances of given status","FormatVersion":"OOS-2019-06-01","Parameters":{"Status":{"Description":"(Required) The status of the Ecs instance.","Type":"String"}},"Tasks":[{"Action":"ACS::ExecuteApi","Name":"foo","Properties":{"API":"DescribeInstances","Parameters":{"Status":"{{ Status }}"},"Service":"Ecs"}}]}`,
+						"template_name": name,
 					}),
 				),
 			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"content": TfRawString(`	jsonencode({
+  FormatVersion = "OOS-2019-06-01"
+  Description   = "Update Describe instances of given status"
+  
+  Parameters = {
+    Status = {
+      Type        = "String"
+      Description = "(Required) The status of the Ecs instance."
+    }
+  }
 
-					"content": "{\"FormatVersion\": \"OOS-2023-11-29\", \"Description\": \"test\", \"Parameters\": {\"Status\": {\"Type\": \"String\", \"Description\": \"test\"}}",
+  Tasks = [
+    {
+      Name   = "bar"
+      Action = "ACS::ExecuteApi"
+      
+      Properties = {
+        API      = "DescribeInstances"
+        Service  = "Ecs"
+        Parameters = {
+          Status = "{{ Status }}"
+        }
+      }
+    }
+  ]
+})`),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"content": "{\"FormatVersion\": \"OOS-2023-11-29\", \"Description\": \"test\", \"Parameters\": {\"Status\": {\"Type\": \"String\", \"Description\": \"test\"}}",
-					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "Test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "Test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "Test-update",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF-update",
-						"tags.For":     "Test-update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "0",
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
+						"content":       `{"Description":"Update Describe instances of given status","FormatVersion":"OOS-2019-06-01","Parameters":{"Status":{"Description":"(Required) The status of the Ecs instance.","Type":"String"}},"Tasks":[{"Action":"ACS::ExecuteApi","Name":"bar","Properties":{"API":"DescribeInstances","Parameters":{"Status":"{{ Status }}"},"Service":"Ecs"}}]}`,
 					}),
 				),
 			},
@@ -112,38 +114,24 @@ func TestAccAlibabacloudStackOosTemplate0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"auto_delete_executions"},
 			},
 		},
 	})
 }
 
 var AlibabacloudTestAccOosTemplateCheckmap = map[string]string{
-
-	"description": CHECKSET,
-
-	"template_format": CHECKSET,
-
-	"updated_date": CHECKSET,
-
+	"description":      CHECKSET,
+	"template_format":  CHECKSET,
+	"updated_date":     CHECKSET,
 	"template_version": CHECKSET,
-
-	"updated_by": CHECKSET,
-
-	"has_trigger": CHECKSET,
-
-	"template_name": CHECKSET,
-
-	"tags": CHECKSET,
-
-	"template_id": CHECKSET,
-
-	"created_by": CHECKSET,
-
-	"create_time": CHECKSET,
-
-	"content": CHECKSET,
-
-	"share_type": CHECKSET,
+	"updated_by":       CHECKSET,
+	"has_trigger":      CHECKSET,
+	"template_name":    CHECKSET,
+	"template_id":      CHECKSET,
+	"created_by":       CHECKSET,
+	"content":          CHECKSET,
+	"share_type":       CHECKSET,
 }
 
 func AlibabacloudTestAccOosTemplateBasicdependence(name string) string {
