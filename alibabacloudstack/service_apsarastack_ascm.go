@@ -125,11 +125,12 @@ func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRol
 	return resp, nil
 }
 
-func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleDataForGet, err error) {
+func (s *AscmService) DescribeAscmRamRoleForRoleid(id string) (role *AscmRoleDataForGet, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetRole", "/ascm/auth/role/getRole")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetRole", "")
 	request.QueryParams["roleId"] = did[1]
 	response := AscmGetRoleResponse{}
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
@@ -147,7 +148,7 @@ func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleDataForGet, 
 	return &response.Data, nil
 }
 
-func (s *AscmService) DescribeAscmRamRoleDescription(id string) (description string, err error) {
+func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleData, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "/ascm/auth/role/listRoles")
 	request.QueryParams["roleName"] = did[0]
@@ -162,15 +163,15 @@ func (s *AscmService) DescribeAscmRamRoleDescription(id string) (description str
 		bresponse, err := s.client.ProcessCommonRequest(request)
 		if err != nil {
 			if bresponse == nil {
-				return "", errmsgs.WrapErrorf(err, "Process Common Request Failed")
+				return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return "", errmsgs.WrapError(err)
+			return nil, errmsgs.WrapError(err)
 		}
 		data = append(data, response.Data...)
 		if response.AsapiErrorCode != "" || response.PageInfo.TotalPage <= currentPage || len(response.Data) < pageSize {
@@ -181,11 +182,11 @@ func (s *AscmService) DescribeAscmRamRoleDescription(id string) (description str
 
 	for _, rg := range data {
 		if rg.RoleName == did[0] {
-			return rg.Description, nil
+			return &rg, nil
 		}
 	}
 
-	return "", errmsgs.GetNotFoundErrorFromString("role " + did[0] + " description not found")
+	return nil, errmsgs.GetNotFoundErrorFromString("role " + did[0] + " not found")
 }
 
 func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, err error) {

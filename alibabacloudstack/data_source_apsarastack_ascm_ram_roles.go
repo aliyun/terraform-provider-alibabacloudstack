@@ -201,7 +201,7 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 			"organization_visibility":     rg.OrganizationVisibility,
 		}
 		if rg.RoleType == "ROLETYPE_RAMROLEAUTHORIZATION" {
-			ramRole, err := ascmservice.DescribeAscmRamRole(roleid)
+			ramRole, err := ascmservice.DescribeAscmRamRoleForRoleid(roleid)
 			if err == nil {
 				mapping["assume_role_policy_document"] = ramRole.AssumeRolePolicyDocument
 			}

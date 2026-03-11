@@ -128,14 +128,13 @@ func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta inter
 	}
 	d.Set("role_name", did[0])
 	d.Set("organization_visibility", organizationVisibility)
-	d.Set("role_id", object.Id)
-	d.Set("assume_role_policy_document", object.AssumeRolePolicyDocument)
+	d.Set("role_id", object.ID)
 	d.Set("role_range", object.RoleRange)
-	description, err := ascmService.DescribeAscmRamRoleDescription(d.Id())
-	if err != nil {
-		return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	role, err := ascmService.DescribeAscmRamRoleForRoleid(d.Id())
+	if err == nil {
+		d.Set("assume_role_policy_document", role.AssumeRolePolicyDocument)
 	}
-	d.Set("description", description)
+	d.Set("description", object.Description)
 	return nil
 }
 
