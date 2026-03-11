@@ -707,11 +707,11 @@ func (s *AscmService) DescribeAscmOrganizationByName(name string) (response *Org
 
 func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMPolicies", "/ascm/auth/role/listRAMPolicies")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRamPolicies", "/ascm/auth/role/listRAMPolicies")
 	request.QueryParams["policyName"] = did[0]
 	var resp = &RamPolicies{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("ListRAMPolicies", bresponse, request, request.QueryParams)
+	addDebug("ListRamPolicies", bresponse, request, request.QueryParams)
 
 	if err != nil {
 		errmsg := ""
@@ -723,7 +723,7 @@ func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, e
 		if errmsgs.IsExpectedErrors(err, "ErrorRamPolicyNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRamPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
@@ -743,7 +743,7 @@ func (s *AscmService) DescribeAscmRamPolicyForRoleId(id string) (response *RamPo
 	request.QueryParams["roleId"] = id
 	var resp = &RamPolicies{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("ListRAMPolicies", bresponse, request, request.QueryParams)
+	addDebug("ListRamPolicies", bresponse, request, request.QueryParams)
 
 	if err != nil {
 		errmsg := ""
@@ -755,7 +755,7 @@ func (s *AscmService) DescribeAscmRamPolicyForRoleId(id string) (response *RamPo
 		if errmsgs.IsExpectedErrors(err, "ErrorRamPolicyNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRamPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
@@ -772,11 +772,11 @@ func (s *AscmService) DescribeAscmRamPolicyForRoleId(id string) (response *RamPo
 
 func (s *AscmService) DescribeAscmRamPolicyForRole(id string) (response *RamPolicies, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMPolicies", "/ascm/auth/role/listRAMPolicies")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRamPolicies", "/ascm/auth/role/listRAMPolicies")
 	request.QueryParams["RamPolicyId"] = did[0]
 	var resp = &RamPolicies{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("ListRAMPolicies", bresponse, request, request.QueryParams)
+	addDebug("ListRamPolicies", bresponse, request, request.QueryParams)
 
 	if err != nil {
 		errmsg := ""
@@ -788,9 +788,9 @@ func (s *AscmService) DescribeAscmRamPolicyForRole(id string) (response *RamPoli
 		if errmsgs.IsExpectedErrors(err, "ErrorRamPolicyNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRamPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListRAMPolicies", response, request, request.QueryParams)
+	addDebug("ListRamPolicies", response, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
