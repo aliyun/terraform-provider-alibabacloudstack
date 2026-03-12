@@ -1,3 +1,17 @@
+# 3.18.25
+
+## 新增
+
+1. mqtt集群的查询能力（`alibabacloudstack_mqtt_clusters`）
+2. ons集群的查询能力（`alibabacloudstack_ons_clusters`）
+3. ascm组织`alibabacloudstack_ascm_organization`支持获取PK信息
+
+## 修复
+1. Datawork Remain无法正常使用的问题
+2. Datawork Connection无法正常使用的问题
+
+---
+
 # 3.18.24
 
 ## 新增

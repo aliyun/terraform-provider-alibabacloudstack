@@ -1,3 +1,20 @@
+# 3.18.25
+
+## Added
+
+1. Added query capability for MQTT clusters (alibabacloudstack_mqtt_clusters).
+2. Added query capability for ONS clusters (alibabacloudstack_ons_clusters).
+3. alibabacloudstack_ascm_organization now supports retrieving PK (Primary Key) information.
+
+## Fixed
+
+1. Fixed an issue where Dataworks Remain was not functioning correctly.
+2. Fixed an issue where Dataworks Connection was not functioning correctly.
+
+
+
+---
+
 # 3.18.24
 
 ## Added
