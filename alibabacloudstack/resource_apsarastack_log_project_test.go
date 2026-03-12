@@ -1,69 +1,13 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
-	"strings"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
-
-func init() {
-	resource.AddTestSweepers("alibabacloudstack_log_project", &resource.Sweeper{
-		Name: "alibabacloudstack_log_project",
-		F:    testSweepLogProjects,
-	})
-}
-
-func testSweepLogProjects(region string) error {
-	rawClient, err := sharedClientForRegion(region)
-	if err != nil {
-		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
-	}
-	client := rawClient.(*connectivity.AlibabacloudStackClient)
-
-	prefixes := []string{
-		"tf-testacc",
-		"tf_testAcc",
-		"tf_test_",
-		"tf-test-",
-	}
-	request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "ListProject", "")
-	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
-	var logProject *LogProject
-	bresponse, _ := client.ProcessCommonRequest(request)
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &logProject)
-	if err != nil {
-		return fmt.Errorf("error unmarshaling LogProject: %s", err)
-	}
-	for _, v := range logProject.Projects {
-		name := v.ProjectName
-		skip := true
-		for _, prefix := range prefixes {
-			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				skip = false
-				break
-			}
-		}
-		if skip {
-			log.Printf("[INFO] Skipping Log Project: %s", name)
-			continue
-		}
-		log.Printf("[INFO] Deleting Log Project: %s", name)
-		request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "DeleteProject", "")
-		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
-		request.QueryParams["ProjectName"] = name
-		_, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			log.Printf("[ERROR] Failed to delete Log Project (%s): %s", name, err)
-		}
-	}
-	return nil
-}
 
 func TestAccAlibabacloudStackLogProject_basic(t *testing.T) {
 	var v *LogProject

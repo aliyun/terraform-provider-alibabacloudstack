@@ -136,11 +136,11 @@ func removeRepByMap(slc []string) []string {
 func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	// TODO: This interface is an asapi interface and is not open to pop
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "")
-	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
+	var Datas []KVInstanceClass
+	pageNumber := 1
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select")
 	mergeMaps(request.QueryParams, map[string]string{
-		"PageSize":  "500",
+		"pageSize":  "100",
 		"saleType":  "new",
 		"pageStart": "1",
 		"status":    "Available",
@@ -160,74 +160,80 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 	if v, ok := d.GetOk("architecture"); ok {
 		request.QueryParams["architecture"] = v.(string)
 	}
-	bresponse, err := client.ProcessCommonRequest(request)
-	log.Printf("Response of ListBucketVpc: %s", bresponse)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		if ossNotFoundError(err) {
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "SelectCommonSpec", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
-	}
-	log.Printf("Bresponse SelectCommonSpec after error")
-	addDebug("SelectCommonSpec", bresponse, nil, request)
-
-	var response *GetKVInstanceClassResponse
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-
-	var datas []KVInstanceClass
-	if string(response.Data) == "{}" {
-		datas = []KVInstanceClass{}
-	} else {
-		if err := json.Unmarshal(response.Data, &datas); err != nil {
-			// Optional: try to parse as single object? (not needed here)
-			return fmt.Errorf("failed to unmarshal data as array: %w", err)
-		}
-	}
-	var Datas []KVInstanceClass
-	var cpu int
-	var memory float64
-	if v, ok := d.GetOk("cpu"); ok {
-		cpu = v.(int)
-	}
-	if v, ok := d.GetOk("memory"); ok {
-		memory = v.(float64)
-	}
-
-	for _, data := range datas {
-		// Convert raw.Memory to float32
-		switch v := data.Memory.(type) {
-		case float64:
-			data.Memory = v
-		case string:
-			if f, err := strconv.ParseFloat(v, 64); err == nil {
-				data.Memory = float64(f)
-			} else {
-				return fmt.Errorf("cannot parse memory string %q as float32", v)
+	for {
+		request.QueryParams["pageStart"] = strconv.Itoa(pageNumber)
+		bresponse, err := client.ProcessCommonRequest(request)
+		log.Printf("Response of ListBucketVpc: %s", bresponse)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-		case int:
-			data.Memory = float64(v)
-		case float32:
-			data.Memory = float64(v)
-		default:
-			return fmt.Errorf("unsupported type for memory: %T (value: %v)", v, v)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if ossNotFoundError(err) {
+				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "SelectCommonSpec", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
-		if data.Cpu == 0 && data.CpuCore != 0 {
-			data.Cpu = data.CpuCore
+		log.Printf("Bresponse SelectCommonSpec after error")
+		addDebug("SelectCommonSpec", bresponse, nil, request)
+
+		var response *GetKVInstanceClassResponse
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if err != nil {
+			return errmsgs.WrapError(err)
 		}
-		if cpu != 0 && data.Cpu != cpu {
-			continue
+
+		var datas []KVInstanceClass
+		if string(response.Data) == "{}" {
+			datas = []KVInstanceClass{}
+		} else {
+			if err := json.Unmarshal(response.Data, &datas); err != nil {
+				// Optional: try to parse as single object? (not needed here)
+				return fmt.Errorf("failed to unmarshal data as array: %w", err)
+			}
 		}
-		if memory != 0 && data.Memory != memory {
-			continue
+		var cpu int
+		var memory float64
+		if v, ok := d.GetOk("cpu"); ok {
+			cpu = v.(int)
 		}
-		Datas = append(Datas, data)
+		if v, ok := d.GetOk("memory"); ok {
+			memory = v.(float64)
+		}
+
+		for _, data := range datas {
+			// Convert raw.Memory to float32
+			switch v := data.Memory.(type) {
+			case float64:
+				data.Memory = v
+			case string:
+				if f, err := strconv.ParseFloat(v, 64); err == nil {
+					data.Memory = float64(f)
+				} else {
+					return fmt.Errorf("cannot parse memory string %q as float32", v)
+				}
+			case int:
+				data.Memory = float64(v)
+			case float32:
+				data.Memory = float64(v)
+			default:
+				return fmt.Errorf("unsupported type for memory: %T (value: %v)", v, v)
+			}
+			if data.Cpu == 0 && data.CpuCore != 0 {
+				data.Cpu = data.CpuCore
+			}
+			if cpu != 0 && data.Cpu != cpu {
+				continue
+			}
+			if memory != 0 && data.Memory != memory {
+				continue
+			}
+			Datas = append(Datas, data)
+		}
+		if len(datas) < 100 {
+			break
+		}
+		pageNumber += 1
 	}
 
 	sortedBy := d.Get("sorted_by").(string)
@@ -265,7 +271,7 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 
 	d.SetId(dataResourceIdHash(ids))
 
-	err = d.Set("instance_classes", s)
+	err := d.Set("instance_classes", s)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
