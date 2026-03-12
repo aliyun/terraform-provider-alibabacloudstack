@@ -56,7 +56,6 @@ func (s *AscmService) DescribeAscmResourceGroup(id string) (result *ResourceGrou
 	}
 	request.QueryParams["OrganizationId"] = did[0]
 	request.QueryParams["Department"] = did[0]
-	request.QueryParams["Department"] = did[0]
 	var resp = &ResourceGroup{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug("ListResourceGroup", bresponse, request, request.QueryParams)
@@ -1011,7 +1010,7 @@ func (s *AscmService) ListRAMServiceRoles(id string) (*ListRAMServiceRolesRespon
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoles", "/ascm/auth/role/listRAMServiceRoles")
 	params := strings.Split(id, ":")
 	request.QueryParams["organizationId"] = params[0]
-	request.QueryParams["OrganizationId"] = params[0]
+	request.QueryParams["OrganizationId"] = params[0] // Due to the case-sensitivity strategy of the POP gateway, both orgid and OrgId must be set.
 	request.QueryParams["productName"] = params[1]
 	var response ListRAMServiceRolesResponse
 	bresponse, err := s.client.ProcessCommonRequest(request)

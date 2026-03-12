@@ -150,7 +150,7 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 		}
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetPrivateCloudAccountByOrganizationId", "/ascm/auth/user/getPrivateCloudAccountByOrganizationId")
 		request.QueryParams["organizationId"] = fmt.Sprint(rg.ID)
-		request.QueryParams["OrganizationId"] = fmt.Sprint(rg.ID)
+		request.QueryParams["OrganizationId"] = fmt.Sprint(rg.ID) // Due to the case-sensitivity strategy of the POP gateway, both orgid and OrgId must be set.
 		bresponse, err := client.ProcessCommonRequest(request)
 
 		var aliyunid, primaryKey string
