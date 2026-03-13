@@ -165,7 +165,7 @@ func resourceAlibabacloudStackOosExecutionCreate(d *schema.ResourceData, meta in
 		request["TemplateVersion"] = v
 	}
 
-	response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
+	response, err := client.DoTeaRequest("POST", "oos", "2019-06-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func resourceAlibabacloudStackOosExecutionDelete(d *schema.ResourceData, meta in
 	request := make(map[string]interface{})
 	request["ExecutionIds"] = convertListToJsonString(convertListStringToListInterface([]string{d.Id()}))
 
-	_, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
+	_, err := client.DoTeaRequest("POST", "oos", "2019-06-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

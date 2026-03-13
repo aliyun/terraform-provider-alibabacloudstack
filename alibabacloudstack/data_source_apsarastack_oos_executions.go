@@ -259,7 +259,7 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 	idsMap := getIdsStringFilter(d)
 
 	for {
-		response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
+		response, err := client.DoTeaRequest("POST", "oos", "2019-06-01", action, "", nil, nil, request)
 		if err != nil {
 			errmsg := ""
 			if response != nil {

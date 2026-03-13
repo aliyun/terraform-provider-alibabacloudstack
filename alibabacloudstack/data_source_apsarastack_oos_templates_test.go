@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestAccAlibabacloudStackOosTemplatesDataSource(t *testing.T) {
@@ -10,6 +11,10 @@ func TestAccAlibabacloudStackOosTemplatesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testAccOosTemplate-%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOosTemplatesDependence)
+
+	oneDay, _ := time.ParseDuration("24h")
+	oneDayAfter := time.Now().Add(oneDay).Format("2006-01-02T15:04Z")
+	oneDayDefore := time.Now().Add(-oneDay).Format("2006-01-02T15:04Z")
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -19,6 +24,48 @@ func TestAccAlibabacloudStackOosTemplatesDataSource(t *testing.T) {
 			"name_regex": "${alibabacloudstack_oos_template.default.template_name}-fake",
 		}),
 	}
+	
+	formatConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"template_format": "JSON",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"template_format": "YAML",
+		}),
+	}
+
+	createByConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"created_by": "${alibabacloudstack_oos_template.default.created_by}",
+			"ids":        []string{"${alibabacloudstack_oos_template.default.template_name}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"created_by": "${alibabacloudstack_oos_template.default.created_by}-fake",
+			"ids":        []string{"${alibabacloudstack_oos_template.default.template_name}"},
+		}),
+	}
+
+	createDataBeforeConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"created_date": oneDayAfter,
+			"ids":          []string{"${alibabacloudstack_oos_template.default.template_name}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"created_date": oneDayDefore,
+			"ids":          []string{"${alibabacloudstack_oos_template.default.template_name}"},
+		}),
+	}
+
+	createDataAfterConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"created_date_after": oneDayDefore,
+			"ids":                []string{"${alibabacloudstack_oos_template.default.template_name}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"created_date_after": oneDayAfter,
+			"ids":                []string{"${alibabacloudstack_oos_template.default.template_name}"},
+		}),
+	}
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -26,22 +73,6 @@ func TestAccAlibabacloudStackOosTemplatesDataSource(t *testing.T) {
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"${alibabacloudstack_oos_template.default.template_name}-fake"},
-		}),
-	}
-	tagsConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_oos_template.default.template_name}"},
-			"tags": map[string]interface{}{
-				"Created": "TF",
-				"For":     "template Test",
-			},
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_oos_template.default.template_name}"},
-			"tags": map[string]interface{}{
-				"Created": "TF_fake",
-				"For":     "template Test",
-			},
 		}),
 	}
 	shareTypeConf := dataSourceTestAccConfig{
@@ -66,20 +97,12 @@ func TestAccAlibabacloudStackOosTemplatesDataSource(t *testing.T) {
 	}
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_oos_template.default.template_name}"},
-			"tags": map[string]interface{}{
-				"Created": "TF",
-				"For":     "template Test",
-			},
+			"ids":         []string{"${alibabacloudstack_oos_template.default.template_name}"},
 			"has_trigger": "false",
 			"share_type":  "Private",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_oos_template.default.template_name}"},
-			"tags": map[string]interface{}{
-				"Created": "TF",
-				"For":     "template Test",
-			},
+			"ids":         []string{"${alibabacloudstack_oos_template.default.template_name}"},
 			"has_trigger": "false",
 			"share_type":  "Public",
 		}),
@@ -118,7 +141,7 @@ func TestAccAlibabacloudStackOosTemplatesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeOosTemplateMapFunc,
 	}
 
-	oosTemplatesInfo.dataSourceTestCheck(t, 0, nameRegexConf, idsConf, tagsConf, shareTypeConf, hasTriggerConf, allConf)
+	oosTemplatesInfo.dataSourceTestCheck(t, 0, nameRegexConf, idsConf, formatConf, createByConf, createDataBeforeConf, createDataAfterConf, shareTypeConf, hasTriggerConf, allConf)
 }
 
 func dataSourceOosTemplatesDependence(name string) string {
@@ -150,10 +173,6 @@ func dataSourceOosTemplatesDependence(name string) string {
 		  EOF
 		  template_name = "%s"
 		  version_name = "test"
-		  tags = {
-			"Created" = "TF",
-			"For" = "template Test"
-		  }
 		}
 	`, name)
 }

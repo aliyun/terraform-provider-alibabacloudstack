@@ -25,6 +25,7 @@ func dataSourceAlibabacloudStackOosTemplates() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Default:  "Other",
 			},
 			"created_by": {
 				Type:     schema.TypeString,
@@ -66,7 +67,6 @@ func dataSourceAlibabacloudStackOosTemplates() *schema.Resource {
 				Default:      "Descending",
 				ValidateFunc: validation.StringInSlice([]string{"Ascending", "Descending"}, false),
 			},
-			"tags": tagsSchema(),
 			"template_format": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -84,11 +84,6 @@ func dataSourceAlibabacloudStackOosTemplates() *schema.Resource {
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
-			},
-			"template_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
 			},
 			"output_file": {
 				Type:       schema.TypeString,
@@ -124,10 +119,6 @@ func dataSourceAlibabacloudStackOosTemplates() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"tags": {
-							Type:     schema.TypeMap,
-							Computed: true,
-						},
 						"template_format": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -141,10 +132,6 @@ func dataSourceAlibabacloudStackOosTemplates() *schema.Resource {
 							Computed: true,
 						},
 						"template_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"template_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -176,7 +163,14 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 		request["Category"] = v
 	}
 	if v, ok := d.GetOk("created_by"); ok {
-		request["CreatedBy"] = v
+		pattern := `\((\d+)\)$`
+			re := regexp.MustCompile(pattern)
+			matches := re.FindStringSubmatch(v.(string))
+			if len(matches) > 1 {
+				request["CreatedBy"] = matches[1]
+			} else {
+				request["CreatedBy"] = v.(string)
+			}
 	}
 	if v, ok := d.GetOk("created_date"); ok {
 		request["CreatedDateBefore"] = v
@@ -196,21 +190,10 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 	if v, ok := d.GetOk("sort_order"); ok {
 		request["SortOrder"] = v
 	}
-	if v, ok := d.GetOk("tags"); ok {
-		respJson, err := convertMaptoJsonString(v.(map[string]interface{}))
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		request["Tags"] = respJson
-	}
 	if v, ok := d.GetOk("template_format"); ok {
 		request["TemplateFormat"] = v
 	}
-	if v, ok := d.GetOk("template_type"); ok {
-		request["TemplateType"] = v
-	}
 	request["MaxResults"] = PageSizeLarge
-	request["Product"] = "Oos"
 	request["OrganizationId"] = client.Department
 
 	var objects []map[string]interface{}
@@ -226,7 +209,7 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 	idsMap := getIdsStringFilter(d)
 
 	for {
-		response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
+		response, err := client.DoTeaRequest("POST", "oos", "2019-06-01", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -268,12 +251,10 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 			"description":      object["Description"],
 			"has_trigger":      object["HasTrigger"],
 			"share_type":       object["ShareType"],
-			"tags":             object["Tags"],
 			"template_format":  object["TemplateFormat"],
 			"template_id":      object["TemplateId"],
 			"id":               fmt.Sprint(object["TemplateName"]),
 			"template_name":    fmt.Sprint(object["TemplateName"]),
-			"template_type":    object["TemplateType"],
 			"template_version": object["TemplateVersion"],
 			"updated_by":       object["UpdatedBy"],
 			"updated_date":     object["UpdatedDate"],
