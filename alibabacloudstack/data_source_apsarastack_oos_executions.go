@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -59,20 +60,18 @@ func dataSourceAlibabacloudStackOosExecutions() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"ram_role": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"sort_field": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "StartDate",
+				ValidateFunc: validation.StringInSlice([]string{"StartDate", "EndDate", "Status"}, false),
 			},
 			"sort_order": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Default:  "Descending",
 			},
 			"start_date_after": {
 				Type:     schema.TypeString,
@@ -90,7 +89,6 @@ func dataSourceAlibabacloudStackOosExecutions() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Cancelled", "Failed", "Queued", "Running", "Started", "Success", "Waiting"}, false),
 			},
-			"tags": tagsSchema(),
 			"template_name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -154,10 +152,6 @@ func dataSourceAlibabacloudStackOosExecutions() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"ram_role": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"start_date": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -212,7 +206,14 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 		request["EndDateAfter"] = v
 	}
 	if v, ok := d.GetOk("executed_by"); ok {
-		request["ExecutedBy"] = v
+		pattern := `\((\d+)\)$`
+		re := regexp.MustCompile(pattern)
+		matches := re.FindStringSubmatch(v.(string))
+		if len(matches) > 1 {
+			request["ExecutedBy"] = matches[1]
+		} else {
+			request["ExecutedBy"] = v.(string)
+		}
 	}
 	if v, ok := d.GetOkExists("include_child_execution"); ok {
 		request["IncludeChildExecution"] = v
@@ -223,10 +224,6 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 	if v, ok := d.GetOk("parent_execution_id"); ok {
 		request["ParentExecutionId"] = v
 	}
-	if v, ok := d.GetOk("ram_role"); ok {
-		request["RamRole"] = v
-	}
-
 	if v, ok := d.GetOk("sort_field"); ok {
 		request["SortField"] = v
 	}
@@ -242,13 +239,6 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 	if v, ok := d.GetOk("status"); ok {
 		request["Status"] = v
 	}
-	if v, ok := d.GetOk("tags"); ok {
-		respJson, err := convertMaptoJsonString(v.(map[string]interface{}))
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		request["Tags"] = respJson
-	}
 	if v, ok := d.GetOk("template_name"); ok {
 		request["TemplateName"] = v
 	}
@@ -259,7 +249,7 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 	idsMap := getIdsStringFilter(d)
 
 	for {
-		response, err := client.DoTeaRequest("POST", "oos", "2019-06-01", action, "", nil, nil, request)
+		response, err := client.DoTeaRequest("POST", "oos", "2019-06-01", action, "", nil, request, nil)
 		if err != nil {
 			errmsg := ""
 			if response != nil {
@@ -308,7 +298,6 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 			"outputs":             object["Outputs"],
 			"parameters":          parameters,
 			"parent_execution_id": object["ParentExecutionId"],
-			"ram_role":            object["RamRole"],
 			"start_date":          object["StartDate"],
 			"status":              object["Status"],
 			"status_message":      object["StatusMessage"],

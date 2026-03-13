@@ -10,8 +10,9 @@ import (
 type OosService struct {
 	client *connectivity.AlibabacloudStackClient
 }
+
 func (s *OosService) DoOosGettemplateRequest(id string) (object map[string]interface{}, err error) {
-    return s.DescribeOosTemplate(id)
+	return s.DescribeOosTemplate(id)
 }
 
 func (s *OosService) DescribeOosTemplate(id string) (object map[string]interface{}, err error) {
@@ -19,8 +20,6 @@ func (s *OosService) DescribeOosTemplate(id string) (object map[string]interface
 	request := map[string]interface{}{
 		"TemplateName": id,
 	}
-	request["PageSize"] = 1
-	request["PageNumber"] = 1
 	response, err = s.client.DoTeaRequest("POST", "oos", "2019-06-01", "GetTemplate", "", nil, request, nil)
 	addDebug("GetTemplate", response, request)
 	if err != nil {
@@ -40,16 +39,14 @@ func (s *OosService) DescribeOosTemplate(id string) (object map[string]interface
 }
 
 func (s *OosService) DoOosListexecutionsRequest(id string) (object map[string]interface{}, err error) {
-    return s.DescribeOosExecution(id)
+	return s.DescribeOosExecution(id)
 }
 func (s *OosService) DescribeOosExecution(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := map[string]interface{}{
 		"ExecutionId": id,
 	}
-	request["PageSize"] = 1
-	request["PageNumber"] = 1
-	response, err = s.client.DoTeaRequest("POST", "oos", "2019-06-01", "ListExecutions", "", nil, nil, request)
+	response, err = s.client.DoTeaRequest("POST", "oos", "2019-06-01", "ListExecutions", "", nil, request, nil)
 	addDebug("ListExecutions", response, request)
 	if err != nil {
 		return
@@ -89,18 +86,17 @@ func (s *OosService) OosExecutionStateRefreshFunc(id string, failStates []string
 	}
 }
 
-
 // BucketProperties defines bucket properties
 type BucketProperties struct {
 	//XMLName      string  `xml:"Bucket"`
-	Name         string    `xml:"Name"`         // Bucket name
-	Location     string    `xml:"Location"`     // Bucket datacenter
+	Name     string `xml:"Name"`     // Bucket name
+	Location string `xml:"Location"` // Bucket datacenter
 	//CreationDate time.Time `xml:"CreationDate"` // Bucket create time
 	CreationDate string `xml:"CreationDate"` // Bucket create time
-	StorageClass string    `xml:"StorageClass"` // Bucket storage class
+	StorageClass string `xml:"StorageClass"` // Bucket storage class
 	//Acl          string    `xml:"acl"` // Bucket acl
-	Extranetendpoint string    `xml:"extranet_endpoint"` // Bucket extranet endpoint
-	Intranetendpoint string    `xml:"intranet_endpoint"` // Bucket intranet endpoint
+	Extranetendpoint string `xml:"extranet_endpoint"` // Bucket extranet endpoint
+	Intranetendpoint string `xml:"intranet_endpoint"` // Bucket intranet endpoint
 	//Owner        struct{}    `xml:"owner"` // Bucket owner
 	//Policy       string    `xml:"policy"` // Bucket policy
 }
