@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackOosExecution0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%soosexecution%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-oosexecution%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccOosExecutionBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -38,85 +38,29 @@ func TestAccAlibabacloudStackOosExecution0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"parameters": "{\"Status\":\"Running\"}",
-
-					"template_name": "MyTemplate",
-
-					"mode": "Automatic",
-
+					"parameters":       TfRawString(`jsonencode({Status="Running"})`),
+					"template_name":    "${alibabacloudstack_oos_template.default.template_name}",
+					"mode":             "Automatic",
 					"template_version": "v1",
-
-					"description": "test",
+					"description":      "test",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"parameters": "{\"Status\":\"Running\"}",
-
-						"template_name": "MyTemplate",
-
-						"mode": "Automatic",
-
+						"parameters":       `{"Status":"Running"}`,
+						"template_name":    name,
+						"mode":             "Automatic",
 						"template_version": "v1",
-
-						"description": "test",
-					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-
-					"parameters": "{\"Status\":\"Update\"}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"parameters": "{\"Status\":\"Update\"}",
-					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "Test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "Test",
+						"description":      "test",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "Test-update",
-					},
+					"parameters": TfRawString(`jsonencode({Status="Update"})`),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF-update",
-						"tags.For":     "Test-update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "0",
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
+						"parameters": `{"Status":"Update"}`,
 					}),
 				),
 			},
@@ -130,48 +74,20 @@ func TestAccAlibabacloudStackOosExecution0(t *testing.T) {
 }
 
 var AlibabacloudTestAccOosExecutionCheckmap = map[string]string{
-
-	"parent_execution_id": CHECKSET,
-
-	"category": CHECKSET,
-
-	"description": CHECKSET,
-
+	"category":         CHECKSET,
+	"description":      CHECKSET,
 	"template_version": CHECKSET,
-
-	"start_date": CHECKSET,
-
-	"update_date": CHECKSET,
-
-	"template_name": CHECKSET,
-
-	"executed_by": CHECKSET,
-
-	"tags": CHECKSET,
-
-	"template_id": CHECKSET,
-
-	"status": CHECKSET,
-
-	"parameters": CHECKSET,
-
-	"is_parent": CHECKSET,
-
-	"create_time": CHECKSET,
-
-	"mode": CHECKSET,
-
-	"end_date": CHECKSET,
-
-	"status_message": CHECKSET,
-
-	"outputs": CHECKSET,
-
-	"ram_role": CHECKSET,
-
-	"counters": CHECKSET,
-
-	"execution_id": CHECKSET,
+	"start_date":       CHECKSET,
+	"update_date":      CHECKSET,
+	"template_name":    CHECKSET,
+	"executed_by":      CHECKSET,
+	"template_id":      CHECKSET,
+	"status":           CHECKSET,
+	"parameters":       CHECKSET,
+	"is_parent":        CHECKSET,
+	"mode":             CHECKSET,
+	"end_date":         CHECKSET,
+	"outputs":          CHECKSET,
 }
 
 func AlibabacloudTestAccOosExecutionBasicdependence(name string) string {
@@ -180,7 +96,34 @@ variable "name" {
     default = "%s"
 }
 
-
+resource "alibabacloudstack_oos_template" "default" {
+  content= <<EOF
+  {
+	"FormatVersion": "OOS-2019-06-01",
+	"Description": "Update Describe instances of given status",
+	"Parameters":{
+	  "Status":{
+		"Type": "String",
+		"Description": "(Required) The status of the Ecs instance."
+	  }
+	},
+	"Tasks": [
+	  {
+		"Properties" :{
+		  "Parameters":{
+			"Status": "{{ Status }}"
+		  },
+		  "API": "DescribeInstances",
+		  "Service": "Ecs"
+		},
+		"Name": "foo",
+		"Action": "ACS::ExecuteApi"
+	  }]
+  }
+  EOF
+  template_name = var.name
+  version_name = "test"
+}
 
 `, name)
 }

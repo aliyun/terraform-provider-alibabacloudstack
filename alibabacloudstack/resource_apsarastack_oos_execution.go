@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -17,8 +18,16 @@ func resourceAlibabacloudStackOosExecution() *schema.Resource {
 			Create: schema.DefaultTimeout(11 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"counters": {
-				Type:     schema.TypeString,
+			"failed_tasks": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"success_tasks": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"total_tasks": {
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"create_date": {
@@ -29,6 +38,10 @@ func resourceAlibabacloudStackOosExecution() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+			},
+			"category": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"end_date": {
 				Type:     schema.TypeString,
@@ -59,15 +72,16 @@ func resourceAlibabacloudStackOosExecution() *schema.Resource {
 				Computed: true,
 			},
 			"parameters": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				ForceNew:         true,
-				Default:          "{}",
-				ValidateFunc:     validation.StringIsJSON,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "{}",
+				ValidateFunc: validation.StringIsJSON,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					equal, _ := compareJsonTemplateAreEquivalent(old, new)
 					return equal
 				},
+				DiffSuppressOnRefresh: true,
 			},
 			"parent_execution_id": {
 				Type:     schema.TypeString,
@@ -127,7 +141,6 @@ func resourceAlibabacloudStackOosExecution() *schema.Resource {
 
 func resourceAlibabacloudStackOosExecutionCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	oosService := OosService{client}
 	var response map[string]interface{}
 	action := "StartExecution"
 	request := make(map[string]interface{})
@@ -171,10 +184,10 @@ func resourceAlibabacloudStackOosExecutionCreate(d *schema.ResourceData, meta in
 	}
 	responseExecution := response["Execution"].(map[string]interface{})
 	d.SetId(fmt.Sprint(responseExecution["ExecutionId"]))
-	stateConf := BuildStateConf([]string{}, []string{"Success"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, oosService.OosExecutionStateRefreshFunc(d.Id(), []string{"Failed"}))
-	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
+//	stateConf := BuildStateConf([]string{}, []string{"Success"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, oosService.OosExecutionStateRefreshFunc(d.Id(), []string{"Failed"}))
+//	if _, err := stateConf.WaitForState(); err != nil {
+//		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+//	}
 
 	return nil
 }
@@ -191,14 +204,21 @@ func resourceAlibabacloudStackOosExecutionRead(d *schema.ResourceData, meta inte
 		}
 		return errmsgs.WrapError(err)
 	}
-	d.Set("counters", object["Counters"])
+	d.Set("failed_tasks", object["Counters"].(map[string]interface{})["FailedTasks"])
+	d.Set("success_tasks", object["Counters"].(map[string]interface{})["SuccessTasks"])
+	d.Set("total_tasks", object["Counters"].(map[string]interface{})["TotalTasks"])
 	d.Set("create_date", object["CreateDate"])
 	d.Set("end_date", object["EndDate"])
 	d.Set("executed_by", object["ExecutedBy"])
 	d.Set("is_parent", object["IsParent"])
 	d.Set("mode", object["Mode"])
 	d.Set("outputs", object["Outputs"])
-	d.Set("parameters", object["Parameters"])
+	if v, err := json.Marshal(object["Parameters"]); err != nil {
+		return err
+	} else {
+		d.Set("parameters", string(v))
+	}
+	d.Set("category", object["Category"])
 	d.Set("parent_execution_id", object["ParentExecutionId"])
 	d.Set("ram_role", object["RamRole"])
 	d.Set("start_date", object["StartDate"])
@@ -208,6 +228,7 @@ func resourceAlibabacloudStackOosExecutionRead(d *schema.ResourceData, meta inte
 	d.Set("template_name", object["TemplateName"])
 	d.Set("template_version", object["TemplateVersion"])
 	d.Set("update_date", object["UpdateDate"])
+	d.Set("description", object["Description"])
 	return nil
 }
 

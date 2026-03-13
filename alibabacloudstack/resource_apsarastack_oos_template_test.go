@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackOosTemplate0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%soostemplate%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-oostemplate%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccOosTemplateBasicdependence)
 	ResourceTest(t, resource.TestCase{
