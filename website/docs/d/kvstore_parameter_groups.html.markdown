@@ -1,5 +1,5 @@
 ---
-subcategory: "ApsaraDB for Redis (KVStore)"
+subcategory:  "KVStore"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_parameter_groups"
 sidebar_current: "docs-Alibabacloudstack-datasource-kvstore-parameter-groups"

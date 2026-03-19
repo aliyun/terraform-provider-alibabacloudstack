@@ -1,5 +1,5 @@
 ---
-subcategory: "EDAS"
+subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_namespace"
 sidebar_current: "docs-Alibabacloudstack-edas-namespace"

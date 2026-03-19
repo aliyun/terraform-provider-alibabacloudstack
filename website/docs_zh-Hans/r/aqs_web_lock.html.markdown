@@ -1,5 +1,5 @@
 ---
-subcategory: "AQS"
+subcategory: "Anti-Brute Force Security (AQS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_aqs_web_lock"
 sidebar_current: "docs-Alibabacloudstack-aqs-web_lock"

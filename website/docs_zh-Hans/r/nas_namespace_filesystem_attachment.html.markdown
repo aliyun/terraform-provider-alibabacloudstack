@@ -1,5 +1,5 @@
 ---
-subcategory: "NAS"
+subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_namespace_filesystem_attachment"
 sidebar_current: "docs-Alibabacloudstack-nas-nas_namespace_filesystem_attachment"

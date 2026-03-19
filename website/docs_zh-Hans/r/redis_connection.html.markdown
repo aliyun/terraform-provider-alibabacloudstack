@@ -1,5 +1,5 @@
 ---
-subcategory: "Redis And Memcache (KVStore)"
+subcategory: "KVStore"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_redis_connection"
 sidebar_current: "docs-Alibabacloudstack-redis-connection"

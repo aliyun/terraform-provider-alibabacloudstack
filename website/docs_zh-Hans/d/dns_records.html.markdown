@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_records"
 sidebar_current: "docs-alibabacloudstack-datasource-dns-records"

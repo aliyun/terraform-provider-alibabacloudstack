@@ -1,5 +1,5 @@
 ---
-subcategory: "Schedulerx2"
+subcategory: "SchedulerX2"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_schedulerx2_workflow"
 sidebar_current: "docs-Alibabacloudstack-schedulerx2-workflow"

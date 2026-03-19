@@ -1,5 +1,5 @@
 ---
-subcategory: "DMSEnterprise"
+subcategory: "DMS Enterprise"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dmsenterprise_instances"
 sidebar_current: "docs-Alibabacloudstack-datasource-dmsenterprise-instances"

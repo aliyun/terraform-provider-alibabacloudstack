@@ -1,5 +1,5 @@
 ---
-subcategory: "Redis And Memcache (KVStore)"
+subcategory: "KVStore"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_backup_policy"
 sidebar_current: "docs-alibabacloudstack-resource-kvstore-backup-policy"

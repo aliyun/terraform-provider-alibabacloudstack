@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_addresspools"
 sidebar_current: "docs-alibabacloudstack-datasource-dns-gtm-addresspools"

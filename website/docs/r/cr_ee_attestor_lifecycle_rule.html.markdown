@@ -1,5 +1,5 @@
 ---
-subcategory: "Container Registry"
+subcategory: "Container Registry (ACR)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_artifact_lifecycle_rule"
 sidebar_current: "docs-Alibabacloudstack-cr-cr_ee_artifact_lifecycle_rule"

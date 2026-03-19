@@ -1,5 +1,5 @@
 ---
-subcategory: "AQS"
+subcategory: "Alibaba Parallel File System (APFS)"
 layout: "alibabacloudstack"
 page_title: "Alibaba Cloud Stack: alibabacloudstack_aqs_oss_scanconfig"
 sidebar_current: "docs-alibabacloudstack-resource-aqs-oss-scanconfig"

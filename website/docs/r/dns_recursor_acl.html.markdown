@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_recursor_acl"
 sidebar_current: "docs-Alibabacloudstack-dns-recursor-acl"
