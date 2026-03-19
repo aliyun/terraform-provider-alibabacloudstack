@@ -1,5 +1,5 @@
 ---
-subcategory: "Redis 和 Memcache (KVStore)"
+subcategory: "KVStore"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_instance_classes"
 sidebar_current: "docs-alibabacloudstack-datasource-kvstore-instance-classes"

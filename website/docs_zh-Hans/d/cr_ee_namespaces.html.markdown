@@ -1,5 +1,5 @@
 ---
-subcategory: "容器镜像服务(CR)"
+subcategory: "Container Registry (ACR)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_namespaces"
 sidebar_current: "docs-alibabacloudstack-datasource-cr-ee-namespaces"

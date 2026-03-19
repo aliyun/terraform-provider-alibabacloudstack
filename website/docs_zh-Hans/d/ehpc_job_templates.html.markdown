@@ -1,5 +1,5 @@
 ---
-subcategory: "弹性高性能计算(ehpc)"
+subcategory: "Elastic High Performance Computing (EHPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ehpc_job_templates"
 sidebar_current: "docs-alibabacloudstack-datasource-ehpc-job-templates"

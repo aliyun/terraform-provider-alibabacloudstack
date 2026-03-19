@@ -1,5 +1,5 @@
 ---
-subcategory: "GPDB"
+subcategory: "AnalyticDB for PostgreSQL (GPDB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_backup_policy"
 sidebar_current: "docs-Alibabacloudstack-gpdb-backup_policy"

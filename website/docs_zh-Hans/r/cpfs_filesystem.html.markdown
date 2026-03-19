@@ -1,5 +1,5 @@
 ---
-subcategory: "文件存储CPFS"
+subcategory: "File Storage CPFS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cpfs_filesystem"
 sidebar_current: "docs-alibabacloudstack-resource-cpfs-filesystem"

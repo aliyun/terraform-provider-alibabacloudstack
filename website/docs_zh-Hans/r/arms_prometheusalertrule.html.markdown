@@ -1,5 +1,5 @@
 ---
-subcategory: "应用实时监控服务 (ARMS)"
+subcategory: "Application Real-Time Monitoring Service (ARMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_arms_prometheus_alert_rule"
 sidebar_current: "docs-alibabacloudstack-resource-arms-prometheus-alert-rule"

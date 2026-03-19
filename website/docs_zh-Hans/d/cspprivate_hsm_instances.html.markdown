@@ -1,5 +1,5 @@
 ---
-subcategory: "密码服务 Cspprivate HSM"
+subcategory: "Cspprivate HSM"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cspprivate_hsm_instances"
 sidebar_current: "docs-alibabacloudstack-datasource-cspprivate-hsm-instances"

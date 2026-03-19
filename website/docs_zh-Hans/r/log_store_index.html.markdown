@@ -1,5 +1,5 @@
 ---
-subcategory: "日志服务 (SLS)"
+subcategory: "Log Service (SLS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_store_index"
 sidebar_current: "docs-alibabacloudstack-resource-log-store-index"

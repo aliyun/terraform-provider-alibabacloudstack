@@ -1,5 +1,5 @@
 ---
-subcategory: "Anti-Brute Force Security (AQS)"
+subcategory: "Alibaba Parallel File System (APFS)"
 layout: "alibabacloudstack"
 page_title: "阿里云专有云: alibabacloudstack_aqs_oss_scanconfig"
 sidebar_current: "docs-alibabacloudstack-resource-aqs-oss-scanconfig"
