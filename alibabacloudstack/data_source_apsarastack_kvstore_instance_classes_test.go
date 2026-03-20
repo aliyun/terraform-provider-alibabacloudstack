@@ -123,10 +123,10 @@ func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
 	//	StorageTypeInmemory, PackageTypeStandard, PackageTypeCustomized, ArchitectureStandard, ArchitectureCluster,
 	//	ArchitectureRwsplit, NodeTypeDouble, NodeTypeSingle, NodeTypeReadone, NodeTypeReadthree, NodeTypeReadfive,
 	//	ArchitectureStandard, allConf)
-	KVStoreInstanceCheckInfo.dataSourceTestCheck(t, rand, EngineVersionConfRedis,
+	KVStoreInstanceCheckInfo.dataSourceTestCheck(t, rand, cpu2, memory2, EngineVersionConfRedis,
 		//prePaidSortedByConfRedis, postPaidSortedByConfRedis
 		editionTypeCommunity,
-		cpu2, memory2, ArchitectureStandard,
+		ArchitectureStandard,
 		NodeType, allConf, NotExisted)
 }
 

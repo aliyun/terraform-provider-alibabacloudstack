@@ -163,7 +163,7 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 	for {
 		request.QueryParams["pageStart"] = strconv.Itoa(pageNumber)
 		bresponse, err := client.ProcessCommonRequest(request)
-		log.Printf("Response of ListBucketVpc: %s", bresponse)
+		// log.Printf("Response of ListBucketVpc: %s", bresponse)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -175,7 +175,7 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "SelectCommonSpec", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
 		log.Printf("Bresponse SelectCommonSpec after error")
-		addDebug("SelectCommonSpec", bresponse, nil, request)
+		// addDebug("SelectCommonSpec", bresponse, nil, request)
 
 		var response *GetKVInstanceClassResponse
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
@@ -200,7 +200,6 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 		if v, ok := d.GetOk("memory"); ok {
 			memory = v.(float64)
 		}
-
 		for _, data := range datas {
 			// Convert raw.Memory to float32
 			switch v := data.Memory.(type) {
@@ -222,7 +221,7 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 			if data.Cpu == 0 && data.CpuCore != 0 {
 				data.Cpu = data.CpuCore
 			}
-			if cpu != 0 && data.Cpu != cpu {
+			if cpu != 0 && data.CpuCore != cpu {
 				continue
 			}
 			if memory != 0 && data.Memory != memory {
@@ -236,19 +235,6 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 		pageNumber += 1
 	}
 
-	sortedBy := d.Get("sorted_by").(string)
-	if sortedBy != "" {
-		sort.SliceStable(Datas, func(i, j int) bool {
-			switch sortedBy {
-			case "CPU":
-				return Datas[i].Cpu < Datas[j].Cpu
-			case "Memory":
-				return Datas[i].Memory.(float64) < Datas[j].Memory.(float64)
-			}
-			return false
-		})
-	}
-
 	var ids []string
 	var s []map[string]interface{}
 	for _, t := range Datas {
@@ -260,13 +246,26 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 			"architecture":   t.Architecture,
 			"edition_type":   t.Series,
 			"node_type":      t.NodeType,
-			"cpu":            t.Cpu,
+			"cpu":            t.CpuCore,
 			"memory":         t.Memory,
 			"status":         t.Status,
 		}
 
 		ids = append(ids, t.InstanceClass)
 		s = append(s, mapping)
+	}
+
+	sortedBy := d.Get("sorted_by").(string)
+	if sortedBy != "" {
+		sort.SliceStable(s, func(i, j int) bool {
+			switch sortedBy {
+			case "CPU":
+				return s[i]["cpu"].(int) < s[j]["cpu"].(int)
+			case "Memory":
+				return s[i]["memory"].(float64) < s[j]["memory"].(float64)
+			}
+			return false
+		})
 	}
 
 	d.SetId(dataResourceIdHash(ids))

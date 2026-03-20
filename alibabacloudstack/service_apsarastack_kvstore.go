@@ -39,7 +39,7 @@ func (s *KvstoreService) DescribeKVstoreInstance(id string) (*r_kvstore.DBInstan
 	bresponse, ok := raw.(*r_kvstore.DescribeInstanceAttributeResponse)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
-			return instance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KVstoreInstance", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return instance, errmsgs.GetNotFoundErrorFromString(id + ": KVstoreInstance Not Found!")
 		}
 		errmsg := ""
 		if ok {
@@ -49,7 +49,7 @@ func (s *KvstoreService) DescribeKVstoreInstance(id string) (*r_kvstore.DBInstan
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if len(bresponse.Instances.DBInstanceAttribute) <= 0 {
-		return instance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KVstoreInstance", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		return instance, errmsgs.GetNotFoundErrorFromString(id + ": KVstoreInstance Not Found!")
 	}
 
 	return &bresponse.Instances.DBInstanceAttribute[0], nil
@@ -440,6 +440,7 @@ func (s *KvstoreService) DescribeKvstoreConnection(id string) (object r_kvstore.
 		return r_kvstoreClient.DescribeDBInstanceNetInfo(request)
 	})
 	bresponse, ok := raw.(*r_kvstore.DescribeDBInstanceNetInfoResponse)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KvstoreConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
