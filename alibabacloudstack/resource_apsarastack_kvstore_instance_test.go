@@ -26,9 +26,10 @@ func TestAccAlibabacloudStackKVStoreInstance_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -42,6 +43,7 @@ func TestAccAlibabacloudStackKVStoreInstance_basic(t *testing.T) {
 					"enable_ssl":     "true",
 					"node_type":      "double",
 					"security_ips":   []string{"10.168.1.11", "10.168.1.12"},
+					"password":       "${random_password.password.0.result}",
 					"encryption_key": "${alibabacloudstack_kms_key.key.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -52,6 +54,14 @@ func TestAccAlibabacloudStackKVStoreInstance_basic(t *testing.T) {
 						"node_type":      "double",
 						"security_ips.#": "2",
 					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"password": "${random_password.password.1.result}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
@@ -138,6 +148,8 @@ resource "alibabacloudstack_kms_key" "key" {
 
 %s
 
+%s
+
 data "alibabacloudstack_kvstore_instance_classes" "default" {
   edition_type   = "enterprise"
   engine_version = "5.0"
@@ -155,5 +167,5 @@ data "alibabacloudstack_kvstore_instance_classes" "update" {
   architecture   = "cluster"
   memory         = 4
 }
-`, name, VSwitchCommonTestCase)
+`, name, VSwitchCommonTestCase, RandomPasswordTestCase(12, 2))
 }
