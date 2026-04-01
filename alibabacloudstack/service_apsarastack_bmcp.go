@@ -4,11 +4,11 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
 
-type EvpcService struct {
+type BcmpService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
-func (s *EvpcService) ListEvpc(evpcName string) ([]map[string]interface{}, error) {
+func (s *BcmpService) ListEvpc(evpcName string) ([]map[string]interface{}, error) {
 	request := map[string]interface{}{}
 	if evpcName != "" {
 		request["EvpcName"] = evpcName
@@ -30,7 +30,7 @@ func (s *EvpcService) ListEvpc(evpcName string) ([]map[string]interface{}, error
 	return result, nil
 }
 
-func (s *EvpcService) DoEasyAIListEvpcRequest(id string) (map[string]interface{}, error) {
+func (s *BcmpService) DoEasyAIListEvpcRequest(id string) (map[string]interface{}, error) {
 	request := map[string]interface{}{}
 	if id != "" {
 		request["EvpcId"] = id
@@ -46,6 +46,27 @@ func (s *EvpcService) DoEasyAIListEvpcRequest(id string) (map[string]interface{}
 
 	for _, evpc := range evpcList {
 		return evpc.(map[string]interface{}), nil
+	}
+
+	return nil, nil
+}
+
+func (s *BcmpService) DoEasyAIListSecurityGroupRequest(id string) (map[string]interface{}, error) {
+	request := map[string]interface{}{}
+	if id != "" {
+		request["SgId"] = id
+	}
+
+	raw, err := s.client.DoTeaRequest("POST", "EasyAI", "2023-11-01", "ListSecurityGroup", "", nil, request, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := raw
+	securityGroupList := response["data"].([]interface{})
+
+	for _, securityGroup := range securityGroupList {
+		return securityGroup.(map[string]interface{}), nil
 	}
 
 	return nil, nil

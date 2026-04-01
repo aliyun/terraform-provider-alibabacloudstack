@@ -16,7 +16,7 @@ func TestAccAlibabacloudStackEvpcEvpc_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_evpc_evpc.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccEvpcEvpcCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &EvpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &BcmpService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DoEasyAIListEvpcRequest")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
