@@ -19,6 +19,12 @@ func dataSourceAlibabacloudStackSlbCACertificates() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -81,6 +87,13 @@ func dataSourceAlibabacloudStackSlbCACertificatesRead(d *schema.ResourceData, me
 	if v, ok := d.GetOk("ids"); ok {
 		for _, vv := range v.([]interface{}) {
 			idsMap[Trim(vv.(string))] = Trim(vv.(string))
+		}
+	}
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request.QueryParams["shared"] = "1"
+		} else {
+			request.QueryParams["shared"] = "0"
 		}
 	}
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {

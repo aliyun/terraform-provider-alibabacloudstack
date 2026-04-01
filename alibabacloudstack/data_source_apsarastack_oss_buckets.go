@@ -29,6 +29,12 @@ func dataSourceAlibabacloudStackOssBuckets() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				ForceNew:     true,
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -102,6 +108,13 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		request.QueryParams["OpenApiAction"] = "GetService"
 		request.QueryParams["ProductName"] = "oss"
+		if v, ok := d.GetOk("shared"); ok {
+			if v.(bool) {
+				request.QueryParams["shared"] = "1"
+			} else {
+				request.QueryParams["shared"] = "0"
+			}
+		}
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			if bresponse == nil {

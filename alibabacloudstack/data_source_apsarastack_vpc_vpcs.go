@@ -46,6 +46,12 @@ func dataSourceAlibabacloudStackVpcs() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -222,6 +228,13 @@ func dataSourceAlibabacloudStackVpcsRead(d *schema.ResourceData, meta interface{
 
 	if v, ok := d.GetOk("vpc_owner_id"); ok {
 		request.VpcOwnerId = requests.NewInteger(v.(int))
+	}
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request.QueryParams["shared"] = "1"
+		} else {
+			request.QueryParams["shared"] = "0"
+		}
 	}
 
 	var allVpcs []vpc.Vpc

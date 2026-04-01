@@ -19,6 +19,12 @@ func dataSourceAlibabacloudStackSlbServerCertificates() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -83,6 +89,13 @@ func dataSourceAlibabacloudStackSlbServerCertificatesRead(d *schema.ResourceData
 			idsMap[Trim(vv.(string))] = Trim(vv.(string))
 		}
 	}
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request.QueryParams["shared"] = "1"
+		} else {
+			request.QueryParams["shared"] = "0"
+		}
+	}
 
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeServerCertificates(request)
@@ -130,11 +143,11 @@ func slbServerCertificatesDescriptionAttributes(d *schema.ResourceData, certific
 	for _, certificate := range certificates {
 
 		mapping := map[string]interface{}{
-			"id":                 certificate.ServerCertificateId,
-			"name":               certificate.ServerCertificateName,
-			"fingerprint":        certificate.Fingerprint,
-			"created_time":       certificate.CreateTime,
-			"created_timestamp":  certificate.CreateTimeStamp,
+			"id":                certificate.ServerCertificateId,
+			"name":              certificate.ServerCertificateName,
+			"fingerprint":       certificate.Fingerprint,
+			"created_time":      certificate.CreateTime,
+			"created_timestamp": certificate.CreateTimeStamp,
 		}
 		ids = append(ids, certificate.ServerCertificateId)
 		names = append(names, certificate.ServerCertificateName)

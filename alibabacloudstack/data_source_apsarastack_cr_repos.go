@@ -26,6 +26,12 @@ func dataSourceAlibabacloudStackCRRepos() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -102,6 +108,14 @@ func dataSourceAlibabacloudStackCRReposRead(d *schema.ResourceData, meta interfa
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("GET", "cr", "2016-06-07", "GetRepoList", "/repos")
 	request.Domain = client.Domain
+
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request.QueryParams["shared"] = "1"
+		} else {
+			request.QueryParams["shared"] = "0"
+		}
+	}
 
 	response, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), response, request)

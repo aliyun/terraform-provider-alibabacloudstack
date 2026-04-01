@@ -13,7 +13,7 @@ import (
 
 func dataSourceAlibabacloudStackSnapshots() *schema.Resource {
 	return &schema.Resource{
-		Read:   dataSourceAlibabacloudStackSnapshotsRead,
+		Read: dataSourceAlibabacloudStackSnapshotsRead,
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -71,6 +71,12 @@ func dataSourceAlibabacloudStackSnapshots() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
 			},
 			"output_file": {
 				Type:     schema.TypeString,
@@ -181,6 +187,13 @@ func dataSourceAlibabacloudStackSnapshotsRead(d *schema.ResourceData, meta inter
 
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(1)
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request.QueryParams["shared"] = "1"
+		} else {
+			request.QueryParams["shared"] = "0"
+		}
+	}
 	var allSnapshots []ecs.Snapshot
 	for {
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
