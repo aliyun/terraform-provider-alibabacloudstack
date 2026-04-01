@@ -3,13 +3,12 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
+	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -71,6 +70,10 @@ func dataSourceAlibabacloudStackAscmOrganizations() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
+						"primary_key": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -88,33 +91,35 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 		parentId = client.Department
 	}
 
-	request := client.NewCommonRequest("GET", "ascm", "2019-05-10", "GetOrganizationList", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetOrganizationList", "/ascm/auth/organization/queryList")
 	request.QueryParams["id"] = parentId
 
 	response := Organization{}
 
-	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" rsponse of raw MeteringWebQuery : %s", raw)
+	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 
-		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
+				time.Sleep(time.Duration(3) * time.Second)
+				return resource.RetryableError(err)
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organizations", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organizations", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return errmsgs.WrapError(err)
+			return resource.NonRetryableError(errmsgs.WrapError(err))
 		}
 		if response.Code == "200" || len(response.Data) < 1 {
-			break
+			return nil
 		}
+		return resource.RetryableError(fmt.Errorf("response code is not 200 or data is empty"))
+	})
+	if err != nil {
+		return err
 	}
 
 	var r *regexp.Regexp
@@ -124,19 +129,31 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 
 	//parent_id
 	var ids []string
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			idsMap[vv.(string)] = vv.(string)
+		}
+	}
 	var s []map[string]interface{}
 	for _, rg := range response.Data {
 		if r != nil && !r.MatchString(rg.Name) {
 			continue
 		}
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[fmt.Sprint(rg.ID)]; !ok {
+				continue
+			}
+		}
 		mapping := map[string]interface{}{
-			"id":        fmt.Sprint(rg.ID),
-			"name":      rg.Name,
-			"parent_id": rg.ParentID,
-			"muser_id":  rg.MuserID,
-			"cuser_id":  rg.CuserID,
-			"alias":     rg.Alias,
-			"internal":  rg.Internal,
+			"id":          fmt.Sprint(rg.ID),
+			"name":        rg.Name,
+			"parent_id":   rg.ParentID,
+			"muser_id":    rg.MuserID,
+			"cuser_id":    rg.CuserID,
+			"alias":       rg.Alias,
+			"internal":    rg.Internal,
+			"primary_key": rg.UUID,
 		}
 		ids = append(ids, fmt.Sprint(rg.ID))
 		s = append(s, mapping)
@@ -144,6 +161,9 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("organizations", s); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if err := d.Set("ids", ids); err != nil {
 		return errmsgs.WrapError(err)
 	}
 

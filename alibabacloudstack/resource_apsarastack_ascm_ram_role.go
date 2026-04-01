@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -68,8 +69,8 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 			"organizationVisibility": organizationvisibility,
 		})
 
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		raw, err := client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+			return ascmClient.ProcessCommonRequest(request)
 		})
 		log.Printf(" rsponse of CreateRole : %s", raw)
 
@@ -137,6 +138,7 @@ func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta inter
 	}
 	d.Set("role_name", did[0])
 	d.Set("organization_visibility", object.Data[0].OrganizationVisibility)
+	d.Set("role_range", object.Data[0].RoleRange)
 	d.Set("role_id", object.Data[0].ID)
 	d.Set("description", object.Data[0].Description)
 	return nil
@@ -163,8 +165,8 @@ func resourceAlibabacloudStackAscmRamRoleDelete(d *schema.ResourceData, meta int
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRole", "/ascm/auth/role/removeRole")
 		request.QueryParams["roleName"] = did[0]
 
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
+		raw, err := client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+			return ascmClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
 			errmsg := ""

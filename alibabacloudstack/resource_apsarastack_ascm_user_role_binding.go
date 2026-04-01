@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -34,35 +32,8 @@ func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
 }
 
 func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
+	// client := meta.(*connectivity.AlibabacloudStackClient)
 	lname := d.Get("login_name").(string)
-	flag := false
-	var roleids []string
-	if v, ok := d.GetOk("role_ids"); ok {
-		roleids = expandStringList(v.(*schema.Set).List())
-	}
-	log.Printf("roleids is %v", roleids)
-	flag = true
-	if flag {
-		for i := range roleids {
-			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddRoleToUser", "/ascm/auth/role/addRoleToUser")
-			request.QueryParams["loginName"] = lname
-			request.QueryParams["roleId"] = fmt.Sprint(roleids[i])
-
-			bresponse, err := client.ProcessCommonRequest(request)
-			if err != nil || bresponse.GetHttpStatus() != 200 {
-				errmsg := ""
-				if bresponse != nil {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_role_binding", "AddRoleToUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-
-			addDebug("AddRoleToUser", bresponse, request, request.QueryParams)
-			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
-		}
-	}
-
 	d.SetId(lname)
 
 	return nil
@@ -84,7 +55,13 @@ func resourceAlibabacloudStackAscmUserRoleBindingRead(d *schema.ResourceData, me
 		return nil
 	}
 	d.Set("login_name", object.Data[0].LoginName)
-
+	role_ids := make([]string, 0)
+	if len(object.Data[0].Roles) > 0 {
+		for _, role := range object.Data[0].Roles {
+			role_ids = append(role_ids, fmt.Sprint(role.ID))
+		}
+	}
+	d.Set("role_ids", role_ids)
 	return nil
 }
 
@@ -98,18 +75,17 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 			roleIdList = append(roleIdList, roleid)
 		}
 	}
+	if len(roleIdList) < 1 {
+		return errmsgs.Error("User role_ids cannot be empty!")
+	}
 	lname := d.Get("login_name").(string)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ResetRolesForUserByLoginName", "/ascm/auth/user/ResetRolesForUserByLoginName")
-
-	request.Headers["x-ascm-product-version"] = "2019-05-10"
+	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 
 	QueryParams := map[string]interface{}{
-		"loginName":        lname,
-		"roleIdList":       roleIdList,
-		"SecurityToken":    client.Config.SecurityToken,
-		"SignatureVersion": "1.0",
-		"SignatureMethod":  "HMAC-SHA1",
+		"loginName":  lname,
+		"roleIdList": roleIdList,
 	}
 
 	requeststring, err := json.Marshal(QueryParams)
@@ -137,53 +113,5 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 }
 
 func resourceAlibabacloudStackAscmUserRoleBindingDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	ascmService := AscmService{client}
-	var roleid string
-	flag := false
-	var roleids []string
-	if v, ok := d.GetOk("role_ids"); ok {
-		roleids = expandStringList(v.(*schema.Set).List())
-		for i := range roleids {
-			if len(roleids) > 1 {
-				roleid = roleids[i]
-				flag = true
-			} else {
-				roleid = roleids[0]
-				flag = true
-			}
-		}
-	}
-	log.Printf("roleid is %v", roleid)
-	log.Printf("roleids is %v", roleids)
-	_, err := ascmService.DescribeAscmUserRoleBinding(d.Id())
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBindingExist", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		if flag {
-			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUser", "/ascm/auth/role/removeRoleFromUser")
-			request.QueryParams["loginName"] = d.Id()
-			request.QueryParams["roleId"] = fmt.Sprint(roleid)
-
-			bresponse, err := client.ProcessCommonRequest(request)
-			if err != nil {
-				errmsg := ""
-				if bresponse != nil {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
-				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "RemoveRoleFromUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-			}
-			_, err = ascmService.DescribeAscmUserRoleBinding(d.Id())
-
-			if err != nil {
-				return resource.NonRetryableError(err)
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "RemoveRoleFromUser", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
 	return nil
 }

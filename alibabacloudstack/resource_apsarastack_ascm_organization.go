@@ -62,7 +62,7 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 		request.QueryParams["parentId"] = parentid
 		request.QueryParams["name"] = name
 		bresponse, err := client.ProcessCommonRequest(request)
-		log.Printf("response of raw CreateOrganization is : %s", bresponse)
+		addDebug("CreateOrganization", bresponse, requestInfo, request)
 
 		if err != nil {
 			if bresponse == nil {
@@ -71,8 +71,6 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organization", "CreateOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug("CreateOrganization", bresponse, requestInfo, request)
-
 		if bresponse.GetHttpStatus() != 200 {
 			errmsg := ""
 			if bresponse != nil {

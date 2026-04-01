@@ -78,10 +78,10 @@ resource "alibabacloudstack_ascm_ram_policy" "default" {
 }
 
 resource "alibabacloudstack_ascm_ram_role" "default" {
-  role_name = "TestPolicyRole"
-  description = "TestingRole"
+  role_name = "Test_Ram_Role"
+  description = "TestRole"
   organization_visibility = "global"
-role_range = "roleRange.allOrganizations"
+  role_range = "roleRange.userGroup"
 }
 
 resource "alibabacloudstack_ascm_ram_policy_for_role" "default" {

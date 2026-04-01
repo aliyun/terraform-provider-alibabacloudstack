@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -44,7 +43,6 @@ func resourceAlibabacloudStackAscmRamPolicy() *schema.Resource {
 
 func resourceAlibabacloudStackAscmRamPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ecs.Client
 	ascmService := AscmService{client}
 	name := d.Get("name").(string)
 
@@ -61,26 +59,16 @@ func resourceAlibabacloudStackAscmRamPolicyCreate(d *schema.ResourceData, meta i
 		request.QueryParams["description"] = description
 		request.QueryParams["policyDocument"] = policyDoc
 
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" rsponse of CreateRAMPolicy : %s", raw)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("CreateRAMPolicy", bresponse, request, request.QueryParams)
+
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				bresponse, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
-			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policy", "CreateRAMPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
-		if bresponse, ok := raw.(*responses.CommonResponse); ok {
-			if bresponse.GetHttpStatus() != 200 {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_policy", "CreateRAMPolicy", errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			addDebug("CreateRAMPolicy", raw, requestInfo, bresponse.GetHttpContentString())
+		if bresponse.GetHttpStatus() != 200 {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_policy", "CreateRAMPolicy", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
 
@@ -114,7 +102,9 @@ func resourceAlibabacloudStackAscmRamPolicyRead(d *schema.ResourceData, meta int
 
 	d.Set("name", did[0])
 	d.Set("ram_id", did[1])
-	d.Set("description", response.Data[0].Description)
+	if response.Data[0].Description != "" {
+		d.Set("description", response.Data[0].Description)
+	}
 	d.Set("policy_document", response.Data[0].PolicyDocument)
 	return nil
 }
@@ -177,22 +167,13 @@ func resourceAlibabacloudStackAscmRamPolicyUpdate(d *schema.ResourceData, meta i
 		request.QueryParams["NewDescription"] = description
 		request.QueryParams["NewPolicyDocument"] = policydoc
 
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw UpdateRAMPolicy : %s", raw)
-
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("UpdateRAMPolicy", bresponse, request, request.QueryParams)
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				bresponse, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
-			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policy", "UpdateRAMPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request)
+		addDebug(request.GetActionName(), bresponse, request, request.GetQueryParams())
 		log.Printf("total QueryParams and rampolicy %v %v", request.GetQueryParams(), name)
 	}
 	d.SetId(name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
@@ -215,9 +196,7 @@ func resourceAlibabacloudStackAscmRamPolicyDelete(d *schema.ResourceData, meta i
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRAMPolicy", "/ascm/auth/role/removeRAMPolicy")
 		request.QueryParams["ramPolicyId"] = did[1]
 
-		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
-		})
+		_, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			return resource.RetryableError(err)
 		}

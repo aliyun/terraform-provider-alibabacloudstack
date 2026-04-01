@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -42,8 +42,8 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d *schema.ResourceData,
 	request.QueryParams["RamPolicyId"] = ram_id
 	request.QueryParams["RoleId"] = fmt.Sprint(roleid)
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -106,8 +106,8 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleDelete(d *schema.ResourceData,
 		request.QueryParams["ramPolicyId"] = did[0]
 		request.QueryParams["roleId"] = did[1]
 
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
+		raw, err := client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+			return ascmClient.ProcessCommonRequest(request)
 		})
 		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
