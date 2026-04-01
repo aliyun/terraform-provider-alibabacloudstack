@@ -83,22 +83,23 @@ const (
 	BMSCode              = ServiceCode("BMS")
 	AEGISCode            = ServiceCode("AEGIS")
 	// undefined code, add first
-	GDBCode                   = ServiceCode("GDB")
-	ARMSCode                  = ServiceCode("ARMS")
-	CSBCode                   = ServiceCode("CSB")
-	DBSCode                   = ServiceCode("DBS")
-	DTSCode                   = ServiceCode("DTS")
-	SLSCode                   = ServiceCode("SLS")
-	RosCode                   = ServiceCode("ROS")
-	QuickbiCode               = ServiceCode("QUICKBI")
-	DataworksPublicCode       = ServiceCode("DATAWORKS_PUBLIC")
-	DataworksPrivateCode      = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
-	OneRouterCode             = ServiceCode("ONEROUTER")
-	BastionHostCode           = ServiceCode("BASTIONHOSTPRIVATE")
-	WAFONECSCode              = ServiceCode("WAF_ONECS")
-	ALIKAFKACode              = ServiceCode("ALIKAFKA")
-	Prometheus2Code           = ServiceCode("PROMETHEUS2")
-	TablestoreCode            = ServiceCode("TABLESTORE")
+	GDBCode              = ServiceCode("GDB")
+	ARMSCode             = ServiceCode("ARMS")
+	CSBCode              = ServiceCode("CSB")
+	DBSCode              = ServiceCode("DBS")
+	DTSCode              = ServiceCode("DTS")
+	SLSCode              = ServiceCode("SLS")
+	RosCode              = ServiceCode("ROS")
+	QuickbiCode          = ServiceCode("QUICKBI")
+	DataworksPublicCode  = ServiceCode("DATAWORKS_PUBLIC")
+	DataworksPrivateCode = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
+	OneRouterCode        = ServiceCode("ONEROUTER")
+	BastionHostCode      = ServiceCode("BASTIONHOSTPRIVATE")
+	WAFONECSCode         = ServiceCode("WAF_ONECS")
+	ALIKAFKACode         = ServiceCode("ALIKAFKA")
+	Prometheus2Code      = ServiceCode("PROMETHEUS2")
+	TablestoreCode       = ServiceCode("TABLESTORE")
+	EasyAICode           = ServiceCode("EASYAI")
 	// Self-built gateway fake Code
 	SlSDataCode = ServiceCode("SLSDATA")
 	BssDataCode = ServiceCode("BSSDATA")
@@ -285,10 +286,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"{{.region}}.ots-internal.{{.domain}}",
 	},
 	DmsEnterpriseCode: PopEndpoint{
-		"newdms-api.{{.domain}}", 
-		"newdms-api.{{.region}}.{{.domain}}", 
+		"newdms-api.{{.domain}}",
+		"newdms-api.{{.region}}.{{.domain}}",
 	},
-	OSSCode:           PopEndpoint{"", ""},
+	OSSCode: PopEndpoint{"", ""},
 	DataworksPublicCode: PopEndpoint{
 		"dataworks-public.{{.domain}}",
 		"dataworks-public.{{.region}}.{{.domain}}",
@@ -444,6 +445,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	SLSCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
+	},
+	EasyAICode: PopEndpoint{
+		"easy-ai.{{.region}}.{{.domain}}",
+		"easy-ai.{{.region}}.{{.domain}}",
 	},
 }
 

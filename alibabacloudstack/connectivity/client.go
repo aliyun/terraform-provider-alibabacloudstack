@@ -1041,7 +1041,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 		protocol = "http"
 	}
 	switch popcode {
-	case "CloudDns", "bms":
+	case "CloudDns", "bms", "EasyAI":
 		protocol = "http"
 	case "CSB":
 		protocol = "https"
