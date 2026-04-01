@@ -49,7 +49,7 @@ func TestAccAlibabacloudStackEvpcEvpcsDataSource(t *testing.T) {
 			"status": "Available",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":    []string{"${alibabacloudstack_evpc_evpc.default.id}_fake"},
+			"ids":    []string{"${alibabacloudstack_evpc_evpc.default.id}"},
 			"status": "Pending",
 		}),
 	}
