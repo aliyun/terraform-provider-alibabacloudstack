@@ -71,3 +71,27 @@ func (s *BcmpService) DoEasyAIListSecurityGroupRequest(id string) (map[string]in
 
 	return nil, nil
 }
+
+func (s *BcmpService) DoEasyAIListKeyPairRequest(id string) (map[string]interface{}, error) {
+	request := map[string]interface{}{
+		"PageNumber": 1,
+		"PageSize":   100,
+	}
+
+	raw, err := s.client.DoTeaRequest("POST", "EasyAI", "2023-11-01", "ListKeyPair", "", nil, request, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := raw
+	data := response["data"].([]interface{})
+	keyPairId := id
+
+	for _, item := range data {
+		itemMap := item.(map[string]interface{})
+		if itemMap["name"].(string) == keyPairId {
+			return itemMap, nil
+		}
+	}
+	return nil, nil
+}
