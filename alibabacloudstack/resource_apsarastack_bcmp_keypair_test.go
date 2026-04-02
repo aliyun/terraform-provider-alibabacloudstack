@@ -89,7 +89,7 @@ func TestAccAlibabacloudStackBcmpKeyPair_PublicKey(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 
 					"key_pair_name": name,
-					"public_key":    "${var.public_key}",
+					"public_key":    "${alibabacloudstack_bcmp_keypair.old.public_key}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -122,9 +122,9 @@ variable "name" {
     default = "%s"
 }
 
-variable "public_key" {
-    default = %s
+resource "alibabacloudstack_bcmp_keypair" "old"{
+	key_pair_name = "${var.name}_old"
 }
 
-`, name, ServerCertificateTestCase())
+`, name)
 }

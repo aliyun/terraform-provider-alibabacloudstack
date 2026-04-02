@@ -26,6 +26,7 @@ func resourceAlibabacloudStackBcmpKeyPair() *schema.Resource {
 			"public_key": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				StateFunc: func(v interface{}) string {
 					switch v.(type) {
 					case string:
@@ -100,6 +101,7 @@ func resourceAlibabacloudStackBcmpKeyPairCreate(d *schema.ResourceData, meta int
 	keyPairData := data["data"].(map[string]interface{})
 
 	d.SetId(keyPairData["name"].(string))
+	d.Set("public_key", keyPairData["publicKey"])
 
 	if file, ok := d.GetOk("key_file"); ok {
 		privateKey := keyPairData["privateKey"].(string)
