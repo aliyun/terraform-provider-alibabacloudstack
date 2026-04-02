@@ -53,7 +53,7 @@ func TestAccAlibabacloudStackBcmpKeyPair0(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"key_file"},
+				ImportStateVerifyIgnore: []string{"key_file", "public_key"},
 			},
 		},
 	})
