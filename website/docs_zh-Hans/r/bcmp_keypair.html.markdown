@@ -23,7 +23,7 @@ resource "alibabacloudstack_bcmp_keypair" "basic" {
 // 导入现有公钥构建密钥对
 resource "alibabacloudstack_bcmp_keypair" "publickey" {
   key_pair_name = "my_public_key"
-  public_key    = "ssh-rsa AB3Napapsod45678qwertyuudsfsg"
+  public_key    = "-----BEGIN CERTIFICATE-----\nMIIDRjCCAq*******<Your Server Certificate String>*****bJJyOm5LqoiA=\n-----END CERTIFICATE-----"
 }
 ```
 

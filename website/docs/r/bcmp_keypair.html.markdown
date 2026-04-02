@@ -23,7 +23,7 @@ resource "alibabacloudstack_bcmp_keypair" "basic" {
 // Import an existing public key to build a key pair
 resource "alibabacloudstack_bcmp_keypair" "publickey" {
   key_pair_name = "my_public_key"
-  public_key    = "xx"
+  public_key    = "-----BEGIN CERTIFICATE-----\nMIIDRjCCAq*******<Your Server Certificate String>*****bJJyOm5LqoiA=\n-----END CERTIFICATE-----"
 }
 ```
 

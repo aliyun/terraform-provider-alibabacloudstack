@@ -22,7 +22,7 @@ variable "name" {
 }
 
 variable "public_key" {
-  default = "xxx"
+  default = "-----BEGIN CERTIFICATE-----\nMIIDRjCCAq*******<Your Server Certificate String>*****bJJyOm5LqoiA=\n-----END CERTIFICATE-----"
 }
 
 
