@@ -628,6 +628,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_evpc_evpcs":                                       dataSourceAlibabacloudStackEvpcs(),
 		"alibabacloudstack_bcmp_keypairs":                                    dataSourceAlibabacloudStackBcmpKeyPairs(),
 		"alibabacloudstack_bcmp_security_groups":                             dataSourceAlibabacloudStackBmcpSecurityGroups(),
+		"alibabacloudstack_bcmp_security_group_rules":                        dataSourceAlibabacloudStackBmcpSecurityGroupRules(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
@@ -1105,6 +1106,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_evpc_evpc":                                       resourceAlibabacloudStackEvpc(),
 		"alibabacloudstack_bcmp_keypair":                                    resourceAlibabacloudStackBcmpKeyPair(),
 		"alibabacloudstack_bcmp_security_group":                             resourceAlibabacloudStackBmcpSecurityGroup(),
+		"alibabacloudstack_bcmp_security_group_rule":                        resourceAlibabacloudStackBmcpSecurityGroupRule(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps

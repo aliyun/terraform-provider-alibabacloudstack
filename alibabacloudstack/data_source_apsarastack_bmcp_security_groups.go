@@ -125,7 +125,7 @@ func dataSourceAlibabacloudStackBmcpSecurityGroupsRead(d *schema.ResourceData, m
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_bmcp_security_groups", "ListSecurityGroup", errmsgs.AlibabacloudStackSdkGoERROR, ""))
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_bcmp_security_groups", "ListSecurityGroup", errmsgs.AlibabacloudStackSdkGoERROR, ""))
 		}
 		addDebug("ListSecurityGroup", raw, nil, request)
 		response = raw
@@ -171,18 +171,18 @@ func securityGroupsDescriptionAttributes(d *schema.ResourceData, securityGroupSe
 
 	for _, securityGroup := range securityGroupSetTypes {
 		mapping := map[string]interface{}{
-			"sg_id":             securityGroup["sgId"],
-			"name":              securityGroup["name"],
-			"description":       securityGroup["description"],
-			"vpc_id":            securityGroup["vpcId"],
-			"resource_group":    securityGroup["ResourceGroup"],
+			"sg_id":               securityGroup["sgId"],
+			"name":                securityGroup["name"],
+			"description":         securityGroup["description"],
+			"vpc_id":              securityGroup["vpcId"],
+			"resource_group":      securityGroup["ResourceGroup"],
 			"resource_group_name": securityGroup["ResourceGroupName"],
-			"department":        securityGroup["Department"],
-			"department_name":   securityGroup["DepartmentName"],
-			"region_id":         securityGroup["RegionId"],
-			"ascm_create_user":  securityGroup["AscmCreateUser"],
-			"create_time":       securityGroup["createTime"],
-			"update_time":       securityGroup["updateTime"],
+			"department":          securityGroup["Department"],
+			"department_name":     securityGroup["DepartmentName"],
+			"region_id":           securityGroup["RegionId"],
+			"ascm_create_user":    securityGroup["AscmCreateUser"],
+			"create_time":         securityGroup["createTime"],
+			"update_time":         securityGroup["updateTime"],
 		}
 
 		ids = append(ids, securityGroup["sgId"].(string))
