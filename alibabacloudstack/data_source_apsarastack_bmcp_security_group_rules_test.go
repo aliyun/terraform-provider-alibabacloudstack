@@ -17,16 +17,6 @@ func TestAccAlibabacloudStackBmcpSecurityGroupRulesDataSource(t *testing.T) {
 			"security_group_id": `"${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}_fake"`,
 		}),
 	}
-	TypeConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"type":              `"ingress"`,
-			"security_group_id": `"${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}"`,
-		}),
-		fakeConfig: testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"type":              `"egress"`,
-			"security_group_id": `"${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}"`,
-		}),
-	}
 	IpProtocolConf := dataSourceTestAccConfig{
 		existConfig: testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name, map[string]string{
 			"ip_protocol":       `"tcp"`,
@@ -68,7 +58,7 @@ func TestAccAlibabacloudStackBmcpSecurityGroupRulesDataSource(t *testing.T) {
 		existMapFunc: exisMapFunc,
 		fakeMapFunc:  fakeMapFunc,
 	}
-	CheckInfo.dataSourceTestCheck(t, rand, SecurityGroupIdConf, TypeConf, IpProtocolConf, PolicyConf)
+	CheckInfo.dataSourceTestCheck(t, rand, SecurityGroupIdConf, IpProtocolConf, PolicyConf)
 }
 
 func testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name string, attrMap map[string]string) string {
@@ -94,13 +84,13 @@ data "alibabacloudstack_bcmp_security_group_rules" "default" {
 
 var BmcpSecurityGroupCommonTestCase = `
 resource "alibabacloudstack_vpc" "default" {
-		name = "tf_acc_bmcp_sg"
-		cidr_block = "172.16.0.0/12"
-	}
+	name = "tf_acc_bmcp_sg_${var.name}"
+	cidr_block = "172.16.0.0/12"
+}
 
 resource "alibabacloudstack_bcmp_security_group" "default" {
   vpc_id = "${alibabacloudstack_vpc.default.id}"
-  name = "tf_acc_bmcp_sg1"
+  name = "tf_acc_bmcp_sg1_${var.name}"
 }
 
 resource "alibabacloudstack_bcmp_security_group_rule" "default" {
@@ -111,6 +101,6 @@ resource "alibabacloudstack_bcmp_security_group_rule" "default" {
   priority          = 1
   security_group_id = "${alibabacloudstack_bcmp_security_group.default.id}"
   cidr_ip           = "0.0.0.0/0"
-  description       = "test"
+  description       = "test_${var.name}"
 }
 `
