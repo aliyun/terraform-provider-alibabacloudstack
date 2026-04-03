@@ -40,8 +40,9 @@ func resourceAlibabacloudStackDBConnection() *schema.Resource {
 			},
 			"network_type": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
+				Default:      "public",
 				ValidateFunc: validation.StringInSlice([]string{"public", "private"}, false),
 				Description:  "Network type of the DB connection. Valid values: public (public network), private (private network).",
 			},
