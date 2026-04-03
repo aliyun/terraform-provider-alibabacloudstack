@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -24,6 +25,13 @@ var dbConnectionIdWithSuffixRegexp = regexp.MustCompile(dbConnectionIdWithSuffix
 func resourceAlibabacloudStackDBConnection() *schema.Resource {
 	resource := &schema.Resource{
 		SchemaVersion: 1, // Schema version for state migration support
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceAlibabacloudStackDBConnectionResourceV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: migrateDBConnectionStateV0ToV1,
+				Version: 0,
+			},
+		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -280,4 +288,57 @@ func GetRdsConnectionPrefix(connecntion string) string {
 		return stringList[0]
 	}
 	return ""
+}
+
+// resourceAlibabacloudStackDBConnectionResourceV0 returns the schema for version 0 of the DB connection resource.
+// Version 0 schema only has instance_id in the ID, without network_type field.
+func resourceAlibabacloudStackDBConnectionResourceV0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"instance_id": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
+			},
+			"connection_prefix": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringLenBetween(1, 31),
+			},
+			"port": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validateDBConnectionPort,
+				Default:      "3306",
+			},
+			"connection_string": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"ip_address": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+// migrateDBConnectionStateV0 migrates state from version 0 to version 1.
+// Version 0: ID is just instance_id, no network_type field
+// Version 1: ID is instance_id:network_type, with network_type defaulting to "public"
+func migrateDBConnectionStateV0ToV1(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	// Get the old ID (which is just the instance_id in version 0)
+	oldID := rawState["id"].(string)
+	parts := strings.Split(oldID, COLON_SEPARATED)
+
+	// Set network_type to "public" as default for migrated resources
+	rawState["network_type"] = "public"
+
+	// Update the ID to the new format: instance_id:network_type
+	newID := fmt.Sprintf("%s%s%s", parts[0], COLON_SEPARATED, "public")
+	rawState["id"] = newID
+
+	return rawState, nil
 }
