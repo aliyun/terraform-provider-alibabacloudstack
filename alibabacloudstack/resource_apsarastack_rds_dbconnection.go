@@ -23,11 +23,19 @@ var dbConnectionIdWithSuffixRegexp = regexp.MustCompile(dbConnectionIdWithSuffix
 
 func resourceAlibabacloudStackDBConnection() *schema.Resource {
 	resource := &schema.Resource{
+		SchemaVersion: 1, // Schema version for state migration support
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Required: true,
+			},
+			"network_type": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"public", "private"}, false),
+				Description:  "Network type of the DB connection. Valid values: public (public network), private (private network).",
 			},
 			"connection_prefix": {
 				Type:         schema.TypeString,
@@ -60,62 +68,62 @@ func resourceAlibabacloudStackDBConnectionCreate(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
 	instanceId := d.Get("instance_id").(string)
-	prefix := d.Get("connection_prefix").(string)
-	if prefix == "" {
-		prefix = fmt.Sprintf("%stf", instanceId)
-	}
+	networkType := d.Get("network_type").(string)
 
-	request := rds.CreateAllocateInstancePublicConnectionRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.DBInstanceId = instanceId
-	request.ConnectionStringPrefix = prefix
-	request.Port = d.Get("port").(string)
+	// Handle different network types: public (allocate new connection) vs private (query existing)
+	if networkType == "public" {
+		prefix := d.Get("connection_prefix").(string)
+		if prefix == "" {
+			prefix = instanceId
+		}
 
-	var raw interface{}
-	var err error
-	err = resource.Retry(8*time.Minute, func() *resource.RetryError {
-		raw, err = client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
-			return rdsClient.AllocateInstancePublicConnection(request)
+		request := rds.CreateAllocateInstancePublicConnectionRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.DBInstanceId = instanceId
+		request.ConnectionStringPrefix = prefix
+		request.Port = d.Get("port").(string)
+
+		var raw interface{}
+		var err error
+		err = resource.Retry(8*time.Minute, func() *resource.RetryError {
+			raw, err = client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
+				return rdsClient.AllocateInstancePublicConnection(request)
+			})
+			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+			if err != nil {
+				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			return nil
 		})
+
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
-				return resource.RetryableError(err)
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*rds.AllocateInstancePublicConnectionResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
 			}
-			return resource.NonRetryableError(err)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_db_connection", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		return nil
-	})
 
-	if err != nil {
-		errmsg := ""
-		if raw != nil {
-			response, ok := raw.(*rds.AllocateInstancePublicConnectionResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_db_connection", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
-	d.SetId(fmt.Sprintf("%s%s%s", instanceId, COLON_SEPARATED, request.ConnectionStringPrefix))
-
+	d.SetId(fmt.Sprintf("%s%s%s", instanceId, COLON_SEPARATED, networkType))
 	if err := rdsService.WaitForDBConnection(d.Id(), Available, DefaultTimeoutMedium); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	// wait instance running after allocating
+	// Wait for instance to be running after allocating connection
 	if err := rdsService.WaitForDBInstance(instanceId, Running, DefaultTimeoutMedium); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
 	return nil
 }
 
+// resourceAlibabacloudStackDBConnectionRead reads the DB connection information from the API
 func resourceAlibabacloudStackDBConnectionRead(d *schema.ResourceData, meta interface{}) error {
-	submatch := dbConnectionIdWithSuffixRegexp.FindStringSubmatch(d.Id())
-	if len(submatch) > 1 {
-		d.SetId(submatch[1])
-	}
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
@@ -133,38 +141,51 @@ func resourceAlibabacloudStackDBConnectionRead(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 	d.Set("instance_id", parts[0])
-	d.Set("connection_prefix", parts[1])
+	d.Set("connection_prefix", GetRdsConnectionPrefix(object.ConnectionString))
 	d.Set("port", object.Port)
+	d.Set("network_type", strings.ToLower(object.IPType))
 	d.Set("connection_string", object.ConnectionString)
 	d.Set("ip_address", object.IPAddress)
 
 	return nil
 }
 
+// resourceAlibabacloudStackDBConnectionUpdate updates the DB connection configuration
 func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
-
-	submatch := dbConnectionIdWithSuffixRegexp.FindStringSubmatch(d.Id())
-	if len(submatch) > 1 {
-		d.SetId(submatch[1])
-	}
 
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 
-	if d.HasChange("port") {
+	if d.IsNewResource() && d.Get("network_type").(string) == "public" {
+		return nil
+	}
+	if d.IsNewResource() && d.Get("network_type").(string) == "private" && d.Get("connection_prefix").(string) == "" && d.Get("connection_prefix").(string) != d.Get("instance_id").(string) {
+		return nil
+	}
+
+	// Only update if port or connection_prefix has changed
+	if d.HasChanges("port", "connection_prefix") {
+		connection_string := d.Get("connection_string").(string)
+		if connection_string == "" {
+			object, err := rdsService.DescribeDBConnection(d.Id())
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			connection_string = object.ConnectionString
+		}
+		prefix := d.Get("connection_prefix").(string)
+		if prefix == "" {
+			prefix = d.Get("instance_id").(string)
+		}
 		request := rds.CreateModifyDBInstanceConnectionStringRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = parts[0]
-		object, err := rdsService.DescribeDBConnection(d.Id())
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		request.CurrentConnectionString = object.ConnectionString
-		request.ConnectionStringPrefix = parts[1]
+		request.CurrentConnectionString = connection_string
+		request.ConnectionStringPrefix = d.Get("connection_prefix").(string)
 		request.Port = d.Get("port").(string)
 
 		if err := resource.Retry(8*time.Minute, func() *resource.RetryError {
@@ -191,7 +212,7 @@ func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta in
 			return err
 		}
 
-		// wait instance running after modifying
+		// Wait for instance to be running after modifying connection
 		if err := rdsService.WaitForDBInstance(request.DBInstanceId, Running, DefaultTimeoutMedium); err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -199,15 +220,15 @@ func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta in
 	return nil
 }
 
+// resourceAlibabacloudStackDBConnectionDelete deletes the DB connection
 func resourceAlibabacloudStackDBConnectionDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	rdsService := RdsService{client}
-
-	submatch := dbConnectionIdWithSuffixRegexp.FindStringSubmatch(d.Id())
-	if len(submatch) > 1 {
-		d.SetId(submatch[1])
+	if d.Get("network_type").(string) == "private" {
+		// private connection strings can`t delete
+		return nil
 	}
 
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	rdsService := RdsService{client}
 	split := strings.Split(d.Id(), COLON_SEPARATED)
 	request := rds.CreateReleaseInstancePublicConnectionRequest()
 	client.InitRpcRequest(*request.RpcRequest)
@@ -235,6 +256,7 @@ func resourceAlibabacloudStackDBConnectionDelete(d *schema.ResourceData, meta in
 					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 				}
 			}
+			// Connection not found or at least one network type exists - treat as success
 			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidCurrentConnectionString.NotFound", "AtLeastOneNetTypeExists"}) {
 				return nil
 			}
@@ -248,5 +270,14 @@ func resourceAlibabacloudStackDBConnectionDelete(d *schema.ResourceData, meta in
 	if err != nil {
 		return err
 	}
+	// Wait for connection to be deleted
 	return rdsService.WaitForDBConnection(d.Id(), Deleted, DefaultTimeoutMedium)
+}
+
+func GetRdsConnectionPrefix(connecntion string) string {
+	stringList := strings.Split(connecntion, ".")
+	if len(stringList) > 0 {
+		return stringList[0]
+	}
+	return ""
 }

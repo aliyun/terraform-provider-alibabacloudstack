@@ -114,7 +114,7 @@ func (s *RdsService) DescribeDBReadonlyInstance(id string) (*rds.DBInstanceAttri
 }
 
 func (s *RdsService) DoRdsDescribeaccountsRequest(id string) (*rds.DBInstanceAccount, error) {
-    return s.DescribeDBAccount(id)
+	return s.DescribeDBAccount(id)
 }
 func (s *RdsService) DescribeDBAccount(id string) (*rds.DBInstanceAccount, error) {
 	ds := &rds.DBInstanceAccount{}
@@ -201,7 +201,7 @@ func (s *RdsService) DescribeDBAccountPrivilege(id string) (*rds.DBInstanceAccou
 }
 
 func (s *RdsService) DoRdsDescribedatabasesRequest(id string) (*rds.Database, error) {
-    return s.DescribeDBDatabase(id)
+	return s.DescribeDBDatabase(id)
 }
 func (s *RdsService) DescribeDBDatabase(id string) (*rds.Database, error) {
 	ds := &rds.Database{}
@@ -443,15 +443,14 @@ func (s *RdsService) DescribeDBConnection(id string) (*rds.DBInstanceNetInfo, er
 		return info, errmsgs.WrapError(err)
 	}
 
-	if object != nil {
+	if len(object) > 0 {
 		for _, o := range object {
-			if strings.HasPrefix(o.ConnectionString, parts[1]) {
+			if strings.ToLower(o.IPType) == parts[1] {
 				return &o, nil
 			}
 		}
 	}
-
-	return info, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+	return info, errmsgs.GetNotFoundErrorFromString("DBConnection Not found for dbinstance: " + id)
 }
 
 func (s *RdsService) DescribeDBReadWriteSplittingConnection(id string) (*rds.DBInstanceNetInfo, error) {
