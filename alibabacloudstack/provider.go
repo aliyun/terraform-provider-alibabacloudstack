@@ -629,6 +629,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_bcmp_keypairs":                                    dataSourceAlibabacloudStackBcmpKeyPairs(),
 		"alibabacloudstack_bcmp_security_groups":                             dataSourceAlibabacloudStackBmcpSecurityGroups(),
 		"alibabacloudstack_bcmp_security_group_rules":                        dataSourceAlibabacloudStackBmcpSecurityGroupRules(),
+		"alibabacloudstack_bmcp_images":                                      dataSourceAlibabacloudStackBmcpImages(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
