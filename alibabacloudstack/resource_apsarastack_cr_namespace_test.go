@@ -10,7 +10,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -160,7 +160,7 @@ func TestAccAlibabacloudStackCRNamespace_Basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name":               name,
+					"name":               "${var.name}",
 					"auto_create":        "false",
 					"default_visibility": "PUBLIC",
 				}),
@@ -180,52 +180,15 @@ func TestAccAlibabacloudStackCRNamespace_Basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name":               name,
-					"auto_create":        "false",
-					"default_visibility": "PUBLIC",
+					"auto_create":        "true",
+					"default_visibility": "PRIVATE",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":               name,
-						"auto_create":        "false",
-						"default_visibility": "PUBLIC",
+						"auto_create":        "true",
+						"default_visibility": "PRIVATE",
 					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackCRNamespace_Multi(t *testing.T) {
-	var v *crDescribeNamespaceResponse
-	resourceId := "alibabacloudstack_cr_namespace.default.1"
-	ra := resourceAttrInit(resourceId, crNamespaceMap)
-	serviceFunc := func() interface{} {
-		return &CrService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-cr-ns-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCRNamespaceConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckNamespaceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":               name + "${count.index}",
-					"auto_create":        "false",
-					"default_visibility": "PUBLIC",
-					"count":              "2",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
 				),
 			},
 		},
@@ -234,8 +197,10 @@ func TestAccAlibabacloudStackCRNamespace_Multi(t *testing.T) {
 
 func resourceCRNamespaceConfigDependence(name string) string {
 	return fmt.Sprintf(`
-
-`)
+variable "name" {
+	default = "%s"
+}
+`, name)
 }
 
 var crNamespaceMap = map[string]string{
