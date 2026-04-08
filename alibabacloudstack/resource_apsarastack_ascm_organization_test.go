@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
@@ -31,7 +33,7 @@ func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		CheckDestroy:  testAccCheckAscm_OrganizationDestroy(name),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -62,6 +64,21 @@ func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
 		},
 	})
 
+}
+
+func testAccCheckAscm_OrganizationDestroy(name string) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
+
+		ascmService := AscmService{client}
+		_, err := ascmService.DescribeAscmOrganizationByName("1", name)
+		if errmsgs.NotFoundError(err) {
+			return nil
+		}
+
+		return errmsgs.Error("organization still exist")
+
+	}
 }
 
 func testaccOrganizationBasic(name string) string {
