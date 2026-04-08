@@ -932,6 +932,7 @@ func (s *AscmService) ExportInitPasswordByLoginName(loginname string) (initPassw
 	loginnamestring, _ := json.Marshal(loginnamelist)
 	request.QueryParams["LoginNameList"] = fmt.Sprint(loginnamestring)
 	var response InitPasswordListResponse
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	bresponse, err := s.client.ProcessCommonRequest(request)
 
 	if err != nil {

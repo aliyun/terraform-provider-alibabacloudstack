@@ -44,6 +44,12 @@ func dataSourceAlibabacloudStackEcsEbsStorageSets() *schema.Resource {
 				Optional:   true,
 				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			// Computed values
 			"storages": {
 				Type:     schema.TypeList,
@@ -80,7 +86,13 @@ func dataSourceAlibabacloudStackEcsEbsStorageSetsRead(d *schema.ResourceData, me
 
 	request := client.NewCommonRequest("GET", "Ecs", "2014-05-26", action, "")
 	idsMap := getIdsStringFilter(d)
-
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request.QueryParams["shared"] = "1"
+		} else {
+			request.QueryParams["shared"] = "0"
+		}
+	}
 	var storageSetName string
 	if v, ok := d.GetOk("storage_set_name"); ok {
 		storageSetName = v.(string)
@@ -136,7 +148,7 @@ func dataSourceAlibabacloudStackEcsEbsStorageSetsRead(d *schema.ResourceData, me
 				"storage_set_id":               object.StorageSetId,
 				"storage_set_partition_number": object.StorageSetPartitionNumber,
 				"storage_set_name":             object.StorageSetName,
-				"zone_id": object.ZoneId,
+				"zone_id":                      object.ZoneId,
 			}
 			ids = append(ids, object.StorageSetId)
 			names = append(names, object.StorageSetName)

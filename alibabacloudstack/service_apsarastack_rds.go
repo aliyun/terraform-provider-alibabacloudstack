@@ -442,8 +442,7 @@ func (s *RdsService) DescribeDBConnection(id string) (*rds.DBInstanceNetInfo, er
 			return &o, nil
 		}
 	}
-
-	return info, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+	return info, errmsgs.GetNotFoundErrorFromString("DBConnection Not found for dbinstance: " + id)
 }
 
 func (s *RdsService) DescribeDBReadWriteSplittingConnection(id string) (map[string]interface{}, error) {
@@ -472,7 +471,7 @@ func (s *RdsService) GrantAccountPrivilege(id, dbName string) error {
 		})
 		response, ok := raw.(*rds.GrantAccountPrivilegeResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -515,7 +514,7 @@ func (s *RdsService) RevokeAccountPrivilege(id, dbName string) error {
 		})
 		response, ok := raw.(*rds.RevokeAccountPrivilegeResponse)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus...) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
@@ -1133,7 +1132,7 @@ func (s *RdsService) WaitForDBConnection(id string, status Status, timeout int) 
 			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ConnectionString, id, errmsgs.ProviderERROR)
 		}
 	}
-}	
+}
 
 func (s *RdsService) WaitForAccount(id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)

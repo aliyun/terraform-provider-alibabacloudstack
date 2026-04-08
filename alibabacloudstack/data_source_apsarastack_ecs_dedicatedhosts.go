@@ -53,6 +53,12 @@ func dataSourceAlibabacloudStackEcsDedicatedHosts() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -259,6 +265,13 @@ func dataSourceAlibabacloudStackEcsDedicatedHostsRead(d *schema.ResourceData, me
 	}
 	if v, ok := d.GetOk("zone_id"); ok {
 		request["ZoneId"] = v
+	}
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request["shared"] = "1"
+		} else {
+			request["shared"] = "0"
+		}
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1

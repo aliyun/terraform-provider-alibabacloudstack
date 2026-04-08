@@ -21,6 +21,12 @@ func dataSourceAlibabacloudStackNatGateways() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				ForceNew:     true,
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -106,6 +112,13 @@ func dataSourceAlibabacloudStackNatGatewaysRead(d *schema.ResourceData, meta int
 			nameRegex = r
 		} else {
 			return errmsgs.WrapError(err)
+		}
+	}
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request.QueryParams["shared"] = "1"
+		} else {
+			request.QueryParams["shared"] = "0"
 		}
 	}
 	invoker := NewInvoker()

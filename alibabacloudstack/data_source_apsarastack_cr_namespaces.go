@@ -21,6 +21,12 @@ func dataSourceAlibabacloudStackCRNamespaces() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -66,6 +72,14 @@ func dataSourceAlibabacloudStackCRNamespacesRead(d *schema.ResourceData, meta in
 	crService := CrService{client}
 
 	request := client.NewCommonRequest("GET", "cr", "2016-06-07", "GetNamespaceList", "/namespace")
+
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request.QueryParams["shared"] = "1"
+		} else {
+			request.QueryParams["shared"] = "0"
+		}
+	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {

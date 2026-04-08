@@ -42,9 +42,14 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	resp := crResponse{}
 	namespaceName := d.Get("name").(string)
 	request := client.NewCommonRequest("PUT", "cr", "2016-06-07", "CreateNamespace", "/namespace")
+	request.QueryParams["NamespaceName"] = namespaceName
+	request.QueryParams["Action"] = "CreateNamespace"
 	body := map[string]interface{}{
+		"Action":        "CreateNamespace",
+		"NamespaceName": namespaceName,
 		"namespace": map[string]interface{}{
 			"namespace":     namespaceName,
+			"AscmShareType": "0",
 			"haApsaraStack": "false",
 			"arch":          "x86_64",
 		},
@@ -70,39 +75,7 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 		return errmsgs.WrapError(fmt.Errorf("Error Unmarshal to JSON: %v", err))
 	}
 	log.Printf("unmarshalled response for create %v", resp)
-	create := d.Get("auto_create").(bool)
-	visibility := d.Get("default_visibility").(string)
-	if create == false || visibility == "PUBLIC" {
-		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateNamespace", fmt.Sprintf("/namespace/%s", namespaceName))
-		body = map[string]interface{}{
-			"namespace": map[string]interface{}{
-				"AutoCreate":        fmt.Sprintf("%t", create),
-				"DefaultVisibility": visibility,
-			},
-		}
-		request.QueryParams["Namespace"] = namespaceName
-		jsonData, err := json.Marshal(body)
-		if err != nil {
-			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
-		}
-		request.SetContentType(requests.Json)
-		request.SetContent(jsonData)
-		uresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if uresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(uresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		err = json.Unmarshal(uresponse.GetHttpContentBytes(), &resp)
-		log.Printf("response for update %v", &resp)
-		if err != nil {
-			return errmsgs.WrapError(fmt.Errorf("Error Unmarshal to JSON: %v", err))
-		}
-		addDebug(request.GetActionName(), uresponse, request)
-	}
-
+	addDebug(request.GetActionName(), bresponse, request)
 	d.SetId(namespaceName)
 
 	return nil
@@ -115,6 +88,7 @@ func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta int
 	if d.HasChanges("auto_create", "default_visibility") {
 		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateNamespace", fmt.Sprintf("/namespace/%s", d.Id()))
 		body := map[string]interface{}{
+			"NamespaceName": d.Id(),
 			"namespace": map[string]interface{}{
 				"AutoCreate":        fmt.Sprintf("%t", create),
 				"DefaultVisibility": visibility,

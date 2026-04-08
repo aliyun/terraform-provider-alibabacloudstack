@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -108,23 +110,30 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 
 	response := OrganizationListResponse{}
 
-	for {
+	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+
 		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			if errmsgs.IsExpectedErrors(err, errmsgs.Throttling) {
+				time.Sleep(time.Duration(3) * time.Second)
+				return resource.RetryableError(err)
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_acm_configuration", "DescribeInstanceTypeFamilies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organizations", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return errmsgs.WrapError(err)
+			return resource.NonRetryableError(errmsgs.WrapError(err))
 		}
 		if response.Code == "200" || len(response.Data) < 1 {
-			break
+			return nil
 		}
+		return resource.RetryableError(fmt.Errorf("response code is not 200 or data is empty"))
+	})
+	if err != nil {
+		return err
 	}
 
 	var r *regexp.Regexp
@@ -169,7 +178,7 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 			aliyunid = resp.Data.AliyunId
 			primaryKey = resp.Data.PrimaryKey
 		}
-		
+
 		if len(primaryKeys) > 0 {
 			if _, ok := primaryKeys[primaryKey]; !ok {
 				continue

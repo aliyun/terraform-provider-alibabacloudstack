@@ -49,6 +49,12 @@ func dataSourceAlibabacloudStackVpcIpv6Gateways() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -120,6 +126,13 @@ func dataSourceAlibabacloudStackVpcIpv6GatewaysRead(d *schema.ResourceData, meta
 	}
 	if v, ok := d.GetOk("vpc_id"); ok {
 		request["VpcId"] = v
+	}
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request["shared"] = "1"
+		} else {
+			request["shared"] = "0"
+		}
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1

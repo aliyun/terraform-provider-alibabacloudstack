@@ -20,6 +20,12 @@ func dataSourceAlibabacloudStackSlbCACertificates() *schema.Resource {
 				Optional:   true,
 				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -76,6 +82,13 @@ func dataSourceAlibabacloudStackSlbCACertificatesRead(d *schema.ResourceData, me
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := slb.CreateDescribeCACertificatesRequest()
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request.QueryParams["shared"] = "1"
+		} else {
+			request.QueryParams["shared"] = "0"
+		}
+	}
 	client.InitRpcRequest(*request.RpcRequest)
 
 	idsMap := getIdsStringFilter(d)

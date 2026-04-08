@@ -38,6 +38,12 @@ func dataSourceAlibabacloudStackImages() *schema.Resource {
 				// must contain a valid Image owner, expected ImageOwnerSystem, ImageOwnerSelf, ImageOwnerOthers, ImageOwnerMarketplace, ImageOwnerDefault
 				ValidateFunc: validation.StringInSlice([]string{"system", "self", "others", "marketplace", ""}, false),
 			},
+			"shared": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.",
+			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -194,6 +200,13 @@ func dataSourceAlibabacloudStackImagesRead(d *schema.ResourceData, meta interfac
 		request.ImageOwnerAlias = owners.(string)
 	} else {
 		request.ImageOwnerAlias = "self"
+	}
+	if v, ok := d.GetOk("shared"); ok {
+		if v.(bool) {
+			request.QueryParams["shared"] = "1"
+		} else {
+			request.QueryParams["shared"] = "0"
+		}
 	}
 
 	var allImages []ecs.Image

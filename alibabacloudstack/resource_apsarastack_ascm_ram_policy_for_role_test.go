@@ -90,11 +90,10 @@ resource "alibabacloudstack_ascm_ram_policy" "default" {
 }
 
 resource "alibabacloudstack_ascm_ram_role" "default" {
-  role_name = var.name
-  description = "TestingRole"
+  role_name = "Test_Ram_Role"
+  description = "TestRole"
   organization_visibility = "global"
-  role_range = "roleRange.rawRamRole"
-  assume_role_policy_document = "{\"Version\":\"1\",\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":[],\"RAM\":[\"acs:ram::1269367165241000:role/ascm-role-65-1-5003\"]}}]}"
+  role_range = "roleRange.userGroup"
 }
 
 `, name)
