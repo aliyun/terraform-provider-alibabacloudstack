@@ -683,6 +683,24 @@ func expandIntList(configured []interface{}) []int {
 	return vs
 }
 
+func getIdsStringFilter(d *schema.ResourceData) map[string]struct{} {
+	return getStringListFilters(d, "ids")
+}
+
+func getStringListFilters(d *schema.ResourceData, key string) map[string]struct{} {
+	filterMap := make(map[string]struct{})
+	if v, ok := d.GetOk(key); ok {
+		for _, vv := range v.([]interface{}) {
+			if vv == nil {
+				filterMap[""] = struct{}{}
+			} else {
+				filterMap[vv.(string)] = struct{}{}
+			}
+		}
+	}
+	return filterMap
+}
+
 func computePeriodByUnit(createTime, endTime interface{}, currentPeriod int, periodUnit string) (int, error) {
 	var createTimeStr, endTimeStr string
 	switch value := createTime.(type) {

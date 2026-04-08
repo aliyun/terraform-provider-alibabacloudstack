@@ -28,7 +28,8 @@ import (
 )
 
 var testAccProviders map[string]*schema.Provider
-var testAccProvider *schema.Provider
+var testAccExternalProviders map[string]resource.ExternalProvider
+var testAccProvider, testYundunProvider *schema.Provider
 var defaultRegionToTest = os.Getenv("ALIBABACLOUDSTACK_REGION")
 
 func init() {
@@ -36,6 +37,11 @@ func init() {
 	testAccProvider = Provider()
 	testAccProviders = map[string]*schema.Provider{
 		"alibabacloudstack": testAccProvider,
+	}
+	testAccExternalProviders = map[string]resource.ExternalProvider{
+		"random": {
+			Source: "hashicorp/random",
+		},
 	}
 }
 
@@ -400,7 +406,7 @@ func GeneratePassword(length int) string {
 	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err != nil && v {
 		return "<YOUR PASSWORD>"
 	}
-	
+
 	// Define character sets
 	const (
 		upperLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
