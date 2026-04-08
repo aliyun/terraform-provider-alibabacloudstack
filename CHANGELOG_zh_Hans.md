@@ -1,3 +1,20 @@
+# 3.16.24
+
+## 新增
+
+1. MongoDB 实例类型的查询能力（`alibabacloudstack_mongodb_instance_types`）
+2. 多个数据源支持查询从其他组织共享的资源能力，新增 `shared` 参数
+
+## 修复
+
+1. 修复 `alibabacloudstack_ascm_organization` 资源创建/更新/删除逻辑，提升稳定性
+2. 修复 `alibabacloudstack_rds_dbconnection` 支持 `schema_version` 参数配置
+3. 修复 `alibabacloudstack_cr_namespace` 创建参数不正确导致创建失败的问题
+4. 修复 `alibabacloudstack_ascm_ram_policy` 描述字段处理逻辑
+5. 修复 `alibabacloudstack_ascm_organizations` 数据源支持 `ids` 过滤和新增 `primary_key` 字段
+
+---
+
 # 3.16.23
 
 ## 新增

@@ -1,3 +1,20 @@
+# 3.16.24
+
+## New
+
+1. Query capability for MongoDB instance types (`alibabacloudstack_mongodb_instance_types`)
+2. Query capability for shared resources from other organizations for multiple data sources, with new `shared` parameter
+
+## Fixes
+
+1. Fixed `alibabacloudstack_ascm_organization` resource create/update/delete logic for improved stability
+2. Fixed `alibabacloudstack_rds_dbconnection` to support `schema_version` parameter configuration
+3. Fixed `alibabacloudstack_cr_namespace` creation parameters causing creation failures
+4. Fixed `alibabacloudstack_ascm_ram_policy` description field handling logic
+5. Fixed `alibabacloudstack_ascm_organizations` data source to support `ids` filtering and added `primary_key` field
+
+---
+
 # 3.16.23
 
 ## New
