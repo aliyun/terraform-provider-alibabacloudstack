@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-ascmlogonpolicybasic%v", rand)
+	name := fmt.Sprintf("tf-ascmorgbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testaccOrganizationBasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -39,13 +39,14 @@ func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
 					"parent_id": "1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"name": name,
+					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name":      "${var.name}update",
-					"parent_id": "1",
+					"name": "${var.name}update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
