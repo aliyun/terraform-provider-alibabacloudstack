@@ -116,7 +116,6 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, errmsgs.Throttling) {
-				time.Sleep(time.Duration(3) * time.Second)
 				return resource.RetryableError(err)
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
@@ -127,10 +126,7 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 		if err != nil {
 			return resource.NonRetryableError(errmsgs.WrapError(err))
 		}
-		if response.Code == "200" || len(response.Data) < 1 {
-			return nil
-		}
-		return resource.RetryableError(fmt.Errorf("response code is not 200 or data is empty"))
+		return nil
 	})
 	if err != nil {
 		return err

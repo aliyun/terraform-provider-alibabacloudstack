@@ -438,7 +438,7 @@ func (s *RdsService) DescribeDBConnection(id string) (*rds.DBInstanceNetInfo, er
 	}
 
 	for _, o := range object {
-		if o.IPType == parts[1] {
+		if strings.ToLower(o.IPType) == parts[1] {
 			return &o, nil
 		}
 	}

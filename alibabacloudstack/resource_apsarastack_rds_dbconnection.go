@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -151,7 +152,11 @@ func resourceAlibabacloudStackDBConnectionRead(d *schema.ResourceData, meta inte
 	}
 	d.Set("instance_id", parts[0])
 	d.Set("connection_prefix", GetRdsConnectionPrefix(object.ConnectionString))
-	d.Set("port", object.Port)
+	port, err := strconv.Atoi(object.Port)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.Set("port", port)
 	d.Set("network_type", strings.ToLower(object.IPType))
 	d.Set("connection_string", object.ConnectionString)
 	d.Set("ip_address", object.IPAddress)
