@@ -420,7 +420,7 @@ type Organization struct {
 	Mtime             int64         `json:"mtime,omitempty"`
 }
 
-type OrganizationListResponse struct {
+type ListOrganizationResponse struct {
 	Code         string         `json:"code"`
 	Cost         int            `json:"cost"`
 	Data         []Organization `json:"data"`
@@ -431,7 +431,7 @@ type OrganizationListResponse struct {
 	Success      bool           `json:"success"`
 }
 
-type OrganizationResponse struct {
+type GetOrganizationResponse struct {
 	Code         string       `json:"code"`
 	Cost         int          `json:"cost"`
 	Data         Organization `json:"data"`

@@ -22,7 +22,7 @@ func TestAccAlibabacloudStackAscmRamPolicyBasic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-ascmrampolicy%v", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccAscm_e_Organization_resource)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccAscm_RamPolicy_resource)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

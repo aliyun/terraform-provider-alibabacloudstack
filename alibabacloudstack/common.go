@@ -713,7 +713,7 @@ func getIdsStringFilter(d *schema.ResourceData) map[string]struct{} {
 	return getStringListFilters(d, "ids")
 }
 
-func getStringListFilters(d *schema.ResourceData, key string ) map[string]struct{} {
+func getStringListFilters(d *schema.ResourceData, key string) map[string]struct{} {
 	filterMap := make(map[string]struct{})
 	if v, ok := d.GetOk(key); ok {
 		for _, vv := range v.([]interface{}) {

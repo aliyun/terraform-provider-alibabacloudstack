@@ -85,6 +85,10 @@ func dataSourceAlibabacloudStackMongoDBInstanceTypes() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"spec": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"series": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -150,11 +154,11 @@ func dataSourceAlibabacloudStackMongodbInstanceTypesRead(d *schema.ResourceData,
 	if v, ok := d.GetOk("node_type"); ok {
 		reqQuery["nodeType"] = v
 	}
-
-	reqHeader := map[string]string{
-		"x-acs-territory": "US",
-		"x-acs-lang":      "EN",
-	}
+	territory := "US"
+	lang := "EN"
+	reqHeader := make(map[string]string)
+	reqHeader["x-acs-territory"] = territory
+	reqHeader["x-acs-lang"] = lang
 	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", reqHeader, reqQuery, nil)
 	if err != nil {
 		return err
@@ -209,6 +213,7 @@ func dataSourceAlibabacloudStackMongodbInstanceTypesRead(d *schema.ResourceData,
 				"cpu":            cpu,
 				"memory":         memory,
 				"series":         data["seriesId"],
+				"spec":           data["spec"],
 				"engine_version": data["engineVersionLabel"],
 				"cpu_type":       data["cpuType"],
 				"connections":    connections,
