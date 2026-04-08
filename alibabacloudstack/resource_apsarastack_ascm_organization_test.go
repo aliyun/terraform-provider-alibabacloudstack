@@ -1,12 +1,11 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
@@ -20,6 +19,10 @@ func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-ascmlogonpolicybasic%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testaccOrganizationBasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -28,12 +31,26 @@ func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckAscm_E_OrganizationDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAscm_e_Organization_resource,
+				Config: testAccConfig(map[string]interface{}{
+					"name":      "${var.name}",
+					"parent_id": "1",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name":      "${var.name}update",
+					"parent_id": "1",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name": name + "update",
+					}),
 				),
 			},
 			{
@@ -46,35 +63,13 @@ func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
 
 }
 
-func testAccCheckAscm_E_OrganizationDestroy(s *terraform.State) error { //destroy function
-	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-
-	ascmService := AscmService{client}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type == "alibabacloudstack_ascm_organization" || rs.Type != "alibabacloudstack_ascm_organization" {
-			continue
-		}
-		ascm, err := ascmService.DescribeAscmOrganization(rs.Primary.ID)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-		if ascm.RequestID != "" {
-			return errmsgs.WrapError(errmsgs.Error("organization still exist"))
-		}
-	}
-
-	return nil
+func testaccOrganizationBasic(name string) string {
+	return fmt.Sprintf(`
+variable name{
+ default = "%s"
 }
-
-const testAccAscm_e_Organization_resource = `
-resource "alibabacloudstack_ascm_organization" "default" {
-  name = "Tf-testingresource-org"
-  parent_id = "1"
-}`
+`, name)
+}
 
 var testAccCheckAscmOrg = map[string]string{
 	"name":      CHECKSET,

@@ -94,7 +94,7 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetOrganizationList", "/ascm/auth/organization/queryList")
 	request.QueryParams["id"] = parentId
 
-	response := Organization{}
+	response := ListOrganizationResponse{}
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		bresponse, err := client.ProcessCommonRequest(request)

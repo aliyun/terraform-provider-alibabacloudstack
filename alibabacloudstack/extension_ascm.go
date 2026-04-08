@@ -333,18 +333,18 @@ type MembersInsideResourceData struct {
 }
 
 type MembersInsideResourceSet struct {
-	SuccessResponse bool   `json:"successResponse"`
-	Code            string `json:"code"`
-	ErrorKey        string `json:"errorKey"`
-	Message         string `json:"message"`
-	ExtraMessage    string `json:"extraMessage"`
-	RequestId       string `json:"requestId"`
-	Action          string `json:"action"`
-	Cost            int    `json:"cost"`
-	Domain          string `json:"domain"`
-	ServerRole      string `json:"serverRole"`
-	Data []MembersInsideResourceData `json:"data"`
-	PageInfo     struct {
+	SuccessResponse bool                        `json:"successResponse"`
+	Code            string                      `json:"code"`
+	ErrorKey        string                      `json:"errorKey"`
+	Message         string                      `json:"message"`
+	ExtraMessage    string                      `json:"extraMessage"`
+	RequestId       string                      `json:"requestId"`
+	Action          string                      `json:"action"`
+	Cost            int                         `json:"cost"`
+	Domain          string                      `json:"domain"`
+	ServerRole      string                      `json:"serverRole"`
+	Data            []MembersInsideResourceData `json:"data"`
+	PageInfo        struct {
 		CurrentPage int `json:"currentPage"`
 		PageSize    int `json:"pageSize"`
 		Total       int `json:"total"`
@@ -401,28 +401,41 @@ type PasswordPolicy struct {
 }
 
 type Organization struct {
-	Code string `json:"code"`
-	Cost int    `json:"cost"`
-	Data []struct {
-		Alias             string        `json:"alias"`
-		CuserID           string        `json:"cuserId"`
-		ID                int           `json:"id"`
-		Internal          bool          `json:"internal"`
-		Level             string        `json:"level"`
-		MultiCloudStatus  string        `json:"multiCloudStatus"`
-		MuserID           string        `json:"muserId"`
-		Name              string        `json:"name"`
-		ParentID          int           `json:"parentId"`
-		SupportRegionList []interface{} `json:"supportRegionList"`
-		UUID              string        `json:"uuid"`
-		SupportRegions    string        `json:"supportRegions,omitempty"`
-		Mtime             int64         `json:"mtime,omitempty"`
-	} `json:"data"`
-	Message      string `json:"message"`
-	PureListData bool   `json:"pureListData"`
-	Redirect     bool   `json:"redirect"`
-	RequestID    string `json:"requestId"`
-	Success      bool   `json:"success"`
+	Alias             string        `json:"alias"`
+	CuserID           string        `json:"cuserId"`
+	ID                int           `json:"id"`
+	Internal          bool          `json:"internal"`
+	Level             string        `json:"level"`
+	MultiCloudStatus  string        `json:"multiCloudStatus"`
+	MuserID           string        `json:"muserId"`
+	Name              string        `json:"name"`
+	ParentID          int           `json:"parentId"`
+	SupportRegionList []interface{} `json:"supportRegionList"`
+	UUID              string        `json:"uuid"`
+	SupportRegions    string        `json:"supportRegions,omitempty"`
+	Mtime             int64         `json:"mtime,omitempty"`
+}
+
+type ListOrganizationResponse struct {
+	Code         string         `json:"code"`
+	Cost         int            `json:"cost"`
+	Data         []Organization `json:"data"`
+	Message      string         `json:"message"`
+	PureListData bool           `json:"pureListData"`
+	Redirect     bool           `json:"redirect"`
+	RequestID    string         `json:"requestId"`
+	Success      bool           `json:"success"`
+}
+
+type GetOrganizationResponse struct {
+	Code         string       `json:"code"`
+	Cost         int          `json:"cost"`
+	Data         Organization `json:"data"`
+	Message      string       `json:"message"`
+	PureListData bool         `json:"pureListData"`
+	Redirect     bool         `json:"redirect"`
+	RequestID    string       `json:"requestId"`
+	Success      bool         `json:"success"`
 }
 
 type RamRole struct {

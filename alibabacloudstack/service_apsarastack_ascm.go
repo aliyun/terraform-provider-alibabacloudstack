@@ -486,11 +486,10 @@ func (s *AscmService) DescribeAscmDeletedUser(id string) (response *DeletedUser,
 	return resp, nil
 }
 
-func (s *AscmService) DescribeAscmOrganization(id string) (response *Organization, err error) {
-	did := strings.Split(id, COLON_SEPARATED)
+func (s *AscmService) DescribeAscmOrganizationByName(parentid string, name string) (response *Organization, err error) {
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetOrganizationList", "/ascm/auth/organization/queryList")
-	request.QueryParams["name"] = did[0]
-	var resp = &Organization{}
+	request.QueryParams["id"] = parentid
+	var resp = &ListOrganizationResponse{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug("GetOrganization", bresponse, request, request.QueryParams)
 
@@ -498,25 +497,48 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 		errmsg := ""
 		if bresponse != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		} else {
-			return nil, err
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorOrganizationNotFound"}) {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return nil, errmsgs.GetNotFoundErrorFromString("The Organization is not found")
 		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, name, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, errmsgs.WrapError(err)
+		return nil, errmsgs.WrapError(err)
+	}
+	for _, o := range resp.Data {
+		if o.Alias == name {
+			return &o, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString("The Organization is not found")
+}
+
+func (s *AscmService) DescribeAscmOrganization(id string) (response *Organization, err error) {
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetOrganization", "/ascm/auth/organization/query")
+	request.QueryParams["id"] = id
+	var resp = &GetOrganizationResponse{}
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("GetOrganization", bresponse, request, request.QueryParams)
+
+	if err != nil {
+		errmsg := ""
+		if bresponse != nil {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorOrganizationNotFound"}) {
+			return nil, errmsgs.GetNotFoundErrorFromString("The Organization is not found")
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	if resp.Code == "200" {
-		return resp, errmsgs.WrapError(err)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
 	}
-
-	return resp, nil
+	return &resp.Data, nil
 }
 
 func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, err error) {
