@@ -182,7 +182,8 @@ func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta in
 	if d.IsNewResource() && d.Get("network_type").(string) == "public" {
 		return nil
 	}
-	if d.IsNewResource() && d.Get("network_type").(string) == "private" && d.Get("connection_prefix").(string) == "" && d.Get("connection_prefix").(string) != d.Get("instance_id").(string) {
+
+	if d.IsNewResource() && d.Get("network_type").(string) == "private" && (d.Get("connection_prefix").(string) == "" || d.Get("connection_prefix").(string) == d.Get("instance_id").(string)) {
 		return nil
 	}
 
@@ -211,6 +212,7 @@ func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta in
 			raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 				return rdsClient.ModifyDBInstanceConnectionString(request)
 			})
+			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			if err != nil {
 				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus...) {
 					return resource.RetryableError(err)
@@ -225,7 +227,6 @@ func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta in
 				err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 				return resource.NonRetryableError(err)
 			}
-			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			return nil
 		}); err != nil {
 			return err
