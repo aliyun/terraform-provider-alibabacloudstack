@@ -109,9 +109,13 @@ func TestAccAlibabacloudStackDBConnectionPrivate(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":  "${alibabacloudstack_db_instance.instance.id}",
 					"network_type": "private",
+					// "port":              "3333",
+					// "connection_prefix": fmt.Sprintf("tftest%d", rand),
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"network_type": "private",
+					}),
 				),
 			},
 			{
@@ -121,13 +125,13 @@ func TestAccAlibabacloudStackDBConnectionPrivate(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"port":              "3333",
-					"connection_prefix": fmt.Sprintf("tftest%d", rand),
+					"port":              "3344",
+					"connection_prefix": fmt.Sprintf("tftest%d2", rand),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"port":              "3333",
-						"connection_prefix": fmt.Sprintf("tftest%d", rand),
+						"port":              "3344",
+						"connection_prefix": fmt.Sprintf("tftest%d2", rand),
 					}),
 				),
 			},

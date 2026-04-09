@@ -872,6 +872,9 @@ func resourceAlibabacloudStackDBInstanceDelete(d *schema.ResourceData, meta inte
 	if err != nil {
 		return err
 	}
+	if err := rdsService.WaitForDBInstance(d.Id(), Deleting, DefaultTimeoutMedium); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	return nil
 }
 
