@@ -166,11 +166,6 @@ func resourceAlibabacloudStackDBConnectionRead(d *schema.ResourceData, meta inte
 
 // resourceAlibabacloudStackDBConnectionUpdate updates the DB connection configuration
 func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
-
-	if d.IsNewResource() {
-		return nil
-	}
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
 
@@ -178,12 +173,15 @@ func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta in
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	if d.IsNewResource() && d.Get("network_type").(string) == "public" {
-		return nil
+	prefix := d.Get("connection_prefix").(string)
+	if prefix == "" {
+		prefix = d.Get("instance_id").(string)
 	}
 
-	if d.IsNewResource() && d.Get("network_type").(string) == "private" && (d.Get("connection_prefix").(string) == "" || d.Get("connection_prefix").(string) == d.Get("instance_id").(string)) {
+	if d.IsNewResource() && parts[1] == "public" {
+		return nil
+	}
+	if d.IsNewResource() && parts[1] == "private" && prefix == d.Get("instance_id").(string) {
 		return nil
 	}
 
@@ -196,10 +194,6 @@ func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta in
 				return errmsgs.WrapError(err)
 			}
 			connection_string = object.ConnectionString
-		}
-		prefix := d.Get("connection_prefix").(string)
-		if prefix == "" {
-			prefix = d.Get("instance_id").(string)
 		}
 		request := rds.CreateModifyDBInstanceConnectionStringRequest()
 		client.InitRpcRequest(*request.RpcRequest)
