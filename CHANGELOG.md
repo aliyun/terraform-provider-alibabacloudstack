@@ -1,3 +1,40 @@
+# 3.18.26
+
+## Added
+
+1. Data source for querying BMCP bare metal compute node images (`alibabacloudstack_bmcp_images`)
+2. Data source for querying BMCP bare metal compute node machine types (`alibabacloudstack_bmcp_machinetypes`)
+3. Data source for querying BMCP bare metal compute nodes (`alibabacloudstack_bmcp_nodes`)
+4. Orchestration support for BCMP bare metal compute keypairs (`alibabacloudstack_bcmp_keypair`)
+5. Data source for querying BCMP bare metal compute keypairs (`alibabacloudstack_bcmp_keypairs`)
+6. Orchestration support for BCMP bare metal compute security groups (`alibabacloudstack_bcmp_security_group`)
+7. Data source for querying BCMP bare metal compute security groups (`alibabacloudstack_bcmp_security_groups`)
+8. Orchestration support for BCMP bare metal compute security group rules (`alibabacloudstack_bcmp_security_group_rule`)
+9. Data source for querying BCMP bare metal compute security group rules (`alibabacloudstack_bcmp_security_group_rules`)
+10. Orchestration support for Enhanced VPC (EVPC) instances (`alibabacloudstack_evpc_evpc`)
+11. Data source for querying Enhanced VPC (EVPC) instances (`alibabacloudstack_evpc_evpcs`)
+
+## Fixed
+
+1. Fixed `alibabacloudstack_ascm_organization` duplicate creation and timeout issues when an organization with the same name already exists
+2. Fixed redundant update requests sent when updating `alibabacloudstack_ascm_organization` name
+3. Fixed struct field access error in the Read method of `alibabacloudstack_ascm_organization`
+4. Fixed missing required parameters causing `alibabacloudstack_cr_namespace` creation to fail
+5. Fixed missing NamespaceName parameter when updating `alibabacloudstack_cr_namespace`
+6. Fixed logic defects in `alibabacloudstack_rds_dbconnection` database connection address creation and update flows
+7. Fixed `alibabacloudstack_kvstore_instance` test cases and optimized instance orchestration logic
+8. Fixed SSL connection field handling in `alibabacloudstack_kvstore_connection`
+9. Fixed execution and template logic defects in `alibabacloudstack_oos_execution` and `alibabacloudstack_oos_template`
+10. Fixed retry condition error in the delete logic of `alibabacloudstack_ascm_organization`
+
+## Changes
+
+1. Restored availability of `cpu_type` field in `alibabacloudstack_kvstore_instance` (removed Deprecated mark)
+2. Optimized `node_type` field diff handling logic in `alibabacloudstack_kvstore_instance`
+3. Batch-added `shared` parameter support to a dozen DataSources for querying shared resources (ECS, OSS, SLB, CR, NAT, VPC, etc.)
+
+---
+
 # 3.18.25
 
 ## Added
