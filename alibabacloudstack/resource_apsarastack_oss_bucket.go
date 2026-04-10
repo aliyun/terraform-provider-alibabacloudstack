@@ -173,10 +173,10 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "GetBucketEndpointMap", errmsgs.AlibabacloudStackOssGoSdk)
 		}
-		if len(endpoints) == 0 {
-			return errmsgs.Error("Terraform Provider Config: Oss EndpointMap is empty!")
-		}
 		if ossCluster != "" {
+			if len(endpoints) == 0 {
+				return errmsgs.Error("Terraform Provider Config: Oss EndpointMap is empty!")
+			}
 			ossEndpoint, exists = endpoints[ossCluster]
 			if !exists {
 				return errmsgs.Error(fmt.Sprint("Oss Cluster %s is not exists for endpointMap: %#v", ossCluster, endpoints))
@@ -272,6 +272,10 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 		}
 		return errmsgs.WrapError(err)
 	}
+	bucketClient, err := ossService.GetBucketClient(d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
 	logging, err := ossService.DescribeOssBucketLogging(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "GetBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
@@ -345,13 +349,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 			break
 		}
 	}
-
-	// Get ACL information
-	ossClient, err := ossService.GetBucketClient(bucketName)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	aclResult, err := ossClient.GetBucketAcl(context.Background(), &oss.GetBucketAclRequest{
+	aclResult, err := bucketClient.GetBucketAcl(context.Background(), &oss.GetBucketAclRequest{
 		Bucket: &bucketName,
 	})
 	if err != nil {
@@ -361,19 +359,13 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 		d.Set("acl", string(*aclResult.ACL))
 	}
 
-	// Get storage capacity information
-	ossSdkSvc := OssSdkService{client}
-	scOssClient, err := ossSdkSvc.GetBucketClient(bucketName)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 	scInput := &oss.OperationInput{
 		OpName:     "GetBucketStorageCapacity",
 		Method:     "GET",
 		Bucket:     oss.Ptr(bucketName),
 		Parameters: map[string]string{"qos": ""},
 	}
-	scOutput, err := scOssClient.InvokeOperation(context.Background(), scInput)
+	scOutput, err := bucketClient.InvokeOperation(context.Background(), scInput)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketStorageCapacity", errmsgs.AlibabacloudStackOssGoSdk)
 	}
@@ -395,7 +387,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	}
 
 	// Get encryption information
-	encResult, err := ossClient.GetBucketEncryption(context.Background(), &oss.GetBucketEncryptionRequest{
+	encResult, err := bucketClient.GetBucketEncryption(context.Background(), &oss.GetBucketEncryptionRequest{
 		Bucket: &bucketName,
 	})
 	if err != nil {
@@ -434,7 +426,10 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	bucketName := d.Get("bucket").(string)
-	var err error
+	bucketClient, err := ossService.GetBucketClient(bucketName)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
 	if !d.IsNewResource() && d.HasChange("tags") {
 		tags := d.Get("tags").(map[string]interface{})
 		var tag_objs []OssTags
@@ -465,11 +460,6 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 		target := ""
 		process := "closing"
 		failed := "starting"
-		ossSdkSvcSync := OssSdkService{client}
-		syncOssClient, err := ossSdkSvcSync.GetBucketClient(bucketName)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
 		var syncInput *oss.OperationInput
 		if v := d.Get("bucket_sync").(bool); v {
 			dual_kms_key := d.Get("dual_kms_key").(string)
@@ -502,7 +492,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 				Parameters: map[string]string{"replication": ""},
 			}
 		}
-		_, err = syncOssClient.InvokeOperation(context.Background(), syncInput)
+		_, err = bucketClient.InvokeOperation(context.Background(), syncInput)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, syncInput.OpName, errmsgs.AlibabacloudStackOssGoSdk)
 		}
@@ -514,11 +504,6 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 
 	if (d.IsNewResource() && d.Get("storage_capacity").(int) != -1) || (!d.IsNewResource() && d.HasChange("storage_capacity")) {
 		storageCapacity := d.Get("storage_capacity").(int)
-		ossSdkSvc2 := OssSdkService{client}
-		scOssClient2, err := ossSdkSvc2.GetBucketClient(bucketName)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
 		xmlBody := fmt.Sprintf("<BucketUserQos><StorageCapacity>%d</StorageCapacity></BucketUserQos>", storageCapacity)
 		scInput2 := &oss.OperationInput{
 			OpName:     "SetBucketStorageCapacity",
@@ -528,7 +513,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			Headers:    map[string]string{"Content-Type": "application/xml"},
 			Body:       strings.NewReader(xmlBody),
 		}
-		_, err = scOssClient2.InvokeOperation(context.Background(), scInput2)
+		_, err = bucketClient.InvokeOperation(context.Background(), scInput2)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "SetBucketStorageCapacity", errmsgs.AlibabacloudStackOssGoSdk)
 		}
@@ -536,11 +521,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 
 	if d.HasChange("acl") {
 		acl := d.Get("acl").(string)
-		ossClient, err := ossService.GetBucketClient(bucketName)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		_, err = ossClient.PutBucketAcl(context.Background(), &oss.PutBucketAclRequest{
+		_, err = bucketClient.PutBucketAcl(context.Background(), &oss.PutBucketAclRequest{
 			Bucket: &bucketName,
 			Acl:    oss.BucketACLType(acl),
 		})
@@ -550,12 +531,8 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 	}
 
 	if d.HasChanges("sse_algorithm", "kms_key_id") {
-		ossClient2, err := ossService.GetBucketClient(bucketName)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
 		if d.Get("sse_algorithm").(string) == "" {
-			_, err := ossClient2.DeleteBucketEncryption(context.Background(), &oss.DeleteBucketEncryptionRequest{
+			_, err := bucketClient.DeleteBucketEncryption(context.Background(), &oss.DeleteBucketEncryptionRequest{
 				Bucket: &bucketName,
 			})
 			if err != nil {
@@ -570,7 +547,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			if sse_algorithm == "KMS" {
 				applyDefault.KMSMasterKeyID = &kms_key_id
 			}
-			_, err := ossClient2.PutBucketEncryption(context.Background(), &oss.PutBucketEncryptionRequest{
+			_, err := bucketClient.PutBucketEncryption(context.Background(), &oss.PutBucketEncryptionRequest{
 				Bucket: &bucketName,
 				ServerSideEncryptionRule: &oss.ServerSideEncryptionRule{
 					ApplyServerSideEncryptionByDefault: applyDefault,
@@ -686,13 +663,7 @@ func checkVpcListChange(oldlist []interface{}, newlist []interface{}, d *schema.
 }
 
 func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) error {
-	var bucket_name string
-	parts := strings.Split(d.Id(), COLON_SEPARATED)
-	if len(parts) > 1 {
-		bucket_name = parts[0]
-	} else {
-		bucket_name = d.Id()
-	}
+	bucket_name := d.Id()
 	ossService := OssService{client}
 	ossClient, err := ossService.GetBucketClient(d.Id())
 	if err != nil {
@@ -795,25 +766,6 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 	}
 
 	return nil
-}
-
-func resourceAlibabacloudStackOssBucketLoggingDescribe(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) (*oss.GetBucketLoggingResult, error) {
-	bucketName := d.Id()
-	ossService := OssService{client}
-	ossClient, err := ossService.GetBucketClient(bucketName)
-	if err != nil {
-		return nil, errmsgs.WrapError(err)
-	}
-
-	result, err := ossClient.GetBucketLogging(context.Background(), &oss.GetBucketLoggingRequest{
-		Bucket: &bucketName,
-	})
-	log.Printf("GetBucketLogging result: %v", result)
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "GetBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
-	}
-
-	return result, nil
 }
 
 type OssTags struct {
