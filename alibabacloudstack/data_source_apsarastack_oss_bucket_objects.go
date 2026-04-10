@@ -1,11 +1,12 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"log"
 	"regexp"
 	"time"
 
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -111,34 +112,21 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 	}
 
 	// List bucket objects
-	var initialOptions []oss.Option
-	if v, ok := d.GetOk("key_prefix"); ok && v.(string) != "" {
-		keyPrefix := v.(string)
-		initialOptions = append(initialOptions, oss.Prefix(keyPrefix))
-	}
 	var allObjects []oss.ObjectProperties
 	nextMarker := ""
+	prefix := ""
+	if v, ok := d.GetOk("key_prefix"); ok && v.(string) != "" {
+		prefix = v.(string)
+	}
 	for {
-		var options []oss.Option
-		options = append(options, initialOptions...)
-		if nextMarker != "" {
-			options = append(options, oss.Marker(nextMarker))
-		}
+		input := oss.ListObjectsRequest{}
+		input.Prefix = &prefix
 
-		response, err := bucket.ListObjects(options...)
-		if err != nil{
+		response, err := bucket.ListObjects(context.Background(), input)
+		if err != nil {
 			return err
 		}
 		log.Printf("err is %s", err)
-		// if err != nil {
-		// 	errmsg := ""
-		// 	if ok {
-		// 		errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		// 	}
-		// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_adb_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		// }
-		// var response *oss.ListObjectsResult
-		// err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if len(response.Objects) < 1 {
 			break
 		}
@@ -159,7 +147,7 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 			r = regexp.MustCompile(keyRegex.(string))
 		}
 		for _, object := range allObjects {
-			if r != nil && !r.MatchString(object.Key) {
+			if r != nil && !r.MatchString(*object.Key) {
 				continue
 			}
 			filteredObjectsTemp = append(filteredObjectsTemp, object)
@@ -175,7 +163,7 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var ids []string
 	var s []map[string]interface{}
-	ossService:=OssService{client}
+	ossService := OssService{client}
 	bucket, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
 		return err
@@ -188,7 +176,7 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 		}
 
 		// Add metadata information
-		objectHeader, err := bucket.GetObjectDetailedMeta(object.Key)
+		objectHeader, err := bucket.GetObjectDetailedMeta(context.Background(), object.Key)
 		if err != nil {
 			errmsg := ""
 			log.Printf("[ERROR] Unable to get metadata for the object %s: %v: %s", object.Key, err, errmsg)
@@ -199,11 +187,11 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 			mapping["content_encoding"] = objectHeader.Get("Content-Encoding")
 			mapping["content_md5"] = objectHeader.Get("Content-Md5")
 			mapping["expires"] = objectHeader.Get("Expires")
-			mapping["server_side_encryption"] = objectHeader.Get(oss.HTTPHeaderOssServerSideEncryption)
-			mapping["sse_kms_key_id"] = objectHeader.Get(oss.HTTPHeaderOssServerSideEncryptionKeyID)
+			mapping["server_side_encryption"] = objectHeader.Get("X-Oss-Server-Side-Encryption")
+			mapping["sse_kms_key_id"] = objectHeader.Get("x-oss-server-side-encryption-key-id")
 		}
 		// Add ACL information
-		objectACL, err := bucket.GetObjectACL(object.Key)
+		objectACL, err := bucket.GetObjectACL(context.Background(), object.Key)
 		if err != nil {
 			errmsg := ""
 			log.Printf("[ERROR] Unable to get ACL for the object %s: %v: %s", object.Key, err, errmsg)
@@ -211,7 +199,7 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 			mapping["acl"] = objectACL.ACL
 		}
 
-		ids = append(ids, object.Key)
+		ids = append(ids, *object.Key)
 		s = append(s, mapping)
 	}
 

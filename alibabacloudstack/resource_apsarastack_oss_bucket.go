@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -87,14 +87,14 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 			},
 			"storage_class": {
 				Type:     schema.TypeString,
-				Default:  oss.StorageStandard,
+				Default:  oss.StorageClassStandard,
 				Optional: true,
 				ForceNew: true,
 			},
 			"vpclist": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:       schema.TypeList,
+				Optional:   true,
+				Elem:       &schema.Schema{Type: schema.TypeString},
 				Deprecated: "`Vpclist` is not available in the latest versions, and is scheduled for removal in version 3.21.0",
 			},
 			"bucket_sync": {
@@ -160,7 +160,7 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	}
 	storage_capacity := d.Get("storage_capacity").(int)
 	// If not present, Create Bucket
-	if det.BucketInfo.Name == "" {
+	if *det.BucketInfo.Name == "" {
 		ossCluster := d.Get("oss_cluster").(string)
 		var ossEndpoint map[string]interface{}
 		ossEndpointData, err := ossService.GetOssEndpointList()
@@ -220,9 +220,6 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			if ossNotFoundError(err) {
-				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
-			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 		}
@@ -236,7 +233,7 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 			if err != nil {
 				return resource.NonRetryableError(err)
 			}
-			if det.BucketInfo.Name == "" {
+			if *det.BucketInfo.Name == "" {
 				return resource.RetryableError(errmsgs.Error("Trying to ensure new OSS bucket %#v has been created successfully.", bucketName))
 			}
 			return nil
@@ -285,7 +282,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	}
 	log.Printf("read describe logging %v", logging)
 	d.Set("bucket", d.Id())
-	if object.BucketInfo.Name == "" {
+	if *object.BucketInfo.Name == "" {
 		log.Print("read: BucketInfo fail!!!!!!")
 	}
 	d.Set("creation_date", object.BucketInfo.CreationDate.Format("2006-01-02"))
@@ -353,9 +350,6 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if ossNotFoundError(err) {
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
-		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 	}
@@ -373,9 +367,6 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		if ossNotFoundError(err) {
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "GetBucketStorageCapacity", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
@@ -398,9 +389,6 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		if ossNotFoundError(err) {
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "GetBucketEncryption", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
@@ -491,9 +479,6 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			if ossNotFoundError(err) {
-				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
-			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 		}
@@ -516,9 +501,6 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			if ossNotFoundError(err) {
-				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
-			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketACL", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 		}
@@ -536,9 +518,6 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			if ossNotFoundError(err) {
-				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
-			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketACL", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 		}
@@ -555,9 +534,6 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			if err != nil {
 				if bresponse == nil {
 					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-				}
-				if ossNotFoundError(err) {
-					return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 				}
 				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "DeleteBucketEncryption", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
@@ -579,9 +555,6 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			if err != nil {
 				if bresponse == nil {
 					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-				}
-				if ossNotFoundError(err) {
-					return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 				}
 				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketEncryption", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
@@ -638,7 +611,7 @@ func resourceAlibabacloudStackOssBucketDelete(d *schema.ResourceData, meta inter
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 	addDebug("IsBucketExist", det.BucketInfo, requestInfo, map[string]string{"bucketName": d.Id()})
-	if det.BucketInfo.Name == "" {
+	if *det.BucketInfo.Name == "" {
 		return nil
 	}
 

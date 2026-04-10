@@ -289,7 +289,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"newdms-api.{{.domain}}",
 		"newdms-api.{{.region}}.{{.domain}}",
 	},
-	OSSCode: PopEndpoint{"", ""},
+	OSSCode: PopEndpoint{
+		"oss-cn-wulan-env205-d01-a.inter.env205.shuguang.com",
+		"oss-cn-wulan-env205-d01-a.inter.env205.shuguang.com",
+	},
 	DataworksPublicCode: PopEndpoint{
 		"dataworks-public.{{.domain}}",
 		"dataworks-public.{{.region}}.{{.domain}}",

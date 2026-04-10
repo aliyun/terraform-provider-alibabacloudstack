@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
@@ -147,8 +147,7 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 					}},
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
@@ -159,8 +158,7 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 					}},
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
@@ -168,8 +166,7 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 					"logging": REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
@@ -417,7 +414,7 @@ func testAccCheckOssBucketDestroy(s *terraform.State) error { // destroy functio
 			}
 			return errmsgs.WrapError(err)
 		}
-		if bucket.BucketInfo.Name != "" {
+		if *bucket.BucketInfo.Name != "" {
 			return errmsgs.WrapError(errmsgs.Error("bucket still exist"))
 		}
 	}

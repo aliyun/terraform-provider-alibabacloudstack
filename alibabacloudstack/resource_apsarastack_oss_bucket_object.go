@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -223,7 +223,7 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 	d.Set("content_md5", object.Get("Content-MD5"))
 	//d.Set("cache_control", object.Get("Cache-Control"))
 	d.Set("server_side_encryption", object.Get("X-Oss-Server-Side-Encryption"))
-	if object.Get("X-Oss-Server-Side-Encryption") == ServerSideEncryptionKMS{
+	if object.Get("X-Oss-Server-Side-Encryption") == ServerSideEncryptionKMS {
 		d.Set("kms_key_id", object.Get("x-oss-server-side-encryption-key-id"))
 	}
 	d.Set("content_disposition", object.Get("Content-Disposition"))
@@ -278,9 +278,9 @@ func buildObjectHeaderOptions(d *schema.ResourceData) (options []oss.Option, err
 		options = append(options, oss.ContentEncoding(v.(string)))
 	}
 
-		if v, ok := d.GetOk("content_md5"); ok {
-			options = append(options, oss.ContentMD5(v.(string)))
-		}
+	if v, ok := d.GetOk("content_md5"); ok {
+		options = append(options, oss.ContentMD5(v.(string)))
+	}
 
 	if v, ok := d.GetOk("expires"); ok {
 		expires := v.(string)

@@ -1,9 +1,10 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"regexp"
 
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -93,104 +94,71 @@ func dataSourceAlibabacloudStackOssBuckets() *schema.Resource {
 
 func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *oss.Client
-	var allBuckets []BucketProperties
-	nextMarker := ""
-	var options []oss.Option
-	if nextMarker != "" {
-		options = append(options, oss.Marker(nextMarker))
-	}
-
-	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	request.QueryParams["OpenApiAction"] = "GetService"
-	request.QueryParams["ProductName"] = "oss"
-	if v, ok := d.GetOk("shared"); ok {
-		if v.(bool) {
-			request.QueryParams["shared"] = "1"
-		} else {
-			request.QueryParams["shared"] = "0"
-		}
-	}
-	bresponse, err := client.ProcessCommonRequest(request)
-
+	ossSdkService := OssSdkService{client}
+	ossclietn, err := ossSdkService.GetOssClient()
 	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		if ossNotFoundError(err) {
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetBucketInfo", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+		return err
 	}
-	addDebug("GetBucketInfo", bresponse, requestInfo, request)
-
-	buckets, err := getBucketListResponseBuckets(bresponse)
-	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			d.SetId(dataResourceIdHash([]string{}))
-			d.Set("buckets", []interface{}{})
-			d.Set("names", []string{})
-			d.Set("ids", []string{})
-			return nil
+	var buckets []oss.BucketProperties
+	for {
+		request := &oss.ListBucketsRequest{}
+		lsRes, err := ossclietn.ListBuckets(context.Background(), request)
+		if err != nil {
+			return errmsgs.WrapError(err)
 		}
-		return errmsgs.WrapError(err)
+
+		buckets = append(buckets, lsRes.Buckets...)
+
+		if !lsRes.IsTruncated {
+			break
+		}
+		request.Marker = lsRes.NextMarker
 	}
 
-	for _, k := range buckets {
-		allBuckets = append(allBuckets, BucketProperties{
-			// 				XMLName:          xml.Name{},
-			Name:             k.Name,
-			Location:         k.Location,
-			StorageClass:     k.StorageClass,
-			CreationDate:     k.CreationDate,
-			Extranetendpoint: k.ExtranetEndpoint,
-			Intranetendpoint: k.IntranetEndpoint,
-		})
+	if len(buckets) == 0 {
+		d.SetId(dataResourceIdHash([]string{}))
+		return nil
 	}
-
-	var filteredBucketsTemp []BucketProperties
-	nameRegex, ok := d.GetOk("name_regex")
-	if ok && nameRegex.(string) != "" {
-		var r *regexp.Regexp
-		if nameRegex != "" {
-			r = regexp.MustCompile(nameRegex.(string))
-		}
-		for _, bucket := range allBuckets {
-			if r != nil && !r.MatchString(bucket.Name) {
+	var filteredBucketsTemp []oss.BucketProperties
+	idsMap := getIdsStringFilter(d)
+	nameRegex := d.Get("name_regex")
+	var r *regexp.Regexp
+	if nameRegex != "" {
+		r = regexp.MustCompile(nameRegex.(string))
+	}
+	for _, bucket := range buckets {
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[*bucket.Name]; !ok {
 				continue
 			}
-			filteredBucketsTemp = append(filteredBucketsTemp, bucket)
 		}
-	} else {
-		filteredBucketsTemp = allBuckets
+		if r != nil && !r.MatchString(*bucket.Name) {
+			continue
+		}
+		filteredBucketsTemp = append(filteredBucketsTemp, bucket)
 	}
 	return bucketsDescriptionAttributes(d, filteredBucketsTemp, meta)
 }
 
-func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []BucketProperties, meta interface{}) error {
+func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []oss.BucketProperties, meta interface{}) error {
 	var ids []string
 	var s []map[string]interface{}
 	var names []string
-	idsMap := getIdsStringFilter(d)
 	for _, bucket := range buckets {
-		if len(idsMap) > 0 {
-			if _, ok := idsMap[bucket.Name]; !ok {
-				continue
-			}
-		}
+		creationDate, _ := bucket.CreationDate.MarshalText()
+		creationDateStr := string(creationDate)
 		mapping := map[string]interface{}{
-			"id":                bucket.Name,
-			"name":              bucket.Name,
-			"location":          bucket.Location,
-			"storage_class":     bucket.StorageClass,
-			"creation_date":     bucket.CreationDate,
-			"extranet_endpoint": bucket.Extranetendpoint,
-			"intranet_endpoint": bucket.Intranetendpoint,
+			"id":            bucket.Name,
+			"name":          bucket.Name,
+			"location":      bucket.Location,
+			"storage_class": bucket.StorageClass,
+			"creation_date": creationDateStr,
+			// "extranet_endpoint": bucket.Extranetendpoint,
+			// "intranet_endpoint": bucket.Intranetendpoint,
 		}
-		ids = append(ids, bucket.Name)
+		ids = append(ids, *bucket.Name)
 		s = append(s, mapping)
-		names = append(names, bucket.Name)
+		names = append(names, *bucket.Name)
 	}
 
 	d.SetId(dataResourceIdHash(ids))

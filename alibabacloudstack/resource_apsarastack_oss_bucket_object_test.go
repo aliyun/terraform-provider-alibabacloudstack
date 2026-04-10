@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
@@ -232,7 +231,7 @@ func testAccCheckAlicloudOssBucketObjectDestroy(s *terraform.State) error {
 
 func testAccCheckOssBucketObjectDestroyWithProvider(s *terraform.State, provider *schema.Provider) error {
 	client := provider.Meta().(*connectivity.AlibabacloudStackClient)
-	var bucket *oss.Bucket
+	var bucket interface{}
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "alibabacloudstack_oss_bucket" {
 			continue
@@ -257,7 +256,7 @@ func testAccCheckOssBucketObjectDestroyWithProvider(s *terraform.State, provider
 		}
 
 		// Try to find the resource
-		exist, err := bucket.IsObjectExist(rs.Primary.ID)
+		exist, err := bucket.Objects.(rs.ID)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "NoSuchBucket") {
 				return nil

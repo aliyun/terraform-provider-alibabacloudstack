@@ -1,11 +1,11 @@
 package errmsgs
 
 import (
-	"slices"
 	"encoding/json"
 	"errors"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/alibabacloud-go/tea/tea"
@@ -20,7 +20,7 @@ import (
 	sdkerrors "github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 
 	//"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+
 	"github.com/aliyun/fc-go-sdk"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -117,10 +117,6 @@ func NotFoundError(err error) bool {
 		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound")
 	}
 
-	if e, ok := err.(oss.ServiceError); ok {
-		return e.StatusCode == 404 || strings.HasPrefix(e.Code, "NoSuch") || strings.HasPrefix(e.Message, "No Row found") || strings.HasPrefix(e.Message, "ResourceNotfound")
-	}
-
 	if e, ok := err.(*tea.SDKError); ok {
 		return *e.StatusCode == 404 || strings.HasSuffix(*e.Code, ".NotFound")
 	}
@@ -210,15 +206,6 @@ func IsExpectedErrors(err error, expectCodes ...string) bool {
 	if e, ok := err.(*sls.Error); ok {
 		for _, code := range expectCodes {
 			if e.Code == code || strings.Contains(e.Message, code) || strings.Contains(e.String(), code) {
-				return true
-			}
-		}
-		return false
-	}
-
-	if e, ok := err.(oss.ServiceError); ok {
-		for _, code := range expectCodes {
-			if e.Code == code || strings.Contains(e.Message, code) {
 				return true
 			}
 		}

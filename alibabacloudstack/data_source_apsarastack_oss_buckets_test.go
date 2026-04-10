@@ -8,22 +8,22 @@ import (
 func TestAccAlibabacloudStackOssBucketsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_oss_buckets.default"
-	name := fmt.Sprintf("tf-testacc-ossbucketsdatasource-basic%d", rand)
+	name := "testtf"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOssBucketsConfigDependence)
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}",
+			"name_regex": "testtf",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}_fake",
+			"name_regex": "testtf_fake",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_oss_bucket.demo.id}"},
+			"ids": []string{"testtf"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"fake-bucket-id-12345"},
@@ -32,21 +32,21 @@ func TestAccAlibabacloudStackOssBucketsDataSource(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"${alibabacloudstack_oss_bucket.demo.id}"},
-			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}",
+			"ids":        []string{"testtf"},
+			"name_regex": "testtf",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":        []string{"fake-bucket-id-12345"},
-			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}_fake",
+			"name_regex": "testtf_fake",
 		}),
 	}
 
 	var existOssBucketsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":      "1",
-			"names.#":    "1",
-			"buckets.#":  "1",
-			"buckets.0.name":                name,
+			"ids.#":          "1",
+			"names.#":        "1",
+			"buckets.#":      "1",
+			"buckets.0.name": name,
 			// Other bucket attributes are computed but we don't know exact values
 			// so we only validate the fields that are guaranteed to be present and known
 		}
@@ -74,10 +74,10 @@ variable "name" {
   default = "%s"
 }
 
-resource "alibabacloudstack_oss_bucket" "demo" {
-  bucket = var.name
-  acl    = "public-read"
-}
+// resource "alibabacloudstack_oss_bucket" "demo" {
+//   bucket = var.name
+//   acl    = "public-read"
+// }
 
 `, name)
 }
