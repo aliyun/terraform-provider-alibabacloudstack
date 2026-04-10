@@ -42,7 +42,7 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 	}
 	quota := d.Get("quota").(int)
 
-	if det.Name == bucketName {
+	if *det.Name == bucketName {
 		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
 		request.QueryParams["ProductName"] = "oss"

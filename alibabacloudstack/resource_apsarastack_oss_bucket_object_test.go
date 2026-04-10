@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -33,6 +34,11 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 	var v http.Header
 	resourceId := "alibabacloudstack_oss_bucket_object.default"
 	ra := resourceAttrInit(resourceId, ossBucketObjectBasicMap)
+	serviceFunc := func() interface{} {
+		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-bucket-object-%d", rand)
@@ -44,7 +50,7 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckAlicloudOssBucketObjectDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -208,11 +214,15 @@ func testAccCheckOssBucketObjectExistsWithProviders(n string, bucketName string,
 			}
 			id_info := strings.SplitN(rs.Primary.ID, ":", 2)
 			key := id_info[1]
-			object, err := buck.GetObjectMeta(key)
+			request := &oss.GetObjectMetaRequest{
+				Bucket: &bucketName,
+				Key:    &key,
+			}
+			object, err := buck.GetObjectMeta(context.Background(), request)
 			log.Printf("[WARN]get oss bucket object %#v", bucketName)
 			if err == nil {
 				if object != nil {
-					obj = object
+					obj = object.Headers
 					return nil
 				}
 				continue
@@ -225,55 +235,3 @@ func testAccCheckOssBucketObjectExistsWithProviders(n string, bucketName string,
 		return fmt.Errorf("Bucket not found")
 	}
 }
-func testAccCheckAlicloudOssBucketObjectDestroy(s *terraform.State) error {
-	return testAccCheckOssBucketObjectDestroyWithProvider(s, testAccProvider)
-}
-
-func testAccCheckOssBucketObjectDestroyWithProvider(s *terraform.State, provider *schema.Provider) error {
-	client := provider.Meta().(*connectivity.AlibabacloudStackClient)
-	var bucket interface{}
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "alibabacloudstack_oss_bucket" {
-			continue
-		}
-		ossService := OssService{client}
-		var err error
-		bucket, err = ossService.GetBucketClient(rs.Primary.ID)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				return nil
-			}
-			return fmt.Errorf("Error getting bucket: %#v", err)
-		}
-	}
-	if bucket == nil {
-		return nil
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "alibabacloudstack_oss_bucket_object" {
-			continue
-		}
-
-		// Try to find the resource
-		exist, err := bucket.Objects.(rs.ID)
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, "NoSuchBucket") {
-				return nil
-			}
-			return fmt.Errorf("IsObjectExist got an error: %#v", err)
-		}
-
-		if !exist {
-			return nil
-		}
-
-		return fmt.Errorf("Found oss object: %s", rs.Primary.ID)
-	}
-
-	return nil
-}
-
-/*
-ALIBABACLOUDSTACK_OSSSERVICE_DOMAIN=oss-cn-qingdao-env66-d01-a.intra.env66.shuguang.com;
-*/

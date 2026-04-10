@@ -94,25 +94,34 @@ func dataSourceAlibabacloudStackOssBuckets() *schema.Resource {
 
 func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	ossSdkService := OssSdkService{client}
-	ossclietn, err := ossSdkService.GetOssClient()
+	ossService := OssService{client}
+	endpointMap, err := ossService.GetBucketEndpointMap()
 	if err != nil {
-		return err
+		return errmsgs.WrapError(err)
+	}
+	if err != nil {
+		return errmsgs.WrapError(err)
 	}
 	var buckets []oss.BucketProperties
-	for {
-		request := &oss.ListBucketsRequest{}
-		lsRes, err := ossclietn.ListBuckets(context.Background(), request)
+	for _, endpoint := range endpointMap {
+		ossclietn, err := ossService.GetOssClient(endpoint)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
+		for {
+			request := &oss.ListBucketsRequest{}
+			lsRes, err := ossclietn.ListBuckets(context.Background(), request)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
 
-		buckets = append(buckets, lsRes.Buckets...)
+			buckets = append(buckets, lsRes.Buckets...)
 
-		if !lsRes.IsTruncated {
-			break
+			if !lsRes.IsTruncated {
+				break
+			}
+			request.Marker = lsRes.NextMarker
 		}
-		request.Marker = lsRes.NextMarker
 	}
 
 	if len(buckets) == 0 {

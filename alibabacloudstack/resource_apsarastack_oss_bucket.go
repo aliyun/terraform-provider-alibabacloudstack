@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
@@ -18,6 +19,7 @@ import (
 
 func resourceAlibabacloudStackOssBucket() *schema.Resource {
 	resource := &schema.Resource{
+		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
 			"bucket": {
 				Type:         schema.TypeString,
@@ -148,7 +150,9 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	bucketName := d.Get("bucket").(string)
-	det, err := ossService.DescribeOssBucket(bucketName)
+	ossCluster := d.Get("oss_cluster").(string)
+	det, err := ossService.DescribeOssBucket(fmt.Sprintf("%s:%s", bucketName, ossCluster))
+
 	log.Printf("======================== det:%#v", det)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk)
@@ -160,31 +164,26 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	}
 	storage_capacity := d.Get("storage_capacity").(int)
 	// If not present, Create Bucket
-	if det.Name == "" {
-		ossCluster := d.Get("oss_cluster").(string)
-		var ossEndpoint map[string]interface{}
-		ossEndpointData, err := ossService.GetOssEndpointList()
+	if *det.Name == "" {
+		var ossEndpoint string
+		var exists bool
+		endpoints, err := ossService.GetBucketEndpointMap()
 		if err != nil {
-			return errmsgs.WrapError(err)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "GetBucketEndpointMap", errmsgs.AlibabacloudStackOssGoSdk)
 		}
-		if ossCluster == "" {
-			if len(ossEndpointData) > 1 {
-				return errmsgs.Error("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
-			} else {
-				ossEndpoint = ossEndpointData[0].(map[string]interface{})
+		if len(endpoints) == 0 {
+			return errmsgs.Error("Terraform Provider Config: Oss EndpointMap is empty!")
+		}
+		if ossCluster != "" {
+			ossEndpoint, exists = endpoints[ossCluster]
+			if !exists {
+				return errmsgs.Error(fmt.Sprint("Oss Cluster %s is not exists for endpointMap: %#v", ossCluster, endpoints))
 			}
 		} else {
-			for _, v := range ossEndpointData {
-				endpoint := v.(map[string]interface{})
-				if endpoint["cluster"].(string) == ossCluster {
-					ossEndpoint = endpoint
-					break
-				}
+			for _, v := range endpoints {
+				ossEndpoint = v
+				break
 			}
-		}
-		if ossEndpoint == nil {
-			return errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OssEndpoint", ossCluster)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-
 		}
 		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
 		request.QueryParams["AppAction"] = "BucketCreate"
@@ -203,8 +202,7 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 				"bucketQuota":        storage_capacity,
 				"size":               1,
 				"xOssAcl":            acl,
-				"ossEndpoint":        ossEndpoint["oss-endpoint"],
-				"location":           ossEndpoint["location"],
+				"ossEndpoint":        ossEndpoint,
 				"dualClusterEnabled": false,
 			},
 		}
@@ -233,7 +231,7 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 			if err != nil {
 				return resource.NonRetryableError(err)
 			}
-			if det.Name == "" {
+			if *det.Name == "" {
 				return resource.RetryableError(errmsgs.Error("Trying to ensure new OSS bucket %#v has been created successfully.", bucketName))
 			}
 			return nil
@@ -272,27 +270,27 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 		}
 		return errmsgs.WrapError(err)
 	}
-	logging, err := resourceAlibabacloudStackOssBucketLoggingDescribe(client, d)
+	logging, err := ossService.DescribeOssBucketLogging(d.Id())
 	if err != nil {
-		return errmsgs.WrapError(err)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "GetBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 	ossEndpointData, err := ossService.GetOssEndpointList()
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 	log.Printf("read describe logging %v", logging)
-	d.Set("bucket", d.Id())
-	if object.Name == "" {
+	d.Set("bucket", object.Name)
+	if *object.Name == "" {
 		log.Print("read: BucketInfo fail!!!!!!")
 	}
-	d.Set("creation_date", object.CreationDate)
-	d.Set("extranet_endpoint", object.ExtranetEndpoint)
-	d.Set("intranet_endpoint", object.IntranetEndpoint)
-	d.Set("location", object.Location)
-	d.Set("storage_class", object.StorageClass)
+	d.Set("creation_date", *object.CreationDate)
+	d.Set("extranet_endpoint", *object.ExtranetEndpoint)
+	d.Set("intranet_endpoint", *object.IntranetEndpoint)
+	d.Set("location", *object.Location)
+	d.Set("storage_class", *object.StorageClass)
 	for _, v := range ossEndpointData {
 		endpoint := v.(map[string]interface{})
-		if endpoint["oss-endpoint"].(string) == object.IntranetEndpoint {
+		if endpoint["oss-endpoint"].(string) == *object.IntranetEndpoint {
 			d.Set("oss_cluster", endpoint["cluster"])
 			break
 		}
@@ -606,7 +604,7 @@ func resourceAlibabacloudStackOssBucketDelete(d *schema.ResourceData, meta inter
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 	addDebug("IsBucketExist", det, requestInfo, map[string]string{"bucketName": d.Id()})
-	if det.Name == "" {
+	if *det.Name == "" {
 		return nil
 	}
 
@@ -661,14 +659,20 @@ func checkVpcListChange(oldlist []interface{}, newlist []interface{}, d *schema.
 }
 
 func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) error {
-	bucketName := d.Id()
-	ossService := OssSdkService{client}
-	ossClient, err := ossService.GetBucketClient(bucketName)
+	var bucket_name string
+	parts := strings.Split(d.Id(), COLON_SEPARATED)
+	if len(parts) > 1 {
+		bucket_name = parts[0]
+	} else {
+		bucket_name = d.Id()
+	}
+	ossService := OssService{client}
+	ossClient, err := ossService.GetBucketClient(d.Id())
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 
-	existingLogging, err := resourceAlibabacloudStackOssBucketLoggingDescribe(client, d)
+	existingLogging, err := ossService.DescribeOssBucketLogging(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "GetBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
 	}
@@ -680,7 +684,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 		if _, v := d.GetOk("logging"); v == false {
 			log.Print("logging is being disabled")
 			_, err = ossClient.DeleteBucketLogging(context.Background(), &oss.DeleteBucketLoggingRequest{
-				Bucket: &bucketName,
+				Bucket: &bucket_name,
 			})
 			if err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
@@ -709,7 +713,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 					targetBucket := fmt.Sprint(logging["target_bucket"])
 					targetPrefix := fmt.Sprint(logging["target_prefix"])
 					_, err = ossClient.PutBucketLogging(context.Background(), &oss.PutBucketLoggingRequest{
-						Bucket: &bucketName,
+						Bucket: &bucket_name,
 						BucketLoggingStatus: &oss.BucketLoggingStatus{
 							LoggingEnabled: &oss.LoggingEnabled{
 								TargetBucket: &targetBucket,
@@ -747,7 +751,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 				targetBucket := fmt.Sprint(logging["target_bucket"])
 				targetPrefix := fmt.Sprint(logging["target_prefix"])
 				_, err = ossClient.PutBucketLogging(context.Background(), &oss.PutBucketLoggingRequest{
-					Bucket: &bucketName,
+					Bucket: &bucket_name,
 					BucketLoggingStatus: &oss.BucketLoggingStatus{
 						LoggingEnabled: &oss.LoggingEnabled{
 							TargetBucket: &targetBucket,
@@ -768,7 +772,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 
 func resourceAlibabacloudStackOssBucketLoggingDescribe(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) (*oss.GetBucketLoggingResult, error) {
 	bucketName := d.Id()
-	ossService := OssSdkService{client}
+	ossService := OssService{client}
 	ossClient, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)

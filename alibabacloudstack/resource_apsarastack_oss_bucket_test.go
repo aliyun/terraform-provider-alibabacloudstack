@@ -2,11 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"log"
 	"testing"
-
-	"strings"
-	"time"
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -15,80 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-
-func init() {
-	resource.AddTestSweepers("alibabacloudstack_oss_bucket", &resource.Sweeper{
-		Name: "alibabacloudstack_oss_bucket",
-		F:    testSweepOSSBuckets,
-	})
-}
-
-func testSweepOSSBuckets(region string) error {
-	rawClient, err := sharedClientForRegion(region)
-	if err != nil {
-		return fmt.Errorf("error getting Alibabacloudstack client: %s", err)
-	}
-	client := rawClient.(*connectivity.AlibabacloudStackClient)
-	ossService := OssService{client}
-
-	prefixes := []string{
-		"tf-testacc",
-		"tf-test-",
-		"test-bucket-",
-		"tf-oss-test-",
-		"tf-object-test-",
-		"test-acc-alibabacloudstack-",
-	}
-
-	buckets, err := ossService.ListOssBucket()
-	if err != nil {
-		return err
-	}
-
-	sweeped := false
-
-	for _, v := range buckets {
-		name := v.Name
-
-		bucket, err := ossService.GetBucketClient(name)
-		if err != nil {
-			return fmt.Errorf("Error getting bucket (%s): %#v", name, err)
-		}
-		skip := true
-		for _, prefix := range prefixes {
-			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				skip = false
-				break
-			}
-		}
-		if skip {
-			log.Printf("[INFO] Skipping OSS bucket: %s", name)
-			continue
-		}
-		sweeped = true
-		if objects, err := bucket.ListObjects(); err != nil {
-			log.Printf("[ERROR] Failed to list objects: %s", err)
-		} else if len(objects.Objects) > 0 {
-			for _, o := range objects.Objects {
-				if err := bucket.DeleteObject(o.Key); err != nil {
-					log.Printf("[ERROR] Failed to delete object (%s): %s.", o.Key, err)
-				}
-			}
-
-		}
-
-		log.Printf("[INFO] Deleting OSS bucket: %s", name)
-
-		err = ossService.DeleteBucket(name)
-		if err != nil {
-			log.Printf("[ERROR] Failed to delete OSS bucket (%s): %s", name, err)
-		}
-	}
-	if sweeped {
-		time.Sleep(5 * time.Second)
-	}
-	return nil
-}
 
 func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 	var v oss.GetBucketInfoResult
@@ -414,7 +336,7 @@ func testAccCheckOssBucketDestroy(s *terraform.State) error { // destroy functio
 			}
 			return errmsgs.WrapError(err)
 		}
-		if *bucket.BucketInfo.Name != "" {
+		if *bucket.Name != "" {
 			return errmsgs.WrapError(errmsgs.Error("bucket still exist"))
 		}
 	}

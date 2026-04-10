@@ -4,18 +4,22 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudStackOssBucketKms_basic(t *testing.T) {
 
-	//var v http.Header
+	var v *oss.ApplyServerSideEncryptionByDefault
 	resourceId := "alibabacloudstack_oss_bucket_kms.default"
 	ra := resourceAttrInit(resourceId, ossBucketKmsBasicMap)
+	serviceFunc := func() interface{} {
+		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-kms-%d", rand)
@@ -27,30 +31,30 @@ func TestAccAlibabacloudStackOssBucketKms_basic(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckAlicloudOssBucketKmsDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket":              "${alibabacloudstack_oss_bucket.default.bucket}",
-					"sse_algorithm":       "AES256",
+					"bucket":        "${alibabacloudstack_oss_bucket.default.bucket}",
+					"sse_algorithm": "AES256",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"bucket": name,
-						"sse_algorithm":       "AES256",
+						"bucket":        name,
+						"sse_algorithm": "AES256",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket":              "${alibabacloudstack_oss_bucket.default.bucket}",
-					"sse_algorithm":       "KMS",
+					"bucket":            "${alibabacloudstack_oss_bucket.default.bucket}",
+					"sse_algorithm":     "KMS",
 					"kms_master_key_id": "${alibabacloudstack_kms_key.key.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"bucket": name,
-						"sse_algorithm":       "KMS",
+						"bucket":        name,
+						"sse_algorithm": "KMS",
 					}),
 				),
 			},
@@ -81,28 +85,5 @@ resource "alibabacloudstack_oss_bucket" "default" {
 }
 
 var ossBucketKmsBasicMap = map[string]string{
-	"bucket":              CHECKSET,
-}
-
-func testAccCheckAlicloudOssBucketKmsDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-	ossService := OssService{client}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type == "alibabacloudstack_oss_bucket" || rs.Type != "alibabacloudstack_oss_bucket" {
-			continue
-		}
-		bucket, err := ossService.DescribeOssBucket(rs.Primary.ID)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-		if bucket.BucketInfo.Name != "" {
-			return errmsgs.WrapError(errmsgs.Error("bucket still exist"))
-		}
-	}
-
-	return nil
+	"bucket": CHECKSET,
 }

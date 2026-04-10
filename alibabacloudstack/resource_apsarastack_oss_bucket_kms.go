@@ -66,9 +66,7 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 	if sseAlgorithm == "KMS" {
 		kmsMasterKeyID = d.Get("kms_master_key_id").(string)
 	}
-
-	ossService2 := OssSdkService{client}
-	ossClient, err := ossService2.GetBucketClient(bucketName)
+	ossClient, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -98,38 +96,14 @@ func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	bucketName := d.Id()
-	_, err := ossService.DescribeOssBucket(bucketName)
+	apply, err := ossService.DescribeOssBucketKms(d.Id())
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "DescribeOssBucketKms", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-	ossService2 := OssSdkService{client}
-	ossClient, err := ossService2.GetBucketClient(bucketName)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	getResult, err := ossClient.GetBucketEncryption(context.Background(), &oss.GetBucketEncryptionRequest{
-		Bucket: oss.Ptr(bucketName),
-	})
-	log.Printf("Response of GetBucketEncryption: %v", getResult)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR)
-	}
-	addDebug("BucketEncryption", getResult, nil, map[string]string{"bucketName": bucketName})
-	log.Printf("Enter for logging")
-	var sseAlgorithmVal string
-	var kmsMasterKeyIDVal string
-	if getResult.ServerSideEncryptionRule != nil && getResult.ServerSideEncryptionRule.ApplyServerSideEncryptionByDefault != nil {
-		apply := getResult.ServerSideEncryptionRule.ApplyServerSideEncryptionByDefault
-		if apply.SSEAlgorithm != nil {
-			sseAlgorithmVal = *apply.SSEAlgorithm
-		}
-		if apply.KMSMasterKeyID != nil {
-			kmsMasterKeyIDVal = *apply.KMSMasterKeyID
-		}
-	}
+
 	d.Set("bucket", bucketName)
-	d.Set("sse_algorithm", sseAlgorithmVal)
-	d.Set("kms_master_key_id", kmsMasterKeyIDVal)
+	d.Set("sse_algorithm", *apply.SSEAlgorithm)
+	d.Set("kms_master_key_id", *apply.KMSMasterKeyID)
 
 	return nil
 }
@@ -137,17 +111,7 @@ func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta inte
 func resourceAlibabacloudStackOssBucketKmsDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
-	det, err := ossService.DescribeOssBucket(d.Id())
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
-	}
-	addDebug("IsBucketExist", det, nil, map[string]string{"bucketName": d.Id()})
-	if det.Name == "" {
-		return nil
-	}
-
-	ossService2 := OssSdkService{client}
-	ossClient, err := ossService2.GetBucketClient(d.Id())
+	ossClient, err := ossService.GetBucketClient(d.Id())
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
