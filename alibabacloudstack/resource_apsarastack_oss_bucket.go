@@ -3,7 +3,9 @@ package alibabacloudstack
 import (
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
+	"io"
 	"log"
 	"strconv"
 	"strings"
@@ -337,9 +339,8 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 			// Disaster recovery relationships appear in pairs
 			d.Set("bucket_sync", true)
 			d.Set("dual_sync_role", rule.SyncRole)
-			dual_kms_key, ok := rule.EncryptionConfiguration["ReplicaKmsKeyID"]
-			if ok {
-				d.Set("dual_kms_key", dual_kms_key)
+			if rule.EncryptionConfiguration.ReplicaKmsKeyID != "" {
+				d.Set("dual_kms_key", rule.EncryptionConfiguration.ReplicaKmsKeyID)
 			}
 			break
 		}
@@ -361,25 +362,36 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	}
 
 	// Get storage capacity information
-	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	request.QueryParams["OpenApiAction"] = "GetBucketStorageCapacity"
-	request.QueryParams["ProductName"] = "oss"
-	request.QueryParams["Params"] = fmt.Sprintf("{\"BucketName\":\"%s\"}", bucketName)
-
-	bresponse, err := client.ProcessCommonRequest(request)
+	ossSdkSvc := OssSdkService{client}
+	scOssClient, err := ossSdkSvc.GetBucketClient(bucketName)
 	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "GetBucketStorageCapacity", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+		return errmsgs.WrapError(err)
 	}
-	storageCapacity := BucketStorageCapacityResponse{}
-	json.Unmarshal([]byte(bresponse.GetHttpContentString()), &storageCapacity)
-	if v, err := strconv.Atoi(storageCapacity.Data.BucketUserQos.StorageCapacity); err == nil {
+	scInput := &oss.OperationInput{
+		OpName:     "GetBucketStorageCapacity",
+		Method:     "GET",
+		Bucket:     oss.Ptr(bucketName),
+		Parameters: map[string]string{"qos": ""},
+	}
+	scOutput, err := scOssClient.InvokeOperation(context.Background(), scInput)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketStorageCapacity", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	scBody, err := io.ReadAll(scOutput.Body)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, "Read GetBucketStorageCapacity response body failed")
+	}
+	type BucketUserQosXML struct {
+		StorageCapacity string `xml:"StorageCapacity"`
+	}
+	var qos BucketUserQosXML
+	if xmlErr := xml.Unmarshal(scBody, &qos); xmlErr != nil {
+		return errmsgs.WrapErrorf(xmlErr, "Parse GetBucketStorageCapacity XML failed")
+	}
+	if v, convErr := strconv.Atoi(qos.StorageCapacity); convErr == nil {
 		d.Set("storage_capacity", v)
 	} else {
-		return errmsgs.WrapErrorf(err, "Get storage capacity failed")
+		return errmsgs.WrapErrorf(convErr, "Get storage capacity failed")
 	}
 
 	// Get encryption information
@@ -450,38 +462,49 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 	}
 
 	if (d.IsNewResource() && d.Get("bucket_sync").(bool)) || (!d.IsNewResource() && d.HasChange("bucket_sync")) {
-		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		target := ""
 		process := "closing"
 		failed := "starting"
+		ossSdkSvcSync := OssSdkService{client}
+		syncOssClient, err := ossSdkSvcSync.GetBucketClient(bucketName)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		var syncInput *oss.OperationInput
 		if v := d.Get("bucket_sync").(bool); v {
-			request.QueryParams["OpenApiAction"] = "PutBucketSync"
 			dual_kms_key := d.Get("dual_kms_key").(string)
 			dual_sync_role := d.Get("dual_sync_role").(string)
+			var syncXmlBody string
 			if dual_kms_key != "" && dual_sync_role != "" {
 				content := `<ReplicationConfiguration><Rule><SyncRole>%s</SyncRole><SourceSelectionCriteria><SseKmsEncryptedObjects><Status>Enabled</Status></SseKmsEncryptedObjects></SourceSelectionCriteria><EncryptionConfiguration><ReplicaKmsKeyID>%s</ReplicaKmsKeyID></EncryptionConfiguration></Rule></ReplicationConfiguration>`
-				request.QueryParams["Content"] = fmt.Sprintf(content, dual_sync_role, dual_kms_key)
+				syncXmlBody = fmt.Sprintf(content, dual_sync_role, dual_kms_key)
 			} else if (dual_kms_key != "" && dual_sync_role == "") || (dual_kms_key == "" && dual_sync_role != "") {
 				return fmt.Errorf("dual_kms_key and dual_sync_role must be set at the same time")
+			} else {
+				syncXmlBody = `<ReplicationConfiguration><Rule></Rule></ReplicationConfiguration>`
+			}
+			syncInput = &oss.OperationInput{
+				OpName:     "PutBucketSync",
+				Method:     "PUT",
+				Bucket:     oss.Ptr(bucketName),
+				Parameters: map[string]string{"replication": ""},
+				Headers:    map[string]string{"Content-Type": "application/xml"},
+				Body:       strings.NewReader(syncXmlBody),
 			}
 			target = "doing"
 			process = "starting"
 			failed = "closing"
-
 		} else {
-			request.QueryParams["OpenApiAction"] = "DeleteBucketSync"
-		}
-		request.QueryParams["ProductName"] = "oss"
-		request.QueryParams["Params"] = fmt.Sprintf("{\"BucketName\":\"%s\"}", bucketName)
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			syncInput = &oss.OperationInput{
+				OpName:     "DeleteBucketSync",
+				Method:     "DELETE",
+				Bucket:     oss.Ptr(bucketName),
+				Parameters: map[string]string{"replication": ""},
 			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+		}
+		_, err = syncOssClient.InvokeOperation(context.Background(), syncInput)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, syncInput.OpName, errmsgs.AlibabacloudStackOssGoSdk)
 		}
 		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, ossService.OssBucketSyncStateRefreshFunc(bucketName, []string{failed}))
 		if _, err := stateConf.WaitForState(); err != nil {
@@ -491,19 +514,23 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 
 	if (d.IsNewResource() && d.Get("storage_capacity").(int) != -1) || (!d.IsNewResource() && d.HasChange("storage_capacity")) {
 		storageCapacity := d.Get("storage_capacity").(int)
-		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
-		request.QueryParams["ProductName"] = "oss"
-		request.QueryParams["Params"] = fmt.Sprintf("{\"BucketName\":\"%s\", \"StorageCapacity\":%d}", bucketName, storageCapacity)
-		request.QueryParams["Content"] = fmt.Sprintf("<BucketUserQos><StorageCapacity>%d</StorageCapacity></BucketUserQos>", storageCapacity)
-
-		bresponse, err := client.ProcessCommonRequest(request)
+		ossSdkSvc2 := OssSdkService{client}
+		scOssClient2, err := ossSdkSvc2.GetBucketClient(bucketName)
 		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketACL", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+			return errmsgs.WrapError(err)
+		}
+		xmlBody := fmt.Sprintf("<BucketUserQos><StorageCapacity>%d</StorageCapacity></BucketUserQos>", storageCapacity)
+		scInput2 := &oss.OperationInput{
+			OpName:     "SetBucketStorageCapacity",
+			Method:     "PUT",
+			Bucket:     oss.Ptr(bucketName),
+			Parameters: map[string]string{"qos": ""},
+			Headers:    map[string]string{"Content-Type": "application/xml"},
+			Body:       strings.NewReader(xmlBody),
+		}
+		_, err = scOssClient2.InvokeOperation(context.Background(), scInput2)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "SetBucketStorageCapacity", errmsgs.AlibabacloudStackOssGoSdk)
 		}
 	}
 

@@ -3,14 +3,15 @@ package alibabacloudstack
 import (
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
+	"io"
 	"log"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/credentials"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -24,29 +25,31 @@ type OssService struct {
 }
 
 type BucketSyncRule struct {
-	Status                      string            `json:"Status"`
-	Destination                 map[string]string `json:"Destination"`
-	Action                      string            `json:"Action"`
-	ID                          string            `json:"ID"`
-	SyncRole                    string            `json:"SyncRole"`
-	SrcLocation                 string            `json:"SrcLocation"`
-	EncryptionConfiguration     map[string]string `json:"EncryptionConfiguration"`
-	HistoricalObjectReplication string            `json:"HistoricalObjectReplication"`
+	Status      string `xml:"Status" json:"Status"`
+	Destination struct {
+		Bucket   string `xml:"Bucket"`
+		Location string `xml:"Location"`
+	} `xml:"Destination" json:"Destination"`
+	Action                  string `xml:"Action" json:"Action"`
+	ID                      string `xml:"ID" json:"ID"`
+	SyncRole                string `xml:"SyncRole" json:"SyncRole"`
+	SrcLocation             string `xml:"SrcLocation" json:"SrcLocation"`
+	EncryptionConfiguration struct {
+		ReplicaKmsKeyID string `xml:"ReplicaKmsKeyID"`
+	} `xml:"EncryptionConfiguration" json:"EncryptionConfiguration"`
+	HistoricalObjectReplication string `xml:"HistoricalObjectReplication" json:"HistoricalObjectReplication"`
 }
 
+// BucketSyncXMLResponse represents the XML response from GetBucketSync (OSS native API)
+type BucketSyncXMLResponse struct {
+	Rule []BucketSyncRule `xml:"Rule"`
+}
+
+// BucketSyncResponse wraps the XML response for compatibility with existing code
 type BucketSyncResponse struct {
-	RequestID string `json:"requestId"`
-	Code      string `json:"code"`
-	Data      struct {
-		ReplicationConfiguration struct {
-			Rule []BucketSyncRule `json:"Rule"`
-		} `json:"ReplicationConfiguration"`
-	} `json:"data"`
-	Cost            int    `json:"cost"`
-	APICost         int    `json:"apiCost"`
-	EagleEyeTraceID string `json:"eagleEyeTraceId"`
-	AscmCode        bool   `json:"ascmCode"`
-	SuccessResponse bool   `json:"successResponse"`
+	Data struct {
+		ReplicationConfiguration BucketSyncXMLResponse
+	}
 }
 
 type BucketStorageCapacityResponse struct {
@@ -296,26 +299,34 @@ func (s *OssService) ossTagIgnored(t map[string]interface{}) bool {
 }
 
 func (s *OssService) GetBucketSync(bucketName string) (object *BucketSyncResponse, err error) {
-	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	request.QueryParams["OpenApiAction"] = "GetBucketSync"
-	request.QueryParams["ProductName"] = "oss"
-	request.QueryParams["Params"] = fmt.Sprintf("{\"BucketName\":\"%s\"}", bucketName)
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	ossService := OssSdkService{s.client}
+	ossClient, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "GetBucketSync", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketSync", errmsgs.AlibabacloudStackOssGoSdk)
 	}
-	bucketSync := BucketSyncResponse{}
-	err = json.Unmarshal([]byte(bresponse.GetHttpContentString()), &bucketSync)
+	input := &oss.OperationInput{
+		OpName:     "GetBucketSync",
+		Method:     "GET",
+		Bucket:     oss.Ptr(bucketName),
+		Parameters: map[string]string{"replication": ""},
+	}
+	output, err := ossClient.InvokeOperation(context.Background(), input)
+	addDebug("GetBucketSync", output, input, nil)
 	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketSync", errmsgs.AlibabacloudStackOssGoSdk)
 	}
-	return &bucketSync, nil
+	defer output.Body.Close()
+	body, err := io.ReadAll(output.Body)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketSync", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	var xmlResp BucketSyncXMLResponse
+	if err = xml.Unmarshal(body, &xmlResp); err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketSync", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	result := &BucketSyncResponse{}
+	result.Data.ReplicationConfiguration = xmlResp
+	return result, nil
 }
 
 func (s *OssService) OssBucketSyncStateRefreshFunc(bucketName string, failStates []string) resource.StateRefreshFunc {
@@ -344,36 +355,98 @@ func (s *OssService) OssBucketSyncStateRefreshFunc(bucketName string, failStates
 	}
 }
 
+func (s OssService) GetBucketClient(bucketName string) (*oss.Client, error) {
+	bucketInfo, err := s.DescribeOssBucket(bucketName)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	if bucketInfo.Name == "" {
+		return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
+	}
+
+	bucketEndpoint := bucketInfo.ExtranetEndpoint
+	schma := strings.ToLower(s.client.Config.Protocol)
+	if !strings.HasPrefix(bucketEndpoint, "http") {
+		bucketEndpoint = fmt.Sprintf("%s://%s", schma, bucketEndpoint)
+	}
+
+	cfg := oss.LoadDefaultConfig().
+		WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+			s.client.Config.AccessKey,
+			s.client.Config.SecretKey,
+			s.client.Config.SecurityToken,
+		)).
+		WithEndpoint(bucketEndpoint).
+		WithRegion(s.client.RegionId)
+
+	client := oss.NewClient(cfg)
+	return client, nil
+}
+
+// VpcipEntry represents a single VPC IP entry in the ListVpcip XML response
+type VpcipEntry struct {
+	Cluster string `xml:"Cluster"`
+	VpcId   string `xml:"VpcId"`
+	Vip     string `xml:"Vip"`
+	Label   string `xml:"Label"`
+	Shared  int    `xml:"Shared"`
+}
+
+// ListVpcipXMLResponse represents the XML response from ListVpcip
+type ListVpcipXMLResponse struct {
+	Vpcip []VpcipEntry `xml:"Vpcip"`
+}
+
+func (s *OssService) listVpcipEntries() ([]VpcipEntry, error) {
+	ossService := OssSdkService{s.client}
+	ossClient, err := ossService.GetOssClient()
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListVpcip", "GetOssClient", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	input := &oss.OperationInput{
+		OpName:     "ListVpcip",
+		Method:     "GET",
+		Parameters: map[string]string{"vpcip": ""},
+	}
+	output, err := ossClient.InvokeOperation(context.Background(), input)
+	addDebug("ListVpcip", output, input, nil)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListVpcip", "InvokeOperation", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	defer output.Body.Close()
+	body, err := io.ReadAll(output.Body)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListVpcip", "ReadBody", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	var xmlResp ListVpcipXMLResponse
+	if err = xml.Unmarshal(body, &xmlResp); err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListVpcip", "XMLUnmarshal", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	return xmlResp.Vpcip, nil
+}
+
 func (s *OssService) DescribeOssSingleTunnel(id string) (map[string]interface{}, error) {
 	parts := strings.Split(id, ":")
-	// request := map[string]interface{}{}
-	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	request.QueryParams["OpenApiAction"] = "ListVpcip"
-	request.QueryParams["ProductName"] = "oss"
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("ListVpcip", bresponse, request, request.QueryParams)
+	entries, err := s.listVpcipEntries()
 	if err != nil {
 		return nil, err
 	}
-	response := make(map[string]interface{})
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	if err != nil {
-		return nil, err
-	}
-	vpcipList, err := jsonpath.Get("$.Data.ListVpcipResult.Vpcip", response)
-	if err != nil {
-		return nil, err
-	}
-	for _, item := range vpcipList.([]interface{}) {
-		data := item.(map[string]interface{})
-		if c, exists := data["Cluster"]; exists && c.(string) != parts[0] {
+	for _, entry := range entries {
+		if entry.Cluster != parts[0] {
 			continue
 		}
-		if v, exists := data["VpcId"]; exists && v.(string) != parts[1] {
+		if entry.VpcId != parts[1] {
 			continue
 		}
-		if v, exists := data["Vip"]; exists && v.(string) != parts[2] {
+		if entry.Vip != parts[2] {
 			continue
+		}
+		data := map[string]interface{}{
+			"Cluster": entry.Cluster,
+			"VpcId":   entry.VpcId,
+			"Vip":     entry.Vip,
+			"Label":   entry.Label,
+			"shared":  entry.Shared,
 		}
 		return data, nil
 	}

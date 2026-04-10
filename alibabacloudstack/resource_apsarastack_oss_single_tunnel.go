@@ -1,12 +1,14 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
+	"context"
+	"encoding/xml"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 
-	"github.com/PaesslerAG/jsonpath"
+	oss "github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -52,40 +54,52 @@ func resourceAlibabacloudStackOssSingleTunnel() *schema.Resource {
 
 func resourceAlibabacloudStackOssSingleTunnelCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	request.QueryParams["OpenApiAction"] = "CreateVpcip"
-	request.QueryParams["ProductName"] = "oss"
-	reqQuery := map[string]interface{}{
-		"Department":    client.Department,
-		"ResourceGroup": client.ResourceGroup,
-		"RegionId":      client.RegionId,
-		"Cluster":       d.Get("cluster").(string),
-		"Share":         d.Get("shared").(string),
-		"Label":         d.Get("label").(string),
-		"VpcId":         d.Get("vpc_id").(string),
-		"VSwitchId":     d.Get("vswitch_id").(string),
-	}
-	if querybytes, err := json.Marshal(reqQuery); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "json Marshal", "CreateVpcip", errmsgs.AlibabacloudStackOssGoSdk)
-	} else {
-		request.QueryParams["Params"] = string(querybytes)
-	}
-	context := fmt.Sprintf("<CreateVpcip><Region>%s</Region><VSwitchId>%s</VSwitchId><Label>%s</Label><Cluster>%s</Cluster></CreateVpcip>", client.Region, reqQuery["VSwitchId"], reqQuery["Label"], reqQuery["Cluster"])
-	request.QueryParams["Content"] = context
-	response := make(map[string]interface{})
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug("CreateVpcip", bresponse, request, request.QueryParams)
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	ossService := OssSdkService{client}
+	ossClient, err := ossService.GetOssClient()
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "json Unmarshal", "CreateVpcip", errmsgs.AlibabacloudStackOssGoSdk)
-	}
-	vpcIp, err := jsonpath.Get("$.Data.CreateVpcipResult.Vip", response)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, d.Id(), "$.Data.CreateVpcipResult.Vip", response)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "CreateVpcip", "GetOssClient", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 
-	// Set the ID as the VPC IP address according to the resource ID rule
-	d.SetId(fmt.Sprintf("%s:%s:%s", d.Get("cluster").(string), d.Get("vpc_id").(string), vpcIp))
+	cluster := d.Get("cluster").(string)
+	label := d.Get("label").(string)
+	vswitchId := d.Get("vswitch_id").(string)
+	vpcId := d.Get("vpc_id").(string)
+	shared := d.Get("shared").(string)
+
+	xmlBody := fmt.Sprintf(
+		"<CreateVpcip><Region>%s</Region><VSwitchId>%s</VSwitchId><Label>%s</Label><Cluster>%s</Cluster><VpcId>%s</VpcId><Share>%s</Share></CreateVpcip>",
+		client.RegionId, vswitchId, label, cluster, vpcId, shared)
+
+	input := &oss.OperationInput{
+		OpName:     "CreateVpcip",
+		Method:     "PUT",
+		Parameters: map[string]string{"vpcip": ""},
+		Headers:    map[string]string{"Content-Type": "application/xml"},
+		Body:       strings.NewReader(xmlBody),
+	}
+	output, err := ossClient.InvokeOperation(context.Background(), input)
+	addDebug("CreateVpcip", output, input, nil)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "CreateVpcip", "InvokeOperation", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	defer output.Body.Close()
+	body, err := io.ReadAll(output.Body)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "CreateVpcip", "ReadBody", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+
+	// Parse XML response to get Vip
+	var createResult struct {
+		Vip string `xml:"Vip"`
+	}
+	if err = xml.Unmarshal(body, &createResult); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "CreateVpcip", "XMLUnmarshal", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	if createResult.Vip == "" {
+		return errmsgs.WrapErrorf(fmt.Errorf("empty Vip in response"), errmsgs.DefaultErrorMsg, "CreateVpcip", "ParseVip", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+
+	d.SetId(fmt.Sprintf("%s:%s:%s", cluster, vpcId, createResult.Vip))
 
 	return nil
 }
@@ -116,20 +130,27 @@ func resourceAlibabacloudStackOssSingleTunnelRead(d *schema.ResourceData, meta i
 
 func resourceAlibabacloudStackOssSingleTunnelDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	ossService := OssSdkService{client}
+	ossClient, err := ossService.GetOssClient()
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DeleteVpcip", "GetOssClient", errmsgs.AlibabacloudStackOssGoSdk)
+	}
 
 	parts := strings.Split(d.Id(), ":")
 
-	content := fmt.Sprintf("<DeleteVpcip><Region>%s</Region><VpcId>%s</VpcId><Vip>%s</Vip></DeleteVpcip>", client.Region, parts[1], parts[2])
+	xmlBody := fmt.Sprintf(
+		"<DeleteVpcip><Region>%s</Region><VpcId>%s</VpcId><Vip>%s</Vip></DeleteVpcip>",
+		client.RegionId, parts[1], parts[2])
 
-	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	mergeMaps(request.QueryParams, map[string]string{
-		"OpenApiAction": "DeleteVpcip",
-		"ProductName":   "oss",
-		"Content":       content,
-		"Params":        "{\"Vip\":\"" + parts[2] + "\"}",
-	})
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug("DeleteVpcip", bresponse, request, bresponse.GetHttpContentString())
+	input := &oss.OperationInput{
+		OpName:     "DeleteVpcip",
+		Method:     "DELETE",
+		Parameters: map[string]string{"vpcip": ""},
+		Headers:    map[string]string{"Content-Type": "application/xml"},
+		Body:       strings.NewReader(xmlBody),
+	}
+	output, err := ossClient.InvokeOperation(context.Background(), input)
+	addDebug("DeleteVpcip", output, input, nil)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}

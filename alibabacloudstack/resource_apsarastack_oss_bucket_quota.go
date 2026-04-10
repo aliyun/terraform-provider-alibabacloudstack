@@ -1,12 +1,15 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
+	"context"
+	"encoding/xml"
 	"fmt"
+	"io"
 	"log"
-	"strconv"
+	"strings"
 
-	"github.com/PaesslerAG/jsonpath"
+	oss "github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/signer"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -42,27 +45,46 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 	}
 	quota := d.Get("quota").(int)
 
-	if *det.Name == bucketName {
-		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
-		request.QueryParams["ProductName"] = "oss"
-		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":%d}", "BucketName", bucketName, "StorageCapacity", quota)
-		request.QueryParams["Content"] = fmt.Sprintf("%s%d%s", "<BucketUserQos><StorageCapacity>", quota, "</StorageCapacity></BucketUserQos>")
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		log.Printf(" response of raw SetBucketStorageCapacity : %s", bresponse)
+	if det.Name == bucketName {
+		ossSdkService := OssSdkService{client}
+		ossClient, err := ossSdkService.GetOssClient()
 		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return errmsgs.WrapError(err)
 		}
+
+		xmlBody := fmt.Sprintf("<BucketUserQos><StorageCapacity>%d</StorageCapacity></BucketUserQos>", quota)
+		input := &oss.OperationInput{
+			OpName: "SetBucketStorageCapacity",
+			Method: "PUT",
+			Bucket: oss.Ptr(bucketName),
+			Parameters: map[string]string{
+				"qos": "",
+			},
+			Headers: map[string]string{
+				"Content-Type": "application/xml",
+			},
+			Body: strings.NewReader(xmlBody),
+		}
+		input.OpMetadata.Set(signer.SubResource, []string{"qos"})
+		output, err := ossClient.InvokeOperation(context.Background(), input)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "SetBucketStorageCapacity", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		if output.Body != nil {
+			output.Body.Close()
+		}
+		addDebug("SetBucketStorageCapacity", output, input, map[string]interface{}{"bucket": bucketName, "quota": quota})
+		log.Printf(" response of SetBucketStorageCapacity for bucket %s", bucketName)
 		log.Printf("Enter for logging")
 	}
 	d.SetId(bucketName)
 
 	return nil
+}
+
+// bucketUserQosXML is used to parse the GetBucketStorageCapacity response
+type bucketUserQosXML struct {
+	StorageCapacity int64 `xml:"StorageCapacity"`
 }
 
 func resourceAlibabacloudStackOssBucketQuotaRead(d *schema.ResourceData, meta interface{}) error {
@@ -73,33 +95,41 @@ func resourceAlibabacloudStackOssBucketQuotaRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	request.QueryParams["OpenApiAction"] = "GetBucketStorageCapacity"
-	request.QueryParams["ProductName"] = "oss"
-	request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName)
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	log.Printf(" response of raw GetBucketStorageCapacity : %s", bresponse)
+	ossSdkService := OssSdkService{client}
+	ossClient, err := ossSdkService.GetOssClient()
 	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapError(err)
 	}
-	resp := make(map[string]interface{})
-	json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
 
-	storageCapacity, err := jsonpath.Get("$.Data.BucketUserQos.StorageCapacity", resp)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	input := &oss.OperationInput{
+		OpName: "GetBucketStorageCapacity",
+		Method: "GET",
+		Bucket: oss.Ptr(bucketName),
+		Parameters: map[string]string{
+			"qos": "",
+		},
 	}
-	quota, err := strconv.Atoi(storageCapacity.(string))
+	input.OpMetadata.Set(signer.SubResource, []string{"qos"})
+	output, err := ossClient.InvokeOperation(context.Background(), input)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, "quota value type error")
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketStorageCapacity", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	d.Set("quota", quota)
+	addDebug("GetBucketStorageCapacity", output, input, map[string]interface{}{"bucket": bucketName})
+	log.Printf(" response of GetBucketStorageCapacity for bucket %s", bucketName)
+
+	defer output.Body.Close()
+	responseBody, err := io.ReadAll(output.Body)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, "read GetBucketStorageCapacity response failed")
+	}
+
+	var qos bucketUserQosXML
+	if err := xml.Unmarshal(responseBody, &qos); err != nil {
+		return errmsgs.WrapErrorf(err, "unmarshal GetBucketStorageCapacity response failed")
+	}
+
+	d.Set("quota", int(qos.StorageCapacity))
 	d.Set("bucket", bucketName)
 
 	return nil
@@ -114,22 +144,35 @@ func resourceAlibabacloudStackOssBucketQuotaDelete(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
-	request.QueryParams["ProductName"] = "oss"
-	request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":%d}", "BucketName", bucketName, "StorageCapacity", -1)
-	request.QueryParams["Content"] = fmt.Sprintf("%s%d%s", "<BucketUserQos><StorageCapacity>", -1, "</StorageCapacity></BucketUserQos>")
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	log.Printf(" response of raw SetBucketStorageCapacity : %s", bresponse)
+	ossSdkService := OssSdkService{client}
+	ossClient, err := ossSdkService.GetOssClient()
 	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapError(err)
 	}
+
+	xmlBody := fmt.Sprintf("<BucketUserQos><StorageCapacity>%d</StorageCapacity></BucketUserQos>", -1)
+	input := &oss.OperationInput{
+		OpName: "SetBucketStorageCapacity",
+		Method: "PUT",
+		Bucket: oss.Ptr(bucketName),
+		Parameters: map[string]string{
+			"qos": "",
+		},
+		Headers: map[string]string{
+			"Content-Type": "application/xml",
+		},
+		Body: strings.NewReader(xmlBody),
+	}
+	input.OpMetadata.Set(signer.SubResource, []string{"qos"})
+	output, err := ossClient.InvokeOperation(context.Background(), input)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "SetBucketStorageCapacity", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if output.Body != nil {
+		output.Body.Close()
+	}
+	addDebug("SetBucketStorageCapacity", output, input, map[string]interface{}{"bucket": bucketName, "quota": -1})
+	log.Printf(" response of SetBucketStorageCapacity for bucket %s", bucketName)
 	log.Printf("Enter for logging")
 	d.SetId(bucketName)
 
