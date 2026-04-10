@@ -1,9 +1,11 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -92,7 +94,12 @@ func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta int
 		return err
 	}
 	objectName := d.Get("oss_object").(string)
-	err = bucket.DeleteObject(objectName)
+	bucketName := d.Get("oss_bucket").(string)
+	delReq := &oss.DeleteObjectRequest{
+		Bucket: &bucketName,
+		Key:    &objectName,
+	}
+	_, err = bucket.DeleteObject(context.Background(), delReq)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "No Content", "Not Found") {
 			return nil
@@ -100,5 +107,5 @@ func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta int
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, objectName, "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucket, objectName, Deleted, DefaultTimeoutMedium))
+	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucketName, objectName, Deleted, DefaultTimeoutMedium))
 }

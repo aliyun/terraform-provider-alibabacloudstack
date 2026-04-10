@@ -14,7 +14,7 @@ require (
 	github.com/alibabacloud-go/tea-rpc-utils v1.1.2
 	github.com/alibabacloud-go/tea-utils v1.4.5
 	github.com/aliyun/alibaba-cloud-sdk-go v1.62.681
-	github.com/aliyun/alibabacloud-oss-go-sdk-v2 v1.0.0
+	github.com/aliyun/alibabacloud-oss-go-sdk-v2 v1.1.0
 	github.com/aliyun/aliyun-datahub-sdk-go v0.1.5
 	github.com/aliyun/aliyun-log-go-sdk v0.1.21
 	github.com/aliyun/aliyun-tablestore-go-sdk v4.1.3+incompatible

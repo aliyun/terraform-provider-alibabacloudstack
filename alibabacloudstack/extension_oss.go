@@ -1,9 +1,10 @@
 package alibabacloudstack
 
 import (
+	"errors"
 	"strings"
 
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 )
 
 type LifecycleRuleStatus string
@@ -14,8 +15,9 @@ const (
 )
 
 func ossNotFoundError(err error) bool {
-	if e, ok := err.(oss.ServiceError); ok &&
-		(e.StatusCode == 404 || strings.HasPrefix(e.Code, "NoSuch") || strings.HasPrefix(e.Message, "No Row found")) {
+	var se *oss.ServiceError
+	if errors.As(err, &se) &&
+		(se.StatusCode == 404 || strings.HasPrefix(se.Code, "NoSuch") || strings.HasPrefix(se.Message, "No Row found")) {
 		return true
 	}
 	return false

@@ -42,7 +42,7 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 	}
 	quota := d.Get("quota").(int)
 
-	if det.BucketInfo.Name == bucketName {
+	if det.Name == bucketName {
 		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
 		request.QueryParams["ProductName"] = "oss"
@@ -95,7 +95,7 @@ func resourceAlibabacloudStackOssBucketQuotaRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 	}
-	quota , err := strconv.Atoi(storageCapacity.(string))
+	quota, err := strconv.Atoi(storageCapacity.(string))
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "quota value type error")
 	}

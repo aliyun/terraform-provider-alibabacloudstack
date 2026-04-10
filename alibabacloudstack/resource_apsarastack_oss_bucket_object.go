@@ -2,9 +2,9 @@ package alibabacloudstack
 
 import (
 	"bytes"
+	"context"
 	"fmt"
-	"io"
-	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -46,7 +46,7 @@ func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
 
 			"acl": {
 				Type:         schema.TypeString,
-				Default:      oss.ACLPrivate,
+				Default:      "private",
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"private", "public-read", "public-read-write"}, false),
 			},
@@ -123,53 +123,84 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	bucketName := d.Get("bucket").(string)
 	ossService := OssService{client}
-	bucket, err := ossService.GetBucketClient(bucketName)
+	ossClient, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
 		return err
 	}
-	var filePath string
-	var body io.Reader
 
+	key := d.Get("key").(string)
+
+	// Build PutObjectRequest
+	putReq := &oss.PutObjectRequest{
+		Bucket: &bucketName,
+		Key:    &key,
+	}
+
+	// Set optional headers
+	if v, ok := d.GetOk("acl"); ok {
+		putReq.Acl = oss.ObjectACLType(v.(string))
+	}
+	if v, ok := d.GetOk("content_type"); ok {
+		s := v.(string)
+		putReq.ContentType = &s
+	}
+	if v, ok := d.GetOk("cache_control"); ok {
+		s := v.(string)
+		putReq.CacheControl = &s
+	}
+	if v, ok := d.GetOk("content_disposition"); ok {
+		s := v.(string)
+		putReq.ContentDisposition = &s
+	}
+	if v, ok := d.GetOk("content_encoding"); ok {
+		s := v.(string)
+		putReq.ContentEncoding = &s
+	}
+	if v, ok := d.GetOk("content_md5"); ok {
+		s := v.(string)
+		putReq.ContentMD5 = &s
+	}
+	if v, ok := d.GetOk("expires"); ok {
+		s := v.(string)
+		if _, err := time.Parse(time.RFC1123, s); err != nil {
+			return fmt.Errorf("expires format must respect the RFC1123 standard (current value: %s)", s)
+		}
+		putReq.Expires = &s
+	}
+	if v, ok := d.GetOk("server_side_encryption"); ok {
+		s := v.(string)
+		putReq.ServerSideEncryption = &s
+		if s == ServerSideEncryptionKMS {
+			if v, ok := d.GetOk("kms_key_id"); ok {
+				kmsKey := v.(string)
+				putReq.SSEKMSKeyId = &kmsKey
+			}
+		}
+	}
+
+	// Set body
 	if v, ok := d.GetOk("source"); ok {
 		source := v.(string)
 		path, err := homedir.Expand(source)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-
-		filePath = path
+		file, err := os.Open(path)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		defer file.Close()
+		putReq.Body = file
 	} else if v, ok := d.GetOk("content"); ok {
 		content := v.(string)
-		body = bytes.NewReader([]byte(content))
+		putReq.Body = bytes.NewReader([]byte(content))
 	} else {
 		return errmsgs.WrapError(errmsgs.Error("[ERROR] Must specify \"source\" or \"content\" field"))
 	}
 
-	key := d.Get("key").(string)
-	options, err := buildObjectHeaderOptions(d)
-
-	if v, ok := d.GetOk("server_side_encryption"); ok {
-		options = append(options, oss.ServerSideEncryption(v.(string)))
-		if v.(string) == ServerSideEncryptionKMS {
-			if v, ok := d.GetOk("kms_key_id"); ok {
-				options = append(options, oss.ServerSideEncryptionKeyID(v.(string)))
-			}
-		}
-	}
-
+	_, err = ossClient.PutObject(context.Background(), putReq)
 	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	if filePath != "" {
-		err = bucket.PutObjectFromFile(key, filePath, options...)
-	}
-
-	if body != nil {
-		err = bucket.PutObject(key, body, options...)
-	}
-
-	if err != nil {
-		return errmsgs.WrapError(errmsgs.Error("Error putting object in Oss bucket (%#v): %s", bucket, err))
+		return errmsgs.WrapError(errmsgs.Error("Error putting object in Oss bucket (%s): %s", bucketName, err))
 	}
 
 	d.SetId(fmt.Sprintf("%s:%s", bucketName, key))
@@ -178,7 +209,6 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 
 func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *oss.Client
 	var bucketName, key string
 	if id_info := strings.SplitN(d.Id(), ":", 2); len(id_info) == 1 {
 		// Compatible with old ID d.SetId(key)
@@ -190,46 +220,62 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 		key = id_info[1]
 	}
 	ossService := OssService{client}
-	bucket, err := ossService.GetBucketClient(bucketName)
+	ossClient, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
 		return err
 	}
-	options, err := buildObjectHeaderOptions(d)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 
-	object, err := bucket.GetObjectDetailedMeta(key, options...)
+	headReq := &oss.HeadObjectRequest{
+		Bucket: &bucketName,
+		Key:    &key,
+	}
+	object, err := ossClient.HeadObject(context.Background(), headReq)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "404 Not Found") {
 			d.SetId("")
 			return errmsgs.WrapError(errmsgs.Error("To get the Object: %#v but it is not exist in the specified bucket %s.", key, bucketName))
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "GetObjectDetailedMeta", errmsgs.AlibabacloudStackLogGoSdkERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "HeadObject", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-	addDebug("GetObjectDetailedMeta", object, requestInfo, map[string]interface{}{
+	addDebug("HeadObject", object, nil, map[string]interface{}{
 		"objectKey": key,
-		"options":   options,
 	})
 
-	if acl, err := bucket.GetObjectACL(key, options...); err == nil {
-		// Requires special permissions, may fail. Do not overwrite the attribute when it fails.
+	// ACL - requires special permissions, may fail. Do not overwrite attribute when it fails.
+	aclReq := &oss.GetObjectAclRequest{
+		Bucket: &bucketName,
+		Key:    &key,
+	}
+	if acl, err := ossClient.GetObjectAcl(context.Background(), aclReq); err == nil {
 		d.Set("acl", acl.ACL)
 	}
 
 	d.Set("bucket", bucketName)
 	d.Set("key", key)
-	d.Set("content_type", object.Get("Content-Type"))
-	d.Set("content_md5", object.Get("Content-MD5"))
-	//d.Set("cache_control", object.Get("Cache-Control"))
-	d.Set("server_side_encryption", object.Get("X-Oss-Server-Side-Encryption"))
-	if object.Get("X-Oss-Server-Side-Encryption") == ServerSideEncryptionKMS {
-		d.Set("kms_key_id", object.Get("x-oss-server-side-encryption-key-id"))
+	if object.ContentType != nil {
+		d.Set("content_type", *object.ContentType)
 	}
-	d.Set("content_disposition", object.Get("Content-Disposition"))
-	d.Set("content_encoding", object.Get("Content-Encoding"))
-	d.Set("expires", object.Get("Expires"))
-	d.Set("version_id", object.Get("x-oss-version-id"))
+	if object.ContentMD5 != nil {
+		d.Set("content_md5", *object.ContentMD5)
+	}
+	if object.ServerSideEncryption != nil {
+		d.Set("server_side_encryption", *object.ServerSideEncryption)
+		if *object.ServerSideEncryption == ServerSideEncryptionKMS && object.SSEKMSKeyId != nil {
+			d.Set("kms_key_id", *object.SSEKMSKeyId)
+		}
+	}
+	if object.ContentDisposition != nil {
+		d.Set("content_disposition", *object.ContentDisposition)
+	}
+	if object.ContentEncoding != nil {
+		d.Set("content_encoding", *object.ContentEncoding)
+	}
+	if object.Expires != nil {
+		d.Set("expires", *object.Expires)
+	}
+	if object.VersionId != nil {
+		d.Set("version_id", *object.VersionId)
+	}
 
 	return nil
 }
@@ -239,12 +285,17 @@ func resourceAlibabacloudStackOssBucketObjectDelete(d *schema.ResourceData, meta
 	ossService := OssService{client}
 
 	bucketName := d.Get("bucket").(string)
-	bucket, err := ossService.GetBucketClient(bucketName)
+	key := d.Get("key").(string)
+	ossClient, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
 		return err
 	}
 
-	err = bucket.DeleteObject(d.Get("key").(string))
+	delReq := &oss.DeleteObjectRequest{
+		Bucket: &bucketName,
+		Key:    &key,
+	}
+	_, err = ossClient.DeleteObject(context.Background(), delReq)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "No Content", "Not Found") {
 			return nil
@@ -252,47 +303,5 @@ func resourceAlibabacloudStackOssBucketObjectDelete(d *schema.ResourceData, meta
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucket, d.Id(), Deleted, DefaultTimeoutMedium))
-
-}
-
-func buildObjectHeaderOptions(d *schema.ResourceData) (options []oss.Option, err error) {
-
-	if v, ok := d.GetOk("acl"); ok {
-		options = append(options, oss.ObjectACL(oss.ACLType(v.(string))))
-	}
-
-	if v, ok := d.GetOk("content_type"); ok {
-		options = append(options, oss.ContentType(v.(string)))
-	}
-
-	if v, ok := d.GetOk("cache_control"); ok {
-		options = append(options, oss.CacheControl(v.(string)))
-	}
-
-	if v, ok := d.GetOk("content_disposition"); ok {
-		options = append(options, oss.ContentDisposition(v.(string)))
-	}
-
-	if v, ok := d.GetOk("content_encoding"); ok {
-		options = append(options, oss.ContentEncoding(v.(string)))
-	}
-
-	if v, ok := d.GetOk("content_md5"); ok {
-		options = append(options, oss.ContentMD5(v.(string)))
-	}
-
-	if v, ok := d.GetOk("expires"); ok {
-		expires := v.(string)
-		expiresTime, err := time.Parse(time.RFC1123, expires)
-		if err != nil {
-			return nil, fmt.Errorf("expires format must respect the RFC1123 standard (current value: %s)", expires)
-		}
-		options = append(options, oss.Expires(expiresTime))
-	}
-
-	if len(options) == 0 {
-		log.Printf("[WARN] Object header options is nil.")
-	}
-	return options, nil
+	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucketName, d.Id(), Deleted, DefaultTimeoutMedium))
 }

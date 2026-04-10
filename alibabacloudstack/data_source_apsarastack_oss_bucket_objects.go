@@ -119,24 +119,28 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 		prefix = v.(string)
 	}
 	for {
-		input := oss.ListObjectsRequest{}
-		input.Prefix = &prefix
+		input := &oss.ListObjectsRequest{
+			Bucket: &bucketName,
+			Prefix: &prefix,
+		}
+		if nextMarker != "" {
+			input.Marker = &nextMarker
+		}
 
 		response, err := bucket.ListObjects(context.Background(), input)
 		if err != nil {
 			return err
 		}
-		log.Printf("err is %s", err)
-		if len(response.Objects) < 1 {
+		if len(response.Contents) < 1 {
 			break
 		}
 
-		allObjects = append(allObjects, response.Objects...)
+		allObjects = append(allObjects, response.Contents...)
 
-		nextMarker = response.NextMarker
-		if nextMarker == "" {
+		if response.NextMarker == nil || *response.NextMarker == "" {
 			break
 		}
+		nextMarker = *response.NextMarker
 	}
 
 	var filteredObjectsTemp []oss.ObjectProperties
@@ -169,37 +173,71 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 		return err
 	}
 	for _, object := range objects {
+		key := ""
+		if object.Key != nil {
+			key = *object.Key
+		}
+		storageClass := ""
+		if object.StorageClass != nil {
+			storageClass = *object.StorageClass
+		}
+		lastModified := ""
+		if object.LastModified != nil {
+			lastModified = object.LastModified.Format(time.RFC3339)
+		}
 		mapping := map[string]interface{}{
-			"key":                    object.Key,
-			"storage_class":          object.StorageClass,
-			"last_modification_time": object.LastModified.Format(time.RFC3339),
+			"key":                    key,
+			"storage_class":          storageClass,
+			"last_modification_time": lastModified,
 		}
 
 		// Add metadata information
-		objectHeader, err := bucket.GetObjectDetailedMeta(context.Background(), object.Key)
+		headReq := &oss.HeadObjectRequest{
+			Bucket: &bucketName,
+			Key:    object.Key,
+		}
+		objectHeader, err := bucket.HeadObject(context.Background(), headReq)
 		if err != nil {
-			errmsg := ""
-			log.Printf("[ERROR] Unable to get metadata for the object %s: %v: %s", object.Key, err, errmsg)
+			log.Printf("[ERROR] Unable to get metadata for the object %s: %v", key, err)
 		} else {
-			mapping["content_type"] = objectHeader.Get("Content-Type")
-			mapping["cache_control"] = objectHeader.Get("Cache-Control")
-			mapping["content_disposition"] = objectHeader.Get("Content-Disposition")
-			mapping["content_encoding"] = objectHeader.Get("Content-Encoding")
-			mapping["content_md5"] = objectHeader.Get("Content-Md5")
-			mapping["expires"] = objectHeader.Get("Expires")
-			mapping["server_side_encryption"] = objectHeader.Get("X-Oss-Server-Side-Encryption")
-			mapping["sse_kms_key_id"] = objectHeader.Get("x-oss-server-side-encryption-key-id")
+			if objectHeader.ContentType != nil {
+				mapping["content_type"] = *objectHeader.ContentType
+			}
+			if objectHeader.CacheControl != nil {
+				mapping["cache_control"] = *objectHeader.CacheControl
+			}
+			if objectHeader.ContentDisposition != nil {
+				mapping["content_disposition"] = *objectHeader.ContentDisposition
+			}
+			if objectHeader.ContentEncoding != nil {
+				mapping["content_encoding"] = *objectHeader.ContentEncoding
+			}
+			if objectHeader.ContentMD5 != nil {
+				mapping["content_md5"] = *objectHeader.ContentMD5
+			}
+			if objectHeader.Expires != nil {
+				mapping["expires"] = *objectHeader.Expires
+			}
+			if objectHeader.ServerSideEncryption != nil {
+				mapping["server_side_encryption"] = *objectHeader.ServerSideEncryption
+			}
+			if objectHeader.SSEKMSKeyId != nil {
+				mapping["sse_kms_key_id"] = *objectHeader.SSEKMSKeyId
+			}
 		}
 		// Add ACL information
-		objectACL, err := bucket.GetObjectACL(context.Background(), object.Key)
+		aclReq := &oss.GetObjectAclRequest{
+			Bucket: &bucketName,
+			Key:    object.Key,
+		}
+		objectACL, err := bucket.GetObjectAcl(context.Background(), aclReq)
 		if err != nil {
-			errmsg := ""
-			log.Printf("[ERROR] Unable to get ACL for the object %s: %v: %s", object.Key, err, errmsg)
-		} else {
-			mapping["acl"] = objectACL.ACL
+			log.Printf("[ERROR] Unable to get ACL for the object %s: %v", key, err)
+		} else if objectACL.ACL != nil {
+			mapping["acl"] = *objectACL.ACL
 		}
 
-		ids = append(ids, *object.Key)
+		ids = append(ids, key)
 		s = append(s, mapping)
 	}
 
