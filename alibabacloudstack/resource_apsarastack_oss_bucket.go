@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/signer"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -243,7 +244,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	if *object.Name == "" {
 		log.Print("read: BucketInfo fail!!!!!!")
 	}
-	d.Set("creation_date", *object.CreationDate)
+	d.Set("creation_date", object.CreationDate.Format("2006-01-02 15:04:05 +0000 UTC"))
 	d.Set("extranet_endpoint", *object.ExtranetEndpoint)
 	d.Set("intranet_endpoint", *object.IntranetEndpoint)
 	d.Set("location", *object.Location)
@@ -319,6 +320,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 		Bucket:     oss.Ptr(bucketName),
 		Parameters: map[string]string{"qos": ""},
 	}
+	scInput.OpMetadata.Set(signer.SubResource, []string{"qos"})
 	scOutput, err := bucketClient.InvokeOperation(context.Background(), scInput)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketStorageCapacity", errmsgs.AlibabacloudStackOssGoSdk)
@@ -406,7 +408,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 				OpName:     "PutBucketSync",
 				Method:     "PUT",
 				Bucket:     oss.Ptr(bucketName),
-				Parameters: map[string]string{"replication": ""},
+				Parameters: map[string]string{"sync": ""},
 				Headers:    map[string]string{"Content-Type": "application/xml"},
 				Body:       strings.NewReader(syncXmlBody),
 			}
@@ -418,9 +420,10 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 				OpName:     "DeleteBucketSync",
 				Method:     "DELETE",
 				Bucket:     oss.Ptr(bucketName),
-				Parameters: map[string]string{"replication": ""},
+				Parameters: map[string]string{"sync": ""},
 			}
 		}
+		syncInput.OpMetadata.Set(signer.SubResource, []string{"sync"})
 		_, err = bucketClient.InvokeOperation(context.Background(), syncInput)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, syncInput.OpName, errmsgs.AlibabacloudStackOssGoSdk)
@@ -442,6 +445,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			Headers:    map[string]string{"Content-Type": "application/xml"},
 			Body:       strings.NewReader(xmlBody),
 		}
+		scInput2.OpMetadata.Set(signer.SubResource, []string{"qos"})
 		_, err = bucketClient.InvokeOperation(context.Background(), scInput2)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "SetBucketStorageCapacity", errmsgs.AlibabacloudStackOssGoSdk)

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	oss "github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/signer"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -76,6 +77,7 @@ func resourceAlibabacloudStackOssSingleTunnelCreate(d *schema.ResourceData, meta
 		Headers:    map[string]string{"Content-Type": "application/xml"},
 		Body:       strings.NewReader(xmlBody),
 	}
+	input.OpMetadata.Set(signer.SubResource, []string{"vpcip"})
 	output, err := ossClient.InvokeOperation(context.Background(), input)
 	addDebug("CreateVpcip", output, input, nil)
 	if err != nil {
@@ -148,6 +150,7 @@ func resourceAlibabacloudStackOssSingleTunnelDelete(d *schema.ResourceData, meta
 		Headers:    map[string]string{"Content-Type": "application/xml"},
 		Body:       strings.NewReader(xmlBody),
 	}
+	input.OpMetadata.Set(signer.SubResource, []string{"vpcip"})
 	output, err := ossClient.InvokeOperation(context.Background(), input)
 	addDebug("DeleteVpcip", output, input, nil)
 	if err != nil {

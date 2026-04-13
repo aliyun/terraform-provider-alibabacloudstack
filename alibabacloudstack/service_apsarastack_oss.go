@@ -15,6 +15,7 @@ import (
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/credentials"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/signer"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -280,8 +281,9 @@ func (s *OssService) GetBucketSync(bucketName string) (object *BucketSyncRespons
 		OpName:     "GetBucketSync",
 		Method:     "GET",
 		Bucket:     oss.Ptr(bucketName),
-		Parameters: map[string]string{"replication": ""},
+		Parameters: map[string]string{"sync": ""},
 	}
+	// input.OpMetadata.Set(signer.SubResource, []string{"sync"})
 	output, err := ossClient.InvokeOperation(context.Background(), input)
 	addDebug("GetBucketSync", output, input, nil)
 	if err != nil {
@@ -352,6 +354,7 @@ func (s *OssService) listVpcipEntries() ([]VpcipEntry, error) {
 		Method:     "GET",
 		Parameters: map[string]string{"vpcip": ""},
 	}
+	input.OpMetadata.Set(signer.SubResource, []string{"vpcip"})
 	for _, endpoint := range endpoints {
 		ossClient, err := s.GetOssClient(endpoint)
 		if err != nil {
@@ -404,9 +407,7 @@ func (s *OssService) DescribeOssSingleTunnel(id string) (map[string]interface{},
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("OSS Single Tunnel not found with id: %s", id))
 }
-
-func (s OssService) GetOssClient(endpoint string) (*oss.Client, error) {
-	// OSS SDK v2 uses a different configuration approach
+func (s OssService) buildOssClientConfig(endpoint string) *oss.Config {
 	schma := strings.ToLower(s.client.Config.Protocol)
 
 	cfg := oss.LoadDefaultConfig().
@@ -414,7 +415,8 @@ func (s OssService) GetOssClient(endpoint string) (*oss.Client, error) {
 		WithRegion(s.client.RegionId).
 		WithInsecureSkipVerify(s.client.Config.Insecure).
 		WithDisableSSL(schma == "http").WithSignatureVersion(oss.SignatureVersionV1)
-	if os.Getenv("TF_LOG") == "DEBUG" {
+	tfLog := os.Getenv("TF_LOG")
+	if tfLog == "TRACE" || tfLog == "DEBUG" {
 		cfg.WithLogLevel(oss.LogDebug)
 	}
 	provider := credentials.CredentialsProviderFunc(func(ctx context.Context) (credentials.Credentials, error) {
@@ -431,6 +433,11 @@ func (s OssService) GetOssClient(endpoint string) (*oss.Client, error) {
 		cfg = cfg.WithProxyHost(s.client.Config.Proxy)
 	}
 
+	return cfg
+}
+
+func (s OssService) GetOssClient(endpoint string) (*oss.Client, error) {
+	cfg := s.buildOssClientConfig(endpoint)
 	client := oss.NewClient(cfg)
 	return client, nil
 }
@@ -484,38 +491,13 @@ func (s OssService) GetBucketClient(bucketName string) (*oss.Client, error) {
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	if bucketInfo == nil && bucketInfo.Name == nil {
+	if bucketInfo == nil || bucketInfo.Name == nil {
 		return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
 	}
 
 	bucketEndpoint := *bucketInfo.ExtranetEndpoint
 
-	return s.InitBucketClient(bucketEndpoint)
-}
-
-func (s OssService) InitBucketClient(endpont string) (*oss.Client, error) {
-	schma := strings.ToLower(s.client.Config.Protocol)
-
-	// OSS SDK v2 uses a different configuration approach
-	cfg := oss.LoadDefaultConfig().
-		WithEndpoint(endpont).
-		WithRegion(s.client.RegionId).
-		WithInsecureSkipVerify(s.client.Config.Insecure).
-		WithDisableSSL(schma == "http").WithSignatureVersion(oss.SignatureVersionV1)
-
-	provider := credentials.CredentialsProviderFunc(func(ctx context.Context) (credentials.Credentials, error) {
-		if s.client.Config.SecurityToken == "" {
-			return credentials.Credentials{AccessKeyID: s.client.Config.AccessKey, AccessKeySecret: s.client.Config.SecretKey}, nil
-		} else {
-			return credentials.Credentials{AccessKeyID: s.client.Config.AccessKey, AccessKeySecret: s.client.Config.SecretKey, SecurityToken: s.client.Config.SecurityToken}, nil
-		}
-	})
-
-	cfg = cfg.WithCredentialsProvider(provider)
-
-	client := oss.NewClient(cfg)
-
-	return client, nil
+	return s.GetOssClient(bucketEndpoint)
 }
 
 func (s OssService) DescribeOssBucket(bucketName string) (*oss.BucketProperties, error) {

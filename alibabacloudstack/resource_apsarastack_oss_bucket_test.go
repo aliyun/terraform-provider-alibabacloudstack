@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
-	var v oss.GetBucketInfoResult
+	var v *oss.BucketProperties
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
 	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
@@ -201,7 +201,7 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
-	var v oss.GetBucketInfoResult
+	var v *oss.BucketProperties
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
 	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
@@ -261,7 +261,7 @@ func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
 }
 
 func TestUatAlibabacloudStackOssBucket_Vpc(t *testing.T) {
-	var v oss.GetBucketInfoResult
+	var v *oss.BucketProperties
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
 	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
