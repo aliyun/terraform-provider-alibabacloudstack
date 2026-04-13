@@ -241,6 +241,24 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("MAX_RETRY_TIMEOUT", 0),
 				Description: descriptions["max_retry_timeout"],
 			},
+			"oss_endpoints": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     schema.TypeString,
+				DefaultFunc: schema.SchemaDefaultFunc(func() (interface{}, error) {
+					oss_endpointstr := os.Getenv("ALIBABACLOUDSTACK_OSS_ENDPOINTS")
+					if oss_endpointstr == "" {
+						return make(map[string]interface{}), nil
+					}
+					var oss_endpointmap map[string]interface{}
+					err := json.Unmarshal([]byte(oss_endpointstr), &oss_endpointmap)
+					if err != nil {
+						return make(map[string]interface{}), err
+					}
+					return oss_endpointmap, nil
+				}),
+				Description: descriptions["oss_endpoints"],
+			},
 		},
 		DataSourcesMap: getDataSourcesMap(),
 		ResourcesMap:   getResourcesMap(),
@@ -1157,7 +1175,12 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	log.Printf("Eagleeye's trace id is: %s", eagleeye.GetTraceId())
-
+	oss_endpoint_map := d.Get("oss_endpoints").(map[string]interface{})
+	oss_endpoints := make(map[string]string)
+	for k, v := range oss_endpoint_map {
+		oss_endpoints[k] = v.(string)
+	}
+	log.Printf("=============================================================oss_endpoint_map %#v", oss_endpoint_map)
 	config := &connectivity.Config{
 		AccessKey:            strings.TrimSpace(accessKey),
 		SecretKey:            strings.TrimSpace(secretKey),
@@ -1173,6 +1196,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Department:           d.Get("department").(string),
 		ResourceGroup:        d.Get("resource_group").(string),
 		ResourceSetName:      d.Get("resource_group_set_name").(string),
+		OssEndpoints:         oss_endpoints,
 		SourceIp:             strings.TrimSpace(d.Get("source_ip").(string)),
 		SecureTransport:      strings.TrimSpace(d.Get("secure_transport").(string)),
 		Endpoints:            make(map[connectivity.ServiceCode]string),

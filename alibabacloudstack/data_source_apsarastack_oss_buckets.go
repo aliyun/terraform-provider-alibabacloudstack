@@ -99,9 +99,6 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 	var buckets []oss.BucketProperties
 	for _, endpoint := range endpointMap {
 		ossclietn, err := ossService.GetOssClient(endpoint)
@@ -136,6 +133,9 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 		r = regexp.MustCompile(nameRegex.(string))
 	}
 	for _, bucket := range buckets {
+		if bucket.Name == nil {
+			continue
+		}
 		if len(idsMap) > 0 {
 			if _, ok := idsMap[*bucket.Name]; !ok {
 				continue

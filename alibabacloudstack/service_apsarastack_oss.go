@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -406,22 +407,36 @@ func (s *OssService) DescribeOssSingleTunnel(id string) (map[string]interface{},
 
 func (s OssService) GetOssClient(endpoint string) (*oss.Client, error) {
 	// OSS SDK v2 uses a different configuration approach
+	schma := strings.ToLower(s.client.Config.Protocol)
+
 	cfg := oss.LoadDefaultConfig().
-		WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-			s.client.Config.AccessKey,
-			s.client.Config.SecretKey,
-			s.client.Config.SecurityToken,
-		)).
 		WithEndpoint(endpoint).
-		WithRegion(s.client.RegionId)
+		WithRegion(s.client.RegionId).
+		WithInsecureSkipVerify(s.client.Config.Insecure).
+		WithDisableSSL(schma == "http").WithSignatureVersion(oss.SignatureVersionV1)
+	if os.Getenv("TF_LOG") == "DEBUG" {
+		cfg.WithLogLevel(oss.LogDebug)
+	}
+	provider := credentials.CredentialsProviderFunc(func(ctx context.Context) (credentials.Credentials, error) {
+		if s.client.Config.SecurityToken == "" {
+			return credentials.Credentials{AccessKeyID: s.client.Config.AccessKey, AccessKeySecret: s.client.Config.SecretKey}, nil
+		} else {
+			return credentials.Credentials{AccessKeyID: s.client.Config.AccessKey, AccessKeySecret: s.client.Config.SecretKey, SecurityToken: s.client.Config.SecurityToken}, nil
+		}
+	})
+
+	cfg = cfg.WithCredentialsProvider(provider)
+
+	if s.client.Config.Proxy != "" {
+		cfg = cfg.WithProxyHost(s.client.Config.Proxy)
+	}
 
 	client := oss.NewClient(cfg)
 	return client, nil
 }
 
 func (s OssService) GetBucketEndpointMap() (map[string]string, error) {
-	schma := strings.ToLower(s.client.Config.Protocol)
-	var ossEndpointMap map[string]string
+	ossEndpointMap := s.client.Config.OssEndpoints
 	if len(ossEndpointMap) > 0 {
 		return ossEndpointMap, nil
 	} else {
@@ -431,10 +446,7 @@ func (s OssService) GetBucketEndpointMap() (map[string]string, error) {
 		}
 		for _, v := range endpoints {
 			endpointData := v.(map[string]interface{})
-			endpoint := endpointData["oss-endpoint"].(string)
-			if !strings.HasPrefix(endpoint, "http") {
-				endpoint = fmt.Sprintf("%s://%s", schma, endpoint)
-			}
+			endpoint := endpointData["oss-public-endpoint"].(string)
 			ossEndpointMap[endpointData["cluster"].(string)] = endpoint
 		}
 	}
@@ -445,6 +457,20 @@ func (s OssService) GetOssClientForCluster(cluster string) (*oss.Client, error) 
 	endpointMap, err := s.GetBucketEndpointMap()
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
+	}
+	if len(endpointMap) == 0 && cluster == "" {
+		// TODO: 按照默认拼接逻辑，拼一个endpoint返回
+		default_endpoint := ""
+		return s.GetOssClient(default_endpoint)
+	}
+	if len(endpointMap) > 1 && cluster == "" {
+		return nil, errmsgs.GetNotFoundErrorFromString("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
+	}
+	if len(endpointMap) == 1 && cluster == "" {
+		for k := range endpointMap {
+			cluster = k
+			break
+		}
 	}
 	ossendpoint, ok := endpointMap[cluster]
 	if !ok {
@@ -458,26 +484,34 @@ func (s OssService) GetBucketClient(bucketName string) (*oss.Client, error) {
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	if *bucketInfo.Name == "" {
+	if bucketInfo == nil && bucketInfo.Name == nil {
 		return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
 	}
 
 	bucketEndpoint := *bucketInfo.ExtranetEndpoint
+
+	return s.InitBucketClient(bucketEndpoint)
+}
+
+func (s OssService) InitBucketClient(endpont string) (*oss.Client, error) {
 	schma := strings.ToLower(s.client.Config.Protocol)
-	if !strings.HasPrefix(bucketEndpoint, "http") {
-		endpoint := fmt.Sprintf("%s://%s", schma, bucketEndpoint)
-		bucketEndpoint = endpoint
-	}
 
 	// OSS SDK v2 uses a different configuration approach
 	cfg := oss.LoadDefaultConfig().
-		WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-			s.client.Config.AccessKey,
-			s.client.Config.SecretKey,
-			s.client.Config.SecurityToken,
-		)).
-		WithEndpoint(bucketEndpoint).
-		WithRegion(s.client.RegionId)
+		WithEndpoint(endpont).
+		WithRegion(s.client.RegionId).
+		WithInsecureSkipVerify(s.client.Config.Insecure).
+		WithDisableSSL(schma == "http").WithSignatureVersion(oss.SignatureVersionV1)
+
+	provider := credentials.CredentialsProviderFunc(func(ctx context.Context) (credentials.Credentials, error) {
+		if s.client.Config.SecurityToken == "" {
+			return credentials.Credentials{AccessKeyID: s.client.Config.AccessKey, AccessKeySecret: s.client.Config.SecretKey}, nil
+		} else {
+			return credentials.Credentials{AccessKeyID: s.client.Config.AccessKey, AccessKeySecret: s.client.Config.SecretKey, SecurityToken: s.client.Config.SecurityToken}, nil
+		}
+	})
+
+	cfg = cfg.WithCredentialsProvider(provider)
 
 	client := oss.NewClient(cfg)
 
@@ -497,7 +531,8 @@ func (s OssService) DescribeOssBucket(bucketName string) (*oss.BucketProperties,
 		}
 		for {
 			request := &oss.ListBucketsRequest{}
-			lsRes, err := ossclietn.ListBuckets(context.Background(), request)
+			// request.ResourceGroupId = &s.client.ResourceGroupId
+			lsRes, err := ossclietn.ListBuckets(context.TODO(), request)
 			if err != nil {
 				return nil, errmsgs.WrapError(err)
 			}

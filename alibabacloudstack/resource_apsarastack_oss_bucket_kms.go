@@ -102,8 +102,14 @@ func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta inte
 	}
 
 	d.Set("bucket", bucketName)
-	d.Set("sse_algorithm", *apply.SSEAlgorithm)
-	d.Set("kms_master_key_id", *apply.KMSMasterKeyID)
+	if apply != nil {
+		if apply.SSEAlgorithm != nil {
+			d.Set("sse_algorithm", *apply.SSEAlgorithm)
+		}
+		if apply.KMSMasterKeyID != nil {
+			d.Set("kms_master_key_id", *apply.KMSMasterKeyID)
+		}
+	}
 
 	return nil
 }

@@ -45,7 +45,7 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 	}
 	quota := d.Get("quota").(int)
 
-	if *det.Name == bucketName {
+	if det != nil && *det.Name == bucketName {
 		ossClient, err := ossService.GetBucketClient(bucketName)
 		if err != nil {
 			return errmsgs.WrapError(err)

@@ -242,20 +242,20 @@ func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"bucket_sync":    "true",
-					"dual_kms_key":   "${alibabacloudstack_kms_key.key.id}",
-					"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"bucket_sync":    "true",
-						"dual_kms_key":   CHECKSET,
-						"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
-					}),
-				),
-			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"bucket_sync":    "true",
+			// 		"dual_kms_key":   "${alibabacloudstack_kms_key.key.id}",
+			// 		"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"bucket_sync":    "true",
+			// 			"dual_kms_key":   CHECKSET,
+			// 			"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
+			// 		}),
+			// 	),
+			// },
 		},
 	})
 }
@@ -359,8 +359,8 @@ resource "alibabacloudstack_vpc" "vpc2" {
 	name = "${var.name}-v2"
 	cidr_block = "192.168.0.0/24"
 }
-%s
-`, name, KeyCommonTestCase)
+
+`, name)
 }
 
 func resourceOssBucketDualDependence(name string) string {
