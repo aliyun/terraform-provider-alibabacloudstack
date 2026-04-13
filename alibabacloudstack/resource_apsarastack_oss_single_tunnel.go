@@ -54,13 +54,12 @@ func resourceAlibabacloudStackOssSingleTunnel() *schema.Resource {
 
 func resourceAlibabacloudStackOssSingleTunnelCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	ossService := OssSdkService{client}
-	ossClient, err := ossService.GetOssClient()
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "CreateVpcip", "GetOssClient", errmsgs.AlibabacloudStackOssGoSdk)
-	}
-
+	ossService := OssService{client}
 	cluster := d.Get("cluster").(string)
+	ossClient, err := ossService.GetOssClientForCluster(cluster)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_single_tunnel", "GetOssClientForCluster", errmsgs.AlibabacloudStackOssGoSdk)
+	}
 	label := d.Get("label").(string)
 	vswitchId := d.Get("vswitch_id").(string)
 	vpcId := d.Get("vpc_id").(string)
@@ -130,13 +129,13 @@ func resourceAlibabacloudStackOssSingleTunnelRead(d *schema.ResourceData, meta i
 
 func resourceAlibabacloudStackOssSingleTunnelDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	ossService := OssSdkService{client}
-	ossClient, err := ossService.GetOssClient()
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DeleteVpcip", "GetOssClient", errmsgs.AlibabacloudStackOssGoSdk)
-	}
-
+	ossService := OssService{client}
 	parts := strings.Split(d.Id(), ":")
+
+	ossClient, err := ossService.GetOssClientForCluster(parts[0])
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_single_tunnel", "GetOssClientForCluster", errmsgs.AlibabacloudStackOssGoSdk)
+	}
 
 	xmlBody := fmt.Sprintf(
 		"<DeleteVpcip><Region>%s</Region><VpcId>%s</VpcId><Vip>%s</Vip></DeleteVpcip>",

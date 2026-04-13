@@ -441,6 +441,18 @@ func (s OssService) GetBucketEndpointMap() (map[string]string, error) {
 	return ossEndpointMap, nil
 }
 
+func (s OssService) GetOssClientForCluster(cluster string) (*oss.Client, error) {
+	endpointMap, err := s.GetBucketEndpointMap()
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	ossendpoint, ok := endpointMap[cluster]
+	if !ok {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("cluster %s endpoint not found", cluster))
+	}
+	return s.GetOssClient(ossendpoint)
+}
+
 func (s OssService) GetBucketClient(bucketName string) (*oss.Client, error) {
 	bucketInfo, err := s.DescribeOssBucket(bucketName)
 	if err != nil {

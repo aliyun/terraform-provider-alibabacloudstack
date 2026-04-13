@@ -45,9 +45,8 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 	}
 	quota := d.Get("quota").(int)
 
-	if det.Name == bucketName {
-		ossSdkService := OssSdkService{client}
-		ossClient, err := ossSdkService.GetOssClient()
+	if *det.Name == bucketName {
+		ossClient, err := ossService.GetBucketClient(bucketName)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -96,8 +95,7 @@ func resourceAlibabacloudStackOssBucketQuotaRead(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	ossSdkService := OssSdkService{client}
-	ossClient, err := ossSdkService.GetOssClient()
+	ossClient, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -143,9 +141,7 @@ func resourceAlibabacloudStackOssBucketQuotaDelete(d *schema.ResourceData, meta 
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-
-	ossSdkService := OssSdkService{client}
-	ossClient, err := ossSdkService.GetOssClient()
+	ossClient, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
