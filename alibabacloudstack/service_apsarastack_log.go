@@ -2,7 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"os"
+	"log"
 	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
@@ -40,24 +40,50 @@ type LogProject struct {
 
 func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 	var err error
-	request := s.client.NewCommonRequest("POST", "SLS", "2020-03-31", "GetProject", "")
-	request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
-	request.QueryParams["projectName"] = id
-
 	var logProject *LogProject
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
+
+	// Attempt 1: New API (2019-10-23)
+	requestBody := map[string]interface{}{"projectName": id}
+	requestHeaders := map[string]string{"AccessKeyId": s.client.AccessKey}
+	response, err := s.client.DoTeaRequest("POST", "Sls", "2019-10-23", "GetProject", "/sls/v1/project/getProject", requestHeaders, nil, requestBody)
+
+	// If new API fails, fallback to old API
+	if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
+		// TODO: Remove old API logic in version 3.20.0
+		log.Printf("[WARN] SLS 2019-10-23 GetProject failed: %v, fallback to 2020-03-31 API", err)
+
+		// Attempt 2: Old API (2020-03-31) - will be removed in 3.20.0
+		request := s.client.NewCommonRequest("POST", "SLS", "2020-03-31", "GetProject", "")
+		request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
+		request.QueryParams["projectName"] = id
+
+		bresponse, err := s.client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if errmsgs.IsExpectedErrors(err, "ProjectNotExist") {
+				return logProject, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+			}
+			if bresponse == nil {
+				return logProject, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return logProject, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &logProject)
+	} else if err != nil {
 		if errmsgs.IsExpectedErrors(err, "ProjectNotExist") {
 			return logProject, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
-		if bresponse == nil {
-			return logProject, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		return logProject, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetProject", errmsgs.AlibabacloudStackSdkGoERROR, err)
+	} else {
+		// Parse response from DoTeaRequest
+		if responseBytes, err := json.Marshal(response); err != nil {
+			return logProject, err
+		} else {
+			err = json.Unmarshal(responseBytes, &logProject)
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return logProject, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &logProject)
+
 	if logProject != nil && logProject.ProjectName == "" && len(logProject.Projects) > 0 {
 		for _, k := range logProject.Projects {
 			if k.ProjectName == id {

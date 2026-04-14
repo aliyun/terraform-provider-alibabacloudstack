@@ -2,10 +2,8 @@ package alibabacloudstack
 
 import (
 	"log"
-	"os"
 	"time"
 
-	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
@@ -42,33 +40,33 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	var err error
 
 	// Attempt 1: New API (2019-10-23)
-	request := client.NewCommonRequest("POST", "Sls", "2019-10-23", "CreateProject", "")
-	request.QueryParams["projectName"] = name
-	request.QueryParams["description"] = description
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	requestBody := map[string]interface{}{"projectName": name, "description": description}
+	requestHeaders := map[string]string{"AccessKeyId": client.AccessKey} // necessary
+	_, err = client.DoTeaRequest("POST", "Sls", "2019-10-23", "CreateProject", "/sls/v1/project/createProjectWithCluster", requestHeaders, nil, requestBody)
 
 	// If new API fails, fallback to old API
-	if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
-		// TODO: Remove old API logic in version 3.20.0
-		log.Printf("[WARN] SLS 2019-10-23 CreateProject failed: %v, fallback to 2020-03-31 API", err)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "InvalidVersion") {
+			// TODO: Remove old API logic in version 3.20.0
+			log.Printf("[WARN] SLS 2019-10-23 CreateProject failed: %v, fallback to 2020-03-31 API", err)
 
-		// Attempt 2: Old API (2020-03-31) - will be removed in 3.20.0
-		request = client.NewCommonRequest("POST", "SLS", "2020-03-31", "CreateProject", "")
-		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
-		request.QueryParams["projectName"] = name
-		request.QueryParams["Description"] = description
+			// Attempt 2: Old API (2020-03-31) - will be removed in 3.20.0
+			request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "CreateProject", "")
+			request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
+			request.QueryParams["projectName"] = name
+			request.QueryParams["Description"] = description
 
-		bresponse, err = client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			bresponse, err := client.ProcessCommonRequest(request)
+			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+			if err != nil {
+				if bresponse == nil {
+					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+				}
+				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
+		return err
 	}
 
 	// Wait for project to be created
@@ -105,25 +103,40 @@ func resourceAlibabacloudStackLogProjectRead(d *schema.ResourceData, meta interf
 
 func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *sls.Client
 
 	name := d.Id()
 	if d.HasChange("description") {
-		request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "UpdateProject", "")
-		request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
-		request.QueryParams["ProjectName"] = name
-		request.QueryParams["description"] = d.Get("description").(string)
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		// Attempt 1: New API (2019-10-23)
+		requestBody := map[string]interface{}{
+			"projectName": name,
+			"description": d.Get("description").(string),
 		}
-		addDebug("UpdateProject", bresponse, requestInfo, request)
+		requestHeaders := map[string]string{"AccessKeyId": client.AccessKey}
+		_, err := client.DoTeaRequest("POST", "Sls", "2019-10-23", "UpdateProject", "/sls/v1/project/updateProject", requestHeaders, nil, requestBody)
+
+		// If new API fails, fallback to old API
+		if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
+			// TODO: Remove old API logic in version 3.20.0
+			log.Printf("[WARN] SLS 2019-10-23 UpdateProject failed: %v, fallback to 2020-03-31 API", err)
+
+			// Attempt 2: Old API (2020-03-31) - will be removed in 3.20.0
+			request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "UpdateProject", "")
+			request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
+			request.QueryParams["ProjectName"] = name
+			request.QueryParams["description"] = d.Get("description").(string)
+
+			bresponse, err := client.ProcessCommonRequest(request)
+			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+			if err != nil {
+				if bresponse == nil {
+					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+				}
+				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+		} else if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateProject", errmsgs.AlibabacloudStackSdkGoERROR, err)
+		}
 	}
 
 	return nil
@@ -131,24 +144,41 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 
 func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *sls.Client
 	name := d.Get("name").(string)
-	request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "DeleteProject", "")
-	request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
-	request.QueryParams["ProjectName"] = name
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
+	// Attempt 1: New API (2019-10-23)
+	requestBody := map[string]interface{}{"projectName": name}
+	requestHeaders := map[string]string{"AccessKeyId": client.AccessKey}
+	_, err := client.DoTeaRequest("POST", "Sls", "2019-10-23", "DeleteProject", "/sls/v1/project/deleteProject", requestHeaders, nil, requestBody)
+
+	// If new API fails, fallback to old API
+	if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
+		// TODO: Remove old API logic in version 3.20.0
+		log.Printf("[WARN] SLS 2019-10-23 DeleteProject failed: %v, fallback to 2020-03-31 API", err)
+
+		// Attempt 2: Old API (2020-03-31) - will be removed in 3.20.0
+		request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "DeleteProject", "")
+		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
+		request.QueryParams["ProjectName"] = name
+
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if errmsgs.IsExpectedErrors(err, "ProjectNotExist") {
+				return nil
+			}
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+	} else if err != nil {
 		if errmsgs.IsExpectedErrors(err, "ProjectNotExist") {
 			return nil
 		}
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteProject", errmsgs.AlibabacloudStackSdkGoERROR, err)
 	}
-	addDebug("DeleteProject", bresponse, requestInfo, request)
+
 	return nil
 }
