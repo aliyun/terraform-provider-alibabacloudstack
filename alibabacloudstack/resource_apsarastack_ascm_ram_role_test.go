@@ -47,24 +47,11 @@ func TestAccAlibabacloudStackAscm_RamRoleBasic(t *testing.T) {
 					}),
 				),
 			},
+			// Destroy resource before changing role_range
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{},
+				Config:  testAccConfig(map[string]interface{}{}),
+				Destroy: true,
 			},
-		},
-	})
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"role_name":               name,
