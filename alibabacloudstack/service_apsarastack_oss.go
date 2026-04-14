@@ -228,10 +228,10 @@ func (s *OssService) DeleteBucket(bucketName string) error {
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "DeleteBucket", errmsgs.AlibabacloudStackOssGoSdk))
 		}
 		det, err := s.DescribeOssBucket(bucketName)
-		if err != nil {
+		if !errmsgs.NotFoundError(err) {
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk))
 		}
-		if *det.Name != "" {
+		if det != nil && *det.Name != "" {
 			return resource.RetryableError(errmsgs.Error("Trying to delete OSS bucket %#v failed.", bucketName))
 		}
 		return nil
@@ -437,6 +437,9 @@ func (s OssService) buildOssClientConfig(endpoint string) *oss.Config {
 }
 
 func (s OssService) GetOssClient(endpoint string) (*oss.Client, error) {
+	if endpoint == "" {
+		return nil, errmsgs.Error("Oss Endpoint is empty!")
+	}
 	cfg := s.buildOssClientConfig(endpoint)
 	client := oss.NewClient(cfg)
 	return client, nil
@@ -465,25 +468,36 @@ func (s OssService) GetOssClientForCluster(cluster string) (*oss.Client, error) 
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	if len(endpointMap) == 0 && cluster == "" {
-		// TODO: 按照默认拼接逻辑，拼一个endpoint返回
-		default_endpoint := ""
-		return s.GetOssClient(default_endpoint)
-	}
-	if len(endpointMap) > 1 && cluster == "" {
-		return nil, errmsgs.GetNotFoundErrorFromString("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
-	}
-	if len(endpointMap) == 1 && cluster == "" {
-		for k := range endpointMap {
-			cluster = k
-			break
+	if cluster != "" {
+		return s.GetOssClient(endpointMap[cluster])
+	} else {
+		var endpoint string
+		if len(endpointMap) > 1 {
+			return nil, errmsgs.Error("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
 		}
+		if len(endpointMap) == 1 {
+			for _, v := range endpointMap {
+				endpoint = v
+				break
+			}
+		}
+		if len(endpointMap) < 1 {
+			endpoint, err = s.GetDefaultOssEndpoint()
+			if err != nil {
+				return nil, errmsgs.WrapError(err)
+			}
+		}
+		return s.GetOssClient(endpoint)
 	}
-	ossendpoint, ok := endpointMap[cluster]
-	if !ok {
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("cluster %s endpoint not found", cluster))
+}
+
+func (s OssService) GetDefaultOssEndpoint() (string, error) {
+	schma := strings.ToLower(s.client.Config.Protocol)
+	if s.client.Config.PopgwDomain == "" {
+		return "", errmsgs.GetNotFoundErrorFromString("Build default `oss_endpoint` failed, because the `popgw_domain` not set!")
 	}
-	return s.GetOssClient(ossendpoint)
+	endpoint := fmt.Sprintf("%s://oss-%s-a.%s/", schma, s.client.RegionId, s.client.Config.PopgwDomain)
+	return endpoint, nil
 }
 
 func (s OssService) GetBucketClient(bucketName string) (*oss.Client, error) {
@@ -505,7 +519,6 @@ func (s OssService) DescribeOssBucket(bucketName string) (*oss.BucketProperties,
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	var buckets []oss.BucketProperties
 	for _, endpoint := range endpointMap {
 		ossclietn, err := s.GetOssClient(endpoint)
 		if err != nil {
@@ -513,23 +526,20 @@ func (s OssService) DescribeOssBucket(bucketName string) (*oss.BucketProperties,
 		}
 		for {
 			request := &oss.ListBucketsRequest{}
-			// request.ResourceGroupId = &s.client.ResourceGroupId
 			lsRes, err := ossclietn.ListBuckets(context.TODO(), request)
 			if err != nil {
 				return nil, errmsgs.WrapError(err)
 			}
-
-			buckets = append(buckets, lsRes.Buckets...)
+			for _, bucket := range lsRes.Buckets {
+				if *bucket.Name == bucketName {
+					return &bucket, nil
+				}
+			}
 
 			if !lsRes.IsTruncated {
 				break
 			}
 			request.Marker = lsRes.NextMarker
-		}
-	}
-	for _, bucket := range buckets {
-		if *bucket.Name == bucketName {
-			return &bucket, nil
 		}
 	}
 	return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
@@ -568,4 +578,73 @@ func (s OssService) DescribeOssBucketLogging(bucketName string) (*oss.GetBucketL
 	}
 
 	return result, nil
+}
+
+func (s OssService) DescribeOssBucketObject(id string) (*oss.HeadObjectResult, error) {
+	var bucketName, key string
+	id_info := strings.SplitN(id, ":", 2)
+	bucketName = id_info[0]
+	key = id_info[1]
+	ossClient, err := s.GetBucketClient(bucketName)
+	if err != nil {
+		return nil, err
+	}
+
+	headReq := &oss.HeadObjectRequest{
+		Bucket: &bucketName,
+		Key:    &key,
+	}
+	object, err := ossClient.HeadObject(context.Background(), headReq)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "404 Not Found") {
+			return nil, errmsgs.GetNotFoundErrorFromString("BUcket Object not found!")
+		}
+		return nil, errmsgs.WrapError(err)
+	}
+	addDebug("HeadObject", object, nil, map[string]interface{}{
+		"objectKey": key,
+	})
+	return object, nil
+}
+
+func (s OssService) DescribeOssBucketObjectAcl(id string) (*oss.GetObjectAclResult, error) {
+	id_info := strings.SplitN(id, ":", 2)
+	ossClient, err := s.GetBucketClient(id_info[0])
+	if err != nil {
+		return nil, err
+	}
+	aclReq := &oss.GetObjectAclRequest{
+		Bucket: &id_info[0],
+		Key:    &id_info[1],
+	}
+	acl, err := ossClient.GetObjectAcl(context.Background(), aclReq)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	return acl, nil
+}
+
+func (s *OssService) UnBindResourceGroup(resourceType, instanceId string) error {
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateInstanceBelong", "/ascm/manage/belong/updateInstance")
+	mergeMaps(request.QueryParams, map[string]string{
+		"resourceType":        resourceType,
+		"instanceId":          instanceId,
+		"regionName":          s.client.RegionId,
+		"targetResourceSetId": s.client.ResourceGroup,
+	})
+	delete(request.QueryParams, "ResourceGroup")
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("UpdateInstanceBelong", bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if ossNotFoundError(err) {
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resourceType, instanceId, "UpdateInstanceBelong", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+	}
+	log.Printf("Bresponse UnBindBucketPolicy after error")
+	return nil
 }

@@ -9,7 +9,7 @@ func TestAccAlibabacloudStackOssBucketObjectsDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_oss_bucket_objects.default"
 
-	name := fmt.Sprintf("tf-testacc-bucket-object-%d", rand)
+	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		name,
 		dataSourceOssBucketObjectsConfigDependence)
@@ -85,7 +85,7 @@ func TestAccAlibabacloudStackOssBucketObjectsDataSource_versioning(t *testing.T)
 	resourceId := "data.alibabacloudstack_oss_bucket_objects.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf-testacc-bucket-object-%d", rand),
+		fmt.Sprintf("tf-testacc-bucket-%d", rand),
 		dataSourceOssBucketObjectsConfigDependenceVersioning)
 
 	bucketNameConf := dataSourceTestAccConfig{
@@ -132,7 +132,7 @@ func TestAccAlibabacloudStackOssBucketObjectsDataSource_versioning(t *testing.T)
 	var existOssBucketObjectsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"objects.#":              "1",
-			"objects.0.key":          fmt.Sprintf("tf-sample/%s-object", fmt.Sprintf("tf-testacc-bucket-object-%d", rand)),
+			"objects.0.key":          fmt.Sprintf("tf-sample/%s-object", fmt.Sprintf("tf-testacc-bucket-%d", rand)),
 			"objects.0.acl":          CHECKSET,
 			"objects.0.content_type": "text/plain",
 			//"objects.0.content_length":         CHECKSET,

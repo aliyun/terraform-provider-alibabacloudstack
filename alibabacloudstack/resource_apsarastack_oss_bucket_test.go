@@ -6,10 +6,8 @@ import (
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
@@ -36,11 +34,12 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckOssBucketDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket": name,
+					"bucket":      name,
+					"oss_cluster": "CdsEbsOssHybridCluster-A-20260325-0208",
 					"tags": map[string]string{
 						"Created": "TF",
 						"For":     "Test",
@@ -224,7 +223,7 @@ func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckOssBucketDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -242,20 +241,20 @@ func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"bucket_sync":    "true",
-			// 		"dual_kms_key":   "${alibabacloudstack_kms_key.key.id}",
-			// 		"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"bucket_sync":    "true",
-			// 			"dual_kms_key":   CHECKSET,
-			// 			"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
-			// 		}),
-			// 	),
-			// },
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"bucket_sync":    "true",
+					"dual_kms_key":   "${alibabacloudstack_kms_key.key.id}",
+					"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"bucket_sync":    "true",
+						"dual_kms_key":   CHECKSET,
+						"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
+					}),
+				),
+			},
 		},
 	})
 }
@@ -284,12 +283,13 @@ func TestUatAlibabacloudStackOssBucket_Vpc(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckOssBucketDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket":  name,
-					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}", "${alibabacloudstack_vpc.vpc2.id}"},
+					"bucket":      name,
+					"vpclist":     []string{"${alibabacloudstack_vpc.vpc.id}", "${alibabacloudstack_vpc.vpc2.id}"},
+					"oss_cluster": "OssHybridCluster-A-20260325-01ec",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -321,29 +321,6 @@ func TestUatAlibabacloudStackOssBucket_Vpc(t *testing.T) {
 	})
 }
 
-func testAccCheckOssBucketDestroy(s *terraform.State) error { // destroy function
-	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-	ossService := OssService{client}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type == "alibabacloudstack_oss_bucket" || rs.Type != "alibabacloudstack_oss_bucket" {
-			continue
-		}
-		bucket, err := ossService.DescribeOssBucket(rs.Primary.ID)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-		if *bucket.Name != "" {
-			return errmsgs.WrapError(errmsgs.Error("bucket still exist"))
-		}
-	}
-
-	return nil
-}
-
 func resourceOssBucketConfigDependence(name string) string {
 	return fmt.Sprintf(`
 
@@ -360,7 +337,9 @@ resource "alibabacloudstack_vpc" "vpc2" {
 	cidr_block = "192.168.0.0/24"
 }
 
-`, name)
+%s
+
+`, name, KeyCommonTestCase)
 }
 
 func resourceOssBucketDualDependence(name string) string {

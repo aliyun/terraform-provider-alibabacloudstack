@@ -1176,6 +1176,17 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	log.Printf("Eagleeye's trace id is: %s", eagleeye.GetTraceId())
 	oss_endpoint_map := d.Get("oss_endpoints").(map[string]interface{})
+	// If d.Get returns an empty map, try reading directly from environment variables (handling known issue with TypeMap DefaultFunc)
+	if len(oss_endpoint_map) == 0 {
+		oss_endpointstr := os.Getenv("ALIBABACLOUDSTACK_OSS_ENDPOINTS")
+		if oss_endpointstr != "" {
+			var env_oss_endpointmap map[string]interface{}
+			err := json.Unmarshal([]byte(oss_endpointstr), &env_oss_endpointmap)
+			if err == nil {
+				oss_endpoint_map = env_oss_endpointmap
+			}
+		}
+	}
 	oss_endpoints := make(map[string]string)
 	for k, v := range oss_endpoint_map {
 		oss_endpoints[k] = v.(string)
@@ -1202,6 +1213,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Endpoints:            make(map[connectivity.ServiceCode]string),
 		Eagleeye:             eagleeye,
 		MaxRetryTimeout:      d.Get("max_retry_timeout").(int),
+		PopgwDomain:          d.Get("popgw_domain").(string),
 	}
 	if v, ok := d.GetOk("security_transport"); config.SecureTransport == "" && ok && v.(string) != "" {
 		config.SecureTransport = v.(string)

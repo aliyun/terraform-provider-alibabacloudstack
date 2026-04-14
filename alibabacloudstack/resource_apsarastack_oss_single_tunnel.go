@@ -47,9 +47,14 @@ func resourceAlibabacloudStackOssSingleTunnel() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"force_bind_resource_group": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackOssSingleTunnelCreate, resourceAlibabacloudStackOssSingleTunnelRead, nil, resourceAlibabacloudStackOssSingleTunnelDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackOssSingleTunnelCreate, resourceAlibabacloudStackOssSingleTunnelRead, resourceAlibabacloudStackOssSingleTunnelUpdate, resourceAlibabacloudStackOssSingleTunnelDelete)
 	return resource
 }
 
@@ -72,7 +77,7 @@ func resourceAlibabacloudStackOssSingleTunnelCreate(d *schema.ResourceData, meta
 
 	input := &oss.OperationInput{
 		OpName:     "CreateVpcip",
-		Method:     "PUT",
+		Method:     "POST",
 		Parameters: map[string]string{"vpcip": ""},
 		Headers:    map[string]string{"Content-Type": "application/xml"},
 		Body:       strings.NewReader(xmlBody),
@@ -101,8 +106,17 @@ func resourceAlibabacloudStackOssSingleTunnelCreate(d *schema.ResourceData, meta
 	}
 
 	d.SetId(fmt.Sprintf("%s:%s:%s", cluster, vpcId, createResult.Vip))
+	err = ossService.UnBindResourceGroup("oss_single_tunnel", createResult.Vip)
+	if d.Get("force_bind_resource_group").(bool) && err != nil {
+		return errmsgs.WrapError(err)
+	}
 
 	return nil
+}
+
+func resourceAlibabacloudStackOssSingleTunnelUpdate(d *schema.ResourceData, meta interface{}) error {
+	notChanged := []string{"force_bind_resource_group"}
+	return noUpdatesAllowedCheck(d, notChanged)
 }
 
 func resourceAlibabacloudStackOssSingleTunnelRead(d *schema.ResourceData, meta interface{}) error {

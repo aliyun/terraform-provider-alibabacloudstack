@@ -210,43 +210,15 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var bucketName, key string
-	if id_info := strings.SplitN(d.Id(), ":", 2); len(id_info) == 1 {
-		// Compatible with old ID d.SetId(key)
-		bucketName = d.Get("bucket").(string)
-		key = d.Get("key").(string)
-		d.SetId(fmt.Sprintf("%s:%s", bucketName, key))
-	} else {
-		bucketName = id_info[0]
-		key = id_info[1]
-	}
+	id_info := strings.SplitN(d.Id(), ":", 2)
+	bucketName = id_info[0]
+	key = id_info[1]
 	ossService := OssService{client}
-	ossClient, err := ossService.GetBucketClient(bucketName)
+	object, err := ossService.DescribeOssBucketObject(d.Id())
 	if err != nil {
 		return err
 	}
-
-	headReq := &oss.HeadObjectRequest{
-		Bucket: &bucketName,
-		Key:    &key,
-	}
-	object, err := ossClient.HeadObject(context.Background(), headReq)
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, "404 Not Found") {
-			d.SetId("")
-			return errmsgs.WrapError(errmsgs.Error("To get the Object: %#v but it is not exist in the specified bucket %s.", key, bucketName))
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "HeadObject", errmsgs.AlibabacloudStackLogGoSdkERROR)
-	}
-	addDebug("HeadObject", object, nil, map[string]interface{}{
-		"objectKey": key,
-	})
-
-	// ACL - requires special permissions, may fail. Do not overwrite attribute when it fails.
-	aclReq := &oss.GetObjectAclRequest{
-		Bucket: &bucketName,
-		Key:    &key,
-	}
-	if acl, err := ossClient.GetObjectAcl(context.Background(), aclReq); err == nil {
+	if acl, err := ossService.DescribeOssBucketObjectAcl(d.Id()); err == nil {
 		d.Set("acl", acl.ACL)
 	}
 

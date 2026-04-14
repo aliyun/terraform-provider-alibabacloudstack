@@ -51,6 +51,7 @@ type Config struct {
 	Domain                   string
 	Eagleeye                 EagleEye
 	MaxRetryTimeout          int
+	PopgwDomain              string
 }
 
 type Region string

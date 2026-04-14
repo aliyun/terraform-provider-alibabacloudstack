@@ -34,14 +34,13 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 	var v http.Header
 	resourceId := "alibabacloudstack_oss_bucket_object.default"
 	ra := resourceAttrInit(resourceId, ossBucketObjectBasicMap)
-	serviceFunc := func() interface{} {
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	}, "DescribeOssBucketObject")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-bucket-object-%d", rand)
+	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketObjectConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -172,11 +171,9 @@ resource "alibabacloudstack_oss_bucket" "default" {
 	bucket = "%s"
 	acl = "public-read-write"
 }
-data "alibabacloudstack_kms_keys" "enabled" {
-	status = "%s"
-}
+
 %s
-`, name, string(EnabledStatus), KeyCommonTestCase)
+`, name, KeyCommonTestCase)
 }
 
 var ossBucketObjectBasicMap = map[string]string{

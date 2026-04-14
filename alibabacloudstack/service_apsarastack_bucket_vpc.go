@@ -30,7 +30,6 @@ type VpcListResult struct {
 func (s *BucketVpcService) BucketVpcList(bucketName string) (vpclist *VpcListResult, err error) {
 	// TODO: This interface is an asapi interface and is not open to pop
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListBucketVpc", "/ascm/manage/saleconf/ossIsolationVpc/select")
-	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	mergeMaps(request.QueryParams, map[string]string{
 		"BucketName":    bucketName,
 		"OpenApiAction": "ListBucketVpc",
@@ -67,7 +66,6 @@ func (s *BucketVpcService) BindBucket(vpcId string, vpcName string, vLan string,
 		"vLan":       vLan,
 		"vpcId":      vpcId,
 	})
-	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if bresponse == nil {
@@ -93,7 +91,6 @@ func (s *BucketVpcService) UnBindBucket(vpcId string, bucket string) error {
 		"bucketName": bucket,
 		"vpcId":      vpcId,
 	})
-	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	log.Printf("Bresponse UnBindBucketPolicy before error")
 	if err != nil {

@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"context"
 	"regexp"
+	"slices"
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -100,6 +101,7 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 	var buckets []oss.BucketProperties
+	names := make([]string, 0)
 	for _, endpoint := range endpointMap {
 		ossclietn, err := ossService.GetOssClient(endpoint)
 		if err != nil {
@@ -107,12 +109,16 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 		}
 		for {
 			request := &oss.ListBucketsRequest{}
-			lsRes, err := ossclietn.ListBuckets(context.Background(), request)
+			lsRes, err := ossclietn.ListBuckets(context.TODO(), request)
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}
-
-			buckets = append(buckets, lsRes.Buckets...)
+			for _, bucket := range lsRes.Buckets {
+				if !slices.Contains(names, *bucket.Name) {
+					buckets = append(buckets, bucket)
+					names = append(names, *bucket.Name)
+				}
+			}
 
 			if !lsRes.IsTruncated {
 				break

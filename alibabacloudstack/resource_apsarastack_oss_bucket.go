@@ -42,6 +42,11 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"force_bind_resource_group": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 			"logging": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -176,11 +181,9 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 		var req oss.PutBucketRequest
 		req.Bucket = oss.Ptr(bucketName)
 		req.Acl = oss.BucketACLType(acl)
-		// req.ResourceGroupId = &client.ResourceGroup
-		// req.Parameters["storageClass"] = storageClass
-		response, err := ossclient.PutBucket(context.TODO(), &req)
-		if response.StatusCode != 200 {
-			return errmsgs.WrapError(fmt.Errorf("PutBucket failed, response.Status:%s", response.Status))
+		_, err = ossclient.PutBucket(context.TODO(), &req)
+		if err != nil {
+			return errmsgs.WrapError(err)
 		}
 
 		err = resource.Retry(3*time.Minute, func() *resource.RetryError {
@@ -199,6 +202,10 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	}
 	// Assign the bucket name as the resource ID
 	d.SetId(bucketName)
+	err = ossService.UnBindResourceGroup("oss_instance", bucketName)
+	if d.Get("force_bind_resource_group").(bool) && err != nil {
+		return errmsgs.WrapError(err)
+	}
 	tags := d.Get("tags").(map[string]interface{})
 	if len(tags) > 0 {
 		var tag_objs []OssTags
@@ -304,7 +311,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 			break
 		}
 	}
-	aclResult, err := bucketClient.GetBucketAcl(context.Background(), &oss.GetBucketAclRequest{
+	aclResult, err := bucketClient.GetBucketAcl(context.TODO(), &oss.GetBucketAclRequest{
 		Bucket: &bucketName,
 	})
 	if err != nil {
@@ -321,7 +328,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 		Parameters: map[string]string{"qos": ""},
 	}
 	scInput.OpMetadata.Set(signer.SubResource, []string{"qos"})
-	scOutput, err := bucketClient.InvokeOperation(context.Background(), scInput)
+	scOutput, err := bucketClient.InvokeOperation(context.TODO(), scInput)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketStorageCapacity", errmsgs.AlibabacloudStackOssGoSdk)
 	}
@@ -343,7 +350,7 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	}
 
 	// Get encryption information
-	encResult, err := bucketClient.GetBucketEncryption(context.Background(), &oss.GetBucketEncryptionRequest{
+	encResult, err := bucketClient.GetBucketEncryption(context.TODO(), &oss.GetBucketEncryptionRequest{
 		Bucket: &bucketName,
 	})
 	if err != nil {
@@ -424,7 +431,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			}
 		}
 		syncInput.OpMetadata.Set(signer.SubResource, []string{"sync"})
-		_, err = bucketClient.InvokeOperation(context.Background(), syncInput)
+		_, err = bucketClient.InvokeOperation(context.TODO(), syncInput)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, syncInput.OpName, errmsgs.AlibabacloudStackOssGoSdk)
 		}
@@ -446,7 +453,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			Body:       strings.NewReader(xmlBody),
 		}
 		scInput2.OpMetadata.Set(signer.SubResource, []string{"qos"})
-		_, err = bucketClient.InvokeOperation(context.Background(), scInput2)
+		_, err = bucketClient.InvokeOperation(context.TODO(), scInput2)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "SetBucketStorageCapacity", errmsgs.AlibabacloudStackOssGoSdk)
 		}
@@ -454,7 +461,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 
 	if d.HasChanges("sse_algorithm", "kms_key_id") {
 		if d.Get("sse_algorithm").(string) == "" {
-			_, err := bucketClient.DeleteBucketEncryption(context.Background(), &oss.DeleteBucketEncryptionRequest{
+			_, err := bucketClient.DeleteBucketEncryption(context.TODO(), &oss.DeleteBucketEncryptionRequest{
 				Bucket: &bucketName,
 			})
 			if err != nil {
@@ -469,7 +476,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			if sse_algorithm == "KMS" {
 				applyDefault.KMSMasterKeyID = &kms_key_id
 			}
-			_, err := bucketClient.PutBucketEncryption(context.Background(), &oss.PutBucketEncryptionRequest{
+			_, err := bucketClient.PutBucketEncryption(context.TODO(), &oss.PutBucketEncryptionRequest{
 				Bucket: &bucketName,
 				ServerSideEncryptionRule: &oss.ServerSideEncryptionRule{
 					ApplyServerSideEncryptionByDefault: applyDefault,
@@ -529,7 +536,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 
 	if d.HasChange("acl") {
 		acl := d.Get("acl").(string)
-		_, err = bucketClient.PutBucketAcl(context.Background(), &oss.PutBucketAclRequest{
+		_, err = bucketClient.PutBucketAcl(context.TODO(), &oss.PutBucketAclRequest{
 			Bucket: &bucketName,
 			Acl:    oss.BucketACLType(acl),
 		})
@@ -642,7 +649,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 		log.Printf("logging is not null %v", d.Get("logging"))
 		if _, v := d.GetOk("logging"); v == false {
 			log.Print("logging is being disabled")
-			_, err = ossClient.DeleteBucketLogging(context.Background(), &oss.DeleteBucketLoggingRequest{
+			_, err = ossClient.DeleteBucketLogging(context.TODO(), &oss.DeleteBucketLoggingRequest{
 				Bucket: &bucket_name,
 			})
 			if err != nil {
@@ -671,7 +678,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 					}
 					targetBucket := fmt.Sprint(logging["target_bucket"])
 					targetPrefix := fmt.Sprint(logging["target_prefix"])
-					_, err = ossClient.PutBucketLogging(context.Background(), &oss.PutBucketLoggingRequest{
+					_, err = ossClient.PutBucketLogging(context.TODO(), &oss.PutBucketLoggingRequest{
 						Bucket: &bucket_name,
 						BucketLoggingStatus: &oss.BucketLoggingStatus{
 							LoggingEnabled: &oss.LoggingEnabled{
@@ -709,7 +716,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 				}
 				targetBucket := fmt.Sprint(logging["target_bucket"])
 				targetPrefix := fmt.Sprint(logging["target_prefix"])
-				_, err = ossClient.PutBucketLogging(context.Background(), &oss.PutBucketLoggingRequest{
+				_, err = ossClient.PutBucketLogging(context.TODO(), &oss.PutBucketLoggingRequest{
 					Bucket: &bucket_name,
 					BucketLoggingStatus: &oss.BucketLoggingStatus{
 						LoggingEnabled: &oss.LoggingEnabled{
