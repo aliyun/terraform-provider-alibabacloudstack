@@ -1,38 +1,60 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
 )
 
-func TestAccAlibabacloudStackAscm_RamServiceRoles_DataSource(t *testing.T) {
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: dataSourceAlibabacloudStackAscm_RamServiceRoles,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ascm_ram_service_roles.default"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_service_roles.default", "roles.id"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_service_roles.default", "roles.name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_service_roles.default", "roles.description"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_service_roles.default", "roles.role_type"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_service_roles.default", "roles.product"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_service_roles.default", "roles.organization_name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ascm_ram_service_roles.default", "roles.aliyun_user_id"),
-				),
-			},
-		},
-	})
+func TestAccAlibabacloudStackAscmRamServiceRoles_DataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_ascm_ram_service_roles.default"
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", dataSourceAscmRamServiceRolesConfigDependence)
+
+	productConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"product": "${data.alibabacloudstack_ascm_ram_service_roles.anyone.roles.0.product}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"product": "fake-product",
+		}),
+	}
+
+	// Since this data source returns roles based on product filter,
+	// and we cannot create/delete service roles in tests,
+	// we assume that "ecs" product will return at least one role in real environment.
+	// For fake product, it should return empty list.
+
+	var existAscmRamServiceRolesMapFunc = func(rand int) map[string]string {
+		// We expect at least one role for "ecs" product
+		return map[string]string{
+			"roles.#":                   CHECKSET, // At least one role expected
+			"roles.0.id":                CHECKSET,
+			"roles.0.name":              CHECKSET,
+			"roles.0.description":       CHECKSET,
+			"roles.0.role_type":         CHECKSET,
+			"roles.0.product":           CHECKSET,
+			"roles.0.organization_name": CHECKSET,
+			"roles.0.aliyun_user_id":    CHECKSET,
+		}
+	}
+
+	var fakeAscmRamServiceRolesMapFunc = func(rand int) map[string]string {
+		// Fake product should return no roles
+		return map[string]string{
+			"roles.#": "0",
+		}
+	}
+
+	var ascmRamServiceRolesCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existAscmRamServiceRolesMapFunc,
+		fakeMapFunc:  fakeAscmRamServiceRolesMapFunc,
+	}
+	ascmRamServiceRolesCheckInfo.dataSourceTestCheck(t, 0, productConf)
 }
 
-const dataSourceAlibabacloudStackAscm_RamServiceRoles = `
-
-data "alibabacloudstack_ascm_ram_service_roles" "default" {
-  product = "ecs"
-}
-
+func dataSourceAscmRamServiceRolesConfigDependence(name string) string {
+	return `
+	data "alibabacloudstack_ascm_ram_service_roles" "anyone" {
+	}
 `
+}

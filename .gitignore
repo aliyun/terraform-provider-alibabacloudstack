@@ -51,3 +51,4 @@ alibabacloudstack/cover.out
 alibabacloudstack/debug.test*
 alibabacloudstack/dryrun_*
 /.dbeaver/
+/.qoder/
