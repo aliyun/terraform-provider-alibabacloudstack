@@ -1,24 +1,26 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudStackAscm_RamRoleBasic(t *testing.T) {
 	var v *AscmRoles
 	resourceId := "alibabacloudstack_ascm_ram_role.default"
-	ra := resourceAttrInit(resourceId, testAccCheckAscmRamRole)
+	ra := resourceAttrInit(resourceId, ascmramroleRoleBasicMap)
 	serviceFunc := func() interface{} {
 		return &AscmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-ascmramrole%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testascmramroleconfigbasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -27,58 +29,79 @@ func TestAccAlibabacloudStackAscm_RamRoleBasic(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckAscm_RamRoleDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAscm_RamRole_resource,
+				Config: testAccConfig(map[string]interface{}{
+					"role_name":               name,
+					"description":             "TestRole",
+					"organization_visibility": "organizationVisibility.global",
+					"role_range":              "roleRange.allOrganizations",
+				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"role_name":               name,
+						"description":             "TestRole",
+						"organization_visibility": CHECKSET,
+						"role_range":              "roleRange.allOrganizations",
+					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{},
 			},
 		},
 	})
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
 
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"role_name":               name,
+					"description":             "TestRole",
+					"organization_visibility": "organizationVisibility.global",
+					"role_range":              "roleRange.userGroup",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_name":               name,
+						"description":             "TestRole",
+						"organization_visibility": CHECKSET,
+						"role_range":              "roleRange.userGroup",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{},
+			},
+		},
+	})
 }
 
-func testAccCheckAscm_RamRoleDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-
-	ascmService := AscmService{client}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type == "alibabacloudstack_ascm_ram_role" || rs.Type != "alibabacloudstack_ascm_ram_role" {
-			continue
-		}
-		ascm, err := ascmService.DescribeAscmRamRole(rs.Primary.ID)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-		if ascm.AsapiErrorCode != "200" {
-			return errmsgs.WrapError(errmsgs.Error("ram role still exist"))
-		}
-	}
-
-	return nil
+func testascmramroleconfigbasic(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
+}
+`, name)
 }
 
-const testAccAscm_RamRole_resource = `
-resource "alibabacloudstack_ascm_ram_role" "default" {
-  role_name = "Test_Ram_Role"
-  description = "TestRole"
-  organization_visibility = "global"
-  role_range = "roleRange.userGroup"
-}
-`
-
-var testAccCheckAscmRamRole = map[string]string{
+var ascmramroleRoleBasicMap = map[string]string{
 	"role_name":               CHECKSET,
+	"description":             CHECKSET,
 	"organization_visibility": CHECKSET,
+	"role_range":              CHECKSET,
 }

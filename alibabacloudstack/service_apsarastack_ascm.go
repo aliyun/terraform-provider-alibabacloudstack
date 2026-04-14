@@ -118,7 +118,12 @@ func (s *AscmService) DescribeAscmRamRole(id string) (response *AscmRoles, err e
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "/ascm/auth/role/listRoles")
 	request.QueryParams["roleName"] = did[0]
-	request.QueryParams["roleType"] = "ROLETYPE_RAM"
+	delete(request.Headers, "x-acs-organizationid")
+	delete(request.Headers, "x-acs-resourcegroupid")
+	delete(request.QueryParams, "Department")
+	delete(request.QueryParams, "ResourceGroup")
+	delete(request.QueryParams, "OrganizationId")
+
 	var resp = &AscmRoles{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 
@@ -145,13 +150,16 @@ func (s *AscmService) DescribeAscmRamRole(id string) (response *AscmRoles, err e
 		return resp, errmsgs.WrapError(err)
 	}
 
+	if len(resp.Data) < 1 {
+		return resp, errmsgs.GetNotFoundErrorFromString("ErrorRamRoleNotFound")
+	}
+
 	return resp, nil
 }
 
 func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, err error) {
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoles", "/ascm/auth/role/listRAMServiceRoles")
 	request.QueryParams["id"] = id
-	request.QueryParams["roleType"] = "ROLETYPE_RAM"
 	var resp = &RamRole{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 

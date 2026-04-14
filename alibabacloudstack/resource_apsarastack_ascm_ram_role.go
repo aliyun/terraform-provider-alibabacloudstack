@@ -31,6 +31,12 @@ func resourceAlibabacloudStackAscmRamRole() *schema.Resource {
 			"organization_visibility": {
 				Type:     schema.TypeString,
 				Required: true,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					oldValue = strings.TrimPrefix(oldValue, "organizationVisibility.")
+					newValue = strings.TrimPrefix(newValue, "organizationVisibility.")
+					return oldValue == newValue
+				},
+				DiffSuppressOnRefresh: true,
 			},
 			"role_id": {
 				Type:     schema.TypeInt,
@@ -56,8 +62,10 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 	rolerange := d.Get("role_range").(string)
 	organizationvisibility := d.Get("organization_visibility").(string)
 	check, err := ascmService.DescribeAscmRamRole(name)
-	if err != nil {
+	if err == nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "role alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
+	} else if err != nil && !errmsgs.NotFoundError(err) {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "DescribeAscmRamRole", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if len(check.Data) == 0 {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateRole", "/ascm/auth/role/createRole")
@@ -65,7 +73,6 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 			"roleName":               name,
 			"description":            description,
 			"roleRange":              rolerange,
-			"roleType":               "ROLETYPE_RAM",
 			"organizationVisibility": organizationvisibility,
 		})
 
@@ -185,7 +192,7 @@ func resourceAlibabacloudStackAscmRamRoleDelete(d *schema.ResourceData, meta int
 		}
 		return nil
 	})
-	if err != nil {
+	if err != nil && !errmsgs.NotFoundError(err) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "RemoveRole", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil
