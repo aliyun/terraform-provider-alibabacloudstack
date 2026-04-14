@@ -233,7 +233,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SLS_ENDPOINT", nil),
 				Description: descriptions["sls_endpoint"],
-				Deprecated:  "Use schema endpoints replace sls_endpoint.",
+				Deprecated:  "Use schema endpoints replace sls_endpoint. remove in 3.20.0",
 			},
 			"max_retry_timeout": {
 				Type:        schema.TypeInt,
@@ -1338,10 +1338,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Endpoints[connectivity.ASAPICode] = asapiEndpoint.(string)
 		config.Endpoints[connectivity.OneRouterCode] = asapiEndpoint.(string)
 		config.Endpoints[connectivity.SLSCode] = asapiEndpoint.(string)
-	}
-
-	if slsEndpoint, ok := d.GetOk("sls_endpoint"); ok && slsEndpoint.(string) != "" {
-		config.Endpoints[connectivity.SLSCode] = slsEndpoint.(string)
+		config.Endpoints[connectivity.KmsCode] = asapiEndpoint.(string)
 	}
 
 	if strings.ToLower(config.Protocol) == "https" {

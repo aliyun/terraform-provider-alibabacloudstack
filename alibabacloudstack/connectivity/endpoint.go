@@ -451,8 +451,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"kms.{{.region}}.{{.domain}}",
 	},
 	SLSCode: PopEndpoint{
-		"public.asapi.{{.region}}.{{.domain}}",
-		"public.asapi.{{.region}}.{{.domain}}",
+		"sls.{{.region}}.{{.domain}}",
+		"sls.{{.region}}.{{.domain}}",
 	},
 	EasyAICode: PopEndpoint{
 		"easy-ai.{{.region}}.{{.domain}}",

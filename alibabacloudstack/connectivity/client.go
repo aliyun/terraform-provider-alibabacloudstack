@@ -1230,6 +1230,16 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		request.SetScheme("https")
 	}
 
+	// if request.Product == "Sls" {
+	// 	request.QueryParams["AccessKeyId"] = client.Config.AccessKey
+	// 	request.QueryParams["Action"] = request.ApiName
+	// 	request.QueryParams["Version"] = request.Version
+	// 	request.QueryParams["Timestamp"] = time.Now().UTC().Format(time.RFC3339)
+	// 	request.QueryParams["SignatureNonce"] = *util.GetNonce()
+	// 	request.QueryParams["SignatureMethod"] = "HMAC-SHA1"
+	// 	request.QueryParams["SignatureVersion"] = "1.0"
+	// }
+
 	var response *responses.CommonResponse
 	var err error
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
