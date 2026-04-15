@@ -195,7 +195,7 @@ func resourceAlibabacloudStackMaxcomputeProjectRead(d *schema.ResourceData, meta
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	d.Set("account", account.EngineInfo.TaskAk.AliyunAccount)
+	// d.Set("account", account.EngineInfo.TaskAk.ID)
 	d.Set("account_pk", fmt.Sprint(account.EngineInfo.TaskAk.Kp))
 	Properties, err := maxcomputeService.DescribeMaxProjectPropertiesForAscm(d.Id(), project.Name)
 	if err != nil {

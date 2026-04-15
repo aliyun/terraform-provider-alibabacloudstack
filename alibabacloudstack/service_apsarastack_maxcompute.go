@@ -213,3 +213,67 @@ func (s *MaxcomputeService) DescribeMaxcomputeUser(id string) (map[string]interf
 	}
 	return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 }
+
+// DescribeMaxcomputeUserForName 根据用户名查询用户信息
+func (s *MaxcomputeService) DescribeMaxcomputeUserForName(username string) (map[string]interface{}, error) {
+	users, err := s.DescribeMaxcomputeUsers()
+	if err != nil {
+		return nil, err
+	}
+	for _, user := range users {
+		userMap := user.(map[string]interface{})
+		if userMap["userName"].(string) == username {
+			return userMap, nil
+		}
+	}
+	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("Maxcompute User", username))
+}
+
+// GetOrCreateMaxcomputeUser 根据用户名获取或创建用户，返回用户ID和AAS PK
+func (s *MaxcomputeService) GetOrCreateMaxcomputeUser(username string) (userId string, aasPk string, err error) {
+	// 先尝试查询用户是否存在
+	userInfo, err := s.DescribeMaxcomputeUserForName(username)
+	if err == nil && userInfo != nil {
+		// 用户存在，返回 id 和 aasPk
+		userId = fmt.Sprintf("%v", userInfo["id"])
+		aasPk = fmt.Sprintf("%v", userInfo["aasPk"])
+		return userId, aasPk, nil
+	}
+	// 用户不存在，创建新用户
+	action := "CreateOdpsUser"
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", action, "")
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
+	mergeMaps(request.QueryParams, map[string]string{
+		"UserName":    username,
+		"Description": "Auto created for test",
+	})
+
+	response := make(map[string]interface{})
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(action, bresponse, request, request.QueryParams)
+	if err != nil {
+		return "", "", errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return "", "", errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	// 重新查询用户列表获取新创建的用户信息
+	users, err := s.DescribeMaxcomputeUsers()
+	if err != nil || len(users) == 0 {
+		return "", "", errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	for _, user := range users {
+		userMap := user.(map[string]interface{})
+		if userMap["userName"].(string) == username {
+			userId = fmt.Sprintf("%v", userMap["id"])
+			aasPk = fmt.Sprintf("%v", userMap["aasPk"])
+			return userId, aasPk, nil
+		}
+	}
+
+	return "", "", errmsgs.Error(errmsgs.GetNotFoundMessage("Maxcompute User after creation", username))
+}

@@ -13,13 +13,12 @@ func TestAccAlibabacloudStackMaxcomputeProject_basic(t *testing.T) {
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf_testAcck%d", rand)
-	// name := "tf_testAcck2016"
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceMaxcomputeProjectDependence)
+	userId, userPk := InitPreCreateMaxcomputeUser(t, name)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceMaxcomputeProjectDependenceWithUser)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			// Currently does not support creating projects with sub-accounts
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -28,18 +27,18 @@ func TestAccAlibabacloudStackMaxcomputeProject_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":           "${var.name}",
 					"disk":           "50",
-					"account":        "${alibabacloudstack_maxcompute_user.default.user_id}",
-					"account_pk":     "${alibabacloudstack_maxcompute_user.default.user_pk}",
+					"account":        userId,
+					"account_pk":     userPk,
 					"quota_id":       "${alibabacloudstack_maxcompute_cu.default.id}",
 					"external_table": "true",
 					"vpc_ids":        []string{"${alibabacloudstack_vpc_vpc.default.id}"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":       name,
-						"quota_id":   CHECKSET,
-						"disk":       "50",
-						"vpc_ids.#":  CHECKSET,
+						"name":      name,
+						"quota_id":  CHECKSET,
+						"disk":      "50",
+						"vpc_ids.#": CHECKSET,
 					}),
 				),
 			},
@@ -61,13 +60,13 @@ func TestAccAlibabacloudStackMaxcomputeProject_basic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cpu_type", "external_table"},
+				ImportStateVerifyIgnore: []string{"cpu_type", "external_table", "account"},
 			},
 		},
 	})
 }
 
-func resourceMaxcomputeProjectDependence(name string) string {
+func resourceMaxcomputeProjectDependenceWithUser(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
@@ -77,11 +76,6 @@ data "alibabacloudstack_maxcompute_clusters" "default"{
 	name_regex = "HYBRIDODPSCLUSTER-.*"
 }
 %s
-
-resource "alibabacloudstack_maxcompute_user" "default"{
-  user_name             = var.name
-  description           = "maxcomput project test"
-}
 
 resource "alibabacloudstack_maxcompute_cu" "default" {
 	cu_name =      "${var.name}"

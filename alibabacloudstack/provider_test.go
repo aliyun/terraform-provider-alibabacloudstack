@@ -409,3 +409,18 @@ func TestProviderSchema(t *testing.T) {
 	assert.Contains(t, providerSchemas, DefaultProviderName, "Provider entry missing")
 
 }
+
+func InitPreCreateMaxcomputeUser(t *testing.T, username string) (string, string) {
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	rawClient, err := sharedClientForRegion(region)
+	if err != nil {
+		t.Skip("Failed to initialize MaxcomputeUser: unable to create sharedClient")
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	maxcomputeService := &MaxcomputeService{client}
+	userId, userPk, err := maxcomputeService.GetOrCreateMaxcomputeUser(username)
+	if err != nil {
+		t.Skip("Failed to initialize MaxcomputeUser: GetOrCreateMaxcomputeUser request failed")
+	}
+	return userId, userPk
+}
