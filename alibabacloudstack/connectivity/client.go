@@ -469,12 +469,31 @@ func (client *AlibabacloudStackClient) getHttpProxy() (proxy *url.URL, err error
 func (client *AlibabacloudStackClient) WithKmsClient(do func(*kms.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the KMS client if necessary
 	if client.kmsconn == nil {
-		conn, error := client.WithProductSDKClient(KmsCode)
-		if error != nil {
-			return nil, error
+		endpoint := client.Config.Endpoints[KmsCode]
+		if endpoint == "" {
+			return nil, fmt.Errorf("[ERROR] unable to initialize the KMS client: endpoint or domain is not provided")
 		}
-		client.kmsconn = &kms.Client{
-			Client: *conn,
+
+		// Create KMS client with AK/SK or STS
+		var err error
+		client.kmsconn, err = kms.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true, true))
+		if err != nil {
+			return nil, fmt.Errorf("unable to initialize the KMS client: %#v", err)
+		}
+
+		// Configure KMS client
+		client.kmsconn.Domain = endpoint
+		client.kmsconn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Hour)
+		client.kmsconn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Hour)
+		client.kmsconn.SourceIp = client.Config.SourceIp
+		client.kmsconn.SecureTransport = client.Config.SecureTransport
+		client.kmsconn.AppendUserAgent(Terraform, TerraformVersion)
+		client.kmsconn.AppendUserAgent(Provider, ProviderVersion)
+		client.kmsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
+		client.kmsconn.SetHTTPSInsecure(client.Config.Insecure)
+		if client.Config.Proxy != "" {
+			client.kmsconn.SetHttpsProxy(client.Config.Proxy)
+			client.kmsconn.SetHttpProxy(client.Config.Proxy)
 		}
 	}
 	return do(client.kmsconn)

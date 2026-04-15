@@ -442,8 +442,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 	},
 	KmsCode: PopEndpoint{
-		"public.asapi.{{.region}}.{{.domain}}",
-		"public.asapi.{{.region}}.{{.domain}}",
+		"kms.{{.region}}.{{.domain}}",
+		"kms.{{.region}}.{{.domain}}",
 	},
 	SLSCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",

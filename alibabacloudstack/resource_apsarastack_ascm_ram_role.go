@@ -138,7 +138,7 @@ func resourceAlibabacloudStackAscmRamRoleUpdate(d *schema.ResourceData, meta int
 	}
 
 	noUpdateAllowedFields := []string{"organization_visibility", "role_range"}
-	if err := noUpdatesAllowedCheck(d, noUpdateAllowedFields); err != nil {
+	if err := 	(d, noUpdateAllowedFields); err != nil {
 		return err
 	}
 
