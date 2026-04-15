@@ -9,8 +9,11 @@ func TestAccAlibabacloudStackMaxcomputeProjectsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999) * 2
 	resourceId := "data.alibabacloudstack_maxcompute_projects.default"
 	name := fmt.Sprintf("tf_testAcck%d", rand)
+	userid, userpk := InitPreCreateMaxcomputeUser(t, name)
 
-	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceMaxcomputeProjectsConfigDependence)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, func(name string) string {
+		return dataSourceMaxcomputeProjectsConfigDependence(name, userid, userpk)
+	})
 
 	// Test with name filter (should return the created project)
 	nameConf := dataSourceTestAccConfig{
@@ -65,11 +68,20 @@ func TestAccAlibabacloudStackMaxcomputeProjectsDataSource(t *testing.T) {
 	maxcomputeProjectsCheckInfo.dataSourceTestCheck(t, rand, nameConf, statusConf)
 }
 
-func dataSourceMaxcomputeProjectsConfigDependence(name string) string {
+func dataSourceMaxcomputeProjectsConfigDependence(name, userid, userpk string) string {
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"
 }
+
+variable "userid" {
+  default = "%s"
+}
+
+variable "userpk" {
+  default = "%s"
+}
+
 
 data "alibabacloudstack_maxcompute_clusters" "default" {
   name_regex = "HYBRIDODPSCLUSTER-.*"
@@ -80,11 +92,6 @@ resource "alibabacloudstack_vpc_vpc" "default" {
   cidr_block = "172.16.0.0/16"
 }
 
-resource "alibabacloudstack_maxcompute_user" "default" {
-  user_name   = var.name
-  description = "maxcomput project test"
-}
-
 resource "alibabacloudstack_maxcompute_cu" "default" {
   cu_name      = var.name
   cu_num       = 2
@@ -92,13 +99,13 @@ resource "alibabacloudstack_maxcompute_cu" "default" {
 }
 
 resource "alibabacloudstack_maxcompute_project" "default" {
-  account_pk     = alibabacloudstack_maxcompute_user.default.user_pk
+  account_pk     = var.userpk
   quota_id       = alibabacloudstack_maxcompute_cu.default.id
   external_table = "true"
   vpc_ids        = [alibabacloudstack_vpc_vpc.default.id]
   name           = var.name
   disk           = 50
-  account        = alibabacloudstack_maxcompute_user.default.user_id
+  account        = var.userid
 }
-`, name)
+`, name, userid, userpk)
 }
