@@ -18,7 +18,6 @@ func resourceAlibabacloudStackBmcpCluster() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAlibabacloudStackBmcpClusterCreate,
 		Read:   resourceAlibabacloudStackBmcpClusterRead,
-		Update: resourceAlibabacloudStackBmcpClusterUpdate,
 		Delete: resourceAlibabacloudStackBmcpClusterDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -57,75 +56,12 @@ func resourceAlibabacloudStackBmcpCluster() *schema.Resource {
 			"node_count": {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-			"machine_type_list": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"machine_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"node_count": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"vswitch_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"arch": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"gpu": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"cpu_count": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"mem_count": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"gpu_num": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"video_mem_count": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"flops_count": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"image": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"image_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"use_origin_image": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"specification": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
 			},
 			"password": {
 				Type:      schema.TypeString,
@@ -382,60 +318,7 @@ func resourceAlibabacloudStackBmcpClusterRead(d *schema.ResourceData, meta inter
 		d.Set("gpu", gpuListData)
 	}
 
-	// Set machine_type_list from Specification
-	if specList, ok := cluster["Specification"].([]interface{}); ok {
-		machineTypeList := make([]map[string]interface{}, 0)
-
-		for _, spec := range specList {
-			specMap := spec.(map[string]interface{})
-			count := formatAnyToInt(specMap["Count"])
-			name := formatAnyToString(specMap["Name"])
-
-			// Query machine type info to fill in the details
-			machineTypeInfo, err := queryMachineTypeInfo(client, name)
-			if err != nil {
-				// If query fails, use default values
-				machineTypeInfo = map[string]interface{}{
-					"cpu_arch":      "x86_64",
-					"gpu":           "",
-					"cpu_number":    0,
-					"memory":        0,
-					"gpu_num":       0,
-					"video_memory":  0,
-					"tflops_fp32":   0,
-					"specification": name,
-				}
-			}
-
-			// Create entry for each instance
-			for i := 0; i < count; i++ {
-				machineTypeList = append(machineTypeList, map[string]interface{}{
-					"machine_type":     name,
-					"node_count":       1,
-					"vswitch_id":       "",
-					"arch":             machineTypeInfo["cpu_arch"],
-					"gpu":              machineTypeInfo["gpu"],
-					"cpu_count":        machineTypeInfo["cpu_number"],
-					"mem_count":        machineTypeInfo["memory"],
-					"gpu_num":          machineTypeInfo["gpu_num"],
-					"video_mem_count":  machineTypeInfo["video_memory"],
-					"flops_count":      machineTypeInfo["tflops_fp32"],
-					"image":            "",
-					"image_type":       "",
-					"use_origin_image": true,
-					"specification":    machineTypeInfo["specification"],
-				})
-			}
-		}
-		d.Set("machine_type_list", machineTypeList)
-	}
-
 	return nil
-}
-
-func resourceAlibabacloudStackBmcpClusterUpdate(d *schema.ResourceData, meta interface{}) error {
-	// Update is not supported for now
-	return resourceAlibabacloudStackBmcpClusterRead(d, meta)
 }
 
 func resourceAlibabacloudStackBmcpClusterDelete(d *schema.ResourceData, meta interface{}) error {
@@ -490,15 +373,6 @@ func waitForBmcpClusterActive(client *connectivity.AlibabacloudStackClient, clus
 
 			cluster := clusterListSlice[0].(map[string]interface{})
 			status := cluster["Status"].(string)
-
-			// Check if cluster creation failed
-			if status == "failed" {
-				errorMsg := cluster["ErrorMessage"]
-				if errorMsg == nil {
-					errorMsg = "cluster creation failed without specific error message"
-				}
-				return nil, "", fmt.Errorf("BMCP cluster creation failed: %v", errorMsg)
-			}
 
 			return cluster, status, nil
 		},
