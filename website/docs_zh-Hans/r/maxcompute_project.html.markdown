@@ -29,12 +29,6 @@ resource "alibabacloudstack_vpc_vpc" "default" {
   cidr_block = "172.16.0.0/16"
 }
 
-
-resource "alibabacloudstack_maxcompute_user" "default"{
-  user_name             = var.name
-  description           = "maxcomput project test"
-}
-
 resource "alibabacloudstack_maxcompute_cu" "default" {
 	cu_name =      "${var.name}"
 	cu_num =       2
@@ -43,7 +37,8 @@ resource "alibabacloudstack_maxcompute_cu" "default" {
 
 
 resource "alibabacloudstack_maxcompute_project" "default" {
-  account_pk = "${alibabacloudstack_maxcompute_user.default.user_pk}"
+  account = ""
+  account_pk = ""
   quota_id = "${alibabacloudstack_maxcompute_cu.default.id}"
   external_table = "true"
   vpc_ids = [
@@ -51,7 +46,6 @@ resource "alibabacloudstack_maxcompute_project" "default" {
             ]
   name = "${var.name}"
   disk = "50"
-  account = "${alibabacloudstack_maxcompute_user.default.user_id}"
 }
 ```
 
