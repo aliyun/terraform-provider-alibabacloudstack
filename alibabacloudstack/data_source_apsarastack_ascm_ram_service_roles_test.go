@@ -11,7 +11,7 @@ func TestAccAlibabacloudStackAscmRamServiceRoles_DataSource(t *testing.T) {
 
 	productConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"product": "ECS",
+			"product": "${data.alibabacloudstack_ascm_ram_service_roles.anyone.roles.0.product}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"product": "fake-product",
@@ -27,13 +27,13 @@ func TestAccAlibabacloudStackAscmRamServiceRoles_DataSource(t *testing.T) {
 		// We expect at least one role for "ecs" product
 		return map[string]string{
 			"roles.#":                   CHECKSET, // At least one role expected
-			"roles.0.id":               CHECKSET,
-			"roles.0.name":             CHECKSET,
-			"roles.0.description":      CHECKSET,
-			"roles.0.role_type":        CHECKSET,
-			"roles.0.product":          "ECS",
+			"roles.0.id":                CHECKSET,
+			"roles.0.name":              CHECKSET,
+			"roles.0.description":       CHECKSET,
+			"roles.0.role_type":         CHECKSET,
+			"roles.0.product":           CHECKSET,
 			"roles.0.organization_name": CHECKSET,
-			"roles.0.aliyun_user_id":   CHECKSET,
+			"roles.0.aliyun_user_id":    CHECKSET,
 		}
 	}
 
@@ -54,5 +54,7 @@ func TestAccAlibabacloudStackAscmRamServiceRoles_DataSource(t *testing.T) {
 
 func dataSourceAscmRamServiceRolesConfigDependence(name string) string {
 	return `
+	data "alibabacloudstack_ascm_ram_service_roles" "anyone" {
+	}
 `
 }

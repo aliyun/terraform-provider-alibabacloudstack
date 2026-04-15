@@ -5,24 +5,22 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackAscmRamRoleBasic(t *testing.T) {
+func TestAccAlibabacloudStackAscm_RamRoleBasic(t *testing.T) {
 	var v *AscmRoleData
 	resourceId := "alibabacloudstack_ascm_ram_role.default"
-	ra := resourceAttrInit(resourceId, testAccCheckAscmRamRole)
+	ra := resourceAttrInit(resourceId, ascmramroleRoleBasicMap)
 	serviceFunc := func() interface{} {
 		return &AscmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tftestrole%d", rand)
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccAscm_RamRole_resource)
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-ascmramrole%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testascmramroleconfigbasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -31,91 +29,66 @@ func TestAccAlibabacloudStackAscmRamRoleBasic(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckAscm_RamRoleDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"role_name":               "${var.name}",
-					"description":             "${var.name} desc",
-					"organization_visibility": "global",
+					"role_name":               name,
+					"description":             "TestRole",
+					"organization_visibility": "organizationVisibility.global",
+					"role_range":              "roleRange.allOrganizations",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_name":               name,
+						"description":             "TestRole",
+						"organization_visibility": CHECKSET,
+						"role_range":              "roleRange.allOrganizations",
+					}),
+				),
+			},
+			// Destroy resource before changing role_range
+			{
+				Config:  testAccConfig(map[string]interface{}{}),
+				Destroy: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"role_name":               name,
+					"description":             "TestRole",
+					"organization_visibility": "organizationVisibility.global",
 					"role_range":              "roleRange.userGroup",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"role_name":               name,
-						"description":             name + " desc",
-						"organization_visibility": "global",
+						"description":             "TestRole",
+						"organization_visibility": CHECKSET,
 						"role_range":              "roleRange.userGroup",
 					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"role_name":               "${var.name}new",
-					"description":             "${var.name} desc update",
-					"organization_visibility": "global",
-					"role_range":              "roleRange.userGroup",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"role_name":               name + "new",
-						"description":             name + " desc update",
-						"organization_visibility": "global",
-						"role_range":              "roleRange.userGroup",
-					}),
-				),
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{},
 			},
 		},
 	})
-
 }
 
-func testAccCheckAscm_RamRoleDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-
-	ascmService := AscmService{client}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type == "alibabacloudstack_ascm_ram_role" || rs.Type != "alibabacloudstack_ascm_ram_role" {
-			continue
-		}
-		object, err := ascmService.DescribeAscmRamRole(rs.Primary.ID)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-		if object != nil {
-			return errmsgs.WrapError(errmsgs.Error("ram role still exist"))
-		}
-	}
-
-	return nil
-}
-
-func testAccAscm_RamRole_resource(name string) string {
+func testascmramroleconfigbasic(name string) string {
 	return fmt.Sprintf(`
-	variable name {
-		default = "%s"
-	}
-	
-	resource alibabacloudstack_ascm_ram_role distractor {
-		role_name               = "${var.name}-distractor"
-		description             = "${var.name} distractor"
-		organization_visibility = "global"
-		role_range              = "roleRange.userGroup"
-	}
-	
+variable "name" {
+  default = "%s"
+}
 `, name)
 }
 
-var testAccCheckAscmRamRole = map[string]string{
+var ascmramroleRoleBasicMap = map[string]string{
 	"role_name":               CHECKSET,
+	"description":             CHECKSET,
 	"organization_visibility": CHECKSET,
+	"role_range":              CHECKSET,
 }

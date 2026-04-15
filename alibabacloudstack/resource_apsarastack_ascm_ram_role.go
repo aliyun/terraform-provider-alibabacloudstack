@@ -33,16 +33,11 @@ func resourceAlibabacloudStackAscmRamRole() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-					old := oldValue
-					new := newValue
-					if strings.Contains(oldValue, "organizationVisibility.") {
-						old = strings.TrimPrefix(oldValue, "organizationVisibility.")
-					}
-					if strings.Contains(newValue, "organizationVisibility.") {
-						new = strings.TrimPrefix(newValue, "organizationVisibility.")
-					}
-					return old == new
+					oldValue = strings.TrimPrefix(oldValue, "organizationVisibility.")
+					newValue = strings.TrimPrefix(newValue, "organizationVisibility.")
+					return oldValue == newValue
 				},
+				DiffSuppressOnRefresh: true,
 			},
 			"role_id": {
 				Type:     schema.TypeInt,
@@ -68,12 +63,11 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 	organizationvisibility := d.Get("organization_visibility").(string)
 	assumeRolePolicyDocument := d.Get("assume_role_policy_document").(string)
 
-	check, err := ascmService.DescribeAscmRamRole(name)
-	if err != nil && !errmsgs.NotFoundError(err) {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "check role failed", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if check != nil {
+	_, err := ascmService.DescribeAscmRamRole(name)
+	if err == nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "role alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
+	} else if err != nil && !errmsgs.NotFoundError(err) {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "DescribeAscmRamRole", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateRole", "/ascm/auth/role/createRole")
@@ -191,7 +185,7 @@ func resourceAlibabacloudStackAscmRamRoleDelete(d *schema.ResourceData, meta int
 
 		return nil
 	})
-	if err != nil {
+	if err != nil && !errmsgs.NotFoundError(err) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "RemoveRole", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil

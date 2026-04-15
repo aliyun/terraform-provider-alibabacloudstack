@@ -191,7 +191,6 @@ func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleData, err er
 func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, err error) {
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoles", "/ascm/auth/role/listRAMServiceRoles")
 	request.QueryParams["id"] = id
-	request.QueryParams["roleType"] = "ROLETYPE_RAM"
 	var resp = &RamRole{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 

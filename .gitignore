@@ -52,3 +52,4 @@ alibabacloudstack/debug.test*
 alibabacloudstack/dryrun_*
 /.dbeaver/
 /tf_docs_data_cache.json
+/.qoder/
