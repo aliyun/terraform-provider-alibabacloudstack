@@ -13,6 +13,8 @@ This data source provides a list of BMCP machine types in an AlibabacloudStack a
 
 ## Example Usage
 
+### Query all machine types
+
 ```hcl
 data "alibabacloudstack_bmcp_machinetypes" "default" {}
 ```
@@ -33,12 +35,51 @@ data "alibabacloudstack_bmcp_machinetypes" "arch_filtered" {
 }
 ```
 
+### Filter by minimum standard instance count
+
+```hcl
+data "alibabacloudstack_bmcp_machinetypes" "min_count_filtered" {
+  min_standard_instance_count = 1
+}
+```
+
+### Filter by maximum standard instance count
+
+```hcl
+data "alibabacloudstack_bmcp_machinetypes" "max_count_filtered" {
+  max_standard_instance_count = 100
+}
+```
+
+### Filter by standard instance count range
+
+```hcl
+data "alibabacloudstack_bmcp_machinetypes" "range_filtered" {
+  min_standard_instance_count = 1
+  max_standard_instance_count = 100
+}
+```
+
 ### Combine filters
 
 ```hcl
 data "alibabacloudstack_bmcp_machinetypes" "combined" {
-  name_regex = "PG"
-  arch_regex = "x86"
+  name_regex                  = "PG"
+  arch_regex                  = "x86"
+  min_standard_instance_count = 1
+}
+```
+
+### Dynamic filtering with pre-query
+
+```hcl
+# First query all machine types to get real data
+data "alibabacloudstack_bmcp_machinetypes" "all" {
+}
+
+# Use dynamic values from real data for filtering
+data "alibabacloudstack_bmcp_machinetypes" "filtered" {
+  name_regex = data.alibabacloudstack_bmcp_machinetypes.all.machinetypes.0.name
 }
 ```
 
@@ -48,6 +89,8 @@ The following arguments are supported:
 
 * `name_regex` - (Optional, ForceNew) A regex string to filter resulting machine types by name.
 * `arch_regex` - (Optional, ForceNew) A regex string to filter resulting machine types by CPU architecture.
+* `min_standard_instance_count` - (Optional, ForceNew) The minimum standard instance count filter. Only machine types with standard instance count greater than or equal to this value will be returned.
+* `max_standard_instance_count` - (Optional, ForceNew) The maximum standard instance count filter. Only machine types with standard instance count less than or equal to this value will be returned.
 
 ## Attributes Reference
 
@@ -64,18 +107,20 @@ The following attributes are exported in addition to the arguments listed above:
   * `cpu_model` - The CPU model of the machine type.
   * `cpu_manufacturer` - The CPU manufacturer of the machine type.
   * `cpu_number` - The number of CPUs.
-  * `memory` - The memory size.
+  * `memory` - The memory size (in GB).
   * `disk` - The disk size.
   * `disk_type` - The disk type.
-  * `gpu` - The GPU information.
+  * `gpu` - The GPU model.
   * `gpu_num` - The number of GPUs.
   * `gpu_manufacturer` - The GPU manufacturer.
-  * `video_memory` - The video memory size.
+  * `video_memory` - The video memory size (in GB).
   * `tflops_fp32` - The TFLOPS FP32 performance.
   * `network_card_type` - The network card type.
   * `network_card_num` - The number of network cards.
   * `rated_power` - The rated power.
   * `specification` - The specification of the machine type.
   * `unit_num` - The unit number.
+  * `standard_instance_count` - The count of standard instances available for this machine type.
+  * `default_fmin` - The default FMin value.
   * `create_time` - The creation time.
   * `update_time` - The update time.

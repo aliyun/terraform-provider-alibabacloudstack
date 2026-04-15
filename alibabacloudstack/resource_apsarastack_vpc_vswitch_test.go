@@ -49,6 +49,7 @@ func TestAccAlibabacloudStackVpcVswitch_basic(t *testing.T) {
 					"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
 
 					"cidr_block": "172.16.1.0/24",
+					"is_cgw":     "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -56,6 +57,7 @@ func TestAccAlibabacloudStackVpcVswitch_basic(t *testing.T) {
 						"description": name,
 
 						"vswitch_name": name,
+						"is_cgw":       "true",
 					}),
 				),
 			},

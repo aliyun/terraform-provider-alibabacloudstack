@@ -627,6 +627,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cspprivate_hsms":                                  dataSourceAlibabacloudStackCspprivateHsms(),
 		"alibabacloudstack_cspprivate_hsm_groups":                            dataSourceAlibabacloudStackCspprivateHsmGroups(),
 		"alibabacloudstack_bms_keypairs":                                     dataSourceAlibabacloudStackBmsKeypairs(),
+		"alibabacloudstack_bms_machinetypes":                                 dataSourceAlibabacloudStackBmsMachineTypes(),
 		"alibabacloudstack_aqs_oss_scanconfigs":                              dataSourceAlibabacloudStackAqsOssScanconfigs(),
 		"alibabacloudstack_aqs_anti_brute_force_rules":                       dataSourceAlibabacloudStackAqsAntiBruteForceRules(),
 		"alibabacloudstack_aqs_web_locks":                                    dataSourceAlibabacloudStackAqsWebLocks(),
@@ -649,6 +650,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_bmcp_images":                                      dataSourceAlibabacloudStackBmcpImages(),
 		"alibabacloudstack_bmcp_machinetypes":                                dataSourceAlibabacloudStackBmcpMachineTypes(),
 		"alibabacloudstack_bmcp_nodes":                                       dataSourceAlibabacloudStackBmcpNodes(),
+		"alibabacloudstack_bmcp_clusters":                                    dataSourceAlibabacloudStackBmcpClusters(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
@@ -1126,6 +1128,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_bcmp_keypair":                                    resourceAlibabacloudStackBcmpKeyPair(),
 		"alibabacloudstack_bcmp_security_group":                             resourceAlibabacloudStackBmcpSecurityGroup(),
 		"alibabacloudstack_bcmp_security_group_rule":                        resourceAlibabacloudStackBmcpSecurityGroupRule(),
+		"alibabacloudstack_bmcp_cluster":                                    resourceAlibabacloudStackBmcpCluster(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps

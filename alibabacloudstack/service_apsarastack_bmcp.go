@@ -95,3 +95,24 @@ func (s *BcmpService) DoEasyAIListKeyPairRequest(id string) (map[string]interfac
 	}
 	return nil, nil
 }
+
+func (s *BcmpService) DescribeBmcpCluster(clusterId string) (map[string]interface{}, error) {
+	request := map[string]interface{}{
+		"PageNumber": 1,
+		"PageSize":   1,
+		"ClusterId":  clusterId,
+	}
+
+	raw, err := s.client.DoTeaRequest("POST", "EasyAI", "2023-11-01", "ListBmcpCluster", "", nil, request, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := raw
+	clusterList, ok := response["ClusterList"].([]interface{})
+	if !ok || len(clusterList) == 0 {
+		return nil, nil
+	}
+
+	return clusterList[0].(map[string]interface{}), nil
+}

@@ -47,11 +47,6 @@ func dataSourceAlibabacloudStackBmcpNodes() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"out_of_band_ip_regex": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"ids": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -88,10 +83,6 @@ func dataSourceAlibabacloudStackBmcpNodes() *schema.Resource {
 							Computed: true,
 						},
 						"vpc_ip": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"out_of_band_ip": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -183,7 +174,6 @@ func dataSourceAlibabacloudStackBmcpNodesRead(d *schema.ResourceData, meta inter
 		clusterName := formatAnyToString(itemMap["ClusterName"])
 		sn := formatAnyToString(itemMap["SN"])
 		vpcIp := formatAnyToString(itemMap["IP"])
-		outOfBandIp := formatAnyToString(itemMap["BMCIP"])
 
 		// Apply node_name_regex filter
 		if nodeNameRegex, ok := d.GetOk("node_name_regex"); ok {
@@ -230,13 +220,6 @@ func dataSourceAlibabacloudStackBmcpNodesRead(d *schema.ResourceData, meta inter
 			}
 		}
 
-		// Apply out_of_band_ip_regex filter
-		if outOfBandIpRegex, ok := d.GetOk("out_of_band_ip_regex"); ok {
-			if !strings.Contains(outOfBandIp, outOfBandIpRegex.(string)) {
-				continue
-			}
-		}
-
 		filteredItems = append(filteredItems, item)
 	}
 
@@ -260,7 +243,6 @@ func bmcpNodesAttributes(d *schema.ResourceData, items []interface{}) error {
 		clusterName := formatAnyToString(itemMap["ClusterName"])
 		sn := formatAnyToString(itemMap["SN"])
 		vpcIp := formatAnyToString(itemMap["IP"])
-		outOfBandIp := formatAnyToString(itemMap["BMCIP"])
 		status := formatAnyToString(itemMap["Status"])
 		machineType := formatAnyToString(itemMap["MachineType"])
 		machineTypeName := machineType
@@ -286,7 +268,6 @@ func bmcpNodesAttributes(d *schema.ResourceData, items []interface{}) error {
 			"cluster_name":      clusterName,
 			"sn":                sn,
 			"vpc_ip":            vpcIp,
-			"out_of_band_ip":    outOfBandIp,
 			"status":            status,
 			"machine_type":      machineType,
 			"machine_type_name": machineTypeName,

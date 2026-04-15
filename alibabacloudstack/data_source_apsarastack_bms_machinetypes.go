@@ -12,9 +12,9 @@ import (
 	"github.com/jmespath/go-jmespath"
 )
 
-func dataSourceAlibabacloudStackBmcpMachineTypes() *schema.Resource {
+func dataSourceAlibabacloudStackBmsMachineTypes() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackBmcpMachineTypesRead,
+		Read: dataSourceAlibabacloudStackBmsMachineTypesRead,
 
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
@@ -24,16 +24,6 @@ func dataSourceAlibabacloudStackBmcpMachineTypes() *schema.Resource {
 			},
 			"arch_regex": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"min_standard_instance_count": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-			},
-			"max_standard_instance_count": {
-				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 			},
@@ -113,7 +103,7 @@ func dataSourceAlibabacloudStackBmcpMachineTypes() *schema.Resource {
 							Computed: true,
 						},
 						"tflops_fp32": {
-							Type:     schema.TypeFloat,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"network_card_type": {
@@ -136,14 +126,6 @@ func dataSourceAlibabacloudStackBmcpMachineTypes() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"standard_instance_count": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"default_fmin": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"create_time": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -159,41 +141,29 @@ func dataSourceAlibabacloudStackBmcpMachineTypes() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackBmcpMachineTypesRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackBmsMachineTypesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	reqQuery := make(map[string]interface{})
 	reqQuery["PageNumber"] = 1
 	reqQuery["PageSize"] = PageSizeLarge
-	reqQuery["DeployTypes"] = []string{"bmcp"}
+	reqQuery["DeployTypes"] = `["bmcp","bmcp_managed","bmcp_no_clone","base","ehpc","ehpc_managed","aspeed"]`
 
-	// Call ListBmcpMachineType API
-	resp, err := client.DoTeaRequest("POST", "EasyAI", "2023-11-01", "ListBmcpMachineType", "", nil, reqQuery, nil)
+	// Call ListMachineType API
+	resp, err := client.DoTeaRequest("POST", "bms", "2022-05-30", "ListMachineType", "", nil, reqQuery, nil)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListBmcpMachineType", "POST", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListMachineType", "POST", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	// Parse response data
-	data, err := jmespath.Search("data.MachineTypeList", resp)
+	data, err := jmespath.Search("data.data", resp)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "ListBmcpMachineType", "data.MachineTypeList", resp)
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "ListMachineType", "data.data", resp)
 	}
 
 	items, ok := data.([]interface{})
 	if !ok {
 		items = []interface{}{}
-	}
-
-	// Get filter values
-	var minStandardInstanceCount, maxStandardInstanceCount int
-	var hasMin, hasMax bool
-	if v, ok := d.GetOk("min_standard_instance_count"); ok {
-		minStandardInstanceCount = v.(int)
-		hasMin = true
-	}
-	if v, ok := d.GetOk("max_standard_instance_count"); ok {
-		maxStandardInstanceCount = v.(int)
-		hasMax = true
 	}
 
 	var filteredItems []interface{}
@@ -205,11 +175,6 @@ func dataSourceAlibabacloudStackBmcpMachineTypesRead(d *schema.ResourceData, met
 
 		name, _ := itemMap["name"].(string)
 		cpuArch, _ := itemMap["CPUArch"].(string)
-		// standardInstanceCount := 0
-		// if v, ok := itemMap["StandardInstanceCount"].(float64); ok {
-		// 	standardInstanceCount = int(v)
-		// }
-		standardInstanceCount := formatAnyToInt(itemMap["StandardInstanceCount"])
 
 		// Apply name regex filter
 		if nameRegex, ok := d.GetOk("name_regex"); ok {
@@ -225,21 +190,13 @@ func dataSourceAlibabacloudStackBmcpMachineTypesRead(d *schema.ResourceData, met
 			}
 		}
 
-		// Apply standard_instance_count range filter
-		if hasMin && standardInstanceCount < minStandardInstanceCount {
-			continue
-		}
-		if hasMax && standardInstanceCount > maxStandardInstanceCount {
-			continue
-		}
-
 		filteredItems = append(filteredItems, item)
 	}
 
-	return dataSourceBmcpMachineTypesAttributes(d, filteredItems)
+	return bmcpMachineTypesAttributes(d, filteredItems)
 }
 
-func dataSourceBmcpMachineTypesAttributes(d *schema.ResourceData, items []interface{}) error {
+func bmcpMachineTypesAttributes(d *schema.ResourceData, items []interface{}) error {
 	var ids []string
 	var s []map[string]interface{}
 
@@ -248,7 +205,6 @@ func dataSourceBmcpMachineTypesAttributes(d *schema.ResourceData, items []interf
 		if !ok {
 			continue
 		}
-
 		var idStr string
 		switch v := itemMap["ID"].(type) {
 		case string:
@@ -285,38 +241,34 @@ func dataSourceBmcpMachineTypesAttributes(d *schema.ResourceData, items []interf
 		ratedPower, _ := itemMap["ratedPower"].(string)
 		specification, _ := itemMap["Specification"].(string)
 		unitNum, _ := itemMap["unitNum"].(float64)
-		standardInstanceCount, _ := itemMap["StandardInstanceCount"].(float64)
-		defaultFmin, _ := itemMap["defaultFmin"].(string)
 		createTime, _ := itemMap["createTime"].(string)
 		updateTime, _ := itemMap["updateTime"].(string)
 
 		mapping := map[string]interface{}{
-			"id":                      id,
-			"name":                    name,
-			"description":             description,
-			"deploy_type":             deployType,
-			"manufacturer":            manufacturer,
-			"cpu_arch":                cpuArch,
-			"cpu_model":               cpuModel,
-			"cpu_manufacturer":        cpuManufacturer,
-			"cpu_number":              int(cpuNumber),
-			"memory":                  int(memory),
-			"disk":                    int(disk),
-			"disk_type":               diskType,
-			"gpu":                     gpu,
-			"gpu_num":                 int(gpuNum),
-			"gpu_manufacturer":        gpuManufacturer,
-			"video_memory":            int(videoMemory),
-			"tflops_fp32":             tflopsFP32,
-			"network_card_type":       networkCardType,
-			"network_card_num":        int(networkCardNum),
-			"rated_power":             ratedPower,
-			"specification":           specification,
-			"unit_num":                int(unitNum),
-			"standard_instance_count": int(standardInstanceCount),
-			"default_fmin":            defaultFmin,
-			"create_time":             createTime,
-			"update_time":             updateTime,
+			"id":                id,
+			"name":              name,
+			"description":       description,
+			"deploy_type":       deployType,
+			"manufacturer":      manufacturer,
+			"cpu_arch":          cpuArch,
+			"cpu_model":         cpuModel,
+			"cpu_manufacturer":  cpuManufacturer,
+			"cpu_number":        int(cpuNumber),
+			"memory":            int(memory),
+			"disk":              int(disk),
+			"disk_type":         diskType,
+			"gpu":               gpu,
+			"gpu_num":           int(gpuNum),
+			"gpu_manufacturer":  gpuManufacturer,
+			"video_memory":      int(videoMemory),
+			"tflops_fp32":       int(tflopsFP32),
+			"network_card_type": networkCardType,
+			"network_card_num":  int(networkCardNum),
+			"rated_power":       ratedPower,
+			"specification":     specification,
+			"unit_num":          int(unitNum),
+			"create_time":       createTime,
+			"update_time":       updateTime,
 		}
 
 		ids = append(ids, id)

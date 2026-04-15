@@ -36,6 +36,10 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"is_cgw": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"cidr_block": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -85,6 +89,9 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 
 	if d.Get("enable_ipv6").(bool) {
 		request.Ipv6CidrBlock = "0"
+	}
+	if d.Get("is_cgw").(bool) {
+		request.IsCgw = "true"
 	}
 
 	if v, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && v.(string) != "" {

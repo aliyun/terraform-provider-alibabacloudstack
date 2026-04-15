@@ -1993,7 +1993,32 @@ func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub_patch.Ecs
 	//}
 	//object = v.([]interface{})[0].(map[string]interface{})
 	return resp, nil
+
 }
+
+func (s *EcsService) CreateActivation(instanceCount int, department int, timeToLiveInHours int, regionId string) (string, string, error) {
+	request := map[string]interface{}{
+		"InstanceCount":     instanceCount,
+		"Department":        department,
+		"TimeToLiveInHours": timeToLiveInHours,
+		"RegionId":          regionId,
+	}
+
+	raw, err := s.client.DoTeaRequest("POST", "Ecs", "2014-05-26", "CreateActivation", "", nil, nil, request)
+	if err != nil {
+		return "", "", err
+	}
+
+	response := raw
+	activationId, ok := response["ActivationId"].(string)
+	ActivationCode, ok := response["ActivationCode"].(string)
+	if !ok || activationId == "" {
+		return "", "", fmt.Errorf("failed to get ActivationId from response")
+	}
+
+	return activationId, ActivationCode, nil
+}
+
 func (s *EcsService) DoEcsDescribedeploymentsetsRequest(id string) (object map[string]interface{}, err error) {
 	return s.DescribeEcsDeploymentSet(id)
 }
