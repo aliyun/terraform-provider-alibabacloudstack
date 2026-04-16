@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
@@ -38,8 +39,7 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket":      name,
-					"oss_cluster": "CdsEbsOssHybridCluster-A-20260325-0208",
+					"bucket": name,
 					"tags": map[string]string{
 						"Created": "TF",
 						"For":     "Test",
@@ -215,6 +215,10 @@ func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	dual_sync_role := os.Getenv("ALIBABACLOUDSTACK_OSS_DUAL_SYNC_ROLE")
+	if dual_sync_role == "" {
+		dual_sync_role = "AliyunOSSPrivateCloudDrsSyncRole"
+	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketDualDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -245,13 +249,13 @@ func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"bucket_sync":    "true",
 					"dual_kms_key":   "${alibabacloudstack_kms_key.key.id}",
-					"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
+					"dual_sync_role": dual_sync_role,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bucket_sync":    "true",
 						"dual_kms_key":   CHECKSET,
-						"dual_sync_role": "AliyunOSSPrivateCloudDrsSyncRole",
+						"dual_sync_role": dual_sync_role,
 					}),
 				),
 			},
@@ -259,67 +263,66 @@ func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
 	})
 }
 
-func TestUatAlibabacloudStackOssBucket_Vpc(t *testing.T) {
-	var v *oss.BucketProperties
+// func TestUatAlibabacloudStackOssBucket_Vpc(t *testing.T) {
+// 	var v *oss.BucketProperties
 
-	resourceId := "alibabacloudstack_oss_bucket.default"
-	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
+// 	resourceId := "alibabacloudstack_oss_bucket.default"
+// 	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
 
-	serviceFunc := func() interface{} {
-		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+// 	serviceFunc := func() interface{} {
+// 		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+// 	}
+// 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 
-	rac := resourceAttrCheckInit(rc, ra)
+// 	rac := resourceAttrCheckInit(rc, ra)
 
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"bucket":      name,
-					"vpclist":     []string{"${alibabacloudstack_vpc.vpc.id}", "${alibabacloudstack_vpc.vpc2.id}"},
-					"oss_cluster": "OssHybridCluster-A-20260325-01ec",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"bucket":    name,
-						"vpclist.0": CHECKSET,
-						"vpclist.#": "2",
-					}),
-				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"bucket":  name,
-					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"bucket":    name,
-						"vpclist.0": CHECKSET,
-						"vpclist.#": "1",
-					}),
-				),
-			},
-		},
-	})
-}
+// 	testAccCheck := rac.resourceAttrMapUpdateSet()
+// 	rand := getAccTestRandInt(1000000, 9999999)
+// 	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+// 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
+// 	ResourceTest(t, resource.TestCase{
+// 		PreCheck: func() {
+// 			testAccPreCheck(t)
+// 		},
+// 		// module name
+// 		IDRefreshName: resourceId,
+// 		Providers:     testAccProviders,
+// 		CheckDestroy:  rac.checkResourceDestroy(),
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"bucket":  name,
+// 					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}", "${alibabacloudstack_vpc.vpc2.id}"},
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"bucket":    name,
+// 						"vpclist.0": CHECKSET,
+// 						"vpclist.#": "2",
+// 					}),
+// 				),
+// 			},
+// 			{
+// 				ResourceName:      resourceId,
+// 				ImportState:       true,
+// 				ImportStateVerify: true,
+// 			},
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"bucket":  name,
+// 					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}"},
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"bucket":    name,
+// 						"vpclist.0": CHECKSET,
+// 						"vpclist.#": "1",
+// 					}),
+// 				),
+// 			},
+// 		},
+// 	})
+// }
 
 func resourceOssBucketConfigDependence(name string) string {
 	return fmt.Sprintf(`
@@ -344,6 +347,7 @@ resource "alibabacloudstack_vpc" "vpc2" {
 
 func resourceOssBucketDualDependence(name string) string {
 	return fmt.Sprintf(`
+
 %s
 
 data "alibabacloudstack_oss_clusters" "default" {

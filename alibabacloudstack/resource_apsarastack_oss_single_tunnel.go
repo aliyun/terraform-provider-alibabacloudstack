@@ -7,11 +7,13 @@ import (
 	"io"
 	"log"
 	"strings"
+	"time"
 
 	oss "github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/signer"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -47,14 +49,9 @@ func resourceAlibabacloudStackOssSingleTunnel() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"force_bind_resource_group": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackOssSingleTunnelCreate, resourceAlibabacloudStackOssSingleTunnelRead, resourceAlibabacloudStackOssSingleTunnelUpdate, resourceAlibabacloudStackOssSingleTunnelDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackOssSingleTunnelCreate, resourceAlibabacloudStackOssSingleTunnelRead, nil, resourceAlibabacloudStackOssSingleTunnelDelete)
 	return resource
 }
 
@@ -106,17 +103,20 @@ func resourceAlibabacloudStackOssSingleTunnelCreate(d *schema.ResourceData, meta
 	}
 
 	d.SetId(fmt.Sprintf("%s:%s:%s", cluster, vpcId, createResult.Vip))
-	err = ossService.UnBindResourceGroup("oss_single_tunnel", createResult.Vip)
-	if d.Get("force_bind_resource_group").(bool) && err != nil {
+	ascmService := AscmService{client}
+	err = resource.Retry(8*time.Minute, func() *resource.RetryError {
+		err = ascmService.ReBindResourceGroup("oss_single_tunnel", createResult.Vip)
+		if err != nil {
+			// Retry on temporary errors
+			return resource.RetryableError(err)
+		}
+		return nil
+	})
+	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 
 	return nil
-}
-
-func resourceAlibabacloudStackOssSingleTunnelUpdate(d *schema.ResourceData, meta interface{}) error {
-	notChanged := []string{"force_bind_resource_group"}
-	return noUpdatesAllowedCheck(d, notChanged)
 }
 
 func resourceAlibabacloudStackOssSingleTunnelRead(d *schema.ResourceData, meta interface{}) error {

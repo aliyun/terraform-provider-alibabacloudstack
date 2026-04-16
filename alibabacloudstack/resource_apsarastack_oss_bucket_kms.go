@@ -59,7 +59,7 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 	bucketName := d.Get("bucket").(string)
 	_, err := ossService.DescribeOssBucket(bucketName)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 	sseAlgorithm := d.Get("sse_algorithm").(string)
 	kmsMasterKeyID := ""
@@ -83,7 +83,7 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 		},
 	})
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "PutBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "PutBucketEncryption", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 	addDebug("PutBucketEncryption", putResult, nil, map[string]string{"bucketName": bucketName})
 	log.Printf("Enter for logging")
@@ -98,7 +98,7 @@ func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta inte
 	bucketName := d.Id()
 	apply, err := ossService.DescribeOssBucketKms(d.Id())
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "DescribeOssBucketKms", errmsgs.AlibabacloudStackLogGoSdkERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "DescribeOssBucketKms", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 
 	d.Set("bucket", bucketName)
@@ -125,7 +125,7 @@ func resourceAlibabacloudStackOssBucketKmsDelete(d *schema.ResourceData, meta in
 		Bucket: oss.Ptr(d.Id()),
 	})
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteBucketEncryption", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteBucketEncryption", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 	addDebug("DeleteBucketEncryption", delResult, nil, map[string]string{"bucketName": d.Id()})
 	return nil

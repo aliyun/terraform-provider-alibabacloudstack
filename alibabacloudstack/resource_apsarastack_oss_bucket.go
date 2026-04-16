@@ -42,11 +42,6 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-			"force_bind_resource_group": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
 			"logging": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -101,7 +96,7 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				ForceNew: true,
 			},
 			"vpclist": {
-				Type:       schema.TypeList,
+				Type:       schema.TypeSet,
 				Optional:   true,
 				Elem:       &schema.Schema{Type: schema.TypeString},
 				Deprecated: "`Vpclist` is not available in the latest versions, and is scheduled for removal in version 3.21.0",
@@ -199,11 +194,19 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackOssGoSdk)
 		}
+
 	}
-	// Assign the bucket name as the resource ID
 	d.SetId(bucketName)
-	err = ossService.UnBindResourceGroup("oss_instance", bucketName)
-	if d.Get("force_bind_resource_group").(bool) && err != nil {
+	ascmService := AscmService{client}
+	err = resource.Retry(8*time.Minute, func() *resource.RetryError {
+		err = ascmService.ReBindResourceGroup("oss_instance", bucketName)
+		if err != nil {
+			// Retry on temporary errors
+			return resource.RetryableError(err)
+		}
+		return nil
+	})
+	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 	tags := d.Get("tags").(map[string]interface{})
@@ -278,20 +281,25 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	if err = d.Set("logging", list); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	bvclient := meta.(*connectivity.AlibabacloudStackClient)
-	bvserver := BucketVpcService{bvclient}
-	vpclist, binderr := bvserver.BucketVpcList(d.Get("bucket").(string))
-	if binderr != nil {
-		return errmsgs.WrapError(binderr)
-	}
-	var vlist []string
-	if len(vpclist.VpcList) > 0 {
-		for _, v := range vpclist.VpcList {
-			vpc := v.(map[string]interface{})
-			vlist = append(vlist, vpc["vpcId"].(string))
-		}
-	}
-	d.Set("vpclist", vlist)
+
+	// policy, err := ossService.DescribeOssBucketPolicy(d.Id())
+	// if err != nil {
+	// 	log.Printf("==========================================================%#v", policy)
+	// }
+	// bvclient := meta.(*connectivity.AlibabacloudStackClient)
+	// bvserver := BucketVpcService{bvclient}
+	// vpclist, binderr := bvserver.BucketVpcList(d.Get("bucket").(string))
+	// if binderr != nil {
+	// 	return errmsgs.WrapError(binderr)
+	// }
+	// var vlist []interface{}
+	// if len(vpclist.VpcList) > 0 {
+	// 	for _, v := range vpclist.VpcList {
+	// 		vpc := v.(map[string]interface{})
+	// 		vlist = append(vlist, vpc["vpcId"].(string))
+	// 	}
+	// }
+	// d.Set("vpclist", schema.NewSet(schema.HashString, vlist))
 
 	bucketName := d.Get("bucket").(string)
 
@@ -393,7 +401,6 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-
 	if (d.IsNewResource() && d.Get("bucket_sync").(bool)) || (!d.IsNewResource() && d.HasChange("bucket_sync")) {
 		target := ""
 		process := "closing"
@@ -408,16 +415,17 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 				syncXmlBody = fmt.Sprintf(content, dual_sync_role, dual_kms_key)
 			} else if (dual_kms_key != "" && dual_sync_role == "") || (dual_kms_key == "" && dual_sync_role != "") {
 				return fmt.Errorf("dual_kms_key and dual_sync_role must be set at the same time")
-			} else {
-				syncXmlBody = `<ReplicationConfiguration><Rule></Rule></ReplicationConfiguration>`
 			}
 			syncInput = &oss.OperationInput{
 				OpName:     "PutBucketSync",
 				Method:     "PUT",
 				Bucket:     oss.Ptr(bucketName),
-				Parameters: map[string]string{"sync": ""},
+				Parameters: map[string]string{"syncinternal": ""},
 				Headers:    map[string]string{"Content-Type": "application/xml"},
 				Body:       strings.NewReader(syncXmlBody),
+			}
+			if syncXmlBody != "" {
+				syncInput.Body = strings.NewReader(syncXmlBody)
 			}
 			target = "doing"
 			process = "starting"
@@ -427,10 +435,10 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 				OpName:     "DeleteBucketSync",
 				Method:     "DELETE",
 				Bucket:     oss.Ptr(bucketName),
-				Parameters: map[string]string{"sync": ""},
+				Parameters: map[string]string{"syncinternal": ""},
 			}
 		}
-		syncInput.OpMetadata.Set(signer.SubResource, []string{"sync"})
+		// syncInput.OpMetadata.Set(signer.SubResource, []string{"syncinternal"})
 		_, err = bucketClient.InvokeOperation(context.TODO(), syncInput)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, syncInput.OpName, errmsgs.AlibabacloudStackOssGoSdk)
@@ -495,16 +503,12 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			return errmsgs.WrapError(err)
 		}
 	}
-	if d.HasChange("vpclist") {
-		// FIXME: Calling this interface will add a rule that denies all permissions
-		o, n := d.GetChange("vpclist")
-		oldlist := o.([]interface{})
-		newlist := n.([]interface{})
-		vpc_err := checkVpcListChange(oldlist, newlist, d, meta)
-		if vpc_err != nil {
-			return errmsgs.WrapError(vpc_err)
-		}
-	}
+	// if d.HasChange("vpclist") {
+	// 	vpc_err := checkVpcListChange(d, meta)
+	// 	if vpc_err != nil {
+	// 		return errmsgs.WrapError(vpc_err)
+	// 	}
+	// }
 	if d.IsNewResource() {
 		return nil
 	}
@@ -549,33 +553,34 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackOssBucketDelete(d *schema.ResourceData, meta interface{}) error {
-	bvclient := meta.(*connectivity.AlibabacloudStackClient)
-	bvserver := BucketVpcService{bvclient}
-	vpclist, binderr := bvserver.BucketVpcList(d.Id())
-	if binderr != nil {
-		return errmsgs.WrapError(binderr)
-	}
-	var vlist []string
-	if len(vpclist.VpcList) > 0 {
-		for _, v := range vpclist.VpcList {
-			vpc := v.(map[string]interface{})
-			client2 := meta.(*connectivity.AlibabacloudStackClient)
-			bvserver := BucketVpcService{client2}
-			binderr := bvserver.UnBindBucket(vpc["vpcId"].(string), d.Id())
-			if binderr != nil {
-				return errmsgs.WrapError(binderr)
-			}
-		}
-	}
-	d.Set("vpclist", vlist)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
-	var requestInfo *oss.Client
+	// ossendpoint, err := ossService.GetOssEndpointForCluster(d.Get("cluster").(string))
+	// if err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
+	// bvserver := BucketVpcService{client}
+	// vpclist, binderr := bvserver.BucketVpcList(d.Id())
+	// if binderr != nil {
+	// 	return errmsgs.WrapError(binderr)
+	// }
+	// var vlist []string
+	// if len(vpclist.VpcList) > 0 {
+	// 	for _, v := range vpclist.VpcList {
+	// 		vpc := v.(map[string]interface{})
+	// 		client2 := meta.(*connectivity.AlibabacloudStackClient)
+	// 		bvserver := BucketVpcService{client2}
+	// 		binderr := bvserver.UnBindBucket(vpc["vpcId"].(string), d.Id(), ossendpoint)
+	// 		if binderr != nil {
+	// 			return errmsgs.WrapError(binderr)
+	// 		}
+	// 	}
+	// }
 	det, err := ossService.DescribeOssBucket(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk)
 	}
-	addDebug("IsBucketExist", det, requestInfo, map[string]string{"bucketName": d.Id()})
+	addDebug("IsBucketExist", det, nil, map[string]string{"bucketName": d.Id()})
 	if *det.Name == "" {
 		return nil
 	}
@@ -586,47 +591,45 @@ func resourceAlibabacloudStackOssBucketDelete(d *schema.ResourceData, meta inter
 	return errmsgs.WrapError(ossService.WaitForOssBucket(d.Id(), Deleted, DefaultTimeoutMedium))
 }
 
-func checkVpcListChange(oldlist []interface{}, newlist []interface{}, d *schema.ResourceData, meta interface{}) error {
-	vpclist := []string{}
-	for _, ovpcid := range oldlist {
-		isdelete := true
-		for _, nvpcid := range newlist {
-			if ovpcid == nvpcid {
-				isdelete = false
-			}
-		}
-		if isdelete {
-			client2 := meta.(*connectivity.AlibabacloudStackClient)
-			bvserver := BucketVpcService{client2}
-			binderr := bvserver.UnBindBucket(ovpcid.(string), d.Id())
-			if binderr != nil {
-				return errmsgs.WrapError(binderr)
-			}
+func checkVpcListChange(d *schema.ResourceData, meta interface{}) error {
+	// FIXME: Calling this interface will add a rule that denies all permissions
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	bvserver := BucketVpcService{client}
+	ossService := OssService{client}
+	vpcServer := VpcService{client}
+
+	ossendpoint, err := ossService.GetOssEndpointForCluster(d.Get("oss_cluster").(string))
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	// Get old and new VPC lists as Sets
+	oldVal, newVal := d.GetChange("vpclist")
+	oldVpcs := oldVal.(*schema.Set)
+	newVpcs := newVal.(*schema.Set)
+
+	// Calculate VPCs to remove (in old but not in new)
+	toRemove := oldVpcs.Difference(newVpcs)
+	for _, vpcId := range toRemove.List() {
+		binderr := bvserver.UnBindBucket(vpcId.(string), d.Id(), ossendpoint)
+		if binderr != nil {
+			return errmsgs.WrapError(binderr)
 		}
 	}
-	for _, nvpcid := range newlist {
-		iscreate := true
-		vpclist = append(vpclist, nvpcid.(string))
-		for _, ovpcid := range oldlist {
-			if ovpcid == nvpcid {
-				iscreate = false
-			}
+
+	// Calculate VPCs to add (in new but not in old)
+	toAdd := newVpcs.Difference(oldVpcs)
+	for _, vpcId := range toAdd.List() {
+		vpcdata, err := vpcServer.DescribeVpc(vpcId.(string))
+		if err != nil {
+			return errmsgs.WrapError(err)
 		}
-		if iscreate {
-			client := meta.(*connectivity.AlibabacloudStackClient)
-			vpcServer := VpcService{client}
-			vpcdata, err := vpcServer.DescribeVpc(nvpcid.(string))
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-			client2 := meta.(*connectivity.AlibabacloudStackClient)
-			bvserver := BucketVpcService{client2}
-			binderr := bvserver.BindBucket(vpcdata.VpcId, vpcdata.VpcName, vpcdata.CidrBlock, d.Id())
-			if binderr != nil {
-				return errmsgs.WrapError(binderr)
-			}
+		binderr := bvserver.BindBucket(vpcdata.VpcId, vpcdata.VpcName, vpcdata.CidrBlock, d.Id(), ossendpoint)
+		if binderr != nil {
+			return errmsgs.WrapError(binderr)
 		}
 	}
+
 	return nil
 }
 

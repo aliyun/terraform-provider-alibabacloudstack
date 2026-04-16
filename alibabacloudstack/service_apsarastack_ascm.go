@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -1088,5 +1089,61 @@ func (s *AscmService) SetResourceTags(d *schema.ResourceData, resourceType strin
 			}
 		}
 	}
+	return nil
+}
+
+func (s *AscmService) CheckResourceInResourceGroup(resourceType, instanceId string) (bool, error) {
+	// request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "SearchResources", "/resources/search")
+	request := map[string]interface{}{
+		"resourceTypes": []string{resourceType},
+		// "organizationIds": []string{s.client.Department},
+		// "resourceSetIds":  []string{s.client.ResourceGroup},
+		"regionIds":  []string{s.client.RegionId},
+		"instanceId": instanceId,
+	}
+	response, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "CloudSearchResources", "/search/resources", nil, nil, request)
+	if err != nil {
+		return false, errmsgs.WrapError(err)
+	}
+	data, err := jsonpath.Get("$.data.resources", response)
+	if len(data.([]interface{})) > 0 {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (s *AscmService) ReBindResourceGroup(resourceType, instanceId string) error {
+	// in, err := s.CheckResourceInResourceGroup(resourceType, instanceId)
+	// if err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
+	// if in {
+	// 	log.Printf("The resource: %s:%s is already in the resource group:%s", resourceType, instanceId, s.client.Config.ResourceSetName)
+	// 	return nil
+	// }
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateInstanceBelong", "/ascm/manage/belong/updateInstance")
+	mergeMaps(request.QueryParams, map[string]string{
+		"AscmPlatformCode":    "default",
+		"ResourceType":        resourceType,
+		"InstanceId":          instanceId,
+		"RegionName":          s.client.RegionId,
+		"TargetResourceSetId": s.client.ResourceGroup,
+	})
+	delete(request.QueryParams, "ResourceGroup")
+	// delete(request.QueryParams, "Department")
+	// delete(request.QueryParams, "OrganizationId")
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("UpdateInstanceBelong", bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if ossNotFoundError(err) {
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resourceType, instanceId, "UpdateInstanceBelong", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+	}
+	log.Printf("Bresponse UnBindBucketPolicy after error")
 	return nil
 }

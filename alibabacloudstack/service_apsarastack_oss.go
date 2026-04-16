@@ -281,10 +281,10 @@ func (s *OssService) GetBucketSync(bucketName string) (object *BucketSyncRespons
 		OpName:     "GetBucketSync",
 		Method:     "GET",
 		Bucket:     oss.Ptr(bucketName),
-		Parameters: map[string]string{"sync": ""},
+		Parameters: map[string]string{"syncinternal": ""},
 	}
-	// input.OpMetadata.Set(signer.SubResource, []string{"sync"})
-	output, err := ossClient.InvokeOperation(context.Background(), input)
+	// input.OpMetadata.Set(signer.SubResource, []string{"syncinternal"})
+	output, err := ossClient.InvokeOperation(context.TODO(), input)
 	addDebug("GetBucketSync", output, input, nil)
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketSync", errmsgs.AlibabacloudStackOssGoSdk)
@@ -463,17 +463,16 @@ func (s OssService) GetBucketEndpointMap() (map[string]string, error) {
 	return ossEndpointMap, nil
 }
 
-func (s OssService) GetOssClientForCluster(cluster string) (*oss.Client, error) {
+func (s OssService) GetOssEndpointForCluster(cluster string) (endpoint string, err error) {
 	endpointMap, err := s.GetBucketEndpointMap()
 	if err != nil {
-		return nil, errmsgs.WrapError(err)
+		return "", errmsgs.WrapError(err)
 	}
 	if cluster != "" {
-		return s.GetOssClient(endpointMap[cluster])
+		endpoint = endpointMap[cluster]
 	} else {
-		var endpoint string
 		if len(endpointMap) > 1 {
-			return nil, errmsgs.Error("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
+			return "", errmsgs.Error("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
 		}
 		if len(endpointMap) == 1 {
 			for _, v := range endpointMap {
@@ -484,11 +483,19 @@ func (s OssService) GetOssClientForCluster(cluster string) (*oss.Client, error) 
 		if len(endpointMap) < 1 {
 			endpoint, err = s.GetDefaultOssEndpoint()
 			if err != nil {
-				return nil, errmsgs.WrapError(err)
+				return "", errmsgs.WrapError(err)
 			}
 		}
-		return s.GetOssClient(endpoint)
 	}
+	return endpoint, nil
+}
+
+func (s OssService) GetOssClientForCluster(cluster string) (*oss.Client, error) {
+	endpoint, err := s.GetOssEndpointForCluster(cluster)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	return s.GetOssClient(endpoint)
 }
 
 func (s OssService) GetDefaultOssEndpoint() (string, error) {
@@ -624,27 +631,38 @@ func (s OssService) DescribeOssBucketObjectAcl(id string) (*oss.GetObjectAclResu
 	return acl, nil
 }
 
-func (s *OssService) UnBindResourceGroup(resourceType, instanceId string) error {
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateInstanceBelong", "/ascm/manage/belong/updateInstance")
-	mergeMaps(request.QueryParams, map[string]string{
-		"resourceType":        resourceType,
-		"instanceId":          instanceId,
-		"regionName":          s.client.RegionId,
-		"targetResourceSetId": s.client.ResourceGroup,
-	})
-	delete(request.QueryParams, "ResourceGroup")
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("UpdateInstanceBelong", bresponse, request, request.QueryParams)
+func (s OssService) DescribeOssBucketPolicy(bucketName string) ([]string, error) {
+	ossClient, err := s.GetBucketClient(bucketName)
 	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		if ossNotFoundError(err) {
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resourceType, instanceId, "UpdateInstanceBelong", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+		return nil, errmsgs.WrapError(err)
 	}
-	log.Printf("Bresponse UnBindBucketPolicy after error")
-	return nil
+	vpclist := make([]string, 0)
+	scInput := &oss.OperationInput{
+		OpName:     "PolicyGetAction",
+		Method:     "GET",
+		Bucket:     oss.Ptr(bucketName),
+		Parameters: map[string]string{"policy": ""},
+	}
+	scInput.OpMetadata.Set(signer.SubResource, []string{"policy"})
+	scOutput, err := ossClient.InvokeOperation(context.TODO(), scInput)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "404 Not Found") {
+			return vpclist, nil
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "PolicyGetAction", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	scBody, err := io.ReadAll(scOutput.Body)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, "Read PolicyGetAction response body failed")
+	}
+	result := make(map[string]interface{})
+	err = json.Unmarshal(scBody, &result)
+	// result, err := ossClient.GetBucketPolicy(context.TODO(), &oss.GetBucketPolicyRequest{
+	// 	Bucket: oss.Ptr(bucketName),
+	// })
+	// if err != nil {
+	// 	return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketPolicy", errmsgs.AlibabacloudStackOssGoSdk)
+	// }
+	addDebug("GetBucketPolicy", result, nil, map[string]string{"bucketName": bucketName})
+	return vpclist, nil
 }
