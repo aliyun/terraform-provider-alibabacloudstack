@@ -160,10 +160,10 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "DescribeOssBucket", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 	acl := d.Get("acl").(string)
-	// storageClass := d.Get("storage_class").(string)
-	// if storageClass == "" {
-	// 	storageClass = "Standard"
-	// }
+	storageClass := d.Get("storage_class").(string)
+	if storageClass == "" {
+		storageClass = "Standard"
+	}
 	// storage_capacity := d.Get("storage_capacity").(int)
 	// If not present, Create Bucket
 	if det == nil || *det.Name == "" {
@@ -173,14 +173,17 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
+		var bucket_config oss.CreateBucketConfiguration
+		bucket_config.DataRedundancyType = oss.DataRedundancyLRS
+		bucket_config.StorageClass = oss.StorageClassType(storageClass)
 		var req oss.PutBucketRequest
 		req.Bucket = oss.Ptr(bucketName)
 		req.Acl = oss.BucketACLType(acl)
+		req.CreateBucketConfiguration = &bucket_config
 		_, err = ossclient.PutBucket(context.TODO(), &req)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-
 		err = resource.Retry(3*time.Minute, func() *resource.RetryError {
 			det, err := ossService.DescribeOssBucket(bucketName)
 			if err != nil {
