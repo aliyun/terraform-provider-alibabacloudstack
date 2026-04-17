@@ -436,6 +436,10 @@ func (s OssService) buildOssClientConfig(endpoint string) *oss.Config {
 		cfg = cfg.WithProxyHost(s.client.Config.Proxy)
 	}
 
+	// ApsaraStack does not use virtual-hosted-style subdomain URLs, so path-style
+	// requests (endpoint/bucket-name/object) must be used instead.
+	cfg = cfg.WithUsePathStyle(true)
+
 	return cfg
 }
 
