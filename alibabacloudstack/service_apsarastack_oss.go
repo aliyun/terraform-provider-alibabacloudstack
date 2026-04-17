@@ -287,6 +287,9 @@ func (s *OssService) GetBucketSync(bucketName string) (object *BucketSyncRespons
 	output, err := ossClient.InvokeOperation(context.TODO(), input)
 	addDebug("GetBucketSync", output, input, nil)
 	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "404 Not Found", "NoSuchReplicationConfiguration") {
+			return nil, errmsgs.GetNotFoundErrorFromString("Bucket Sync not found!")
+		}
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketSync", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 	defer output.Body.Close()

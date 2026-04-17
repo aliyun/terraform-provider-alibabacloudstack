@@ -167,23 +167,38 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	// storage_capacity := d.Get("storage_capacity").(int)
 	// If not present, Create Bucket
 	if det == nil || *det.Name == "" {
-		var err error
-		var ossclient *oss.Client
-		ossclient, err = ossService.GetOssClientForCluster(ossCluster)
+		// Use OSS SDK low-level API (InvokeOperation) to support dualClusterEnabled parameter
+		bucketSync := false
+		// Do not enable bucketSync during creation, preparing for enabling Role and KMS key later
+
+		// Build XML body for PutBucket request
+		xmlBody := fmt.Sprintf(`<CreateBucketConfiguration><StorageClass>%s</StorageClass><DataRedundancyType>LRS</DataRedundancyType><DualClusterEnabled>%t</DualClusterEnabled></CreateBucketConfiguration>`, storageClass, bucketSync)
+
+		ossclient, err := ossService.GetOssClientForCluster(ossCluster)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		var bucket_config oss.CreateBucketConfiguration
-		bucket_config.DataRedundancyType = oss.DataRedundancyLRS
-		bucket_config.StorageClass = oss.StorageClassType(storageClass)
-		var req oss.PutBucketRequest
-		req.Bucket = oss.Ptr(bucketName)
-		req.Acl = oss.BucketACLType(acl)
-		req.CreateBucketConfiguration = &bucket_config
-		_, err = ossclient.PutBucket(context.TODO(), &req)
-		if err != nil {
-			return errmsgs.WrapError(err)
+
+		input := &oss.OperationInput{
+			OpName: "PutBucket",
+			Method: "PUT",
+			Bucket: oss.Ptr(bucketName),
+			Headers: map[string]string{
+				"Content-Type": "application/xml",
+				"x-oss-acl":    acl,
+			},
+			Body: strings.NewReader(xmlBody),
 		}
+
+		output, err := ossclient.InvokeOperation(context.TODO(), input)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "PutBucket", errmsgs.AlibabacloudStackOssGoSdk)
+		}
+		if output.Body != nil {
+			output.Body.Close()
+		}
+		addDebug("PutBucket", output, input, map[string]interface{}{"bucket": bucketName, "acl": acl, "storage_class": storageClass, "bucket_sync": bucketSync})
+
 		err = resource.Retry(3*time.Minute, func() *resource.RetryError {
 			det, err := ossService.DescribeOssBucket(bucketName)
 			if err != nil {
@@ -304,24 +319,26 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	// }
 	// d.Set("vpclist", schema.NewSet(schema.HashString, vlist))
 
-	bucketName := d.Get("bucket").(string)
-
-	bucketSync, err := ossService.GetBucketSync(bucketName)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
+	bucketSync, err := ossService.GetBucketSync(d.Id())
 	d.Set("bucket_sync", false)
-	for _, rule := range bucketSync.Data.ReplicationConfiguration.Rule {
-		if rule.Status == "doing" && rule.SrcLocation == "" {
-			// Disaster recovery relationships appear in pairs
-			d.Set("bucket_sync", true)
-			d.Set("dual_sync_role", rule.SyncRole)
-			if rule.EncryptionConfiguration.ReplicaKmsKeyID != "" {
-				d.Set("dual_kms_key", rule.EncryptionConfiguration.ReplicaKmsKeyID)
+	if err != nil {
+		if !errmsgs.NotFoundError(err) {
+			return errmsgs.WrapError(err)
+		}
+	} else {
+		for _, rule := range bucketSync.Data.ReplicationConfiguration.Rule {
+			if rule.Status == "doing" && rule.SrcLocation == "" {
+				// Disaster recovery relationships appear in pairs
+				d.Set("bucket_sync", true)
+				d.Set("dual_sync_role", rule.SyncRole)
+				if rule.EncryptionConfiguration.ReplicaKmsKeyID != "" {
+					d.Set("dual_kms_key", rule.EncryptionConfiguration.ReplicaKmsKeyID)
+				}
+				break
 			}
-			break
 		}
 	}
+	bucketName := d.Id()
 	aclResult, err := bucketClient.GetBucketAcl(context.TODO(), &oss.GetBucketAclRequest{
 		Bucket: &bucketName,
 	})
