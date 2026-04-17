@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -101,8 +102,11 @@ func (s *OssService) HeadOssBucketObject(bucketName string, objectName string) e
 	}
 	result, err := ossClient.HeadObject(context.TODO(), headReq)
 	if err != nil {
-		// Object does not exist when 404 or NoSuchKey is returned
-		if errmsgs.IsExpectedErrors(err, "404 Not Found", "NoSuchKey") {
+		// HEAD responses have no body, so OSS SDK returns BadErrorResponse
+		// instead of NoSuchKey when the object does not exist (HTTP 404).
+		// Use errors.As to extract ServiceError and check StatusCode directly.
+		var se *oss.ServiceError
+		if errors.As(err, &se) && se.StatusCode == 404 {
 			return errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OssObject", objectName)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, objectName, "HeadObject", errmsgs.AlibabacloudStackOssGoSdk)
