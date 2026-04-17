@@ -12,7 +12,7 @@ func TestAccAlibabacloudStackOssBucketQuota_basic(t *testing.T) {
 	ra := resourceAttrInit(resourceId, ossBucketQuotaBasicMap)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-quota-%d", rand)
+	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccOssBucketQuotaConfig)
 
 	ResourceTest(t, resource.TestCase{

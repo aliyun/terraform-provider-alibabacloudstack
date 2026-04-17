@@ -199,7 +199,7 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackOssBucket_Sync(t *testing.T) {
+func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 	var v *oss.BucketProperties
 
 	resourceId := "alibabacloudstack_oss_bucket.default"

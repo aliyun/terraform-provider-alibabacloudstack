@@ -213,6 +213,8 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackOssGoSdk)
 		}
 
+	} else {
+		return fmt.Errorf("OSS bucket %#v already exists.", bucketName)
 	}
 	d.SetId(bucketName)
 	ascmService := AscmService{client}
@@ -529,6 +531,16 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 	// 		return errmsgs.WrapError(vpc_err)
 	// 	}
 	// }
+	if d.HasChange("acl") {
+		acl := d.Get("acl").(string)
+		_, err = bucketClient.PutBucketAcl(context.TODO(), &oss.PutBucketAclRequest{
+			Bucket: &bucketName,
+			Acl:    oss.BucketACLType(acl),
+		})
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "PutBucketAcl", errmsgs.AlibabacloudStackOssGoSdk)
+		}
+	}
 	if d.IsNewResource() {
 		return nil
 	}
@@ -557,18 +569,6 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketTags", errmsgs.AlibabacloudStackOssGoSdk, err.Error()) // nolint
 		}
 	}
-
-	if d.HasChange("acl") {
-		acl := d.Get("acl").(string)
-		_, err = bucketClient.PutBucketAcl(context.TODO(), &oss.PutBucketAclRequest{
-			Bucket: &bucketName,
-			Acl:    oss.BucketACLType(acl),
-		})
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "PutBucketAcl", errmsgs.AlibabacloudStackOssGoSdk)
-		}
-	}
-
 	return nil
 }
 

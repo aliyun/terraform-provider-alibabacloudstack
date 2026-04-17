@@ -8,22 +8,22 @@ import (
 func TestAccAlibabacloudStackOssBucketsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_oss_buckets.default"
-	name := "testtf"
+	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOssBucketsConfigDependence)
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "testtf",
+			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "testtf_fake",
+			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}_fake",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"testtf"},
+			"ids": []string{"${alibabacloudstack_oss_bucket.demo.bucket}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"fake-bucket-id-12345"},
@@ -32,12 +32,12 @@ func TestAccAlibabacloudStackOssBucketsDataSource(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"testtf"},
-			"name_regex": "testtf",
+			"ids":        []string{"${alibabacloudstack_oss_bucket.demo.bucket}"},
+			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":        []string{"fake-bucket-id-12345"},
-			"name_regex": "testtf_fake",
+			"name_regex": "${alibabacloudstack_oss_bucket.demo.bucket}_fake",
 		}),
 	}
 
@@ -74,10 +74,10 @@ variable "name" {
   default = "%s"
 }
 
-// resource "alibabacloudstack_oss_bucket" "demo" {
-//   bucket = var.name
-//   acl    = "public-read"
-// }
+resource "alibabacloudstack_oss_bucket" "demo" {
+  bucket = var.name
+  acl    = "public-read"
+}
 
 `, name)
 }
