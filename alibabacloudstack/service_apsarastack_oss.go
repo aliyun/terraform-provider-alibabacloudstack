@@ -90,35 +90,28 @@ func (s *OssService) WaitForOssBucket(id string, status Status, timeout int) err
 }
 
 func (s *OssService) HeadOssBucketObject(bucketName string, objectName string) error {
-	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
-	mergeMaps(request.QueryParams, map[string]string{
-		"AppAction": "HeadObject",
-		"AppName":   "one-console-app-oss",
-		"Params":    "{\"region\":\"" + s.client.RegionId + "\",\"params\":{\"bucketName\":\"" + bucketName + "\",\"objectName\":\"" + objectName + "\"}}",
-	})
-	request.Headers["x-acs-instanceid"] = bucketName
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-
-	if err != nil || bresponse.GetHttpStatus() != 200 {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, objectName, "HeadObject", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
-	}
-
-	addDebug("HeadObject", bresponse, request, bresponse.GetHttpContentString())
-
-	resp := make(map[string]interface{})
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
+	ossClient, err := s.GetBucketClient(bucketName)
 	if err != nil {
-		return errmsgs.WrapError(err)
+		return err
 	}
 
-	if resp["asapiSuccess"] == false && (resp["Message"] == "Not Found" || resp["Code"] == "NoSuchKey") {
-		return errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OssObject", objectName)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+	headReq := &oss.HeadObjectRequest{
+		Bucket: &bucketName,
+		Key:    &objectName,
 	}
+	result, err := ossClient.HeadObject(context.TODO(), headReq)
+	if err != nil {
+		// Object does not exist when 404 or NoSuchKey is returned
+		if errmsgs.IsExpectedErrors(err, "404 Not Found", "NoSuchKey") {
+			return errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OssObject", objectName)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, objectName, "HeadObject", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+
+	addDebug("HeadObject", result, headReq, map[string]interface{}{
+		"bucketName": bucketName,
+		"objectName": objectName,
+	})
 
 	return nil
 }
@@ -240,6 +233,7 @@ func (s *OssService) DeleteBucket(bucketName string) error {
 
 func (s *OssService) GetOssEndpointList() ([]interface{}, error) {
 	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	request.QueryParams["AppAction"] = "GetOssEndpointList"
 	request.QueryParams["AppName"] = "one-console-app-oss"
 	request.QueryParams["Params"] = fmt.Sprintf("{\"params\":{\"region\":\"%s\"}}", s.client.RegionId)

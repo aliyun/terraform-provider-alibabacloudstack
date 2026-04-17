@@ -1186,6 +1186,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 
 	if popcode == OneRouterCode {
 		// special logic, 3.16.2 mandatory, no longer required after 3.18.1
+		// remove in 3.21.0
 		request.QueryParams["AccountInfo"] = client.GetAccountInfo()
 	}
 

@@ -93,7 +93,7 @@ const (
 	QuickbiCode          = ServiceCode("QUICKBI")
 	DataworksPublicCode  = ServiceCode("DATAWORKS_PUBLIC")
 	DataworksPrivateCode = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
-	OneRouterCode        = ServiceCode("ONEROUTER")
+	OneRouterCode        = ServiceCode("ONEROUTER") // remove in 3.21.0
 	BastionHostCode      = ServiceCode("BASTIONHOSTPRIVATE")
 	WAFONECSCode         = ServiceCode("WAF_ONECS")
 	ALIKAFKACode         = ServiceCode("ALIKAFKA")
@@ -432,11 +432,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"aegis-biz.{{.region}}.{{.domain}}",
 		"aegis-biz.{{.region}}.{{.domain}}",
 	},
-	// 3.18.3 new sites will not be opened
 	OneRouterCode: PopEndpoint{
-		"public.asapi.{{.region}}.{{.domain}}",
-		"public.asapi.{{.region}}.{{.domain}}",
-	},
+		"occ.{{.domain}}",
+		"occ.{{.region}}.{{.domain}}",
+	}, // remove in 3.21.0
+	// 3.18.3 new sites will not be opened
 	ASAPICode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",

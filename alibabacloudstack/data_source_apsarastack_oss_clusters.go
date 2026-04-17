@@ -105,6 +105,7 @@ func dataSourceAlibabacloudStackOssClusters() *schema.Resource {
 func dataSourceAlibabacloudStackOssClustersRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
+	request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 	request.QueryParams["AppAction"] = "GetOssEndpointList"
 	request.QueryParams["AppName"] = "one-console-app-oss"
 	region := client.RegionId
