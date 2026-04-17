@@ -59,15 +59,16 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				},
 				MaxItems: 1,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if k == "logging.#" && old == "1" && new == "0" {
-						loggings := d.Get("logging").([]interface{})
-						logging := loggings[0].(map[string]interface{})
-						if logging["target_bucket"] == "" && logging["target_prefix"] == "" {
-							return true
-						}
-					}
-					return false
+					// Treat undefined and empty list as equivalent (no logging).
+					// Suppress diff when both old and new logging are effectively empty.
+					oldRaw, newRaw := d.GetChange("logging")
+					oldList := oldRaw.([]interface{})
+					newList := newRaw.([]interface{})
+					oldEmpty := len(oldList) == 0 || (len(oldList) == 1 && oldList[0].(map[string]interface{})["target_bucket"] == "")
+					newEmpty := len(newList) == 0 || (len(newList) == 1 && newList[0].(map[string]interface{})["target_bucket"] == "")
+					return oldEmpty && newEmpty || old == new
 				},
+				DiffSuppressOnRefresh: true,
 			},
 			"creation_date": {
 				Type:     schema.TypeString,
@@ -518,9 +519,21 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 		}
 	}
 
-	if d.HasChange("logging") {
-		log.Print("changes in logging")
-		err := resourceAlibabacloudStackOssBucketLoggingCreate(client, d)
+	needLoggingUpdate := false
+	if _, ok := d.GetOk("logging"); ok && d.IsNewResource() {
+		// For new resources, compare existing server-side logging with desired config.
+		existingLogging, err := ossService.DescribeOssBucketLogging(d.Id())
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "GetBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
+		}
+		desiredLogging := d.Get("logging").([]interface{})
+		needLoggingUpdate = !isLoggingEqual(existingLogging, desiredLogging)
+	} else {
+		// For existing resources, just check if logging config changed.
+		needLoggingUpdate = d.HasChange("logging")
+	}
+	if needLoggingUpdate {
+		err := resourceAlibabacloudStackOssBucketLoggingUpdate(client, d)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -653,110 +666,82 @@ func checkVpcListChange(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) error {
-	bucket_name := d.Id()
+func resourceAlibabacloudStackOssBucketLoggingUpdate(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) error {
+	bucketName := d.Id()
 	ossService := OssService{client}
-	ossClient, err := ossService.GetBucketClient(d.Id())
+	ossClient, err := ossService.GetBucketClient(bucketName)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 
-	existingLogging, err := ossService.DescribeOssBucketLogging(d.Id())
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "GetBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
+	loggingList := d.Get("logging").([]interface{})
+
+	// If logging is empty or not set, delete existing logging configuration.
+	if len(loggingList) == 0 {
+		log.Printf("[DEBUG] Deleting bucket logging for %s", bucketName)
+		_, err = ossClient.DeleteBucketLogging(context.TODO(), &oss.DeleteBucketLoggingRequest{
+			Bucket: &bucketName,
+		})
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "DeleteBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
+		}
+		return nil
 	}
 
-	loggingEnabled := existingLogging != nil && existingLogging.BucketLoggingStatus != nil && existingLogging.BucketLoggingStatus.LoggingEnabled != nil
+	// Put logging configuration.
+	logging := loggingList[0].(map[string]interface{})
+	targetBucket := fmt.Sprint(logging["target_bucket"])
+	targetPrefix := fmt.Sprint(logging["target_prefix"])
 
-	if loggingEnabled {
-		log.Printf("logging is not null %v", d.Get("logging"))
-		if _, v := d.GetOk("logging"); v == false {
-			log.Print("logging is being disabled")
-			_, err = ossClient.DeleteBucketLogging(context.TODO(), &oss.DeleteBucketLoggingRequest{
-				Bucket: &bucket_name,
-			})
-			if err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
-			}
-			log.Printf("deleting logs oss done")
-		} else {
-			logging := make(map[string]interface{})
-			log.Print("logging to be updated")
-			if v := d.Get("logging"); v != nil {
-				log.Print("logging is being enabled")
-				all, ok := v.([]interface{})
-				if ok {
-					log.Printf("printall %v", all)
-					for _, a := range all {
-						logging, _ = a.(map[string]interface{})
-						log.Printf("check target_bucket %v", logging["target_bucket"])
-						log.Printf("check target_prefix %v", logging["target_prefix"])
-					}
-					targetBucketName := fmt.Sprint(logging["target_bucket"])
-					log.Printf("checking bucket %v", targetBucketName)
-					oldOssService := OssService{client}
-					_, err := oldOssService.DescribeOssBucket(targetBucketName)
-					if err != nil {
-						return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "DescribeBucket")
-					}
-					targetBucket := fmt.Sprint(logging["target_bucket"])
-					targetPrefix := fmt.Sprint(logging["target_prefix"])
-					_, err = ossClient.PutBucketLogging(context.TODO(), &oss.PutBucketLoggingRequest{
-						Bucket: &bucket_name,
-						BucketLoggingStatus: &oss.BucketLoggingStatus{
-							LoggingEnabled: &oss.LoggingEnabled{
-								TargetBucket: &targetBucket,
-								TargetPrefix: &targetPrefix,
-							},
-						},
-					})
-					if err != nil {
-						return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "PutBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
-					}
-					log.Printf("logging oss done")
-				}
-			}
-		}
-	} else {
-		logging := make(map[string]interface{})
-		log.Print("logging is  null")
-		if v := d.Get("logging"); v != nil {
-			log.Print("logging is being enabled")
-			all, ok := v.([]interface{})
-			if ok {
-				log.Printf("printall %v", all)
-				for _, a := range all {
-					logging, _ = a.(map[string]interface{})
-					log.Printf("check target_bucket %v", logging["target_bucket"])
-					log.Printf("check target_prefix %v", logging["target_prefix"])
-				}
-				targetBucketName := fmt.Sprint(logging["target_bucket"])
-				log.Printf("checking bucket %v", targetBucketName)
-				oldOssService := OssService{client}
-				_, err := oldOssService.DescribeOssBucket(targetBucketName)
-				if err != nil {
-					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "DescribeBucket")
-				}
-				targetBucket := fmt.Sprint(logging["target_bucket"])
-				targetPrefix := fmt.Sprint(logging["target_prefix"])
-				_, err = ossClient.PutBucketLogging(context.TODO(), &oss.PutBucketLoggingRequest{
-					Bucket: &bucket_name,
-					BucketLoggingStatus: &oss.BucketLoggingStatus{
-						LoggingEnabled: &oss.LoggingEnabled{
-							TargetBucket: &targetBucket,
-							TargetPrefix: &targetPrefix,
-						},
-					},
-				})
-				if err != nil {
-					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "PutBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
-				}
-				log.Printf("logging oss done")
-			}
-		}
+	// Verify the target bucket exists.
+	_, err = ossService.DescribeOssBucket(targetBucket)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "DescribeBucket")
+	}
+
+	log.Printf("[DEBUG] Putting bucket logging for %s, target_bucket: %s, target_prefix: %s", bucketName, targetBucket, targetPrefix)
+	_, err = ossClient.PutBucketLogging(context.TODO(), &oss.PutBucketLoggingRequest{
+		Bucket: &bucketName,
+		BucketLoggingStatus: &oss.BucketLoggingStatus{
+			LoggingEnabled: &oss.LoggingEnabled{
+				TargetBucket: &targetBucket,
+				TargetPrefix: &targetPrefix,
+			},
+		},
+	})
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "PutBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 
 	return nil
+}
+
+// isLoggingEqual compares server-side logging config with Terraform desired config.
+func isLoggingEqual(existing *oss.GetBucketLoggingResult, desired []interface{}) bool {
+	// Both empty means equal.
+	hasExisting := existing != nil && existing.BucketLoggingStatus != nil && existing.BucketLoggingStatus.LoggingEnabled != nil
+	if !hasExisting && len(desired) == 0 {
+		return true
+	}
+	// One has logging, the other doesn't.
+	if !hasExisting || len(desired) == 0 {
+		return false
+	}
+
+	existingLogging := existing.BucketLoggingStatus.LoggingEnabled
+	desiredMap := desired[0].(map[string]interface{})
+
+	existingBucket := ""
+	if existingLogging.TargetBucket != nil {
+		existingBucket = *existingLogging.TargetBucket
+	}
+	existingPrefix := ""
+	if existingLogging.TargetPrefix != nil {
+		existingPrefix = *existingLogging.TargetPrefix
+	}
+
+	return existingBucket == fmt.Sprint(desiredMap["target_bucket"]) &&
+		existingPrefix == fmt.Sprint(desiredMap["target_prefix"])
 }
 
 type OssTags struct {
