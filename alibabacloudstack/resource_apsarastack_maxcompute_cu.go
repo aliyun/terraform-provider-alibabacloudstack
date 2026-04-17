@@ -154,7 +154,10 @@ func resourceAlibabacloudStackMaxcomputeCuDelete(d *schema.ResourceData, meta in
 	_, err := client.DoTeaRequest("POST", "dataworks-private-cloud", "2019-01-17", action, "", nil, request, nil)
 
 	if err != nil {
-		return err
+		if errmsgs.IsExpectedErrors(err, "There are still some projects using this quota group,") {
+			return nil
+		}
+		return errmsgs.WrapError(err)
 	}
 	return nil
 }

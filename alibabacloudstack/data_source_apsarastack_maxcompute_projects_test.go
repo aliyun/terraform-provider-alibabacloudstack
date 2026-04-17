@@ -94,18 +94,18 @@ resource "alibabacloudstack_vpc_vpc" "default" {
 
 resource "alibabacloudstack_maxcompute_cu" "default" {
   cu_name      = var.name
-  cu_num       = 2
+  cu_num       = 1
   cluster_name = data.alibabacloudstack_maxcompute_clusters.default.clusters.0.cluster
 }
 
 resource "alibabacloudstack_maxcompute_project" "default" {
   account_pk     = var.userpk
+  account        = var.userid
   quota_id       = alibabacloudstack_maxcompute_cu.default.id
   external_table = "true"
   vpc_ids        = [alibabacloudstack_vpc_vpc.default.id]
   name           = var.name
   disk           = 50
-  account        = var.userid
 }
 `, name, userid, userpk)
 }
