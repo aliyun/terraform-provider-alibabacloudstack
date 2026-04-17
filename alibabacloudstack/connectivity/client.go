@@ -480,7 +480,6 @@ func (client *AlibabacloudStackClient) WithKmsClient(do func(*kms.Client) (inter
 		if err != nil {
 			return nil, fmt.Errorf("unable to initialize the KMS client: %#v", err)
 		}
-
 		// Configure KMS client
 		client.kmsconn.Domain = endpoint
 		client.kmsconn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Hour)
@@ -931,6 +930,9 @@ func (client *AlibabacloudStackClient) InitRpcRequest(request requests.RpcReques
 		request.Scheme = "https"
 	} else {
 		request.Scheme = "http"
+	}
+	if strings.ToLower(request.GetProduct()) == "kms" {
+		request.Scheme = "https"
 	}
 	request.RegionId = client.RegionId
 	request.Headers = client.defaultHeaders(request.GetProduct())

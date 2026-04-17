@@ -3,11 +3,13 @@ package alibabacloudstack
 import (
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -157,7 +159,6 @@ func resourceAlibabacloudStackKmsKeyCreate(d *schema.ResourceData, meta interfac
 	if v, ok := d.GetOk("protection_level"); ok {
 		request.ProtectionLevel = v.(string)
 	}
-
 	raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.CreateKey(request)
 	})
@@ -171,6 +172,15 @@ func resourceAlibabacloudStackKmsKeyCreate(d *schema.ResourceData, meta interfac
 	}
 	addDebug(request.GetActionName(), raw)
 	d.SetId(fmt.Sprintf("%v", bresponse.KeyMetadata.KeyId))
+	ascmService := AscmService{client}
+	err = resource.Retry(8*time.Minute, func() *resource.RetryError {
+		err = ascmService.ReBindResourceGroup("kms_instance", bresponse.KeyMetadata.KeyId)
+		if err != nil {
+			// Retry on temporary errors
+			return resource.RetryableError(err)
+		}
+		return nil
+	})
 
 	return nil
 }
