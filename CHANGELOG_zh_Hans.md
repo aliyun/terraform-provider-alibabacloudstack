@@ -1,3 +1,32 @@
+# 3.18.27
+
+## 新增
+
+1. BMCP裸机计算节点的编排能力（`alibabacloudstack_bmcp_cluster`）
+2. BMCP裸机计算节点的查询能力（`alibabacloudstack_bmcp_clusters`）
+3. BMS裸机计算节点规格的查询能力（`alibabacloudstack_bms_machinetypes`）
+4. ASCM RAM服务角色的查询能力（`alibabacloudstack_ascm_ram_service_roles`）
+5. 增强虚拟专有网络（EVPC）实例的查询能力（`alibabacloudstack_evpc_vpcs`）
+
+## 下线
+
+1. 下线 MaxCompute 用户的编排能力（`alibabacloudstack_maxcompute_user`）
+
+## 修复
+
+1. 修复 `alibabacloudstack_oss_bucket` 生命周期、版本控制等属性的读写逻辑缺陷
+2. 修复 `alibabacloudstack_oss_bucket` CORS 规则更新时缺少校验导致的错误
+3. 修复 `alibabacloudstack_image_export` 导出镜像时未等待任务完成的 bug
+4. 修复 `alibabacloudstack_vpc_vswitch` SDK 兼容性问题
+
+## 变更
+
+1. `alibabacloudstack_oss_bucket` 大规模重构，重构资源管理内部实现
+2. `alibabacloudstack_oss_bucket_object` 简化对象操作逻辑
+3. `alibabacloudstack_oss_bucket_kms` 重构 KMS 配置逻辑
+
+---
+
 # 3.18.26
 
 ## 新增

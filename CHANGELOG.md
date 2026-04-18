@@ -1,3 +1,32 @@
+# 3.18.27
+
+## Added
+
+1. Orchestration support for BMCP bare metal compute cluster (`alibabacloudstack_bmcp_cluster`)
+2. Data source for querying BMCP bare metal compute clusters (`alibabacloudstack_bmcp_clusters`)
+3. Data source for querying BMS bare metal compute machine types (`alibabacloudstack_bms_machinetypes`)
+4. Data source for querying ASCM RAM service roles (`alibabacloudstack_ascm_ram_service_roles`)
+5. Data source for querying Enhanced VPC (EVPC) instances (`alibabacloudstack_evpc_vpcs`)
+
+## Removals
+
+1. Removed MaxCompute user orchestration capability (`alibabacloudstack_maxcompute_user`)
+
+## Fixed
+
+1. Fixed lifecycle and versioning attribute read/write logic defects in `alibabacloudstack_oss_bucket`
+2. Fixed missing validation in CORS rule updates for `alibabacloudstack_oss_bucket`
+3. Fixed bug where `alibabacloudstack_image_export` did not wait for export task completion
+4. Fixed SDK compatibility issue in `alibabacloudstack_vpc_vswitch`
+
+## Changes
+
+1. Major refactoring of `alibabacloudstack_oss_bucket` internal resource management implementation
+2. Simplified object operation logic in `alibabacloudstack_oss_bucket_object`
+3. Refactored KMS configuration logic in `alibabacloudstack_oss_bucket_kms`
+
+---
+
 # 3.18.26
 
 ## Added
