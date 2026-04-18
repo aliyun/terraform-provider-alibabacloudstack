@@ -82,54 +82,45 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
-	request := vpc.CreateCreateVSwitchRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-
 	log.Printf("[DEBUG] alibabacloud_vswitch ipv6CidrBlock: %s", d.Get("ipv6_cidr_block").(string))
 
+	// Build request query parameters
+	reqQuery := map[string]interface{}{
+		"VpcId":     Trim(d.Get("vpc_id").(string)),
+		"CidrBlock": Trim(d.Get("cidr_block").(string)),
+	}
+
 	if d.Get("enable_ipv6").(bool) {
-		request.Ipv6CidrBlock = "0"
+		reqQuery["Ipv6CidrBlock"] = 0
 	}
 	if d.Get("is_cgw").(bool) {
-		request.IsCgw = "true"
+		reqQuery["IsCgw"] = true
 	}
 
 	if v, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && v.(string) != "" {
-		request.ZoneId = v.(string)
+		reqQuery["ZoneId"] = v.(string)
 	}
-	request.VpcId = Trim(d.Get("vpc_id").(string))
-	request.CidrBlock = Trim(d.Get("cidr_block").(string))
 
 	if v, ok := connectivity.GetResourceDataOk(d, "vswitch_name", "name"); ok && v.(string) != "" {
-		request.VSwitchName = v.(string)
+		reqQuery["VSwitchName"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("description"); ok && v != "" {
-		request.Description = v.(string)
+		reqQuery["Description"] = v.(string)
 	}
 
-	request.ClientToken = buildClientToken(request.GetActionName())
-
 	if err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-		args := *request
-		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
-			return vpcClient.CreateVSwitch(&args)
-		})
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		response, err := client.DoTeaRequest("POST", "VPC", "2016-04-28", "CreateVSwitch", "", nil, reqQuery, nil)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "TaskConflict", "UnknownError", "InvalidStatus.RouteEntry", errmsgs.Throttling, "OperationFailed.IdempotentTokenProcessing") {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
-			errmsg := ""
-			if bresponse, ok := raw.(*vpc.CreateVSwitchResponse); ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_vswitch", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_vswitch", "CreateVSwitch", errmsgs.AlibabacloudStackSdkGoERROR))
 		}
-		response, _ := raw.(*vpc.CreateVSwitchResponse)
-		log.Printf("Vswitch response %s", response)
-		d.SetId(response.VSwitchId)
+		vswitchId, _ := response["VSwitchId"].(string)
+		log.Printf("Vswitch response VSwitchId: %s", vswitchId)
+		d.SetId(vswitchId)
 		return nil
 	}); err != nil {
 		return err
