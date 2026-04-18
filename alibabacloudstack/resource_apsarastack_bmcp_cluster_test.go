@@ -45,6 +45,9 @@ func TestAccAlibabacloudStackBmcpCluster_basic(t *testing.T) {
 					"machine_type":        "${data.alibabacloudstack_bmcp_machinetypes.all.machinetypes.0.name}",
 					"node_count":          1,
 					"vswitch_id":          "${alibabacloudstack_vswitch.default.id}",
+					"lifecycle": []map[string]interface{}{{
+						"ignore_changes": TfRawString("[machine_type]"),
+					}},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

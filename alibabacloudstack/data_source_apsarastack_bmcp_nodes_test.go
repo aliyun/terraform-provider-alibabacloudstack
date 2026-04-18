@@ -168,6 +168,11 @@ resource "alibabacloudstack_bmcp_cluster" "default" {
 	machine_type        = data.alibabacloudstack_bmcp_machinetypes.all.machinetypes.0.name
 	node_count          = 1
 	vswitch_id          = alibabacloudstack_vswitch.default.id
+	lifecycle {
+      ignore_changes = [
+		machine_type
+      ]
+  	}
 }
 
 data "alibabacloudstack_bmcp_nodes" "all" {
