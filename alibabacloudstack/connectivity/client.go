@@ -475,25 +475,25 @@ func (client *AlibabacloudStackClient) WithKmsClient(do func(*kms.Client) (inter
 		}
 
 		// Create KMS client with AK/SK or STS
-		var err error
-		client.kmsconn, err = kms.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true, true))
+		tmpKmsConn, err := kms.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true, true))
 		if err != nil {
 			return nil, fmt.Errorf("unable to initialize the KMS client: %#v", err)
 		}
-		// Configure KMS client
-		client.kmsconn.Domain = endpoint
-		client.kmsconn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Hour)
-		client.kmsconn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Hour)
-		client.kmsconn.SourceIp = client.Config.SourceIp
-		client.kmsconn.SecureTransport = client.Config.SecureTransport
-		client.kmsconn.AppendUserAgent(Terraform, TerraformVersion)
-		client.kmsconn.AppendUserAgent(Provider, ProviderVersion)
-		client.kmsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		client.kmsconn.SetHTTPSInsecure(client.Config.Insecure)
+		// Configure KMS client before assignment to avoid concurrent map writes
+		tmpKmsConn.Domain = endpoint
+		tmpKmsConn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Hour)
+		tmpKmsConn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Hour)
+		tmpKmsConn.SourceIp = client.Config.SourceIp
+		tmpKmsConn.SecureTransport = client.Config.SecureTransport
+		tmpKmsConn.AppendUserAgent(Terraform, TerraformVersion)
+		tmpKmsConn.AppendUserAgent(Provider, ProviderVersion)
+		tmpKmsConn.AppendUserAgent(Module, client.Config.ConfigurationSource)
+		tmpKmsConn.SetHTTPSInsecure(client.Config.Insecure)
 		if client.Config.Proxy != "" {
-			client.kmsconn.SetHttpsProxy(client.Config.Proxy)
-			client.kmsconn.SetHttpProxy(client.Config.Proxy)
+			tmpKmsConn.SetHttpsProxy(client.Config.Proxy)
+			tmpKmsConn.SetHttpProxy(client.Config.Proxy)
 		}
+		client.kmsconn = tmpKmsConn
 	}
 	return do(client.kmsconn)
 }
