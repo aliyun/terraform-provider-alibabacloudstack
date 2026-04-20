@@ -626,7 +626,7 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 
 	if update {
 		//begin
-		request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ModifyClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterId, d.Id()))
+		request := client.NewCommonRequest("PUT", "CS", "2015-12-15", "ModifyClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterId, d.Id()))
 		request.QueryParams["ClusterId"] = clusterId
 		request.QueryParams["SignatureVersion"] = "1.0"
 		request.Headers["x-acs-asapi-gateway-version"] = "3.0"
@@ -774,7 +774,7 @@ func resourceAlibabacloudStackCSNodePoolDelete(d *schema.ResourceData, meta inte
 	clusterId := d.Get("cluster_id").(string)
 	var raw interface{}
 	// delete all nodes
-	err := RemoveNodePoolNodes(d, meta, clusterId, d.Id(), nil, nil)
+	err := DeleteAllPoolNodes(d, meta)
 	if err != nil {
 		return err
 	}
@@ -782,7 +782,7 @@ func resourceAlibabacloudStackCSNodePoolDelete(d *schema.ResourceData, meta inte
 	req := client.NewCommonRequest("DELETE", "CS", "2015-12-15", "DeleteClusterNodepool", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterId, d.Id()))
 	req.QueryParams["ClusterId"] = clusterId
 	req.QueryParams["NodepoolId"] = d.Id()
-	req.Headers["x-acs-asapi-gateway-version"] = "3.0"
+	// req.Headers["x-acs-asapi-gateway-version"] = "3.0"
 
 	response, err := client.ProcessCommonRequest(req)
 	if err != nil {
@@ -1178,6 +1178,57 @@ func flattenTagsConfig(config []Tag) map[string]string {
 
 	return m
 }
+
+func DeleteAllPoolNodes(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	csService := CsService{client}
+	clusterid := d.Get("cluster_id").(string)
+	object, err := csService.DescribeClusterNodes(clusterid, d.Id())
+	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
+		return errmsgs.WrapError(err)
+	}
+	// fetch the NodeName of all nodes
+	var allNodeName []string
+	for _, value := range object.Nodes {
+		allNodeName = append(allNodeName, value.NodeName)
+	}
+
+	if len(allNodeName) > 0 {
+
+		req := csService.client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", fmt.Sprintf("/api/v2/clusters/%s/nodes/remove", clusterid))
+		req.QueryParams["SignatureVersion"] = "1.0"
+		req.Headers["x-acs-asapi-gateway-version"] = "3.0"
+		body := map[string]interface{}{
+			"release_node": true,
+			"drain_node":   true,
+			"nodes":        allNodeName,
+			"ClusterId":    clusterid,
+		}
+		jsonData, err := json.Marshal(body)
+		if err != nil {
+			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+		}
+		req.SetContentType(requests.Json)
+		req.SetContent(jsonData)
+		resp, err := csService.client.ProcessCommonRequest(req)
+		if err != nil {
+			if resp == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteKubernetesClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterid, []string{"deleting", "failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
+	return nil
+}
+
 func RemoveNodePoolNodes(d *schema.ResourceData, meta interface{}, clusterid, nodepoolid string, oldNodes []interface{}, newNodes []interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}

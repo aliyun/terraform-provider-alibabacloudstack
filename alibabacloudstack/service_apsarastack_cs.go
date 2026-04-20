@@ -168,6 +168,40 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 	return clusternodepools, nil
 }
 
+func (s *CsService) DescribeClusterMasterNodes(id string) (nodes []NodeObject, err error) {
+	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterNodes", fmt.Sprintf("/clusters/%s/nodes", id))
+	mergeMaps(request.QueryParams, map[string]string{
+		// "SignatureVersion": "1.0",
+		// "nodepool_id":      nodepoolid,
+		"ClusterId": id,
+	})
+
+	response, err := s.client.ProcessCommonRequest(request)
+	addDebug("DescribeClusterNodes", response, request, request.QueryParams)
+	if err != nil {
+		if response == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		if errmsgs.IsExpectedErrors(err, "ErrorClusterNodePoolNotFound") {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	if !response.IsSuccess() {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "DescribeClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	var clusternodepools *NodePools
+	_ = json.Unmarshal(response.GetHttpContentBytes(), &clusternodepools)
+	for _, n := range clusternodepools.Nodes {
+		if n.InstanceRole == "Master" && n.InstanceStatus == "Running" {
+			nodes = append(nodes, n)
+		}
+	}
+	return nodes, nil
+}
+
 func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
 	req := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterNodePools", fmt.Sprintf("/clusters/%s/nodepools", id))
 	req.QueryParams["ProductName"] = "CS"
@@ -521,29 +555,31 @@ type Cluster struct {
 	ZoneID      string `json:"zone_id"`
 }
 
+type NodeObject struct {
+	CreationTime       time.Time `json:"creation_time"`
+	ErrorMessage       string    `json:"error_message"`
+	InstanceName       string    `json:"instance_name"`
+	NodeStatus         string    `json:"node_status"`
+	IsAliyunNode       bool      `json:"is_aliyun_node"`
+	NodeName           string    `json:"node_name"`
+	ExpiredTime        time.Time `json:"expired_time"`
+	IPAddress          []string  `json:"ip_address"`
+	Source             string    `json:"source"`
+	InstanceTypeFamily string    `json:"instance_type_family"`
+	InstanceID         string    `json:"instance_id"`
+	InstanceChargeType string    `json:"instance_charge_type"`
+	InstanceRole       string    `json:"instance_role"`
+	State              string    `json:"state"`
+	InstanceStatus     string    `json:"instance_status"`
+	ImageID            string    `json:"image_id"`
+	InstanceType       string    `json:"instance_type"`
+	NodepoolID         string    `json:"nodepool_id"`
+	HostName           string    `json:"host_name"`
+}
+
 type NodePools struct {
-	Nodes []struct {
-		CreationTime       time.Time `json:"creation_time"`
-		ErrorMessage       string    `json:"error_message"`
-		InstanceName       string    `json:"instance_name"`
-		NodeStatus         string    `json:"node_status"`
-		IsAliyunNode       bool      `json:"is_aliyun_node"`
-		NodeName           string    `json:"node_name"`
-		ExpiredTime        time.Time `json:"expired_time"`
-		IPAddress          []string  `json:"ip_address"`
-		Source             string    `json:"source"`
-		InstanceTypeFamily string    `json:"instance_type_family"`
-		InstanceID         string    `json:"instance_id"`
-		InstanceChargeType string    `json:"instance_charge_type"`
-		InstanceRole       string    `json:"instance_role"`
-		State              string    `json:"state"`
-		InstanceStatus     string    `json:"instance_status"`
-		ImageID            string    `json:"image_id"`
-		InstanceType       string    `json:"instance_type"`
-		NodepoolID         string    `json:"nodepool_id"`
-		HostName           string    `json:"host_name"`
-	} `json:"nodes"`
-	Page struct {
+	Nodes []NodeObject `json:"nodes"`
+	Page  struct {
 		PageNumber int `json:"page_number"`
 		TotalCount int `json:"total_count"`
 		PageSize   int `json:"page_size"`

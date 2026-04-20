@@ -1406,6 +1406,8 @@ variable "existed_k8s_cluster_id" {
 
 %s
 
+%s
+
 data "alibabacloudstack_cs_kubernetes_clusters" "default" {
 	ids = var.existed_k8s_cluster_id == "" ? [] : [var.existed_k8s_cluster_id]
 }
@@ -1417,18 +1419,18 @@ locals {
 resource "alibabacloudstack_cs_kubernetes" "default" {
 	count						= local.create_count
 	name						= var.name
-	version						= "1.30.7-aliyun.1"
+	version						= "1.34.1-aliyun.1"
 	os_type						= "linux"
 	platform					= "AliyunLinux"
 	num_of_nodes				= "3"
 	master_count				= "3"
 	master_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
-	master_instance_types		= ["ecs.n4v2.large","ecs.n4v2.large","ecs.n4v2.large"]
-	master_disk_category		= "cloud_ssd"
+	master_instance_types		= ["${local.default_instance_type_id}","${local.default_instance_type_id}","${local.default_instance_type_id}"]
+	master_disk_category		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 	vpc_id						= "${alibabacloudstack_vpc_vpc.default.id}"
-	worker_instance_types		= ["ecs.n4v2.large"]
+	worker_instance_types		= ["${local.default_instance_type_id}"]
 	worker_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}"]
-	worker_disk_category		= "cloud_ssd"
+	worker_disk_category		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 	password					= random_password.password.0.result
 	pod_cidr					= "172.20.0.0/16"
 	service_cidr				= "172.21.0.0/20"
@@ -1438,7 +1440,7 @@ resource "alibabacloudstack_cs_kubernetes" "default" {
 	security_group_id			= alibabacloudstack_ecs_securitygroup.default.id
 	runtime	 {
 		name	= "containerd"
-		version	= "1.6.28"
+		version	= "2.1.5"
 	}
 }
 
@@ -1446,7 +1448,7 @@ locals {
 	k8s_cluster_id = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.ids.0 : alibabacloudstack_cs_kubernetes.default.0.id
 	k8s_cluster_name = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.names.0 : alibabacloudstack_cs_kubernetes.default.0.name
 }
-`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1))
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1), DataAlibabacloudstackInstanceTypes)
 }
 
 func checkOrImportEdasK8sInstance(k8sId string) error {
