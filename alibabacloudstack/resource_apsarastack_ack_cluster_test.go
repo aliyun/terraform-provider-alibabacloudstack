@@ -69,7 +69,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					// 	"For":     "acceptance test",
 					// },
 					"runtime": []map[string]interface{}{
-						{"name": "containerd", "version": "1.6.28"},
+						{"name": "containerd", "version": "2.1.5"},
 					},
 					"addons": []map[string]interface{}{
 						{
@@ -98,21 +98,21 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 						},
 					},
 					"name":                                "${var.name}",
-					"version":                             "1.32.1-aliyun.1",
+					"version":                             "1.34.1-aliyun.1",
 					"os_type":                             "linux",
 					"platform":                            "AliyunLinux",
 					"timeout_mins":                        "60",
 					"vpc_id":                              "${alibabacloudstack_vpc_vpc.default.id}",
 					"master_count":                        "3",
 					"master_disk_category":                "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
-					"image_id":                            "${var.image_id}",
+					"image_id":                            "${data.alibabacloudstack_images.default.images.0.id}",
 					"master_disk_size":                    "40",
-					"master_instance_types":               []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"master_instance_types":               []string{"${local.default_instance_type_id}", "${local.default_instance_type_id}", "${local.default_instance_type_id}"},
 					"master_vswitch_ids":                  []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
 					"num_of_nodes":                        "1",
 					"worker_disk_category":                "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"worker_disk_size":                    "40",
-					"worker_instance_types":               []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"worker_instance_types":               []string{"${local.default_instance_type_id}"},
 					"worker_vswitch_ids":                  []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"enable_ssh":                          "${var.enable_ssh}",
 					"password":                            "${random_password.password.0.result}",
@@ -142,10 +142,29 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": name,
-						// "tags.%":            "3",
-						// "tags.Created":      "TF",
-						// "tags.For":          "acceptance test",
+						"name":                    name,
+						"nodepool_id":             CHECKSET,
+						"vpc_id":                  CHECKSET,
+						"pod_cidr":                CHECKSET,
+						"service_cidr":            CHECKSET,
+						"version":                 CHECKSET,
+						"delete_protection":       "false",
+						"worker_instance_types.#": "1",
+						"worker_vswitch_ids.#":    "1",
+						"worker_disk_category":    CHECKSET,
+						"worker_disk_size":        "40",
+						"cpu_policy":              "none",
+						"runtime.#":               "1",
+						"runtime.0.name":          "containerd",
+						"runtime.0.version":       "2.1.5",
+						"master_nodes.#":          "3",
+						"worker_nodes.#":          "1",
+						"tags.%":                  "3",
+						"tags.Created":            "TF",
+						"tags.For":                "acceptance test",
+						"proxy_mode":              "ipvs",
+						"node_cidr_mask":          "26",
+						"worker_data_disks.#":     "1",
 					}),
 				),
 			},
@@ -153,7 +172,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids", "new_nat_gateway", "password", "slb_internet_enabled", "worker_data_disks"},
+				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "image_id", "is_enterprise_security_group", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_port_range", "os_type", "platform", "timeout_mins", "new_nat_gateway", "password", "slb_internet_enabled"},
 			},
 		},
 	})
@@ -177,10 +196,10 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:  testAccCheckCsK8sDestroy,
+		CheckDestroy:      testAccCheckCsK8sDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -190,7 +209,7 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 					// 	"For":     "acceptance test",
 					// },
 					"runtime": []map[string]interface{}{
-						{"name": "containerd", "version": "1.6.28"},
+						{"name": "containerd", "version": "2.1.5"},
 					},
 					"addons": []map[string]interface{}{
 						{
@@ -219,21 +238,21 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 						},
 					},
 					"name":                         "${var.name}",
-					"version":                      "1.32.1-aliyun.1",
+					"version":                      "1.34.1-aliyun.1",
 					"os_type":                      "linux",
 					"platform":                     "AliyunLinux",
 					"timeout_mins":                 "60",
 					"vpc_id":                       "${alibabacloudstack_vpc_vpc.default.id}",
 					"master_count":                 "3",
 					"master_disk_category":         "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
-					"image_id":                     "${var.image_id}",
+					"image_id":                     "${data.alibabacloudstack_images.default.images.0.id}",
 					"master_disk_size":             "40",
-					"master_instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"master_instance_types":        []string{"${local.default_instance_type_id}", "${local.default_instance_type_id}", "${local.default_instance_type_id}"},
 					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
 					"num_of_nodes":                 "1",
 					"worker_disk_category":         "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"worker_disk_size":             "40",
-					"worker_instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"worker_instance_types":        []string{"${local.default_instance_type_id}"},
 					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"security_group_id":            "${alibabacloudstack_ecs_securitygroup.default.id}",
 					"is_enterprise_security_group": "false",
@@ -249,7 +268,26 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": name,
+						"name":                    name,
+						"nodepool_id":             CHECKSET,
+						"vpc_id":                  CHECKSET,
+						"pod_cidr":                CHECKSET,
+						"service_cidr":            CHECKSET,
+						"version":                 CHECKSET,
+						"delete_protection":       "false",
+						"worker_instance_types.#": "1",
+						"worker_vswitch_ids.#":    "1",
+						"worker_disk_category":    CHECKSET,
+						"worker_disk_size":        "40",
+						"key_name":                CHECKSET,
+						"cpu_policy":              "none",
+						"runtime.#":               "1",
+						"runtime.0.name":          "containerd",
+						"runtime.0.version":       "2.1.5",
+						"master_nodes.#":          "3",
+						"worker_nodes.#":          "1",
+						"proxy_mode":              "ipvs",
+						"node_cidr_mask":          "26",
 					}),
 				),
 			},
@@ -267,7 +305,7 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids"},
+				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "image_id", "is_enterprise_security_group", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_port_range", "os_type", "platform", "timeout_mins"},
 			},
 		},
 	})
@@ -286,15 +324,11 @@ variable "k8s_number" {
   default     = 1
 }
 
-variable "image_id" {
-  default     = "centos_7_9_x64_20G_alibase_20220322.vhd"
-}
+// variable "image_id" {
+//   default     = "centos_7_9_x64_20G_alibase_20220322.vhd"
+// }
 
-data "alibabacloudstack_instance_types" "default" {
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  cpu_core_count       = 1
-  memory_size          = 1
-}
+%s
 
 # leave it to empty then terraform will create several vswitches
 
@@ -314,7 +348,7 @@ variable "runtime" {
  default     = [
 		{
 			name = "containerd"
-  			version = "1.5.13"
+  			version = "2.1.5"
 		}
 	]
 }
@@ -334,6 +368,8 @@ variable "enable_ssh" {
   description = "Enable login to the node through SSH."
   default     = true
 }
+
+%s
 
 %s
 
@@ -359,7 +395,7 @@ resource "alibabacloudstack_kms_key" "default" {
 	pending_window_in_days = "7"
 }
 
-`, name, SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1))
+`, name, SecurityGroupCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, RandomPasswordTestCase(12, 1))
 }
 
 var CsK8sMap = map[string]string{}

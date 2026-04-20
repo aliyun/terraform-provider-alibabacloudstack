@@ -928,7 +928,6 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
-	d.Partial(true)
 	invoker := NewInvoker()
 
 	var nodepoolid string
@@ -1039,11 +1038,8 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
-			//d.SetPartial("num_of_nodes")
 		}
 	}
-
-	d.Partial(false)
 	return nil
 }
 
@@ -1085,18 +1081,79 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	d.Set("pod_cidr", object.ContainerCIDR)
 	d.Set("version", object.CurrentVersion)
 	d.Set("delete_protection", object.DeletionProtection)
-	d.Set("version", object.InitVersion)
-	var smaster, sworker []map[string]interface{}
-	//var MasterNodes, WorkerNodes map[string]interface{}
-	for _, k := range clusternode.Nodes {
-		if k.InstanceRole == "Master" {
-			MasterNodes := map[string]interface{}{
-				"id":         k.InstanceID,
-				"name":       k.InstanceName,
-				"private_ip": fmt.Sprintf("%s", k.IPAddress),
+
+	// Fill in more attribute readings
+	d.Set("security_group_id", object.SecurityGroupId)
+	d.Set("worker_ram_role_name", object.WorkerRamRoleName)
+
+	// Read worker-related configurations from nodepool
+	if nodepool.ScalingGroup.InstanceTypes != nil {
+		d.Set("worker_instance_types", nodepool.ScalingGroup.InstanceTypes)
+	}
+	if nodepool.ScalingGroup.VswitchIds != nil {
+		d.Set("worker_vswitch_ids", nodepool.ScalingGroup.VswitchIds)
+	}
+	if nodepool.ScalingGroup.SystemDiskCategory != "" {
+		d.Set("worker_disk_category", nodepool.ScalingGroup.SystemDiskCategory)
+	}
+	if nodepool.ScalingGroup.SystemDiskSize > 0 {
+		d.Set("worker_disk_size", nodepool.ScalingGroup.SystemDiskSize)
+	}
+	if nodepool.ScalingGroup.KeyPair != "" {
+		d.Set("key_name", nodepool.ScalingGroup.KeyPair)
+	}
+
+	// Read configurations from kubernetes_config
+	if nodepool.KubernetesConfig.CPUPolicy != "" {
+		d.Set("cpu_policy", nodepool.KubernetesConfig.CPUPolicy)
+	}
+	d.Set("cloud_monitor_flags", nodepool.KubernetesConfig.CmsEnabled)
+	if nodepool.KubernetesConfig.UserData != "" {
+		d.Set("user_data", nodepool.KubernetesConfig.UserData)
+	}
+
+	// Read runtime configuration
+	// Prefer nodepool.KubernetesConfig for runtime details as it's more specific to the node pool
+	runtimeName := nodepool.KubernetesConfig.Runtime
+	runtimeVersion := nodepool.KubernetesConfig.RuntimeVersion
+
+	// Fallback to object.MetaData if nodepool doesn't have runtime info
+	if runtimeName == "" || runtimeVersion == "" {
+		if object.MetaData != "" {
+			var metaDataMap map[string]interface{}
+			if err := json.Unmarshal([]byte(object.MetaData), &metaDataMap); err == nil {
+				if rn, ok := metaDataMap["Runtime"].(string); ok && runtimeName == "" {
+					runtimeName = rn
+				}
+				if rv, ok := metaDataMap["RuntimeVersion"].(string); ok && runtimeVersion == "" {
+					runtimeVersion = rv
+				}
 			}
-			smaster = append(smaster, MasterNodes)
-		} else {
+		}
+	}
+
+	if runtimeName != "" || runtimeVersion != "" {
+		runtime := []map[string]interface{}{
+			{
+				"name":    runtimeName,
+				"version": runtimeVersion,
+			},
+		}
+		d.Set("runtime", runtime)
+	}
+	var smaster, sworker []map[string]interface{}
+	masternodes, err := csService.DescribeClusterMasterNodes(d.Id())
+	for _, k := range masternodes {
+		MasterNodes := map[string]interface{}{
+			"id":         k.InstanceID,
+			"name":       k.InstanceName,
+			"private_ip": fmt.Sprintf("%s", k.IPAddress),
+		}
+		smaster = append(smaster, MasterNodes)
+	}
+
+	for _, k := range clusternode.Nodes {
+		if k.InstanceRole == "Worker" && k.InstanceStatus == "Running" {
 			WorkerNodes := map[string]interface{}{
 				"id":         k.InstanceID,
 				"name":       k.InstanceName,
@@ -1180,7 +1237,6 @@ func getDefaultNodePoolId(csService CsService, clusterId string) (string, error)
 func updateKubernetesClusterTag(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
-	d.Partial(true)
 	invoker := NewInvoker()
 	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ModifyClusterTags", fmt.Sprintf("/clusters/%s/tags", d.Id()))
 	tagss := make([]interface{}, 0)
