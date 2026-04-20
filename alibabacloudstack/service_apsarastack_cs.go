@@ -278,8 +278,8 @@ func (s *CsService) DescribeCsKubernetesNodePool(id, clusterid string) (*NodePoo
 		if response == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, "<QuerySeter> no row found") {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, "<QuerySeter> no row found", "ErrorNodePoolNotFound") {
+			return nil, errmsgs.GetNotFoundErrorFromString("The CsK8s NodePool not found!")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_nodepool", "DescribeNodePool", response, errmsg)

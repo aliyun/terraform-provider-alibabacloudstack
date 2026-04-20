@@ -473,7 +473,6 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 	csService := CsService{client}
 
 	clusterId := d.Get("cluster_id").(string)
-	d.Partial(true)
 	update := false
 
 	args := &CreateNodePoolRequest{
@@ -673,9 +672,6 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 			}
 		}
 	}
-
-	update = false
-	d.Partial(false)
 	return nil
 }
 
@@ -1123,10 +1119,10 @@ func flattenNodeDataDisksConfig(config []NodePoolDataDisk) (m []map[string]inter
 
 	for _, disks := range config {
 		m = append(m, map[string]interface{}{
-			"size":              disks.Size,
-			"category":          disks.Category,
-			"encrypted":         disks.Encrypted,
-			"performance_level": disks.PerformanceLevel,
+			"size":      disks.Size,
+			"category":  disks.Category,
+			"encrypted": disks.Encrypted,
+			// "performance_level": disks.PerformanceLevel,
 		})
 	}
 
@@ -1312,7 +1308,7 @@ func ScaleClusterNodePool(d *schema.ResourceData, meta interface{}, clusterid, n
 	csService := CsService{client}
 
 	// list all nodes of the nodepool
-	req := csService.client.NewCommonRequest("POST", "CS", "2015-12-15", "ScaleClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s)", clusterid, nodepoolid))
+	req := csService.client.NewCommonRequest("POST", "CS", "2015-12-15", "ScaleClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterid, nodepoolid))
 	req.QueryParams["SignatureVersion"] = "1.0"
 	body := map[string]interface{}{
 		"ClusterId":  clusterid,
