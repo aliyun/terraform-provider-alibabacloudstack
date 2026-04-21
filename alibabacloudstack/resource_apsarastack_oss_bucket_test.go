@@ -263,6 +263,126 @@ func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackOssBucket_Nokmskey(t *testing.T) {
+	var v *oss.BucketProperties
+
+	resourceId := "alibabacloudstack_oss_bucket.default"
+	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
+
+	serviceFunc := func() interface{} {
+		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketNokmskeyDependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"bucket": name,
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "Test",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"bucket":           name,
+						"storage_capacity": "1024",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"logging": []map[string]interface{}{{
+						"target_bucket": "${var.name}",
+						"target_prefix": "oss-accesslog/",
+					}},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"logging": []map[string]interface{}{{
+						"target_bucket": "${var.name}",
+						"target_prefix": "oss-accesslog-update/",
+					}},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"logging": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"acl": "public-read",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"acl": "public-read",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sse_algorithm": "AES256",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sse_algorithm": "AES256",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sse_algorithm": "",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sse_algorithm": "",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"storage_capacity": "2048",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"storage_capacity": "2048",
+					}),
+				),
+			},
+		},
+	})
+}
+
 // func TestUatAlibabacloudStackOssBucket_Vpc(t *testing.T) {
 // 	var v *oss.BucketProperties
 
@@ -324,6 +444,18 @@ func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 // 	})
 // }
 
+func resourceOssBucketNokmskeyDependence(name string) string {
+	return fmt.Sprintf(`
+
+variable "name" {
+	default = "%s"
+}
+
+%s
+
+`, name)
+}
+
 func resourceOssBucketConfigDependence(name string) string {
 	return fmt.Sprintf(`
 
@@ -342,7 +474,7 @@ resource "alibabacloudstack_vpc" "vpc2" {
 
 %s
 
-`, name, GetKeyFromEnvTestCase())
+`, name, KeyCommonTestCase)
 }
 
 func resourceOssBucketDualDependence(name string) string {
@@ -353,7 +485,7 @@ func resourceOssBucketDualDependence(name string) string {
 data "alibabacloudstack_oss_clusters" "default" {
 }
 	
-`, GetKeyFromEnvTestCase())
+`, KeyCommonTestCase)
 }
 
 var ossBucketBasicMap = map[string]string{
