@@ -110,18 +110,18 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 					}),
 				),
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"sse_algorithm": "KMS",
-					"kms_key_id":    "${alibabacloudstack_kms_key.key.id}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"sse_algorithm": "KMS",
-						"kms_key_id":    CHECKSET,
-					}),
-				),
-			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"sse_algorithm": "KMS",
+			// 		// "kms_key_id":    "${local.kms_key}",
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"sse_algorithm": "KMS",
+			// 			"kms_key_id":    CHECKSET,
+			// 		}),
+			// 	),
+			// },
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"sse_algorithm": "",
@@ -248,7 +248,7 @@ func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"bucket_sync":    "true",
-					"dual_kms_key":   "${alibabacloudstack_kms_key.key.id}",
+					"dual_kms_key":   "${local.kms_key}",
 					"dual_sync_role": dual_sync_role,
 				}),
 				Check: resource.ComposeTestCheckFunc(

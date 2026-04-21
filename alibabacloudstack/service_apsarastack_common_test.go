@@ -1730,13 +1730,14 @@ locals {
 	create = %d
 }
 resource "alibabacloudstack_kms_key" "key" {
+  count = local.create
   description             = "Hello KMS"
   pending_window_in_days  = "7"
   key_state               = "Enabled"
 }
 
 locals{
-	kms_key = create == 1 ? alibabacloudstack_kms_key.key.id : "%s"
+	kms_key = local.create == 1 ? alibabacloudstack_kms_key.key.0.id : "%s"
 }
 `, create, kmskey)
 }
