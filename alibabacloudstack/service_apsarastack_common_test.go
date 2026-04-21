@@ -1718,6 +1718,29 @@ resource "alibabacloudstack_kms_key" "key" {
 }
 `
 
+func GetKeyFromEnvTestCase() string {
+	create := 1
+	kmskey := os.Getenv("ALIBABACLOUDSTACK_KMS_KEY")
+	if kmskey != "" {
+		create = 0
+	}
+	return fmt.Sprintf(`
+
+locals {
+	create = %d
+}
+resource "alibabacloudstack_kms_key" "key" {
+  description             = "Hello KMS"
+  pending_window_in_days  = "7"
+  key_state               = "Enabled"
+}
+
+locals{
+	kms_key = create == 1 ? alibabacloudstack_kms_key.key.id : "%s"
+}
+`, create, kmskey)
+}
+
 func CheckOrCreateApiGatewayV2K8sInstance(k8sId string) error {
 	rawClient, err := sharedClientForRegion("")
 	if err != nil {

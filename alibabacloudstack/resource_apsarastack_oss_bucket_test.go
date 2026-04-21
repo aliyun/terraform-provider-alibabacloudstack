@@ -342,7 +342,7 @@ resource "alibabacloudstack_vpc" "vpc2" {
 
 %s
 
-`, name, KeyCommonTestCase)
+`, name, GetKeyFromEnvTestCase())
 }
 
 func resourceOssBucketDualDependence(name string) string {
@@ -353,7 +353,7 @@ func resourceOssBucketDualDependence(name string) string {
 data "alibabacloudstack_oss_clusters" "default" {
 }
 	
-`, KeyCommonTestCase)
+`, GetKeyFromEnvTestCase())
 }
 
 var ossBucketBasicMap = map[string]string{

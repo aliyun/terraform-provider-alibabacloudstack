@@ -100,6 +100,7 @@ const (
 	Prometheus2Code      = ServiceCode("PROMETHEUS2")
 	TablestoreCode       = ServiceCode("TABLESTORE")
 	EasyAICode           = ServiceCode("EASYAI")
+	ApiDevelopCode       = ServiceCode("APIDEVELOP")
 	// Self-built gateway fake Code
 	SlSDataCode = ServiceCode("SLSDATA")
 	BssDataCode = ServiceCode("BSSDATA")
@@ -431,6 +432,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	AEGISCode: PopEndpoint{
 		"aegis-biz.{{.region}}.{{.domain}}",
 		"aegis-biz.{{.region}}.{{.domain}}",
+	},
+	ApiDevelopCode: PopEndpoint{
+		"apidevelop-openapi.{{.domain}}",
+		"apidevelop-openapi.{{.region}}.{{.domain}}",
 	},
 	OneRouterCode: PopEndpoint{
 		"occ.{{.domain}}",

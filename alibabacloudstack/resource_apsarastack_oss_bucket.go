@@ -266,24 +266,23 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "GetBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
 	}
-	ossEndpointData, err := ossService.GetOssEndpointList()
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
+	ossEndpointData, _ := ossService.GetBucketEndpointMap()
 	log.Printf("read describe logging %v", logging)
-	d.Set("bucket", object.Name)
+	d.Set("bucket", d.Id())
 	if *object.Name == "" {
 		log.Print("read: BucketInfo fail!!!!!!")
 	}
-	d.Set("creation_date", object.CreationDate.Format("2006-01-02 15:04:05 +0000 UTC"))
+	log.Printf("========================================================%#v", object.CreationDate)
+	log.Printf("========================================================%s", object.CreationDate.Format("2006-01-02T15:04:05.000Z"))
+
+	d.Set("creation_date", object.CreationDate.Format("2006-01-02T15:04:05.000Z"))
 	d.Set("extranet_endpoint", *object.ExtranetEndpoint)
 	d.Set("intranet_endpoint", *object.IntranetEndpoint)
 	d.Set("location", *object.Location)
 	d.Set("storage_class", *object.StorageClass)
-	for _, v := range ossEndpointData {
-		endpoint := v.(map[string]interface{})
-		if endpoint["oss-endpoint"].(string) == *object.IntranetEndpoint {
-			d.Set("oss_cluster", endpoint["cluster"])
+	for k, v := range ossEndpointData {
+		if v == *object.IntranetEndpoint {
+			d.Set("oss_cluster", k)
 			break
 		}
 	}

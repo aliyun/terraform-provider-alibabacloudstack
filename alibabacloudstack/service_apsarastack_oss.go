@@ -235,7 +235,7 @@ func (s *OssService) DeleteBucket(bucketName string) error {
 	})
 }
 
-func (s *OssService) GetOssEndpointList() ([]interface{}, error) {
+func (s *OssService) GetOssEndpointListForAsApi() ([]interface{}, error) {
 	request := s.client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
 	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	request.QueryParams["AppAction"] = "GetOssEndpointList"
@@ -450,19 +450,42 @@ func (s OssService) GetOssClient(endpoint string) (*oss.Client, error) {
 	return client, nil
 }
 
+func (s OssService) GetOssEndpointListForIot() ([]interface{}, error) {
+	request := map[string]interface{}{
+		"region":          nil,
+		"fullClusterInfo": "true",
+	}
+	response, err := s.client.DoTeaRequest("POST", "ApiDevelop", "2025-06-20", "GetOssEndpointListAction", "/apidevelop/getOssEndpointListAction", nil, nil, request)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	data, ok := response["Data"]
+	if !ok || len(data.([]interface{})) == 0 {
+		return nil, errmsgs.Error(fmt.Sprintf("GetOssEndpointList Failed! region: %s \n %#v", s.client.RegionId, response))
+	}
+	return data.([]interface{}), nil
+}
+
+func (s OssService) GetOssEndpointList() ([]interface{}, error) {
+	data, err := s.GetOssEndpointListForIot()
+	if err != nil || len(data) == 0 {
+		data, err = s.GetOssEndpointListForAsApi()
+	}
+	return data, err
+}
+
 func (s OssService) GetBucketEndpointMap() (map[string]string, error) {
 	ossEndpointMap := s.client.Config.OssEndpoints
 	if len(ossEndpointMap) > 0 {
 		return ossEndpointMap, nil
 	} else {
 		endpoints, err := s.GetOssEndpointList()
-		if err != nil {
-			return nil, errmsgs.WrapError(err)
-		}
-		for _, v := range endpoints {
-			endpointData := v.(map[string]interface{})
-			endpoint := endpointData["oss-public-endpoint"].(string)
-			ossEndpointMap[endpointData["cluster"].(string)] = endpoint
+		if err == nil {
+			for _, v := range endpoints {
+				endpointData := v.(map[string]interface{})
+				endpoint := endpointData["oss-public-endpoint"].(string)
+				ossEndpointMap[endpointData["cluster"].(string)] = endpoint
+			}
 		}
 	}
 	return ossEndpointMap, nil
@@ -527,9 +550,17 @@ func (s OssService) GetBucketClient(bucketName string) (*oss.Client, error) {
 }
 
 func (s OssService) DescribeOssBucket(bucketName string) (*oss.BucketProperties, error) {
-	endpointMap, err := s.GetBucketEndpointMap()
-	if err != nil {
-		return nil, errmsgs.WrapError(err)
+	var endpointMap map[string]string
+	var err error
+	endpointMap, err = s.GetBucketEndpointMap()
+	if err != nil || len(endpointMap) < 1 {
+		endpoint, err := s.GetDefaultOssEndpoint()
+		if err != nil {
+			return nil, errmsgs.WrapError(err)
+		}
+		endpointMap = map[string]string{
+			"defaultCluster": endpoint,
+		}
 	}
 	for _, endpoint := range endpointMap {
 		ossclietn, err := s.GetOssClient(endpoint)
