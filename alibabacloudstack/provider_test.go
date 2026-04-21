@@ -9,6 +9,7 @@ import (
 	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 
 	"os"
 	"testing"
@@ -211,6 +212,26 @@ func testAccPreCheckWithMultiAZ(t *testing.T) {
 		t.Skipf("Insufficient number of zones")
 		t.Skipped()
 	}
+}
+
+func testAccPreCheckKmsServer(t *testing.T) {
+	req := ecs.CreateDescribeZonesRequest()
+	rawClient, err := sharedClientForRegion(os.Getenv("ALIBABACLOUDSTACK_REGION"))
+	if err != nil {
+		t.Skipf("Skipping the test case with err: %s", err)
+		t.Skipped()
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	client.InitRpcRequest(*req.RpcRequest)
+	request := kms.CreateListKeysRequest()
+	client.InitRpcRequest(*request.RpcRequest)
+	_, err = client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
+		return kmsClient.ListKeys(request)
+	})
+	if err != nil {
+		t.Skipf("Skipping the test case with Kms Server err: %s", err)
+	}
+
 }
 
 func testAccPreCheckWithEnvVariable(t *testing.T, envVariableName string) {

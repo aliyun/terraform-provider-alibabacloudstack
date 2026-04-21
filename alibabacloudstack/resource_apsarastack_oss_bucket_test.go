@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketBasicDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -110,18 +110,6 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 					}),
 				),
 			},
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"sse_algorithm": "KMS",
-			// 		// "kms_key_id":    "${local.kms_key}",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"sse_algorithm": "KMS",
-			// 			"kms_key_id":    CHECKSET,
-			// 		}),
-			// 	),
-			// },
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"sse_algorithm": "",
@@ -223,6 +211,7 @@ func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckKmsServer(t)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -248,7 +237,7 @@ func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"bucket_sync":    "true",
-					"dual_kms_key":   "${local.kms_key}",
+					"dual_kms_key":   "${alibabacloudstack_kms_key.key.id}",
 					"dual_sync_role": dual_sync_role,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -263,7 +252,7 @@ func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackOssBucket_Nokmskey(t *testing.T) {
+func TestAccAlibabacloudStackOssBucket_kmskey(t *testing.T) {
 	var v *oss.BucketProperties
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
@@ -279,10 +268,11 @@ func TestAccAlibabacloudStackOssBucket_Nokmskey(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketNokmskeyDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckKmsServer(t)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -346,6 +336,18 @@ func TestAccAlibabacloudStackOssBucket_Nokmskey(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"acl": "public-read",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sse_algorithm": "KMS",
+					"kms_key_id":    "${alibabacloudstack_kms_key.key.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sse_algorithm": "KMS",
+						"kms_key_id":    CHECKSET,
 					}),
 				),
 			},
@@ -444,37 +446,23 @@ func TestAccAlibabacloudStackOssBucket_Nokmskey(t *testing.T) {
 // 	})
 // }
 
-func resourceOssBucketNokmskeyDependence(name string) string {
+func resourceOssBucketBasicDependence(name string) string {
 	return fmt.Sprintf(`
 
 variable "name" {
 	default = "%s"
 }
-
-%s
-
 `, name)
 }
 
 func resourceOssBucketConfigDependence(name string) string {
 	return fmt.Sprintf(`
 
-variable "name" {
-	default = "%s"
-}
-	
-resource "alibabacloudstack_vpc" "vpc" {
-	name = "${var.name}-v"
-	cidr_block = "192.168.0.0/24"
-}
-resource "alibabacloudstack_vpc" "vpc2" {
-	name = "${var.name}-v2"
-	cidr_block = "192.168.0.0/24"
-}
+%s
 
 %s
 
-`, name, KeyCommonTestCase)
+`, resourceOssBucketBasicDependence(name), KeyCommonTestCase)
 }
 
 func resourceOssBucketDualDependence(name string) string {
