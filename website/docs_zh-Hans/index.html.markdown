@@ -80,6 +80,7 @@ export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxx.xxx.com"
 | protocol          | ALIBABACLOUDSTACK_PROTOCOL        | string   | 访问环境时使用的网络协议                  | 根据环境实际情况确定                                                                         | 默认值 `HTTP`, 可选 `HTTP` 或 `HTTPS`                                                        |
 | insecure          | ALIBABACLOUDSTACK_INSECURE        | bool     | 访问环境时是否跳过 HTTPS 证书校验          | 根据环境实际情况确定                                                                         | 默认值 `false`<br>仅当 protocol 为 `HTTPS` 时生效                     |
 | proxy             | ALIBABACLOUDSTACK_PROXY           | string   | 访问环境时的代理服务器地址                 | 根据环境实际情况确定                                                                         |                                                                      |
+| oss_endpoints      | ALIBABACLOUDSTACK_OSS_ENDPOINTS    | map   | 访问环境oss存储服务时需要的集群名和对应地址    | 阿里云平台 >> 产品 >> OSS服务 >> Bucket创建页面  | 数据结构：{集群名: 集群对应的服务地址}|
 
 ---
 

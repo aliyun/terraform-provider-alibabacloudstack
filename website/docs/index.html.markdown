@@ -83,7 +83,9 @@ export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxx.xxx.com"
 | protocol             | ALIBABACLOUDSTACK_PROTOCOL        | string   | The Network protocol used to access the environment      | Determined by the actual situation                                                       | Default: `HTTP`    (Valid values: `HTTP` or `HTTPS`)                                                 |
 | insecure             | ALIBABACLOUDSTACK_INSECURE        | bool     | Whether to skip verification of HTTPS certificates      | Determined by the actual situation                                                       | Default: `false`<br>Effective only when protocol is `HTTPS`          |
 | proxy                | ALIBABACLOUDSTACK_PROXY           | string   | The proxy endpoint that is used to access the environment    | Determined by the actual situation                                                       |                                                                      |
+| oss_endpoints      | ALIBABACLOUDSTACK_OSS_ENDPOINTS    | map   | Cluster names and corresponding addresses required for accessing OSS storage services in the environment    | Alibaba Cloud Platform >> Products >> OSS Service >> Bucket Creation Page  | Data structure: {cluster name: endpoint of the cluster}|
 
+---
 ### Credential Parameters
 
 AlibabacloudStack supports two authentication methods: STS Token and AK/SK. **STS Token authentication is generally recommended**.
