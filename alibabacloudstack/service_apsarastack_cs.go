@@ -153,6 +153,11 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 		if response == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		result := make(map[string]interface{})
+		_ = json.Unmarshal(response.GetHttpContentBytes(), &result)
+		if v, ok := result["Code"]; ok && v.(string) == "ErrorClusterNodePoolNotFound" {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
 		if errmsgs.IsExpectedErrors(err, "ErrorClusterNodePoolNotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
@@ -166,6 +171,22 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 	var clusternodepools *NodePools
 	_ = json.Unmarshal(response.GetHttpContentBytes(), &clusternodepools)
 	return clusternodepools, nil
+}
+
+func (s *CsService) DescribeTaskInfo(taskid string) (task map[string]interface{}, err error) {
+	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeTaskInfo", fmt.Sprintf("/tasks/%s", taskid))
+	request.QueryParams["TaskId"] = taskid
+	response, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	addDebug("DescribeTaskInfo", response, request, request.QueryParams)
+	result := make(map[string]interface{})
+	err = json.Unmarshal(response.GetHttpContentBytes(), &result)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	return result, nil
 }
 
 func (s *CsService) DescribeClusterMasterNodes(id string) (nodes []NodeObject, err error) {
@@ -247,9 +268,9 @@ func (s *CsService) CsKubernetesInstanceStateRefreshFunc(id string, failStates [
 	}
 }
 
-func (s *CsService) CsKubernetesNodePoolStateRefreshFunc(id, clusterid string, failStates []string) resource.StateRefreshFunc {
+func (s *CsService) CsKubernetesNodePoolStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		object, err := s.DescribeCsKubernetesNodePool(id, clusterid)
+		object, err := s.DescribeCsKubernetesNodePool(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
@@ -267,19 +288,24 @@ func (s *CsService) CsKubernetesNodePoolStateRefreshFunc(id, clusterid string, f
 	}
 }
 
-func (s *CsService) DescribeCsKubernetesNodePool(id, clusterid string) (*NodePoolAlone, error) {
-	req := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterNodePoolDetail", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterid, id))
+func (s *CsService) DescribeCsKubernetesNodePool(id string) (*NodePoolAlone, error) {
+	parts, err := ParseResourceId(id, 2)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	req := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterNodePoolDetail", fmt.Sprintf("/clusters/%s/nodepools/%s", parts[0], parts[1]))
 	req.Headers["x-acs-asapi-gateway-version"] = "3.0"
-	req.QueryParams["ClusterId"] = clusterid
-	req.QueryParams["NodepoolId"] = id
+	req.QueryParams["ClusterId"] = parts[0]
+	req.QueryParams["NodepoolId"] = parts[1]
 	response, err := s.client.ProcessCommonRequest(req)
 	addDebug(req.GetActionName(), response, req, req.QueryParams)
 	if err != nil || !response.IsSuccess() {
 		if response == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, "<QuerySeter> no row found", "ErrorNodePoolNotFound") {
-			return nil, errmsgs.GetNotFoundErrorFromString("The CsK8s NodePool not found!")
+		notfounmsg := fmt.Sprintf("nodePool (%s) not found", id)
+		if errmsgs.IsExpectedErrors(err, notfounmsg, "ErrorNodePoolNotFound") {
+			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_nodepool", "DescribeNodePool", response, errmsg)
@@ -635,7 +661,7 @@ type NodePoolAlone struct {
 		Taints            []Taint `json:"taints"`
 		Labels            []Label `json:"labels"`
 	} `json:"kubernetes_config"`
-	AutoScaling  AutoScaling `json:"auto_scaling"`
+	AutoScaling  autoScaling `json:"auto_scaling"`
 	NodepoolInfo struct {
 		ResourceGroupID string    `json:"resource_group_id"`
 		Created         time.Time `json:"created"`

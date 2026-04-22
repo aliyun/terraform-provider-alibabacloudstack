@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 	"time"
 
@@ -103,7 +102,7 @@ func resourceAlibabacloudStackCSKubernetesNodePool() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"AliyunLinux", "Windows", "CentOS", "WindowsCore"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"AliyunLinux", "Windows", "CentOS", "WindowsCore", "Custom"}, false),
 			},
 			"image_id": {
 				Type:     schema.TypeString,
@@ -363,6 +362,8 @@ type autoScaling struct {
 	MaxInstances int64  `json:"max_instances"`
 	MinInstances int64  `json:"min_instances"`
 	Type         string `json:"type"`
+	IsBondEip    bool   `json:"is_bond_eip"`
+	EipBandWidth int64  `json:"eip_bandwidth"`
 }
 type kubernetesConfig struct {
 	Taints []Taint `json:"taints"`
@@ -381,7 +382,7 @@ type tEEConfig struct {
 }
 type CreateClusterNodePoolRequest struct {
 	Count            int64            `json:"count"`
-	NodePoolInfo     NodePoolInfo     `json:"node_pool_info"`
+	NodePoolInfo     NodePoolInfo     `json:"nodepool_info"`
 	ScalingGroup     scalingGroup     `json:"scaling_group"`
 	KubernetesConfig kubernetesConfig `json:"kubernetes_config"`
 	AutoScaling      autoScaling      `json:"auto_scaling"`
@@ -398,12 +399,12 @@ type NodePoolInfo struct {
 	ResourceGroupId string    `json:"resource_group_id"`
 }
 type scalingGroup struct {
-	VswitchIds    []string `json:"vswitch_ids"`
-	InstanceTypes []string `json:"instance_types"`
-	LoginPassword string   `json:"login_password"`
-
-	SystemDiskCategory string `json:"system_disk_category"`
-	SystemDiskSize     int64  `json:"system_disk_size"`
+	VswitchIds         []string `json:"vswitch_ids"`
+	InstanceTypes      []string `json:"instance_types"`
+	LoginPassword      string   `json:"login_password"`
+	KeyPair            string   `json:"key_pair"`
+	SystemDiskCategory string   `json:"system_disk_category"`
+	SystemDiskSize     int64    `json:"system_disk_size"`
 
 	DataDisks []nodePoolDataDisk `json:"data_disks"` // Support multiple data disks
 	Tags      []Tag              `json:"tags"`
@@ -422,6 +423,7 @@ type CreateNodePoolRequest struct {
 	ClusterID        string           `json:"ClusterId"`
 	NodepoolID       string           `json:"NodepoolId"`
 	UpdateNodes      bool             `json:"update_nodes"`
+	NodePoolInfo     NodePoolInfo     `json:"nodepool_info"`
 	ScalingGroup     scalingGroup     `json:"scaling_group"`
 	KubernetesConfig kubernetesConfig `json:"kubernetes_config"`
 	TEEConfig        tEEConfig        `json:"tee_config"`
@@ -451,11 +453,12 @@ func resourceAlibabacloudStackCSKubernetesNodePoolCreate(d *schema.ResourceData,
 	if err := json.Unmarshal(response.GetHttpContentBytes(), &nodepoolresponse); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "NodePoolCommonResponse", response)
 	}
+	resourceId := fmt.Sprintf("%s:%s", d.Get("cluster_id").(string), nodepoolresponse.NodePoolID)
 
-	d.SetId(nodepoolresponse.NodePoolID)
+	d.SetId(resourceId)
 
 	// reset interval to 10s
-	stateConf := BuildStateConf([]string{"initial", "scaling"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), d.Get("cluster_id").(string), []string{"deleting", "failed"}))
+	stateConf := BuildStateConf([]string{"initial", "scaling"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, "ResourceID:%s , TaskID:%s ", d.Id(), nodepoolresponse.TaskId)
 	}
@@ -470,19 +473,31 @@ func resourceAlibabacloudStackCSKubernetesNodePoolCreate(d *schema.ResourceData,
 
 func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	if d.IsNewResource() {
+		return nil
+	}
 	csService := CsService{client}
-
-	clusterId := d.Get("cluster_id").(string)
+	parts, err := ParseResourceId(d.Id(), 2)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	clusterId := parts[0]
+	nodePoolId := parts[1]
 	update := false
 
 	args := &CreateNodePoolRequest{
 		ClusterID:        clusterId,
-		NodepoolID:       d.Id(),
+		NodepoolID:       nodePoolId,
 		UpdateNodes:      true,
+		NodePoolInfo:     NodePoolInfo{},
 		ScalingGroup:     scalingGroup{},
 		KubernetesConfig: kubernetesConfig{},
 		TEEConfig:        tEEConfig{},
 		AutoScaling:      autoScaling{},
+	}
+	args.NodePoolInfo.Name = d.Get("name").(string)
+	if d.HasChange("name") {
+		update = true
 	}
 	if d.HasChange("node_count") {
 		oldV, newV := d.GetChange("node_count")
@@ -495,29 +510,18 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 		if !ok {
 			return errmsgs.WrapErrorf(fmt.Errorf("node_count new value can not be parsed"), "parseError %d", newValue)
 		}
-		log.Printf("UUUUUUUUUUUUUUUUUUUUUUUUUUUU %d , %d", newValue, oldValue)
 		if newValue < oldValue {
-			err := RemoveNodePoolNodes(d, meta, clusterId, d.Id(), nil, nil)
+			err := RemoveNodePoolNodes(d, meta, clusterId, nodePoolId, nil, nil)
 			if err != nil {
 				return err
 			}
-
-			// The removal of a node is logically independent.
-			// The removal of a node should not involve parameter changes.
-			return nil
-
 		}
 		//update = true
 		if newValue > oldValue {
-			err := ScaleClusterNodePool(d, meta, clusterId, d.Id(), oldValue, newValue)
+			err := ScaleClusterNodePool(d, meta, clusterId, nodePoolId, oldValue, newValue)
 			if err != nil {
 				return err
 			}
-
-			// The removal of a node is logically independent.
-			// The removal of a node should not involve parameter changes.
-			return nil
-
 		}
 	}
 
@@ -544,9 +548,13 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 
 	// password is required by update method
 	args.ScalingGroup.LoginPassword = d.Get("password").(string)
+	args.ScalingGroup.KeyPair = d.Get("key_name").(string)
 	if d.HasChange("password") {
 		update = true
-		args.ScalingGroup.LoginPassword = d.Get("password").(string)
+	}
+
+	if d.HasChange("key_name") {
+		update = true
 	}
 
 	if d.HasChange("system_disk_category") {
@@ -625,10 +633,8 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 
 	if update {
 		//begin
-		request := client.NewCommonRequest("PUT", "CS", "2015-12-15", "ModifyClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterId, d.Id()))
+		request := client.NewCommonRequest("PUT", "CS", "2015-12-15", "ModifyClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterId, nodePoolId))
 		request.QueryParams["ClusterId"] = clusterId
-		request.QueryParams["SignatureVersion"] = "1.0"
-		request.Headers["x-acs-asapi-gateway-version"] = "3.0"
 		jsonData, err := json.Marshal(args)
 		if err != nil {
 			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
@@ -636,6 +642,7 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 		request.SetContentType(requests.Json)
 		request.SetContent(jsonData)
 		response, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), response, request, request.QueryParams)
 		if err != nil {
 			if response == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -644,7 +651,7 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateKubernetesNodePool", response, errmsg)
 		}
 
-		stateConf := BuildStateConf([]string{"scaling", "updating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterId, []string{"deleting", "failed"}))
+		stateConf := BuildStateConf([]string{"scaling", "updating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
 
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -666,7 +673,7 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 		if len(newValue) > len(oldValue) {
 			attachExistingInstance(d, meta)
 		} else {
-			err := RemoveNodePoolNodes(d, meta, clusterId, d.Id(), oldValue, newValue)
+			err := RemoveNodePoolNodes(d, meta, clusterId, nodePoolId, oldValue, newValue)
 			if err != nil {
 				return err
 			}
@@ -677,10 +684,14 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 
 func resourceAlibabacloudStackCSNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	clusterId := d.Get("cluster_id").(string)
 	csService := CsService{client}
+	parts, err := ParseResourceId(d.Id(), 2)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	clusterId := parts[0]
 
-	object, err := csService.DescribeCsKubernetesNodePool(d.Id(), clusterId)
+	object, err := csService.DescribeCsKubernetesNodePool(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -688,6 +699,7 @@ func resourceAlibabacloudStackCSNodePoolRead(d *schema.ResourceData, meta interf
 		}
 		return errmsgs.WrapError(err)
 	}
+	d.Set("cluster_id", clusterId)
 
 	d.Set("node_count", object.Status.TotalNodes)
 	d.Set("name", object.NodepoolInfo.Name)
@@ -767,18 +779,36 @@ func resourceAlibabacloudStackCSNodePoolRead(d *schema.ResourceData, meta interf
 func resourceAlibabacloudStackCSNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
-	clusterId := d.Get("cluster_id").(string)
-	var raw interface{}
-	// delete all nodes
-	err := DeleteAllPoolNodes(d, meta)
+	parts, err := ParseResourceId(d.Id(), 2)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	clusterId := parts[0]
+	nodePoolId := parts[1]
+	stateConf := BuildStateConf([]string{"scaling", "updating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+	err = DeleteAllPoolNodes(d, meta)
 	if err != nil {
 		return err
 	}
-
-	req := client.NewCommonRequest("DELETE", "CS", "2015-12-15", "DeleteClusterNodepool", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterId, d.Id()))
+	req := client.NewCommonRequest("DELETE", "CS", "2015-12-15", "DeleteClusterNodepool", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterId, nodePoolId))
 	req.QueryParams["ClusterId"] = clusterId
-	req.QueryParams["NodepoolId"] = d.Id()
-	// req.Headers["x-acs-asapi-gateway-version"] = "3.0"
+	req.QueryParams["NodepoolId"] = nodePoolId
+	req.QueryParams["force"] = "true"
+	req.QueryParams["Force"] = "true"
+	body := map[string]interface{}{
+		"force": true,
+		"Force": true,
+	}
+	jsonData, err := json.Marshal(body)
+	if err != nil {
+		return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+	}
+	req.SetContentType(requests.Json)
+	req.SetContent(jsonData)
+	req.Headers["x-acs-asapi-gateway-version"] = "3.0"
 
 	response, err := client.ProcessCommonRequest(req)
 	if err != nil {
@@ -786,11 +816,10 @@ func resourceAlibabacloudStackCSNodePoolDelete(d *schema.ResourceData, meta inte
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteClusterNodePool", raw, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteClusterNodePool", errmsg)
 	}
-
-	stateConf := BuildStateConf([]string{"deleting"}, []string{}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterId, []string{"failed"}))
-	if _, err := stateConf.WaitForState(); err != nil {
+	stateConf = BuildStateConf([]string{"deleting", "active"}, []string{""}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"failed"}))
+	if _, err = stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
@@ -823,13 +852,18 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.Comm
 
 		VswitchIds:    expandStringList(d.Get("vswitch_ids").([]interface{})),
 		InstanceTypes: expandStringList(d.Get("instance_types").([]interface{})),
-		LoginPassword: password,
+		// LoginPassword: password,
 
 		SystemDiskCategory: d.Get("system_disk_category").(string),
 		SystemDiskSize:     int64(d.Get("system_disk_size").(int)),
 
 		ImageId:  d.Get("image_id").(string),
 		Platform: d.Get("platform").(string),
+	}
+	if password != "" {
+		ScalingGroup.LoginPassword = password
+	} else {
+		ScalingGroup.KeyPair = d.Get("key_name").(string)
 	}
 	KubernetesConfig := kubernetesConfig{}
 	AutoScaling := autoScaling{}
@@ -848,6 +882,7 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.Comm
 		ScalingGroup.LoginPassword = v.(string)
 
 	}
+
 	if v, ok := d.GetOk("install_cloud_monitor"); ok {
 		KubernetesConfig.CmsEnabled = v.(bool)
 	}
@@ -1047,6 +1082,14 @@ func setAutoScalingConfig(l []interface{}) (config autoScaling) {
 		config.Type = v
 	}
 
+	if v, ok := m["is_bond_eip"].(bool); ok {
+		config.IsBondEip = v
+	}
+
+	if v, ok := m["eip_bandwidth"].(int); ok {
+		config.EipBandWidth = int64(v)
+	}
+
 	return config
 }
 
@@ -1081,17 +1124,16 @@ func flattenSpotPriceLimit(config []SpotPrice) (m []map[string]interface{}) {
 	return m
 }
 
-func flattenAutoScalingConfig(config *AutoScaling) (m []map[string]interface{}) {
+func flattenAutoScalingConfig(config *autoScaling) (m []map[string]interface{}) {
 	if config == nil {
 		return
 	}
 	m = append(m, map[string]interface{}{
-		"min_size":                 config.MinInstances,
-		"max_size":                 config.MaxInstances,
-		"type":                     config.Type,
-		"is_bond_eip":              config.IsBindEip,
-		"eip_internet_charge_type": config.EipInternetChargeType,
-		"eip_bandwidth":            config.EipBandWidth,
+		"min_size":      config.MinInstances,
+		"max_size":      config.MaxInstances,
+		"type":          config.Type,
+		"is_bond_eip":   config.IsBondEip,
+		"eip_bandwidth": config.EipBandWidth,
 	})
 
 	return
@@ -1178,11 +1220,15 @@ func flattenTagsConfig(config []Tag) map[string]string {
 func DeleteAllPoolNodes(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
-	clusterid := d.Get("cluster_id").(string)
-	object, err := csService.DescribeClusterNodes(clusterid, d.Id())
+	parts, err := ParseResourceId(d.Id(), 2)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	clusterId := parts[0]
+	nodePoolId := parts[1]
+	object, err := csService.DescribeClusterNodes(clusterId, nodePoolId)
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
-			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
@@ -1195,14 +1241,14 @@ func DeleteAllPoolNodes(d *schema.ResourceData, meta interface{}) error {
 
 	if len(allNodeName) > 0 {
 
-		req := csService.client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", fmt.Sprintf("/api/v2/clusters/%s/nodes/remove", clusterid))
+		req := csService.client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", fmt.Sprintf("/api/v2/clusters/%s/nodes/remove", clusterId))
 		req.QueryParams["SignatureVersion"] = "1.0"
 		req.Headers["x-acs-asapi-gateway-version"] = "3.0"
 		body := map[string]interface{}{
 			"release_node": true,
 			"drain_node":   true,
 			"nodes":        allNodeName,
-			"ClusterId":    clusterid,
+			"ClusterId":    clusterId,
 		}
 		jsonData, err := json.Marshal(body)
 		if err != nil {
@@ -1217,7 +1263,7 @@ func DeleteAllPoolNodes(d *schema.ResourceData, meta interface{}) error {
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteKubernetesClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterid, []string{"deleting", "failed"}))
+		stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -1230,7 +1276,7 @@ func RemoveNodePoolNodes(d *schema.ResourceData, meta interface{}, clusterid, no
 	csService := CsService{client}
 
 	// list all nodes of the nodepool
-	object, err := csService.DescribeClusterNodes(clusterid, d.Id())
+	object, err := csService.DescribeClusterNodes(clusterid, nodepoolid)
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -1295,7 +1341,7 @@ func RemoveNodePoolNodes(d *schema.ResourceData, meta interface{}, clusterid, no
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteKubernetesClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterid, []string{"deleting", "failed"}))
+		stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -1331,7 +1377,7 @@ func ScaleClusterNodePool(d *schema.ResourceData, meta interface{}, clusterid, n
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "ScaleClusterNodePool", raw)
 	}
 
-	stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterid, []string{"deleting", "failed"}))
+	stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -1367,10 +1413,15 @@ func attachExistingInstance(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, ResourceName, "InitializeClient", err)
 	}
-	clusterId := d.Get("cluster_id").(string)
+	parts, err := ParseResourceId(d.Id(), 2)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	clusterId := parts[0]
+	nodePoolId := parts[1]
 
 	args := &roacs.AttachInstancesRequest{
-		NodepoolId:       tea.String(d.Id()),
+		NodepoolId:       tea.String(nodePoolId),
 		FormatDisk:       tea.Bool(false),
 		KeepInstanceName: tea.Bool(true),
 	}
@@ -1380,7 +1431,8 @@ func attachExistingInstance(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if v, ok := d.GetOk("key_name"); ok {
-		args.KeyPair = tea.String(v.(string))
+		args.SetKeyPair(v.(string))
+
 	}
 
 	if v, ok := d.GetOk("format_disk"); ok {
@@ -1399,12 +1451,12 @@ func attachExistingInstance(d *schema.ResourceData, meta interface{}) error {
 		args.Instances = tea.StringSlice(expandStringList(v.([]interface{})))
 	}
 
-	_, err = client.AttachInstances(tea.String(clusterId), args)
+	raw, err := client.AttachInstances(tea.String(clusterId), args)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, ResourceName, "AttachInstances", errmsgs.AliyunTablestoreGoSdk)
 	}
-
-	stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterId, []string{"deleting", "failed"}))
+	addDebug("AttachInstances", raw, args, args)
+	stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

@@ -940,6 +940,8 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 	} else {
 		nodepoolid = d.Get("nodepool_id").(string)
 	}
+	resourceNodepoolId := fmt.Sprintf("%s:%s", d.Id(), nodepoolid)
+
 	if d.HasChange("num_of_nodes") && !d.IsNewResource() {
 		password := d.Get("password").(string)
 		if password == "" {
@@ -1001,7 +1003,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				//return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
 				return err
 			}
-			stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(nodepoolid, d.Id(), []string{"deleting", "failed"}))
+			stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(resourceNodepoolId, []string{"deleting", "failed"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
@@ -1033,7 +1035,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				addDebug("ScaleClusterNodePool", resp, resizeRequestMap)
 			}
 
-			stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(nodepoolid, d.Id(), []string{"deleting", "failed"}))
+			stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(resourceNodepoolId, []string{"deleting", "failed"}))
 
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -1069,7 +1071,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	// if err != nil {
 	// 	return errmsgs.WrapError(err)
 	// }
-	nodepool, err := csService.DescribeCsKubernetesNodePool(nodepoolid, d.Id())
+	nodepool, err := csService.DescribeCsKubernetesNodePool(fmt.Sprintf("%s:%s", d.Id(), nodepoolid))
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}

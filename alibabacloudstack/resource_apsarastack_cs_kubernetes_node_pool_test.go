@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
-	var v *NodePoolDetail
+	var v *NodePoolAlone
 
 	resourceId := "alibabacloudstack_cs_kubernetes_node_pool.default"
 	ra := resourceAttrInit(resourceId, csdKubernetesNodePoolBasicMap)
@@ -62,7 +62,6 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 						"vswitch_ids.#":         "1",
 						"instance_types.#":      "1",
 						"node_count":            "1",
-						"key_name":              CHECKSET,
 						"system_disk_category":  CHECKSET,
 						"system_disk_size":      "40",
 						"install_cloud_monitor": "false",
@@ -110,7 +109,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 						"system_disk_size":      "80",
 						"data_disks.#":          "1",
 						"data_disks.0.size":     "40",
-						"data_disks.0.category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
+						"data_disks.0.category": CHECKSET,
 					}),
 				),
 			},
@@ -130,7 +129,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
-	var v *NodePoolDetail
+	var v *NodePoolAlone
 
 	resourceId := "alibabacloudstack_cs_kubernetes_node_pool.autoscaling"
 	ra := resourceAttrInit(resourceId, csdKubernetesNodePoolBasicMap)
@@ -163,11 +162,12 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 					"cluster_id":            "${local.k8s_cluster_id}",
 					"vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"instance_types":        []string{"${local.default_instance_type_id}"},
+					"image_id":              "${data.alibabacloudstack_images.default.images.0.id}",
 					"key_name":              "${alibabacloudstack_ecs_keypair.default.key_name}",
 					"system_disk_category":  "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"system_disk_size":      "40",
 					"install_cloud_monitor": "false",
-					"platform":              "AliyunLinux",
+					"platform":              "Custom",
 					"scaling_policy":        "release",
 					"scaling_config": []map[string]string{
 						{
@@ -186,10 +186,10 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 						"vswitch_ids.#":                  "1",
 						"instance_types.#":               "1",
 						"key_name":                       CHECKSET,
-						"system_disk_category":           "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
+						"system_disk_category":           CHECKSET,
 						"system_disk_size":               "40",
 						"install_cloud_monitor":          "false",
-						"platform":                       "AliyunLinux",
+						"platform":                       "Custom",
 						"scaling_policy":                 "release",
 						"scaling_config.#":               "1",
 						"scaling_config.0.min_size":      "1",
@@ -205,18 +205,24 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password", "node_count"},
+				ImportStateVerifyIgnore: []string{"password"},
 			},
 			// Step 3: 更新自动扩缩容配置（调整max_size）
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"platform":       "AliyunLinux",
 					"scaling_policy": "release",
-					"scaling_config": []map[string]string{{"min_size": "1", "max_size": "20", "type": "cpu", "is_bond_eip": "true", "eip_internet_charge_type": "PayByBandwidth", "eip_bandwidth": "5"}},
+					"scaling_config": []map[string]string{
+						{
+							"min_size":      "1",
+							"max_size":      "20",
+							"type":          "cpu",
+							"is_bond_eip":   "true",
+							"eip_bandwidth": "5",
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"platform":                       "AliyunLinux",
 						"scaling_policy":                 "release",
 						"scaling_config.#":               "1",
 						"scaling_config.0.min_size":      "1",
@@ -230,7 +236,15 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 			// Step 4: 修改EIP绑定配置
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"scaling_config": []map[string]string{{"min_size": "1", "max_size": "20", "type": "cpu", "is_bond_eip": "false", "eip_internet_charge_type": "PayByBandwidth", "eip_bandwidth": "5"}},
+					"scaling_config": []map[string]string{
+						{
+							"min_size":      "1",
+							"max_size":      "20",
+							"type":          "cpu",
+							"is_bond_eip":   "false",
+							"eip_bandwidth": "5",
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -260,6 +274,8 @@ variable "name" {
 
 %s
 
+%s
+
 locals {
   update_instance_type_id = coalesce(
     try(local.filtered_default[0].ids[1], null),
@@ -272,5 +288,5 @@ resource "alibabacloudstack_ecs_keypair" "default" {
   key_name = var.name
 }
 
-`, name, AckK8sCommonTestCase())
+`, name, DataAlibabacloudstackImages, AckK8sCommonTestCase())
 }

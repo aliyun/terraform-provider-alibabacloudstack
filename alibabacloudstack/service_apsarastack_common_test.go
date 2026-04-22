@@ -1422,7 +1422,7 @@ resource "alibabacloudstack_cs_kubernetes" "default" {
 	version						= "1.34.1-aliyun.1"
 	os_type						= "linux"
 	platform					= "AliyunLinux"
-	num_of_nodes				= "3"
+	num_of_nodes				= "1"
 	master_count				= "3"
 	master_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
 	master_instance_types		= ["${local.default_instance_type_id}","${local.default_instance_type_id}","${local.default_instance_type_id}"]
