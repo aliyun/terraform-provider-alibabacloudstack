@@ -1085,7 +1085,9 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	d.Set("delete_protection", object.DeletionProtection)
 
 	// Fill in more attribute readings
-	d.Set("security_group_id", object.SecurityGroupId)
+	if object.SecurityGroupId != "" {
+		d.Set("security_group_id", object.SecurityGroupId)
+	}
 	d.Set("worker_ram_role_name", object.WorkerRamRoleName)
 
 	// Read worker-related configurations from nodepool
@@ -1174,7 +1176,6 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta interface{}) error {
-	return nil
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	invoker := NewInvoker()
@@ -1224,11 +1225,15 @@ func getDefaultNodePoolId(csService CsService, clusterId string) (string, error)
 			}
 		}
 		if nodepoolid == "" {
-			if len(nodepool.Nodepools) == 1 && nodepool.Nodepools[0].NodepoolInfo.Name == "default-nodepool" {
-				nodepoolid = nodepool.Nodepools[0].NodepoolInfo.NodepoolID
-			} else {
-				return resource.RetryableError(errmsgs.WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools))
+			for _, npinfo := range nodepool.Nodepools {
+				if npinfo.NodepoolInfo.Name == "default-nodepool" {
+					nodepoolid = npinfo.NodepoolInfo.NodepoolID
+					break
+				}
 			}
+		}
+		if nodepoolid == "" {
+			return resource.RetryableError(errmsgs.WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools))
 		}
 		return nil
 	}); err != nil {

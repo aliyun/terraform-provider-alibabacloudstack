@@ -303,6 +303,11 @@ func (s *CsService) DescribeCsKubernetesNodePool(id string) (*NodePoolAlone, err
 		if response == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		result := make(map[string]interface{})
+		_ = json.Unmarshal(response.GetHttpContentBytes(), &result)
+		if v, ok := result["Code"]; ok && v.(string) == "ErrorNodePoolNotFound" {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
 		notfounmsg := fmt.Sprintf("nodePool (%s) not found", id)
 		if errmsgs.IsExpectedErrors(err, notfounmsg, "ErrorNodePoolNotFound") {
 			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)

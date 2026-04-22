@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -14,7 +13,8 @@ func dataSourceAlibabacloudStackCSKubernetesClustersKubeConfig() *schema.Resourc
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
+				ForceNew: true,
 			},
 			"private_address": {
 				Type:     schema.TypeBool,

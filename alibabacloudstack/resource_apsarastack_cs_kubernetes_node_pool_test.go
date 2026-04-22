@@ -257,6 +257,16 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"instance_types": []string{"${local.default_instance_type_id}", "${local.update_instance_type_id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_types.#": "2",
+					}),
+				),
+			},
 		},
 	})
 }
