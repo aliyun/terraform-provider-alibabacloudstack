@@ -438,6 +438,10 @@ func (s OssService) buildOssClientConfig(endpoint string) *oss.Config {
 	// requests (endpoint/bucket-name/object) must be used instead.
 	cfg = cfg.WithUsePathStyle(true)
 
+	// Extend timeouts to accommodate slower or high-latency ApsaraStack environments.
+	cfg = cfg.WithConnectTimeout(10 * time.Second).
+		WithReadWriteTimeout(30 * time.Second)
+
 	return cfg
 }
 

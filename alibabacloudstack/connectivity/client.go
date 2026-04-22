@@ -85,14 +85,13 @@ type AlibabacloudStackClient struct {
 	teaRoaSdkConfig              roa.Config
 	accountId                    string
 	roleId                       int
-	Conns                        map[ServiceCode]*sdk.Client
-	connsMu                      sync.Mutex
 	ascmconn                     *sdk.Client
 	ecsconn                      *ecs.Client
 	accountIdMutex               sync.RWMutex
 	roleIdMutex                  sync.RWMutex
 	OssEndpointOnce              sync.Once
 	vpcconn                      *vpc.Client
+	essconn                      *ess.Client
 	bastionhostprivateconn       *yundun_bastionhost.Client
 	slbconn                      *slb.Client
 	polarDBconn                  *polardb.Client
@@ -177,7 +176,6 @@ func (c *Config) Client() (*AlibabacloudStackClient, error) {
 		ResourceGroupId:              c.ResourceGroupId,
 		Domain:                       c.Domain,
 		OtsInstanceName:              c.OtsInstanceName,
-		Conns:                        make(map[ServiceCode]*sdk.Client),
 		tablestoreconnByInstanceName: make(map[string]*tablestore.TableStoreClient),
 		Eagleeye:                     c.Eagleeye,
 	}, nil
@@ -271,16 +269,16 @@ func (client *AlibabacloudStackClient) WithCloudApiClient(do func(*cloudapi.Clie
 }
 
 func (client *AlibabacloudStackClient) WithEssClient(do func(*ess.Client) (interface{}, error)) (interface{}, error) {
-	conn, err := client.getConnectClient("ESS")
-	if err != nil {
-		return nil, err
+	if client.essconn == nil {
+		conn, error := client.WithProductSDKClient(ESSCode)
+		if error != nil {
+			return nil, error
+		}
+		client.essconn = &ess.Client{
+			Client: *conn,
+		}
 	}
-	essconn := &ess.Client{
-		Client: *conn,
-	}
-	return retryDo(func() (interface{}, error) {
-		return do(essconn)
-	})
+	return do(client.essconn)
 }
 
 func (client *AlibabacloudStackClient) WithRkvClient(do func(*r_kvstore.Client) (interface{}, error)) (interface{}, error) {
@@ -1155,22 +1153,6 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 	return response, err
 }
 
-func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*sdk.Client, error) {
-	client.connsMu.Lock()
-	defer client.connsMu.Unlock()
-	var conn *sdk.Client
-	var exists bool
-	if conn, exists = client.Conns[popcode]; !exists {
-		c, err := client.WithProductSDKClient(popcode)
-		if err != nil {
-			return nil, err
-		}
-		client.Conns[popcode] = c
-		conn = c
-	}
-	return conn, nil
-}
-
 func (client *AlibabacloudStackClient) GetAccountInfo() string {
 	accountMap := make(map[string]interface{})
 
@@ -1198,15 +1180,14 @@ func (client *AlibabacloudStackClient) GetAccountInfo() string {
 func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {
 	popcode := ServiceCode(strings.ReplaceAll(strings.ToUpper(request.Product), "-", "_"))
 
-	conn, err := client.getConnectClient(popcode)
-	if err != nil {
-		return nil, err
+	endpoint := client.Config.Endpoints[popcode]
+	if endpoint == "" {
+		return nil, fmt.Errorf("[ERROR] unable to initialize the %s client: endpoint or domain is not provided", string(popcode))
 	}
 
-	//request.Domain = conn.Domain
 	domain := request.Domain
 	if domain == "" {
-		domain = conn.Domain
+		domain = endpoint
 	}
 
 	if popcode == OneRouterCode {
@@ -1247,10 +1228,14 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 	}
 
 	var response *responses.CommonResponse
+	var err error
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	retryTimes := 3
 	resource.Retry(5*time.Minute, func() *resource.RetryError {
-		// Retry only when the request does not return normally
+		conn, connErr := client.WithProductSDKClient(popcode)
+		if connErr != nil {
+			return resource.NonRetryableError(connErr)
+		}
 		response, err = conn.ProcessCommonRequest(request)
 		resp := map[string]interface{}{}
 		json.Unmarshal(response.GetHttpContentBytes(), &resp)
