@@ -455,7 +455,7 @@ func (s OssService) GetOssEndpointListForIot() ([]interface{}, error) {
 		"region":          nil,
 		"fullClusterInfo": "true",
 	}
-	response, err := s.client.DoTeaRequest("POST", "ApiDevelop", "2025-06-20", "GetOssEndpointListAction", "/apidevelop/getOssEndpointListAction", nil, nil, request)
+	response, err := s.client.DoTeaRequest("POST", "ApiDevelop", "2025-06-20", "GetOssEndpointList", "/apidevelop/getOssEndpointList", nil, nil, request)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
