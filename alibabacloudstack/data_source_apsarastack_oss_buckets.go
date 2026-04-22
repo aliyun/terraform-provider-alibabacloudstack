@@ -97,8 +97,14 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	endpointMap, err := ossService.GetBucketEndpointMap()
-	if err != nil {
-		return errmsgs.WrapError(err)
+	if err != nil || len(endpointMap) < 1 {
+		endpoint, err := ossService.GetDefaultOssEndpoint()
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		endpointMap = map[string]string{
+			"defaultCluster": endpoint,
+		}
 	}
 	var buckets []oss.BucketProperties
 	names := make([]string, 0)
