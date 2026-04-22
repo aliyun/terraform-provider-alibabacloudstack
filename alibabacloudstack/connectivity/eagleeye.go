@@ -3,12 +3,12 @@ package connectivity
 import (
 	"bytes"
 	"fmt"
+	"net"
 	"os"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"time"
-	"net"
-	"strings"
 )
 
 const pidFlag = "d"
@@ -49,22 +49,22 @@ func getIp16(ip string) string {
 }
 
 func getLocalIP() string {
-    addrs, err := net.InterfaceAddrs()
-    if err != nil {
-        return "127.0.0.1"
-    }
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "127.0.0.1"
+	}
 
-    for _, addr := range addrs {
-        // Check the address type and ensure it is not a loopback address
-        ipNet, ok := addr.(*net.IPNet)
-        if ok && !ipNet.IP.IsLoopback() {
-            if ipNet.IP.To4() != nil {
-                return ipNet.IP.String()
-            }
-        }
-    }
+	for _, addr := range addrs {
+		// Check the address type and ensure it is not a loopback address
+		ipNet, ok := addr.(*net.IPNet)
+		if ok && !ipNet.IP.IsLoopback() {
+			if ipNet.IP.To4() != nil {
+				return ipNet.IP.String()
+			}
+		}
+	}
 
-    return "127.0.0.1"
+	return "127.0.0.1"
 }
 
 func GenerateTraceId() string {
@@ -79,9 +79,9 @@ func GenerateTraceId() string {
 }
 
 type EagleEye struct {
-	TraceId  string
-	RpcId    string
-	Index     int
+	TraceId string
+	RpcId   string
+	Index   int32 // use int32 for atomic operations
 }
 
 const DefaultRpcId = "3"
@@ -91,6 +91,6 @@ func (eagleeye *EagleEye) GetTraceId() string {
 }
 
 func (eagleeye *EagleEye) GetRpcId() string {
-	eagleeye.Index += 1
-	return fmt.Sprintf("%s.%d", eagleeye.RpcId, eagleeye.Index)
+	idx := atomic.AddInt32(&eagleeye.Index, 1)
+	return fmt.Sprintf("%s.%d", eagleeye.RpcId, idx)
 }

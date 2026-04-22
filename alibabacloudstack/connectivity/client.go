@@ -86,10 +86,12 @@ type AlibabacloudStackClient struct {
 	accountId                    string
 	roleId                       int
 	Conns                        map[ServiceCode]*sdk.Client
+	connsMu                      sync.Mutex
 	ascmconn                     *sdk.Client
 	ecsconn                      *ecs.Client
 	accountIdMutex               sync.RWMutex
 	roleIdMutex                  sync.RWMutex
+	OssEndpointOnce              sync.Once
 	vpcconn                      *vpc.Client
 	bastionhostprivateconn       *yundun_bastionhost.Client
 	slbconn                      *slb.Client
@@ -1154,6 +1156,8 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 }
 
 func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*sdk.Client, error) {
+	client.connsMu.Lock()
+	defer client.connsMu.Unlock()
 	var conn *sdk.Client
 	var exists bool
 	if conn, exists = client.Conns[popcode]; !exists {

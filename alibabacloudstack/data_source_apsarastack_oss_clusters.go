@@ -103,29 +103,8 @@ func dataSourceAlibabacloudStackOssClusters() *schema.Resource {
 
 func dataSourceAlibabacloudStackOssClustersRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	// request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoApi", "")
-	// request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
-	// request.QueryParams["AppAction"] = "GetOssEndpointList"
-	// request.QueryParams["AppName"] = "one-console-app-oss"
-	// region := client.RegionId
-	// request.QueryParams["Params"] = fmt.Sprintf("{\"region\":\"%s\", \"params\":{\"region\":\"%s\"}}", region, region)
-	// bresponse, err := client.ProcessCommonRequest(request)
-	// addDebug("GetOssEndpointList", bresponse, request, request.QueryParams)
-	// if err != nil {
-	// 	if bresponse == nil {
-	// 		return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-	// 	}
-	// 	errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-	// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetOssEndpointList", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
-	// }
-	// result := make(map[string]interface{})
-	// _ = json.Unmarshal(bresponse.GetHttpContentBytes(), &result)
-	// data, ok := result["Data"]
-	// if !ok || len(data.([]interface{})) == 0 {
-	// 	return errmsgs.Error(fmt.Sprintf("GetOssEndpointList Failed! region: %s \n %#v", client.RegionId, bresponse.GetHttpContentString()))
-	// }
 	ossService := OssService{client}
-	data, err := ossService.GetOssEndpointListForIot()
+	data, err := ossService.GetOssEndpointList()
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}

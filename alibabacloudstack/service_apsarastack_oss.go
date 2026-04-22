@@ -450,7 +450,7 @@ func (s OssService) GetOssClient(endpoint string) (*oss.Client, error) {
 	return client, nil
 }
 
-func (s OssService) GetOssEndpointListForIot() ([]interface{}, error) {
+func (s OssService) GetOssEndpointListForPop() ([]interface{}, error) {
 	request := map[string]interface{}{
 		"region":          nil,
 		"fullClusterInfo": "true",
@@ -467,18 +467,22 @@ func (s OssService) GetOssEndpointListForIot() ([]interface{}, error) {
 }
 
 func (s OssService) GetOssEndpointList() ([]interface{}, error) {
-	data, err := s.GetOssEndpointListForIot()
-	if err != nil || len(data) == 0 {
+	data, err := s.GetOssEndpointListForPop()
+	if err != nil && errmsgs.IsExpectedErrors(err, "InvalidAction.NotFound") {
+		// TODO: Remove in 3.21.0
 		data, err = s.GetOssEndpointListForAsApi()
 	}
 	return data, err
 }
 
 func (s OssService) GetBucketEndpointMap() (map[string]string, error) {
-	ossEndpointMap := s.client.Config.OssEndpoints
-	if len(ossEndpointMap) > 0 {
-		return ossEndpointMap, nil
-	} else {
+	// Use sync.Once to ensure the endpoint list is fetched only once (thread-safe).
+	// The nil check for static config is inside Do to avoid data race on Config.OssEndpoints.
+	s.client.OssEndpointOnce.Do(func() {
+		if s.client.Config.OssEndpoints != nil {
+			return // already set by provider config, no need to fetch
+		}
+		ossEndpointMap := map[string]string{}
 		endpoints, err := s.GetOssEndpointList()
 		if err == nil {
 			for _, v := range endpoints {
@@ -487,8 +491,9 @@ func (s OssService) GetBucketEndpointMap() (map[string]string, error) {
 				ossEndpointMap[endpointData["cluster"].(string)] = endpoint
 			}
 		}
-	}
-	return ossEndpointMap, nil
+		s.client.Config.OssEndpoints = &ossEndpointMap
+	})
+	return *s.client.Config.OssEndpoints, nil
 }
 
 func (s OssService) GetOssEndpointForCluster(cluster string) (endpoint string, err error) {

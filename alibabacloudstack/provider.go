@@ -1188,9 +1188,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 			}
 		}
 	}
-	oss_endpoints := make(map[string]string)
-	for k, v := range oss_endpoint_map {
-		oss_endpoints[k] = v.(string)
+	var oss_endpoints *map[string]string
+	if len(oss_endpoint_map) > 0 {
+		m := map[string]string{}
+		for k, v := range oss_endpoint_map {
+			m[k] = v.(string)
+		}
+		oss_endpoints = &m
 	}
 	log.Printf("=============================================================oss_endpoint_map %#v", oss_endpoint_map)
 	config := &connectivity.Config{
