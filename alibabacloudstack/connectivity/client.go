@@ -999,6 +999,17 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 	}
 
 	if err != nil {
+		// Auth or invalid action errors with retry budget
+		if errmsgs.IsExpectedErrors(err, "Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable", "UnknownError") && retryTimes > 0 {
+			retryTimes--
+			return resource.RetryableError(err), retryTimes
+		}
+
+		if errmsgs.IsHostNotFound(err) {
+			retryTimes--
+			return resource.RetryableError(err), retryTimes
+		}
+
 		if errmsgs.NotFoundError(err) {
 			return resource.NonRetryableError(err), retryTimes
 		}
@@ -1009,12 +1020,6 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 
 		// Timeout or transient errors
 		if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, errmsgs.Throttling, errmsgs.LogClientTimeout, "ONS_SYSTEM_FLOW_CONTROL", "LockTimeout", "RequestTimeout", "asapi.server.timeout.socket") {
-			return resource.RetryableError(err), retryTimes
-		}
-
-		// Auth or invalid action errors with retry budget
-		if errmsgs.IsExpectedErrors(err, "Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable", "UnknownError") && retryTimes > 0 {
-			retryTimes--
 			return resource.RetryableError(err), retryTimes
 		}
 
@@ -1076,10 +1081,10 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 	}
 	runtime.SetAutoretry(false) // When using ASAPI, the Tea package cannot retry, as it will modify the endpoint
 	if client.Config.ClientReadTimeout > 0 {
-		log.Printf("====================================================================== client.Config.ClientReadTimeout: %d", client.Config.ClientReadTimeout)
+		log.Printf("client.Config.ClientReadTimeout: %d", client.Config.ClientReadTimeout)
 	}
 	if client.Config.ClientConnectTimeout > 0 {
-		log.Printf("====================================================================== client.Config.ClientConnectTimeout: %d", client.Config.ClientConnectTimeout)
+		log.Printf("client.Config.ClientConnectTimeout: %d", client.Config.ClientConnectTimeout)
 	}
 	readTimeout := client.Config.ClientReadTimeout
 	connectTimeout := client.Config.ClientConnectTimeout
@@ -1241,14 +1246,22 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		resp := map[string]interface{}{}
 		json.Unmarshal(response.GetHttpContentBytes(), &resp)
 		if response == nil {
-			retryTimes -= 1
-			wait()
-			return resource.RetryableError(err)
+			retryTimes--
+			if retryTimes > 0 {
+				wait()
+				return resource.RetryableError(err)
+			} else {
+				return resource.NonRetryableError(err)
+			}
 		}
 		var retryErr *resource.RetryError
 		retryErr, retryTimes = requestErrorHandler(fmt.Sprintf("%s_%s_%s", request.Product, request.Version, request.ApiName), resp, err, retryTimes)
 		if retryErr != nil {
-			wait()
+			if retryErr.Retryable && retryTimes <= 0 {
+				return resource.NonRetryableError(retryErr.Err)
+			} else {
+				wait()
+			}
 		}
 		return retryErr
 	})

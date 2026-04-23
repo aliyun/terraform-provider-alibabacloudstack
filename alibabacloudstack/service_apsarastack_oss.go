@@ -248,6 +248,12 @@ func (s *OssService) GetOssEndpointListForAsApi() ([]interface{}, error) {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if errmsg == "" {
+			errmsg = bresponse.GetHttpContentString()
+			if strings.Contains(errmsg, "DNS Lookup Failed") || strings.Contains(errmsg, "nodename nor servname provided, or not known") {
+				return nil, errmsgs.GetHostNotFoundError(request.GetDomain())
+			}
+		}
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetOssEndpointList", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 	}
 	result := make(map[string]interface{})

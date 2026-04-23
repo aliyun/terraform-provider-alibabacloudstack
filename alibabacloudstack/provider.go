@@ -116,7 +116,7 @@ func Provider() *schema.Provider {
 			"client_connect_timeout": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("CLIENT_CONNECT_TIMEOUT", 60000),
+				DefaultFunc: schema.EnvDefaultFunc("CLIENT_CONNECT_TIMEOUT", 10000),
 				Description: descriptions["client_connect_timeout"],
 			},
 			"source_ip": {
@@ -1393,15 +1393,12 @@ var descriptions map[string]string
 
 func init() {
 	descriptions = map[string]string{
-		"access_key": "The access key for API operations. You can retrieve this from the 'Security Management' section of the AlibabacloudStack console.",
-
-		"secret_key": "The secret key for API operations. You can retrieve this from the 'Security Management' section of the AlibabacloudStack console.",
-
-		"security_token": "Security token. A security token is only required if you are using Security Token Service.",
-
-		"insecure":       "Use this to trust self-signed certificates. It's typically used to allow insecure connections.",
-		"proxy":          "Use this to set proxy connection.",
-		"popgw_domain":   "Use this to override the default domain. It's typically used to connect to custom domain.",
+		"access_key":             "The access key for API operations. You can retrieve this from the 'Security Management' section of the AlibabacloudStack console.",
+		"secret_key":             "The secret key for API operations. You can retrieve this from the 'Security Management' section of the AlibabacloudStack console.",
+		"security_token":         "Security token. A security token is only required if you are using Security Token Service.",
+		"insecure":               "Use this to trust self-signed certificates. It's typically used to allow insecure connections.",
+		"proxy":                  "Use this to set proxy connection.",
+		"popgw_domain":           "Use this to override the default domain. It's typically used to connect to custom domain.",
 		"client_read_timeout":    "The maximum duration (in milliseconds) for reading a single response from the API server. Default is 60000 ms (60 seconds).",
 		"client_connect_timeout": "The maximum duration (in milliseconds) for establishing a connection to the API server. Default is 60000 ms (60 seconds).",
 	}

@@ -19,13 +19,13 @@ func TestAccAlibabacloudStackOssClustersDataSource(t *testing.T) {
 	// Test with name_regex filter
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string {`${data.alibabacloudstack_oss_clusters.anyone.clusters.0.cluster}`},
+			"ids": []string{`${data.alibabacloudstack_oss_clusters.anyone.clusters.0.cluster}`},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string {"fake-nonexistent-cluster"},
+			"ids": []string{"fake-nonexistent-cluster"},
 		}),
 	}
-	
+
 	// Test with name_regex filter
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -38,18 +38,18 @@ func TestAccAlibabacloudStackOssClustersDataSource(t *testing.T) {
 
 	var existOssClustersMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":       CHECKSET, // Should contain at least one cluster
-			"clusters.#":  CHECKSET, // Should contain at least one cluster
-			"clusters.0.id":                                    CHECKSET,
-			"clusters.0.cluster":                               CHECKSET,
-			"clusters.0.cluster_name":                          CHECKSET,
-			"clusters.0.location":                              CHECKSET,
-			"clusters.0.oss_endpoint":                          CHECKSET,
-			"clusters.0.real_zone":                             CHECKSET,
+			"ids.#":                   CHECKSET, // Should contain at least one cluster
+			"clusters.#":              CHECKSET, // Should contain at least one cluster
+			"clusters.0.id":           CHECKSET,
+			"clusters.0.cluster":      CHECKSET,
+			"clusters.0.cluster_name": CHECKSET,
+			"clusters.0.location":     CHECKSET,
+			"clusters.0.oss_endpoint": CHECKSET,
+			"clusters.0.real_zone":    CHECKSET,
 			// Boolean fields should be set to either "true" or "false"
-			"clusters.0.ha_apsara_stack":                       CHECKSET,
-			"clusters.0.oss_ha_enable_single_cluster_access":   CHECKSET,
-			"clusters.0.is_master_zone":                        CHECKSET,
+			"clusters.0.ha_apsara_stack":                     CHECKSET,
+			"clusters.0.oss_ha_enable_single_cluster_access": CHECKSET,
+			"clusters.0.is_master_zone":                      CHECKSET,
 		}
 	}
 
@@ -66,6 +66,7 @@ func TestAccAlibabacloudStackOssClustersDataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existOssClustersMapFunc,
 		fakeMapFunc:  fakeOssClustersMapFunc,
+		PreCheck:     func() { testAccPreCheckOssEndpointList(t) },
 	}
 	ossClustersCheckInfo.dataSourceTestCheck(t, 0, basicConf, idsConf, nameRegexConf)
 }

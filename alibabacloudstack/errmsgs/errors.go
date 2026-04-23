@@ -3,6 +3,8 @@ package errmsgs
 import (
 	"encoding/json"
 	"errors"
+	"net"
+	"net/url"
 	"reflect"
 	"regexp"
 	"slices"
@@ -35,6 +37,7 @@ const (
 	Throttling              = "Throttling"
 	ServiceUnavailable      = "ServiceUnavailable"
 	ReuqestFailed           = "Reuqest Failed"
+	HostNotFound            = "HostNotFound"
 
 	// RAM Instance Not Found
 	RamInstanceNotFound              = "Forbidden.InstanceNotFound"
@@ -74,6 +77,13 @@ func (err *ProviderError) ErrorCode() string {
 
 func (err *ProviderError) Message() string {
 	return err.message
+}
+
+func GetHostNotFoundError(host string) error {
+	return &ProviderError{
+		errorCode: HostNotFound,
+		message:   host,
+	}
 }
 
 func GetNotFoundErrorFromString(str string) error {
@@ -413,3 +423,47 @@ const DefaultDebugMsg = "\n*************** %s Response *************** \n%s\n%s*
 const FailedToReachTargetStatus = "Failed to reach target status. Current status is %s."
 const FailedGetAttributeMsg = "Getting resource %s attribute by path %s failed!!! Body: %v."
 const NotFoundWithResponse = ResourceNotfound + "!!! Response: %v"
+
+// IsNetworkError checks if the error is a network connectivity error
+// It returns true if the error is caused by DNS resolution failure or network unreachable
+func IsHostNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if IsExpectedErrors(err, HostNotFound) {
+		return true
+	}
+
+	if ce, ok := err.(*ComplexError); ok {
+		if IsHostNotFound(ce.Cause) {
+			return true
+		}
+		if IsHostNotFound(ce.Err) {
+			return true
+		}
+	}
+
+	var urlErr *url.Error
+	if errors.As(err, &urlErr) {
+		var dnsErr *net.DNSError
+		if errors.As(urlErr.Err, &dnsErr) && dnsErr.IsNotFound {
+			return true
+		}
+	}
+
+	// Check for common network error messages
+	errMsg := err.Error()
+	networkErrors := []string{
+		"no such host",
+		"DNS Lookup Failed",
+	}
+
+	for _, networkError := range networkErrors {
+		if strings.Contains(errMsg, networkError) {
+			return true
+		}
+	}
+
+	return false
+}

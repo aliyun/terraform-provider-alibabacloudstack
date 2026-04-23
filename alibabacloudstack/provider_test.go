@@ -4,21 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"slices"
-
-	"github.com/PaesslerAG/jsonpath"
-
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
-
 	"os"
+	"slices"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
 	"io/ioutil"
 	"path/filepath"
-	"strconv"
-	"strings"
+
+	"github.com/PaesslerAG/jsonpath"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -108,6 +107,23 @@ func testAccPreCheck(t *testing.T) {
 	//	t.Fatal("ALIBABACLOUDSTACK_RESOURCE_GROUP_SET must be set for acceptance tests")
 	//}
 
+}
+
+func testAccPreCheckOssEndpointList(t *testing.T) {
+	testAccPreCheck(t)
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	rawClient, err := sharedClientForRegion(region)
+	if err != nil {
+		t.Skipf("Skipping OSS test case with err: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	ossService := OssService{client}
+	if _, err := ossService.GetOssEndpointList(); err != nil {
+		if errmsgs.IsHostNotFound(err) {
+			t.Skipf("Skipping OSS cluster test case: GetOssEndpointList API not support")
+		}
+		t.Fatalf("GetOssEndpointList failed: %s", err)
+	}
 }
 
 func testAccPreYunCheck(t *testing.T) {
