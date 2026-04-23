@@ -826,7 +826,7 @@ func resourceAlibabacloudStackCSNodePoolDelete(d *schema.ResourceData, meta inte
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteClusterNodePool", errmsg)
 	}
-	stateConf = BuildStateConf([]string{"deleting", "active"}, []string{""}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"failed"}))
+	stateConf = BuildStateConf([]string{"deleting", "active"}, []string{}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"failed"}))
 	if _, err = stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

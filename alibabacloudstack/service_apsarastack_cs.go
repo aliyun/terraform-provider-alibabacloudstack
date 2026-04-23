@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -155,11 +156,12 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 		}
 		result := make(map[string]interface{})
 		_ = json.Unmarshal(response.GetHttpContentBytes(), &result)
+		notfounmsg := fmt.Sprintf("nodePool (%s) not found", id)
 		if v, ok := result["Code"]; ok && v.(string) == "ErrorClusterNodePoolNotFound" {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
 		}
-		if errmsgs.IsExpectedErrors(err, "ErrorClusterNodePoolNotFound") {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, notfounmsg, "ErrorClusterNodePoolNotFound") {
+			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -305,10 +307,12 @@ func (s *CsService) DescribeCsKubernetesNodePool(id string) (*NodePoolAlone, err
 		}
 		result := make(map[string]interface{})
 		_ = json.Unmarshal(response.GetHttpContentBytes(), &result)
-		if v, ok := result["Code"]; ok && v.(string) == "ErrorNodePoolNotFound" {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
 		notfounmsg := fmt.Sprintf("nodePool (%s) not found", id)
+		log.Printf("=========================================================%#v", result)
+		if v, ok := result["Code"]; ok && v.(string) == "ErrorNodePoolNotFound" {
+			log.Printf("=========================================================%s", result["Code"].(string))
+			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
+		}
 		if errmsgs.IsExpectedErrors(err, notfounmsg, "ErrorNodePoolNotFound") {
 			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
 		}

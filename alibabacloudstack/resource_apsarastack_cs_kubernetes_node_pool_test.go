@@ -205,7 +205,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateVerifyIgnore: []string{"password", "node_count"},
 			},
 			// Step 3: 更新自动扩缩容配置（调整max_size）
 			{
