@@ -1395,15 +1395,15 @@ func init() {
 	descriptions = map[string]string{
 		"access_key": "The access key for API operations. You can retrieve this from the 'Security Management' section of the AlibabacloudStack console.",
 
-		"secret_key": "The secret key for API operations. You can retrieve this from the 'Security Management' section of the AlibabacloudStackconsole.",
+		"secret_key": "The secret key for API operations. You can retrieve this from the 'Security Management' section of the AlibabacloudStack console.",
 
-		"security_token": "security token. A security token is only required if you are using Security Token Service.",
+		"security_token": "Security token. A security token is only required if you are using Security Token Service.",
 
-		"insecure": "Use this to Trust self-signed certificates. It's typically used to allow insecure connections",
-
-		"proxy": "Use this to set proxy connection",
-
-		"popgw_domain": "Use this to override the default domain. It's typically used to connect to custom domain.",
+		"insecure":       "Use this to trust self-signed certificates. It's typically used to allow insecure connections.",
+		"proxy":          "Use this to set proxy connection.",
+		"popgw_domain":   "Use this to override the default domain. It's typically used to connect to custom domain.",
+		"client_read_timeout":    "The maximum duration (in milliseconds) for reading a single response from the API server. Default is 60000 ms (60 seconds).",
+		"client_connect_timeout": "The maximum duration (in milliseconds) for establishing a connection to the API server. Default is 60000 ms (60 seconds).",
 	}
 }
 func endpointsSchema() *schema.Schema {

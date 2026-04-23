@@ -186,7 +186,7 @@ func (client *AlibabacloudStackClient) NewTeaSDkClient(productCode string, endpo
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
 	}
 	sdkConfig := client.teaRpcSdkConfig
-	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) // Unit: milliseconds
+	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout) // Unit: milliseconds
 	conn, err := rpc.NewClient(&sdkConfig)
 	for key, value := range client.defaultHeaders(productCode) {
 		conn.Headers[key] = &value
@@ -213,8 +213,8 @@ func (client *AlibabacloudStackClient) WithProductSDKClient(popcode ServiceCode)
 	}
 
 	conn.Domain = endpoint
-	conn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Hour)
-	conn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Hour)
+	conn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Millisecond)
+	conn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Millisecond)
 	conn.SourceIp = client.Config.SourceIp
 	conn.SecureTransport = client.Config.SecureTransport
 	conn.AppendUserAgent(Terraform, TerraformVersion)
@@ -481,8 +481,8 @@ func (client *AlibabacloudStackClient) WithKmsClient(do func(*kms.Client) (inter
 		}
 		// Configure KMS client before assignment to avoid concurrent map writes
 		tmpKmsConn.Domain = endpoint
-		tmpKmsConn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Hour)
-		tmpKmsConn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Hour)
+		tmpKmsConn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Millisecond)
+		tmpKmsConn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Millisecond)
 		tmpKmsConn.SourceIp = client.Config.SourceIp
 		tmpKmsConn.SecureTransport = client.Config.SecureTransport
 		tmpKmsConn.AppendUserAgent(Terraform, TerraformVersion)
@@ -1081,8 +1081,8 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 	if client.Config.ClientConnectTimeout > 0 {
 		log.Printf("====================================================================== client.Config.ClientConnectTimeout: %d", client.Config.ClientConnectTimeout)
 	}
-	readTimeout := client.Config.ClientReadTimeout * 1000
-	connectTimeout := client.Config.ClientConnectTimeout * 1000
+	readTimeout := client.Config.ClientReadTimeout
+	connectTimeout := client.Config.ClientConnectTimeout
 	// runtime.ConnectTimeout = &runtimeout
 	runtime.SetConnectTimeout(connectTimeout)
 	runtime.SetReadTimeout(readTimeout)
@@ -1131,7 +1131,8 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 		} else {
 			response, err = func() (map[string]interface{}, error) {
 				sdkConfig := client.teaRpcSdkConfig
-				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) // Unit: milliseconds
+				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout) // Unit: milliseconds
+				sdkConfig.SetConnectTimeout(client.Config.ClientConnectTimeout)
 				sdkConfig.SetProtocol(protocol)
 				conn, err := rpc.NewClient(&sdkConfig)
 				if err != nil {
