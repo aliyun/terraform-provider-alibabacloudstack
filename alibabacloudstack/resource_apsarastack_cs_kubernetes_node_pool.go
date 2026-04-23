@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -27,7 +28,14 @@ func resourceAlibabacloudStackCSKubernetesNodePool() *schema.Resource {
 			Update: schema.DefaultTimeout(60 * time.Minute),
 			Delete: schema.DefaultTimeout(60 * time.Minute),
 		},
-
+		SchemaVersion: 1, // Schema version for state migration support
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceAlibabacloudStackCSKubernetesNodePoolV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: migrateDBConnectionStateV0ToV1,
+				Version: 0,
+			},
+		},
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
 				Type:     schema.TypeString,
@@ -1555,4 +1563,331 @@ type KubernetesConfig struct {
 	CmsEnabled        bool   `json:"cms_enabled"`
 	OverwriteHostname bool   `json:"overwrite_hostname"`
 	Unschedulable     bool   `json:"unschedulable"`
+}
+
+func migrateK8sNodePoolStateV0ToV1(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	// Get the old ID (which is just the instance_id in version 0)
+	oldID := rawState["id"].(string)
+	cluster_id := rawState["cluster_id"].(string)
+	// Update the ID to the new format: instance_id:network_type
+	newID := fmt.Sprintf("%s%s%s", cluster_id, COLON_SEPARATED, oldID)
+	rawState["id"] = newID
+
+	return rawState, nil
+}
+
+func resourceAlibabacloudStackCSKubernetesNodePoolV0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"cluster_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"node_count": {
+				Type:          schema.TypeInt,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"instances"},
+			},
+			"vswitch_ids": {
+				Type:     schema.TypeList,
+				Required: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				MinItems: 1,
+			},
+			"instance_types": {
+				Type:     schema.TypeList,
+				Required: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				MinItems: 1,
+				MaxItems: 10,
+			},
+			"password": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"key_name", "kms_encrypted_password"},
+			},
+			"key_name": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"password", "kms_encrypted_password"},
+			},
+			"kms_encrypted_password": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"password", "key_name"},
+			},
+			"security_group_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"system_disk_category": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  DiskCloudEfficiency,
+			},
+			"system_disk_size": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      40,
+				ValidateFunc: validation.IntBetween(20, 32768),
+			},
+			"system_disk_performance_level": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateFunc:     validation.StringInSlice([]string{"PL0", "PL1", "PL2", "PL3"}, false),
+				DiffSuppressFunc: csNodepoolDiskPerformanceLevelDiffSuppressFunc,
+			},
+			"platform": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"AliyunLinux", "Windows", "CentOS", "WindowsCore", "Custom"}, false),
+			},
+			"image_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"instance_charge_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      PostPaid,
+				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
+			},
+			"period": {
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Default:          1,
+				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 6, 12, 24, 36, 48, 60}),
+				DiffSuppressFunc: csNodepoolInstancePostPaidDiffSuppressFunc,
+			},
+			"period_unit": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          Month,
+				ValidateFunc:     validation.StringInSlice([]string{"Month"}, false),
+				DiffSuppressFunc: csNodepoolInstancePostPaidDiffSuppressFunc,
+			},
+			"auto_renew": {
+				Type:             schema.TypeBool,
+				Default:          false,
+				Optional:         true,
+				DiffSuppressFunc: csNodepoolInstancePostPaidDiffSuppressFunc,
+			},
+			"auto_renew_period": {
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Default:          1,
+				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 6, 12}),
+				DiffSuppressFunc: csNodepoolInstancePostPaidDiffSuppressFunc,
+			},
+			"install_cloud_monitor": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"unschedulable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"data_disks": {
+				Optional: true,
+				Type:     schema.TypeList,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"size": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"category": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"all", "cloud", "ephemeral_ssd", "cloud_essd", "cloud_efficiency", "cloud_ssd", "local_disk", "cloud_pperf", "cloud_sperf"}, false),
+						},
+						"encrypted": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"tags": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
+			"labels": {
+				Optional: true,
+				Type:     schema.TypeList,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"taints": {
+				Optional: true,
+				Type:     schema.TypeList,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"effect": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"node_name_mode": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^customized,[a-z0-9]([-a-z0-9\.])*,([5-9]|[1][0-2]),([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`), "Each node name consists of a prefix, an IP substring, and a suffix. For example, if the node IP address is 192.168.0.55, the prefix is aliyun.com, IP substring length is 5, and the suffix is test, the node name will be aliyun.com00055test."),
+			},
+			"user_data": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"scaling_group_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"scaling_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"min_size": {
+							Type:         schema.TypeInt,
+							Required:     true,
+							ValidateFunc: validation.IntBetween(0, 1000),
+						},
+						"max_size": {
+							Type:         schema.TypeInt,
+							Required:     true,
+							ValidateFunc: validation.IntBetween(0, 1000),
+						},
+						"type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"cpu", "gpu", "gpushare", "spot"}, false),
+						},
+						"is_bond_eip": {
+							Type:          schema.TypeBool,
+							Optional:      true,
+							ConflictsWith: []string{"internet_charge_type"},
+						},
+						"eip_internet_charge_type": {
+							Type:          schema.TypeString,
+							Optional:      true,
+							ValidateFunc:  validation.StringInSlice([]string{"PayByBandwidth", "PayByTraffic"}, false),
+							ConflictsWith: []string{"internet_charge_type"},
+						},
+						"eip_bandwidth": {
+							Type:          schema.TypeInt,
+							Optional:      true,
+							ValidateFunc:  validation.IntBetween(1, 500),
+							ConflictsWith: []string{"internet_charge_type"},
+						},
+					},
+				},
+				ConflictsWith: []string{"instances"},
+			},
+			"scaling_policy": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateFunc:     validation.StringInSlice([]string{"release", "recycle"}, false),
+				DiffSuppressFunc: csNodepoolScalingPolicyDiffSuppressFunc,
+			},
+			"resource_group_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"internet_charge_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"PayByTraffic", "PayByBandwidth"}, false),
+			},
+			"internet_max_bandwidth_out": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"spot_strategy": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"SpotWithPriceLimit"}, false),
+			},
+			"spot_price_limit": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"instance_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"price_limit": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+				DiffSuppressFunc: csNodepoolSpotInstanceSettingDiffSuppressFunc,
+			},
+			"instances": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				MaxItems:      100,
+				ConflictsWith: []string{"node_count", "scaling_config"},
+			},
+			"keep_instance_name": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"format_disk": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+		},
+	}
 }

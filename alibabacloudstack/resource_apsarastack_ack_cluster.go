@@ -1075,7 +1075,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	d.Set("num_of_nodes", nodepool.Status.HealthyNodes)
+	d.Set("num_of_nodes", nodepool.Status.TotalNodes)
 	//d.Set("id", object.ClusterId)
 	//d.Set("state", object.State)
 	d.Set("vpc_id", object.VpcId)

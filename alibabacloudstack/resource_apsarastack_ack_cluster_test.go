@@ -169,6 +169,18 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccConfig(map[string]interface{}{
+					"num_of_nodes": "2",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name":           name,
+						"num_of_nodes":   "2",
+						"worker_nodes.#": "2",
+					}),
+				),
+			},
+			{
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
