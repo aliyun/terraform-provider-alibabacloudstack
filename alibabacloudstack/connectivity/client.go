@@ -1080,12 +1080,6 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 		runtime.HttpsProxy = &client.Config.Proxy
 	}
 	runtime.SetAutoretry(false) // When using ASAPI, the Tea package cannot retry, as it will modify the endpoint
-	if client.Config.ClientReadTimeout > 0 {
-		log.Printf("client.Config.ClientReadTimeout: %d", client.Config.ClientReadTimeout)
-	}
-	if client.Config.ClientConnectTimeout > 0 {
-		log.Printf("client.Config.ClientConnectTimeout: %d", client.Config.ClientConnectTimeout)
-	}
 	readTimeout := client.Config.ClientReadTimeout
 	connectTimeout := client.Config.ClientConnectTimeout
 	// runtime.ConnectTimeout = &runtimeout
@@ -1151,7 +1145,10 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 		log.Printf(" ================================ %s ======================================\n query %#v \n request %#v \n response: %#v", apiname, query, body, response)
 		var retryErr *resource.RetryError
 		retryErr, retryTimes = requestErrorHandler(fmt.Sprintf("%s_%s_%s", popcode, version, apiname), response, err, retryTimes)
-		if retryErr != nil {
+		if retryErr != nil && retryErr.Retryable {
+			if retryTimes <= 0 {
+				return resource.NonRetryableError(retryErr.Err)
+			}
 			wait()
 		}
 		return retryErr
@@ -1256,12 +1253,11 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		}
 		var retryErr *resource.RetryError
 		retryErr, retryTimes = requestErrorHandler(fmt.Sprintf("%s_%s_%s", request.Product, request.Version, request.ApiName), resp, err, retryTimes)
-		if retryErr != nil {
-			if retryErr.Retryable && retryTimes <= 0 {
+		if retryErr != nil && retryErr.Retryable {
+			if retryTimes <= 0 {
 				return resource.NonRetryableError(retryErr.Err)
-			} else {
-				wait()
 			}
+			wait()
 		}
 		return retryErr
 	})

@@ -165,6 +165,24 @@ func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []oss.BucketPr
 	var ids []string
 	var s []map[string]interface{}
 	var names []string
+
+	// Sort buckets by Name
+	slices.SortFunc(buckets, func(a, b oss.BucketProperties) int {
+		if a.Name == nil {
+			return 1
+		}
+		if b.Name == nil {
+			return -1
+		}
+		if *a.Name < *b.Name {
+			return -1
+		}
+		if *a.Name > *b.Name {
+			return 1
+		}
+		return 0
+	})
+
 	for _, bucket := range buckets {
 		creationDate, _ := bucket.CreationDate.MarshalText()
 		creationDateStr := string(creationDate)

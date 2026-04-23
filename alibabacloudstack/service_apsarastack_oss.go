@@ -550,7 +550,12 @@ func (s OssService) GetDefaultOssEndpoint() (string, error) {
 	return endpoint, nil
 }
 
-func (s OssService) GetBucketClient(bucketName string) (*oss.Client, error) {
+type OssClient struct {
+	*oss.Client
+	BucketName string
+}
+
+func (s OssService) GetBucketClient(bucketName string) (*OssClient, error) {
 	bucketInfo, err := s.DescribeOssBucket(bucketName)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
@@ -561,36 +566,44 @@ func (s OssService) GetBucketClient(bucketName string) (*oss.Client, error) {
 
 	bucketEndpoint := *bucketInfo.ExtranetEndpoint
 
-	return s.GetOssClient(bucketEndpoint)
+	client, err := s.GetOssClient(bucketEndpoint)
+
+	return &OssClient{Client: client, BucketName: bucketName}, err
 }
 
 func (s OssService) DescribeOssBucket(bucketName string) (*oss.BucketProperties, error) {
+	bucket, _, err := s.DescribeOssBucketWithCluster(bucketName)
+	return bucket, err
+
+}
+
+func (s OssService) DescribeOssBucketWithCluster(bucketName string) (*oss.BucketProperties, string, error) {
 	var endpointMap map[string]string
 	var err error
 	endpointMap, err = s.GetBucketEndpointMap()
 	if err != nil || len(endpointMap) < 1 {
 		endpoint, err := s.GetDefaultOssEndpoint()
 		if err != nil {
-			return nil, errmsgs.WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 		endpointMap = map[string]string{
 			"defaultCluster": endpoint,
 		}
 	}
-	for _, endpoint := range endpointMap {
-		ossclietn, err := s.GetOssClient(endpoint)
+	for cluster, endpoint := range endpointMap {
+		ossclient, err := s.GetOssClient(endpoint)
 		if err != nil {
-			return nil, errmsgs.WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 		for {
 			request := &oss.ListBucketsRequest{}
-			lsRes, err := ossclietn.ListBuckets(context.TODO(), request)
+			lsRes, err := ossclient.ListBuckets(context.TODO(), request)
 			if err != nil {
-				return nil, errmsgs.WrapError(err)
+				return nil, "", errmsgs.WrapError(err)
 			}
 			for _, bucket := range lsRes.Buckets {
 				if *bucket.Name == bucketName {
-					return &bucket, nil
+					return &bucket, cluster, nil
 				}
 			}
 
@@ -600,7 +613,7 @@ func (s OssService) DescribeOssBucket(bucketName string) (*oss.BucketProperties,
 			request.Marker = lsRes.NextMarker
 		}
 	}
-	return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
+	return nil, "", errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
 }
 
 func (s OssService) DescribeOssBucketKms(bucketName string) (*oss.ApplyServerSideEncryptionByDefault, error) {

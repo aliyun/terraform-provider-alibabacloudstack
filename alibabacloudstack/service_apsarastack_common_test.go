@@ -1986,3 +1986,42 @@ func RsaPublicKeyTestCase() string {
 	}
 	return `ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC6SdEciZk/TehMsv+AN7FBWeWt0wMWEyFuiZjIMQLtZGAbIy5pWIejxgHmdn0eMJ5dtTYj8SDypCpEeFlUfy7DA5NjFFcjFOnAS6vNw3AkIuIYiNW3/T4lmQ7w+coRmGNKl5mQfTkPOtWF8Yh0zBgkaNuLlQKnq2ZMTWPPs9JKca4CgM8FRyypct22R7m+NyRF88rxsgbGB3i4z8VpHxWw5DrsfriUL11B5ybqokQ+nB8JpKk9nqrmhIW/lr7YkA//4qaXssBeJ2zgjYLXyUWCN4VMKqdJ23uvgRCwiVR0YArjq5xQxG+e6fpCAaaPZ1Dm1omqJoJf4NyxN9EhWuw+lTsdOp11aSzW9V7jAqH3sB46acvfdImgb+r+zly26oQy5E90od1bnPUCQJpZlpg66rGty76Mnm3cOWiDoA8dC3pFd9YKxnHpz9+bSwedFUmuFayICYo6f4QC91AplrcVagqjOK/JUsnZJf0Ic2lmuarhRlI7rFAqjOaOXNmXLMyxRn+pF4I0jQgTDx2QxLCG9Xpgla/+IqXl3Nkr4Wy07xJ6aKBiz1uXz/GKl8u3jL1Kn7e5qqvNaT5vAjxrtycyqEFAJozX/M9yd2QuXvKagPpwQZQ63GiR2FbGrpnBpLurw7+NBTCzBvJp89tqcJe6tzs7Zt3W+FBUo0wdADfCtw== root@vm010017040011`
 }
+
+// ossClusterFilterCache stores the cached cluster filter result
+var ossClusterFilterCache struct {
+	initialized bool
+	filter      string
+}
+
+// GetOssClusterFilter returns the OSS cluster filter configuration.
+// It caches the result after the first call to avoid repeated API calls.
+func GetOssClusterFilter() string {
+	if ossClusterFilterCache.initialized {
+		return ossClusterFilterCache.filter
+	}
+
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	if rawClient, err := sharedClientForRegion(region); err == nil {
+		client := rawClient.(*connectivity.AlibabacloudStackClient)
+		ossService := OssService{client}
+		if _, err := ossService.GetOssEndpointList(); errmsgs.IsHostNotFound(err) {
+			ossClusterFilterCache.filter = `
+		locals {
+			cluster_filter = ""
+		}
+		`
+		} else {
+			ossClusterFilterCache.filter = `
+		data "alibabacloudstack_oss_clusters" "default" {
+		}
+
+		locals {
+			cluster_filter = "${data.alibabacloudstack_oss_clusters.default.clusters.0.id}"
+		}
+		`
+		}
+	}
+
+	ossClusterFilterCache.initialized = true
+	return ossClusterFilterCache.filter
+}

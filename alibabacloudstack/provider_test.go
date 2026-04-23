@@ -128,7 +128,6 @@ func testAccPreCheckOssEndpointList(t *testing.T) {
 }
 
 func testAccPreCheckOss(t *testing.T) {
-	testAccPreCheck(t)
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {

@@ -40,7 +40,8 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket": name,
+					"bucket":      name,
+					"oss_cluster": "${local.cluster_filter}",
 					"tags": map[string]string{
 						"Created": "TF",
 						"For":     "Test",
@@ -284,7 +285,8 @@ func TestAccAlibabacloudStackOssBucket_kmskey(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"bucket": name,
+					"bucket":      name,
+					"oss_cluster": "${local.cluster_filter}",
 					"tags": map[string]string{
 						"Created": "TF",
 						"For":     "Test",
@@ -450,12 +452,16 @@ func TestAccAlibabacloudStackOssBucket_kmskey(t *testing.T) {
 // }
 
 func resourceOssBucketBasicDependence(name string) string {
+	clusterFilter := GetOssClusterFilter()
 	return fmt.Sprintf(`
 
 variable "name" {
 	default = "%s"
 }
-`, name)
+
+%s
+
+`, name, clusterFilter)
 }
 
 func resourceOssBucketConfigDependence(name string) string {

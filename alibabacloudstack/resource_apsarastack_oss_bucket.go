@@ -250,7 +250,7 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
-	object, err := ossService.DescribeOssBucket(d.Id())
+	object, cluster, err := ossService.DescribeOssBucketWithCluster(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -266,7 +266,6 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "GetBucketLogging", errmsgs.AlibabacloudStackOssGoSdk)
 	}
-	ossEndpointData, _ := ossService.GetBucketEndpointMap()
 	log.Printf("read describe logging %v", logging)
 	d.Set("bucket", d.Id())
 	if *object.Name == "" {
@@ -280,11 +279,8 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	d.Set("intranet_endpoint", *object.IntranetEndpoint)
 	d.Set("location", *object.Location)
 	d.Set("storage_class", *object.StorageClass)
-	for k, v := range ossEndpointData {
-		if v == *object.IntranetEndpoint {
-			d.Set("oss_cluster", k)
-			break
-		}
+	if d.Get("oss_cluster").(string) == "" {
+		d.Set("oss_cluster", cluster)
 	}
 	var list []map[string]interface{}
 	if logging != nil && logging.BucketLoggingStatus != nil && logging.BucketLoggingStatus.LoggingEnabled != nil {
