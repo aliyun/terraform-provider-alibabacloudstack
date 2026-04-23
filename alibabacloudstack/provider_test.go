@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -18,6 +19,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -110,7 +112,6 @@ func testAccPreCheck(t *testing.T) {
 }
 
 func testAccPreCheckOssEndpointList(t *testing.T) {
-	testAccPreCheck(t)
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
@@ -123,6 +124,35 @@ func testAccPreCheckOssEndpointList(t *testing.T) {
 			t.Skipf("Skipping OSS cluster test case: GetOssEndpointList API not support")
 		}
 		t.Fatalf("GetOssEndpointList failed: %s", err)
+	}
+}
+
+func testAccPreCheckOss(t *testing.T) {
+	testAccPreCheck(t)
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	rawClient, err := sharedClientForRegion(region)
+	if err != nil {
+		t.Skipf("Skipping OSS test case with err: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	ossService := OssService{client}
+	if data, err := ossService.GetOssEndpointList(); err == nil {
+		if len(data) > 0 {
+			return
+		}
+		t.Skipf("No OSS product deployed in the environment")
+	}
+	endpoint, err := ossService.GetDefaultOssEndpoint()
+	if err != nil {
+		t.Fatalf("Lost popgw_domain")
+	}
+	ossclietn, err := ossService.GetOssClient(endpoint)
+	if err != nil {
+		t.Fatalf("Init oss client failed")
+	}
+	request := &oss.ListBucketsRequest{}
+	if _, err := ossclietn.ListBuckets(context.TODO(), request); err != nil {
+		t.Skipf("No OSS product deployed in the environment")
 	}
 }
 

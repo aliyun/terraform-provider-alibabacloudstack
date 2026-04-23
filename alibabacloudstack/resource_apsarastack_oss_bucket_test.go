@@ -31,6 +31,7 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckOss(t)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -211,6 +212,7 @@ func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckOss(t)
 			testAccPreCheckKmsServer(t)
 		},
 		// module name
@@ -272,6 +274,7 @@ func TestAccAlibabacloudStackOssBucket_kmskey(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckOss(t)
 			testAccPreCheckKmsServer(t)
 		},
 		// module name

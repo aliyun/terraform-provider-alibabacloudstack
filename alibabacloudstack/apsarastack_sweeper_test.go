@@ -16,7 +16,7 @@ func TestMain(m *testing.M) {
 
 // functions for a given region
 func sharedClientForRegion(region string) (interface{}, error) {
-	var accessKey, secretKey, proxy, domain, popgw_domain, rgsName, rgid, dept, protocol string
+	var accessKey, secretKey, proxy, domain, popgwDomain, rgsName, rgid, dept, protocol string
 	var insecure, is_center_region bool
 	if accessKey = os.Getenv("ALIBABACLOUDSTACK_ACCESS_KEY"); accessKey == "" {
 		return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_ACCESS_KEY")
@@ -26,7 +26,7 @@ func sharedClientForRegion(region string) (interface{}, error) {
 		return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_SECRET_KEY")
 	}
 	insecure, _ = strconv.ParseBool(os.Getenv("ALIBABACLOUDSTACK_INSECURE"))
-	if popgw_domain = os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"); popgw_domain == "" {
+	if popgwDomain = os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"); popgwDomain == "" {
 		return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_POPGW_DOMAIN")
 	}
 	if rgsName = os.Getenv("ALIBABACLOUDSTACK_RESOURCE_GROUP_SET"); rgsName == "" {
@@ -69,6 +69,7 @@ func sharedClientForRegion(region string) (interface{}, error) {
 		ResourceGroup:   rgid,
 		Department:      dept,
 		ResourceSetName: rgsName,
+		PopgwDomain:     popgwDomain,
 	}
 	if accountId := os.Getenv("ALIBABACLOUDSTACK_ACCOUNT_ID"); accountId != "" {
 		conf.AccountId = accountId
@@ -82,7 +83,7 @@ func sharedClientForRegion(region string) (interface{}, error) {
 		if domain != "" {
 			conf.Endpoints[popcode] = domain
 		} else {
-			endpoint := connectivity.GeneratorEndpoint(popcode, region, popgw_domain, is_center_region)
+			endpoint := connectivity.GeneratorEndpoint(popcode, region, popgwDomain, is_center_region)
 			if endpoint != "" {
 				conf.Endpoints[popcode] = endpoint
 			}

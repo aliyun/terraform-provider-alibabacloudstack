@@ -27,6 +27,10 @@ func TestAccAlibabacloudStackAqsOssScanconfigsDataSource(t *testing.T) {
 			}
 		},
 		Providers: testYunDunProviders(),
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckOss(t)
+		},
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{

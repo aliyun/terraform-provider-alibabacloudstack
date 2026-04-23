@@ -63,6 +63,10 @@ func TestAccAlibabacloudStackOssBucketsDataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existOssBucketsMapFunc,
 		fakeMapFunc:  fakeOssBucketsMapFunc,
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckOss(t)
+		},
 	}
 	ossBucketsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }

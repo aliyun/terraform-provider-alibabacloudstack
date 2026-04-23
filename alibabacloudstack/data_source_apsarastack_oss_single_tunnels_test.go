@@ -66,6 +66,10 @@ func TestAccAlibabacloudStackOssSingleTunnelsDataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existOtstunnelsMapFunc,
 		fakeMapFunc:  fakeOtstunnelsMapFunc,
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckOss(t)
+		},
 	}
 
 	otstunnelsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
