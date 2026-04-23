@@ -932,14 +932,26 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 
 	var nodepoolid string
 	if d.IsNewResource() {
-		var err error
-		nodepoolid, err = getDefaultNodePoolId(csService, d.Id())
-		if err != nil {
-			return err
-		}
-	} else {
-		nodepoolid = d.Get("nodepool_id").(string)
+		return nil
 	}
+	noUpdatesAllowedCheck(d, []string{
+		"name", "master_disk_size", "master_disk_category", "master_disk_encrypt_algorithm",
+		"master_disk_kms_key_id", "master_disk_encrypted", "delete_protection",
+		"worker_disk_size", "worker_disk_category", "worker_disk_encrypt_algorithm",
+		"worker_disk_kms_key_id", "worker_disk_encrypted", "worker_data_disks",
+		"pod_vswitch_ids", "pod_cidr", "service_cidr", "node_cidr_mask",
+		"new_nat_gateway", "enable_ssh", "node_port_range", "image_id",
+		"version", "cluster_type", "os_type", "platform", "cpu_policy",
+		"proxy_mode", "addons", "slb_internet_enabled", "master_instance_types",
+		"master_vswitch_ids", "worker_instance_types", "worker_vswitch_ids",
+		"instances", "format_disk", "keep_instance_name", "master_count",
+		"timeout_mins", "nodes", "user_data", "cloud_monitor_flags", "runtime",
+		"is_enterprise_security_group", "security_group_id",
+		"master_system_disk_performance_level", "worker_system_disk_performance_level",
+		"master_storage_set_id", "master_storage_set_partition_number",
+		"worker_storage_set_id", "worker_storage_set_partition_number",
+	})
+	nodepoolid = d.Get("nodepool_id").(string)
 	resourceNodepoolId := fmt.Sprintf("%s:%s", d.Id(), nodepoolid)
 
 	if d.HasChange("num_of_nodes") && !d.IsNewResource() {
@@ -1025,15 +1037,9 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				resp, err = client.ProcessCommonRequest(request)
 				return err
 			}); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", resp)
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ScaleClusterNodePool", resp)
 			}
-
-			if debugOn() {
-				resizeRequestMap := make(map[string]interface{})
-				resizeRequestMap["ClusterId"] = d.Id()
-				resizeRequestMap["Args"] = request.GetQueryParams()
-				addDebug("ScaleClusterNodePool", resp, resizeRequestMap)
-			}
+			addDebug("ScaleClusterNodePool", resp, request, request.QueryParams)
 
 			stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(resourceNodepoolId, []string{"deleting", "failed"}))
 
@@ -1062,10 +1068,6 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 	d.Set("nodepool_id", nodepoolid)
-	clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 	d.Set("name", object.Name)
 	// node_count, err := csService.GetCsK8sNodesCount(d.Id())
 	// if err != nil {
@@ -1076,6 +1078,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 	d.Set("num_of_nodes", nodepool.Status.TotalNodes)
+
 	//d.Set("id", object.ClusterId)
 	//d.Set("state", object.State)
 	d.Set("vpc_id", object.VpcId)
@@ -1145,7 +1148,9 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		}
 		d.Set("runtime", runtime)
 	}
-	var smaster, sworker []map[string]interface{}
+	smaster := make([]map[string]interface{}, 0)
+	sworker := make([]map[string]interface{}, 0)
+
 	masternodes, err := csService.DescribeClusterMasterNodes(d.Id())
 	for _, k := range masternodes {
 		MasterNodes := map[string]interface{}{
@@ -1155,7 +1160,10 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		}
 		smaster = append(smaster, MasterNodes)
 	}
-
+	clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
 	for _, k := range clusternode.Nodes {
 		if k.InstanceRole == "Worker" && k.InstanceStatus == "Running" {
 			WorkerNodes := map[string]interface{}{

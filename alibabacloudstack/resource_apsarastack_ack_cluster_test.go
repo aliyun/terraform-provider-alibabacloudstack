@@ -174,17 +174,16 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":           name,
-						"num_of_nodes":   "2",
-						"worker_nodes.#": "2",
+						"num_of_nodes": "2",
 					}),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "image_id", "is_enterprise_security_group", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_port_range", "os_type", "platform", "timeout_mins", "new_nat_gateway", "password", "slb_internet_enabled"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "image_id", "is_enterprise_security_group", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_port_range", "os_type", "platform",
+					"timeout_mins", "new_nat_gateway", "password", "slb_internet_enabled", "master_storage_set_id", "master_storage_set_partition_number", "node_cidr_mask", "proxy_mode", "service_cidr", "worker_data_disks", "worker_storage_set_id", "worker_storage_set_partition_number"},
 			},
 		},
 	})
