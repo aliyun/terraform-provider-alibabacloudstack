@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
@@ -550,12 +551,21 @@ func (s OssService) GetDefaultOssEndpoint() (string, error) {
 	return endpoint, nil
 }
 
-type OssClient struct {
-	*oss.Client
-	BucketName string
-}
+var (
+	BucketClient     = make(map[string]oss.Client)
+	BucketClientLock sync.RWMutex
+)
 
-func (s OssService) GetBucketClient(bucketName string) (*OssClient, error) {
+func (s OssService) GetBucketClient(bucketName string) (*oss.Client, error) {
+	// 先尝试读取缓存（读锁）
+	BucketClientLock.RLock()
+	if client, ok := BucketClient[bucketName]; ok {
+		BucketClientLock.RUnlock()
+		return &client, nil
+	}
+	BucketClientLock.RUnlock()
+
+	// 缓存未命中，需要创建新客户端
 	bucketInfo, err := s.DescribeOssBucket(bucketName)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
@@ -567,17 +577,28 @@ func (s OssService) GetBucketClient(bucketName string) (*OssClient, error) {
 	bucketEndpoint := *bucketInfo.ExtranetEndpoint
 
 	client, err := s.GetOssClient(bucketEndpoint)
+	if err == nil {
+		// 写入缓存（写锁）
+		BucketClientLock.Lock()
+		// 双重检查，防止并发创建
+		if existingClient, ok := BucketClient[bucketName]; ok {
+			BucketClientLock.Unlock()
+			return &existingClient, nil
+		}
+		BucketClient[bucketName] = *client
+		BucketClientLock.Unlock()
+	}
 
-	return &OssClient{Client: client, BucketName: bucketName}, err
+	return client, err
 }
 
-func (s OssService) DescribeOssBucket(bucketName string) (*oss.BucketProperties, error) {
+func (s OssService) DescribeOssBucket(bucketName string) (*oss.BucketInfo, error) {
 	bucket, _, err := s.DescribeOssBucketWithCluster(bucketName)
 	return bucket, err
 
 }
 
-func (s OssService) DescribeOssBucketWithCluster(bucketName string) (*oss.BucketProperties, string, error) {
+func (s OssService) DescribeOssBucketWithCluster(bucketName string) (*oss.BucketInfo, string, error) {
 	var endpointMap map[string]string
 	var err error
 	endpointMap, err = s.GetBucketEndpointMap()
@@ -595,23 +616,17 @@ func (s OssService) DescribeOssBucketWithCluster(bucketName string) (*oss.Bucket
 		if err != nil {
 			return nil, "", errmsgs.WrapError(err)
 		}
-		for {
-			request := &oss.ListBucketsRequest{}
-			lsRes, err := ossclient.ListBuckets(context.TODO(), request)
-			if err != nil {
-				return nil, "", errmsgs.WrapError(err)
-			}
-			for _, bucket := range lsRes.Buckets {
-				if *bucket.Name == bucketName {
-					return &bucket, cluster, nil
-				}
-			}
-
-			if !lsRes.IsTruncated {
-				break
-			}
-			request.Marker = lsRes.NextMarker
+		request := &oss.GetBucketInfoRequest{
+			Bucket: oss.Ptr(bucketName),
 		}
+		result, err := ossclient.GetBucketInfo(context.TODO(), request)
+		if err != nil {
+			if errmsgs.IsHostNotFound(err) {
+				continue
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		return &result.BucketInfo, cluster, nil
 	}
 	return nil, "", errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
 }

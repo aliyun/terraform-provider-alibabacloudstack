@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
-	var v *oss.BucketProperties
+	var v *oss.BucketInfo
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
 	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
@@ -190,7 +190,7 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 }
 
 func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
-	var v *oss.BucketProperties
+	var v *oss.BucketInfo
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
 	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
@@ -256,7 +256,7 @@ func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackOssBucket_kmskey(t *testing.T) {
-	var v *oss.BucketProperties
+	var v *oss.BucketInfo
 
 	resourceId := "alibabacloudstack_oss_bucket.default"
 	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
@@ -389,67 +389,6 @@ func TestAccAlibabacloudStackOssBucket_kmskey(t *testing.T) {
 		},
 	})
 }
-
-// func TestUatAlibabacloudStackOssBucket_Vpc(t *testing.T) {
-// 	var v *oss.BucketProperties
-
-// 	resourceId := "alibabacloudstack_oss_bucket.default"
-// 	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
-
-// 	serviceFunc := func() interface{} {
-// 		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-// 	}
-// 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-
-// 	rac := resourceAttrCheckInit(rc, ra)
-
-// 	testAccCheck := rac.resourceAttrMapUpdateSet()
-// 	rand := getAccTestRandInt(1000000, 9999999)
-// 	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
-// 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
-// 	ResourceTest(t, resource.TestCase{
-// 		PreCheck: func() {
-// 			testAccPreCheck(t)
-// 		},
-// 		// module name
-// 		IDRefreshName: resourceId,
-// 		Providers:     testAccProviders,
-// 		CheckDestroy:  rac.checkResourceDestroy(),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccConfig(map[string]interface{}{
-// 					"bucket":  name,
-// 					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}", "${alibabacloudstack_vpc.vpc2.id}"},
-// 				}),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheck(map[string]string{
-// 						"bucket":    name,
-// 						"vpclist.0": CHECKSET,
-// 						"vpclist.#": "2",
-// 					}),
-// 				),
-// 			},
-// 			{
-// 				ResourceName:      resourceId,
-// 				ImportState:       true,
-// 				ImportStateVerify: true,
-// 			},
-// 			{
-// 				Config: testAccConfig(map[string]interface{}{
-// 					"bucket":  name,
-// 					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}"},
-// 				}),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheck(map[string]string{
-// 						"bucket":    name,
-// 						"vpclist.0": CHECKSET,
-// 						"vpclist.#": "1",
-// 					}),
-// 				),
-// 			},
-// 		},
-// 	})
-// }
 
 func resourceOssBucketBasicDependence(name string) string {
 	clusterFilter := GetOssClusterFilter()

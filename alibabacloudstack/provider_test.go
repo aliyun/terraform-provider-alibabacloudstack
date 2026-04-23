@@ -145,12 +145,12 @@ func testAccPreCheckOss(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lost popgw_domain")
 	}
-	ossclietn, err := ossService.GetOssClient(endpoint)
+	ossclient, err := ossService.GetOssClient(endpoint)
 	if err != nil {
 		t.Fatalf("Init oss client failed")
 	}
 	request := &oss.ListBucketsRequest{}
-	if _, err := ossclietn.ListBuckets(context.TODO(), request); err != nil {
+	if _, err := ossclient.ListBuckets(context.TODO(), request); err != nil {
 		t.Skipf("No OSS product deployed in the environment")
 	}
 }
