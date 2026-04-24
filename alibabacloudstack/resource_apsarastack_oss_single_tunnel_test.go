@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackOssSingleTunnel_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckOss(t)
+			testAccPreCheckOssEndpointList(t)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

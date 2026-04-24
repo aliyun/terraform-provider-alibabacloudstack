@@ -23,6 +23,11 @@ func dataSourceAlibabacloudStackOssBucketObjects() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"oss_cluster": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"key_prefix": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -106,7 +111,7 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 
 	bucketName := d.Get("bucket_name").(string)
 	ossService := OssService{client}
-	bucket, err := ossService.GetBucketClient(bucketName)
+	ossClient, err := ossService.GetOssClientForCluster(d.Get("oss_cluster").(string))
 	if err != nil {
 		return err
 	}
@@ -127,7 +132,7 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 			input.Marker = &nextMarker
 		}
 
-		response, err := bucket.ListObjects(context.Background(), input)
+		response, err := ossClient.ListObjects(context.Background(), input)
 		if err != nil {
 			return err
 		}
@@ -168,7 +173,7 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 	var ids []string
 	var s []map[string]interface{}
 	ossService := OssService{client}
-	bucket, err := ossService.GetBucketClient(bucketName)
+	ossClient, err := ossService.GetOssClientForCluster(d.Get("oss_cluster").(string))
 	if err != nil {
 		return err
 	}
@@ -196,7 +201,7 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 			Bucket: &bucketName,
 			Key:    object.Key,
 		}
-		objectHeader, err := bucket.HeadObject(context.Background(), headReq)
+		objectHeader, err := ossClient.HeadObject(context.Background(), headReq)
 		if err != nil {
 			log.Printf("[ERROR] Unable to get metadata for the object %s: %v", key, err)
 		} else {
@@ -230,7 +235,7 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 			Bucket: &bucketName,
 			Key:    object.Key,
 		}
-		objectACL, err := bucket.GetObjectAcl(context.Background(), aclReq)
+		objectACL, err := ossClient.GetObjectAcl(context.Background(), aclReq)
 		if err != nil {
 			log.Printf("[ERROR] Unable to get ACL for the object %s: %v", key, err)
 		} else if objectACL.ACL != nil {

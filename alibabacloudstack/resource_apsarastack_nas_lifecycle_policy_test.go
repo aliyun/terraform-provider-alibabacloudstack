@@ -22,7 +22,8 @@ func TestAccAlibabacloudStackNasLifecyclePolicy_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackNasLifecyclePolicyDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-
+			testAccPreCheck(t)
+			testAccPreCheckOss(t)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -70,16 +71,20 @@ func TestAccAlibabacloudStackNasLifecyclePolicy_basic(t *testing.T) {
 }
 
 func AlibabacloudStackNasLifecyclePolicyDependence(name string) string {
+	clusterFilter := GetOssClusterFilter()
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
 }
 %s
 
+%s
+
 resource "alibabacloudstack_oss_bucket" "default" {
   bucket = "${var.name}"
   acl    = "public-read"
+  oss_cluster = local.cluster_filter
 }
 
-`, name, NasCommonTestCase)
+`, name, NasCommonTestCase, clusterFilter)
 }

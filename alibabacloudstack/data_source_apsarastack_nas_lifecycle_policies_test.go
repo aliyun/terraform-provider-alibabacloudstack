@@ -2,58 +2,60 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackNasLifecyclePolicies_DataSource(t *testing.T) {
 	rand := getAccTestRandInt(100000, 999999)
+	resourceId := "data.alibabacloudstack_nas_lifecycle_policies.default"
+	name := fmt.Sprintf("tf-testacc-nas-liecycle-datasource%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccAlibabacloudStackNasLifecyclePoliciesDataSourceConfig)
+
 	descriptionConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackNasLifecyclePoliciesDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_file_system.default.id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_file_system.default.id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackNasLifecyclePoliciesDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"eeeeeeeeee"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "eeeeeeeeee",
 		}),
 	}
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackNasLifecyclePoliciesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_nas_lifecycle_policy.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_lifecycle_policy.default.id}"},
 		}),
-		fakeConfig: testAccAlibabacloudStackNasLifecyclePoliciesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_nas_lifecycle_policy.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_lifecycle_policy.default.id}_fake"},
 		}),
 	}
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackNasLifecyclePoliciesDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"${alibabacloudstack_nas_file_system.default.id}"`,
-			"ids":            `["${alibabacloudstack_nas_lifecycle_policy.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "${alibabacloudstack_nas_file_system.default.id}",
+			"ids":            []string{"${alibabacloudstack_nas_lifecycle_policy.default.id}"},
 		}),
-		fakeConfig: testAccAlibabacloudStackNasLifecyclePoliciesDataSourceConfig(rand, map[string]string{
-			"file_system_id": `"eeeeeeeeee"`,
-			"ids":            `["${alibabacloudstack_nas_lifecycle_policy.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"file_system_id": "eeeeeeeeee",
+			"ids":            []string{"${alibabacloudstack_nas_lifecycle_policy.default.id}_fake"},
 		}),
 	}
 
 	LifecyclePoliciesCheckInfo.dataSourceTestCheck(t, rand, descriptionConf, idsConf, allConf)
 }
 
-func testAccAlibabacloudStackNasLifecyclePoliciesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func testAccAlibabacloudStackNasLifecyclePoliciesDataSourceConfig(name string) string {
+	clusterFilter := GetOssClusterFilter()
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testacc-nas-liecycle-datasource%d"
+  default = "%s"
 }
+
+%s
 
 %s
 
 resource "alibabacloudstack_oss_bucket" "default" {
   bucket = "${var.name}"
   acl    = "public-read"
+  oss_cluster = local.cluster_filter
 }
 
 resource "alibabacloudstack_nas_lifecycle_policy" "default" {
@@ -69,9 +71,7 @@ data "alibabacloudstack_nas_lifecycle_policies" "default" {
 	depends_on = [
 		alibabacloudstack_nas_lifecycle_policy.default
 	]
-	%s
-}`, rand, NasCommonTestCase, strings.Join(pairs, "\n  "))
-	return config
+}`, name, NasCommonTestCase, clusterFilter)
 }
 
 var existLifecyclePoliciesMapCheck = func(rand int) map[string]string {

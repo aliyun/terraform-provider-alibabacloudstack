@@ -63,7 +63,7 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAlicloudOssBucketObjectExists(
-						"alibabacloudstack_oss_bucket_object.default", name, v),
+						"alibabacloudstack_oss_bucket_object.default", v),
 					testAccCheck(map[string]string{
 						"bucket": name,
 						"source": tmpFile.Name(),
@@ -166,15 +166,22 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 }
 
 func resourceOssBucketObjectConfigDependence(name string) string {
-
+	clusterFilter := GetOssClusterFilter()
 	return fmt.Sprintf(`
+	variable name {
+		default = "%s"
+	}
+
+	%s
+
 resource "alibabacloudstack_oss_bucket" "default" {
-	bucket = "%s"
+	bucket = var.name
 	acl = "public-read-write"
+	oss_cluster = local.cluster_filter
 }
 
 %s
-`, name, KeyCommonTestCase)
+`, name, clusterFilter, KeyCommonTestCase)
 }
 
 var ossBucketObjectBasicMap = map[string]string{
@@ -185,11 +192,11 @@ var ossBucketObjectBasicMap = map[string]string{
 	"acl":          "public-read-write",
 }
 
-func testAccCheckAlicloudOssBucketObjectExists(n string, bucket string, obj http.Header) resource.TestCheckFunc {
+func testAccCheckAlicloudOssBucketObjectExists(n string, obj http.Header) resource.TestCheckFunc {
 	providers := []*schema.Provider{testAccProvider}
-	return testAccCheckOssBucketObjectExistsWithProviders(n, bucket, obj, &providers)
+	return testAccCheckOssBucketObjectExistsWithProviders(n, obj, &providers)
 }
-func testAccCheckOssBucketObjectExistsWithProviders(n string, bucketName string, obj http.Header, providers *[]*schema.Provider) resource.TestCheckFunc {
+func testAccCheckOssBucketObjectExistsWithProviders(n string, obj http.Header, providers *[]*schema.Provider) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -206,12 +213,14 @@ func testAccCheckOssBucketObjectExistsWithProviders(n string, bucketName string,
 			}
 			client := provider.Meta().(*connectivity.AlibabacloudStackClient)
 			ossService := OssService{client}
-			buck, err := ossService.GetBucketClient(bucketName)
+			id_info := strings.SplitN(rs.Primary.ID, ":", 3)
+			ossCluster := id_info[0]
+			buck, err := ossService.GetOssClientForCluster(ossCluster)
 			if err != nil {
 				return fmt.Errorf("Error getting bucket: %#v", err)
 			}
-			id_info := strings.SplitN(rs.Primary.ID, ":", 2)
-			key := id_info[1]
+			bucketName := id_info[1]
+			key := id_info[2]
 			request := &oss.GetObjectMetaRequest{
 				Bucket: &bucketName,
 				Key:    &key,

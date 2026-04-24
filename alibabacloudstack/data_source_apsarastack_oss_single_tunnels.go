@@ -22,6 +22,12 @@ func dataSourceAlibabacloudStackOssSingleTunnels() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				ForceNew: true,
+			},
+			"oss_cluster": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -68,9 +74,25 @@ func dataSourceAlibabacloudStackOssSingleTunnelsRead(d *schema.ResourceData, met
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 
-	entries, err := ossService.listVpcipEntries()
-	if err != nil {
-		return errmsgs.WrapError(err)
+	var clusters []string
+	if ossCluster, ok := d.GetOk("oss_cluster"); ok {
+		clusters = []string{ossCluster.(string)}
+	} else {
+		endpoints, err := ossService.GetBucketEndpointMap()
+		if err != nil {
+			return err
+		}
+		for cluster := range endpoints {
+			clusters = append(clusters, cluster)
+		}
+	}
+	entries := []VpcipEntry{}
+	for _, cluster := range clusters {
+		result, err := ossService.listVpcipEntries(cluster)
+		if err != nil {
+			continue
+		}
+		entries = append(entries, result...)
 	}
 
 	// Create filters based on schema

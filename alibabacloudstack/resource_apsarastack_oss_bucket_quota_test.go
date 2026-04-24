@@ -56,16 +56,24 @@ func TestAccAlibabacloudStackOssBucketQuota_basic(t *testing.T) {
 }
 
 func testAccOssBucketQuotaConfig(name string) string {
+	clusterFilter := GetOssClusterFilter()
 	return fmt.Sprintf(`
+variable name {
+	default = "%s"
+}
+
+%s
+
 resource "alibabacloudstack_oss_bucket" "default" {
-  bucket = "%s"
+  bucket = var.name
+  oss_cluster = local.cluster_filter
   lifecycle {
       ignore_changes = [
         storage_capacity
       ]
   }
 }
-`, name)
+`, name, clusterFilter)
 }
 
 var ossBucketQuotaBasicMap = map[string]string{

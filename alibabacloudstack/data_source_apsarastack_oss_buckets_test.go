@@ -72,15 +72,19 @@ func TestAccAlibabacloudStackOssBucketsDataSource(t *testing.T) {
 }
 
 func dataSourceOssBucketsConfigDependence(name string) string {
+	clusterFilter := GetOssClusterFilter()
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"
 }
 
+%s
+
 resource "alibabacloudstack_oss_bucket" "demo" {
   bucket = var.name
   acl    = "public-read"
+  oss_cluster = local.cluster_filter
 }
 
-`, name)
+`, name, clusterFilter)
 }

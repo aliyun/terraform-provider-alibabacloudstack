@@ -27,6 +27,11 @@ func resourceAlibabacloudStackImageExport() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"oss_cluster": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"oss_prefix": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -89,7 +94,8 @@ func resourceAlibabacloudStackImageExportRead(d *schema.ResourceData, meta inter
 func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client: client}
-	bucket, err := ossService.GetBucketClient(d.Get("oss_bucket").(string))
+	ossCluster := d.Get("oss_cluster").(string)
+	bucket, err := ossService.GetOssClientForCluster(ossCluster)
 	if err != nil {
 		return err
 	}
@@ -106,6 +112,6 @@ func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta int
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, objectName, "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-
-	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucketName, objectName, Deleted, DefaultTimeoutMedium))
+	id := ossCluster + ":" + bucketName + ":" + objectName
+	return errmsgs.WrapError(ossService.WaitForOssBucketObject(id, Deleted, DefaultTimeoutMedium))
 }

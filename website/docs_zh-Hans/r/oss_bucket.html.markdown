@@ -55,3 +55,13 @@ resource "alibabacloudstack_oss_bucket" "demo" {
 * `owner` - 存储桶的所有者信息。
 * `storage_class` - 存储桶的存储类别，例如 `Standard`、`IA` 或 `Archive`。
 * `vpclist` - 存储桶允许访问的 VPC 列表。
+
+## 导入
+
+OSS 存储桶可以使用以下导入命令导入：
+
+```
+$ terraform import alibabacloudstack_oss_bucket.example <oss_cluster>:<bucket>
+```
+
+其中 `oss_cluster` 是 OSS 集群的 ID，`bucket` 是存储桶的名称。

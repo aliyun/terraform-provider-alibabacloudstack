@@ -170,14 +170,17 @@ func TestAccAlibabacloudStackOssBucketObjectsDataSource_versioning(t *testing.T)
 }
 
 func dataSourceOssBucketObjectsConfigDependence(name string) string {
+	clusterFilter := GetOssClusterFilter()
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
 }
+	%s
 
 resource "alibabacloudstack_oss_bucket" "default" {
 	bucket = "${var.name}"
 	acl = "public-read-write"
+	oss_cluster = local.cluster_filter
 }
 
 resource "alibabacloudstack_oss_bucket_object" "default" {
@@ -192,17 +195,21 @@ resource "alibabacloudstack_oss_bucket_object" "default" {
 	acl = "public-read-write"
 }
 
-`, name)
+`, name, clusterFilter)
 }
 func dataSourceOssBucketObjectsConfigDependenceVersioning(name string) string {
+	clusterFilter := GetOssClusterFilter()
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
 }
 
+%s
+
 resource "alibabacloudstack_oss_bucket" "default" {
 	bucket = "${var.name}"
 	acl = "public-read-write"
+	oss_cluster = local.cluster_filter
 }
 
 resource "alibabacloudstack_oss_bucket_object" "default" {
@@ -216,5 +223,5 @@ resource "alibabacloudstack_oss_bucket_object" "default" {
 	expires = "Wed, 06 May 2020 00:00:00 GMT"
 }
 
-`, name)
+`, name, clusterFilter)
 }

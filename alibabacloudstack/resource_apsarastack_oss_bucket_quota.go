@@ -24,6 +24,11 @@ func resourceAlibabacloudStackOssBucketQuota() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"oss_cluster": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"quota": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -39,14 +44,16 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	bucketName := d.Get("bucket").(string)
-	det, err := ossService.DescribeOssBucket(bucketName)
+	ossCluster := d.Get("oss_cluster").(string)
+	id := ossCluster + ":" + bucketName
+	det, err := ossService.DescribeOssBucket(id)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 	quota := d.Get("quota").(int)
 
 	if det != nil && *det.Name == bucketName {
-		ossClient, err := ossService.GetBucketClient(bucketName)
+		ossClient, err := ossService.GetOssClientForCluster(ossCluster)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -76,7 +83,7 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 		log.Printf(" response of SetBucketStorageCapacity for bucket %s", bucketName)
 		log.Printf("Enter for logging")
 	}
-	d.SetId(bucketName)
+	d.SetId(id)
 
 	return nil
 }
@@ -89,13 +96,19 @@ type bucketUserQosXML struct {
 func resourceAlibabacloudStackOssBucketQuotaRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
-	bucketName := d.Id()
-	_, err := ossService.DescribeOssBucket(bucketName)
+	if !strings.Contains(d.Id(), ":") {
+		d.SetId(d.Get("oss_cluster").(string) + ":" + d.Id())
+	}
+	_, err := ossService.DescribeOssBucket(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk)
 	}
 
-	ossClient, err := ossService.GetBucketClient(bucketName)
+	parts := strings.Split(d.Id(), ":")
+	bucketName := parts[1]
+	ossCluster := parts[0]
+
+	ossClient, err := ossService.GetOssClientForCluster(ossCluster)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -137,11 +150,12 @@ func resourceAlibabacloudStackOssBucketQuotaDelete(d *schema.ResourceData, meta 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	bucketName := d.Get("bucket").(string)
-	_, err := ossService.DescribeOssBucket(bucketName)
+	ossCluster := d.Get("oss_cluster").(string)
+	_, err := ossService.DescribeOssBucket(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk)
 	}
-	ossClient, err := ossService.GetBucketClient(bucketName)
+	ossClient, err := ossService.GetOssClientForCluster(ossCluster)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}

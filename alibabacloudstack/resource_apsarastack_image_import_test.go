@@ -42,6 +42,7 @@ func TestAccAlibabacloudStackImportImage(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckOss(t)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -116,13 +117,17 @@ func TestAccAlibabacloudStackImportImage(t *testing.T) {
 var testAccImageImageCheckMap = map[string]string{}
 
 func resourceImageImageBasicConfigDependence(filename string) func(string) string {
+	clusterFilter := GetOssClusterFilter()
 	return func(name string) string {
 		return fmt.Sprintf(`
 	variable "name" {
 		default = "%s"
 	}
+	
+	%s
 
 	resource "alibabacloudstack_oss_bucket" "default" {
+	oss_cluster = local.cluster_filter
 	bucket = "${var.name}"
 	acl = "public-read-write"
 	}
@@ -132,6 +137,6 @@ func resourceImageImageBasicConfigDependence(filename string) func(string) strin
 	key=          "test-object-source-key"
 	source=       "%s"
 	}
-`, name, filename)
+`, name, clusterFilter, filename)
 	}
 }

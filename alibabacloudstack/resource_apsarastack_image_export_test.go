@@ -56,10 +56,13 @@ var testAccExportImageCheckMap = map[string]string{
 }
 
 func resourceImageExportBasicConfigDependence(name string) string {
+	clusterFilter := GetOssClusterFilter()
 	return fmt.Sprintf(`
 	variable "name" {
 		default = "%s"
 	}
+
+	%s
 
 	%s
 
@@ -71,6 +74,7 @@ func resourceImageExportBasicConfigDependence(name string) string {
 	resource "alibabacloudstack_oss_bucket" "default" {
 	bucket = "${var.name}"
 	acl = "public-read-write"
+	oss_cluster = local.oss_cluster
 	}
-`, name, ECSInstanceCommonTestCase)
+`, name, ECSInstanceCommonTestCase, clusterFilter)
 }

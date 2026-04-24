@@ -69,10 +69,17 @@ func TestAccAlibabacloudStackOssBucketKms_basic(t *testing.T) {
 }
 
 func resourceOssBucketKmsConfigDependence(name string) string {
-
+	clusterFilter := GetOssClusterFilter()
 	return fmt.Sprintf(`
+variable name {
+	default = "%s"
+}
+
+%s
+
 resource "alibabacloudstack_oss_bucket" "default" {
-	bucket = "%s"
+	bucket = var.name
+	oss_cluster = local.cluster_filter
 	lifecycle {
 	    ignore_changes = [
 	      sse_algorithm,
@@ -82,7 +89,7 @@ resource "alibabacloudstack_oss_bucket" "default" {
 }
 
 %s
-`, name, KeyCommonTestCase)
+`, name, clusterFilter, KeyCommonTestCase)
 }
 
 var ossBucketKmsBasicMap = map[string]string{

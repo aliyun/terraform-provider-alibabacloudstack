@@ -25,7 +25,11 @@ func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-
+			"oss_cluster": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"key": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -123,7 +127,8 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	bucketName := d.Get("bucket").(string)
 	ossService := OssService{client}
-	ossClient, err := ossService.GetBucketClient(bucketName)
+	ossCluster := d.Get("oss_cluster").(string)
+	ossClient, err := ossService.GetOssClientForCluster(ossCluster)
 	if err != nil {
 		return err
 	}
@@ -203,16 +208,17 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 		return errmsgs.WrapError(errmsgs.Error("Error putting object in Oss bucket (%s): %s", bucketName, err))
 	}
 
-	d.SetId(fmt.Sprintf("%s:%s", bucketName, key))
+	d.SetId(fmt.Sprintf("%s:%s:%s", ossCluster, bucketName, key))
 	return nil
 }
 
 func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var bucketName, key string
-	id_info := strings.SplitN(d.Id(), ":", 2)
-	bucketName = id_info[0]
-	key = id_info[1]
+	if len(strings.Split(d.Id(), ":")) == 2 {
+		d.SetId(d.Get("oss_clsuter").(string) + ":" + d.Id())
+	}
+	id_info := strings.SplitN(d.Id(), ":", 3)
+	ossCluster, bucketName, key := id_info[0], id_info[1], id_info[2]
 	ossService := OssService{client}
 	object, err := ossService.DescribeOssBucketObject(d.Id())
 	if err != nil {
@@ -222,6 +228,7 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 		d.Set("acl", acl.ACL)
 	}
 
+	d.Set("oss_cluster", ossCluster)
 	d.Set("bucket", bucketName)
 	d.Set("key", key)
 	if object.ContentType != nil {
@@ -255,10 +262,10 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackOssBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
-
+	ossCluster := d.Get("oss_cluster").(string)
 	bucketName := d.Get("bucket").(string)
 	key := d.Get("key").(string)
-	ossClient, err := ossService.GetBucketClient(bucketName)
+	ossClient, err := ossService.GetOssClientForCluster(ossCluster)
 	if err != nil {
 		return err
 	}
@@ -275,5 +282,5 @@ func resourceAlibabacloudStackOssBucketObjectDelete(d *schema.ResourceData, meta
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucketName, d.Id(), Deleted, DefaultTimeoutMedium))
+	return errmsgs.WrapError(ossService.WaitForOssBucketObject(d.Id(), Deleted, DefaultTimeoutMedium))
 }

@@ -2004,7 +2004,7 @@ func GetOssClusterFilter() string {
 	if rawClient, err := sharedClientForRegion(region); err == nil {
 		client := rawClient.(*connectivity.AlibabacloudStackClient)
 		ossService := OssService{client}
-		if _, err := ossService.GetOssEndpointList(); errmsgs.IsHostNotFound(err) {
+		if endpoints, err := ossService.GetOssEndpointList(); errmsgs.IsHostNotFound(err) || len(endpoints) == 0 {
 			ossClusterFilterCache.filter = `
 		locals {
 			cluster_filter = ""

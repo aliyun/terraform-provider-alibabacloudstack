@@ -69,8 +69,6 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate(d *schema.Reso
 		"InstanceIds": strings.Join(aString, ","),
 	}
 	edasService := EdasService{client}
-	client.Config.ClientReadTimeout = 120 * 1000    // Unit: milliseconds
-	client.Config.ClientConnectTimeout = 120 * 1000 // Unit: milliseconds
 	_, err := client.DoTeaRequest("POST", "Edas", "2017-08-01", "InstallAgent", "/pop/v5/ecss/install_agent", nil, request, nil)
 	id := fmt.Sprintf("%s:%s", clusterId, strings.Join(aString, ","))
 	d.SetId(id)

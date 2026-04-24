@@ -24,6 +24,7 @@ import (
 	//"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
 	"github.com/aliyun/fc-go-sdk"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -131,6 +132,14 @@ func NotFoundError(err error) bool {
 		return *e.StatusCode == 404 || strings.HasSuffix(*e.Code, ".NotFound")
 	}
 
+	// Handle OSS SDK OperationError
+	if e, ok := err.(*oss.OperationError); ok {
+		var serviceErr *oss.ServiceError
+		if errors.As(e, &serviceErr) {
+			return serviceErr.StatusCode == 404 || strings.HasSuffix(serviceErr.Code, ".NotFound")
+		}
+	}
+
 	return strings.HasSuffix(err.Error(), ".NotFound") || strings.HasPrefix(err.Error(), ResourceNotfound)
 
 }
@@ -226,6 +235,19 @@ func IsExpectedErrors(err error, expectCodes ...string) bool {
 		for _, code := range expectCodes {
 			if e.ErrorCode == code || strings.Contains(e.ErrorMessage, code) {
 				return true
+			}
+		}
+		return false
+	}
+
+	// Handle OSS SDK OperationError
+	if e, ok := err.(*oss.OperationError); ok {
+		var serviceErr *oss.ServiceError
+		if errors.As(e, &serviceErr) {
+			for _, code := range expectCodes {
+				if serviceErr.Code == code || strings.Contains(serviceErr.Message, code) {
+					return true
+				}
 			}
 		}
 		return false

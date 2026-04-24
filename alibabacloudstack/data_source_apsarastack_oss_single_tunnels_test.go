@@ -22,6 +22,17 @@ func TestAccAlibabacloudStackOssSingleTunnelsDataSource(t *testing.T) {
 		}),
 	}
 
+	clusterConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":         []string{"${alibabacloudstack_oss_single_tunnel.default.id}"},
+			"oss_cluster": "${alibabacloudstack_oss_single_tunnel.default.cluster}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":         []string{"${alibabacloudstack_oss_single_tunnel.default.id}"},
+			"oss_cluster": "${alibabacloudstack_oss_single_tunnel.default.cluster}-fake",
+		}),
+	}
+
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "${alibabacloudstack_oss_single_tunnel.default.label}",
@@ -68,11 +79,11 @@ func TestAccAlibabacloudStackOssSingleTunnelsDataSource(t *testing.T) {
 		fakeMapFunc:  fakeOtstunnelsMapFunc,
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckOss(t)
+			testAccPreCheckOssEndpointList(t)
 		},
 	}
 
-	otstunnelsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
+	otstunnelsCheckInfo.dataSourceTestCheck(t, rand, idsConf, clusterConf, nameRegexConf, allConf)
 }
 
 func dataSourceOssSingleTunnelsDependence(name string) string {

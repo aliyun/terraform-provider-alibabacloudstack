@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -17,6 +18,11 @@ func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
 			"bucket": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
+			},
+			"oss_cluster": {
+				Type:     schema.TypeString,
+				Optional: true,
 				ForceNew: true,
 			},
 			"sse_algorithm": {
@@ -57,7 +63,8 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	bucketName := d.Get("bucket").(string)
-	_, err := ossService.DescribeOssBucket(bucketName)
+	id := d.Get("oss_cluster").(string) + ":" + bucketName
+	_, err := ossService.DescribeOssBucket(id)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk)
 	}
@@ -66,7 +73,7 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 	if sseAlgorithm == "KMS" {
 		kmsMasterKeyID = d.Get("kms_master_key_id").(string)
 	}
-	ossClient, err := ossService.GetBucketClient(bucketName)
+	ossClient, err := ossService.GetOssClientForCluster(d.Get("oss_cluster").(string))
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -87,7 +94,7 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 	}
 	addDebug("PutBucketEncryption", putResult, nil, map[string]string{"bucketName": bucketName})
 	log.Printf("Enter for logging")
-	d.SetId(bucketName)
+	d.SetId(id)
 
 	return nil
 }
@@ -95,13 +102,15 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
-	bucketName := d.Id()
+	if !strings.Contains(d.Id(), ":") {
+		d.SetId(d.Get("oss_cluster").(string) + ":" + d.Id())
+	}
 	apply, err := ossService.DescribeOssBucketKms(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "DescribeOssBucketKms", errmsgs.AlibabacloudStackOssGoSdk)
 	}
-
-	d.Set("bucket", bucketName)
+	d.Set("bucket", strings.Split(d.Id(), ":")[1])
+	d.Set("oss_cluster", strings.Split(d.Id(), ":")[0])
 	if apply != nil {
 		if apply.SSEAlgorithm != nil {
 			d.Set("sse_algorithm", *apply.SSEAlgorithm)
@@ -117,12 +126,12 @@ func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta inte
 func resourceAlibabacloudStackOssBucketKmsDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
-	ossClient, err := ossService.GetBucketClient(d.Id())
+	ossClient, err := ossService.GetOssClientForCluster(d.Get("oss_cluster").(string))
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 	delResult, err := ossClient.DeleteBucketEncryption(context.Background(), &oss.DeleteBucketEncryptionRequest{
-		Bucket: oss.Ptr(d.Id()),
+		Bucket: oss.Ptr(d.Get("bucket").(string)),
 	})
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteBucketEncryption", errmsgs.AlibabacloudStackOssGoSdk)

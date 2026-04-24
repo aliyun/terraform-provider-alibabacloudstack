@@ -54,3 +54,13 @@ The following attributes are exported:
 * `owner` - The bucket owner.
 * `storage_class` -  The storage class of the bucket.
 * `vpclist` -  The list of accessible VPCs for the bucket.
+
+## Import
+
+OSS bucket can be imported using the id, e.g.
+
+```
+$ terraform import alibabacloudstack_oss_bucket.example <oss_cluster>:<bucket>
+```
+
+The `oss_cluster` is the ID of the OSS cluster and `bucket` is the name of the storage bucket.

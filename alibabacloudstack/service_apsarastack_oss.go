@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -12,7 +11,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
@@ -65,10 +63,10 @@ type BucketStorageCapacityResponse struct {
 	} `json:"data"`
 }
 
-func (s *OssService) WaitForOssBucket(id string, status Status, timeout int) error {
+func (s *OssService) WaitForOssBucket(cluster, bucketName string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
-		object, err := s.DescribeOssBucket(id)
+		object, err := s.DescribeOssBucket(cluster + ":" + bucketName)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
@@ -86,45 +84,15 @@ func (s *OssService) WaitForOssBucket(id string, status Status, timeout int) err
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Name, status, errmsgs.ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, cluster, bucketName, GetFunc(1), timeout, object.Name, status, errmsgs.ProviderERROR)
 		}
 	}
 }
 
-func (s *OssService) HeadOssBucketObject(bucketName string, objectName string) error {
-	ossClient, err := s.GetBucketClient(bucketName)
-	if err != nil {
-		return err
-	}
-
-	headReq := &oss.HeadObjectRequest{
-		Bucket: &bucketName,
-		Key:    &objectName,
-	}
-	result, err := ossClient.HeadObject(context.TODO(), headReq)
-	if err != nil {
-		// HEAD responses have no body, so OSS SDK returns BadErrorResponse
-		// instead of NoSuchKey when the object does not exist (HTTP 404).
-		// Use errors.As to extract ServiceError and check StatusCode directly.
-		var se *oss.ServiceError
-		if errors.As(err, &se) && se.StatusCode == 404 {
-			return errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OssObject", objectName)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, objectName, "HeadObject", errmsgs.AlibabacloudStackOssGoSdk)
-	}
-
-	addDebug("HeadObject", result, headReq, map[string]interface{}{
-		"bucketName": bucketName,
-		"objectName": objectName,
-	})
-
-	return nil
-}
-
-func (s *OssService) WaitForOssBucketObject(bucketName string, id string, status Status, timeout int) error {
+func (s *OssService) WaitForOssBucketObject(id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
-		err := s.HeadOssBucketObject(bucketName, id)
+		_, err := s.DescribeOssBucketObject(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				return nil
@@ -133,13 +101,13 @@ func (s *OssService) WaitForOssBucketObject(bucketName string, id string, status
 		}
 
 		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, strconv.FormatBool(true), status, errmsgs.ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, timeout, strconv.FormatBool(true), status, errmsgs.ProviderERROR)
 		}
 	}
 }
 
-func (s *OssService) PutOssBucketTags(bucketName string, tags []OssTags) error {
-	ossClient, err := s.GetBucketClient(bucketName)
+func (s *OssService) PutOssBucketTags(cluster, bucketName string, tags []OssTags) error {
+	ossClient, err := s.GetOssClientForCluster(cluster)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -168,9 +136,9 @@ func (s *OssService) PutOssBucketTags(bucketName string, tags []OssTags) error {
 	return nil
 }
 
-func (s *OssService) GetBucketTags(bucketName string) (tags []interface{}, err error) {
+func (s *OssService) GetBucketTags(cluster, bucketName string) (tags []interface{}, err error) {
 	tags = make([]interface{}, 0)
-	ossClient, err := s.GetBucketClient(bucketName)
+	ossClient, err := s.GetOssClientForCluster(cluster)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
@@ -196,8 +164,8 @@ func (s *OssService) GetBucketTags(bucketName string) (tags []interface{}, err e
 	return tags, nil
 }
 
-func (s *OssService) DeleteBucketTags(bucketName string) error {
-	ossClient, err := s.GetBucketClient(bucketName)
+func (s *OssService) DeleteBucketTags(cluster, bucketName string) error {
+	ossClient, err := s.GetOssClientForCluster(cluster)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -210,8 +178,8 @@ func (s *OssService) DeleteBucketTags(bucketName string) error {
 	return nil
 }
 
-func (s *OssService) DeleteBucket(bucketName string) error {
-	ossClient, err := s.GetBucketClient(bucketName)
+func (s *OssService) DeleteBucket(cluster, bucketName string) error {
+	ossClient, err := s.GetOssClientForCluster(cluster)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -225,7 +193,7 @@ func (s *OssService) DeleteBucket(bucketName string) error {
 			}
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "DeleteBucket", errmsgs.AlibabacloudStackOssGoSdk))
 		}
-		det, err := s.DescribeOssBucket(bucketName)
+		det, err := s.DescribeOssBucket(cluster + ":" + bucketName)
 		if !errmsgs.NotFoundError(err) {
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk))
 		}
@@ -277,8 +245,8 @@ func (s *OssService) ossTagIgnored(t map[string]interface{}) bool {
 	return false
 }
 
-func (s *OssService) GetBucketSync(bucketName string) (object *BucketSyncResponse, err error) {
-	ossClient, err := s.GetBucketClient(bucketName)
+func (s *OssService) GetBucketSync(cluster, bucketName string) (object *BucketSyncResponse, err error) {
+	ossClient, err := s.GetOssClientForCluster(cluster)
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketSync", errmsgs.AlibabacloudStackOssGoSdk)
 	}
@@ -311,9 +279,9 @@ func (s *OssService) GetBucketSync(bucketName string) (object *BucketSyncRespons
 	return result, nil
 }
 
-func (s *OssService) OssBucketSyncStateRefreshFunc(bucketName string, failStates []string) resource.StateRefreshFunc {
+func (s *OssService) OssBucketSyncStateRefreshFunc(cluster, bucketName string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		result, err := s.GetBucketSync(bucketName)
+		result, err := s.GetBucketSync(cluster, bucketName)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
@@ -351,11 +319,11 @@ type ListVpcipXMLResponse struct {
 	Vpcip []VpcipEntry `xml:"Vpcip"`
 }
 
-func (s *OssService) listVpcipEntries() ([]VpcipEntry, error) {
+func (s *OssService) listVpcipEntries(cluster string) ([]VpcipEntry, error) {
 	var result []VpcipEntry
-	endpoints, err := s.GetBucketEndpointMap()
+	ossClient, err := s.GetOssClientForCluster(cluster)
 	if err != nil {
-		return nil, errmsgs.WrapError(err)
+		return result, errmsgs.WrapError(err)
 	}
 	input := &oss.OperationInput{
 		OpName:     "ListVpcip",
@@ -363,33 +331,33 @@ func (s *OssService) listVpcipEntries() ([]VpcipEntry, error) {
 		Parameters: map[string]string{"vpcip": ""},
 	}
 	input.OpMetadata.Set(signer.SubResource, []string{"vpcip"})
-	for _, endpoint := range endpoints {
-		ossClient, err := s.GetOssClient(endpoint)
-		if err != nil {
-			return nil, errmsgs.WrapError(err)
-		}
-		output, err := ossClient.InvokeOperation(context.Background(), input)
-		addDebug("ListVpcip", output, input, nil)
-		if err != nil {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListVpcip", "InvokeOperation", errmsgs.AlibabacloudStackOssGoSdk)
-		}
-		defer output.Body.Close()
-		body, err := io.ReadAll(output.Body)
-		if err != nil {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListVpcip", "ReadBody", errmsgs.AlibabacloudStackOssGoSdk)
-		}
-		var xmlResp ListVpcipXMLResponse
-		if err = xml.Unmarshal(body, &xmlResp); err != nil {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListVpcip", "XMLUnmarshal", errmsgs.AlibabacloudStackOssGoSdk)
-		}
-		result = append(result, xmlResp.Vpcip...)
+	output, err := ossClient.InvokeOperation(context.Background(), input)
+	addDebug("ListVpcip", output, input, nil)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListVpcip", "InvokeOperation", errmsgs.AlibabacloudStackOssGoSdk)
 	}
-	return result, nil
+	defer output.Body.Close()
+	body, err := io.ReadAll(output.Body)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListVpcip", "ReadBody", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	var xmlResp ListVpcipXMLResponse
+	if err = xml.Unmarshal(body, &xmlResp); err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListVpcip", "XMLUnmarshal", errmsgs.AlibabacloudStackOssGoSdk)
+	}
+	vpcips := []VpcipEntry{}
+	for _, vpcip := range xmlResp.Vpcip {
+		if vpcip.Cluster != cluster {
+			continue
+		}
+		vpcips = append(vpcips, vpcip)
+	}
+	return vpcips, nil
 }
 
 func (s *OssService) DescribeOssSingleTunnel(id string) (map[string]interface{}, error) {
 	parts := strings.Split(id, ":")
-	entries, err := s.listVpcipEntries()
+	entries, err := s.listVpcipEntries(parts[0])
 	if err != nil {
 		return nil, err
 	}
@@ -508,30 +476,26 @@ func (s OssService) GetBucketEndpointMap() (map[string]string, error) {
 }
 
 func (s OssService) GetOssEndpointForCluster(cluster string) (endpoint string, err error) {
+
 	endpointMap, err := s.GetBucketEndpointMap()
 	if err != nil {
 		return "", errmsgs.WrapError(err)
 	}
-	if cluster != "" {
-		endpoint = endpointMap[cluster]
-	} else {
-		if len(endpointMap) > 1 {
-			return "", errmsgs.Error("The OssCluster in the current region is greater than 1, the `oss_cluster` attribute must be set.")
-		}
+	if cluster == "" {
 		if len(endpointMap) == 1 {
-			for _, v := range endpointMap {
-				endpoint = v
-				break
+			for _, endpoint := range endpointMap {
+				return endpoint, nil
 			}
-		}
-		if len(endpointMap) < 1 {
-			endpoint, err = s.GetDefaultOssEndpoint()
-			if err != nil {
-				return "", errmsgs.WrapError(err)
-			}
+		} else {
+			// 兼容不支持指定cluster的旧代码
+			return s.GetDefaultOssEndpoint()
 		}
 	}
-	return endpoint, nil
+	if endpoint, existed := endpointMap[cluster]; !existed {
+		return "", errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("OssEndpoint not found for cluster: %s", cluster))
+	} else {
+		return endpoint, nil
+	}
 }
 
 func (s OssService) GetOssClientForCluster(cluster string) (*oss.Client, error) {
@@ -551,88 +515,30 @@ func (s OssService) GetDefaultOssEndpoint() (string, error) {
 	return endpoint, nil
 }
 
-var (
-	BucketClient     = make(map[string]oss.Client)
-	BucketClientLock sync.RWMutex
-)
-
-func (s OssService) GetBucketClient(bucketName string) (*oss.Client, error) {
-	// 先尝试读取缓存（读锁）
-	BucketClientLock.RLock()
-	if client, ok := BucketClient[bucketName]; ok {
-		BucketClientLock.RUnlock()
-		return &client, nil
-	}
-	BucketClientLock.RUnlock()
-
-	// 缓存未命中，需要创建新客户端
-	bucketInfo, err := s.DescribeOssBucket(bucketName)
+func (s OssService) DescribeOssBucket(id string) (*oss.BucketInfo, error) {
+	cluster, bucketName := strings.Split(id, ":")[0], strings.Split(id, ":")[1]
+	client, err := s.GetOssClientForCluster(cluster)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	if bucketInfo == nil || bucketInfo.Name == nil {
-		return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
+
+	request := &oss.GetBucketInfoRequest{
+		Bucket: oss.Ptr(bucketName),
 	}
-
-	bucketEndpoint := *bucketInfo.ExtranetEndpoint
-
-	client, err := s.GetOssClient(bucketEndpoint)
-	if err == nil {
-		// 写入缓存（写锁）
-		BucketClientLock.Lock()
-		// 双重检查，防止并发创建
-		if existingClient, ok := BucketClient[bucketName]; ok {
-			BucketClientLock.Unlock()
-			return &existingClient, nil
+	result, err := client.GetBucketInfo(context.TODO(), request)
+	if err != nil {
+		if errmsgs.IsHostNotFound(err) || errmsgs.IsExpectedErrors(err, "NoSuchBucket") {
+			return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
 		}
-		BucketClient[bucketName] = *client
-		BucketClientLock.Unlock()
+		return nil, errmsgs.WrapError(err)
 	}
-
-	return client, err
+	return &result.BucketInfo, nil
 }
 
-func (s OssService) DescribeOssBucket(bucketName string) (*oss.BucketInfo, error) {
-	bucket, _, err := s.DescribeOssBucketWithCluster(bucketName)
-	return bucket, err
-
-}
-
-func (s OssService) DescribeOssBucketWithCluster(bucketName string) (*oss.BucketInfo, string, error) {
-	var endpointMap map[string]string
-	var err error
-	endpointMap, err = s.GetBucketEndpointMap()
-	if err != nil || len(endpointMap) < 1 {
-		endpoint, err := s.GetDefaultOssEndpoint()
-		if err != nil {
-			return nil, "", errmsgs.WrapError(err)
-		}
-		endpointMap = map[string]string{
-			"defaultCluster": endpoint,
-		}
-	}
-	for cluster, endpoint := range endpointMap {
-		ossclient, err := s.GetOssClient(endpoint)
-		if err != nil {
-			return nil, "", errmsgs.WrapError(err)
-		}
-		request := &oss.GetBucketInfoRequest{
-			Bucket: oss.Ptr(bucketName),
-		}
-		result, err := ossclient.GetBucketInfo(context.TODO(), request)
-		if err != nil {
-			if errmsgs.IsHostNotFound(err) {
-				continue
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-		return &result.BucketInfo, cluster, nil
-	}
-	return nil, "", errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
-}
-
-func (s OssService) DescribeOssBucketKms(bucketName string) (*oss.ApplyServerSideEncryptionByDefault, error) {
-	client, err := s.GetBucketClient(bucketName)
+func (s OssService) DescribeOssBucketKms(id string) (*oss.ApplyServerSideEncryptionByDefault, error) {
+	parts := strings.Split(id, ":")
+	cluster, bucketName := parts[0], parts[1]
+	client, err := s.GetOssClientForCluster(cluster)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
@@ -641,6 +547,9 @@ func (s OssService) DescribeOssBucketKms(bucketName string) (*oss.ApplyServerSid
 	})
 	addDebug("BucketEncryption", getResult, nil, map[string]string{"bucketName": bucketName})
 	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "NoSuchBucket") {
+			return nil, errmsgs.GetNotFoundErrorFromString("Bucket " + bucketName + " Not Found")
+		}
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "GetBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 	if getResult.ServerSideEncryptionRule != nil && getResult.ServerSideEncryptionRule.ApplyServerSideEncryptionByDefault != nil {
@@ -650,8 +559,8 @@ func (s OssService) DescribeOssBucketKms(bucketName string) (*oss.ApplyServerSid
 	return nil, errmsgs.GetNotFoundErrorFromString("Bucket Encryption data Not Found")
 }
 
-func (s OssService) DescribeOssBucketLogging(bucketName string) (*oss.GetBucketLoggingResult, error) {
-	ossClient, err := s.GetBucketClient(bucketName)
+func (s OssService) DescribeOssBucketLogging(cluster, bucketName string) (*oss.GetBucketLoggingResult, error) {
+	ossClient, err := s.GetOssClientForCluster(cluster)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
@@ -668,10 +577,9 @@ func (s OssService) DescribeOssBucketLogging(bucketName string) (*oss.GetBucketL
 
 func (s OssService) DescribeOssBucketObject(id string) (*oss.HeadObjectResult, error) {
 	var bucketName, key string
-	id_info := strings.SplitN(id, ":", 2)
-	bucketName = id_info[0]
-	key = id_info[1]
-	ossClient, err := s.GetBucketClient(bucketName)
+	id_info := strings.SplitN(id, ":", 3)
+	ossCluster, bucketName, key := id_info[0], id_info[1], id_info[2]
+	ossClient, err := s.GetOssClientForCluster(ossCluster)
 	if err != nil {
 		return nil, err
 	}
@@ -682,7 +590,7 @@ func (s OssService) DescribeOssBucketObject(id string) (*oss.HeadObjectResult, e
 	}
 	object, err := ossClient.HeadObject(context.Background(), headReq)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, "404 Not Found") {
+		if errmsgs.NotFoundError(err) {
 			return nil, errmsgs.GetNotFoundErrorFromString("BUcket Object not found!")
 		}
 		return nil, errmsgs.WrapError(err)
@@ -694,14 +602,15 @@ func (s OssService) DescribeOssBucketObject(id string) (*oss.HeadObjectResult, e
 }
 
 func (s OssService) DescribeOssBucketObjectAcl(id string) (*oss.GetObjectAclResult, error) {
-	id_info := strings.SplitN(id, ":", 2)
-	ossClient, err := s.GetBucketClient(id_info[0])
+	id_info := strings.SplitN(id, ":", 3)
+	ossCluster, bucketName, key := id_info[0], id_info[1], id_info[2]
+	ossClient, err := s.GetOssClientForCluster(ossCluster)
 	if err != nil {
 		return nil, err
 	}
 	aclReq := &oss.GetObjectAclRequest{
-		Bucket: &id_info[0],
-		Key:    &id_info[1],
+		Bucket: &bucketName,
+		Key:    &key,
 	}
 	acl, err := ossClient.GetObjectAcl(context.Background(), aclReq)
 	if err != nil {
@@ -710,8 +619,8 @@ func (s OssService) DescribeOssBucketObjectAcl(id string) (*oss.GetObjectAclResu
 	return acl, nil
 }
 
-func (s OssService) DescribeOssBucketPolicy(bucketName string) ([]string, error) {
-	ossClient, err := s.GetBucketClient(bucketName)
+func (s OssService) DescribeOssBucketPolicy(cluster, bucketName string) ([]string, error) {
+	ossClient, err := s.GetOssClientForCluster(cluster)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
