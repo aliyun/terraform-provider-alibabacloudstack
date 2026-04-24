@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":                  name,
 					"cluster_id":            "${local.k8s_cluster_id}",
-					"vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
+					"vswitch_ids":           []string{"${local.k8s_vswitch_id}"},
 					"instance_types":        []string{"${local.default_instance_type_id}"},
 					"node_count":            "1",
 					"password":              "${random_password.password.0.result}",
@@ -160,7 +160,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":                  name,
 					"cluster_id":            "${local.k8s_cluster_id}",
-					"vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
+					"vswitch_ids":           []string{"${local.k8s_vswitch_id}"},
 					"instance_types":        []string{"${local.default_instance_type_id}"},
 					"image_id":              "${data.alibabacloudstack_images.default.images.0.id}",
 					"key_name":              "${alibabacloudstack_ecs_keypair.default.key_name}",
