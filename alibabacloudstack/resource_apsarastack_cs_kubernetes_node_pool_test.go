@@ -35,7 +35,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 		ExternalProviders: testAccExternalProviders,
 		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
-			// Step 1: 创建基础节点池（使用node_count）
+			// Step 1: Create basic node pool with node_count
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name":                  name,
@@ -84,14 +84,14 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 					}),
 				),
 			},
-			// Step 2: 导入验证
+			// Step 2: Import verification
 			{
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
 			},
-			// Step 3: 扩容节点并修改系统盘和数据盘
+			// Step 3: Scale up nodes and modify system/data disks
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"node_count":       "2",
@@ -113,7 +113,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 					}),
 				),
 			},
-			// Step 4: 缩容节点
+			// Step 4: Scale down nodes
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"node_count": "1",
@@ -155,7 +155,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 		ExternalProviders: testAccExternalProviders,
 		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
-			// Step 1: 创建自动扩缩容节点池（使用scaling_config）
+			// Step 1: Create auto-scaling node pool (with scaling_config)
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name":                  name,
@@ -200,14 +200,14 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 					}),
 				),
 			},
-			// Step 2: 导入验证
+			// Step 2: Import verification
 			{
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password", "node_count"},
 			},
-			// Step 3: 更新自动扩缩容配置（调整max_size）
+			// Step 3: Update auto-scaling config (adjust max_size)
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"scaling_policy": "release",
@@ -233,7 +233,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 					}),
 				),
 			},
-			// Step 4: 修改EIP绑定配置
+			// Step 4: Modify EIP binding configuration
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"scaling_config": []map[string]string{

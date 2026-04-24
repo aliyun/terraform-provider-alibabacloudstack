@@ -115,7 +115,7 @@ func dataSourceAlibabacloudStackAscmRamPoliciesForUserRead(d *schema.ResourceDat
 			"policy_type":     rp.PolicyType,
 			"description":     rp.Description,
 			"default_version": rp.DefaultVersion,
-			"attach_date":     time.Unix(rp.AttachDate/1000, 0).Format("2006-01-02 03:04:05"), // 使用转换后的时间戳
+			"attach_date":     time.Unix(rp.AttachDate/1000, 0).Format("2006-01-02 03:04:05"), // Use converted timestamp
 			"policy_document": rp.PolicyDocument,
 		}
 		names = append(names, rp.PolicyName)

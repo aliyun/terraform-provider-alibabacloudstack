@@ -419,7 +419,7 @@ type Config struct {
 
 func VswitchsHandler(vswitchsStr string) []string {
 	result := make([]string, 0)
-	// 使用,切割字符串，并对切割完成的字符串数组进行去重后返回
+	// Split string by comma, deduplicate and return the slice
 	if vswitchsStr == "" {
 		return result
 	}

@@ -493,7 +493,7 @@ func (s OssService) GetOssEndpointForCluster(cluster string) (endpoint string, e
 				return endpoint, nil
 			}
 		} else {
-			// 兼容不支持指定cluster的旧代码
+			// Backward compatibility with legacy code that does not support specifying cluster
 			return s.GetDefaultOssEndpoint()
 		}
 	}

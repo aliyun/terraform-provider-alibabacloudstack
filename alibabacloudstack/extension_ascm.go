@@ -1072,7 +1072,7 @@ type InitPasswordListResponse struct {
 	} `json:"data"`
 }
 
-// RoleResponse 角色响应结构体
+// RoleResponse represents the role response structure
 type AscmGetRoleResponse struct {
 	SuccessResponse bool               `json:"successResponse"`
 	EagleEyeTraceId string             `json:"eagleEyeTraceId"`
@@ -1086,7 +1086,7 @@ type AscmGetRoleResponse struct {
 	Message         string             `json:"message"`
 }
 
-// RoleData 角色数据详情
+// RoleData represents role data details
 type AscmRoleDataForGet struct {
 	RoleRange  string `json:"roleRange"`
 	ArId       string `json:"arId"`

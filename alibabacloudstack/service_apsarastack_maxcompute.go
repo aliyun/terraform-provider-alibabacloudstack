@@ -214,7 +214,7 @@ func (s *MaxcomputeService) DescribeMaxcomputeUser(id string) (map[string]interf
 	return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 }
 
-// DescribeMaxcomputeUserForName 根据用户名查询用户信息
+// DescribeMaxcomputeUserForName queries user information by username
 func (s *MaxcomputeService) DescribeMaxcomputeUserForName(username string) (map[string]interface{}, error) {
 	users, err := s.DescribeMaxcomputeUsers()
 	if err != nil {
@@ -229,17 +229,17 @@ func (s *MaxcomputeService) DescribeMaxcomputeUserForName(username string) (map[
 	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("Maxcompute User", username))
 }
 
-// GetOrCreateMaxcomputeUser 根据用户名获取或创建用户，返回用户ID和AAS PK
+// GetOrCreateMaxcomputeUser retrieves or creates a user by username, returning userId and aasPk
 func (s *MaxcomputeService) GetOrCreateMaxcomputeUser(username string) (userId string, aasPk string, err error) {
-	// 先尝试查询用户是否存在
+	// Try to check if the user exists
 	userInfo, err := s.DescribeMaxcomputeUserForName(username)
 	if err == nil && userInfo != nil {
-		// 用户存在，返回 id 和 aasPk
+		// User exists, return id and aasPk
 		userId = fmt.Sprintf("%v", userInfo["id"])
 		aasPk = fmt.Sprintf("%v", userInfo["aasPk"])
 		return userId, aasPk, nil
 	}
-	// 用户不存在，创建新用户
+	// User does not exist, create a new user
 	action := "CreateOdpsUser"
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", action, "")
 	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
@@ -260,7 +260,7 @@ func (s *MaxcomputeService) GetOrCreateMaxcomputeUser(username string) (userId s
 		return "", "", errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	// 重新查询用户列表获取新创建的用户信息
+	// Re-query the user list to retrieve the newly created user information
 	users, err := s.DescribeMaxcomputeUsers()
 	if err != nil || len(users) == 0 {
 		return "", "", errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)

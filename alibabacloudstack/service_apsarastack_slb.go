@@ -79,7 +79,7 @@ type LoadBalancerNew struct {
 	InstanceChargeType           string                   `json:"InstanceChargeType" xml:"InstanceChargeType"`
 	ServiceManagedReason         string                   `json:"ServiceManagedReason" xml:"ServiceManagedReason"`
 	IneffectiveOrderList         slb.IneffectiveOrderList `json:"IneffectiveOrderList" xml:"IneffectiveOrderList"`
-	Tags                         []LoadBalancerTag        `json:"Tags" xml:"Tags"` // 改为数组格式以匹配API返回
+	Tags                         []LoadBalancerTag        `json:"Tags" xml:"Tags"` // Changed to array format to match API response
 }
 
 const max_num_per_time = 50

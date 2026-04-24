@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackKmsCiphertext_basic(t *testing.T) {
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  nil,
-		// 该资源只有本地属性，不支持删除
+		// This resource only has local attributes and does not support deletion.
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
