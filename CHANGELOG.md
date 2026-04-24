@@ -1,3 +1,19 @@
+# 3.18.28
+
+## Fixed
+
+1. Fixed incorrect reference logic when updating node pool vswitch configuration in `alibabacloudstack_ack_cluster`
+2. Fixed refresh operation failure in `alibabacloudstack_cs_kubernetes_node_pool` under multi-node-pool scenarios
+
+## Changes
+
+1. Comprehensive refactoring of OSS resources (`alibabacloudstack_oss_bucket`, `alibabacloudstack_oss_bucket_object`, `alibabacloudstack_oss_bucket_kms`, `alibabacloudstack_oss_bucket_quota`) to eliminate ASAPI dependency, now using cloud product's self-built gateway to obtain endpoints
+2. `alibabacloudstack_cs_kubernetes_node_pool` supports creating node pools with existing K8s clusters, added `platform = "Custom"` support
+3. Simplified cluster update logic in `alibabacloudstack_ack_cluster`, fixed state transition handling
+4. Fixed Client `ReadTimeout` and `ConnectTimeout` unit error (corrected from Hour to Millisecond)
+
+---
+
 # 3.18.27
 
 ## Added

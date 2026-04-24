@@ -1,3 +1,19 @@
+# 3.18.28
+
+## 修复
+
+1. 修复 `alibabacloudstack_ack_cluster` 更新节点池 vswitch 配置时的引用错误逻辑
+2. 修复 `alibabacloudstack_cs_kubernetes_node_pool` 多节点池场景下 refresh 操作失败的缺陷
+
+## 变更
+
+1. OSS 资源全量改造，`alibabacloudstack_oss_bucket`、`alibabacloudstack_oss_bucket_object`、`alibabacloudstack_oss_bucket_kms`、`alibabacloudstack_oss_bucket_quota` 摆脱对 ASAPI 的依赖，改用云产品自建网关获取 Endpoint
+2. `alibabacloudstack_cs_kubernetes_node_pool` 支持通过已有 K8s 集群创建节点池，新增 `platform = "Custom"` 支持
+3. `alibabacloudstack_ack_cluster` 简化集群更新逻辑，修复状态迁移处理
+4. 修复 Client `ReadTimeout` 和 `ConnectTimeout` 超时单位错误（从 Hour 修正为 Millisecond）
+
+---
+
 # 3.18.27
 
 ## 新增
