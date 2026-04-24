@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"regexp"
+	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -297,11 +298,12 @@ func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData,
 		if r != nil && !r.MatchString(kc.Name) {
 			continue
 		}
+		vswitch_ids := VswitchsHandler(kc.VswitchID)
 		mapping := map[string]interface{}{
 			"id":                   kc.ClusterID,
 			"name":                 kc.Name,
 			"vpc_id":               kc.VpcID,
-			"vswitch_ids":          []string{kc.VswitchID},
+			"vswitch_ids":          vswitch_ids,
 			"security_group_id":    kc.SecurityGroupID,
 			"availability_zone":    kc.ZoneID,
 			"state":                kc.State,
@@ -413,4 +415,23 @@ type Config struct {
 			ClientKeyData         string `yaml:"client-key-data"`
 		} `yaml:"user"`
 	} `yaml:"users"`
+}
+
+func VswitchsHandler(vswitchsStr string) []string {
+	result := make([]string, 0)
+	// 使用,切割字符串，并对切割完成的字符串数组进行去重后返回
+	if vswitchsStr == "" {
+		return result
+	}
+
+	vswitchList := strings.Split(vswitchsStr, ",")
+	seen := make(map[string]bool)
+	for _, v := range vswitchList {
+		v = strings.TrimSpace(v)
+		if v != "" && !seen[v] {
+			seen[v] = true
+			result = append(result, v)
+		}
+	}
+	return result
 }

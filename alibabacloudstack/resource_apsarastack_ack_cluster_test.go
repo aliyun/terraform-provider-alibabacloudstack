@@ -384,6 +384,10 @@ variable "enable_ssh" {
 
 %s
 
+resource "alibabacloudstack_ecs_keypair" "default" {
+  key_name = var.name
+}
+
 variable "worker_number" {
   description = "The number of worker nodes in kubernetes cluster."
   default     = 3
