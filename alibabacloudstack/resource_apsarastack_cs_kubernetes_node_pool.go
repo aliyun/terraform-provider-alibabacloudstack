@@ -687,7 +687,7 @@ func resourceAlibabacloudStackCSNodePoolRead(d *schema.ResourceData, meta interf
 	csService := CsService{client}
 	parts := strings.Split(d.Id(), ":")
 	var clusterId string
-	if len(parts) < 2 || parts[1] == "" {
+	if len(parts) == 1 {
 		clusterId = d.Get("cluster_id").(string)
 		newId := fmt.Sprintf("%s:%s", clusterId, d.Id())
 		d.SetId(newId)
