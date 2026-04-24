@@ -8,7 +8,7 @@ import (
 func TestAccAlibabacloudStackOssBucketsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_oss_buckets.default"
-	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	name := fmt.Sprintf("tf-bucket-data-%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOssBucketsConfigDependence)
 
 	nameRegexConf := dataSourceTestAccConfig{

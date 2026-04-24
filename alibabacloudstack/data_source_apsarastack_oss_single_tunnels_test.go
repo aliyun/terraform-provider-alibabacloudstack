@@ -10,7 +10,7 @@ func TestAccAlibabacloudStackOssSingleTunnelsDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_oss_single_tunnels.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf-testAcc%d", rand),
+		fmt.Sprintf("tf-tunnel-data%d", rand),
 		dataSourceOssSingleTunnelsDependence)
 
 	idsConf := dataSourceTestAccConfig{

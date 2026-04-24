@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackOssBucket_Basic(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	name := fmt.Sprintf("tf-bucket-basic-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketBasicDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -204,7 +204,7 @@ func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	name := fmt.Sprintf("tf-bucket-sync-%d", rand)
 	dual_sync_role := os.Getenv("ALIBABACLOUDSTACK_OSS_DUAL_SYNC_ROLE")
 	if dual_sync_role == "" {
 		dual_sync_role = "AliyunOSSPrivateCloudDrsSyncRole"
@@ -270,7 +270,7 @@ func TestAccAlibabacloudStackOssBucket_kmskey(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	name := fmt.Sprintf("tf-bucket-kmskey-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

@@ -9,7 +9,7 @@ func TestAccAlibabacloudStackOssBucketObjectsDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_oss_bucket_objects.default"
 
-	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	name := fmt.Sprintf("tf-object-data-%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		name,
 		dataSourceOssBucketObjectsConfigDependence)

@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	name := fmt.Sprintf("tf-oss-object-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketObjectConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
