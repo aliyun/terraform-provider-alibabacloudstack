@@ -16,6 +16,7 @@ This data source provides the objects of an OSS bucket.
 ```
 data "alibabacloudstack_oss_bucket_objects" "bucket_objects_ds" {
   bucket_name = "sample_bucket"
+  oss_cluster = "your-oss-cluster"  # Optional: OSS cluster name
   key_regex   = "sample/sample_object.txt"
 }
 
@@ -29,6 +30,7 @@ output "first_object_key" {
 The following arguments are supported:
 
 * `bucket_name` - Name of the bucket that contains the objects to find.
+* `oss_cluster` - (Optional) The name of the OSS cluster. If not specified, the default cluster will be used.
 * `key_regex` - (Optional) A regex string to filter results by key.
 * `key_prefix` - (Optional) Filter results by the given key prefix (such as "path/to/folder/logs-").
 

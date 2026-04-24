@@ -16,6 +16,7 @@ description: |-
 ```
 data "alibabacloudstack_oss_bucket_objects" "bucket_objects_ds" {
   bucket_name = "sample_bucket"
+  oss_cluster = "your-oss-cluster"  # 可选：OSS 集群名称
   key_regex   = "sample/sample_object.txt"
 }
 
@@ -29,9 +30,9 @@ output "first_object_key" {
 支持以下参数：
 
 * `bucket_name` - （必需）包含要查找的对象的存储桶名称。
+* `oss_cluster` - （可选）OSS 集群名称。如果不指定，将使用默认集群。
 * `key_regex` - （可选）用于通过键过滤结果的正则表达式字符串。此参数可用于精确匹配或部分匹配对象键。
-* `key_prefix` - （可选）通过给定的键前缀过滤结果（例如“path/to/folder/logs-”）。此参数可用于筛选具有特定前缀的对象。
-
+* `key_prefix` - （可选）通过给定的键前缀过滤结果（例如"path/to/folder/logs-"）。此参数可用于筛选具有特定前缀的对象。
 ## 属性说明
 
 除了上述参数外，还导出以下属性：

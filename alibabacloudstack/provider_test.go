@@ -115,7 +115,7 @@ func testAccPreCheckOssEndpointList(t *testing.T) {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		t.Skipf("Skipping OSS test case with err: %s", err)
+		t.Fatalf("Init Provider failed: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
@@ -131,7 +131,7 @@ func testAccPreCheckOss(t *testing.T) {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		t.Skipf("Skipping OSS test case with err: %s", err)
+		t.Fatalf("Init Provider failed: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}

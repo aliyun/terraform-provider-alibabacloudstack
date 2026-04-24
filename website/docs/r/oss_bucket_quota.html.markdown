@@ -19,8 +19,9 @@ resource "alibabacloudstack_oss_bucket" "default" {
 }
 
 resource "alibabacloudstack_oss_bucket_quota" "default" {
-  bucket = alibabacloudstack_oss_bucket.default.bucket
-  quota  = 10240  # Quota in MB
+  bucket      = alibabacloudstack_oss_bucket.default.bucket
+  oss_cluster = "your-oss-cluster"  # Optional: OSS cluster name
+  quota       = 10240  # Quota in MB
 }
 ```
 
@@ -28,6 +29,7 @@ resource "alibabacloudstack_oss_bucket_quota" "default" {
 The following arguments are supported:
 
 * `bucket` - (Required, ForceNew) - The name of the OSS bucket.
+* `oss_cluster` - (Optional, ForceNew) - The name of the OSS cluster. If not specified, the default cluster will be used.
 * `quota` - (Required, ForceNew) - The storage quota for the OSS bucket in megabytes (MB).
 
 
@@ -35,4 +37,5 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
 
 * `bucket` - The name of the OSS bucket.
+* `oss_cluster` - The name of the OSS cluster.
 * `quota` - The storage quota for the OSS bucket in megabytes (MB).

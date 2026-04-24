@@ -21,8 +21,9 @@ resource "alibabacloudstack_oss_bucket" "default" {
 }
 
 resource "alibabacloudstack_oss_bucket_quota" "default" {
-  bucket = alibabacloudstack_oss_bucket.default.bucket
-  quota  = 10240  # 配额以 MB 为单位
+  bucket      = alibabacloudstack_oss_bucket.default.bucket
+  oss_cluster = "your-oss-cluster"  # 可选：OSS 集群名称
+  quota       = 10240  # 配额以 MB 为单位
 }
 ```
 
@@ -31,6 +32,7 @@ resource "alibabacloudstack_oss_bucket_quota" "default" {
 以下参数被支持：
 
 * `bucket` - (必填，变更时重建) - 指定需要设置配额的 OSS 存储桶名称。此参数必须与已创建的 OSS 存储桶名称一致。
+* `oss_cluster` - (可选，变更时重建) - OSS 集群名称。如果不指定，将使用默认集群。
 * `quota` - (必填，变更时重建) - 设置 OSS 存储桶的存储配额，单位为兆字节（MB）。通过此参数可以限制存储桶的最大存储容量。
 
 ## 属性说明
@@ -38,4 +40,5 @@ resource "alibabacloudstack_oss_bucket_quota" "default" {
 除了上述列出的参数外，还导出以下属性：
 
 * `bucket` - 返回所设置配额的 OSS 存储桶名称。
+* `oss_cluster` - 返回 OSS 集群名称。
 * `quota` - 返回 OSS 存储桶的存储配额，单位为兆字节（MB）。此值与设置时的值一致，表示当前存储桶的存储限制。
