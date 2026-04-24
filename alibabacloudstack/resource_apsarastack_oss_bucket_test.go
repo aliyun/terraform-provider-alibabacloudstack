@@ -214,6 +214,7 @@ func TestUatAlibabacloudStackOssBucket_Sync(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckOss(t)
+			testAccPreCheckOssEndpointList(t)
 			testAccPreCheckKmsServer(t)
 		},
 		// module name

@@ -117,7 +117,7 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 			request := &oss.ListBucketsRequest{}
 			lsRes, err := ossclietn.ListBuckets(context.TODO(), request)
 			if err != nil {
-				if errmsgs.IsHostNotFound(err) {
+				if errmsgs.IsHostNotFound(err) || errmsgs.IsExpectedErrors(err, "With part response body Bad Gateway: [Errno 61] Connection refused.") {
 					break
 				}
 				return errmsgs.WrapError(err)

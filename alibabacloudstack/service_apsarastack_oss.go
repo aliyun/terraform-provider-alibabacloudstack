@@ -183,18 +183,24 @@ func (s *OssService) DeleteBucket(cluster, bucketName string) error {
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resource.Retry(1*time.Minute, func() *resource.RetryError {
+	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		_, err := ossClient.DeleteBucket(context.Background(), &oss.DeleteBucketRequest{
 			Bucket: &bucketName,
 		})
 		if err != nil {
-			if ossNotFoundError(err) {
-				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk))
+			if errmsgs.NotFoundError(err) {
+				return nil
 			}
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "DeleteBucket", errmsgs.AlibabacloudStackOssGoSdk))
 		}
 		det, err := s.DescribeOssBucket(cluster + ":" + bucketName)
-		if !errmsgs.NotFoundError(err) {
+		if errmsgs.IsExpectedErrors(err, "AccessDenied") {
+			return resource.RetryableError(errmsgs.Error("Trying to delete OSS bucket %#v failed.", bucketName))
+		}
+		if errmsgs.NotFoundError(err) {
+			return nil
+		}
+		if err != nil {
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk))
 		}
 		if det != nil && *det.Name != "" {

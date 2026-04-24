@@ -8,9 +8,9 @@ import (
 func TestAccAlibabacloudStackOssSingleTunnelsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_oss_single_tunnels.default"
-
+	name := fmt.Sprintf("tf-tunnel-data%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf-tunnel-data%d", rand),
+		name,
 		dataSourceOssSingleTunnelsDependence)
 
 	idsConf := dataSourceTestAccConfig{
@@ -58,7 +58,7 @@ func TestAccAlibabacloudStackOssSingleTunnelsDataSource(t *testing.T) {
 			"ids.#":             "1",
 			"tunnels.#":         "1",
 			"tunnels.0.id":      CHECKSET,
-			"tunnels.0.label":   fmt.Sprintf("tf-testAcc%d", rand),
+			"tunnels.0.label":   name,
 			"tunnels.0.cluster": CHECKSET,
 			"tunnels.0.vip":     CHECKSET,
 			"tunnels.0.vpc_id":  CHECKSET,
