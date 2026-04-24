@@ -88,18 +88,6 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 					}),
 				),
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"server_side_encryption": "KMS",
-					"kms_key_id":             "${alibabacloudstack_kms_key.key.id}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"server_side_encryption": "KMS",
-						"kms_key_id":             CHECKSET,
-					}),
-				),
-			},
 			/*
 				{
 					Config: testAccConfig(map[string]interface{}{
@@ -165,6 +153,75 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackOssBucketObject_kmskey(t *testing.T) {
+	tmpFile, err := ioutil.TempFile("", "tf-oss-object-test-acc-source")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	// first write some data to the tempfile just so it's not 0 bytes.
+	err = ioutil.WriteFile(tmpFile.Name(), []byte("{anything will do }"), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var v http.Header
+	resourceId := "alibabacloudstack_oss_bucket_object.default"
+	ra := resourceAttrInit(resourceId, ossBucketObjectBasicMap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeOssBucketObject")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := ra.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("tf-oss-object-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketObjectConfigKmsDependence)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckOss(t)
+			testAccPreCheckKmsServer(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"bucket":                 "${alibabacloudstack_oss_bucket.default.bucket}",
+					"key":                    "test-object-source-key",
+					"source":                 strings.Replace(tmpFile.Name(), "\\", "\\\\", -1),
+					"content_type":           "binary/octet-stream",
+					"acl":                    "public-read-write",
+					"content_md5":            "ewBv9NcPaMxlBhrPL4Aubw==",
+					"server_side_encryption": "KMS",
+					"kms_key_id":             "${alibabacloudstack_kms_key.key.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAlicloudOssBucketObjectExists(
+						"alibabacloudstack_oss_bucket_object.default", v),
+					testAccCheck(map[string]string{
+						"bucket":                 name,
+						"source":                 tmpFile.Name(),
+						"server_side_encryption": "KMS",
+						"kms_key_id":             CHECKSET,
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// source is a local attribute, cannot be loaded from remote
+				// acl requires special permissions, currently cannot be adjusted during testing
+				ImportStateVerifyIgnore: []string{"source", "acl"},
+			},
+		},
+	})
+}
+
 func resourceOssBucketObjectConfigDependence(name string) string {
 	clusterFilter := GetOssClusterFilter()
 	return fmt.Sprintf(`
@@ -180,8 +237,15 @@ resource "alibabacloudstack_oss_bucket" "default" {
 	oss_cluster = local.cluster_filter
 }
 
+`, name, clusterFilter)
+}
+
+func resourceOssBucketObjectConfigKmsDependence(name string) string {
+	return fmt.Sprintf(`
+	%s
+
 %s
-`, name, clusterFilter, KeyCommonTestCase)
+`, resourceOssBucketObjectConfigDependence(name), KeyCommonTestCase)
 }
 
 var ossBucketObjectBasicMap = map[string]string{

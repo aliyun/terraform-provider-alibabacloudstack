@@ -29,6 +29,7 @@ func TestAccAlibabacloudStackOssBucketKms_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckOss(t)
+			testAccPreCheckKmsServer(t)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
