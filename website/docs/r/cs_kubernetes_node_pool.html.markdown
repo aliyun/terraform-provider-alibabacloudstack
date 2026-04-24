@@ -12,289 +12,209 @@ description: |-
 This resource will help you to manage node pool in Kubernetes Cluster. 
 
 
-
--> **NOTE:** From version 1.109.1, support managed node pools, but only for the professional managed clusters.
-
--> **NOTE:** From version 1.109.1, support remove node pool nodes.
-
--> **NOTE:** From version 1.111.0, support auto scaling node pool. For more information on how to use auto scaling node pools, see [Use Terraform to create an elastic node pool](https://help.aliyun.com/document_detail/197717.htm). With auto-scaling is enabled, the nodes in the node pool will be labeled with `k8s.aliyun.com=true` to prevent system pods such as coredns, metrics-servers from being scheduled to elastic nodes, and to prevent node shrinkage from causing business abnormalities.
-
--> **NOTE:** ACK adds a new RamRole (AliyunCSManagedAutoScalerRole) for the permission control of the node pool with auto-scaling enabled. If you are using a node pool with auto scaling, please click [AliyunCSManagedAutoScalerRole](https://ram.console.aliyun.com/role/authorization?request=%7B%22Services%22%3A%5B%7B%22Service%22%3A%22CS%22%2C%22Roles%22%3A%5B%7B%22RoleName%22%3A%22AliyunCSManagedAutoScalerRole%22%2C%22TemplateId%22%3A%22AliyunCSManagedAutoScalerRole%22%7D%5D%7D%5D%2C%22ReturnUrl%22%3A%22https%3A%2F%2Fcs.console.aliyun.com%2F%22%7D) to complete the authorization. 
-
--> **NOTE:** ACK adds a new RamRole(AliyunCSManagedNlcRole) for the permission control of the management node pool. If you use the management node pool, please click [AliyunCSManagedNlcRole](https://ram.console.aliyun.com/role/authorization?spm=5176.2020520152.0.0.387f16ddEOZxMv&request=%7B%22Services%22%3A%5B%7B%22Service%22%3A%22CS%22%2C%22Roles%22%3A%5B%7B%22RoleName%22%3A%22AliyunCSManagedNlcRole%22%2C%22TemplateId%22%3A%22AliyunCSManagedNlcRole%22%7D%5D%7D%5D%2C%22ReturnUrl%22%3A%22https%3A%2F%2Fcs.console.aliyun.com%2F%22%7D) to complete the authorization.
-
--> **NOTE:** From version 1.123.1, supports the creation of a node pool of spot instance.
-
--> **NOTE:** It is recommended to create a cluster with zero worker nodes, and then use a node pool to manage the cluster nodes. 
-
--> **NOTE:** From version 1.127.0, support for adding existing nodes to the node pool. In order to distinguish automatically created nodes, it is recommended that existing nodes be placed separately in a node pool for management. 
-
 ## Example Usage
 
 The managed cluster configuration,
 
 ```terraform
+
 variable "name" {
-  default = "tf-test"
+	default = "tf-testAccNodePool-9633174"
 }
-variable "password" {
+
+
+data "alibabacloudstack_images" "default" {
+  name_regex  = "^aliyun_.*"
+  most_recent = true
+  owners      = "system"
 }
-data "alibabacloudstack_zones" default {
+
+variable "existed_k8s_cluster_id" {
+	default = ""
+}
+
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
+  enable_details = true
 }
-data "alibabacloudstack_instance_types" "default" {
-  availability_zone    = data.alibabacloudstack_zones.default.zones.0.id
-  cpu_core_count       = 2
-  memory_size          = 4
-  kubernetes_node_role = "Worker"
-}
-resource "alibabacloudstack_vpc" "default" {
-  vpc_name   = var.name
-  cidr_block = "10.1.0.0/21"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vswitch_name = var.name
-  vpc_id       = alibabacloudstack_vpc.default.id
-  cidr_block   = "10.1.1.0/24"
-  zone_id      = data.alibabacloudstack_zones.default.zones.0.id
-}
-resource "alibabacloudstack_key_pair" "default" {
-  key_pair_name = var.name
-}
-resource "alibabacloudstack_cs_managed_kubernetes" "default" {
-  name                         = var.name
-  count                        = 1
-  cluster_spec                 = "ack.pro.small"
-  is_enterprise_security_group = true
-  worker_number                = 2
-  password                     = var.password
-  pod_cidr                     = "172.20.0.0/16"
-  service_cidr                 = "172.21.0.0/20"
-  worker_vswitch_ids           = [alibabacloudstack_vswitch.default.id]
-  worker_instance_types        = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-}
-```
 
-Create a node pool.
-
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name           = var.name
-  cluster_id     = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids    = [alibabacloudstack_vswitch.default.id]
-  instance_types = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
-
-  # you need to specify the number of nodes in the node pool, which can be 0
-  node_count = 1
-}
-```
-
-Create a managed node pool. If you need to enable maintenance window, you need to set the maintenance window in `alibabacloudstack_cs_managed_kubernetes`.
-
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = var.name
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-
-  # only key_name is supported in the management node pool
-  key_name = alibabacloudstack_key_pair.default.key_name
-
-  # you need to specify the number of nodes in the node pool, which can be zero
-  node_count = 1
-
-  # management node pool configuration.
-  management {
-    auto_repair     = true
-    auto_upgrade    = true
-    surge           = 1
-    max_unavailable = 1
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name = "${var.name}_vpc"
+  cidr_block = "172.16.0.0/16"
+  tags = {
+    common_test = "terraform"
+	filter = var.name
   }
-
+  lifecycle {
+      ignore_changes = [
+		secondary_cidr_blocks,
+        tags
+      ]
+  }
 }
-```
+
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  vswitch_name = "${var.name}_vsw"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block = "172.16.1.0/24"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  lifecycle {
+      ignore_changes = [
+        tags
+      ]
+  }
+}
+
+
+resource "alibabacloudstack_ecs_securitygroup" "default" {
+  name   = "${var.name}_sg"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+}
+
+resource "alibabacloudstack_security_group_rule" "default" {
+  	type = "ingress"
+  	ip_protocol = "tcp"
+  	nic_type = "intranet"
+  	policy = "accept"
+  	port_range = "22/22"
+  	priority = 1
+  	security_group_id = "${alibabacloudstack_ecs_securitygroup.default.id}"
+  	cidr_ip = "192.168.0.0/16"
+}
+
+resource "random_password" "password" {
+	count            = 1
+	length           = 12
+	special          = true
+	override_special = "!@#$^&*()_"
+	min_lower        = 1
+	min_upper        = 1
+	min_numeric      = 1
+}
+
+data "alibabacloudstack_instance_types" "all" {
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+  sorted_by         = "CPU"
+}
+
+data "alibabacloudstack_instance_types" "default" {
+  count = 8  # Traverse 1-8 core CPU configurations
+
+  availability_zone    = data.alibabacloudstack_zones.default.zones[0].id
+  cpu_core_count       = count.index + 1  # 1-8
+  sorted_by            = "Memory"
+}
+
+locals {
+  filtered_default = [for d in data.alibabacloudstack_instance_types.default : d if length(d.ids) > 0]
+  fallback_all     = length(data.alibabacloudstack_instance_types.all.ids) > 0 ? data.alibabacloudstack_instance_types.all.ids : []
+  
+  default_instance_type_id = coalesce(
+    try(local.filtered_default[0].ids[0], null),
+    try(local.fallback_all[0], null),
+    "no-available-instance-type"
+  )
+}
+
+data "alibabacloudstack_cs_kubernetes_clusters" "default" {
+	ids = var.existed_k8s_cluster_id == "" ? [] : [var.existed_k8s_cluster_id]
+}
+
+locals {
+	create_count = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? 0 : 1
+}
+
+resource "alibabacloudstack_cs_kubernetes" "default" {
+	count						= local.create_count
+	name						= var.name
+	version						= "1.34.1-aliyun.1"
+	os_type						= "linux"
+	platform					= "AliyunLinux"
+	num_of_nodes				= "1"
+	master_count				= "3"
+	master_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+	master_instance_types		= ["${local.default_instance_type_id}","${local.default_instance_type_id}","${local.default_instance_type_id}"]
+	master_disk_category		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	vpc_id						= "${alibabacloudstack_vpc_vpc.default.id}"
+	worker_instance_types		= ["${local.default_instance_type_id}"]
+	worker_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}"]
+	worker_disk_category		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	password					= random_password.password.0.result
+	pod_cidr					= "172.20.0.0/16"
+	service_cidr				= "172.21.0.0/20"
+	worker_disk_size			= "40"
+	master_disk_size			= "40"
+	slb_internet_enabled		= "true"
+	security_group_id			= alibabacloudstack_ecs_securitygroup.default.id
+	runtime	 {
+		name	= "containerd"
+		version	= "2.1.5"
+	}
+}
+
+locals {
+	k8s_cluster_id = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.ids.0 : alibabacloudstack_cs_kubernetes.default.0.id
+	k8s_cluster_name = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.names.0 : alibabacloudstack_cs_kubernetes.default.0.name
+}
+
+resource "alibabacloudstack_ecs_keypair" "default" {
+  key_name = var.name
+}
+
+
+resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
+  name = "tf-testAccNodePool-9633174"
+  cluster_id = "${local.k8s_cluster_id}"
+  instance_types = [
+                     "${local.default_instance_type_id}"
+                   ]
+  password = "${random_password.password.0.result}"
+  tags = {
+           Created = "TF"
+           Foo = "Bar"
+         }
+  system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+  system_disk_size = "40"
+  data_disks {
+    size = "100"
+    category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+  }
+  
+  node_count = "1"
+  install_cloud_monitor = "false"
+  vswitch_ids = [
+                  "${alibabacloudstack_vpc_vswitch.default.id}"
+                ]
+}
 
 Enable automatic scaling for the node pool. `scaling_config` is required.
 
 ```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = var.name
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
 
-  # automatic scaling node pool configuration.
-  # With auto-scaling is enabled, the nodes in the node pool will be labeled with `k8s.aliyun.com=true` to prevent system pods such as coredns, metrics-servers from being scheduled to elastic nodes, and to prevent node shrinkage from causing business abnormalities.
+resource "alibabacloudstack_cs_kubernetes_node_pool" "autoscaling" {
+  name = "tf-testAccNodePoolAuto-9719402"
+  cluster_id = "${local.k8s_cluster_id}"
+  vswitch_ids = [
+                  "${alibabacloudstack_vpc_vswitch.default.id}"
+                ]
+  key_name = "${alibabacloudstack_ecs_keypair.default.key_name}"
+  system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+  install_cloud_monitor = "false"
   scaling_config {
-    min_size = 1
-    max_size = 10
+    min_size = "1"
+    max_size = "10"
+    type = "cpu"
+    is_bond_eip = "true"
+    eip_bandwidth = "5"
   }
-
-}
-```
-
-Enable automatic scaling for managed node pool.
-
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = var.name
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
-  # management node pool configuration.
-  management {
-    auto_repair     = true
-    auto_upgrade    = true
-    surge           = 1
-    max_unavailable = 1
-  }
-  # enable auto-scaling
-  scaling_config {
-    min_size = 1
-    max_size = 10
-    type     = "cpu"
-  }
-  # Rely on auto-scaling configuration, please create auto-scaling configuration through alibabacloudstack_cs_autoscaling_config first.
-  depends_on = [alibabacloudstack_cs_autoscaling_config.default]
-}
-```
-
-Create a `PrePaid` node pool.
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = var.name
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
-  # use PrePaid
-  instance_charge_type = "PrePaid"
-  period               = 1
-  period_unit          = "Month"
-  auto_renew           = true
-  auto_renew_period    = 1
-
-  # open cloud monitor
-  install_cloud_monitor = true
-
-  # enable auto-scaling
-  scaling_config {
-    min_size = 1
-    max_size = 10
-    type     = "cpu"
-  }
-}
-```
-
-Create a node pool with spot instance.
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name           = var.name
-  cluster_id     = v_cs_managed_kubernetes.default.0.id
-  vswitch_ids    = [alibabacloudstack_vswitch.default.id]
-  instance_types = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
-
-  # you need to specify the number of nodes in the node pool, which can be 0
-  node_count = 1
-
-  # spot config
-  spot_strategy = "SpotWithPriceLimit"
-  spot_price_limit {
-    instance_type = data.alibabacloudstack_instance_types.default.instance_types.0.id
-    # Different instance types have different price caps
-    price_limit = "0.70"
-  }
-}
-```
-
-Use Spot instances to create a node pool with auto-scaling enabled 
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = var.name
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
-
-  # automatic scaling node pool configuration.
-  scaling_config {
-    min_size = 1
-    max_size = 10
-    type     = "spot"
-  }
-  # spot price config
-  spot_strategy = "SpotWithPriceLimit"
-  spot_price_limit {
-    instance_type = data.alibabacloudstack_instance_types.default.instance_types.0.id
-    price_limit   = "0.70"
-  }
-}
-```
-
-Create a node pool with platform as Windows 
-```terraform
-
-variable "password" {
-}
-
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = "windows-np"
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  instance_charge_type = "PostPaid"
-  node_count           = 1
-
-  // if the instance platform is windows, the password is requered.
-  password = var.password
-  platform = "Windows"
-  image_id = "${window_image_id}"
-}
-```
-
-Add an existing node to the node pool
-
-In order to distinguish automatically created nodes, it is recommended that existing nodes be placed separately in a node pool for management. 
-
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = "existing-node"
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  instance_charge_type = "PostPaid"
-
-  # add existing node to nodepool
-  instances = ["instance_id_01", "instance_id_02", "instance_id_03"]
-  # default is false
-  format_disk = false
-  # default is true
-  keep_instance_name = true
+  
+  instance_types = [
+                     "${local.default_instance_type_id}"
+                   ]
+  platform = "Custom"
+  image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+  system_disk_size = "40"
+  scaling_policy = "release"
 }
 ```
 
@@ -316,7 +236,7 @@ The following arguments are supported:
   * `category` - The type of the data disks. Valid values:`cloud`, `cloud_efficiency`, `cloud_ssd` and `cloud_essd`.
   * `size` - The size of a data disk, Its valid value range [40~32768] in GB. Default to `40`.
   * `encrypted` - Specifies whether to encrypt data disks. Valid values: true and false. Default to `false`.
-* `platform` - (Optional) The platform. One of `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`. If you select `Windows` or `WindowsCore`, the `passord` is required.
+* `platform` - (Optional) The platform. One of `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`, `Custom`. If you select `Windows` or `WindowsCore`, the `passord` is required.
 * `image_id` - (Optional) Custom Image support. Must based on CentOS7 or AliyunLinux2.
 * `node_name_mode` - (Optional) Each node name consists of a prefix, an IP substring, and a suffix. For example "customized,aliyun.com,5,test", if the node IP address is 192.168.0.55, the prefix is aliyun.com, IP substring length is 5, and the suffix is test, the node name will be aliyun.com00055test.
 * `user_data` - (Optional) Windows instances support batch and PowerShell scripts. If your script file is larger than 1 KB, we recommend that you upload the script to Object Storage Service (OSS) and pull it through the internal endpoint of your OSS bucket.
@@ -381,7 +301,7 @@ The following attributes are exported:
 * `security_group_id` - The ID of security group where the current cluster worker node is located.
 * `scaling_group_id` - (Available in 1.105.0+) Id of the Scaling Group.
 * `system_disk_performance_level` - The performance level (PL) of the system disk that you want to use for the node. This parameter takes effect only for ESSDs. Its valid value is one of {"PL0", "PL1", "PL2", "PL3"}.
-* `platform` - The platform. One of `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`.
+* `platform` - The platform. One of `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`, `Custom`.
 * `instance_charge_type` - Node payment type. Valid values: `PostPaid`, `PrePaid`.
 * `resource_group_id` - The ID of the resource group.
 * `internet_charge_type` - The billing method for network usage. Valid values `PayByBandwidth` and `PayByTraffic`.

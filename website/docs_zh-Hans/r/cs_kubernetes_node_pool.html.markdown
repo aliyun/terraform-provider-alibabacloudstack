@@ -14,267 +14,208 @@ description: |-
 
 ## 示例用法
 
-托管集群配置，
-
+托管集群配置
 ```terraform
+
 variable "name" {
-  default = "tf-test"
+	default = "tf-testAccNodePool-9633174"
 }
-variable "password" {
+
+
+data "alibabacloudstack_images" "default" {
+  name_regex  = "^aliyun_.*"
+  most_recent = true
+  owners      = "system"
 }
-data "alibabacloudstack_zones" default {
+
+variable "existed_k8s_cluster_id" {
+	default = ""
+}
+
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
+  enable_details = true
 }
+
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name = "${var.name}_vpc"
+  cidr_block = "172.16.0.0/16"
+  tags = {
+    common_test = "terraform"
+	filter = var.name
+  }
+  lifecycle {
+      ignore_changes = [
+		secondary_cidr_blocks,
+        tags
+      ]
+  }
+}
+
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  vswitch_name = "${var.name}_vsw"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block = "172.16.1.0/24"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  lifecycle {
+      ignore_changes = [
+        tags
+      ]
+  }
+}
+
+
+resource "alibabacloudstack_ecs_securitygroup" "default" {
+  name   = "${var.name}_sg"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+}
+
+resource "alibabacloudstack_security_group_rule" "default" {
+  	type = "ingress"
+  	ip_protocol = "tcp"
+  	nic_type = "intranet"
+  	policy = "accept"
+  	port_range = "22/22"
+  	priority = 1
+  	security_group_id = "${alibabacloudstack_ecs_securitygroup.default.id}"
+  	cidr_ip = "192.168.0.0/16"
+}
+
+resource "random_password" "password" {
+	count            = 1
+	length           = 12
+	special          = true
+	override_special = "!@#$^&*()_"
+	min_lower        = 1
+	min_upper        = 1
+	min_numeric      = 1
+}
+
+data "alibabacloudstack_instance_types" "all" {
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+  sorted_by         = "CPU"
+}
+
 data "alibabacloudstack_instance_types" "default" {
-  availability_zone    = data.alibabacloudstack_zones.default.zones.0.id
-  cpu_core_count       = 2
-  memory_size          = 4
-  kubernetes_node_role = "Worker"
+  count = 8  # Traverse 1-8 core CPU configurations
+
+  availability_zone    = data.alibabacloudstack_zones.default.zones[0].id
+  cpu_core_count       = count.index + 1  # 1-8
+  sorted_by            = "Memory"
 }
-resource "alibabacloudstack_vpc" "default" {
-  vpc_name   = var.name
-  cidr_block = "10.1.0.0/21"
+
+locals {
+  filtered_default = [for d in data.alibabacloudstack_instance_types.default : d if length(d.ids) > 0]
+  fallback_all     = length(data.alibabacloudstack_instance_types.all.ids) > 0 ? data.alibabacloudstack_instance_types.all.ids : []
+  
+  default_instance_type_id = coalesce(
+    try(local.filtered_default[0].ids[0], null),
+    try(local.fallback_all[0], null),
+    "no-available-instance-type"
+  )
 }
-resource "alibabacloudstack_vswitch" "default" {
-  vswitch_name = var.name
-  vpc_id       = alibabacloudstack_vpc.default.id
-  cidr_block   = "10.1.1.0/24"
-  zone_id      = data.alibabacloudstack_zones.default.zones.0.id
+
+data "alibabacloudstack_cs_kubernetes_clusters" "default" {
+	ids = var.existed_k8s_cluster_id == "" ? [] : [var.existed_k8s_cluster_id]
 }
-resource "alibabacloudstack_key_pair" "default" {
-  key_pair_name = var.name
+
+locals {
+	create_count = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? 0 : 1
 }
-resource "alibabacloudstack_cs_managed_kubernetes" "default" {
-  name                         = var.name
-  count                        = 1
-  cluster_spec                 = "ack.pro.small"
-  is_enterprise_security_group = true
-  worker_number                = 2
-  password                     = var.password
-  pod_cidr                     = "172.20.0.0/16"
-  service_cidr                 = "172.21.0.0/20"
-  worker_vswitch_ids           = [alibabacloudstack_vswitch.default.id]
-  worker_instance_types        = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
+
+resource "alibabacloudstack_cs_kubernetes" "default" {
+	count						= local.create_count
+	name						= var.name
+	version						= "1.34.1-aliyun.1"
+	os_type						= "linux"
+	platform					= "AliyunLinux"
+	num_of_nodes				= "1"
+	master_count				= "3"
+	master_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+	master_instance_types		= ["${local.default_instance_type_id}","${local.default_instance_type_id}","${local.default_instance_type_id}"]
+	master_disk_category		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	vpc_id						= "${alibabacloudstack_vpc_vpc.default.id}"
+	worker_instance_types		= ["${local.default_instance_type_id}"]
+	worker_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}"]
+	worker_disk_category		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	password					= random_password.password.0.result
+	pod_cidr					= "172.20.0.0/16"
+	service_cidr				= "172.21.0.0/20"
+	worker_disk_size			= "40"
+	master_disk_size			= "40"
+	slb_internet_enabled		= "true"
+	security_group_id			= alibabacloudstack_ecs_securitygroup.default.id
+	runtime	 {
+		name	= "containerd"
+		version	= "2.1.5"
+	}
+}
+
+locals {
+	k8s_cluster_id = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.ids.0 : alibabacloudstack_cs_kubernetes.default.0.id
+	k8s_cluster_name = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.names.0 : alibabacloudstack_cs_kubernetes.default.0.name
+}
+
+resource "alibabacloudstack_ecs_keypair" "default" {
+  key_name = var.name
 }
 ```
 
-创建一个节点池。
-
-```terraform
+```hcl
 resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name           = var.name
-  cluster_id     = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids    = [alibabacloudstack_vswitch.default.id]
-  instance_types = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
-
-  # 您需要指定节点池中的节点数，可以为 0
-  node_count = 1
-}
-```
-
-创建一个托管节点池。如果需要启用维护窗口，您需要在 `alibabacloudstack_cs_managed_kubernetes` 中设置维护窗口。
-
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = var.name
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-
-  # 只有托管节点池支持 key_name
-  key_name = alibabacloudstack_key_pair.default.key_name
-
-  # 托管节点池配置。
-  management {
-    auto_repair     = true
-    auto_upgrade    = true
-    surge           = 1
-    max_unavailable = 1
+  name = "tf-testAccNodePool-9633174"
+  cluster_id = "${local.k8s_cluster_id}"
+  instance_types = [
+                     "${local.default_instance_type_id}"
+                   ]
+  password = "${random_password.password.0.result}"
+  tags = {
+           Created = "TF"
+           Foo = "Bar"
+         }
+  system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+  system_disk_size = "40"
+  data_disks {
+    size = "100"
+    category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
   }
-
+  
+  node_count = "1"
+  install_cloud_monitor = "false"
+  vswitch_ids = [
+                  "${alibabacloudstack_vpc_vswitch.default.id}"
+                ]
 }
 ```
 
-为节点池启用自动扩展。`scaling_config` 是必填的。
+Enable automatic scaling for the node pool. `scaling_config` is required.
 
 ```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = var.name
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
 
-  # 自动扩展节点池配置。
-  # 启用自动扩展后，节点池中的节点将被标记为 `k8s.aliyun.com=true`，以防止诸如 coredns、metrics-servers 等系统 Pod 被调度到弹性节点上，并防止节点缩减导致业务异常。
+resource "alibabacloudstack_cs_kubernetes_node_pool" "autoscaling" {
+  name = "tf-testAccNodePoolAuto-9719402"
+  cluster_id = "${local.k8s_cluster_id}"
+  vswitch_ids = [
+                  "${alibabacloudstack_vpc_vswitch.default.id}"
+                ]
+  key_name = "${alibabacloudstack_ecs_keypair.default.key_name}"
+  system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+  install_cloud_monitor = "false"
   scaling_config {
-    min_size = 1
-    max_size = 10
+    min_size = "1"
+    max_size = "10"
+    type = "cpu"
+    is_bond_eip = "true"
+    eip_bandwidth = "5"
   }
-
-}
-```
-
-为托管节点池启用自动扩展。
-
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = var.name
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
-  # 托管节点池配置。
-  management {
-    auto_repair     = true
-    auto_upgrade    = true
-    surge           = 1
-    max_unavailable = 1
-  }
-  # 启用自动扩展
-  scaling_config {
-    min_size = 1
-    max_size = 10
-    type     = "cpu"
-  }
-  # 依赖于自动扩展配置，请先通过 alibabacloudstack_cs_autoscaling_config 创建自动扩展配置。
-  depends_on = [alibabacloudstack_cs_autoscaling_config.default]
-}
-```
-
-创建一个 `PrePaid` 节点池。
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = var.name
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
-  # 使用 PrePaid
-  instance_charge_type = "PrePaid"
-  period               = 1
-  period_unit          = "Month"
-  auto_renew           = true
-  auto_renew_period    = 1
-
-  # 开启云监控
-  install_cloud_monitor = true
-
-  # 启用自动扩展
-  scaling_config {
-    min_size = 1
-    max_size = 10
-    type     = "cpu"
-  }
-}
-```
-
-创建一个抢占式实例节点池。
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name           = var.name
-  cluster_id     = v_cs_managed_kubernetes.default.0.id
-  vswitch_ids    = [alibabacloudstack_vswitch.default.id]
-  instance_types = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
-
-  # 您需要指定节点池中的节点数，可以为 0
-  node_count = 1
-
-  # 抢占式实例配置
-  spot_strategy = "SpotWithPriceLimit"
-  spot_price_limit {
-    instance_type = data.alibabacloudstack_instance_types.default.instance_types.0.id
-    # 不同实例类型有不同的价格上限
-    price_limit = "0.70"
-  }
-}
-```
-
-使用抢占式实例创建启用自动扩展的节点池 
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = var.name
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  key_name             = alibabacloudstack_key_pair.default.key_name
-
-  # 自动扩展节点池配置。
-  scaling_config {
-    min_size = 1
-    max_size = 10
-    type     = "spot"
-  }
-  # 抢占式实例价格配置
-  spot_strategy = "SpotWithPriceLimit"
-  spot_price_limit {
-    instance_type = data.alibabacloudstack_instance_types.default.instance_types.0.id
-    price_limit   = "0.70"
-  }
-}
-```
-
-创建一个平台为 Windows 的节点池
-```terraform
-
-variable "password" {
-}
-
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = "windows-np"
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  instance_charge_type = "PostPaid"
-  node_count           = 1
-
-  // 如果实例平台为 windows，则密码是必填项。
-  password = var.password
-  platform = "Windows"
-  image_id = "${window_image_id}"
-}
-```
-
-将现有节点添加到节点池
-
-为了区分自动创建的节点，建议将现有节点单独放在一个节点池中进行管理。 
-
-```terraform
-resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
-  name                 = "existing-node"
-  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
-  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
-  system_disk_category = "cloud_efficiency"
-  system_disk_size     = 40
-  instance_charge_type = "PostPaid"
-
-  # 将现有节点添加到节点池
-  instances = ["instance_id_01", "instance_id_02", "instance_id_03"]
-  # 默认值为 false
-  format_disk = false
-  # 默认值为 true
-  keep_instance_name = true
+  
+  instance_types = [
+                     "${local.default_instance_type_id}"
+                   ]
+  platform = "Custom"
+  image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+  system_disk_size = "40"
+  scaling_policy = "release"
 }
 ```
 
@@ -296,7 +237,7 @@ resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   * `category` - 数据磁盘的类型。有效值：`cloud`, `cloud_efficiency`, `cloud_ssd` 和 `cloud_essd`。
   * `size` - 数据磁盘的大小，其有效值范围 [40~32768] GB。默认为 `40`。
   * `encrypted` - 指定是否加密数据磁盘。有效值：true 和 false。默认为 `false`。
-* `platform` - (可选) 平台。其中之一 `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`。如果您选择 `Windows` 或 `WindowsCore`，则需要提供 `password`。
+* `platform` - (可选) 平台。其中之一 `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`, `Custom`。如果您选择 `Windows` 或 `WindowsCore`，则需要提供 `password`。
 * `image_id` - (可选) 自定义镜像支持。必须基于 CentOS7 或 AliyunLinux2。
 * `node_name_mode` - (可选) 每个节点名由前缀、IP 子串和后缀组成。例如 "customized,aliyun.com,5,test"，如果节点 IP 地址是 192.168.0.55，前缀是 aliyun.com，IP 子串长度是 5，后缀是 test，那么节点名将是 aliyun.com00055test。
 * `user_data` - (可选) Windows 实例支持批处理和 PowerShell 脚本。如果您的脚本文件大于 1 KB，我们建议您将脚本上传到对象存储服务 (OSS)，并通过您的 OSS 存储桶的内部端点拉取它。
@@ -360,7 +301,7 @@ tags {
 * `security_group_id` - 当前集群工作节点所在的安全组 ID。
 * `scaling_group_id` - 伸缩组 ID。
 * `system_disk_performance_level` - 节点要使用的系统磁盘的性能级别 (PL)。此参数仅对 ESSD 生效。其有效值为 {"PL0", "PL1", "PL2", "PL3"}。
-* `platform` - 平台。其中之一 `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`。
+* `platform` - 平台。其中之一 `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`, `Custom`。
 * `instance_charge_type` - 节点支付类型。有效值：`PostPaid`, `PrePaid`。
 * `resource_group_id` - 资源组 ID。
 * `internet_charge_type` - 网络使用计费方式。有效值 `PayByBandwidth` 和 `PayByTraffic`。
