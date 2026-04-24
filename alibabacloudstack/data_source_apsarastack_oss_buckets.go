@@ -117,6 +117,9 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 			request := &oss.ListBucketsRequest{}
 			lsRes, err := ossclietn.ListBuckets(context.TODO(), request)
 			if err != nil {
+				if errmsgs.IsHostNotFound(err) {
+					break
+				}
 				return errmsgs.WrapError(err)
 			}
 			for _, bucket := range lsRes.Buckets {
