@@ -172,6 +172,14 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"enabled", "disabled"}, false),
 				Optional:     true,
 			},
+			"encryption_key": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"role_arn": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"maintain_start_time": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -367,7 +375,10 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	if !(d.Get("tde_status") == "" && tdeInfo.TDEStatus == "disabled") {
 		d.Set("tde_status", tdeInfo.TDEStatus)
 	}
-
+	encryptionKeyInfo, err := ddsService.DescribeDBInstanceEncryptionKey(d.Id())
+	if encryptionKeyInfo.EncryptionKey != "" && encryptionKeyInfo.EncryptionKey != "NoActiveBYOK" {
+		d.Set("encryption_key", encryptionKeyInfo.EncryptionKey)
+	}
 	d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
 	auditStatus, err := ddsService.DescribeAuditPolicy(d.Id())
 	if err != nil {
@@ -380,8 +391,6 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
-
-	d.Partial(true)
 
 	if !d.IsNewResource() && (d.HasChange("instance_charge_type") && d.Get("instance_charge_type").(string) == "PrePaid") {
 		prePaidRequest := dds.CreateTransformToPrePaidRequest()
@@ -406,8 +415,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapError(err)
 		}
-		//d.SetPartial("instance_charge_type")
-		//d.SetPartial("period")
 	}
 
 	if d.HasChange("audit_status") {
@@ -434,8 +441,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		if err := ddsService.MotifyMongoDBBackupPolicy(d); err != nil {
 			return errmsgs.WrapError(err)
 		}
-		//d.SetPartial("preferred_backup_time")
-		//d.SetPartial("preferred_backup_period")
 	}
 
 	if d.HasChange("tde_status") {
@@ -443,7 +448,12 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
 		request.TDEStatus = d.Get("tde_status").(string)
-
+		if v, ok := d.GetOk("encryption_key"); ok {
+			request.EncryptionKey = v.(string)
+		}
+		if v, ok := d.GetOk("role_arn"); ok {
+			request.RoleARN = v.(string)
+		}
 		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 			return client.ModifyDBInstanceTDE(request)
 		})
@@ -459,7 +469,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapError(err)
 		}
-		//d.SetPartial("tde_status")
 	}
 	if d.HasChange("ssl_action") && !(d.IsNewResource() && d.Get("ssl_action") == "Close") {
 		request := dds.CreateModifyDBInstanceSSLRequest()
@@ -483,8 +492,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("ssl_action")
 	}
 
 	if d.HasChanges("maintain_start_time", "maintain_end_time") {
@@ -505,8 +512,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("maintain_start_time")
-		//d.SetPartial("maintain_end_time")
 	}
 
 	if d.HasChange("security_group_id") {
@@ -526,7 +531,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("security_group_id")
 	}
 
 	if err := ddsService.setInstanceTags(d); err != nil {
@@ -534,7 +538,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 	}
 
 	if d.IsNewResource() {
-		d.Partial(false)
 		return nil
 	}
 
@@ -556,7 +559,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("db_instance_description")
 	}
 
 	if d.HasChange("security_ip_list") {
@@ -570,13 +572,11 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		if err := ddsService.ModifyMongoDBSecurityIps(d.Id(), ipstr); err != nil {
 			return errmsgs.WrapError(err)
 		}
-		//d.SetPartial("security_ip_list")
 	}
 
 	if d.HasChanges("account_password", "kms_encrypted_password") {
 		var accountPassword string
 		if accountPassword = d.Get("account_password").(string); accountPassword != "" {
-			//d.SetPartial("account_password")
 		} else if kmsPassword := d.Get("kms_encrypted_password").(string); kmsPassword != "" {
 			kmsService := KmsService{meta.(*connectivity.AlibabacloudStackClient)}
 			decryptResp, err := kmsService.Decrypt(kmsPassword, d.Get("kms_encryption_context").(map[string]interface{}))
@@ -584,8 +584,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 				return errmsgs.WrapError(err)
 			}
 			accountPassword = decryptResp.Plaintext
-			//d.SetPartial("kms_encrypted_password")
-			//d.SetPartial("kms_encryption_context")
 		}
 
 		err := ddsService.ResetAccountPassword(d, accountPassword)
@@ -629,16 +627,11 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		}
 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("db_instance_class")
-		//d.SetPartial("db_instance_storage")
-		//d.SetPartial("replication_factor")
-
 		// wait instance status is running after modifying
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapError(err)
 		}
 	}
-	d.Partial(false)
 	return nil
 }
 

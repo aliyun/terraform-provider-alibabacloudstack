@@ -370,6 +370,32 @@ func (s *MongoDBService) DescribeMongoDBTDEInfo(id string) (*dds.DescribeDBInsta
 	return response, nil
 }
 
+func (s *MongoDBService) DescribeDBInstanceEncryptionKey(id string) (*dds.DescribeDBInstanceEncryptionKeyResponse, error) {
+
+	response := &dds.DescribeDBInstanceEncryptionKeyResponse{}
+	request := dds.CreateDescribeDBInstanceEncryptionKeyRequest()
+	s.client.InitRpcRequest(*request.RpcRequest)
+	request.DBInstanceId = id
+	statErr := s.WaitForMongoDBInstance(id, Running, DefaultLongTimeout)
+	if statErr != nil {
+		return response, errmsgs.WrapError(statErr)
+	}
+	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+		return client.DescribeDBInstanceEncryptionKey(request)
+	})
+	bresponse, ok := raw.(*dds.DescribeDBInstanceEncryptionKeyResponse)
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	response, _ = raw.(*dds.DescribeDBInstanceEncryptionKeyResponse)
+	return response, nil
+}
+
 func (s *MongoDBService) DescribeDBInstanceSSL(id string) (*dds.DescribeDBInstanceSSLResponse, error) {
 	response := &dds.DescribeDBInstanceSSLResponse{}
 	request := dds.CreateDescribeDBInstanceSSLRequest()
