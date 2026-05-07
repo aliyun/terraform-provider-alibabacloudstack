@@ -40,9 +40,9 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	var err error
 
 	// Attempt 1: New API (2019-10-23)
-	requestBody := map[string]interface{}{"projectName": name, "description": description}
+	requestBody := map[string]interface{}{"ProjectName": name, "Description": description}
 	requestHeaders := map[string]string{"AccessKeyId": client.AccessKey} // necessary
-	_, err = client.DoTeaRequest("POST", "Sls", "2019-10-23", "CreateProject", "/sls/v1/project/createProjectWithCluster", requestHeaders, nil, requestBody)
+	_, err = client.DoTeaRequest("POST", "Sls", "2020-03-31", "CreateProject", "/sls/v1/project/createProjectWithCluster", requestHeaders, nil, requestBody)
 
 	// If new API fails, fallback to old API
 	if err != nil {
@@ -108,11 +108,11 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 	if d.HasChange("description") {
 		// Attempt 1: New API (2019-10-23)
 		requestBody := map[string]interface{}{
-			"projectName": name,
-			"description": d.Get("description").(string),
+			"ProjectName": name,
+			"Description": d.Get("description").(string),
 		}
 		requestHeaders := map[string]string{"AccessKeyId": client.AccessKey}
-		_, err := client.DoTeaRequest("POST", "Sls", "2019-10-23", "UpdateProject", "/sls/v1/project/updateProject", requestHeaders, nil, requestBody)
+		_, err := client.DoTeaRequest("PUT", "Sls", "2020-03-31", "UpdateProject", "/sls/v1/project/updateProject", requestHeaders, nil, requestBody)
 
 		// If new API fails, fallback to old API
 		if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
@@ -147,9 +147,9 @@ func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta inte
 	name := d.Get("name").(string)
 
 	// Attempt 1: New API (2019-10-23)
-	requestBody := map[string]interface{}{"projectName": name}
+	requestBody := map[string]interface{}{"ProjectName": name}
 	requestHeaders := map[string]string{"AccessKeyId": client.AccessKey}
-	_, err := client.DoTeaRequest("POST", "Sls", "2019-10-23", "DeleteProject", "/sls/v1/project/deleteProject", requestHeaders, nil, requestBody)
+	_, err := client.DoTeaRequest("DELETE", "Sls", "2020-03-31", "DeleteProject", "/sls/v1/project/deleteProject", requestHeaders, requestBody, nil)
 
 	// If new API fails, fallback to old API
 	if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {

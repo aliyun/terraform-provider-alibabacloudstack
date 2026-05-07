@@ -43,9 +43,9 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 	var logProject *LogProject
 
 	// Attempt 1: New API (2019-10-23)
-	requestBody := map[string]interface{}{"projectName": id}
+	requestBody := map[string]interface{}{"ProjectName": id}
 	requestHeaders := map[string]string{"AccessKeyId": s.client.AccessKey}
-	response, err := s.client.DoTeaRequest("POST", "Sls", "2019-10-23", "GetProject", "/sls/v1/project/getProject", requestHeaders, nil, requestBody)
+	response, err := s.client.DoTeaRequest("GET", "Sls", "2020-03-31", "GetProject", "/sls/v1/project/getProject", requestHeaders, requestBody, nil)
 
 	// If new API fails, fallback to old API
 	if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
@@ -55,7 +55,7 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 		// Attempt 2: Old API (2020-03-31) - will be removed in 3.20.0
 		request := s.client.NewCommonRequest("POST", "SLS", "2020-03-31", "GetProject", "")
 		request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
-		request.QueryParams["projectName"] = id
+		request.QueryParams["ProjectName"] = id
 
 		bresponse, err := s.client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -71,8 +71,8 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 		}
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &logProject)
 	} else if err != nil {
-		if errmsgs.IsExpectedErrors(err, "ProjectNotExist") {
-			return logProject, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+		if errcode, ok := response["errorCode"]; ok && errcode.(string) == "ProjectNotExist" {
+			return logProject, errmsgs.GetNotFoundErrorFromString("LogProject not found")
 		}
 		return logProject, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetProject", errmsgs.AlibabacloudStackSdkGoERROR, err)
 	} else {
@@ -94,7 +94,7 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 		}
 	}
 	if logProject == nil || logProject.ProjectName == "" {
-		return logProject, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("LogProject", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+		return logProject, errmsgs.GetNotFoundErrorFromString("LogProject not found")
 	}
 	return logProject, nil
 }

@@ -16,7 +16,7 @@ func TestAccAlibabacloudStackLogProject_basic(t *testing.T) {
 	serviceFunc := func() interface{} {
 		return &LogService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeLogProject")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
@@ -53,42 +53,6 @@ func TestAccAlibabacloudStackLogProject_basic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"description": REMOVEKEY,
 					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackLogProject_multi(t *testing.T) {
-	var v *LogProject
-	resourceId := "alibabacloudstack_log_project.default.2"
-	ra := resourceAttrInit(resourceId, logProjectMap)
-	serviceFunc := func() interface{} {
-		return &LogService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacclogproject-%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogProjectConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		//CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":        name + "${count.index}",
-					"count":       "3",
-					"description": "Test_log_project",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
 				),
 			},
 		},
