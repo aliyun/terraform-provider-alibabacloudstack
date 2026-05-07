@@ -438,6 +438,17 @@ type GetOrganizationResponse struct {
 	Success      bool         `json:"success"`
 }
 
+type OrganizationIdResponse struct {
+	Code string `json:"code"`
+	Cost int    `json:"cost"`
+	Data struct {
+		AliyunId   string `json:"aliyunid"`
+		PrimaryKey string `json:"primaryKey"`
+	} `json:"data"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
 type RamRole struct {
 	Redirect       bool   `json:"redirect"`
 	AsapiSuccess   bool   `json:"asapiSuccess"`

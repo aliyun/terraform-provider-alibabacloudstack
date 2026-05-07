@@ -145,7 +145,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 				Config: testMongoDBInstance_classic_base,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":       "3.4",
+						"engine_version":       "4.0",
 						"db_instance_storage":  "10",
 						"db_instance_class":    "dds.mongo.mid",
 						"name":                 "",
@@ -357,7 +357,7 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 				Config: testMongoDBInstance_vpc_base,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":       "3.4",
+						"engine_version":       "4.0",
 						"db_instance_storage":  "10",
 						"db_instance_class":    "dds.mongo.mid",
 						"name":                 "",
@@ -461,7 +461,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 				Config: testMongoDBInstance_multiAZ_base,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":       "3.4",
+						"engine_version":       "4.0",
 						"db_instance_storage":  "10",
 						"db_instance_class":    "dds.mongo.mid",
 						"name":                 "",
@@ -565,7 +565,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 				Config: testMongoDBInstance_multi_instance_base,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":       "3.4",
+						"engine_version":       "4.0",
 						"db_instance_storage":  "10",
 						"db_instance_class":    "dds.mongo.mid",
 						"name":                 "",
@@ -646,7 +646,7 @@ data "alibabacloudstack_zones" "default" {
 }
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
 }`
@@ -658,7 +658,7 @@ data "alibabacloudstack_zones" "default" {
 }
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
   ssl_action          = "Open"
@@ -671,7 +671,7 @@ data "alibabacloudstack_zones" "default" {
 }
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
   ssl_action          = "Close"
@@ -696,7 +696,7 @@ data "alibabacloudstack_zones" "default" {
 }
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
   ssl_action          = "Close"
@@ -713,7 +713,7 @@ data "alibabacloudstack_zones" "default" {
 }
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
   name                = "tf-testAccMongoDBInstance_test"
@@ -727,7 +727,7 @@ data "alibabacloudstack_zones" "default" {
 }
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -741,7 +741,7 @@ data "alibabacloudstack_zones" "default" {
 }
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -757,7 +757,7 @@ data "alibabacloudstack_zones" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
   tde_status    = "enabled"
@@ -781,7 +781,6 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_class   = "dds.mongo.mid"
   tde_status    	  = "enabled"
   encryption_key 	  = alibabacloudstack_kms_key.key.id
-  role_arn 			  = ""
 }`
 
 const testMongoDBInstance_audit_status = `
@@ -806,7 +805,7 @@ data "alibabacloudstack_zones" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -826,7 +825,7 @@ data "alibabacloudstack_security_groups" "default" {
 }
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -844,7 +843,7 @@ data "alibabacloudstack_zones" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -864,7 +863,7 @@ data "alibabacloudstack_zones" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -886,7 +885,7 @@ data "alibabacloudstack_zones" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test_together"
@@ -920,7 +919,7 @@ resource "alibabacloudstack_vswitch" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
 }`
@@ -947,7 +946,7 @@ resource "alibabacloudstack_vswitch" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
   name                = "tf-testAccMongoDBInstance_test"
@@ -975,7 +974,7 @@ resource "alibabacloudstack_vswitch" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1004,7 +1003,7 @@ resource "alibabacloudstack_vswitch" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1035,7 +1034,7 @@ resource "alibabacloudstack_vswitch" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1067,7 +1066,7 @@ resource "alibabacloudstack_vswitch" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1101,7 +1100,7 @@ resource "alibabacloudstack_vswitch" "default" {
 
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test_together"
@@ -1136,7 +1135,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
 }`
@@ -1165,7 +1164,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1195,7 +1194,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1225,7 +1224,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1258,7 +1257,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1292,7 +1291,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1328,7 +1327,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test_together"
@@ -1361,7 +1360,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   count               = 3
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
 }`
@@ -1388,7 +1387,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   count               = 3
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1416,7 +1415,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   count               = 3
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1445,7 +1444,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   count               = 3
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1476,7 +1475,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   count               = 3
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1508,7 +1507,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   count               = 3
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
@@ -1542,7 +1541,7 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   count               = 3
-  engine_version      = "3.4"
+  engine_version      = "4.0"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test_together"

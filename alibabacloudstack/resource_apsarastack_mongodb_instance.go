@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -376,6 +377,7 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 		d.Set("tde_status", tdeInfo.TDEStatus)
 	}
 	encryptionKeyInfo, err := ddsService.DescribeDBInstanceEncryptionKey(d.Id())
+
 	if encryptionKeyInfo.EncryptionKey != "" && encryptionKeyInfo.EncryptionKey != "NoActiveBYOK" {
 		d.Set("encryption_key", encryptionKeyInfo.EncryptionKey)
 	}
@@ -450,9 +452,15 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		request.TDEStatus = d.Get("tde_status").(string)
 		if v, ok := d.GetOk("encryption_key"); ok {
 			request.EncryptionKey = v.(string)
-		}
-		if v, ok := d.GetOk("role_arn"); ok {
-			request.RoleARN = v.(string)
+			if v, ok := d.GetOk("role_arn"); ok {
+				request.RoleARN = v.(string)
+			} else {
+				roleArn, err := getMongoDBEncryptionRoleArn(meta)
+				if err != nil {
+					return errmsgs.WrapError(err)
+				}
+				request.RoleARN = roleArn
+			}
 		}
 		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 			return client.ModifyDBInstanceTDE(request)
@@ -671,4 +679,34 @@ func resourceAlibabacloudStackMongoDBInstanceDelete(d *schema.ResourceData, meta
 	stateConf := BuildStateConf([]string{"Creating", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{}))
 	_, err = stateConf.WaitForState()
 	return errmsgs.WrapError(err)
+}
+
+// getMongoDBEncryptionRoleArn retrieves the encryption role ARN for MongoDB instance
+func getMongoDBEncryptionRoleArn(meta interface{}) (string, error) {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetPrivateCloudAccountByOrganizationId", "/ascm/auth/user/getPrivateCloudAccountByOrganizationId")
+	request.QueryParams["organizationId"] = client.Department
+	request.QueryParams["OrganizationId"] = client.Department
+	bresponse, err := client.ProcessCommonRequest(request)
+	var primaryKey string
+	if err != nil {
+		if bresponse == nil {
+			return "", errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organizations", "GetPrivateCloudAccountByOrganizationId", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	} else {
+		var resp OrganizationIdResponse
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
+		if err != nil {
+			return "", errmsgs.WrapError(err)
+		}
+		primaryKey = resp.Data.PrimaryKey
+	}
+	if primaryKey == "" {
+		return "", errmsgs.GetNotFoundErrorFromString("The CloudAccount By OrganizationId not found!")
+	}
+	roleArn := fmt.Sprintf("acs:ram::%s:role/aliyunrdsinstanceencryptiondefaultrole", primaryKey)
+	return roleArn, nil
 }

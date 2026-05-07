@@ -376,6 +376,8 @@ func (s *MongoDBService) DescribeDBInstanceEncryptionKey(id string) (*dds.Descri
 	request := dds.CreateDescribeDBInstanceEncryptionKeyRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
+	request.RegionId = s.client.RegionId
+	request.QueryParams["TargetRegionId"] = s.client.RegionId
 	statErr := s.WaitForMongoDBInstance(id, Running, DefaultLongTimeout)
 	if statErr != nil {
 		return response, errmsgs.WrapError(statErr)

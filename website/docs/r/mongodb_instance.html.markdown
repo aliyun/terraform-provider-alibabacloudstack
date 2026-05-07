@@ -47,29 +47,33 @@ resource "alibabacloudstack_mongodb_instance" "example" {
 
 The following arguments are supported:
 
-* `engine_version` - (Required, ForceNew) The database engine version of the instance. Valid values include: `3.4`, `4.0`, etc.
+* `engine_version` - (Required, ForceNew) The database engine version of the instance. Valid values: `8.0`, `7.0`, `6.0`, `5.0`, `4.4`, `4.2`, `4.0`. Note: Versions 3.4 and below are no longer available for purchase.
 * `db_instance_class` - (Required) The instance type. For example: `dds.mongo.s.small`, `dds.mongo.mid`.
-* `db_instance_storage` - (Required) The storage capacity of the instance. Valid values: 10 to 3000. The value must be a multiple of 10. Unit: GB.
+* `db_instance_storage` - (Required) The storage capacity of the instance. Valid values: 10 to 2000. Unit: GB.
 * `zone_id` - (Optional, ForceNew) The zone ID of the instance. If not specified, the system will select one by default.
-* `backup_period` - (Optional) The backup period for the MongoDB instance. It is required when `preferred_backup_time` is set. Valid values: `[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`. Default: `[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`.
+* `backup_period` - (Optional, Deprecated) The backup period for the MongoDB instance. It is required when `preferred_backup_time` is set. Valid values: `[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`. Default: `[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`. This field is deprecated, please use `preferred_backup_period` instead.
+* `preferred_backup_period` - (Optional) The backup period for the MongoDB instance. Valid values: `[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`. Default: `[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`.
+* `backup_time` - (Optional, Deprecated) The backup time window for the MongoDB instance. In the format of `HH:mmZ-HH:mmZ`. Time setting interval is one hour. If not set, the system will return a default, like `23:00Z-24:00Z`. This field is deprecated, please use `preferred_backup_time` instead.
 * `preferred_backup_time` - (Optional) The backup time window for the MongoDB instance. In the format of `HH:mmZ-HH:mmZ`. Time setting interval is one hour. If not set, the system will return a default, like `23:00Z-24:00Z`.
 * `name` - (Optional) The name of the DB instance. It's a string of 2 to 256 characters.
 * `security_ip_list` - (Optional) A list of IP addresses that are allowed to access the MongoDB instance. Each IP address can have up to 256 characters. Defaults to an empty list.
 * `ssl_action` - (Optional) Actions performed on SSL functions. Valid values: `Open`: turn on SSL encryption; `Close`: turn off SSL encryption; `Update`: update SSL certificate.
-* `tde_status` - (Optional, ForceNew) The Transparent Data Encryption (TDE) status. Valid values: `Enabled`, `Disabled`.
-* `replication_factor` - (Optional) Number of replica set nodes. Valid values: `1`, `3`, `5`, `7`. Default: `3`.
+* `tde_status` - (Optional) The Transparent Data Encryption (TDE) status. Valid values: `enabled`, `disabled`.
+* `replication_factor` - (Optional) Number of replica set nodes. Valid values: `3`, `5`, `7`. Default: `3`.
 * `storage_engine` - (Optional, ForceNew) Storage engine for the instance. Valid values: `WiredTiger`, `RocksDB`. System default: `WiredTiger`.
 * `instance_charge_type` - (Optional) The charge type of the instance. Valid values: `PrePaid`, `PostPaid`. Default: `PostPaid`.
 * `period` - (Optional) The duration that you will buy the DB instance (in months). It is valid when `instance_charge_type` is `PrePaid`. Valid values: `[1~9], 12, 24, 36`. Default: `1`.
 * `vswitch_id` - (Optional, ForceNew) The virtual switch ID to launch DB instances in one VPC.
 * `security_group_id` - (Optional) The Security Group ID of ECS. One instance can bind up to 10 ECS security groups.
-* `account_password` - (Optional) Password of the root account. It is a string of 6 to 32 characters and is composed of letters, numbers, and underlines.
+* `account_password` - (Optional) Password of the root account. It must contain at least three of the following: uppercase letters, lowercase letters, numbers, and special characters. The length is 8 to 32 characters.
 * `kms_encrypted_password` - (Optional) An KMS encrypted password used to create or update the instance. If `account_password` is provided, this field will be ignored.
 * `kms_encryption_context` - (Optional) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating the instance.
 * `maintain_start_time` - (Optional) The start time of the maintenance window. Specify the time in the `HH:mmZ` format. The time must be in UTC.
 * `maintain_end_time` - (Optional) The end time of the maintenance window. Specify the time in the `HH:mmZ` format. The time must be in UTC.
 * `tags` - (Optional, Map) A mapping of tags to assign to the resource.
 * `audit_status` - (Optional) The status of the Sql audit. Valid values: `enabled`, `disabled`.
+* `encryption_key` - (Optional) The ID of the custom key used for TDE encryption.
+* `role_arn` - (Optional) The ARN of the RAM role that allows MongoDB to access your KMS key.
 
 ## Attributes Reference
 
@@ -85,3 +89,11 @@ The following attributes are exported in addition to the arguments listed above:
 * `security_ip_list` - A list of IP addresses that are allowed to access the MongoDB instance.
 * `security_group_id` - The Security Group ID of ECS.
 * `backup_period` - MongoDB Instance backup period.
+
+## Import
+
+MongoDB instances can be imported using the instance ID, e.g.
+
+```
+$ terraform import alibabacloudstack_mongodb_instance.example dds-bp1234567890abcdef
+```
