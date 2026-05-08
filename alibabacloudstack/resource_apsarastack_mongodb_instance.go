@@ -377,9 +377,13 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 		d.Set("tde_status", tdeInfo.TDEStatus)
 	}
 	encryptionKeyInfo, err := ddsService.DescribeDBInstanceEncryptionKey(d.Id())
-
-	if encryptionKeyInfo.EncryptionKey != "" && encryptionKeyInfo.EncryptionKey != "NoActiveBYOK" {
-		d.Set("encryption_key", encryptionKeyInfo.EncryptionKey)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	encryptionKey, ok1 := encryptionKeyInfo["EncryptionKey"].(string)
+	encryptionKeyEnabled, ok2 := encryptionKeyInfo["EncryptionKeyStatus"].(string)
+	if ok1 && ok2 && encryptionKeyEnabled == "Enabled" && encryptionKey != "NoActiveBYOK" {
+		d.Set("encryption_key", encryptionKey)
 	}
 	d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
 	auditStatus, err := ddsService.DescribeAuditPolicy(d.Id())
@@ -476,6 +480,10 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		stateConf := BuildStateConf([]string{"TDEModifying"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapError(err)
+		}
+		ok := ddsService.WaitMongodbDBInstanceEncryptionKeyState(d.Id())
+		if !ok {
+			return fmt.Errorf("failed to enable TDE with the specified KMS")
 		}
 	}
 	if d.HasChange("ssl_action") && !(d.IsNewResource() && d.Get("ssl_action") == "Close") {

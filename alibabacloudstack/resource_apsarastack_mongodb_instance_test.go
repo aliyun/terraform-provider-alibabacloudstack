@@ -788,13 +788,20 @@ data "alibabacloudstack_zones" "default" {
   
 }
 
+resource "alibabacloudstack_kms_key" "key" {
+  description             = "Hello KMS"
+  pending_window_in_days  = "7"
+  key_state               = "Enabled"
+}
+
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
   engine_version      = "4.0"
   db_instance_storage = 10
   db_instance_class   = "dds.mongo.mid"
-  tde_status    = "enabled"
-  audit_status = "enabled"
+  tde_status    	  = "enabled"
+  encryption_key 	  = alibabacloudstack_kms_key.key.id
+  audit_status 		  = "enabled"
 }`
 
 func testMongoDBInstance_classic_security_ip_list(password string) string {
