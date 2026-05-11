@@ -1,3 +1,27 @@
+# 3.16.25
+
+## New
+
+1. `alibabacloudstack_mongodb_instance` supports specifying KMS encryption key for TDE scenarios, with new `encryption_key` and `role_arn` parameters
+
+## Fixes
+
+1. Fixed `alibabacloudstack_ascm_ram_role` `organization_visibility` field diff error caused by prefix mismatch
+2. Fixed `alibabacloudstack_ascm_ram_role` Create method incorrectly determining role already exists
+3. Fixed `alibabacloudstack_ascm_ram_role` Delete method returning error for NotFound scenarios
+4. Fixed `alibabacloudstack_ascm_ram_service_roles` data source to use ASCM native pagination instead of deprecated EcsClient
+
+## Changes
+
+1. `alibabacloudstack_ascm_ram_service_roles` data source switched to pagination query mode
+2. `alibabacloudstack_ascm_ram_role` creation now removes `roleType` parameter
+
+## Deprecated
+
+1. `alibabacloudstack_ascm_ram_service_roles` data source `output_file` field is deprecated (will be removed in 3.19.0), use `local_file` provider instead
+
+---
+
 # 3.16.24
 
 ## New

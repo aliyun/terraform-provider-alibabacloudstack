@@ -1,3 +1,27 @@
+# 3.16.25
+
+## 新增
+
+1. `alibabacloudstack_mongodb_instance` 支持 TDE 场景指定 KMS 加密密钥，新增 `encryption_key` 和 `role_arn` 参数
+
+## 修复
+
+1. 修复 `alibabacloudstack_ascm_ram_role` 中 `organization_visibility` 字段因前缀不一致导致 diff 报错的问题
+2. 修复 `alibabacloudstack_ascm_ram_role` 中 Create 方法错误判定角色已存在的问题
+3. 修复 `alibabacloudstack_ascm_ram_role` 中 Delete 方法对 NotFound 场景错误返回的问题
+4. 修复 `alibabacloudstack_ascm_ram_service_roles` 数据源查询改用 ASCM 原生分页替代已废弃 EcsClient 的问题
+
+## 变更
+
+1. `alibabacloudstack_ascm_ram_service_roles` 数据源改为分页查询模式
+2. `alibabacloudstack_ascm_ram_role` 创建时移除 `roleType` 参数
+
+## 废弃
+
+1. `alibabacloudstack_ascm_ram_service_roles` 数据源的 `output_file` 字段已废弃（将在 3.19.0 版本移除），建议使用 `local_file` provider 替代
+
+---
+
 # 3.16.24
 
 ## 新增
