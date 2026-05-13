@@ -379,6 +379,12 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Optional: true,
 				// DiffSuppressFunc: imageIdSuppressFunc,
 			},
+			"image_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "AliyunLinux3",
+				//TODO Need to supplement the method for automatically obtaining the value range of image_type.
+			},
 			// 			"install_cloud_monitor": {
 			// 				Type:             schema.TypeBool,
 			// 				Optional:         true,
@@ -813,7 +819,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"cloud_monitor_flags":                  d.Get("cloud_monitor_flags").(bool),
 		"master_system_disk_performance_level": d.Get("master_system_disk_performance_level").(string),
 		"image_id":                             d.Get("image_id").(string),
-		"image_type":                           "AliyunLinux3",
+		"image_type":                           d.Get("image_type").(string),
 	}
 
 	pod := 0
@@ -848,7 +854,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"vpc_id":                        d.Get("vpc_id").(string),
 		"vswitch_ids":                   d.Get("worker_vswitch_ids").([]interface{}),
 		"instance_types":                d.Get("worker_instance_types").([]interface{}),
-		"image_type":                    "AliyunLinux3",
+		"image_type":                    d.Get("image_type").(string),
 		"system_disk_size":              d.Get("worker_disk_size").(int),
 		"system_disk_category":          d.Get("worker_disk_category").(string),
 		"system_disk_performance_level": d.Get("worker_system_disk_performance_level").(string),
