@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -19,6 +20,10 @@ func resourceAlibabacloudStackLogProject() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"cluster_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -34,13 +39,16 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	name := d.Get("name").(string)
-	description := d.Get("description").(string)
-
+	request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "CreateProject", "")
+	request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
 	// Try new API first (SLS 2019-10-23), fallback to old API (SLS 2020-03-31)
 	var err error
 
 	// Attempt 1: New API (2019-10-23)
 	requestBody := map[string]interface{}{"ProjectName": name, "Description": description}
+	if v, ok := d.GetOk("cluster_name"); ok && v.(string) != "" {
+		requestBody["ClusterName"] = v.(string)
+	}
 	requestHeaders := map[string]string{"AccessKeyId": client.AccessKey} // necessary
 	_, err = client.DoTeaRequest("POST", "Sls", "2020-03-31", "CreateProject", "/sls/v1/project/createProjectWithCluster", requestHeaders, nil, requestBody)
 
@@ -55,6 +63,9 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 			request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 			request.QueryParams["projectName"] = name
 			request.QueryParams["Description"] = description
+			if v, ok := d.GetOk("cluster_name"); ok && v.(string) != "" {
+				requestBody["ClusterName"] = v.(string)
+			}
 
 			bresponse, err := client.ProcessCommonRequest(request)
 			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -97,6 +108,7 @@ func resourceAlibabacloudStackLogProjectRead(d *schema.ResourceData, meta interf
 	}
 	d.Set("name", object.ProjectName)
 	d.Set("description", object.Description)
+	d.Set("cluster_name", object.ClusterName)
 
 	return nil
 }

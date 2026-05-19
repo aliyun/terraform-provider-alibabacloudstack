@@ -651,6 +651,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_bmcp_machinetypes":                                dataSourceAlibabacloudStackBmcpMachineTypes(),
 		"alibabacloudstack_bmcp_nodes":                                       dataSourceAlibabacloudStackBmcpNodes(),
 		"alibabacloudstack_bmcp_clusters":                                    dataSourceAlibabacloudStackBmcpClusters(),
+		"alibabacloudstack_log_clusters":                                     dataSourceAlibabacloudStackLogClusters(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err == nil && !v {
 		return maps
