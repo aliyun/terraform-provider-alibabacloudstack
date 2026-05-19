@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -150,9 +149,16 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 		if response == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		notfounmsg := fmt.Sprintf("nodePool (%s) not found", id)
+		responseBody := string(response.GetHttpContentBytes())
+		if responseBody == "code=404, message=Not Found" {
+			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
+		}
+		if response.GetHttpStatus() >= 400 && response.GetHttpStatus() < 500 {
+			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
+		}
 		result := make(map[string]interface{})
 		_ = json.Unmarshal(response.GetHttpContentBytes(), &result)
-		notfounmsg := fmt.Sprintf("nodePool (%s) not found", id)
 		if v, ok := result["Code"]; ok && v.(string) == "ErrorClusterNodePoolNotFound" {
 			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
 		}
@@ -301,15 +307,21 @@ func (s *CsService) DescribeCsKubernetesNodePool(id string) (*NodePoolAlone, err
 		if response == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		result := make(map[string]interface{})
-		_ = json.Unmarshal(response.GetHttpContentBytes(), &result)
 		notfounmsg := fmt.Sprintf("nodePool (%s) not found", id)
-		log.Printf("=========================================================%#v", result)
-		if v, ok := result["Code"]; ok && v.(string) == "ErrorNodePoolNotFound" {
-			log.Printf("=========================================================%s", result["Code"].(string))
+		// Check if response body contains "code=404, message=Not Found"
+		responseBody := string(response.GetHttpContentBytes())
+		if responseBody == "code=404, message=Not Found" {
 			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
 		}
-		if errmsgs.IsExpectedErrors(err, notfounmsg, "ErrorNodePoolNotFound") {
+		if response.GetHttpStatus() >= 400 && response.GetHttpStatus() < 500 {
+			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
+		}
+		result := make(map[string]interface{})
+		_ = json.Unmarshal(response.GetHttpContentBytes(), &result)
+		if v, ok := result["Code"]; ok && v.(string) == "ErrorNodePoolNotFound" {
+			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
+		}
+		if errmsgs.IsExpectedErrors(err, notfounmsg, "ErrorNodePoolNotFound", "Not Found") {
 			return nil, errmsgs.GetNotFoundErrorFromString(notfounmsg)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)

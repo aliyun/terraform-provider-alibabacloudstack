@@ -49,7 +49,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testAccCsK8sConfigBasic%d", rand)
+	name := fmt.Sprintf("tf-testAccK8s%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCsK8sConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -338,7 +338,7 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"num_of_nodes": "0",
+						"num_of_nodes":            "0",
 						"worker_vswitch_ids.#":    REMOVEKEY,
 						"worker_disk_size":        REMOVEKEY,
 						"nodepool_id":             REMOVEKEY,
@@ -441,9 +441,11 @@ variable "service_cidr" {
 }
 
 resource "alibabacloudstack_kms_key" "default" {
-	description = "${var.name}"
-	protection_level =     "SOFTWARE"
-	pending_window_in_days = "7"
+	description 			= "${var.name}"
+	protection_level 		= "SOFTWARE"
+	pending_window_in_days 	= "7"
+	rotation_interval 		= "7d"
+	automatic_rotation 		= "Enabled"
 }
 
 `, name, SecurityGroupCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, RandomPasswordTestCase(12, 1))

@@ -1216,9 +1216,11 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(fmt.Sprintf("%s:%s", d.Id(), nodepoolid), []string{"deleting", "failed"}))
-	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	if nodepoolid != "" {
+		stateConf := BuildStateConf([]string{"scaling", "deleting"}, []string{"active", ""}, d.Timeout(schema.TimeoutUpdate), 20*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(fmt.Sprintf("%s:%s", d.Id(), nodepoolid), []string{"failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
 	}
 	time.Sleep(10 * time.Second)
 	d.Set("nodepool_id", nodepoolid)
@@ -1281,11 +1283,18 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	// if err != nil {
 	// 	return errmsgs.WrapError(err)
 	// }
+	var nodepool *NodePoolAlone
 	if nodepoolid != "" {
-		nodepool, err := csService.DescribeCsKubernetesNodePool(fmt.Sprintf("%s:%s", d.Id(), nodepoolid))
+		nodepool, err = csService.DescribeCsKubernetesNodePool(fmt.Sprintf("%s:%s", d.Id(), nodepoolid))
 		if err != nil {
-			return errmsgs.WrapError(err)
+			if errmsgs.NotFoundError(err) {
+				d.Set("num_of_nodes", 0)
+			} else {
+				return errmsgs.WrapError(err)
+			}
 		}
+	}
+	if nodepool != nil {
 		d.Set("num_of_nodes", nodepool.Status.TotalNodes)
 
 		// Read worker-related configurations from nodepool
@@ -1379,20 +1388,22 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		}
 		sworker := make([]map[string]interface{}, 0)
 		clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
-		if err != nil {
+		if err != nil && !errmsgs.NotFoundError(err) {
 			return errmsgs.WrapError(err)
 		}
-		for _, k := range clusternode.Nodes {
-			if k.InstanceRole == "Worker" && k.InstanceStatus == "Running" {
-				WorkerNodes := map[string]interface{}{
-					"id":         k.InstanceID,
-					"name":       k.InstanceName,
-					"private_ip": fmt.Sprintf("%s", k.IPAddress),
+		if clusternode != nil && len(clusternode.Nodes) > 0 {
+			for _, k := range clusternode.Nodes {
+				if k.InstanceRole == "Worker" && k.InstanceStatus == "Running" {
+					WorkerNodes := map[string]interface{}{
+						"id":         k.InstanceID,
+						"name":       k.InstanceName,
+						"private_ip": fmt.Sprintf("%s", k.IPAddress),
+					}
+					sworker = append(sworker, WorkerNodes)
 				}
-				sworker = append(sworker, WorkerNodes)
 			}
+			d.Set("worker_nodes", sworker)
 		}
-		d.Set("worker_nodes", sworker)
 	} else {
 		d.Set("num_of_nodes", 0)
 	}
@@ -1475,7 +1486,7 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteCluster", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	stateConf := BuildStateConf([]string{"running", "deleting", "initial"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Minute, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"delete_failed"}))
+	stateConf := BuildStateConf([]string{"running", "deleting", "initial"}, []string{""}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"delete_failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
