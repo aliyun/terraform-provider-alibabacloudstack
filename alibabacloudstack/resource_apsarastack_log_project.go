@@ -39,6 +39,7 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	name := d.Get("name").(string)
+	description := d.Get("description").(string)
 	request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "CreateProject", "")
 	request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
 	// Try new API first (SLS 2019-10-23), fallback to old API (SLS 2020-03-31)

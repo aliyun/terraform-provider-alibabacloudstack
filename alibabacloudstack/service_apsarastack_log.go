@@ -25,6 +25,7 @@ type LogProject struct {
 	Region         string `json:"region"`
 	CreateTime     string `json:"createTime"`
 	LastModifyTime string `json:"lastModifyTime"`
+	ClusterName    string `json:"clusterName"`
 	Count          int    `json:"count"`
 	Total          int    `json:"total"`
 	Projects       []struct {
@@ -32,6 +33,7 @@ type LogProject struct {
 		Status         string `json:"status"`
 		Owner          string `json:"owner"`
 		Description    string `json:"description"`
+		ClusterName    string `json:"clusterName"`
 		Region         string `json:"region"`
 		CreateTime     string `json:"createTime"`
 		LastModifyTime string `json:"lastModifyTime"`
@@ -89,6 +91,7 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 			if k.ProjectName == id {
 				logProject.ProjectName = k.ProjectName
 				logProject.Description = k.Description
+				logProject.ClusterName = k.ClusterName
 				break
 			}
 		}
