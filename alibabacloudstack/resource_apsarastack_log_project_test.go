@@ -19,7 +19,7 @@ func TestAccAlibabacloudStackLogProject_basic(t *testing.T) {
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeLogProject")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000000, 9999999)
+	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf-testacclogproject-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogProjectConfigDependence)
 	ResourceTest(t, resource.TestCase{
@@ -33,10 +33,14 @@ func TestAccAlibabacloudStackLogProject_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name": name,
+					// "cluster_name": "${data.alibabacloudstack_log_clusters.example.clusters.0.name}",
+					"description": "tf-testAccLogProject_basic",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name": name,
+						// "cluster_name": CHECKSET,
+						"description": "tf-testAccLogProject_basic",
 					}),
 				),
 			},
@@ -60,7 +64,10 @@ func TestAccAlibabacloudStackLogProject_basic(t *testing.T) {
 }
 
 func resourceLogProjectConfigDependence(name string) string {
-	return ""
+	return `
+data "alibabacloudstack_log_clusters" "example" {
+}
+`
 }
 
 var logProjectMap = map[string]string{
