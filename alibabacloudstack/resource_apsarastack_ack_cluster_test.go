@@ -278,6 +278,7 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 					"master_count":                 "3",
 					"master_disk_category":         "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"image_id":                     "${data.alibabacloudstack_images.default.images.0.id}",
+					"image_type":                   "AliyunLinux3",
 					"master_disk_size":             "40",
 					"master_instance_types":        []string{"${local.default_instance_type_id}", "${local.default_instance_type_id}", "${local.default_instance_type_id}"},
 					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
