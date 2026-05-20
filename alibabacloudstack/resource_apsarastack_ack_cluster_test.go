@@ -203,8 +203,13 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "image_id", "is_enterprise_security_group", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_port_range", "os_type", "platform",
-					"timeout_mins", "new_nat_gateway", "password", "slb_internet_enabled", "master_storage_set_id", "master_storage_set_partition_number", "node_cidr_mask", "proxy_mode", "service_cidr", "worker_data_disks", "worker_storage_set_id", "worker_storage_set_partition_number"},
+				ImportStateVerifyIgnore: []string{
+					"enable_ssh", "addons", "cluster_type", "image_id", "image_type",
+					"is_enterprise_security_group", "master_count", "master_disk_category", "master_disk_size", "master_instance_types",
+					"master_vswitch_ids", "node_port_range", "os_type", "platform", "timeout_mins", "cloud_monitor_flags", "image_type",
+					"key_name", "new_nat_gateway", "slb_internet_enabled", "worker_disk_category", "worker_disk_size",
+					"worker_instance_types", "worker_vswitch_ids", "worker_nodes", "worker_ram_role_name",
+				},
 			},
 		},
 	})
@@ -350,10 +355,16 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "image_id", "is_enterprise_security_group", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_port_range", "os_type", "platform", "timeout_mins"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"enable_ssh", "addons", "cluster_type", "image_id", "image_type",
+					"is_enterprise_security_group", "master_count", "master_disk_category", "master_disk_size", "master_instance_types",
+					"master_vswitch_ids", "node_port_range", "os_type", "platform", "timeout_mins", "cloud_monitor_flags", "image_type",
+					"key_name", "new_nat_gateway", "slb_internet_enabled", "worker_disk_category", "worker_disk_size",
+					"worker_instance_types", "worker_vswitch_ids", "worker_nodes", "worker_ram_role_name",
+				},
 			},
 		},
 	})
