@@ -23,6 +23,7 @@ func resourceAlibabacloudStackLogProject() *schema.Resource {
 			"cluster_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
