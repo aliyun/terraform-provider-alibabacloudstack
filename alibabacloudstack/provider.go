@@ -1339,7 +1339,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Endpoints[connectivity.ASAPICode] = asapiEndpoint.(string)
 		config.Endpoints[connectivity.OneRouterCode] = asapiEndpoint.(string)
 		config.Endpoints[connectivity.SLSCode] = asapiEndpoint.(string)
-		config.Endpoints[connectivity.KmsCode] = asapiEndpoint.(string)
 	}
 
 	if strings.ToLower(config.Protocol) == "https" {

@@ -57,10 +57,10 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	// If new API fails, fallback to old API
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "InvalidVersion") {
-			// TODO: Remove old API logic in version 3.20.0
+			// TODO: Remove old API logic in version 3.21.0
 			log.Printf("[WARN] SLS 2019-10-23 CreateProject failed: %v, fallback to 2020-03-31 API", err)
 
-			// Attempt 2: Old API (2020-03-31) - will be removed in 3.20.0
+			// Attempt 2: Old API (2020-03-31) - will be removed in 3.21.0
 			request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "CreateProject", "")
 			request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 			request.QueryParams["projectName"] = name
@@ -130,10 +130,10 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 
 		// If new API fails, fallback to old API
 		if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
-			// TODO: Remove old API logic in version 3.20.0
+			// TODO: Remove old API logic in version 3.21.0
 			log.Printf("[WARN] SLS 2019-10-23 UpdateProject failed: %v, fallback to 2020-03-31 API", err)
 
-			// Attempt 2: Old API (2020-03-31) - will be removed in 3.20.0
+			// Attempt 2: Old API (2020-03-31) - will be removed in 3.21.0
 			request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "UpdateProject", "")
 			request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 			request.QueryParams["ProjectName"] = name
@@ -167,10 +167,10 @@ func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta inte
 
 	// If new API fails, fallback to old API
 	if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
-		// TODO: Remove old API logic in version 3.20.0
+		// TODO: Remove old API logic in version 3.21.0
 		log.Printf("[WARN] SLS 2019-10-23 DeleteProject failed: %v, fallback to 2020-03-31 API", err)
 
-		// Attempt 2: Old API (2020-03-31) - will be removed in 3.20.0
+		// Attempt 2: Old API (2020-03-31) - will be removed in 3.21.0
 		request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "DeleteProject", "")
 		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 		request.QueryParams["ProjectName"] = name
