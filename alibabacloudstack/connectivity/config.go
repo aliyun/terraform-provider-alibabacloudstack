@@ -45,6 +45,7 @@ type Config struct {
 	RamRoleSessionExpiration int
 	Endpoints                map[ServiceCode]string
 	OssEndpoints             *map[string]string
+	SlsDataEndpoint          string
 	ConfigurationSource      string
 	Insecure                 bool
 	Proxy                    string

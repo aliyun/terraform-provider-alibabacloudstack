@@ -27,39 +27,40 @@ func testSweepLogConfigs(region string) error {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	logService := LogService{client}
 
 	prefixes := []string{
 		"tf-testAcc",
 		"tf_testAcc",
 	}
 
-	raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-		return slsClient.ListProject()
-	})
+	raw, err := logService.GetSlsDataClient("")
+	if err != nil {
+		log.Printf("[ERROR] Error getting SLS client: %s", errmsgs.WrapError(err))
+		return err
+	}
+	
+	// Get all projects
+	projects, err := raw.ListProject()
 	if err != nil {
 		log.Printf("[ERROR] Error retrieving Log Projects: %s", errmsgs.WrapError(err))
+		return err
 	}
-	names, _ := raw.([]string)
 
-	for _, v := range names {
+	for _, v := range projects {
 		name := v
 		skip := true
 		for _, prefix := range prefixes {
 			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				cfNameList, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-					cfNames, _, cfErr := slsClient.ListConfig(name, 0, 100)
-					return cfNames, cfErr
-				})
-				if err != nil {
-					log.Printf("[ERROR] Error retrieving Log config: %s", errmsgs.WrapError(err))
+				cfNameList, _, cfErr := raw.ListConfig(name, 0, 100)
+				if cfErr != nil {
+					log.Printf("[ERROR] Error retrieving Log config: %s", errmsgs.WrapError(cfErr))
+					continue
 				}
-				for _, cfName := range cfNameList.([]string) {
+				for _, cfName := range cfNameList {
 					log.Printf("[INFO] Deleting Log config: %s", cfName)
-					_, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-						return nil, slsClient.DeleteConfig(name, cfName)
-					})
-					if err != nil {
-						log.Printf("[ERROR] Failed to delete Log Config (%s): %s", cfName, err)
+					if delErr := raw.DeleteConfig(name, cfName); delErr != nil {
+						log.Printf("[ERROR] Failed to delete Log Config (%s): %s", cfName, delErr)
 					}
 				}
 				skip = false
@@ -71,11 +72,8 @@ func testSweepLogConfigs(region string) error {
 			continue
 		}
 		log.Printf("[INFO] Deleting Log Project: %s", name)
-		_, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			return nil, slsClient.DeleteProject(name)
-		})
-		if err != nil {
-			log.Printf("[ERROR] Failed to delete Log Project (%s): %s", name, err)
+		if delErr := raw.DeleteProject(name); delErr != nil {
+			log.Printf("[ERROR] Failed to delete Log Project (%s): %s", name, delErr)
 		}
 	}
 	return nil

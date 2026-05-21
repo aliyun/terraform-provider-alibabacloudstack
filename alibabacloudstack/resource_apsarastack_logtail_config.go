@@ -70,12 +70,14 @@ func resourceAlibabacloudStackLogtailConfig() *schema.Resource {
 
 func resourceAlibabacloudStackLogtailConfigCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	logService := LogService{client}
+	
 	var inputConfigInputDetail = make(map[string]interface{})
 	data := d.Get("input_detail").(string)
 	if jsonErr := json.Unmarshal([]byte(data), &inputConfigInputDetail); jsonErr != nil {
 		return errmsgs.WrapError(jsonErr)
 	}
-	var requestInfo *sls.Client
+	
 	logconfig := &sls.LogConfig{
 		Name:       d.Get("name").(string),
 		InputType:  d.Get("input_type").(string),
@@ -85,24 +87,25 @@ func resourceAlibabacloudStackLogtailConfigCreate(d *schema.ResourceData, meta i
 			LogStoreName: d.Get("logstore").(string),
 		},
 	}
-	raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-		requestInfo = slsClient
-		sls.AddNecessaryInputConfigField(inputConfigInputDetail)
-		covertInput, covertErr := assertInputDetailType(inputConfigInputDetail, logconfig)
-		if covertErr != nil {
-			return nil, covertErr
-		}
-		logconfig.InputDetail = covertInput
-		return nil, slsClient.CreateConfig(d.Get("project").(string), logconfig)
-	})
-	addDebug("CreateConfig", raw, requestInfo, map[string]interface{}{
-		"project": d.Get("project").(string),
-		"config":  logconfig,
-	})
+	
+	sls.AddNecessaryInputConfigField(inputConfigInputDetail)
+	covertInput, covertErr := assertInputDetailType(inputConfigInputDetail, logconfig)
+	if covertErr != nil {
+		return covertErr
+	}
+	logconfig.InputDetail = covertInput
+	
+	slsClient, err := logService.GetSlsDataClient(d.Get("project").(string))
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	
+	err = slsClient.CreateConfig(d.Get("project").(string), logconfig)
 	if err != nil {
 		errmsg := ""
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_logtail_config", "CreateConfig", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
+	
 	d.SetId(fmt.Sprintf("%s%s%s%s%s", d.Get("project").(string), COLON_SEPARATED, d.Get("logstore").(string), COLON_SEPARATED, d.Get("name").(string)))
 	return nil
 }
@@ -179,7 +182,6 @@ func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta 
 		return nil
 	}
 	if d.HasChanges("input_detail", "input_type") {
-		// logconfig := &sls.LogConfig{}
 		inputConfigInputDetail := make(map[string]interface{})
 		data := d.Get("input_detail").(string)
 		conver_err := json.Unmarshal([]byte(data), &inputConfigInputDetail)
@@ -188,7 +190,7 @@ func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta 
 		}
 
 		client := meta.(*connectivity.AlibabacloudStackClient)
-		var requestInfo *sls.Client
+		logService := LogService{client}
 		params := &sls.LogConfig{
 			Name:       parts[2],
 			InputType:  d.Get("input_type").(string),
@@ -204,19 +206,16 @@ func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta 
 			return covertErr
 		}
 		params.InputDetail = covertInput
-		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return nil, slsClient.UpdateConfig(parts[0], params)
-		})
+		
+		slsClient, err := logService.GetSlsDataClient(parts[0])
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		
+		err = slsClient.UpdateConfig(parts[0], params)
 		if err != nil {
 			errmsg := ""
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateConfig", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
-		}
-		if debugOn() {
-			addDebug("UpdateConfig", raw, requestInfo, map[string]interface{}{
-				"project": parts[0],
-				"config":  params,
-			})
 		}
 	}
 	return nil
@@ -229,12 +228,14 @@ func resourceAlibabacloudStackLogtailConfigDelete(d *schema.ResourceData, meta i
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	var requestInfo *sls.Client
+	
+	slsClient, err := logService.GetSlsDataClient(parts[0])
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	
 	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return nil, slsClient.DeleteConfig(parts[0], parts[2])
-		})
+		err := slsClient.DeleteConfig(parts[0], parts[2])
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
@@ -242,12 +243,6 @@ func resourceAlibabacloudStackLogtailConfigDelete(d *schema.ResourceData, meta i
 			}
 			errmsg := ""
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteConfig", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg))
-		}
-		if debugOn() {
-			addDebug("DeleteConfig", raw, requestInfo, map[string]string{
-				"project": parts[0],
-				"config":  parts[2],
-			})
 		}
 		return nil
 	})

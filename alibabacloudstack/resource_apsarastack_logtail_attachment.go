@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 
-	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -35,25 +34,22 @@ func resourceAlibabacloudStackLogtailAttachment() *schema.Resource {
 
 func resourceAlibabacloudStackLogtailAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	logService := LogService{client}
 	project := d.Get("project").(string)
 	config_name := d.Get("logtail_config_name").(string)
 	group_name := d.Get("machine_group_name").(string)
-	var requestInfo *sls.Client
-	raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-		requestInfo = slsClient
-		return nil, slsClient.ApplyConfigToMachineGroup(project, config_name, group_name)
-	})
+
+	slsClient, err := logService.GetSlsDataClient(project)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	err = slsClient.ApplyConfigToMachineGroup(project, config_name, group_name)
 	if err != nil {
 		errmsg := ""
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_logtail_attachment", "ApplyConfigToMachineGroup", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
-	if debugOn() {
-		addDebug("ApplyConfigToMachineGroup", raw, requestInfo, map[string]string{
-			"project":   project,
-			"confName":  config_name,
-			"groupName": group_name,
-		})
-	}
+
 	d.SetId(fmt.Sprintf("%s%s%s%s%s", project, COLON_SEPARATED, config_name, COLON_SEPARATED, group_name))
 	return nil
 }
@@ -88,21 +84,17 @@ func resourceAlibabacloudStackLogtailAttachmentDelete(d *schema.ResourceData, me
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	var requestInfo *sls.Client
-	raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-		requestInfo = slsClient
-		return nil, slsClient.RemoveConfigFromMachineGroup(parts[0], parts[1], parts[2])
-	})
+
+	slsClient, err := logService.GetSlsDataClient(parts[0])
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	err = slsClient.RemoveConfigFromMachineGroup(parts[0], parts[1], parts[2])
 	if err != nil {
 		errmsg := ""
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "RemoveConfigFromMachineGroup", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
-	if debugOn() {
-		addDebug("RemoveConfigFromMachineGroup", raw, requestInfo, map[string]string{
-			"project":   parts[0],
-			"confName":  parts[1],
-			"groupName": parts[2],
-		})
-	}
+
 	return errmsgs.WrapError(logService.WaitForLogtailAttachment(d.Id(), Deleted, DefaultTimeout))
 }

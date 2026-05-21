@@ -59,12 +59,15 @@ func resourceAlibabacloudStackLogMachineGroupCreate(d *schema.ResourceData, meta
 			TopicName: d.Get("topic").(string),
 		},
 	}
-	var requestInfo *sls.Client
-	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return nil, slsClient.CreateMachineGroup(d.Get("project").(string), params)
-		})
+	
+	slsservice := LogService{client}
+	slsClient, err := slsservice.GetSlsDataClient(d.Get("project").(string))
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		err := slsClient.CreateMachineGroup(d.Get("project").(string), params)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
@@ -72,14 +75,9 @@ func resourceAlibabacloudStackLogMachineGroupCreate(d *schema.ResourceData, meta
 			}
 			return resource.NonRetryableError(err)
 		}
-		if debugOn() {
-			addDebug("CreateMachineGroup", raw, requestInfo, map[string]interface{}{
-				"project":      d.Get("project").(string),
-				"MachineGroup": params,
-			})
-		}
 		return nil
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 
@@ -121,7 +119,7 @@ func resourceAlibabacloudStackLogMachineGroupUpdate(d *schema.ResourceData, meta
 		}
 
 		client := meta.(*connectivity.AlibabacloudStackClient)
-		var requestInfo *sls.Client
+		logService := LogService{client}
 		params := &sls.MachineGroup{
 			Name:          parts[1],
 			MachineIDType: d.Get("identify_type").(string),
@@ -130,11 +128,14 @@ func resourceAlibabacloudStackLogMachineGroupUpdate(d *schema.ResourceData, meta
 				TopicName: d.Get("topic").(string),
 			},
 		}
-		if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-			raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-				requestInfo = slsClient
-				return nil, slsClient.UpdateMachineGroup(parts[0], params)
-			})
+		
+		slsClient, err := logService.GetSlsDataClient(parts[0])
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		
+		err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+			err := slsClient.UpdateMachineGroup(parts[0], params)
 			if err != nil {
 				if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 					time.Sleep(5 * time.Second)
@@ -142,14 +143,9 @@ func resourceAlibabacloudStackLogMachineGroupUpdate(d *schema.ResourceData, meta
 				}
 				return resource.NonRetryableError(err)
 			}
-			if debugOn() {
-				addDebug("UpdateMachineGroup", raw, requestInfo, map[string]interface{}{
-					"project":      parts[0],
-					"MachineGroup": params,
-				})
-			}
 			return nil
-		}); err != nil {
+		})
+		if err != nil {
 			return err
 		}
 	}
@@ -164,24 +160,20 @@ func resourceAlibabacloudStackLogMachineGroupDelete(d *schema.ResourceData, meta
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	var requestInfo *sls.Client
+	
+	slsClient, err := logService.GetSlsDataClient(parts[0])
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	
 	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return nil, slsClient.DeleteMachineGroup(parts[0], parts[1])
-		})
+		err := slsClient.DeleteMachineGroup(parts[0], parts[1])
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
-		}
-		if debugOn() {
-			addDebug("DeleteMachineGroup", raw, requestInfo, map[string]interface{}{
-				"project":      parts[0],
-				"machineGroup": parts[1],
-			})
 		}
 		return nil
 	})

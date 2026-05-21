@@ -207,14 +207,19 @@ func resourceAlibabacloudStackLogAlertCreate(d *schema.ResourceData, meta interf
 			Interval: d.Get("schedule_interval").(string),
 		},
 	}
-	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		_, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			var err error
-			if alert.Configuration, err = createAlertConfig(d, slsClient); err != nil {
-				return nil, err
-			}
-			return nil, slsClient.CreateAlert(project_name, alert)
-		})
+	
+	slsservice := LogService{client}
+	slsClient, err := slsservice.GetSlsDataClient(project_name)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	
+	if alert.Configuration, err = createAlertConfig(d, slsClient); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		err := slsClient.CreateAlert(project_name, alert)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
@@ -223,7 +228,8 @@ func resourceAlibabacloudStackLogAlertCreate(d *schema.ResourceData, meta interf
 			return resource.NonRetryableError(err)
 		}
 		return nil
-	}); err != nil {
+	})
+	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_log_alert", "CreateLogstoreAlert", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
@@ -310,14 +316,18 @@ func resourceAlibabacloudStackLogAlertUpdate(d *schema.ResourceData, meta interf
 		},
 	}
 
-	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		_, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			var err error
-			if params.Configuration, err = createAlertConfig(d, slsClient); err != nil {
-				return nil, err
-			}
-			return nil, slsClient.UpdateAlert(parts[0], params)
-		})
+	slsservice := LogService{client}
+	slsClient, err := slsservice.GetSlsDataClient(parts[0])
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	if params.Configuration, err = createAlertConfig(d, slsClient); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		err := slsClient.UpdateAlert(parts[0], params)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
@@ -326,7 +336,8 @@ func resourceAlibabacloudStackLogAlertUpdate(d *schema.ResourceData, meta interf
 			return resource.NonRetryableError(err)
 		}
 		return nil
-	}); err != nil {
+	})
+	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateAlert", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
@@ -340,24 +351,20 @@ func resourceAlibabacloudStackLogAlertDelete(d *schema.ResourceData, meta interf
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	var requestInfo *sls.Client
+	
+	slsClient, err := logService.GetSlsDataClient(parts[0])
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	
 	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return nil, slsClient.DeleteAlert(parts[0], parts[1])
-		})
+		err := slsClient.DeleteAlert(parts[0], parts[1])
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
-		}
-		if debugOn() {
-			addDebug("DeleteAlert", raw, requestInfo, map[string]interface{}{
-				"project_name": parts[0],
-				"alert":        parts[1],
-			})
 		}
 		return nil
 	})

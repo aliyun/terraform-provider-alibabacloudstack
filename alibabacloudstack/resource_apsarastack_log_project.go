@@ -29,6 +29,10 @@ func resourceAlibabacloudStackLogProject() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"data_endpoint": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackLogProjectCreate,
@@ -41,7 +45,7 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	logService := LogService{client}
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
-	request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "CreateProject", "")
+	request := client.NewCommonRequest("POST", "SLS", "2019-10-23", "CreateProject", "")
 	request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
 	// Try new API first (SLS 2019-10-23), fallback to old API (SLS 2020-03-31)
 	var err error
@@ -61,7 +65,7 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 			log.Printf("[WARN] SLS 2019-10-23 CreateProject failed: %v, fallback to 2020-03-31 API", err)
 
 			// Attempt 2: Old API (2020-03-31) - will be removed in 3.21.0
-			request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "CreateProject", "")
+			request := client.NewCommonRequest("POST", "SLS", "2019-10-23", "CreateProject", "")
 			request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 			request.QueryParams["projectName"] = name
 			request.QueryParams["Description"] = description
@@ -111,6 +115,7 @@ func resourceAlibabacloudStackLogProjectRead(d *schema.ResourceData, meta interf
 	d.Set("name", object.ProjectName)
 	d.Set("description", object.Description)
 	d.Set("cluster_name", object.ClusterName)
+	d.Set("data_endpoint", object.DataEndpoint)
 
 	return nil
 }
@@ -134,7 +139,7 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 			log.Printf("[WARN] SLS 2019-10-23 UpdateProject failed: %v, fallback to 2020-03-31 API", err)
 
 			// Attempt 2: Old API (2020-03-31) - will be removed in 3.21.0
-			request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "UpdateProject", "")
+			request := client.NewCommonRequest("POST", "SLS", "2019-10-23", "UpdateProject", "")
 			request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 			request.QueryParams["ProjectName"] = name
 			request.QueryParams["description"] = d.Get("description").(string)
@@ -171,7 +176,7 @@ func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta inte
 		log.Printf("[WARN] SLS 2019-10-23 DeleteProject failed: %v, fallback to 2020-03-31 API", err)
 
 		// Attempt 2: Old API (2020-03-31) - will be removed in 3.21.0
-		request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "DeleteProject", "")
+		request := client.NewCommonRequest("POST", "SLS", "2019-10-23", "DeleteProject", "")
 		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 		request.QueryParams["ProjectName"] = name
 

@@ -2,7 +2,9 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
@@ -18,26 +20,39 @@ type LogService struct {
 }
 
 type LogProject struct {
-	ProjectName    string `json:"projectName"`
-	Status         string `json:"status"`
-	Owner          string `json:"owner"`
-	Description    string `json:"description"`
-	Region         string `json:"region"`
-	CreateTime     string `json:"createTime"`
-	LastModifyTime string `json:"lastModifyTime"`
-	ClusterName    string `json:"clusterName"`
-	Count          int    `json:"count"`
-	Total          int    `json:"total"`
-	Projects       []struct {
-		ProjectName    string `json:"projectName"`
-		Status         string `json:"status"`
-		Owner          string `json:"owner"`
-		Description    string `json:"description"`
-		ClusterName    string `json:"clusterName"`
-		Region         string `json:"region"`
-		CreateTime     string `json:"createTime"`
-		LastModifyTime string `json:"lastModifyTime"`
-	} `json:"projects"`
+	CreateTime         string   `json:"createTime"`
+	LastModifyTime     string   `json:"lastModifyTime"`
+	Description        string   `json:"description"`
+	Owner              string   `json:"owner"`
+	ProjectName        string   `json:"projectName"`
+	Region             string   `json:"region"`
+	Status             string   `json:"status"`
+	ResourceGroupId    string   `json:"resourceGroupId"`
+	DataRedundancyType string   `json:"dataRedundancyType"`
+	ClusterName        string   `json:"clusterName"`
+	DataEndpoint       string   `json:"dataEndpoint"`
+	RecycleBinEnabled  bool     `json:"recycleBinEnabled"`
+	Location           string   `json:"location"`
+	Quota              LogQuota `json:"quota"`
+}
+
+type LogQuota struct {
+	LogStore       int `json:"LogStore"`
+	Report         int `json:"Report"`
+	SavedSearch    int `json:"SavedSearch"`
+	Config         int `json:"Config"`
+	MinWriteQuota  int `json:"MinWriteQuota"`
+	Dashboard      int `json:"Dashboard"`
+	MinReadQuota   int `json:"MinReadQuota"`
+	Ingestion      int `json:"Ingestion"`
+	MachineGroup   int `json:"MachineGroup"`
+	ScheduledSQL   int `json:"ScheduledSQL"`
+	Export         int `json:"Export"`
+	Alert          int `json:"Alert"`
+	ETL            int `json:"ETL"`
+	Shard          int `json:"Shard"`
+	Chart          int `json:"Chart"`
+	MinLengthQuota int `json:"MinLengthQuota"`
 }
 
 func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
@@ -86,20 +101,44 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 		}
 	}
 
-	if logProject != nil && logProject.ProjectName == "" && len(logProject.Projects) > 0 {
-		for _, k := range logProject.Projects {
-			if k.ProjectName == id {
-				logProject.ProjectName = k.ProjectName
-				logProject.Description = k.Description
-				logProject.ClusterName = k.ClusterName
-				break
-			}
-		}
-	}
+	// if logProject != nil && logProject.ProjectName == "" && len(logProject.LogQuota) > 0 {
+	// 	for _, k := range logProject.LogQuota {
+	// 		if k.ProjectName == id {
+	// 			logProject.ProjectName = k.ProjectName
+	// 			logProject.Description = k.Description
+	// 			logProject.ClusterName = k.ClusterName
+	// 			break
+	// 		}
+	// 	}
+	// }
 	if logProject == nil || logProject.ProjectName == "" {
 		return logProject, errmsgs.GetNotFoundErrorFromString("LogProject not found")
 	}
 	return logProject, nil
+}
+
+func (s *LogService) GetSlsDataClient(projectName string) (slsClient *sls.Client, err error) {
+	project, err := s.DescribeLogProject(projectName)
+	if s.client.Config.Proxy != "" {
+		os.Setenv("http_proxy", s.client.Config.Proxy)
+		os.Setenv("https_proxy", s.client.Config.Proxy)
+	}
+	var endpoint string
+	if s.client.Config.SlsDataEndpoint != "" {
+		endpoint = s.client.Config.SlsDataEndpoint
+	} else if project.DataEndpoint != "" {
+		endpoint = project.DataEndpoint
+	} else {
+		endpoint = fmt.Sprintf("data.%s.sls-pub.%s", s.client.RegionId, s.client.Config.PopgwDomain)
+	}
+	slsClient = &sls.Client{
+		AccessKeyID:     s.client.Config.AccessKey,
+		AccessKeySecret: s.client.Config.SecretKey,
+		Endpoint:        endpoint,
+		SecurityToken:   s.client.Config.SecurityToken,
+		UserAgent:       s.client.GetUserAgent(),
+	}
+	return slsClient, nil
 }
 
 func (s *LogService) WaitForLogProject(id string, status Status, timeout int) error {
@@ -131,12 +170,14 @@ func (s *LogService) DescribeLogStore(id string) (*sls.LogStore, error) {
 		return store, errmsgs.WrapError(err)
 	}
 	projectName, name := parts[0], parts[1]
-	var requestInfo *sls.Client
+
+	slsClient, err := s.GetSlsDataClient(projectName)
+	if err != nil {
+		return store, errmsgs.WrapError(err)
+	}
+
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return slsClient.GetLogStore(projectName, name)
-		})
+		raw, err := slsClient.GetLogStore(projectName, name)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
@@ -144,12 +185,12 @@ func (s *LogService) DescribeLogStore(id string) (*sls.LogStore, error) {
 			return resource.NonRetryableError(err)
 		}
 		if debugOn() {
-			addDebug("GetLogStore", raw, requestInfo, map[string]string{
+			addDebug("GetLogStore", raw, map[string]string{
 				"project":  projectName,
 				"logstore": name,
 			})
 		}
-		store, _ = raw.(*sls.LogStore)
+		store = raw
 		return nil
 	})
 	if err != nil {
@@ -198,12 +239,14 @@ func (s *LogService) DescribeLogStoreIndex(id string) (*sls.Index, error) {
 		return index, errmsgs.WrapError(err)
 	}
 	projectName, name := parts[0], parts[1]
-	var requestInfo *sls.Client
+
+	slsClient, err := s.GetSlsDataClient(projectName)
+	if err != nil {
+		return index, errmsgs.WrapError(err)
+	}
+
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return slsClient.GetIndex(projectName, name)
-		})
+		raw, err := slsClient.GetIndex(projectName, name)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
@@ -211,12 +254,12 @@ func (s *LogService) DescribeLogStoreIndex(id string) (*sls.Index, error) {
 			return resource.NonRetryableError(err)
 		}
 		if debugOn() {
-			addDebug("GetIndex", raw, requestInfo, map[string]string{
+			addDebug("GetIndex", raw, map[string]string{
 				"project":  projectName,
 				"logstore": name,
 			})
 		}
-		index, _ = raw.(*sls.Index)
+		index = raw
 		return nil
 	})
 
@@ -240,12 +283,14 @@ func (s *LogService) DescribeLogMachineGroup(id string) (*sls.MachineGroup, erro
 		return group, errmsgs.WrapError(err)
 	}
 	projectName, groupName := parts[0], parts[1]
-	var requestInfo *sls.Client
+
+	slsClient, err := s.GetSlsDataClient(projectName)
+	if err != nil {
+		return group, errmsgs.WrapError(err)
+	}
+
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return slsClient.GetMachineGroup(projectName, groupName)
-		})
+		raw, err := slsClient.GetMachineGroup(projectName, groupName)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
@@ -253,12 +298,12 @@ func (s *LogService) DescribeLogMachineGroup(id string) (*sls.MachineGroup, erro
 			return resource.NonRetryableError(err)
 		}
 		if debugOn() {
-			addDebug("GetMachineGroup", raw, requestInfo, map[string]string{
+			addDebug("GetMachineGroup", raw, map[string]string{
 				"project":      projectName,
 				"machineGroup": groupName,
 			})
 		}
-		group, _ = raw.(*sls.MachineGroup)
+		group = raw
 		return nil
 	})
 
@@ -309,12 +354,14 @@ func (s *LogService) DescribeLogtailConfig(id string) (*sls.LogConfig, error) {
 		return response, errmsgs.WrapError(err)
 	}
 	projectName, configName := parts[0], parts[2]
-	var requestInfo *sls.Client
+
+	slsClient, err := s.GetSlsDataClient(projectName)
+	if err != nil {
+		return response, errmsgs.WrapError(err)
+	}
+
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return slsClient.GetConfig(projectName, configName)
-		})
+		raw, err := slsClient.GetConfig(projectName, configName)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "InternalServerError") {
 				return resource.RetryableError(err)
@@ -322,12 +369,12 @@ func (s *LogService) DescribeLogtailConfig(id string) (*sls.LogConfig, error) {
 			return resource.NonRetryableError(err)
 		}
 		if debugOn() {
-			addDebug("GetConfig", raw, requestInfo, map[string]string{
+			addDebug("GetConfig", raw, map[string]string{
 				"project": projectName,
 				"config":  configName,
 			})
 		}
-		response, _ = raw.(*sls.LogConfig)
+		response = raw
 		return nil
 	})
 	if err != nil {
@@ -375,14 +422,15 @@ func (s *LogService) DescribeLogtailAttachment(id string) (groupName string, err
 		return groupName, errmsgs.WrapError(err)
 	}
 	projectName, configName, name := parts[0], parts[1], parts[2]
-	var groupNames []string
-	var requestInfo *sls.Client
-	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 
-		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return slsClient.GetAppliedMachineGroups(projectName, configName)
-		})
+	slsClient, err := s.GetSlsDataClient(projectName)
+	if err != nil {
+		return groupName, errmsgs.WrapError(err)
+	}
+
+	var groupNames []string
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		raw, err := slsClient.GetAppliedMachineGroups(projectName, configName)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "InternalServerError") {
 				return resource.RetryableError(err)
@@ -390,12 +438,12 @@ func (s *LogService) DescribeLogtailAttachment(id string) (groupName string, err
 			return resource.NonRetryableError(err)
 		}
 		if debugOn() {
-			addDebug("GetAppliedMachineGroups", raw, requestInfo, map[string]string{
+			addDebug("GetAppliedMachineGroups", raw, map[string]string{
 				"project":  projectName,
 				"confName": configName,
 			})
 		}
-		groupNames, _ = raw.([]string)
+		groupNames = raw
 		return nil
 	})
 	if err != nil {
@@ -449,12 +497,14 @@ func (s *LogService) DescribeLogAlert(id string) (*sls.Alert, error) {
 		return alert, errmsgs.WrapError(err)
 	}
 	projectName, alertName := parts[0], parts[1]
-	var requestInfo *sls.Client
+
+	slsClient, err := s.GetSlsDataClient(projectName)
+	if err != nil {
+		return alert, errmsgs.WrapError(err)
+	}
+
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return slsClient.GetAlert(projectName, alertName)
-		})
+		raw, err := slsClient.GetAlert(projectName, alertName)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
@@ -462,12 +512,12 @@ func (s *LogService) DescribeLogAlert(id string) (*sls.Alert, error) {
 			return resource.NonRetryableError(err)
 		}
 		if debugOn() {
-			addDebug("GetLogstoreAlert", raw, requestInfo, map[string]string{
+			addDebug("GetLogstoreAlert", raw, map[string]string{
 				"project":    projectName,
 				"alert_name": alertName,
 			})
 		}
-		alert, _ = raw.(*sls.Alert)
+		alert = raw
 		return nil
 	})
 
@@ -516,10 +566,14 @@ func (s *LogService) CreateLogDashboard(project, name string) error {
 		DashboardName: name,
 		ChartList:     []sls.Chart{},
 	}
-	err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			return nil, slsClient.CreateDashboard(project, dashboard)
-		})
+
+	slsClient, err := s.GetSlsDataClient(project)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		err := slsClient.CreateDashboard(project, dashboard)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
@@ -530,7 +584,7 @@ func (s *LogService) CreateLogDashboard(project, name string) error {
 			return resource.NonRetryableError(err)
 		}
 		if debugOn() {
-			addDebug("CreateLogDashboard", raw, map[string]string{
+			addDebug("CreateLogDashboard", dashboard, map[string]string{
 				"project":        project,
 				"dashboard_name": name,
 			})
@@ -595,12 +649,14 @@ func (s *LogService) DescribeLogDashboard(id string) (*sls.Dashboard, error) {
 		return dashboard, errmsgs.WrapError(err)
 	}
 	projectName, dashboardName := parts[0], parts[1]
-	var requestInfo *sls.Client
+
+	slsClient, err := s.GetSlsDataClient(projectName)
+	if err != nil {
+		return dashboard, errmsgs.WrapError(err)
+	}
+
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return slsClient.GetDashboard(projectName, dashboardName)
-		})
+		raw, err := slsClient.GetDashboard(projectName, dashboardName)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
@@ -608,12 +664,12 @@ func (s *LogService) DescribeLogDashboard(id string) (*sls.Dashboard, error) {
 			return resource.NonRetryableError(err)
 		}
 		if debugOn() {
-			addDebug("GetLogstoreDashboard", raw, requestInfo, map[string]string{
+			addDebug("GetLogstoreDashboard", raw, map[string]string{
 				"project":        projectName,
 				"dashboard_name": dashboardName,
 			})
 		}
-		dashboard, _ = raw.(*sls.Dashboard)
+		dashboard = raw
 		return nil
 	})
 

@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -88,25 +89,25 @@ func resourceAlibabacloudStackLogStore() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-//			"encryption": {
-//				Type:     schema.TypeBool,
-//				Optional: true,
-//			},
-//			"cmk_key_id": {
-//				Type:     schema.TypeString,
-//				Optional: true,
-//			},
-//			"arn": {
-//				Type:     schema.TypeString,
-//				Optional: true,
-//			},
-//			"encrypt_type": {
-//				Type:         schema.TypeString,
-//				Optional:     true,
-//				ForceNew:     true,
-//				Default:      "sm4_gcm",
-//				ValidateFunc: validation.StringInSlice([]string{"sm4_gcm", "aes_gcm"}, false),
-//			},
+			//			"encryption": {
+			//				Type:     schema.TypeBool,
+			//				Optional: true,
+			//			},
+			//			"cmk_key_id": {
+			//				Type:     schema.TypeString,
+			//				Optional: true,
+			//			},
+			//			"arn": {
+			//				Type:     schema.TypeString,
+			//				Optional: true,
+			//			},
+			//			"encrypt_type": {
+			//				Type:         schema.TypeString,
+			//				Optional:     true,
+			//				ForceNew:     true,
+			//				Default:      "sm4_gcm",
+			//				ValidateFunc: validation.StringInSlice([]string{"sm4_gcm", "aes_gcm"}, false),
+			//			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackLogStoreCreate, resourceAlibabacloudStackLogStoreRead, resourceAlibabacloudStackLogStoreUpdate, resourceAlibabacloudStackLogStoreDelete)
@@ -115,6 +116,12 @@ func resourceAlibabacloudStackLogStore() *schema.Resource {
 
 func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	slsservice := LogService{client}
+	project := d.Get("project").(string)
+	slsClient, err := slsservice.GetSlsDataClient(project)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
 	logstore := &sls.LogStore{
 		Name:          d.Get("name").(string),
 		TTL:           d.Get("retention_period").(int),
@@ -124,14 +131,9 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 		MaxSplitShard: d.Get("max_split_shard_count").(int),
 		AppendMeta:    d.Get("append_meta").(bool),
 	}
-	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			return nil, slsClient.CreateLogStoreV2(d.Get("project").(string), logstore)
-		})
-		addDebug("CreateLogStoreV2", raw, logstore, map[string]interface{}{
-			"project":  d.Get("project").(string),
-			"logstore": logstore,
-		})
+	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
+		err := slsClient.CreateLogStoreV2(d.Get("project").(string), logstore)
+		log.Printf("[DEBUG] SLS CreateLogStoreV2 %++v", logstore)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)
@@ -226,20 +228,25 @@ func resourceAlibabacloudStackLogStoreUpdate(d *schema.ResourceData, meta interf
 		store.WebTracking = d.Get("enable_web_tracking").(bool)
 		store.AppendMeta = d.Get("append_meta").(bool)
 		store.AutoSplit = d.Get("auto_split").(bool)
-		var requestInfo *sls.Client
-		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return nil, slsClient.UpdateLogStoreV2(parts[0], store)
+
+		slsClient, err := logService.GetSlsDataClient(parts[0])
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+
+		err = resource.Retry(3*time.Minute, func() *resource.RetryError {
+			err := slsClient.UpdateLogStoreV2(parts[0], store)
+			if err != nil {
+				if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
+					return resource.RetryableError(err)
+				}
+				errmsg := ""
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateLogStoreV2", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg))
+			}
+			return nil
 		})
 		if err != nil {
-			errmsg := ""
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateLogStoreV2", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
-		}
-		if debugOn() {
-			addDebug("UpdateLogStoreV2", raw, requestInfo, map[string]interface{}{
-				"project":  parts[0],
-				"logstore": store,
-			})
+			return err
 		}
 	}
 
@@ -248,19 +255,28 @@ func resourceAlibabacloudStackLogStoreUpdate(d *schema.ResourceData, meta interf
 
 func resourceAlibabacloudStackLogStoreDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	logService := LogService{client}
 	name := d.Get("name").(string)
 	project := d.Get("project").(string)
-	var requestInfo *sls.Client
-	raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-		return nil, slsClient.DeleteLogStore(project, name)
-	})
-	addDebug("DeleteLogStore", raw, requestInfo, map[string]interface{}{
-		"project":  project,
-		"logstore": name,
+
+	slsClient, err := logService.GetSlsDataClient(project)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
+		err := slsClient.DeleteLogStore(project, name)
+		if err != nil {
+			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
+				return resource.RetryableError(err)
+			}
+			errmsg := ""
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteLogStore", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg))
+		}
+		return nil
 	})
 	if err != nil {
-		errmsg := ""
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteLogStore", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+		return err
 	}
 	return nil
 }

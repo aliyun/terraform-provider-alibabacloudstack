@@ -1220,6 +1220,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Eagleeye:             eagleeye,
 		MaxRetryTimeout:      d.Get("max_retry_timeout").(int),
 		PopgwDomain:          d.Get("popgw_domain").(string),
+		SlsDataEndpoint:      d.Get("sls_openapi_endpoint").(string),
 	}
 	if v, ok := d.GetOk("security_transport"); config.SecureTransport == "" && ok && v.(string) != "" {
 		config.SecureTransport = v.(string)

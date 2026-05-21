@@ -276,12 +276,14 @@ func resourceAlibabacloudStackLogStoreIndexUpdate(d *schema.ResourceData, meta i
 	}
 
 	if update {
-		var requestInfo *sls.Client
-		if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-			raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-				requestInfo = slsClient
-				return nil, slsClient.UpdateIndex(parts[0], parts[1], *index)
-			})
+		slsservice := LogService{client}
+		slsClient, err := slsservice.GetSlsDataClient(parts[0])
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		
+		err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+			err := slsClient.UpdateIndex(parts[0], parts[1], *index)
 			if err != nil {
 				if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 					time.Sleep(5 * time.Second)
@@ -289,15 +291,9 @@ func resourceAlibabacloudStackLogStoreIndexUpdate(d *schema.ResourceData, meta i
 				}
 				return resource.NonRetryableError(err)
 			}
-			if debugOn() {
-				addDebug("UpdateIndex", raw, requestInfo, map[string]interface{}{
-					"project":  parts[0],
-					"logstore": parts[1],
-					"index":    index,
-				})
-			}
 			return nil
-		}); err != nil {
+		})
+		if err != nil {
 			return err
 		}
 	}
@@ -320,12 +316,14 @@ func resourceAlibabacloudStackLogStoreIndexDelete(d *schema.ResourceData, meta i
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DescribeLogStoreIndex", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-	var requestInfo *sls.Client
-	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			requestInfo = slsClient
-			return nil, slsClient.DeleteIndex(parts[0], parts[1])
-		})
+	
+	slsClient, err := logService.GetSlsDataClient(parts[0])
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		err := slsClient.DeleteIndex(parts[0], parts[1])
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
 				time.Sleep(5 * time.Second)
@@ -333,14 +331,9 @@ func resourceAlibabacloudStackLogStoreIndexDelete(d *schema.ResourceData, meta i
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteIndex", errmsgs.AlibabacloudStackLogGoSdkERROR))
 		}
-		if debugOn() {
-			addDebug("DeleteIndex", raw, requestInfo, map[string]interface{}{
-				"project":  parts[0],
-				"logstore": parts[1],
-			})
-		}
 		return nil
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 	return nil
