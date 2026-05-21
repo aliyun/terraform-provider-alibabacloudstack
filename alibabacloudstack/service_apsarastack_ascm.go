@@ -1144,6 +1144,6 @@ func (s *AscmService) ReBindResourceGroup(resourceType, instanceId string) error
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resourceType, instanceId, "UpdateInstanceBelong", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
-	log.Printf("Bresponse UnBindBucketPolicy after error")
+	log.Printf("Bresponse ReBindResourceGroup after error")
 	return nil
 }

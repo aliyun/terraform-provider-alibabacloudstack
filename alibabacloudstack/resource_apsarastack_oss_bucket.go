@@ -316,25 +316,6 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 		return errmsgs.WrapError(err)
 	}
 
-	// policy, err := ossService.DescribeOssBucketPolicy(d.Id())
-	// if err != nil {
-	// 	log.Printf("==========================================================%#v", policy)
-	// }
-	// bvclient := meta.(*connectivity.AlibabacloudStackClient)
-	// bvserver := BucketVpcService{bvclient}
-	// vpclist, binderr := bvserver.BucketVpcList(d.Get("bucket").(string))
-	// if binderr != nil {
-	// 	return errmsgs.WrapError(binderr)
-	// }
-	// var vlist []interface{}
-	// if len(vpclist.VpcList) > 0 {
-	// 	for _, v := range vpclist.VpcList {
-	// 		vpc := v.(map[string]interface{})
-	// 		vlist = append(vlist, vpc["vpcId"].(string))
-	// 	}
-	// }
-	// d.Set("vpclist", schema.NewSet(schema.HashString, vlist))
-
 	bucketSync, err := ossService.GetBucketSync(ossCluster, bucketName)
 	d.Set("bucket_sync", false)
 	if err != nil {
@@ -617,48 +598,6 @@ func resourceAlibabacloudStackOssBucketDelete(d *schema.ResourceData, meta inter
 	}
 	return errmsgs.WrapError(ossService.WaitForOssBucket(ossCluster, bucketName, Deleted, DefaultTimeoutMedium))
 }
-
-// func checkVpcListChange(d *schema.ResourceData, meta interface{}) error {
-// 	// FIXME: Calling this interface will add a rule that denies all permissions
-// 	client := meta.(*connectivity.AlibabacloudStackClient)
-// 	bvserver := BucketVpcService{client}
-// 	ossService := OssService{client}
-// 	vpcServer := VpcService{client}
-
-// 	ossendpoint, err := ossService.GetOssEndpointForCluster(d.Get("oss_cluster").(string))
-// 	if err != nil {
-// 		return errmsgs.WrapError(err)
-// 	}
-
-// 	// Get old and new VPC lists as Sets
-// 	oldVal, newVal := d.GetChange("vpclist")
-// 	oldVpcs := oldVal.(*schema.Set)
-// 	newVpcs := newVal.(*schema.Set)
-
-// 	// Calculate VPCs to remove (in old but not in new)
-// 	toRemove := oldVpcs.Difference(newVpcs)
-// 	for _, vpcId := range toRemove.List() {
-// 		binderr := bvserver.UnBindBucket(vpcId.(string), d.Id(), ossendpoint)
-// 		if binderr != nil {
-// 			return errmsgs.WrapError(binderr)
-// 		}
-// 	}
-
-// 	// Calculate VPCs to add (in new but not in old)
-// 	toAdd := newVpcs.Difference(oldVpcs)
-// 	for _, vpcId := range toAdd.List() {
-// 		vpcdata, err := vpcServer.DescribeVpc(vpcId.(string))
-// 		if err != nil {
-// 			return errmsgs.WrapError(err)
-// 		}
-// 		binderr := bvserver.BindBucket(vpcdata.VpcId, vpcdata.VpcName, vpcdata.CidrBlock, d.Id(), ossendpoint)
-// 		if binderr != nil {
-// 			return errmsgs.WrapError(binderr)
-// 		}
-// 	}
-
-// 	return nil
-// }
 
 func resourceAlibabacloudStackOssBucketLoggingUpdate(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) error {
 	ossService := OssService{client}

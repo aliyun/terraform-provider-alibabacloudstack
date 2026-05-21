@@ -91,7 +91,6 @@ func sharedClientForRegion(region string) (interface{}, error) {
 	}
 	if asapiEndpoint := os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"); asapiEndpoint != "" {
 		conf.Endpoints[connectivity.ASAPICode] = asapiEndpoint
-		conf.Endpoints[connectivity.SLSCode] = asapiEndpoint
 	}
 	if conf.Department == "" || conf.ResourceGroup == "" {
 		dept, resId, rgid, err := getResourceCredentials(&conf)

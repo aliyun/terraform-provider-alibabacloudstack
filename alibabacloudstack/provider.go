@@ -1271,30 +1271,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, err
 	}
 
-	// domain := d.Get("domain").(string)
-	// if domain != "" {
-	// 	if strings.Contains(domain, "/") && d.Get("proxy").(string) != "" {
-	// 		return nil, fmt.Errorf("[Error]Domain containing the character '/' is not supported for proxy configuration.")
-	// 	}
-	// 	// For services without generated popgw addresses, continue using asapi
-	// 	var setEndpointIfEmpty = func(endpoint string, domain string) string {
-	// 		if endpoint == "" {
-	// 			return domain
-	// 		}
-	// 		return endpoint
-	// 	}
-	// 	for popcode := range connectivity.PopEndpoints {
-	// 		if popcode == connectivity.OssDataCode {
-	// 			// Oss data gateway is not configured
-	// 			continue
-	// 		}
-	// 		if popcode == connectivity.SlSDataCode {
-	// 			// SLS data gateway is not configured
-	// 			continue
-	// 		}
-	// 		config.Endpoints[popcode] = setEndpointIfEmpty(config.Endpoints[popcode], domain)
-	// 	}
-	// }
 	if v, ok := d.GetOk("popgw_domain"); ok && v.(string) != "" {
 		popgw_domain := v.(string)
 		log.Printf("Generator Popgw Endpoint: %s", popgw_domain)
@@ -1337,7 +1313,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 	if asapiEndpoint, ok := d.GetOk("asapi_endpoint"); ok && asapiEndpoint.(string) != "" {
 		config.Endpoints[connectivity.ASAPICode] = asapiEndpoint.(string)
-		config.Endpoints[connectivity.OneRouterCode] = asapiEndpoint.(string)
 	}
 
 	if strings.ToLower(config.Protocol) == "https" {

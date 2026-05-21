@@ -177,7 +177,7 @@ func resourceAlibabacloudStackMaxcomputeProjectRead(d *schema.ResourceData, meta
 	project, err := maxcomputeService.DescribeMaxcomputeProject(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
-			log.Printf("[DEBUG] Resource alibabacloudstack_maxcompute_project_user maxcomputeService.DescribeMaxcomputeUser Failed!!! %s", err)
+			log.Printf("[DEBUG] Resource maxcomputeService.DescribeMaxcomputeProject Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}

@@ -441,11 +441,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"occ.{{.domain}}",
 		"occ.{{.region}}.{{.domain}}",
 	}, // remove in 3.21.0
-	// 3.18.3 new sites will not be opened
 	ASAPICode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
-	},
+	}, // 3.18.3 new sites will not be opened
 	KmsCode: PopEndpoint{
 		"kms.{{.region}}.{{.domain}}",
 		"kms.{{.region}}.{{.domain}}",
