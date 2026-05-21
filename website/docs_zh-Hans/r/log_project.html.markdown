@@ -1,5 +1,5 @@
 ---
-subcategory: "Log Service (SLS)"
+subcategory: "日志服务 SLS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_project"
 sidebar_current: "docs-alibabacloudstack-resource-log-project"
@@ -17,7 +17,7 @@ description: |-
 
 ### 基础用法
 要调用此资源，您需要在provider参数中设置sls的endpoint地址
-```
+```hcl
 provider "alibabacloudstack" {
   endpoints {
     sls_endpoint = "var.sls_openapi_endpoint"
@@ -36,14 +36,24 @@ resource "alibabacloudstack_log_project" "example" {
 
 支持以下参数：
 
-* `name` - (必填，变更时重建) 日志项目的名称。在一个 Alibabacloudstack 账户中唯一。  
-* `description` - (可选) 日志项目的描述信息。用于提供关于该项目的详细说明。
+* `name` - （必填，ForceNew）日志项目的名称。在您的阿里云账户内必须唯一。修改此参数会强制重新创建资源。
+* `description` - （可选）日志项目的描述信息。用于提供关于该项目的详细说明。
+* `cluster_name` - （可选，Computed）日志项目所在的集群名称。此属性由 API 返回，无法手动设置。
 
 
 ## 属性说明
 
 导出以下属性：
 
-* `id` - 日志项目的唯一标识符。其值与 `name` 相同。  
-* `name` - 日志项目的名称。  
+* `id` - 日志项目的唯一标识符。其值与 `name` 相同。
+* `name` - 日志项目的名称。
 * `description` - 日志项目的描述信息。与创建或更新时提供的 `description` 参数一致。
+* `cluster_name` - 日志项目所在的集群名称。
+
+## Import
+
+日志项目可以使用 name 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_log_project.example my-log-project
+```

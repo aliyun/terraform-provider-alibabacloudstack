@@ -103,12 +103,10 @@ func TestAccAlibabacloudStackLogProject_Cluster(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name":        name + "updated",
 					"description": "tf-testAccLogProject_cluster_updated",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":        name + "updated",
 						"description": "tf-testAccLogProject_cluster_updated",
 					}),
 				),
