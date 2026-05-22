@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"log"
-	"os"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -45,12 +44,9 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	logService := LogService{client}
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
-	request := client.NewCommonRequest("POST", "SLS", "2019-10-23", "CreateProject", "")
-	request.SetDomain(os.Getenv("ALIBABACLOUDSTACK_ASAPI_ENDPOINT"))
-	// Try new API first (SLS 2019-10-23), fallback to old API (SLS 2020-03-31)
 	var err error
 
-	// Attempt 1: New API (2019-10-23)
+	// Attempt 1: New API (2020-03-31)
 	requestBody := map[string]interface{}{"ProjectName": name, "Description": description}
 	if v, ok := d.GetOk("cluster_name"); ok && v.(string) != "" {
 		requestBody["ClusterName"] = v.(string)
@@ -62,13 +58,13 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "InvalidVersion") {
 			// TODO: Remove old API logic in version 3.21.0
-			log.Printf("[WARN] SLS 2019-10-23 CreateProject failed: %v, fallback to 2020-03-31 API", err)
+			log.Printf("[WARN] Sls 2020-03-31 CreateProject failed: %v, fallback to 2020-03-31 API", err)
 
 			// Attempt 2: Old API (2020-03-31) - will be removed in 3.21.0
-			request := client.NewCommonRequest("POST", "SLS", "2019-10-23", "CreateProject", "")
+			request := client.NewCommonRequest("POST", "Sls", "2020-03-31", "CreateProject", "")
 			request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 			request.QueryParams["projectName"] = name
-			request.QueryParams["Description"] = description
+			// request.QueryParams["Description"] = description
 			if v, ok := d.GetOk("cluster_name"); ok && v.(string) != "" {
 				requestBody["ClusterName"] = v.(string)
 			}
@@ -83,7 +79,6 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 		}
-		return err
 	}
 
 	// Wait for project to be created
@@ -125,7 +120,7 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 
 	name := d.Id()
 	if d.HasChange("description") {
-		// Attempt 1: New API (2019-10-23)
+		// Attempt 1: New API (2020-03-31)
 		requestBody := map[string]interface{}{
 			"ProjectName": name,
 			"Description": d.Get("description").(string),
@@ -136,12 +131,12 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 		// If new API fails, fallback to old API
 		if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
 			// TODO: Remove old API logic in version 3.21.0
-			log.Printf("[WARN] SLS 2019-10-23 UpdateProject failed: %v, fallback to 2020-03-31 API", err)
+			log.Printf("[WARN] Sls 2020-03-31 UpdateProject failed: %v, fallback to 2020-03-31 API", err)
 
 			// Attempt 2: Old API (2020-03-31) - will be removed in 3.21.0
-			request := client.NewCommonRequest("POST", "SLS", "2019-10-23", "UpdateProject", "")
+			request := client.NewCommonRequest("PUT", "Sls", "2020-03-31", "UpdateProject", "")
 			request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
-			request.QueryParams["ProjectName"] = name
+			request.QueryParams["projectName"] = name
 			request.QueryParams["description"] = d.Get("description").(string)
 
 			bresponse, err := client.ProcessCommonRequest(request)
@@ -165,7 +160,7 @@ func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	name := d.Get("name").(string)
 
-	// Attempt 1: New API (2019-10-23)
+	// Attempt 1: New API (2020-03-31)
 	requestBody := map[string]interface{}{"ProjectName": name}
 	requestHeaders := map[string]string{"AccessKeyId": client.AccessKey}
 	_, err := client.DoTeaRequest("DELETE", "Sls", "2020-03-31", "DeleteProject", "/sls/v1/project/deleteProject", requestHeaders, requestBody, nil)
@@ -173,10 +168,10 @@ func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta inte
 	// If new API fails, fallback to old API
 	if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
 		// TODO: Remove old API logic in version 3.21.0
-		log.Printf("[WARN] SLS 2019-10-23 DeleteProject failed: %v, fallback to 2020-03-31 API", err)
+		log.Printf("[WARN] Sls 2020-03-31 DeleteProject failed: %v, fallback to 2020-03-31 API", err)
 
 		// Attempt 2: Old API (2020-03-31) - will be removed in 3.21.0
-		request := client.NewCommonRequest("POST", "SLS", "2019-10-23", "DeleteProject", "")
+		request := client.NewCommonRequest("POST", "Sls", "2020-03-31", "DeleteProject", "")
 		request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 		request.QueryParams["ProjectName"] = name
 

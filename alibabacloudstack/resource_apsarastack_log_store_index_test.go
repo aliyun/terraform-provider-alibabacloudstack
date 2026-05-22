@@ -6,7 +6,7 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackLogStoreIndex_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacclogstoreindex-%d", rand)
+	name := fmt.Sprintf("testtf-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogStoreIndexConfigDependence)
 
 	ResourceTest(t, resource.TestCase{

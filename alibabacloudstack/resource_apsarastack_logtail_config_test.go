@@ -39,7 +39,7 @@ func testSweepLogConfigs(region string) error {
 		log.Printf("[ERROR] Error getting SLS client: %s", errmsgs.WrapError(err))
 		return err
 	}
-	
+
 	// Get all projects
 	projects, err := raw.ListProject()
 	if err != nil {
@@ -90,7 +90,7 @@ func TestAccAlibabacloudStackLogTail_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacclogtailconfig-%d", rand)
+	name := fmt.Sprintf("testtf-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogTailDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -183,7 +183,7 @@ func TestAccAlibabacloudStackLogTail_plugin(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacclogtailconfig-%d", rand)
+	name := fmt.Sprintf("testtf-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogTailDependence)
 
 	ResourceTest(t, resource.TestCase{

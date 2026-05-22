@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -20,7 +20,7 @@ func TestAccAlibabacloudStackLogtailAttachmentBasic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacclogtailattachment-%d", rand)
+	name := fmt.Sprintf("testtf-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogtailAttachmentDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -100,6 +100,7 @@ resource "alibabacloudstack_logtail_config" "default"{
 }
 `, name)
 }
+
 var logtailAttachmentMap = map[string]string{
 	"logtail_config_name": CHECKSET,
 	"project":             CHECKSET,

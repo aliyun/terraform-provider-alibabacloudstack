@@ -142,26 +142,26 @@ func resourceAlibabacloudStackLogStoreIndexCreate(d *schema.ResourceData, meta i
 		return errmsgs.WrapError(err)
 	}
 
-	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := store.GetIndex()
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
-				time.Sleep(5 * time.Second)
-				return resource.RetryableError(err)
-			}
-			if !errmsgs.IsExpectedErrors(err, "IndexConfigNotExist") {
-				return resource.NonRetryableError(err)
-			}
-		}
-		if raw != nil {
-			return resource.NonRetryableError(errmsgs.WrapError(errmsgs.Error("There is already existing an index in the store %s. Please import it using id '%s%s%s'.",
-				store.Name, project, COLON_SEPARATED, store.Name)))
-		}
-		addDebug("GetIndex", raw)
-		return nil
-	}); err != nil {
-		return err
-	}
+	// if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
+	// 	raw, err := store.GetIndex()
+	// 	if err != nil {
+	// 		if errmsgs.IsExpectedErrors(err, errmsgs.LogClientTimeout) {
+	// 			time.Sleep(5 * time.Second)
+	// 			return resource.RetryableError(err)
+	// 		}
+	// 		if !errmsgs.IsExpectedErrors(err, "IndexConfigNotExist", "SignatureNotMatch", " not match") {
+	// 			return resource.NonRetryableError(err)
+	// 		}
+	// 	}
+	// 	if raw != nil {
+	// 		return resource.NonRetryableError(errmsgs.WrapError(errmsgs.Error("There is already existing an index in the store %s. Please import it using id '%s%s%s'.",
+	// 			store.Name, project, COLON_SEPARATED, store.Name)))
+	// 	}
+	// 	addDebug("GetIndex", raw)
+	// 	return nil
+	// }); err != nil {
+	// 	return err
+	// }
 
 	var index sls.Index
 	if fullOk {
@@ -281,7 +281,7 @@ func resourceAlibabacloudStackLogStoreIndexUpdate(d *schema.ResourceData, meta i
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		
+
 		err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 			err := slsClient.UpdateIndex(parts[0], parts[1], *index)
 			if err != nil {
@@ -316,12 +316,12 @@ func resourceAlibabacloudStackLogStoreIndexDelete(d *schema.ResourceData, meta i
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DescribeLogStoreIndex", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-	
+
 	slsClient, err := logService.GetSlsDataClient(parts[0])
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	
+
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 		err := slsClient.DeleteIndex(parts[0], parts[1])
 		if err != nil {

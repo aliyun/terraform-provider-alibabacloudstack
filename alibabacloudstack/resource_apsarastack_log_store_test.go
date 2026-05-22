@@ -20,7 +20,7 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc-log-store-%d", rand)
+	name := fmt.Sprintf("testtf-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogStoreConfigDependence)
 
 	ResourceTest(t, resource.TestCase{

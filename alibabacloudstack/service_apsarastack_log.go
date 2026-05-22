@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -118,7 +117,6 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 }
 
 func (s *LogService) GetSlsDataClient(projectName string) (slsClient *sls.Client, err error) {
-	project, err := s.DescribeLogProject(projectName)
 	if s.client.Config.Proxy != "" {
 		os.Setenv("http_proxy", s.client.Config.Proxy)
 		os.Setenv("https_proxy", s.client.Config.Proxy)
@@ -126,10 +124,12 @@ func (s *LogService) GetSlsDataClient(projectName string) (slsClient *sls.Client
 	var endpoint string
 	if s.client.Config.SlsDataEndpoint != "" {
 		endpoint = s.client.Config.SlsDataEndpoint
-	} else if project.DataEndpoint != "" {
-		endpoint = project.DataEndpoint
 	} else {
-		endpoint = fmt.Sprintf("data.%s.sls-pub.%s", s.client.RegionId, s.client.Config.PopgwDomain)
+		project, err := s.DescribeLogProject(projectName)
+		if err != nil {
+			return slsClient, errmsgs.WrapError(err)
+		}
+		endpoint = project.DataEndpoint
 	}
 	slsClient = &sls.Client{
 		AccessKeyID:     s.client.Config.AccessKey,
@@ -167,13 +167,13 @@ func (s *LogService) DescribeLogStore(id string) (*sls.LogStore, error) {
 	store := &sls.LogStore{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return store, errmsgs.WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 	projectName, name := parts[0], parts[1]
 
 	slsClient, err := s.GetSlsDataClient(projectName)
 	if err != nil {
-		return store, errmsgs.WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
@@ -195,12 +195,12 @@ func (s *LogService) DescribeLogStore(id string) (*sls.LogStore, error) {
 	})
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "ProjectNotExist", "LogStoreNotExist") {
-			return store, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
-		return store, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "GetLogStore", errmsgs.AlibabacloudStackLogGoSdkERROR)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "GetLogStore", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 	if store == nil || store.Name == "" {
-		return store, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("LogStore", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+		return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("LogStore", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	return store, nil
 }

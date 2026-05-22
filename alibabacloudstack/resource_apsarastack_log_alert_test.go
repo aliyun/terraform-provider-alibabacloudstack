@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackLogAlert_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacclogalert-%d", rand)
+	name := fmt.Sprintf("testtf-%d", rand)
 	displayname := fmt.Sprintf("alert_displayname-%d", rand)
 	content := "aliyun sls alert test"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogAlertDependence)
@@ -77,8 +77,8 @@ func TestAccAlibabacloudStackLogAlert_basic(t *testing.T) {
 							},
 						},
 						{
-							"type":        "MessageCenter",
-							"content":     content,
+							"type":    "MessageCenter",
+							"content": content,
 						},
 					},
 				}),
