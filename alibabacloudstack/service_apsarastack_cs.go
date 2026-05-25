@@ -140,9 +140,8 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *ClusterObject, err erro
 func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePools, err error) {
 	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterNodes", fmt.Sprintf("/clusters/%s/nodes", id))
 	mergeMaps(request.QueryParams, map[string]string{
-		"SignatureVersion": "1.0",
-		"nodepool_id":      nodepoolid,
-		"ClusterId":        id,
+		"nodepool_id": nodepoolid,
+		"ClusterId":   id,
 	})
 
 	response, err := s.client.ProcessCommonRequest(request)
@@ -689,23 +688,24 @@ type NodePoolAlone struct {
 		PreUserData       string  `json:"pre_user_data"`
 	} `json:"kubernetes_config"`
 	Management struct {
-		Enable bool `json:"enable"`
+		Enable        bool `json:"enable"`
 		UpgradeConfig struct {
-			AutoUpgrade        bool `json:"auto_upgrade"`
-			MaxUnavailable     int  `json:"max_unavailable"`
-			MaxParallelism     int  `json:"max_parallelism"`
-			Surge              int  `json:"surge"`
-			KeepSurgeOnFailed  bool `json:"keep_surge_on_failed"`
+			AutoUpgrade       bool `json:"auto_upgrade"`
+			MaxUnavailable    int  `json:"max_unavailable"`
+			MaxParallelism    int  `json:"max_parallelism"`
+			Surge             int  `json:"surge"`
+			KeepSurgeOnFailed bool `json:"keep_surge_on_failed"`
 		} `json:"upgrade_config"`
 	} `json:"management"`
 	AutoScaling struct {
-		Enable              bool   `json:"enable"`
-		MaxInstances        int64  `json:"max_instances"`
-		MinInstances        int64  `json:"min_instances"`
-		Type                string `json:"type"`
-		HealthCheckType     string `json:"health_check_type"`
+		Enable                bool   `json:"enable"`
+		MaxInstances          int64  `json:"max_instances"`
+		MinInstances          int64  `json:"min_instances"`
+		Type                  string `json:"type"`
+		HealthCheckType       string `json:"health_check_type"`
+		IsBondEip             bool   `json:"is_bond_eip"`
 		EipInternetChargeType string `json:"eip_internet_charge_type"`
-		EipBandWidth        int64  `json:"eip_bandwidth"`
+		EipBandWidth          int64  `json:"eip_bandwidth"`
 	} `json:"auto_scaling"`
 	NodepoolInfo struct {
 		ResourceGroupID string    `json:"resource_group_id"`
@@ -774,53 +774,53 @@ type AutoScaling struct {
 }
 
 type ClusterObject struct {
-	Tags                 []Tag     `json:"tags"`
-	ResourceGroupID      string    `json:"resource_group_id"`
-	PrivateZone          bool      `json:"private_zone"`
-	VpcID                string    `json:"vpc_id"`
-	NetworkMode          string    `json:"network_mode"`
-	SecurityGroupID      string    `json:"security_group_id"`
-	ClusterType          string    `json:"cluster_type"`
-	DockerVersion        string    `json:"docker_version"`
-	DataDiskCategory     string    `json:"data_disk_category"`
-	NextVersion          string    `json:"next_version"`
-	ZoneID               string    `json:"zone_id"`
-	ClusterID            string    `json:"cluster_id"`
-	Department           int       `json:"Department"`
-	ExternalLoadbalancerID string  `json:"external_loadbalancer_id"`
-	VswitchID            string    `json:"vswitch_id"`
-	VswitchIds           []string  `json:"vswitch_ids"`
-	SwarmMode            bool      `json:"swarm_mode"`
-	RMRegionID           string    `json:"RMRegionId"`
-	State                string    `json:"state"`
-	ResourceGroup        int       `json:"ResourceGroup"`
-	InitVersion          string    `json:"init_version"`
-	NodeStatus           string    `json:"node_status"`
-	NeedUpdateAgent      bool      `json:"need_update_agent"`
-	Created              time.Time `json:"created"`
-	DeletionProtection   bool      `json:"deletion_protection"`
-	SubnetCidr           string    `json:"subnet_cidr"`
-	ContainerCIDR        string    `json:"container_cidr"`
-	ServiceCIDR          string    `json:"service_cidr"`
-	Profile              string    `json:"profile"`
-	RegionID             string    `json:"region_id"`
-	MasterURL            string    `json:"master_url"`
-	CurrentVersion       string    `json:"current_version"`
-	Runtime              string    `json:"runtime"`
-	RuntimeVersion       string    `json:"runtime_version"`
-	ProxyMode            string    `json:"proxy_mode"`
-	NodeCidrMask         string    `json:"node_cidr_mask"`
-	IPStack              string    `json:"ip_stack"`
-	ServiceDomainName    string    `json:"service_domain_name"`
-	MetaData             string    `json:"meta_data"`
-	DisableEncryption    bool      `json:"disable_encryption"`
-	Size                 int       `json:"size"`
-	Name                 string    `json:"name"`
-	Updated              time.Time `json:"updated"`
-	InstanceType         string    `json:"instance_type"`
-	WorkerRAMRoleName    string    `json:"worker_ram_role_name"`
-	ResourceGroupName    string    `json:"ResourceGroupName"`
-	MaintenanceWindow    struct {
+	Tags                   []Tag     `json:"tags"`
+	ResourceGroupID        string    `json:"resource_group_id"`
+	PrivateZone            bool      `json:"private_zone"`
+	VpcID                  string    `json:"vpc_id"`
+	NetworkMode            string    `json:"network_mode"`
+	SecurityGroupID        string    `json:"security_group_id"`
+	ClusterType            string    `json:"cluster_type"`
+	DockerVersion          string    `json:"docker_version"`
+	DataDiskCategory       string    `json:"data_disk_category"`
+	NextVersion            string    `json:"next_version"`
+	ZoneID                 string    `json:"zone_id"`
+	ClusterID              string    `json:"cluster_id"`
+	Department             int       `json:"Department"`
+	ExternalLoadbalancerID string    `json:"external_loadbalancer_id"`
+	VswitchID              string    `json:"vswitch_id"`
+	VswitchIds             []string  `json:"vswitch_ids"`
+	SwarmMode              bool      `json:"swarm_mode"`
+	RMRegionID             string    `json:"RMRegionId"`
+	State                  string    `json:"state"`
+	ResourceGroup          int       `json:"ResourceGroup"`
+	InitVersion            string    `json:"init_version"`
+	NodeStatus             string    `json:"node_status"`
+	NeedUpdateAgent        bool      `json:"need_update_agent"`
+	Created                time.Time `json:"created"`
+	DeletionProtection     bool      `json:"deletion_protection"`
+	SubnetCidr             string    `json:"subnet_cidr"`
+	ContainerCIDR          string    `json:"container_cidr"`
+	ServiceCIDR            string    `json:"service_cidr"`
+	Profile                string    `json:"profile"`
+	RegionID               string    `json:"region_id"`
+	MasterURL              string    `json:"master_url"`
+	CurrentVersion         string    `json:"current_version"`
+	Runtime                string    `json:"runtime"`
+	RuntimeVersion         string    `json:"runtime_version"`
+	ProxyMode              string    `json:"proxy_mode"`
+	NodeCidrMask           string    `json:"node_cidr_mask"`
+	IPStack                string    `json:"ip_stack"`
+	ServiceDomainName      string    `json:"service_domain_name"`
+	MetaData               string    `json:"meta_data"`
+	DisableEncryption      bool      `json:"disable_encryption"`
+	Size                   int       `json:"size"`
+	Name                   string    `json:"name"`
+	Updated                time.Time `json:"updated"`
+	InstanceType           string    `json:"instance_type"`
+	WorkerRAMRoleName      string    `json:"worker_ram_role_name"`
+	ResourceGroupName      string    `json:"ResourceGroupName"`
+	MaintenanceWindow      struct {
 		Enable       bool   `json:"enable"`
 		WeeklyPeriod string `json:"weekly_period"`
 	} `json:"maintenance_window"`

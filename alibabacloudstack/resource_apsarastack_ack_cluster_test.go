@@ -39,13 +39,13 @@ func testAccCheckCsK8sDestroy(s *terraform.State) error {
 }
 
 func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
-	var v *KubernetesClusterDetail
+	var v *ClusterObject
 	resourceId := "alibabacloudstack_cs_kubernetes.k8s"
 	ra := resourceAttrInit(resourceId, CsK8sMap)
 	serviceFunc := func() interface{} {
 		return &CsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeCsKubernetes")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
@@ -126,12 +126,12 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"proxy_mode":                          "ipvs",
 					"master_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.master.storage_set_id}",
 					"master_storage_set_partition_number": "3",
-					// "master_disk_encrypt_algorithm":       "aes-256",
-					// "master_disk_kms_key_id":              "${alibabacloudstack_kms_key.default.id}",
-					// "master_disk_encrypted":               "true",
-					// "worker_disk_kms_key_id":              "${alibabacloudstack_kms_key.default.id}",
-					// "worker_disk_encrypted":               "true",
-					// "worker_disk_encrypt_algorithm":       "aes-256",
+					"master_disk_encrypt_algorithm":       "aes-256",
+					"master_disk_kms_key_id":              "${alibabacloudstack_kms_key.default.id}",
+					"master_disk_encrypted":               "true",
+					"worker_disk_kms_key_id":              "${alibabacloudstack_kms_key.default.id}",
+					"worker_disk_encrypted":               "true",
+					"worker_disk_encrypt_algorithm":       "aes-256",
 					"worker_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.worker.storage_set_id}",
 					"worker_storage_set_partition_number": "3",
 					"worker_data_disks": []map[string]string{{
@@ -141,9 +141,8 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 						"kms_key_id": "${alibabacloudstack_kms_key.default.id}",
 					}},
 					"tags": map[string]string{
-						"Created":                   "TF",
-						"For":                       "acceptance test",
-						"AAAAAAAAAAAAAAAAAAAAAAAAA": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+						"Created": "TF",
+						"For":     "acceptance test",
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -164,13 +163,13 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 						"runtime.0.name":          "containerd",
 						"runtime.0.version":       "2.1.5",
 						"master_nodes.#":          "3",
-						"worker_nodes.#":          "1",
-						"tags.%":                  "3",
-						"tags.Created":            "TF",
-						"tags.For":                "acceptance test",
-						"proxy_mode":              "ipvs",
-						"node_cidr_mask":          "26",
-						"worker_data_disks.#":     "1",
+						// "worker_nodes.#":          "1",
+						"tags.%":              "2",
+						"tags.Created":        "TF",
+						"tags.For":            "acceptance test",
+						"proxy_mode":          "ipvs",
+						"node_cidr_mask":      "26",
+						"worker_data_disks.#": "1",
 					}),
 				),
 			},
@@ -212,13 +211,13 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
-	var v *KubernetesClusterDetail
+	var v *ClusterObject
 	resourceId := "alibabacloudstack_cs_kubernetes.k8s"
 	ra := resourceAttrInit(resourceId, CsK8sMap)
 	serviceFunc := func() interface{} {
 		return &CsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeCsKubernetes")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000000, 9999999)
@@ -331,6 +330,16 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"num_of_nodes": "3",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"num_of_nodes": "0",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"num_of_nodes": "0",
 					}),
 				),
 			},

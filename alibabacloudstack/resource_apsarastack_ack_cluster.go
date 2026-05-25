@@ -37,6 +37,79 @@ var (
 	KubernetesClusterNodeCIDRMasksByDefault = 24
 )
 
+// csKubernetesAddonsDiffSuppressFunc suppresses diff for addons when only the order changes or config is empty
+func csKubernetesAddonsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	// Get the old and new addon lists
+	oldAddons, newAddons := d.GetChange("addons")
+	oldList, oldOk := oldAddons.([]interface{})
+	newList, newOk := newAddons.([]interface{})
+
+	if !oldOk || !newOk {
+		return false
+	}
+
+	// Convert old list to map: name -> config
+	oldMap := make(map[string]string)
+	for _, item := range oldList {
+		if addon, ok := item.(map[string]interface{}); ok {
+			name, nameOk := addon["name"].(string)
+			config, configOk := addon["config"].(string)
+			if nameOk && name != "" {
+				if !configOk {
+					config = ""
+				}
+				oldMap[name] = config
+			}
+		}
+	}
+
+	// Convert new list to map: name -> config
+	newMap := make(map[string]string)
+	for _, item := range newList {
+		if addon, ok := item.(map[string]interface{}); ok {
+			name, nameOk := addon["name"].(string)
+			config, configOk := addon["config"].(string)
+			if nameOk && name != "" {
+				if !configOk {
+					config = ""
+				}
+				newMap[name] = config
+			}
+		}
+	}
+
+	// Compare the maps
+	// Check if all keys in newMap exist in oldMap with same values
+	for name, newConfig := range newMap {
+		if name == "" {
+			continue // Ignore empty keys
+		}
+		oldConfig, exists := oldMap[name]
+		if !exists {
+			// Key exists in new but not in old - this is a change
+			return false
+		}
+		if oldConfig != newConfig {
+			// Key exists in both but values differ - this is a change
+			return false
+		}
+	}
+
+	// Check if all keys in oldMap exist in newMap
+	for name := range oldMap {
+		if name == "" {
+			continue // Ignore empty keys
+		}
+		if _, exists := newMap[name]; !exists {
+			// Key exists in old but not in new - this is a change
+			return false
+		}
+	}
+
+	// No differences found
+	return true
+}
+
 func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
@@ -93,12 +166,17 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Description:  "The number of worker nodes. Set to 0 to create a cluster without a default nodepool.",
 			},
 			"worker_disk_size": {
-				Type:             schema.TypeInt,
-				Optional:         true,
-				Default:          40,
-				ValidateFunc:     validation.IntBetween(20, 32768),
-				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
-				Description:      "The `worker_disk_size` field will become Computed in version 3.21.0 and will no longer support input.",
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      40,
+				ValidateFunc: validation.IntBetween(20, 32768),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if v, ok := d.GetOk("num_of_nodes"); ok && v.(int) == 0 {
+						return true
+					}
+					return old == new
+				},
+				Description: "The `worker_disk_size` field will become Computed in version 3.21.0 and will no longer support input.",
 			},
 			"worker_disk_category": {
 				Type:     schema.TypeString,
@@ -297,9 +375,9 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Default:  PortRange,
 			},
 			"image_id": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				DiffSuppressFunc: imageIdSuppressFunc,
+				Type:     schema.TypeString,
+				Optional: true,
+				// DiffSuppressFunc: imageIdSuppressFunc,
 			},
 			// 			"install_cloud_monitor": {
 			// 				Type:             schema.TypeBool,
@@ -341,9 +419,10 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"iptables", "ipvs"}, false),
 			},
 			"addons": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MinItems: 1,
+				Type:             schema.TypeList,
+				Optional:         true,
+				MinItems:         1,
+				DiffSuppressFunc: csKubernetesAddonsDiffSuppressFunc,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -1131,6 +1210,11 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
+	stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(fmt.Sprintf("%s:%s", d.Id(), nodepoolid), []string{"deleting", "failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+	time.Sleep(10 * time.Second)
 	d.Set("nodepool_id", nodepoolid)
 	d.Set("name", object.Name)
 	d.Set("vpc_id", object.VpcID)
@@ -1288,10 +1372,6 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 			d.Set("runtime", runtime)
 		}
 		sworker := make([]map[string]interface{}, 0)
-		stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(fmt.Sprintf("%s:%s", d.Id(), nodepoolid), []string{"deleting", "failed"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
 		clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
 		if err != nil {
 			return errmsgs.WrapError(err)
@@ -1309,13 +1389,9 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		d.Set("worker_nodes", sworker)
 	} else {
 		d.Set("num_of_nodes", 0)
-		d.Set("worker_instance_types", nil)
-		d.Set("worker_vswitch_ids", nil)
-		d.Set("worker_disk_category", nil)
-		d.Set("worker_disk_size", nil)
-		d.Set("worker_nodes", nil)
 	}
 	smaster := make([]map[string]interface{}, 0)
+	master_instance_types := make([]string, 0)
 	masternodes, err := csService.DescribeClusterMasterNodes(d.Id())
 	for _, k := range masternodes {
 		MasterNodes := map[string]interface{}{
@@ -1324,38 +1400,40 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 			"private_ip": fmt.Sprintf("%s", k.IPAddress),
 		}
 		smaster = append(smaster, MasterNodes)
+		master_instance_types = append(master_instance_types, k.InstanceType)
 	}
-
+	d.Set("image_id", masternodes[0].ImageID)
 	d.Set("master_nodes", smaster)
+	d.Set("master_instance_types", master_instance_types)
 
-	// Parse and set addons from MetaData
-	if object.MetaData != "" {
-		var metaDataMap map[string]interface{}
-		if err := json.Unmarshal([]byte(object.MetaData), &metaDataMap); err == nil {
-			if addonsRaw, ok := metaDataMap["Addons"].([]interface{}); ok && len(addonsRaw) > 0 {
-				addons := make([]map[string]interface{}, 0)
-				for _, addonRaw := range addonsRaw {
-					if addon, ok := addonRaw.(map[string]interface{}); ok {
-						addonMap := make(map[string]interface{})
-						if name, ok := addon["name"].(string); ok {
-							addonMap["name"] = name
-						}
-						if config, ok := addon["config"].(string); ok && config != "" {
-							addonMap["config"] = config
-						}
-						if version, ok := addon["version"].(string); ok && version != "" {
-							// Store version in config if needed, or ignore based on schema
-							// Schema only has name and config fields
-						}
-						addons = append(addons, addonMap)
-					}
-				}
-				if len(addons) > 0 {
-					d.Set("addons", addons)
-				}
-			}
-		}
-	}
+	// // Parse and set addons from MetaData
+	// if object.MetaData != "" {
+	// 	var metaDataMap map[string]interface{}
+	// 	if err := json.Unmarshal([]byte(object.MetaData), &metaDataMap); err == nil {
+	// 		if addonsRaw, ok := metaDataMap["Addons"].([]interface{}); ok && len(addonsRaw) > 0 {
+	// 			addons := make([]map[string]interface{}, 0)
+	// 			for _, addonRaw := range addonsRaw {
+	// 				if addon, ok := addonRaw.(map[string]interface{}); ok {
+	// 					addonMap := make(map[string]interface{})
+	// 					if name, ok := addon["name"].(string); ok {
+	// 						addonMap["name"] = name
+	// 					}
+	// 					if config, ok := addon["config"].(string); ok && config != "" {
+	// 						addonMap["config"] = config
+	// 					}
+	// 					if version, ok := addon["version"].(string); ok && version != "" {
+	// 						// Store version in config if needed, or ignore based on schema
+	// 						// Schema only has name and config fields
+	// 					}
+	// 					addons = append(addons, addonMap)
+	// 				}
+	// 			}
+	// 			if len(addons) > 0 {
+	// 				d.Set("addons", addons)
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	if err := d.Set("tags", flattenTagsConfig(object.Tags)); err != nil {
 		return errmsgs.WrapError(err)

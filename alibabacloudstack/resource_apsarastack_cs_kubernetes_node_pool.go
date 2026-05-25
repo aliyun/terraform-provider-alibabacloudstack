@@ -768,7 +768,17 @@ func resourceAlibabacloudStackCSNodePoolRead(d *schema.ResourceData, meta interf
 	// }
 
 	if object.AutoScaling.Enable == true {
-		if err := d.Set("scaling_config", flattenAutoScalingConfig(&object.AutoScaling)); err != nil {
+		scalingConfig := []map[string]interface{}{
+			{
+				"min_size":                 object.AutoScaling.MinInstances,
+				"max_size":                 object.AutoScaling.MaxInstances,
+				"type":                     object.AutoScaling.Type,
+				"is_bond_eip":              object.AutoScaling.IsBondEip,
+				"eip_internet_charge_type": object.AutoScaling.EipInternetChargeType,
+				"eip_bandwidth":            object.AutoScaling.EipBandWidth,
+			},
+		}
+		if err := d.Set("scaling_config", scalingConfig); err != nil {
 			return errmsgs.WrapError(err)
 		}
 	}
