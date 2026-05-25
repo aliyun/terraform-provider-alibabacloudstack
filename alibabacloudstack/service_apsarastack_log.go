@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
@@ -131,6 +132,8 @@ func (s *LogService) GetSlsDataClient(projectName string) (slsClient *sls.Client
 		}
 		endpoint = project.DataEndpoint
 	}
+	// Remove protocol prefix from endpoint to avoid signature mismatch
+	endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "https://"), "http://")
 	slsClient = &sls.Client{
 		AccessKeyID:     s.client.Config.AccessKey,
 		AccessKeySecret: s.client.Config.SecretKey,
@@ -239,14 +242,13 @@ func (s *LogService) DescribeLogStoreIndex(id string) (*sls.Index, error) {
 		return index, errmsgs.WrapError(err)
 	}
 	projectName, name := parts[0], parts[1]
-
-	slsClient, err := s.GetSlsDataClient(projectName)
+	client, err := s.GetSlsDataClient(projectName)
 	if err != nil {
 		return index, errmsgs.WrapError(err)
 	}
-
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := slsClient.GetIndex(projectName, name)
+		raw, err := client.GetIndex(projectName, name)
+
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
 				return resource.RetryableError(err)

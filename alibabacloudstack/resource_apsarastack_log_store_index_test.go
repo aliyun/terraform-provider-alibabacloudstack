@@ -34,7 +34,7 @@ func TestAccAlibabacloudStackLogStoreIndex_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"project":  "${alibabacloudstack_log_project.default.name}",
+					"project":  "testtf-9999",
 					"logstore": "${alibabacloudstack_log_store.default.name}",
 					"full_text": []map[string]interface{}{
 						{
@@ -122,12 +122,12 @@ func resourceLogStoreIndexConfigDependence(name string) string {
 	variable "name" {
 	    default = "%s"
 	}
-	resource "alibabacloudstack_log_project" "default" {
-	    name = "${var.name}"
-	    description = "tf unit test"
-	}
+	// resource "alibabacloudstack_log_project" "default" {
+	//     name = "${var.name}"
+	//     description = "tf unit test"
+	// }
 	resource "alibabacloudstack_log_store" "default" {
-	    project = "${alibabacloudstack_log_project.default.name}"
+	    project = "testtf-9999"
 	    name = "${var.name}"
 	    retention_period = "3000"
 	    shard_count = 1
