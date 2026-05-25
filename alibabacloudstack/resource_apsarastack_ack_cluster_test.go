@@ -317,7 +317,6 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 						"runtime.0.name":          "containerd",
 						"runtime.0.version":       "2.1.5",
 						"master_nodes.#":          "3",
-						"worker_nodes.#":          "1",
 						"proxy_mode":              "ipvs",
 						"node_cidr_mask":          "26",
 					}),
@@ -340,6 +339,12 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"num_of_nodes": "0",
+						"worker_vswitch_ids.#":    REMOVEKEY,
+						"worker_disk_size":        REMOVEKEY,
+						"nodepool_id":             REMOVEKEY,
+						"worker_disk_category":    REMOVEKEY,
+						"worker_nodes.#":          REMOVEKEY,
+						"worker_instance_types.#": REMOVEKEY,
 					}),
 				),
 			},
