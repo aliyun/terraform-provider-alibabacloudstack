@@ -1142,11 +1142,49 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	d.Set("cluster_type", string(object.ClusterType))
 	d.Set("security_group_id", object.SecurityGroupID)
 	d.Set("delete_protection", object.DeletionProtection)
-	d.Set("worker_ram_role_name", object.WorkerRAMRoleName)
-	
+	// worker_ram_role_name will be set from nodepool if available
+
 	// Additional fields from ClusterObject
 	if object.ZoneID != "" {
 		d.Set("availability_zone", object.ZoneID)
+	}
+	if object.ProxyMode != "" {
+		d.Set("proxy_mode", object.ProxyMode)
+	}
+	if object.NodeCidrMask != "" {
+		d.Set("node_cidr_mask", object.NodeCidrMask)
+	}
+	if object.ServiceCIDR != "" {
+		d.Set("service_cidr", object.ServiceCIDR)
+	}
+	if object.ControlPlaneConfig.NodePortRange != "" {
+		d.Set("node_port_range", object.ControlPlaneConfig.NodePortRange)
+	}
+	// cpu_policy will be set from nodepool if available, fallback to cluster
+	if object.ControlPlaneConfig.CPUPolicy != "" && nodepoolid == "" {
+		d.Set("cpu_policy", object.ControlPlaneConfig.CPUPolicy)
+	}
+	if object.ControlPlaneConfig.CloudMonitorFlags && nodepoolid == "" {
+		d.Set("cloud_monitor_flags", object.ControlPlaneConfig.CloudMonitorFlags)
+	}
+	if object.ControlPlaneConfig.SSHFlags {
+		d.Set("enable_ssh", object.ControlPlaneConfig.SSHFlags)
+	}
+	if object.ControlPlaneConfig.SystemDiskCategory != "" {
+		d.Set("master_disk_category", object.ControlPlaneConfig.SystemDiskCategory)
+	}
+	if object.ControlPlaneConfig.SystemDiskSize > 0 {
+		d.Set("master_disk_size", object.ControlPlaneConfig.SystemDiskSize)
+	}
+	// runtime will be set from nodepool if available, fallback to cluster
+	if (object.Runtime != "" || object.RuntimeVersion != "") && nodepoolid == "" {
+		runtime := []map[string]interface{}{
+			{
+				"name":    object.Runtime,
+				"version": object.RuntimeVersion,
+			},
+		}
+		d.Set("runtime", runtime)
 	}
 
 	// node_count, err := csService.GetCsK8sNodesCount(d.Id())
@@ -1182,8 +1220,53 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		if nodepool.ScalingGroup.Platform != "" {
 			d.Set("platform", nodepool.ScalingGroup.Platform)
 		}
+		if nodepool.ScalingGroup.SystemDiskEncrypted {
+			d.Set("worker_disk_encrypted", nodepool.ScalingGroup.SystemDiskEncrypted)
+		}
+		if nodepool.ScalingGroup.SystemDiskEncryptAlgorithm != "" {
+			d.Set("worker_disk_encrypt_algorithm", nodepool.ScalingGroup.SystemDiskEncryptAlgorithm)
+		}
+		if nodepool.ScalingGroup.SystemDiskKMSKeyID != "" {
+			d.Set("worker_disk_kms_key_id", nodepool.ScalingGroup.SystemDiskKMSKeyID)
+		}
+		if nodepool.ScalingGroup.RAMRoleName != "" {
+			d.Set("worker_ram_role_name", nodepool.ScalingGroup.RAMRoleName)
+		}
+		if nodepool.ScalingGroup.SystemDiskPerformanceLevel != "" {
+			d.Set("worker_system_disk_performance_level", nodepool.ScalingGroup.SystemDiskPerformanceLevel)
+		}
 
-		// Read configurations from kubernetes_config
+		// Read data disks from nodepool
+		if len(nodepool.ScalingGroup.DataDisks) > 0 {
+			workerDataDisks := make([]map[string]interface{}, 0)
+			for _, disk := range nodepool.ScalingGroup.DataDisks {
+				diskMap := make(map[string]interface{})
+				if disk.Size > 0 {
+					diskMap["size"] = disk.Size
+				}
+				if disk.Category != "" {
+					diskMap["category"] = disk.Category
+				}
+				if disk.Encrypted != "" {
+					diskMap["encrypted"] = disk.Encrypted == "true"
+				}
+				if disk.KMSKeyId != "" {
+					diskMap["kms_key_id"] = disk.KMSKeyId
+				}
+				if disk.AutoSnapshotPolicyId != "" {
+					diskMap["auto_snapshot_policy_id"] = disk.AutoSnapshotPolicyId
+				}
+				if disk.PerformanceLevel != "" {
+					diskMap["performance_level"] = disk.PerformanceLevel
+				}
+				workerDataDisks = append(workerDataDisks, diskMap)
+			}
+			if len(workerDataDisks) > 0 {
+				d.Set("worker_data_disks", workerDataDisks)
+			}
+		}
+
+		// Read configurations from kubernetes_config (nodepool takes precedence)
 		if nodepool.KubernetesConfig.CPUPolicy != "" {
 			d.Set("cpu_policy", nodepool.KubernetesConfig.CPUPolicy)
 		}
@@ -1191,17 +1274,9 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		if nodepool.KubernetesConfig.UserData != "" {
 			d.Set("user_data", nodepool.KubernetesConfig.UserData)
 		}
-		// Read runtime configuration
-		// Prefer nodepool.KubernetesConfig for runtime details as it's more specific to the node pool
+		// Read runtime configuration (nodepool takes precedence)
 		runtimeName := nodepool.KubernetesConfig.Runtime
 		runtimeVersion := nodepool.KubernetesConfig.RuntimeVersion
-
-		// Fallback to nodepool.KubernetesConfig if runtime info is not available
-		// Note: ClusterObject does not have MetaData field, so we skip the fallback logic
-		if runtimeName == "" || runtimeVersion == "" {
-			// MetaData field is not available in ClusterObject
-			// This logic has been removed as part of the migration from KubernetesClusterDetail to ClusterObject
-		}
 
 		if runtimeName != "" || runtimeVersion != "" {
 			runtime := []map[string]interface{}{
@@ -1213,6 +1288,10 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 			d.Set("runtime", runtime)
 		}
 		sworker := make([]map[string]interface{}, 0)
+		stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(fmt.Sprintf("%s:%s", d.Id(), nodepoolid), []string{"deleting", "failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
 		clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
 		if err != nil {
 			return errmsgs.WrapError(err)
@@ -1248,6 +1327,36 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	}
 
 	d.Set("master_nodes", smaster)
+
+	// Parse and set addons from MetaData
+	if object.MetaData != "" {
+		var metaDataMap map[string]interface{}
+		if err := json.Unmarshal([]byte(object.MetaData), &metaDataMap); err == nil {
+			if addonsRaw, ok := metaDataMap["Addons"].([]interface{}); ok && len(addonsRaw) > 0 {
+				addons := make([]map[string]interface{}, 0)
+				for _, addonRaw := range addonsRaw {
+					if addon, ok := addonRaw.(map[string]interface{}); ok {
+						addonMap := make(map[string]interface{})
+						if name, ok := addon["name"].(string); ok {
+							addonMap["name"] = name
+						}
+						if config, ok := addon["config"].(string); ok && config != "" {
+							addonMap["config"] = config
+						}
+						if version, ok := addon["version"].(string); ok && version != "" {
+							// Store version in config if needed, or ignore based on schema
+							// Schema only has name and config fields
+						}
+						addons = append(addons, addonMap)
+					}
+				}
+				if len(addons) > 0 {
+					d.Set("addons", addons)
+				}
+			}
+		}
+	}
+
 	if err := d.Set("tags", flattenTagsConfig(object.Tags)); err != nil {
 		return errmsgs.WrapError(err)
 	}

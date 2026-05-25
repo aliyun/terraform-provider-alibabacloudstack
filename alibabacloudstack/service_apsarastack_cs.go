@@ -627,15 +627,20 @@ type NodePoolAlone struct {
 		TeeEnable bool   `json:"tee_enable"`
 		TeeType   string `json:"tee_type"`
 	} `json:"tee_config"`
+	NodeConfig struct {
+		// Empty in the response, but keep for future use
+	} `json:"node_config"`
 	ScalingGroup struct {
 		InstanceTypes                    []string           `json:"instance_types"`
 		PeriodUnit                       string             `json:"period_unit"`
 		SecurityGroupID                  string             `json:"security_group_id"`
+		SecurityGroupIDs                 []string           `json:"security_group_ids"`
 		MultiAzPolicy                    string             `json:"multi_az_policy"`
 		Platform                         string             `json:"platform"`
 		WorkerHpcClusterID               string             `json:"worker_hpc_cluster_id"`
 		DataDisks                        []NodePoolDataDisk `json:"data_disks"`
 		RAMPolicy                        string             `json:"ram_policy"`
+		RAMRoleName                      string             `json:"ram_role_name"`
 		LoginPassword                    string             `json:"login_password"`
 		InstanceChargeType               string             `json:"instance_charge_type"`
 		VswitchIds                       []string           `json:"vswitch_ids"`
@@ -650,10 +655,25 @@ type NodePoolAlone struct {
 		SpotPriceLimit                   []SpotPrice        `json:"spot_price_limit"`
 		AutoRenew                        bool               `json:"auto_renew"`
 		SystemDiskCategory               string             `json:"system_disk_category"`
+		SystemDiskEncrypted              bool               `json:"system_disk_encrypted"`
+		SystemDiskEncryptAlgorithm       string             `json:"system_disk_encrypt_algorithm"`
+		SystemDiskKMSKeyID               string             `json:"system_disk_kms_key_id"`
+		SystemDiskPerformanceLevel       string             `json:"system_disk_performance_level"`
 		RdsInstances                     []interface{}      `json:"rds_instances"`
 		WorkerSystemDiskSnapshotPolicyID string             `json:"worker_system_disk_snapshot_policy_id"`
 		ImageID                          string             `json:"image_id"`
+		ImageType                        string             `json:"image_type"`
 		ScalingPolicy                    string             `json:"scaling_policy"`
+		InternetMaxBandwidthOut          int                `json:"internet_max_bandwidth_out"`
+		OSType                           string             `json:"os_type"`
+		SupportIPv6                      bool               `json:"support_ipv6"`
+		DeploymentSetID                  string             `json:"deploymentset_id"`
+		SystemDiskCategories             []string           `json:"system_disk_categories"`
+		SecurityEnhancementStrategy      string             `json:"security_enhancement_strategy"`
+		PrivatePoolOptions               interface{}        `json:"private_pool_options"`
+		SchedulerOptions                 struct {
+			ManagedPrivateSpaceID string `json:"managed_private_space_id"`
+		} `json:"scheduler_options"`
 	} `json:"scaling_group"`
 	KubernetesConfig struct {
 		RuntimeVersion    string  `json:"runtime_version"`
@@ -666,8 +686,27 @@ type NodePoolAlone struct {
 		Unschedulable     bool    `json:"unschedulable"`
 		Taints            []Taint `json:"taints"`
 		Labels            []Label `json:"labels"`
+		PreUserData       string  `json:"pre_user_data"`
 	} `json:"kubernetes_config"`
-	AutoScaling  autoScaling `json:"auto_scaling"`
+	Management struct {
+		Enable bool `json:"enable"`
+		UpgradeConfig struct {
+			AutoUpgrade        bool `json:"auto_upgrade"`
+			MaxUnavailable     int  `json:"max_unavailable"`
+			MaxParallelism     int  `json:"max_parallelism"`
+			Surge              int  `json:"surge"`
+			KeepSurgeOnFailed  bool `json:"keep_surge_on_failed"`
+		} `json:"upgrade_config"`
+	} `json:"management"`
+	AutoScaling struct {
+		Enable              bool   `json:"enable"`
+		MaxInstances        int64  `json:"max_instances"`
+		MinInstances        int64  `json:"min_instances"`
+		Type                string `json:"type"`
+		HealthCheckType     string `json:"health_check_type"`
+		EipInternetChargeType string `json:"eip_internet_charge_type"`
+		EipBandWidth        int64  `json:"eip_bandwidth"`
+	} `json:"auto_scaling"`
 	NodepoolInfo struct {
 		ResourceGroupID string    `json:"resource_group_id"`
 		Created         time.Time `json:"created"`
@@ -679,14 +718,17 @@ type NodePoolAlone struct {
 		Updated         time.Time `json:"updated"`
 	} `json:"nodepool_info"`
 	Status struct {
-		ServingNodes  int    `json:"serving_nodes"`
-		TotalNodes    int    `json:"total_nodes"`
-		State         string `json:"state"`
-		OfflineNodes  int    `json:"offline_nodes"`
-		RemovingNodes int    `json:"removing_nodes"`
-		InitialNodes  int    `json:"initial_nodes"`
-		FailedNodes   int    `json:"failed_nodes"`
-		HealthyNodes  int    `json:"healthy_nodes"`
+		DesiredNodes      int    `json:"desired_nodes"`
+		SpotNodes         int    `json:"spot_nodes"`
+		ServingNodes      int    `json:"serving_nodes"`
+		TotalNodes        int    `json:"total_nodes"`
+		RemovingWaitNodes int    `json:"removing_wait_nodes"`
+		State             string `json:"state"`
+		OfflineNodes      int    `json:"offline_nodes"`
+		RemovingNodes     int    `json:"removing_nodes"`
+		InitialNodes      int    `json:"initial_nodes"`
+		FailedNodes       int    `json:"failed_nodes"`
+		HealthyNodes      int    `json:"healthy_nodes"`
 	} `json:"status"`
 }
 
@@ -732,53 +774,82 @@ type AutoScaling struct {
 }
 
 type ClusterObject struct {
-	Tags  []Tag `json:"tags"`
-	Tags2 struct {
-		Tags []Tag `json:"Tag"`
-	} `json:"Tags"`
-	ResourceGroupID        string    `json:"resource_group_id"`
-	PrivateZone            bool      `json:"private_zone"`
-	VpcID                  string    `json:"vpc_id"`
-	NetworkMode            string    `json:"network_mode"`
-	SecurityGroupID        string    `json:"security_group_id"`
-	ClusterType            string    `json:"cluster_type"`
-	DockerVersion          string    `json:"docker_version"`
-	DataDiskCategory       string    `json:"data_disk_category"`
-	NextVersion            string    `json:"next_version"`
-	ZoneID                 string    `json:"zone_id"`
-	ClusterID              string    `json:"cluster_id"`
-	Department             int       `json:"Department"`
-	ExternalLoadbalancerID string    `json:"external_loadbalancer_id"`
-	VswitchID              string    `json:"vswitch_id"`
-	SwarmMode              bool      `json:"swarm_mode"`
-	RMRegionID             string    `json:"RMRegionId"`
-	State                  string    `json:"state"`
-	ResourceGroup          int       `json:"ResourceGroup"`
-	InitVersion            string    `json:"init_version"`
-	NodeStatus             string    `json:"node_status"`
-	NeedUpdateAgent        bool      `json:"need_update_agent"`
-	Created                time.Time `json:"created"`
-	DeletionProtection     bool      `json:"deletion_protection"`
-	SubnetCidr             string    `json:"subnet_cidr"`
-	Profile                string    `json:"profile"`
-	RegionID               string    `json:"region_id"`
-	MasterURL              string    `json:"master_url"`
-	CurrentVersion         string    `json:"current_version"`
-	NAMING_FAILED          string    `json:"-"`
-	VswitchCidr            string    `json:"vswitch_cidr"`
-	ClusterHealthy         string    `json:"cluster_healthy"`
-	ClusterSpec            string    `json:"cluster_spec"`
-	Size                   int       `json:"size"`
-	DataDiskSize           int       `json:"data_disk_size"`
-	Port                   int       `json:"port"`
-	EnabledMigration       bool      `json:"enabled_migration"`
-	Name                   string    `json:"name"`
-	DepartmentName         string    `json:"DepartmentName"`
-	Updated                time.Time `json:"updated"`
-	InstanceType           string    `json:"instance_type"`
-	WorkerRAMRoleName      string    `json:"worker_ram_role_name"`
-	ResourceGroupName      string    `json:"ResourceGroupName"`
-	NodePools              []struct {
+	Tags                 []Tag     `json:"tags"`
+	ResourceGroupID      string    `json:"resource_group_id"`
+	PrivateZone          bool      `json:"private_zone"`
+	VpcID                string    `json:"vpc_id"`
+	NetworkMode          string    `json:"network_mode"`
+	SecurityGroupID      string    `json:"security_group_id"`
+	ClusterType          string    `json:"cluster_type"`
+	DockerVersion        string    `json:"docker_version"`
+	DataDiskCategory     string    `json:"data_disk_category"`
+	NextVersion          string    `json:"next_version"`
+	ZoneID               string    `json:"zone_id"`
+	ClusterID            string    `json:"cluster_id"`
+	Department           int       `json:"Department"`
+	ExternalLoadbalancerID string  `json:"external_loadbalancer_id"`
+	VswitchID            string    `json:"vswitch_id"`
+	VswitchIds           []string  `json:"vswitch_ids"`
+	SwarmMode            bool      `json:"swarm_mode"`
+	RMRegionID           string    `json:"RMRegionId"`
+	State                string    `json:"state"`
+	ResourceGroup        int       `json:"ResourceGroup"`
+	InitVersion          string    `json:"init_version"`
+	NodeStatus           string    `json:"node_status"`
+	NeedUpdateAgent      bool      `json:"need_update_agent"`
+	Created              time.Time `json:"created"`
+	DeletionProtection   bool      `json:"deletion_protection"`
+	SubnetCidr           string    `json:"subnet_cidr"`
+	ContainerCIDR        string    `json:"container_cidr"`
+	ServiceCIDR          string    `json:"service_cidr"`
+	Profile              string    `json:"profile"`
+	RegionID             string    `json:"region_id"`
+	MasterURL            string    `json:"master_url"`
+	CurrentVersion       string    `json:"current_version"`
+	Runtime              string    `json:"runtime"`
+	RuntimeVersion       string    `json:"runtime_version"`
+	ProxyMode            string    `json:"proxy_mode"`
+	NodeCidrMask         string    `json:"node_cidr_mask"`
+	IPStack              string    `json:"ip_stack"`
+	ServiceDomainName    string    `json:"service_domain_name"`
+	MetaData             string    `json:"meta_data"`
+	DisableEncryption    bool      `json:"disable_encryption"`
+	Size                 int       `json:"size"`
+	Name                 string    `json:"name"`
+	Updated              time.Time `json:"updated"`
+	InstanceType         string    `json:"instance_type"`
+	WorkerRAMRoleName    string    `json:"worker_ram_role_name"`
+	ResourceGroupName    string    `json:"ResourceGroupName"`
+	MaintenanceWindow    struct {
+		Enable       bool   `json:"enable"`
+		WeeklyPeriod string `json:"weekly_period"`
+	} `json:"maintenance_window"`
+	ControlPlaneConfig struct {
+		InstanceTypes              []string `json:"instance_types"`
+		SystemDiskEncryptAlgorithm string   `json:"system_disk_encrypt_algorithm"`
+		ChargeType                 string   `json:"charge_type"`
+		RuntimeVersion             string   `json:"runtime_version"`
+		StorageSetID               string   `json:"storageset_id"`
+		KeyPair                    string   `json:"key_pair"`
+		SystemDiskKMSKeyID         string   `json:"system_disk_kms_key_id"`
+		DeploymentSetID            string   `json:"deploymentset_id"`
+		CloudMonitorFlags          bool     `json:"cloud_monitor_flags"`
+		SystemDiskEncrypted        string   `json:"system_disk_encrypted"`
+		Runtime                    string   `json:"runtime"`
+		SSHFlags                   bool     `json:"ssh_flags"`
+		SystemDiskSize             int      `json:"system_disk_size"`
+		NodePortRange              string   `json:"node_port_range"`
+		LoginPassword              string   `json:"login_password"`
+		Size                       int      `json:"size"`
+		SystemDiskCategory         string   `json:"system_disk_category"`
+		CPUPolicy                  string   `json:"cpu_policy"`
+		SystemDiskPerformanceLevel string   `json:"system_disk_performance_level"`
+		SystemDiskSnapshotPolicyID string   `json:"system_disk_snapshot_policy_id"`
+		NodeNameMode               string   `json:"node_name_mode"`
+		ImageType                  string   `json:"image_type"`
+	} `json:"control_plane_config"`
+	OperationPolicy map[string]interface{} `json:"operation_policy"`
+	NodePools       []struct {
 		NodepoolInfo     interface{} `json:"nodepool_info"`
 		ScalingGroup     interface{} `json:"scaling_group"`
 		KubernetesConfig interface{} `json:"kubernetes_config"`
