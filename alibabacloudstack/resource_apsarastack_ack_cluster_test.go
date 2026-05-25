@@ -3,40 +3,12 @@ package alibabacloudstack
 import (
 	"fmt"
 
-	"log"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
-
-func testAccCheckCsK8sDestroy(s *terraform.State) error {
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "alibabacloudstack_cs_kubernetes" {
-			continue
-		}
-
-		// Try to find the Disk
-		client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-		csService := CsService{client}
-		log.Printf("repo ID %s", rs.Primary.ID)
-		_, err := csService.DescribeCsKubernetes(rs.Primary.ID)
-
-		if err == nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	return nil
-}
 
 func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 	var v *ClusterObject
@@ -59,7 +31,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:      testAccCheckCsK8sDestroy,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -246,7 +218,7 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:      testAccCheckCsK8sDestroy,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -401,7 +373,7 @@ func TestUatAlibabacloudStackCsK8s_masternode_encrypted(t *testing.T) {
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:      testAccCheckCsK8sDestroy,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
