@@ -54,4 +54,4 @@ alibabacloudstack/dryrun_*
 /.dbeaver/
 /tf_docs_data_cache.json
 /.qoder/
-/.aone_copilot/
+/.aone_copilot/*
