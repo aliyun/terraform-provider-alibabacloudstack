@@ -117,7 +117,7 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 	return logProject, nil
 }
 
-func (s *LogService) GetSlsDataClient(projectName string) (slsClient *sls.Client, err error) {
+func (s *LogService) GetSlsDataClient(projectName string) (slsClient sls.ClientInterface, err error) {
 	if s.client.Config.Proxy != "" {
 		os.Setenv("http_proxy", s.client.Config.Proxy)
 		os.Setenv("https_proxy", s.client.Config.Proxy)
@@ -134,13 +134,7 @@ func (s *LogService) GetSlsDataClient(projectName string) (slsClient *sls.Client
 	}
 	// Remove protocol prefix from endpoint to avoid signature mismatch
 	endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "https://"), "http://")
-	slsClient = &sls.Client{
-		AccessKeyID:     s.client.Config.AccessKey,
-		AccessKeySecret: s.client.Config.SecretKey,
-		Endpoint:        endpoint,
-		SecurityToken:   s.client.Config.SecurityToken,
-		UserAgent:       s.client.GetUserAgent(),
-	}
+	slsClient = sls.CreateNormalInterface(endpoint, s.client.Config.AccessKey, s.client.Config.SecretKey, s.client.Config.SecurityToken)
 	return slsClient, nil
 }
 
@@ -600,7 +594,7 @@ func (s *LogService) CreateLogDashboard(project, name string) error {
 	return nil
 }
 
-func CreateDashboard(project, name string, client *sls.Client) error {
+func CreateDashboard(project, name string, client sls.ClientInterface) error {
 	dashboard := sls.Dashboard{
 		DashboardName: name,
 		ChartList:     []sls.Chart{},

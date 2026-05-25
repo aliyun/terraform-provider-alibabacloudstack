@@ -64,7 +64,7 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 			request := client.NewCommonRequest("POST", "Sls", "2020-03-31", "CreateProject", "")
 			request.SetDomain(client.Config.Endpoints[connectivity.ASAPICode])
 			request.QueryParams["projectName"] = name
-			// request.QueryParams["Description"] = description
+			request.QueryParams["Description"] = description
 			if v, ok := d.GetOk("cluster_name"); ok && v.(string) != "" {
 				requestBody["ClusterName"] = v.(string)
 			}
@@ -119,7 +119,7 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	name := d.Id()
-	if d.HasChange("description") {
+	if !d.IsNewResource() && d.HasChange("description") {
 		// Attempt 1: New API (2020-03-31)
 		requestBody := map[string]interface{}{
 			"ProjectName": name,

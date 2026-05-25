@@ -207,17 +207,17 @@ func resourceAlibabacloudStackLogAlertCreate(d *schema.ResourceData, meta interf
 			Interval: d.Get("schedule_interval").(string),
 		},
 	}
-	
+
 	slsservice := LogService{client}
 	slsClient, err := slsservice.GetSlsDataClient(project_name)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	
+
 	if alert.Configuration, err = createAlertConfig(d, slsClient); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	
+
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 		err := slsClient.CreateAlert(project_name, alert)
 		if err != nil {
@@ -351,12 +351,12 @@ func resourceAlibabacloudStackLogAlertDelete(d *schema.ResourceData, meta interf
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	
+
 	slsClient, err := logService.GetSlsDataClient(parts[0])
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	
+
 	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
 		err := slsClient.DeleteAlert(parts[0], parts[1])
 		if err != nil {
@@ -374,7 +374,7 @@ func resourceAlibabacloudStackLogAlertDelete(d *schema.ResourceData, meta interf
 	return errmsgs.WrapError(logService.WaitForLogstoreAlert(d.Id(), Deleted, DefaultTimeout))
 }
 
-func createAlertConfig(d *schema.ResourceData, client *sls.Client) (*sls.AlertConfiguration, error) {
+func createAlertConfig(d *schema.ResourceData, client sls.ClientInterface) (*sls.AlertConfiguration, error) {
 
 	project := d.Get("project_name").(string)
 	dashboard := d.Get("dashboard").(string)

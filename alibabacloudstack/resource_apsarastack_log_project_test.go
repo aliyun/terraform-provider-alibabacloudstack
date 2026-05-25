@@ -72,7 +72,7 @@ func TestAccAlibabacloudStackLogProject_Cluster(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
-	name := fmt.Sprintf("tf-testacclogproject-%d", rand)
+	name := fmt.Sprintf("testtf-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogProjectConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -84,15 +84,15 @@ func TestAccAlibabacloudStackLogProject_Cluster(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name": name,
-					// "cluster_name": "${data.alibabacloudstack_log_clusters.example.clusters.0.name}",
-					"description": "tf-testAccLogProject_cluster",
+					"name":         name,
+					"cluster_name": "${data.alibabacloudstack_log_clusters.example.clusters.0.name}",
+					"description":  "tf-testAccLogProject_cluster",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": name,
-						// "cluster_name": CHECKSET,
-						"description": "tf-testAccLogProject_cluster",
+						"name":         name,
+						"cluster_name": CHECKSET,
+						"description":  "tf-testAccLogProject_cluster",
 					}),
 				),
 			},
@@ -117,8 +117,8 @@ func TestAccAlibabacloudStackLogProject_Cluster(t *testing.T) {
 
 func resourceLogProjectConfigDependence(name string) string {
 	return `
-// data "alibabacloudstack_log_clusters" "example" {
-// }
+data "alibabacloudstack_log_clusters" "example" {
+}
 `
 }
 

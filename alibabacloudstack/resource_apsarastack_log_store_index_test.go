@@ -6,7 +6,7 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -34,7 +34,7 @@ func TestAccAlibabacloudStackLogStoreIndex_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"project":  "testtf-9999",
+					"project":  "${alibabacloudstack_log_project.default.name}",
 					"logstore": "${alibabacloudstack_log_store.default.name}",
 					"full_text": []map[string]interface{}{
 						{
@@ -122,12 +122,12 @@ func resourceLogStoreIndexConfigDependence(name string) string {
 	variable "name" {
 	    default = "%s"
 	}
-	// resource "alibabacloudstack_log_project" "default" {
-	//     name = "${var.name}"
-	//     description = "tf unit test"
-	// }
+	resource "alibabacloudstack_log_project" "default" {
+	    name = "${var.name}"
+	    description = "tf unit test"
+	}
 	resource "alibabacloudstack_log_store" "default" {
-	    project = "testtf-9999"
+	    project = "${alibabacloudstack_log_project.default.name}"
 	    name = "${var.name}"
 	    retention_period = "3000"
 	    shard_count = 1
