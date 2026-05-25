@@ -75,13 +75,13 @@ func (s *CsService) GetCsK8sNodesCount(id string) (node_count int, err error) {
 	return node_count, nil
 }
 
-func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *KubernetesClusterDetail, err error) {
+func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *ClusterObject, err error) {
 	return s.DescribeCsKubernetes(id)
 }
 
-func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail, err error) {
-	cluster := &KubernetesClusterDetail{}
-	cluster.ClusterId = ""
+func (s *CsService) DescribeCsKubernetes(id string) (cl *ClusterObject, err error) {
+	cluster := &ClusterObject{}
+	cluster.ClusterID = ""
 
 	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
 	request.QueryParams["SignatureVersion"] = "1.0"
@@ -109,35 +109,32 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail
 	Cdetails := ClustersV1{}
 	_ = json.Unmarshal(clusterdetails.GetHttpContentBytes(), &Cdetails)
 
-	cluster = &KubernetesClusterDetail{}
+	// cluster = &KubernetesClusterDetail{}
 	for _, k := range Cdetails.Clusters {
 		if k.ClusterID == id {
-			cluster.Tags = k.Tags
-			cluster.Name = k.Name
-			cluster.State = k.State
-			cluster.ClusterId = k.ClusterID
-			cluster.ClusterType = KubernetesClusterType(k.ClusterType)
-			cluster.VpcId = k.VpcID
-			cluster.ResourceGroupId = k.ResourceGroupID
-			cluster.ContainerCIDR = k.SubnetCidr
-			cluster.CurrentVersion = k.CurrentVersion
-			cluster.DeletionProtection = k.DeletionProtection
-			cluster.RegionId = k.RegionID
-			cluster.Size = int64(k.Size)
-			cluster.IngressLoadbalancerId = k.ExternalLoadbalancerID
-			cluster.InitVersion = k.InitVersion
-			cluster.NetworkMode = k.NetworkMode
-			cluster.PrivateZone = k.PrivateZone
-			cluster.Profile = k.Profile
-			cluster.VSwitchIds = k.VswitchID
-			break
+			return &k, nil
+			// cluster.Tags = k.Tags
+			// cluster.Name = k.Name
+			// cluster.State = k.State
+			// cluster.ClusterId = k.ClusterID
+			// cluster.ClusterType = KubernetesClusterType(k.ClusterType)
+			// cluster.VpcId = k.VpcID
+			// cluster.ResourceGroupId = k.ResourceGroupID
+			// cluster.ContainerCIDR = k.SubnetCidr
+			// cluster.CurrentVersion = k.CurrentVersion
+			// cluster.DeletionProtection = k.DeletionProtection
+			// cluster.RegionId = k.RegionID
+			// cluster.Size = int64(k.Size)
+			// cluster.IngressLoadbalancerId = k.ExternalLoadbalancerID
+			// cluster.InitVersion = k.InitVersion
+			// cluster.NetworkMode = k.NetworkMode
+			// cluster.PrivateZone = k.PrivateZone
+			// cluster.Profile = k.Profile
+			// cluster.VSwitchIds = k.VswitchID
+			// break
 		}
 	}
-	if cluster.ClusterId != id {
-		return cluster, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("CsKubernetes", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-	}
-
-	return cluster, nil
+	return nil, errmsgs.GetNotFoundErrorFromString("Cs Kubernetes not found!")
 }
 
 func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePools, err error) {
@@ -734,6 +731,63 @@ type AutoScaling struct {
 	EipBandWidth int64 `json:"eip_bandwidth"`
 }
 
+type ClusterObject struct {
+	Tags  []Tag `json:"tags"`
+	Tags2 struct {
+		Tags []Tag `json:"Tag"`
+	} `json:"Tags"`
+	ResourceGroupID        string    `json:"resource_group_id"`
+	PrivateZone            bool      `json:"private_zone"`
+	VpcID                  string    `json:"vpc_id"`
+	NetworkMode            string    `json:"network_mode"`
+	SecurityGroupID        string    `json:"security_group_id"`
+	ClusterType            string    `json:"cluster_type"`
+	DockerVersion          string    `json:"docker_version"`
+	DataDiskCategory       string    `json:"data_disk_category"`
+	NextVersion            string    `json:"next_version"`
+	ZoneID                 string    `json:"zone_id"`
+	ClusterID              string    `json:"cluster_id"`
+	Department             int       `json:"Department"`
+	ExternalLoadbalancerID string    `json:"external_loadbalancer_id"`
+	VswitchID              string    `json:"vswitch_id"`
+	SwarmMode              bool      `json:"swarm_mode"`
+	RMRegionID             string    `json:"RMRegionId"`
+	State                  string    `json:"state"`
+	ResourceGroup          int       `json:"ResourceGroup"`
+	InitVersion            string    `json:"init_version"`
+	NodeStatus             string    `json:"node_status"`
+	NeedUpdateAgent        bool      `json:"need_update_agent"`
+	Created                time.Time `json:"created"`
+	DeletionProtection     bool      `json:"deletion_protection"`
+	SubnetCidr             string    `json:"subnet_cidr"`
+	Profile                string    `json:"profile"`
+	RegionID               string    `json:"region_id"`
+	MasterURL              string    `json:"master_url"`
+	CurrentVersion         string    `json:"current_version"`
+	NAMING_FAILED          string    `json:"-"`
+	VswitchCidr            string    `json:"vswitch_cidr"`
+	ClusterHealthy         string    `json:"cluster_healthy"`
+	ClusterSpec            string    `json:"cluster_spec"`
+	Size                   int       `json:"size"`
+	DataDiskSize           int       `json:"data_disk_size"`
+	Port                   int       `json:"port"`
+	EnabledMigration       bool      `json:"enabled_migration"`
+	Name                   string    `json:"name"`
+	DepartmentName         string    `json:"DepartmentName"`
+	Updated                time.Time `json:"updated"`
+	InstanceType           string    `json:"instance_type"`
+	WorkerRAMRoleName      string    `json:"worker_ram_role_name"`
+	ResourceGroupName      string    `json:"ResourceGroupName"`
+	NodePools              []struct {
+		NodepoolInfo     interface{} `json:"nodepool_info"`
+		ScalingGroup     interface{} `json:"scaling_group"`
+		KubernetesConfig interface{} `json:"kubernetes_config"`
+		AutoScaling      interface{} `json:"auto_scaling"`
+		TeeConfig        interface{} `json:"tee_config"`
+		Count            int         `json:"count"`
+	} `json:"node_pools"`
+}
+
 type ClustersV1 struct {
 	Redirect        bool   `json:"redirect"`
 	EagleEyeTraceID string `json:"eagleEyeTraceId"`
@@ -749,65 +803,10 @@ type ClustersV1 struct {
 		TotalCount int `json:"total_count"`
 		PageSize   int `json:"page_size"`
 	} `json:"page_info"`
-	Domain       string `json:"domain"`
-	PureListData bool   `json:"pureListData"`
-	API          string `json:"api"`
-	Clusters     []struct {
-		Tags  []Tag `json:"tags"`
-		Tags2 struct {
-			Tags []Tag `json:"Tag"`
-		} `json:"Tags"`
-		ResourceGroupID        string    `json:"resource_group_id"`
-		PrivateZone            bool      `json:"private_zone"`
-		VpcID                  string    `json:"vpc_id"`
-		NetworkMode            string    `json:"network_mode"`
-		SecurityGroupID        string    `json:"security_group_id"`
-		ClusterType            string    `json:"cluster_type"`
-		DockerVersion          string    `json:"docker_version"`
-		DataDiskCategory       string    `json:"data_disk_category"`
-		NextVersion            string    `json:"next_version"`
-		ZoneID                 string    `json:"zone_id"`
-		ClusterID              string    `json:"cluster_id"`
-		Department             int       `json:"Department"`
-		ExternalLoadbalancerID string    `json:"external_loadbalancer_id"`
-		VswitchID              string    `json:"vswitch_id"`
-		SwarmMode              bool      `json:"swarm_mode"`
-		RMRegionID             string    `json:"RMRegionId"`
-		State                  string    `json:"state"`
-		ResourceGroup          int       `json:"ResourceGroup"`
-		InitVersion            string    `json:"init_version"`
-		NodeStatus             string    `json:"node_status"`
-		NeedUpdateAgent        bool      `json:"need_update_agent"`
-		Created                time.Time `json:"created"`
-		DeletionProtection     bool      `json:"deletion_protection"`
-		SubnetCidr             string    `json:"subnet_cidr"`
-		Profile                string    `json:"profile"`
-		RegionID               string    `json:"region_id"`
-		MasterURL              string    `json:"master_url"`
-		CurrentVersion         string    `json:"current_version"`
-		NAMING_FAILED          string    `json:"-"`
-		VswitchCidr            string    `json:"vswitch_cidr"`
-		ClusterHealthy         string    `json:"cluster_healthy"`
-		ClusterSpec            string    `json:"cluster_spec"`
-		Size                   int       `json:"size"`
-		DataDiskSize           int       `json:"data_disk_size"`
-		Port                   int       `json:"port"`
-		EnabledMigration       bool      `json:"enabled_migration"`
-		Name                   string    `json:"name"`
-		DepartmentName         string    `json:"DepartmentName"`
-		Updated                time.Time `json:"updated"`
-		InstanceType           string    `json:"instance_type"`
-		WorkerRAMRoleName      string    `json:"worker_ram_role_name"`
-		ResourceGroupName      string    `json:"ResourceGroupName"`
-		NodePools              []struct {
-			NodepoolInfo     interface{} `json:"nodepool_info"`
-			ScalingGroup     interface{} `json:"scaling_group"`
-			KubernetesConfig interface{} `json:"kubernetes_config"`
-			AutoScaling      interface{} `json:"auto_scaling"`
-			TeeConfig        interface{} `json:"tee_config"`
-			Count            int         `json:"count"`
-		} `json:"node_pools"`
-	} `json:"clusters"`
+	Domain       string          `json:"domain"`
+	PureListData bool            `json:"pureListData"`
+	API          string          `json:"api"`
+	Clusters     []ClusterObject `json:"clusters"`
 }
 
 // Cluster Info

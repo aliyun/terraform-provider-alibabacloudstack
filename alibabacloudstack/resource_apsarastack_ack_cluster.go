@@ -940,7 +940,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	}
 	d.SetId(clusterresponse.ClusterID)
 
-	stateConf := BuildStateConf([]string{"initial", " "}, []string{"running"}, d.Timeout(schema.TimeoutCreate), 15*time.Minute, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
+	stateConf := BuildStateConf([]string{"initial", " "}, []string{"running"}, d.Timeout(schema.TimeoutCreate), 10*time.Minute, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
 	stateConf.NotFoundChecks = 1000
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -1133,13 +1133,21 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	}
 	d.Set("nodepool_id", nodepoolid)
 	d.Set("name", object.Name)
-	d.Set("vpc_id", object.VpcId)
-	d.Set("pod_cidr", object.ContainerCIDR)
+	d.Set("vpc_id", object.VpcID)
+	d.Set("pod_cidr", object.SubnetCidr)
 	d.Set("version", object.InitVersion)
+	if object.CurrentVersion != "" {
+		d.Set("version", object.CurrentVersion) // Prefer current version if available
+	}
 	d.Set("cluster_type", string(object.ClusterType))
-	d.Set("security_group_id", object.SecurityGroupId)
+	d.Set("security_group_id", object.SecurityGroupID)
 	d.Set("delete_protection", object.DeletionProtection)
-	d.Set("worker_ram_role_name", object.WorkerRamRoleName)
+	d.Set("worker_ram_role_name", object.WorkerRAMRoleName)
+	
+	// Additional fields from ClusterObject
+	if object.ZoneID != "" {
+		d.Set("availability_zone", object.ZoneID)
+	}
 
 	// node_count, err := csService.GetCsK8sNodesCount(d.Id())
 	// if err != nil {
@@ -1168,6 +1176,12 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		if nodepool.ScalingGroup.KeyPair != "" {
 			d.Set("key_name", nodepool.ScalingGroup.KeyPair)
 		}
+		if nodepool.ScalingGroup.ImageID != "" {
+			d.Set("image_id", nodepool.ScalingGroup.ImageID)
+		}
+		if nodepool.ScalingGroup.Platform != "" {
+			d.Set("platform", nodepool.ScalingGroup.Platform)
+		}
 
 		// Read configurations from kubernetes_config
 		if nodepool.KubernetesConfig.CPUPolicy != "" {
@@ -1182,19 +1196,11 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		runtimeName := nodepool.KubernetesConfig.Runtime
 		runtimeVersion := nodepool.KubernetesConfig.RuntimeVersion
 
-		// Fallback to object.MetaData if nodepool doesn't have runtime info
+		// Fallback to nodepool.KubernetesConfig if runtime info is not available
+		// Note: ClusterObject does not have MetaData field, so we skip the fallback logic
 		if runtimeName == "" || runtimeVersion == "" {
-			if object.MetaData != "" {
-				var metaDataMap map[string]interface{}
-				if err := json.Unmarshal([]byte(object.MetaData), &metaDataMap); err == nil {
-					if rn, ok := metaDataMap["Runtime"].(string); ok && runtimeName == "" {
-						runtimeName = rn
-					}
-					if rv, ok := metaDataMap["RuntimeVersion"].(string); ok && runtimeVersion == "" {
-						runtimeVersion = rv
-					}
-				}
-			}
+			// MetaData field is not available in ClusterObject
+			// This logic has been removed as part of the migration from KubernetesClusterDetail to ClusterObject
 		}
 
 		if runtimeName != "" || runtimeVersion != "" {
