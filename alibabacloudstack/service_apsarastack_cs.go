@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -78,10 +79,7 @@ func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *ClusterObje
 	return s.DescribeCsKubernetes(id)
 }
 
-func (s *CsService) DescribeCsKubernetes(id string) (cl *ClusterObject, err error) {
-	cluster := &ClusterObject{}
-	cluster.ClusterID = ""
-
+func (s *CsService) DescribeCsKubernetes(id string) (*ClusterObject, error) {
 	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
 	request.QueryParams["SignatureVersion"] = "1.0"
 	request.QueryParams["ProductName"] = "CS"
@@ -93,44 +91,22 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *ClusterObject, err erro
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		if errmsgs.IsExpectedErrors(err, "ErrorClusterNotFound") {
-			return cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
-		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 
-	}
-
-	if debugOn() {
-		requestMap := make(map[string]interface{})
-		requestMap["ClusterId"] = id
-		addDebug("DescribeKubernetesCluster", clusterdetails, request, requestMap)
 	}
 	Cdetails := ClustersV1{}
 	_ = json.Unmarshal(clusterdetails.GetHttpContentBytes(), &Cdetails)
+	if len(Cdetails.Clusters) == 0 {
+		log.Printf("======================================================================= Cs Kubernetes: %s not found!", id)
+		return nil, errmsgs.GetNotFoundErrorFromString("Cs Kubernetes not found!")
+	}
 
-	// cluster = &KubernetesClusterDetail{}
 	for _, k := range Cdetails.Clusters {
 		if k.ClusterID == id {
 			return &k, nil
-			// cluster.Tags = k.Tags
-			// cluster.Name = k.Name
-			// cluster.State = k.State
-			// cluster.ClusterId = k.ClusterID
-			// cluster.ClusterType = KubernetesClusterType(k.ClusterType)
-			// cluster.VpcId = k.VpcID
-			// cluster.ResourceGroupId = k.ResourceGroupID
-			// cluster.ContainerCIDR = k.SubnetCidr
-			// cluster.CurrentVersion = k.CurrentVersion
-			// cluster.DeletionProtection = k.DeletionProtection
-			// cluster.RegionId = k.RegionID
-			// cluster.Size = int64(k.Size)
-			// cluster.IngressLoadbalancerId = k.ExternalLoadbalancerID
-			// cluster.InitVersion = k.InitVersion
-			// cluster.NetworkMode = k.NetworkMode
-			// cluster.PrivateZone = k.PrivateZone
-			// cluster.Profile = k.Profile
-			// cluster.VSwitchIds = k.VswitchID
-			// break
 		}
 	}
 	return nil, errmsgs.GetNotFoundErrorFromString("Cs Kubernetes not found!")
@@ -174,6 +150,25 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 	}
 	var clusternodepools *NodePools
 	_ = json.Unmarshal(response.GetHttpContentBytes(), &clusternodepools)
+
+	// Retry logic: if Nodes length is 0, retry up to 3 times with 10 seconds interval
+	if clusternodepools != nil && len(clusternodepools.Nodes) == 0 {
+		for i := 0; i < 3; i++ {
+			time.Sleep(10 * time.Second)
+			response, err = s.client.ProcessCommonRequest(request)
+			if err != nil {
+				continue
+			}
+			if !response.IsSuccess() {
+				continue
+			}
+			_ = json.Unmarshal(response.GetHttpContentBytes(), &clusternodepools)
+			if clusternodepools != nil && len(clusternodepools.Nodes) > 0 {
+				return clusternodepools, nil
+			}
+		}
+	}
+
 	return clusternodepools, nil
 }
 

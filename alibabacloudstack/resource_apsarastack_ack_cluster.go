@@ -1234,6 +1234,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	d.Set("cluster_type", string(object.ClusterType))
 	d.Set("security_group_id", object.SecurityGroupID)
 	d.Set("delete_protection", object.DeletionProtection)
+
 	// worker_ram_role_name will be set from nodepool if available
 
 	// Additional fields from ClusterObject
@@ -1422,6 +1423,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	d.Set("image_id", masternodes[0].ImageID)
 	d.Set("master_nodes", smaster)
 	d.Set("master_instance_types", master_instance_types)
+	d.Set("master_count", len(smaster))
 
 	// // Parse and set addons from MetaData
 	// if object.MetaData != "" {
