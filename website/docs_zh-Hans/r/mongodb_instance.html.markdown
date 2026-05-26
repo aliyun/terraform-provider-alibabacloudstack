@@ -52,11 +52,14 @@ resource "alibabacloudstack_mongodb_instance" "example" {
 * `zone_id` - (选填，变更时重建) 实例所在的可用区 ID。如果不指定，系统将默认选择一个。
 * `backup_period` - (选填) MongoDB 实例的备份周期。当设置了 `preferred_backup_time` 时为必填项。有效值：`[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`。默认值：`[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`。
 * `preferred_backup_time` - (选填) MongoDB 实例的备份时间窗口。格式为 `HH:mmZ-HH:mmZ`。时间设置间隔为一小时。如果未设置，默认返回类似 `23:00Z-24:00Z`。
-* `name` - (选填) DB 实例的名称。长度为 2 到 256 个字符的字符串。
+* `name` - (选填，已废弃) DB 实例的名称。长度为 2 到 256 个字符的字符串。该字段已废弃，将在未来版本中移除，请使用 `db_instance_description` 替代。
+* `db_instance_description` - (选填) DB 实例的描述。
 * `security_ip_list` - (选填) 允许访问 MongoDB 实例的 IP 地址列表。每个 IP 地址最多可以有 256 个字符。默认为空列表。
 * `ssl_action` - (选填) 在 SSL 功能上执行的操作。有效值：`Open`：打开 SSL 加密；`Close`：关闭 SSL 加密；`Update`：更新 SSL 证书。
-* `tde_status` - (选填，变更时重建) 透明数据加密(TDE)状态。有效值：`Enabled`, `Disabled`。
-* `replication_factor` - (选填) 副本集节点数量。有效值：`1`, `3`, `5`, `7`。默认值：`3`。
+* `tde_status` - (选填) 透明数据加密(TDE)状态。有效值：`enabled`, `disabled`。
+* `encryption_key` - (选填) TDE 加密密钥。当 `tde_status` 设置为 `enabled` 时需要提供。
+* `role_arn` - (选填) 具有访问 KMS 服务权限的 RAM 角色 ARN。使用自定义加密密钥时需要提供。
+* `replication_factor` - (选填) 副本集节点数量。有效值：`3`, `5`, `7`。默认值：`3`。
 * `storage_engine` - (选填，变更时重建) 实例的存储引擎。有效值：`WiredTiger`, `RocksDB`。系统默认值：`WiredTiger`。
 * `instance_charge_type` - (选填) 实例的计费类型。有效值：`PrePaid`, `PostPaid`。默认值：`PostPaid`。
 * `period` - (选填) 购买 DB 实例的时长(以月为单位)。当 `instance_charge_type` 为 `PrePaid` 时有效。有效值：`[1~9], 12, 24, 36`。默认值：`1`。
@@ -66,7 +69,6 @@ resource "alibabacloudstack_mongodb_instance" "example" {
 * `kms_encryption_context` - (选填) 用于在创建或更新实例之前解密 `kms_encrypted_password` 的 KMS 加密上下文。
 * `maintain_start_time` - (选填) 维护窗口的开始时间。指定 UTC 时间格式为 `HH:mmZ`。
 * `maintain_end_time` - (选填) 维护窗口的结束时间。指定 UTC 时间格式为 `HH:mmZ`。
-* `db_instance_description` - (选填) DB 实例的描述。
 * `audit_status` - (选填) 是否开启该实例的日志审计能力。 有效值包括：`Enable`, `Disabled`。
 * `audit_filter` - (选填) 需要审计的日志类型列表。有效值包括：`admin`, `slow`, `query`, `insert`, `update`, `delete`, `command`。
 * `private_connections` - (选填) Mongdodb的内网链接信息。
@@ -95,3 +97,11 @@ resource "alibabacloudstack_mongodb_instance" "example" {
   * `connect_string` - 完整的连接字串.
 * `public_connections` - Mongdodb的公网链接信息。
   * `connect_string` - 完整的连接字串.
+
+## Import
+
+MongoDB 实例可以使用 DBInstanceId 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_mongodb_instance.example dds-12345678
+```

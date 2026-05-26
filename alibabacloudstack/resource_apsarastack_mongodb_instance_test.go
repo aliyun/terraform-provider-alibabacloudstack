@@ -145,7 +145,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv3(t *testing.T) {
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:      testAccCheckMongoDBInstanceDestroy,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -251,7 +251,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:      testAccCheckMongoDBInstanceDestroy,
+		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -297,52 +297,52 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 					),
 				),
 			},
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"enable_public_connection": true,
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"enable_public_connection": "true",
-			// 		})),
-			// },
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"audit_filter": []map[string]interface{}{{
-			// 			"role_type": "db",
-			// 			"filters":   []string{"update", "delete", "admin"},
-			// 		}},
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"audit_status":   "Enable",
-			// 			"audit_filter.#": "1",
-			// 		}),
-			// 		resource.TestCheckTypeSetElemNestedAttrs(
-			// 			resourceId,
-			// 			"audit_filter.*",
-			// 			map[string]string{
-			// 				"role_type": "db",
-			// 				"filters.#": "3",
-			// 			},
-			// 		),
-			// 		resource.TestCheckTypeSetElemAttr(
-			// 			resourceId,
-			// 			"audit_filter.*.filters.*",
-			// 			"update",
-			// 		),
-			// 		resource.TestCheckTypeSetElemAttr(
-			// 			resourceId,
-			// 			"audit_filter.*.filters.*",
-			// 			"delete",
-			// 		),
-			// 		resource.TestCheckTypeSetElemAttr(
-			// 			resourceId,
-			// 			"audit_filter.*.filters.*",
-			// 			"admin",
-			// 		),
-			// 	),
-			// },
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable_public_connection": true,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable_public_connection": "true",
+					})),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"audit_filter": []map[string]interface{}{{
+						"role_type": "db",
+						"filters":   []string{"update", "delete", "admin"},
+					}},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"audit_status":   "Enable",
+						"audit_filter.#": "1",
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceId,
+						"audit_filter.*",
+						map[string]string{
+							"role_type": "db",
+							"filters.#": "3",
+						},
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"update",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"delete",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"admin",
+					),
+				),
+			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"tde_status":     "enabled",
@@ -360,52 +360,52 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"audit_status": "Disabled",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"audit_status": "Disabled",
+						"audit_filter": REMOVEKEY,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"ssl_action": "Open",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"ssl_action": "Open",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"ssl_action": "Close",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"ssl_action": "Close",
+					}),
+				),
+			},
 			// {
 			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"audit_status": "Disabled",
+			// 		"tags": map[string]string{
+			// 			"Created": "TF",
+			// 			"For":     "acceptance test",
+			// 		},
 			// 	}),
 			// 	Check: resource.ComposeTestCheckFunc(
 			// 		testAccCheck(map[string]string{
-			// 			"audit_status": "Disabled",
-			// 			"audit_filter": REMOVEKEY,
+			// 			"tags.%":       "2",
+			// 			"tags.Created": "TF",
+			// 			"tags.For":     "acceptance test",
 			// 		}),
 			// 	),
 			// },
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"ssl_action": "Open",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"ssl_action": "Open",
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"ssl_action": "Close",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"ssl_action": "Close",
-			// 		}),
-			// 	),
-			// },
-			//			{
-			//				Config: testAccConfig(map[string]interface{}{
-			//					"tags": map[string]string{
-			//						"Created": "TF",
-			//						"For":     "acceptance test",
-			//					},
-			//				}),
-			//				Check: resource.ComposeTestCheckFunc(
-			//					testAccCheck(map[string]string{
-			//						"tags.%":       "2",
-			//						"tags.Created": "TF",
-			//						"tags.For":     "acceptance test",
-			//					}),
-			//				),
-			//			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"db_instance_description": "tf-testAccMongoDBInstance_test",
@@ -448,14 +448,14 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 					}),
 				),
 			},
-			//						{
-			//							Config: testMongoDBInstance_classic_security_group_id,
-			//							Check: resource.ComposeTestCheckFunc(
-			//								testAccCheck(map[string]string{
-			//									"security_group_id": CHECKSET,
-			//								}),
-			//							),
-			//						},
+			// {
+			// 	Config: testMongoDBInstance_classic_security_group_id,
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"security_group_id": CHECKSET,
+			// 		}),
+			// 	),
+			// },
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"backup_period": []string{"Wednesday"},
@@ -502,7 +502,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckMongoDBInstanceDestroy,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testMongoDBInstance_multiAZ_base,

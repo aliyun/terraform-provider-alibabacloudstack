@@ -55,10 +55,13 @@ The following arguments are supported:
 * `preferred_backup_period` - (Optional) The backup period for the MongoDB instance. Valid values: `[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`. Default: `[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`.
 * `backup_time` - (Optional, Deprecated) The backup time window for the MongoDB instance. In the format of `HH:mmZ-HH:mmZ`. Time setting interval is one hour. If not set, the system will return a default, like `23:00Z-24:00Z`. This field is deprecated, please use `preferred_backup_time` instead.
 * `preferred_backup_time` - (Optional) The backup time window for the MongoDB instance. In the format of `HH:mmZ-HH:mmZ`. Time setting interval is one hour. If not set, the system will return a default, like `23:00Z-24:00Z`.
-* `name` - (Optional) The name of the DB instance. It's a string of 2 to 256 characters.
+* `name` - (Optional, Deprecated) The name of the DB instance. It's a string of 2 to 256 characters. Field 'name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.
+* `db_instance_description` - (Optional) The description of the DB instance.
 * `security_ip_list` - (Optional) A list of IP addresses that are allowed to access the MongoDB instance. Each IP address can have up to 256 characters. Defaults to an empty list.
 * `ssl_action` - (Optional) Actions performed on SSL functions. Valid values: `Open`: turn on SSL encryption; `Close`: turn off SSL encryption; `Update`: update SSL certificate.
 * `tde_status` - (Optional) The Transparent Data Encryption (TDE) status. Valid values: `enabled`, `disabled`.
+* `encryption_key` - (Optional) The encryption key for TDE. Required when `tde_status` is set to `enabled`.
+* `role_arn` - (Optional) The ARN of the RAM role that has permission to access the KMS service. Required when using a custom encryption key.
 * `replication_factor` - (Optional) Number of replica set nodes. Valid values: `3`, `5`, `7`. Default: `3`.
 * `storage_engine` - (Optional, ForceNew) Storage engine for the instance. Valid values: `WiredTiger`, `RocksDB`. System default: `WiredTiger`.
 * `instance_charge_type` - (Optional) The charge type of the instance. Valid values: `PrePaid`, `PostPaid`. Default: `PostPaid`.
@@ -69,7 +72,6 @@ The following arguments are supported:
 * `kms_encryption_context` - (Optional) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating the instance.
 * `maintain_start_time` - (Optional) The start time of the maintenance window. Specify the time in the `HH:mmZ` format. The time must be in UTC.
 * `maintain_end_time` - (Optional) The end time of the maintenance window. Specify the time in the `HH:mmZ` format. The time must be in UTC.
-* `db_instance_description` - (Optional) The description of the DB instance.
 * `audit_status` - (Optional) Enable or disable log audit for the DB instance. Valid values include: `Enable`, `Disabled`.
 * `audit_filter` - (Optional) Operation Type List for Audit Log Filter. Valid values include: `admin`, `slow`, `query`, `insert`, `update`, `delete`, `command`.
 * `private_connections` - (Optional) Internal connection information for MongoDB.
@@ -99,3 +101,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `connect_string` - Complete connection string.
 * `public_connections` -  Public connection information for MongoDB.
   * `connect_string` - Complete connection string.
+
+## Import
+
+MongoDB instance can be imported using the DBInstanceId, e.g.
+
+```
+$ terraform import alibabacloudstack_mongodb_instance.example dds-12345678
+```

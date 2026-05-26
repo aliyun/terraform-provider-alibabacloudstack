@@ -15,7 +15,6 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -60,12 +59,11 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 		raw, err = s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 			return client.DescribeDBInstanceAttribute(request)
 		})
-
 		if err != nil {
-			if _, ok := err.(*errors.ServerError); ok {
-				return resource.RetryableError(err)
+			if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
+				return resource.NonRetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			return resource.RetryableError(err)
 		}
 		return nil
 	})
@@ -76,13 +74,13 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
 		if errmsgs.IsExpectedErrors(err, "InvalidDBInstanceId.NotFound") {
-			return instance, err
+			return instance, errmsgs.GetNotFoundErrorFromString("Mongodb Instance NotFound!")
 		}
 		return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if bresponse == nil || len(bresponse.DBInstances.DBInstance) == 0 {
-		return instance, errmsgs.WrapErrorf(errmsgs.GetNotFoundErrorFromString(errmsgs.GetNotFoundMessage("MongoDB Instance", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		return instance, errmsgs.GetNotFoundErrorFromString("Mongodb Instance NotFound!")
 	}
 	return bresponse.DBInstances.DBInstance[0], nil
 }

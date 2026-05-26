@@ -602,10 +602,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapError(err)
 		}
-		ok := ddsService.WaitMongodbDBInstanceEncryptionKeyState(d.Id())
-		if !ok {
-			return fmt.Errorf("failed to enable TDE with the specified KMS")
-		}
 	}
 	if d.HasChange("ssl_action") && !(d.IsNewResource() && d.Get("ssl_action").(string) != "Open") {
 		request := dds.CreateModifyDBInstanceSSLRequest()
