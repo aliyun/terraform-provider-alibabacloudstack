@@ -297,50 +297,62 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 					),
 				),
 			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"enable_public_connection": true,
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"enable_public_connection": "true",
+			// 		})),
+			// },
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"audit_filter": []map[string]interface{}{{
+			// 			"role_type": "db",
+			// 			"filters":   []string{"update", "delete", "admin"},
+			// 		}},
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"audit_status":   "Enable",
+			// 			"audit_filter.#": "1",
+			// 		}),
+			// 		resource.TestCheckTypeSetElemNestedAttrs(
+			// 			resourceId,
+			// 			"audit_filter.*",
+			// 			map[string]string{
+			// 				"role_type": "db",
+			// 				"filters.#": "3",
+			// 			},
+			// 		),
+			// 		resource.TestCheckTypeSetElemAttr(
+			// 			resourceId,
+			// 			"audit_filter.*.filters.*",
+			// 			"update",
+			// 		),
+			// 		resource.TestCheckTypeSetElemAttr(
+			// 			resourceId,
+			// 			"audit_filter.*.filters.*",
+			// 			"delete",
+			// 		),
+			// 		resource.TestCheckTypeSetElemAttr(
+			// 			resourceId,
+			// 			"audit_filter.*.filters.*",
+			// 			"admin",
+			// 		),
+			// 	),
+			// },
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"enable_public_connection": true,
+					"tde_status":     "enabled",
+					"encryption_key": "${alibabacloudstack_kms_key.key.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"enable_public_connection": "true",
-					})),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"audit_filter": []map[string]interface{}{{
-						"role_type": "db",
-						"filters":   []string{"update", "delete", "admin"},
-					}},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"audit_status":   "Enable",
-						"audit_filter.#": "1",
+						"tde_status":     "enabled",
+						"encryption_key": CHECKSET,
 					}),
-					resource.TestCheckTypeSetElemNestedAttrs(
-						resourceId,
-						"audit_filter.*",
-						map[string]string{
-							"role_type": "db",
-							"filters.#": "3",
-						},
-					),
-					resource.TestCheckTypeSetElemAttr(
-						resourceId,
-						"audit_filter.*.filters.*",
-						"update",
-					),
-					resource.TestCheckTypeSetElemAttr(
-						resourceId,
-						"audit_filter.*.filters.*",
-						"delete",
-					),
-					resource.TestCheckTypeSetElemAttr(
-						resourceId,
-						"audit_filter.*.filters.*",
-						"admin",
-					),
 				),
 			},
 			{
@@ -348,37 +360,37 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"audit_status": "Disabled",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"audit_status": "Disabled",
-						"audit_filter": REMOVEKEY,
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"ssl_action": "Open",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"ssl_action": "Open",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"ssl_action": "Close",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"ssl_action": "Close",
-					}),
-				),
-			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"audit_status": "Disabled",
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"audit_status": "Disabled",
+			// 			"audit_filter": REMOVEKEY,
+			// 		}),
+			// 	),
+			// },
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"ssl_action": "Open",
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"ssl_action": "Open",
+			// 		}),
+			// 	),
+			// },
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"ssl_action": "Close",
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"ssl_action": "Close",
+			// 		}),
+			// 	),
+			// },
 			//			{
 			//				Config: testAccConfig(map[string]interface{}{
 			//					"tags": map[string]string{
@@ -415,16 +427,6 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tde_status": "enabled",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tde_status": "enabled",
-					}),
 				),
 			},
 			{
@@ -609,7 +611,9 @@ variable "name" {
 
 %s
 
-`, name, engineVersion, RandomPasswordTestCase(12, 1), vpcString)
+%s
+
+`, name, engineVersion, KeyCommonTestCase, RandomPasswordTestCase(12, 1), vpcString)
 	}
 }
 

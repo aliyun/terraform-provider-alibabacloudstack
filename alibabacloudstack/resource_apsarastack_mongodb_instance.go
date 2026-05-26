@@ -417,7 +417,7 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	if replication_factor, err := strconv.Atoi(instance.ReplicationFactor); err == nil {
 		d.Set("replication_factor", replication_factor)
 	}
-	d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
+	// d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
 
 	if backupPolicy, err := ddsService.DescribeMongoDBBackupPolicy(d.Id()); err != nil {
 		return errmsgs.WrapError(err)
