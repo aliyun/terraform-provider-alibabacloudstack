@@ -46,9 +46,9 @@ resource "alibabacloudstack_mongodb_instance" "example" {
 
 支持以下参数：
 
-* `engine_version` - (必填，变更时重建) 实例的数据库引擎版本。有效值包括：`3.4`, `4.0` 等。
+* `engine_version` - (必填，变更时重建) 实例的数据库引擎版本。有效值：`8.0`, `7.0`, `6.0`, `5.0`, `4.4`, `4.2`, `4.0`。注意：3.4 及以下版本已停售。
 * `db_instance_class` - (必填) 实例类型。例如：`dds.mongo.s.small`, `dds.mongo.mid`。
-* `db_instance_storage` - (必填) 实例的存储容量。有效值：10 到 3000。值必须是 10 的倍数。单位：GB。
+* `db_instance_storage` - (必填) 实例的存储容量。有效值：10 到 2000。单位：GB。
 * `zone_id` - (选填，变更时重建) 实例所在的可用区 ID。如果不指定，系统将默认选择一个。
 * `backup_period` - (选填) MongoDB 实例的备份周期。当设置了 `preferred_backup_time` 时为必填项。有效值：`[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`。默认值：`[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]`。
 * `preferred_backup_time` - (选填) MongoDB 实例的备份时间窗口。格式为 `HH:mmZ-HH:mmZ`。时间设置间隔为一小时。如果未设置，默认返回类似 `23:00Z-24:00Z`。

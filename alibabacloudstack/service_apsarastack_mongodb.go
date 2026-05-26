@@ -126,6 +126,20 @@ func (s *MongoDBService) MongoDbInstanceNodeAddressStateRefreshFunc(nodeid, netT
 	}
 }
 
+func (s *MongoDBService) WaitMongodbDBInstanceEncryptionKeyState(id string) bool {
+	retryInterval := 10 * time.Second
+	maxRetries := 20
+	for i := 0; i < maxRetries; i++ {
+		object, _ := s.DescribeDBInstanceEncryptionKey(id)
+		if object["EncryptionKeyStatus"].(string) == "Enabled" {
+			return true
+		}
+		i++
+		time.Sleep(retryInterval)
+	}
+	return false
+}
+
 func (s *MongoDBService) DescribeMongoDBSecurityIps(instanceId string) (ips []string, err error) {
 	request := dds.CreateDescribeSecurityIpsRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
@@ -424,6 +438,44 @@ func (s *MongoDBService) DescribeMongoDBTDEInfo(id string) (*dds.DescribeDBInsta
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ = raw.(*dds.DescribeDBInstanceTDEInfoResponse)
+	return response, nil
+}
+
+func (s *MongoDBService) DescribeDBInstanceEncryptionKey(id string) (map[string]interface{}, error) {
+
+	// response := &dds.DescribeDBInstanceEncryptionKeyResponse{}
+	// request := dds.CreateDescribeDBInstanceEncryptionKeyRequest()
+	// s.client.InitRpcRequest(*request.RpcRequest)
+	// request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeDBInstanceEncryptionKey", "")
+	req := map[string]interface{}{
+		// "TargetRegionId": s.client.RegionId,
+		"DBInstanceId": id,
+	}
+	// mergeMaps(request.QueryParams, req)
+	response, err := s.client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeDBInstanceEncryptionKey", "", nil, req, nil)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	// request.DBInstanceId = id
+	// request.RegionId = s.client.RegionId
+	// request.QueryParams["TargetRegionId"] = s.client.RegionId
+	// statErr := s.WaitForMongoDBInstance(id, Running, DefaultLongTimeout)
+	// if statErr != nil {
+	// 	return response, errmsgs.WrapError(statErr)
+	// }
+	// raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+	// 	return client.DescribeDBInstanceEncryptionKey(request)
+	// })
+	// bresponse, ok := raw.(*dds.DescribeDBInstanceEncryptionKeyResponse)
+	// if err != nil {
+	// 	errmsg := ""
+	// 	if ok {
+	// 		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	// 	}
+	// 	return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	// }
+	// addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	// response, _ = raw.(*dds.DescribeDBInstanceEncryptionKeyResponse)
 	return response, nil
 }
 
