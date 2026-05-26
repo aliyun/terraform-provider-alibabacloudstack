@@ -3,7 +3,8 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"log"
-	"os"
+	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -118,10 +119,6 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 }
 
 func (s *LogService) GetSlsDataClient(projectName string) (slsClient sls.ClientInterface, err error) {
-	if s.client.Config.Proxy != "" {
-		os.Setenv("http_proxy", s.client.Config.Proxy)
-		os.Setenv("https_proxy", s.client.Config.Proxy)
-	}
 	var endpoint string
 	if s.client.Config.SlsDataEndpoint != "" {
 		endpoint = s.client.Config.SlsDataEndpoint
@@ -135,6 +132,19 @@ func (s *LogService) GetSlsDataClient(projectName string) (slsClient sls.ClientI
 	// Remove protocol prefix from endpoint to avoid signature mismatch
 	endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "https://"), "http://")
 	slsClient = sls.CreateNormalInterface(endpoint, s.client.Config.AccessKey, s.client.Config.SecretKey, s.client.Config.SecurityToken)
+
+	// Configure proxy via SetHTTPClient for precise control without polluting global env
+	if s.client.Config.Proxy != "" {
+		proxyURL, err := url.Parse(s.client.Config.Proxy)
+		if err == nil {
+			slsClient.SetHTTPClient(&http.Client{
+				Transport: &http.Transport{
+					Proxy: http.ProxyURL(proxyURL),
+				},
+			})
+		}
+	}
+
 	return slsClient, nil
 }
 
