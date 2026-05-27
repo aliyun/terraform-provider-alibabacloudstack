@@ -163,7 +163,8 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"password", "addons", "image_type", "is_enterprise_security_group", "os_type",
 					"master_storage_set_id", "master_storage_set_partition_number", "master_vswitch_ids",
 					"new_nat_gateway", "slb_internet_enabled", "timeout_mins", "worker_storage_set_id",
-					"worker_storage_set_partition_number",
+					"worker_storage_set_partition_number", "master_disk_encrypt_algorithm", "worker_disk_encrypt_algorithm",
+					"master_disk_kms_key_id",
 				},
 			},
 			{
