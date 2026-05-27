@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
@@ -15,6 +16,12 @@ import (
 )
 
 var SlsClientTimeoutCatcher = Catcher{errmsgs.LogClientTimeout, 15, 5}
+
+// slsEndpointCache caches the mapping from project name to data endpoint to avoid repeated API calls.
+var (
+	slsEndpointCache   = make(map[string]string)
+	slsEndpointCacheMu sync.RWMutex
+)
 
 type LogService struct {
 	client *connectivity.AlibabacloudStackClient
@@ -123,11 +130,27 @@ func (s *LogService) GetSlsDataClient(projectName string) (slsClient sls.ClientI
 	if s.client.Config.SlsDataEndpoint != "" {
 		endpoint = s.client.Config.SlsDataEndpoint
 	} else {
-		project, err := s.DescribeLogProject(projectName)
-		if err != nil {
-			return slsClient, errmsgs.WrapError(err)
+		// Check cache with read lock first
+		slsEndpointCacheMu.RLock()
+		cachedEndpoint, hit := slsEndpointCache[projectName]
+		slsEndpointCacheMu.RUnlock()
+
+		if hit {
+			// Cache hit: use cached endpoint directly
+			endpoint = cachedEndpoint
+		} else {
+			// Cache miss: fetch from API and store in cache
+			project, err := s.DescribeLogProject(projectName)
+			if err != nil {
+				return slsClient, errmsgs.WrapError(err)
+			}
+			endpoint = project.DataEndpoint
+
+			// Write endpoint into cache under write lock
+			slsEndpointCacheMu.Lock()
+			slsEndpointCache[projectName] = endpoint
+			slsEndpointCacheMu.Unlock()
 		}
-		endpoint = project.DataEndpoint
 	}
 	// Remove protocol prefix from endpoint to avoid signature mismatch
 	endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "https://"), "http://")
