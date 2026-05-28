@@ -126,6 +126,12 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"proxy_mode":                          "ipvs",
 					"master_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.master.storage_set_id}",
 					"master_storage_set_partition_number": "3",
+					"master_disk_encrypt_algorithm":       "aes-256",
+					"master_disk_kms_key_id":              "${alibabacloudstack_kms_key.default.id}",
+					"master_disk_encrypted":               "true",
+					"worker_disk_kms_key_id":              "${alibabacloudstack_kms_key.default.id}",
+					"worker_disk_encrypted":               "true",
+					"worker_disk_encrypt_algorithm":       "aes-256",
 					"worker_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.worker.storage_set_id}",
 					"worker_storage_set_partition_number": "3",
 					"worker_data_disks": []map[string]string{{
@@ -184,7 +190,14 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"num_of_nodes": "0",
+						"num_of_nodes":          "0",
+						"worker_disk_category":  REMOVEKEY,
+						"worker_vswitch_ids":    REMOVEKEY,
+						"worker_disk_size":      REMOVEKEY,
+						"worker_nodes":          REMOVEKEY,
+						"worker_instance_types": REMOVEKEY,
+						"cpu_policy":            REMOVEKEY,
+						"nodepool_id":           REMOVEKEY,
 					}),
 				),
 			},

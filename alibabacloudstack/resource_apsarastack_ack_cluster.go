@@ -93,17 +93,12 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Description:  "The number of worker nodes. Set to 0 to create a cluster without a default nodepool.",
 			},
 			"worker_disk_size": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Default:      40,
-				ValidateFunc: validation.IntBetween(20, 32768),
-				DiffSuppressFunc: func(k, o, n string, d *schema.ResourceData) bool {
-					if d.Get("num_of_nodes").(int) == 0 {
-						return true
-					}
-					return o == n
-				},
-				Description: "The `worker_disk_size` field will become Computed in version 3.21.0 and will no longer support input.",
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Default:          40,
+				ValidateFunc:     validation.IntBetween(20, 32768),
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
+				Description:      "The `worker_disk_size` field will become Computed in version 3.21.0 and will no longer support input.",
 			},
 			"worker_disk_category": {
 				Type:     schema.TypeString,
@@ -111,29 +106,27 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Default:  DiskCloudSSD,
 				ValidateFunc: validation.StringInSlice([]string{
 					string(DiskCloudEfficiency), string(DiskCloudSSD), string(DiskCloudPPERF), string(DiskCloudSPERF)}, false),
-				DiffSuppressFunc: func(k, o, n string, d *schema.ResourceData) bool {
-					if d.Get("num_of_nodes").(int) == 0 {
-						return true
-					}
-					return o == n
-				},
-				Description: "The `worker_disk_category` field will become Computed in version 3.21.0 and will no longer support input.",
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
+				Description:      "The `worker_disk_category` field will become Computed in version 3.21.0 and will no longer support input.",
 			},
 			"worker_disk_encrypt_algorithm": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
-				Description:  "The `worker_disk_encrypt_algorithm` field will become Computed in version 3.21.0 and will no longer support input.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateFunc:     validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
+				Description:      "The `worker_disk_encrypt_algorithm` field will become Computed in version 3.21.0 and will no longer support input.",
 			},
 			"worker_disk_kms_key_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The `worker_disk_kms_key_id` field will become Computed in version 3.21.0 and will no longer support input.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
+				Description:      "The `worker_disk_kms_key_id` field will become Computed in version 3.21.0 and will no longer support input.",
 			},
 			"worker_disk_encrypted": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "The `worker_disk_encrypted` field will become Computed in version 3.21.0 and will no longer support input.",
+				Type:             schema.TypeBool,
+				Optional:         true,
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
+				Description:      "The `worker_disk_encrypted` field will become Computed in version 3.21.0 and will no longer support input.",
 			},
 			// 			"worker_data_disk_size": {
 			// 				Type:             schema.TypeInt,
@@ -269,15 +262,10 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				DiffSuppressFunc: csForceUpdateSuppressFunc,
 			},
 			"key_name": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"password", "kms_encrypted_password"},
-				DiffSuppressFunc: func(k, o, n string, d *schema.ResourceData) bool {
-					if d.Get("num_of_nodes").(int) == 0 {
-						return true
-					}
-					return o == n
-				},
+				Type:             schema.TypeString,
+				Optional:         true,
+				ConflictsWith:    []string{"password", "kms_encrypted_password"},
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
 			},
 			"kms_encrypted_password": {
 				Type:          schema.TypeString,
@@ -341,10 +329,11 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			},
 			// cpu policy options of kubelet
 			"cpu_policy": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "none",
-				ValidateFunc: validation.StringInSlice([]string{"none", "static"}, false),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "none",
+				ValidateFunc:     validation.StringInSlice([]string{"none", "static"}, false),
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
 			},
 			"proxy_mode": {
 				Type:         schema.TypeString,
@@ -545,30 +534,20 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Required: true,
 			},
 			"worker_instance_types": {
-				Type:          schema.TypeList,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"instances"},
-				Optional:      true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if d.Get("num_of_nodes").(int) == 0 {
-						return true
-					}
-					return false
-				},
-				Description: "The `worker_instance_types` field will become Computed in version 3.21.0 and will no longer support input.",
+				Type:             schema.TypeList,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				ConflictsWith:    []string{"instances"},
+				Optional:         true,
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
+				Description:      "The `worker_instance_types` field will become Computed in version 3.21.0 and will no longer support input.",
 			},
 			"worker_vswitch_ids": {
-				Type:          schema.TypeList,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"instances"},
-				Optional:      true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if d.Get("num_of_nodes").(int) == 0 {
-						return true
-					}
-					return false
-				},
-				Description: "The `worker_vswitch_ids` field will become Computed in version 3.21.0 and will no longer support input.",
+				Type:             schema.TypeList,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				ConflictsWith:    []string{"instances"},
+				Optional:         true,
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
+				Description:      "The `worker_vswitch_ids` field will become Computed in version 3.21.0 and will no longer support input.",
 			},
 			"instances": {
 				Type:          schema.TypeSet,
@@ -658,8 +637,9 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			// 				//Removed:          "Field 'log_config' has been removed from provider version 1.75.0. New field 'addons' replaces it.",
 			// 			},
 			"user_data": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
 			},
 			// 			"node_name_mode": {
 			// 				Type:         schema.TypeString,
@@ -1065,6 +1045,11 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			}
 			if newValue == 0 {
 				// If the number of worker nodes is 0, delete the default node pool
+				stateConf := BuildStateConf([]string{"initial", "removing"}, []string{"active", "running"}, d.Timeout(schema.TimeoutUpdate), 15*time.Second, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"failed"}))
+				stateConf.NotFoundChecks = 1000
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
 				req := client.NewCommonRequest("DELETE", "CS", "2015-12-15", "DeleteClusterNodepool", fmt.Sprintf("/clusters/%s/nodepools/%s", d.Id(), nodepoolid))
 				req.QueryParams["ClusterId"] = d.Id()
 				req.QueryParams["NodepoolId"] = nodepoolid
@@ -1080,7 +1065,6 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				}
 				req.SetContentType(requests.Json)
 				req.SetContent(jsonData)
-				req.Headers["x-acs-asapi-gateway-version"] = "3.0"
 
 				response, err := client.ProcessCommonRequest(req)
 				if err != nil {
@@ -1090,7 +1074,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 					errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, nodepoolid, "DeleteClusterNodePool", errmsg)
 				}
-				stateConf = BuildStateConf([]string{"deleting", "active"}, []string{}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(fmt.Sprintf("%s:%s", d.Id(), nodepoolid), []string{"failed"}))
+				stateConf = BuildStateConf([]string{"deleting", "active"}, []string{}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(resourceNodepoolId, []string{"failed"}))
 				if _, err = stateConf.WaitForState(); err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, nodepoolid)
 				}
@@ -1098,6 +1082,10 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 		}
 
 		if newValue > oldValue {
+			if oldValue == 0 {
+				// Cannot create default node pool when num_of_nodes was 0
+				return errmsgs.WrapErrorf(fmt.Errorf("num_of_nodes can not be greater than before"), "scaleOutFailed %d:%d", newValue, oldValue)
+			}
 			request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ScaleClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s", d.Id(), nodepoolid))
 			body := fmt.Sprintf("{\"%s\":%d}",
 				"count", int64(newValue)-int64(oldValue),
@@ -1218,20 +1206,30 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 			}
 			d.Set("runtime", runtime)
 		}
+		sworker := make([]map[string]interface{}, 0)
+		clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		for _, k := range clusternode.Nodes {
+			if k.InstanceRole == "Worker" && k.InstanceStatus == "Running" {
+				WorkerNodes := map[string]interface{}{
+					"id":         k.InstanceID,
+					"name":       k.InstanceName,
+					"private_ip": fmt.Sprintf("%s", k.IPAddress),
+				}
+				sworker = append(sworker, WorkerNodes)
+			}
+		}
+		d.Set("worker_nodes", sworker)
 	} else {
 		d.Set("num_of_nodes", 0)
 		d.Set("worker_instance_types", nil)
 		d.Set("worker_vswitch_ids", nil)
 		d.Set("worker_disk_category", nil)
 		d.Set("worker_disk_size", nil)
-		d.Set("key_name", nil)
-		d.Set("cpu_policy", nil)
-		d.Set("user_data", nil)
 	}
-
 	smaster := make([]map[string]interface{}, 0)
-	sworker := make([]map[string]interface{}, 0)
-
 	masternodes, err := csService.DescribeClusterMasterNodes(d.Id())
 	for _, k := range masternodes {
 		MasterNodes := map[string]interface{}{
@@ -1241,23 +1239,8 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		}
 		smaster = append(smaster, MasterNodes)
 	}
-	clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	for _, k := range clusternode.Nodes {
-		if k.InstanceRole == "Worker" && k.InstanceStatus == "Running" {
-			WorkerNodes := map[string]interface{}{
-				"id":         k.InstanceID,
-				"name":       k.InstanceName,
-				"private_ip": fmt.Sprintf("%s", k.IPAddress),
-			}
-			sworker = append(sworker, WorkerNodes)
-		}
-	}
 
 	d.Set("master_nodes", smaster)
-	d.Set("worker_nodes", sworker)
 	if err := d.Set("tags", flattenTagsConfig(object.Tags)); err != nil {
 		return errmsgs.WrapError(err)
 	}
