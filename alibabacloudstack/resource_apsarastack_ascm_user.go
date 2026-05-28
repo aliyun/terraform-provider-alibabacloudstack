@@ -62,8 +62,9 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 				Required: true,
 			},
 			"init_password": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:       schema.TypeString,
+				Computed:   true,
+				Deprecated: "This will be removed in version 3.21.0.",
 			},
 			"role_ids": {
 				Type:     schema.TypeSet,

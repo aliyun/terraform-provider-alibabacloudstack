@@ -226,7 +226,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ASAPI_ENDPOINT", nil),
 				Description: descriptions["asapi_endpoint"],
-				Deprecated:  "Use schema endpoints replace asapi_endpoint.",
+				Deprecated:  "Use schema endpoints replace asapi_endpoint. This will be removed in version 3.21.0.",
 			},
 			"sls_endpoint": {
 				Type:        schema.TypeString,
