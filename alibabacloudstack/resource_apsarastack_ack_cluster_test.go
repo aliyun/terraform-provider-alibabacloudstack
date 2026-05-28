@@ -98,11 +98,11 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"proxy_mode":                          "ipvs",
 					"master_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.master.storage_set_id}",
 					"master_storage_set_partition_number": "3",
+					"master_disk_kms_key_id":              "${local.disk_kmskey}",
+					"master_disk_encrypted":               "${local.disk_encrypted}",
 					"master_disk_encrypt_algorithm":       "aes-256",
-					"master_disk_kms_key_id":              "${alibabacloudstack_kms_key.default.id}",
-					"master_disk_encrypted":               "true",
-					"worker_disk_kms_key_id":              "${alibabacloudstack_kms_key.default.id}",
-					"worker_disk_encrypted":               "true",
+					"worker_disk_kms_key_id":              "${local.disk_kmskey}",
+					"worker_disk_encrypted":               "${local.disk_encrypted}",
 					"worker_disk_encrypt_algorithm":       "aes-256",
 					"worker_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.worker.storage_set_id}",
 					"worker_storage_set_partition_number": "3",
@@ -441,6 +441,12 @@ resource "alibabacloudstack_kms_key" "default" {
 	pending_window_in_days 	= "7"
 	rotation_interval 		= "7d"
 	automatic_rotation 		= "Enabled"
+}
+
+locals {
+    disk_category = data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0
+    disk_encrypted = contains(["cloud_pperf", "cloud_sperf"], local.disk_category) ? true : false
+	disk_kmskey = local.disk_encrypted? alibabacloudstack_kms_key.default.id:""
 }
 
 `, name, SecurityGroupCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, RandomPasswordTestCase(12, 1))
