@@ -1228,6 +1228,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		d.Set("worker_vswitch_ids", nil)
 		d.Set("worker_disk_category", nil)
 		d.Set("worker_disk_size", nil)
+		d.Set("worker_nodes", nil)
 	}
 	smaster := make([]map[string]interface{}, 0)
 	masternodes, err := csService.DescribeClusterMasterNodes(d.Id())
@@ -1248,6 +1249,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta interface{}) error {
+	return nil
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	invoker := NewInvoker()

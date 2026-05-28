@@ -734,6 +734,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ack_cluster":                            resourceAlibabacloudStackCSKubernetes(),
 		"alibabacloudstack_ack_template":                           resourceAlibabacloudStackAckTemplate(),
 		"alibabacloudstack_cs_kubernetes_node_pool":                resourceAlibabacloudStackCSKubernetesNodePool(),
+		"alibabacloudstack_cs_autoscaling_config":                  resourceAlibabacloudStackCSAutoscalingConfig(),
 		"alibabacloudstack_datahub_project":                        resourceAlibabacloudStackDatahubProject(),
 		"alibabacloudstack_datahub_subscription":                   resourceAlibabacloudStackDatahubSubscription(),
 		"alibabacloudstack_datahub_topic":                          resourceAlibabacloudStackDatahubTopic(),

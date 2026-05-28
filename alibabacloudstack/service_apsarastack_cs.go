@@ -910,3 +910,51 @@ func (s *CsService) GetK8sClusterKubeConfig(clusterId string, private_address bo
 	err = json.Unmarshal(resp.GetHttpContentBytes(), &response)
 	return response["config"].(string), nil
 }
+
+// AddonInstance represents a Kubernetes addon instance
+type AddonInstance struct {
+	Name   string `json:"name"`
+	Config string `json:"config"`
+}
+
+// GetCsKubernetesAddonInstance retrieves the configuration of a Kubernetes addon
+func (s *CsService) GetCsKubernetesAddonInstance(clusterId, addonName string) (*AddonInstance, error) {
+	pathPattern := fmt.Sprintf("/cluster/%s/autoscale/config/", clusterId)
+	response, err := s.client.DoTeaRequest("GET", "CS", "2015-12-15", "DescribeClusterAddon", pathPattern, nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	addonInstance := &AddonInstance{}
+	if name, ok := response["name"]; ok {
+		addonInstance.Name = name.(string)
+	}
+	if config, ok := response["config"]; ok {
+		// Config might be a string or an object, convert to JSON string
+		switch v := config.(type) {
+		case string:
+			addonInstance.Config = v
+		default:
+			configBytes, _ := json.Marshal(v)
+			addonInstance.Config = string(configBytes)
+		}
+	}
+
+	return addonInstance, nil
+}
+
+func (s *CsService) GetAutoscalingConfig(cluster_id string) (map[string]interface{}, error) {
+	scalerType := "cluster-autoscaler"
+
+	object, err := s.GetCsKubernetesAddonInstance(cluster_id, scalerType)
+	if err != nil {
+		return nil, err
+	}
+
+	autoscalerConfigRaw := make(map[string]interface{})
+	err = json.Unmarshal([]byte(object.Config), &autoscalerConfigRaw)
+	if err != nil {
+		return nil, err
+	}
+	return autoscalerConfigRaw, nil
+}
