@@ -67,26 +67,26 @@ func resourceAlibabacloudStackCSAutoscalingConfigCreate(d *schema.ResourceData, 
 }
 
 func resourceAlibabacloudStackCSAutoscalingConfigRead(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*connectivity.AlibabacloudStackClient)
-	// csService := CsService{client}
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	csService := CsService{client}
 
-	// addonConfigRaw, err := csService.GetAutoscalingConfig(d.Id())
-	// if err != nil {
-	// 	return errmsgs.WrapError(err)
-	// }
+	addonConfigRaw, err := csService.GetAutoscalingConfig(d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
 
-	// if v, ok := addonConfigRaw["ScaleDownUnneededTime"]; ok {
-	// 	d.Set("cool_down_duration", v.(string))
-	// }
-	// if v, ok := addonConfigRaw["ScaleDownDelayAfterAdd"]; ok {
-	// 	d.Set("unneeded_duration", v.(string))
-	// }
-	// if v, ok := addonConfigRaw["ScaleDownUtilizationThreshold"]; ok {
-	// 	d.Set("utilization_threshold", v.(string))
-	// }
-	// if v, ok := addonConfigRaw["ScaleDownGpuUtilizationThreshold"]; ok {
-	// 	d.Set("gpu_utilization_threshold", v.(string))
-	// }
+	if v, ok := addonConfigRaw["ScaleDownUnneededTime"]; ok {
+		d.Set("cool_down_duration", v.(string))
+	}
+	if v, ok := addonConfigRaw["ScaleDownDelayAfterAdd"]; ok {
+		d.Set("unneeded_duration", v.(string))
+	}
+	if v, ok := addonConfigRaw["ScaleDownUtilizationThreshold"]; ok {
+		d.Set("utilization_threshold", v.(string))
+	}
+	if v, ok := addonConfigRaw["ScaleDownGpuUtilizationThreshold"]; ok {
+		d.Set("gpu_utilization_threshold", v.(string))
+	}
 	return nil
 }
 
