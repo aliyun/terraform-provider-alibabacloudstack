@@ -95,6 +95,7 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Default:          40,
 				ValidateFunc:     validation.IntBetween(20, 32768),
 				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Description:      "The `worker_disk_size` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			"worker_disk_category": {
 				Type:     schema.TypeString,
@@ -103,19 +104,23 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					string(DiskCloudEfficiency), string(DiskCloudSSD), string(DiskCloudPPERF), string(DiskCloudSPERF)}, false),
 				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Description:      "The `worker_disk_category` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			"worker_disk_encrypt_algorithm": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
+				Description:  "The `worker_disk_encrypt_algorithm` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			"worker_disk_kms_key_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The `worker_disk_kms_key_id` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			"worker_disk_encrypted": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "The `worker_disk_encrypted` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			// 			"worker_data_disk_size": {
 			// 				Type:             schema.TypeInt,
@@ -169,6 +174,7 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 						// },
 					},
 				},
+				Description: "The `worker_data_disks` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			"master_storage_set_id": {
 				Type:     schema.TypeString,
@@ -184,10 +190,11 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				ValidateFunc: validation.IntBetween(1, 2000),
 			},
 			"worker_storage_set_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "The `worker_storage_set_id` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			"worker_storage_set_partition_number": {
 				Type:         schema.TypeInt,
@@ -195,6 +202,7 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.IntBetween(1, 2000),
+				Description:  "The `worker_storage_set_partition_number` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			// 			"exclude_autoscaler_nodes": {
 			// 				Type:     schema.TypeBool,
@@ -419,9 +427,10 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Computed: true,
 			},
 			"worker_system_disk_performance_level": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The `worker_system_disk_performance_level` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			"is_enterprise_security_group": {
 				Type:     schema.TypeBool,
@@ -522,18 +531,21 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"instances"},
 				Optional:      true,
+				Description:   "The `worker_instance_types` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			"worker_vswitch_ids": {
 				Type:          schema.TypeList,
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"instances"},
 				Optional:      true,
+				Description:   "The `worker_vswitch_ids` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			"instances": {
 				Type:          schema.TypeSet,
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"worker_instance_types", "worker_vswitch_ids", "worker_disk_category"},
 				Optional:      true,
+				Description:   "The `instances` field will become Computed in version 3.20.0 and will no longer support input.",
 			},
 			"format_disk": {
 				Type:     schema.TypeBool,
@@ -1069,85 +1081,86 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	}
 	d.Set("nodepool_id", nodepoolid)
 	d.Set("name", object.Name)
+	d.Set("vpc_id", object.VpcId)
+	d.Set("pod_cidr", object.ContainerCIDR)
+	d.Set("version", object.InitVersion)
+
 	// node_count, err := csService.GetCsK8sNodesCount(d.Id())
 	// if err != nil {
 	// 	return errmsgs.WrapError(err)
 	// }
-	nodepool, err := csService.DescribeCsKubernetesNodePool(fmt.Sprintf("%s:%s", d.Id(), nodepoolid))
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	d.Set("num_of_nodes", nodepool.Status.TotalNodes)
+	if nodepoolid != "" {
+		nodepool, err := csService.DescribeCsKubernetesNodePool(fmt.Sprintf("%s:%s", d.Id(), nodepoolid))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		d.Set("num_of_nodes", nodepool.Status.TotalNodes)
 
-	//d.Set("id", object.ClusterId)
-	//d.Set("state", object.State)
-	d.Set("vpc_id", object.VpcId)
-	//d.Set("resource_group_id", object.ResourceGroupId)
-	d.Set("pod_cidr", object.ContainerCIDR)
-	d.Set("version", object.CurrentVersion)
-	d.Set("delete_protection", object.DeletionProtection)
+		// Read worker-related configurations from nodepool
+		if nodepool.ScalingGroup.InstanceTypes != nil {
+			d.Set("worker_instance_types", nodepool.ScalingGroup.InstanceTypes)
+		}
+		if nodepool.ScalingGroup.VswitchIds != nil {
+			d.Set("worker_vswitch_ids", nodepool.ScalingGroup.VswitchIds)
+		}
+		if nodepool.ScalingGroup.SystemDiskCategory != "" {
+			d.Set("worker_disk_category", nodepool.ScalingGroup.SystemDiskCategory)
+		}
+		if nodepool.ScalingGroup.SystemDiskSize > 0 {
+			d.Set("worker_disk_size", nodepool.ScalingGroup.SystemDiskSize)
+		}
+		if nodepool.ScalingGroup.KeyPair != "" {
+			d.Set("key_name", nodepool.ScalingGroup.KeyPair)
+		}
 
-	// Fill in more attribute readings
-	if object.SecurityGroupId != "" {
-		d.Set("security_group_id", object.SecurityGroupId)
-	}
-	d.Set("worker_ram_role_name", object.WorkerRamRoleName)
+		// Read configurations from kubernetes_config
+		if nodepool.KubernetesConfig.CPUPolicy != "" {
+			d.Set("cpu_policy", nodepool.KubernetesConfig.CPUPolicy)
+		}
+		d.Set("cloud_monitor_flags", nodepool.KubernetesConfig.CmsEnabled)
+		if nodepool.KubernetesConfig.UserData != "" {
+			d.Set("user_data", nodepool.KubernetesConfig.UserData)
+		}
+		// Read runtime configuration
+		// Prefer nodepool.KubernetesConfig for runtime details as it's more specific to the node pool
+		runtimeName := nodepool.KubernetesConfig.Runtime
+		runtimeVersion := nodepool.KubernetesConfig.RuntimeVersion
 
-	// Read worker-related configurations from nodepool
-	if nodepool.ScalingGroup.InstanceTypes != nil {
-		d.Set("worker_instance_types", nodepool.ScalingGroup.InstanceTypes)
-	}
-	if nodepool.ScalingGroup.VswitchIds != nil {
-		d.Set("worker_vswitch_ids", nodepool.ScalingGroup.VswitchIds)
-	}
-	if nodepool.ScalingGroup.SystemDiskCategory != "" {
-		d.Set("worker_disk_category", nodepool.ScalingGroup.SystemDiskCategory)
-	}
-	if nodepool.ScalingGroup.SystemDiskSize > 0 {
-		d.Set("worker_disk_size", nodepool.ScalingGroup.SystemDiskSize)
-	}
-	if nodepool.ScalingGroup.KeyPair != "" {
-		d.Set("key_name", nodepool.ScalingGroup.KeyPair)
-	}
-
-	// Read configurations from kubernetes_config
-	if nodepool.KubernetesConfig.CPUPolicy != "" {
-		d.Set("cpu_policy", nodepool.KubernetesConfig.CPUPolicy)
-	}
-	d.Set("cloud_monitor_flags", nodepool.KubernetesConfig.CmsEnabled)
-	if nodepool.KubernetesConfig.UserData != "" {
-		d.Set("user_data", nodepool.KubernetesConfig.UserData)
-	}
-
-	// Read runtime configuration
-	// Prefer nodepool.KubernetesConfig for runtime details as it's more specific to the node pool
-	runtimeName := nodepool.KubernetesConfig.Runtime
-	runtimeVersion := nodepool.KubernetesConfig.RuntimeVersion
-
-	// Fallback to object.MetaData if nodepool doesn't have runtime info
-	if runtimeName == "" || runtimeVersion == "" {
-		if object.MetaData != "" {
-			var metaDataMap map[string]interface{}
-			if err := json.Unmarshal([]byte(object.MetaData), &metaDataMap); err == nil {
-				if rn, ok := metaDataMap["Runtime"].(string); ok && runtimeName == "" {
-					runtimeName = rn
-				}
-				if rv, ok := metaDataMap["RuntimeVersion"].(string); ok && runtimeVersion == "" {
-					runtimeVersion = rv
+		// Fallback to object.MetaData if nodepool doesn't have runtime info
+		if runtimeName == "" || runtimeVersion == "" {
+			if object.MetaData != "" {
+				var metaDataMap map[string]interface{}
+				if err := json.Unmarshal([]byte(object.MetaData), &metaDataMap); err == nil {
+					if rn, ok := metaDataMap["Runtime"].(string); ok && runtimeName == "" {
+						runtimeName = rn
+					}
+					if rv, ok := metaDataMap["RuntimeVersion"].(string); ok && runtimeVersion == "" {
+						runtimeVersion = rv
+					}
 				}
 			}
 		}
+
+		if runtimeName != "" || runtimeVersion != "" {
+			runtime := []map[string]interface{}{
+				{
+					"name":    runtimeName,
+					"version": runtimeVersion,
+				},
+			}
+			d.Set("runtime", runtime)
+		}
+	} else {
+		d.Set("num_of_nodes", 0)
+		d.Set("worker_instance_types", nil)
+		d.Set("worker_vswitch_ids", nil)
+		d.Set("worker_disk_category", nil)
+		d.Set("worker_disk_size", nil)
+		d.Set("key_name", nil)
+		d.Set("cpu_policy", nil)
+		d.Set("user_data", nil)
 	}
 
-	if runtimeName != "" || runtimeVersion != "" {
-		runtime := []map[string]interface{}{
-			{
-				"name":    runtimeName,
-				"version": runtimeVersion,
-			},
-		}
-		d.Set("runtime", runtime)
-	}
 	smaster := make([]map[string]interface{}, 0)
 	sworker := make([]map[string]interface{}, 0)
 
@@ -1240,9 +1253,9 @@ func getDefaultNodePoolId(csService CsService, clusterId string) (string, error)
 				}
 			}
 		}
-		if nodepoolid == "" {
-			return resource.RetryableError(errmsgs.WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools))
-		}
+		// if nodepoolid == "" {
+		// 	return resource.RetryableError(errmsgs.WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools))
+		// }
 		return nil
 	}); err != nil {
 		return "", err
