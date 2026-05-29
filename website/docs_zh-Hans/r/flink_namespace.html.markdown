@@ -1,5 +1,5 @@
 ---
-subcategory: "Realtime Compute for Apache Flink"
+subcategory: "实时计算 Flink 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack:alibabacloudstack_flink_namespace"
 sidebar_current: "docs-alibabacloudstack-resource-flink-namespace"

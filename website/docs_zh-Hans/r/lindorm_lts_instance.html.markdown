@@ -1,5 +1,5 @@
 ---
-subcategory: "Lindorm"
+subcategory: "云原生多模数据库 Lindorm"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_lindorm_lts_instance"
 sidebar_current: "docs-alibabacloudstack-resource-lindorm-lts-instance"

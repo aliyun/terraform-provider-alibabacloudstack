@@ -1,5 +1,5 @@
 ---
-subcategory: "ASCM"
+subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_password_policy"
 sidebar_current: "docs-alibabacloudstack-resource-ascm-password-policy"

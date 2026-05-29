@@ -1,5 +1,5 @@
 ---
-subcategory: "PolarDB-X 1.0"
+subcategory: "云原生分布式数据库PolarDB-X 1.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_database"
 sidebar_current: "docs-Alibabacloudstack-drds-database"

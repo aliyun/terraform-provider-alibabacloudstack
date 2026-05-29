@@ -1,5 +1,5 @@
 ---
-subcategory: "Express Connect"
+subcategory: "高速通道"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_express_connect_access_points"
 sidebar_current: "docs-alibabacloudstack-datasource-express-connect-access-points"

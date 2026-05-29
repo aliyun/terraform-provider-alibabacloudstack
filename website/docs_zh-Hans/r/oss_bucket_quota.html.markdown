@@ -1,5 +1,5 @@
 ---
-subcategory: "Object Storage Service (OSS)"
+subcategory: "对象存储 OSS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_quota"
 sidebar_current: "docs-Alibabacloudstack-oss-bucket-quota"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Hologres"
+subcategory: "实时数仓 Hologres"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hologram_instance"
 sidebar_current: "docs-alibabacloudstack-resource-hologram-instance"

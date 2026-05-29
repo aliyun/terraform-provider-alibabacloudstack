@@ -1,5 +1,5 @@
 ---
-subcategory: "Alibaba Cloud DNS"
+subcategory: "云解析 DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_domain"
 sidebar_current: "docs-Alibabacloudstack-dns-private_domain"

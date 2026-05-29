@@ -1,5 +1,5 @@
 ---
-subcategory: "Key Management Service"
+subcategory: "密钥管理服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_ciphertexts"
 sidebar_current: "docs-alibabacloudstack-datasource-kms-ciphertext"

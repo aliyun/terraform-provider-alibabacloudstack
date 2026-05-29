@@ -1,5 +1,5 @@
 ---
-subcategory: "Virtual Private Cloud (VPC)"
+subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_eip_addresses"
 sidebar_current: "docs-Alibabacloudstack-datasource-eip-addresses"

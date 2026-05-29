@@ -1,5 +1,5 @@
 ---
-subcategory: "Simple Log Service"
+subcategory: "日志服务 SLS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_machine_group"
 sidebar_current: "docs-alibabacloudstack-resource-log-machine-group"

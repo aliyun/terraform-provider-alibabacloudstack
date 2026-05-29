@@ -1,5 +1,5 @@
 ---
-subcategory: "Bare Metal Computing Platform (BMCP)"
+subcategory: "裸金属算力平台 BMCP"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bcmp_keypair"
 sidebar_current: "docs-Alibabacloudstack-bcmp-keypair"

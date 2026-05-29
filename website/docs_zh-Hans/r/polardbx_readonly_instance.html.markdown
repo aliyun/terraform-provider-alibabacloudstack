@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud-Native Distributed Database PolarDB-X 2.0"
+subcategory: "云原生分布式数据库PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_readonly_instance"
 sidebar_current: "docs-alibabacloudstack-polardbx-readonly-instance"

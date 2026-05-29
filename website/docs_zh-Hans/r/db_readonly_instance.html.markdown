@@ -1,5 +1,5 @@
 ---
-subcategory: "ApsaraDB RDS"
+subcategory: "云数据库 RDS 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_readonly_instance"
 sidebar_current: "docs-alibabacloudstack-resource-db-readonly-instance"

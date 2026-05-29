@@ -1,5 +1,5 @@
 ---
-subcategory: "Simple Log Service"
+subcategory: "日志服务 SLS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_logtail_config"
 sidebar_current: "docs-alibabacloudstack-resource-logtail-config"

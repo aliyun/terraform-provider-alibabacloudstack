@@ -1,5 +1,5 @@
 ---
-subcategory: "Express Connect"
+subcategory: "高速通道"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgpnetworks"
 sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-bgpnetworks"

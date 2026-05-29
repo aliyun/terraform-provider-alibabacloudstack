@@ -1,5 +1,5 @@
 ---
-subcategory: "Resource Orchestration Service (ROS)"
+subcategory: "资源编排 ROS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ros_stacks"
 sidebar_current: "docs-Alibabacloudstack-datasource-ros-stacks"

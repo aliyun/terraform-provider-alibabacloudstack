@@ -1,5 +1,5 @@
 ---
-subcategory: "ASCM"
+subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_ascm_ram_policies_for_user"
 sidebar_current: "docs-alibabacloudstack-datasource-ascm-ram-policies-for-user"

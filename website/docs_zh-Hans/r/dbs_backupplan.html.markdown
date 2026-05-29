@@ -1,5 +1,5 @@
 ---
-subcategory: "Database Backup"
+subcategory: "数据库备份服务 DBS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dbs_backupplan"
 sidebar_current: "docs-Alibabacloudstack-dbs-backupplan"

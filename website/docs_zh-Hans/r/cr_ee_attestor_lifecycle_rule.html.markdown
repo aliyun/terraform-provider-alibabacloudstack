@@ -1,5 +1,5 @@
 ---
-subcategory: "Container Registry (ACR)"
+subcategory: "容器镜像服务 ACR"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_artifact_lifecycle_rule"
 sidebar_current: "docs-Alibabacloudstack-cr-cr_ee_artifact_lifecycle_rule"
