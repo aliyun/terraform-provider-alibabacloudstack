@@ -1,5 +1,5 @@
 ---
-subcategory: "云数据库 Tair（兼容 Redis）"
+subcategory: "云数据库 Redis 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_backup_policy"
 sidebar_current: "docs-alibabacloudstack-resource-kvstore-backup-policy"

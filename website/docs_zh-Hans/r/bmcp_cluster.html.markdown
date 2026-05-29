@@ -1,5 +1,5 @@
 ---
-subcategory: "裸金属计算平台 (BMCP)"
+subcategory: "裸金属算力平台 BMCP"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bmcp_cluster"
 sidebar_current: "docs-Alibabacloudstack-bmcp-cluster"

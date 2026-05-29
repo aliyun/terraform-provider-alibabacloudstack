@@ -1,5 +1,5 @@
 ---
-subcategory: "应用"
+subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_ram_policy_for_role"
 sidebar_current: "docs-alibabacloudstack-resource-ascm-ram-policy-for-role"

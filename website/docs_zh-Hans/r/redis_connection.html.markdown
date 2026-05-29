@@ -1,5 +1,5 @@
 ---
-subcategory: "云数据库 Tair（兼容 Redis）"
+subcategory: "云数据库 Redis 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_redis_connection"
 sidebar_current: "docs-Alibabacloudstack-redis-connection"

@@ -1,5 +1,5 @@
 ---
-subcategory: "企业级分布式应用服务"
+subcategory: "企业级分布式应用服务 EDAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_application_scale"
 sidebar_current: "docs-Alibabacloudstack-edas-application-scale"

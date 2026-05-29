@@ -1,5 +1,5 @@
 ---
-subcategory: "日志服务"
+subcategory: "日志服务 SLS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_alert"
 sidebar_current: "docs-alibabacloudstack-resource-log-alert"

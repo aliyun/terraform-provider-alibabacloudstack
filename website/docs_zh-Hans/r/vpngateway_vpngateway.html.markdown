@@ -1,5 +1,5 @@
 ---
-subcategory: "专有网络 VPC"
+subcategory: "VPN网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpngateway"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-vpngateway"

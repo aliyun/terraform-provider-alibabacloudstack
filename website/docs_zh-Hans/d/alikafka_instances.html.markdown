@@ -1,5 +1,5 @@
 ---
-subcategory: "Alikafka"
+subcategory: "消息队列 Kafka 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_instances"
 sidebar_current: "docs-alibabacloudstack-datasource-alikafka-instances"

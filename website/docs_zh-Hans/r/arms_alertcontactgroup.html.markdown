@@ -1,5 +1,5 @@
 ---
-subcategory: "应用实时监控服务 ARMS"
+subcategory: "应用实时监控服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_arms_alertcontactgroup"
 sidebar_current: "docs-Alibabacloudstack-arms-alertcontactgroup"

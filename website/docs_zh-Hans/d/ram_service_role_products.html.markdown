@@ -1,5 +1,5 @@
 ---
-subcategory: "企业控制台(ASCM)"
+subcategory: "资源访问管理"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ram_service_role_products"
 sidebar_current: "docs-Alibabacloudstack-datasource-ram-service-role-products"

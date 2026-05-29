@@ -1,5 +1,5 @@
 ---
-subcategory: "云服务器 ECS"
+subcategory: "资源访问管理"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ram_role_attachment"
 sidebar_current: "docs-Alibabacloudstack-ecs-ramroleattachment"

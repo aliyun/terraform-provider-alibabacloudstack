@@ -1,5 +1,5 @@
 ---
-subcategory: "应用"
+subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_user_group_role_binding"
 sidebar_current: "docs-alibabacloudstack-resource-ascm-user-role-binding"

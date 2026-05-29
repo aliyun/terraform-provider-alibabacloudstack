@@ -1,5 +1,5 @@
 ---
-subcategory: "云服务总线 CSB"
+subcategory: "API 网关（API Gateway）V2 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_service_source"
 sidebar_current: "docs-Alibabacloudstack-api_gateway-api_gateway_v2_service_source"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Alikafka"
+subcategory: "消息队列 Kafka 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_sasl_acl"
 sidebar_current: "docs-alibabacloudstack-resource-alikafka-sasl_acl"

@@ -1,5 +1,5 @@
 ---
-subcategory: "裸金属计算平台"
+subcategory: "裸金属算力平台 BMCP"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bcmp_keypairs"
 sidebar_current: "docs-Alibabacloudstack-datasource-bcmp-keypairs"

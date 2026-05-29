@@ -1,5 +1,5 @@
 ---
-subcategory: "阿里云并行文件系统(APFS)"
+subcategory: "防暴力破解安全服务"
 layout: "alibabacloudstack"
 page_title: "阿里云专有云: alibabacloudstack_aqs_oss_scanconfig"
 sidebar_current: "docs-alibabacloudstack-resource-aqs-oss-scanconfig"

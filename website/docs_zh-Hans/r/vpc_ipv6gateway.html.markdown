@@ -1,5 +1,5 @@
 ---
-subcategory: "专有网络"
+subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6gateway"
 sidebar_current: "docs-Alibabacloudstack-vpc-ipv6gateway"

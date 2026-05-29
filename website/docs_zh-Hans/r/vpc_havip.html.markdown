@@ -1,5 +1,5 @@
 ---
-subcategory: "专有网络"
+subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_havip"
 sidebar_current: "docs-Alibabacloudstack-vpc-havip"

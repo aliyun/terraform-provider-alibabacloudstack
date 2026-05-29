@@ -1,5 +1,5 @@
 ---
-subcategory: "分布式关系型数据库"
+subcategory: "云数据库 RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_instance_types"
 sidebar_current: "docs-alibabacloudstack-rds-instance-types"

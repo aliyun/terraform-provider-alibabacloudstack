@@ -1,5 +1,5 @@
 ---
-subcategory: "专有网络"
+subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_router_interface_connection"
 sidebar_current: "docs-alibabacloudstack-resource-route-interface-connection"

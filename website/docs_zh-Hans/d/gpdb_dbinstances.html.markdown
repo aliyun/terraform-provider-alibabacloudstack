@@ -1,5 +1,5 @@
 ---
-subcategory: "AnalyticDB for PostgreSQL"
+subcategory: "云原生数据仓库 AnalyticDB PostgreSQL版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_dbinstances"
 sidebar_current: "docs-Alibabacloudstack-datasource-gpdb-dbinstances"
