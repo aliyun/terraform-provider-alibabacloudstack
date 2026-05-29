@@ -1,5 +1,5 @@
 ---
-subcategory: "VPNGateway"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnpbrrouteentry"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-vpnpbrrouteentry"
@@ -61,16 +61,25 @@ resource "alibabacloudstack_vpngateway_vpn_pbr_route_entry" "default" {
 ## 参数参考
 
 支持以下参数：
-  * `next_hop` - (必填, 变更时重建) - 目的路由的下一跳。
-  * `overlay_mode` - (选填, 变更时重建) - 隧道协议，取值：**Ipsec**（IPsec隧道协议）。
-  * `publish_vpc` - (必填) - 是否发布策略路由到VPC，取值：- **true**：发布策略路由到VPC。- **false**：不发布策略路由到VPC。
-  * `route_dest` - (必填, 变更时重建) - 目的路由的目标网段。
-  * `route_source` - (必填, 变更时重建) - 策略路由的源网段。
-  * `vpn_gateway_id` - (必填, 变更时重建) - VPN网关的ID。
-  * `weight` - (必填) - 目的路由的权重值，取值：**0**|**100**。
+  * `vpn_gateway_id` - (必填, 变更时重建) VPN网关的ID。
+  * `route_source` - (必填, 变更时重建) 策略路由的源网段。
+  * `route_dest` - (必填, 变更时重建) 目的路由的目标网段。
+  * `next_hop` - (必填, 变更时重建) 目的路由的下一跳。
+  * `weight` - (必填) 目的路由的权重值，取值：`0` 或 `100`。
+  * `publish_vpc` - (必填) 是否发布策略路由到VPC，取值：`true`（发布）或 `false`（不发布）。
+  * `overlay_mode` - (选填) 隧道协议，默认值：`Ipsec`，取值：`Ipsec`（IPsec隧道协议）。
 
 ## 属性参考
 
 除了上述所有参数外，还导出了以下属性：
-  * `create_time` - VPN目的路由的创建时间。
-  * `status` - VPN目的路由的状态。
+  * `id` - 资源的ID，格式为 `<vpn_gateway_id>_<route_source>_<route_dest>_<next_hop>`。
+  * `create_time` - VPN PBR路由条目的创建时间。
+  * `status` - VPN PBR路由条目的状态。
+
+## Import
+
+VPN PBR路由条目可以使用组合ID进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_vpngateway_vpn_pbr_route_entry.example <vpn_gateway_id>_<route_source>_<route_dest>_<next_hop>
+```

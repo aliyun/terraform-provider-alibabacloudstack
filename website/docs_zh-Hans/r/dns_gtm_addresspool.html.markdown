@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_addresspool"
 sidebar_current: "docs-Alibabacloudstack-dns-dns_gtm_addresspool"
@@ -57,3 +57,11 @@ resource "alibabacloudstack_dns_gtm_addresspool" "default" {
 以下属性会从API响应中导出：
 
 * `id` - 地址池的ID。
+
+## Import
+
+云解析全局调度地址池可以使用地址池 ID 导入，例如：
+
+```
+$ terraform import alibabacloudstack_dns_gtm_addresspool.example <address_pool_id>
+```

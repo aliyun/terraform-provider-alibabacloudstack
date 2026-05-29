@@ -1,5 +1,5 @@
 ---
-subcategory: "OSS"
+subcategory: "Object Storage Service (OSS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_quota"
 sidebar_current: "docs-Alibabacloudstack-oss-bucket-quota"
@@ -42,3 +42,11 @@ resource "alibabacloudstack_oss_bucket_quota" "default" {
 * `bucket` - 返回所设置配额的 OSS 存储桶名称。
 * `oss_cluster` - 返回 OSS 集群名称。
 * `quota` - 返回 OSS 存储桶的存储配额，单位为兆字节（MB）。此值与设置时的值一致，表示当前存储桶的存储限制。
+
+## Import
+
+OSS Bucket Quota 可以使用 `oss_cluster:bucket` 格式导入，例如：
+
+```
+$ terraform import alibabacloudstack_oss_bucket_quota.example oss-cluster-1:my-bucket-name
+```

@@ -1,15 +1,18 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_ecs_snapshotgroup"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_snapshot_group"
 sidebar_current: "docs-Alibabacloudstack-ecs-snapshotgroup"
 description: |-
-  Provides a ecs Snapshotgroup resource.
+  Provides a ECS Snapshot Group resource.
 ---
 
-# alibabacloudstack\_ecs\_snapshotgroup
+# alibabacloudstack\_ecs\_snapshot\_group
 
-Provides a ecs Snapshotgroup resource.
+> **Note:** This resource can also be referred to by the following aliases:
+> - `alibabacloudstack_ecs_snapshotgroup`
+
+Provides a ECS Snapshot Group resource. A snapshot-consistent group contains snapshots of one or more disks that belong to the same ECS instance or multiple instances within the same zone.
 
 ## Example Usage
 ```
@@ -132,19 +135,29 @@ resource "alibabacloudstack_ecs_snapshot_group" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `create_time` - (Optional) - The creation time of the resource
-  * `description` - (Optional) - snapshot group description
-  * `exclude_disk_ids` - (Optional) - The disk IDs excluded from the snapshot group.
-  * `disk_ids` - (Optional) - The disk IDs included in the snapshot group.
-  * `instance_id` - (Optional) - instance id
-  * `instant_access` - (Optional) - Whether to enable snapshot speed is available. Value range:-true: on.-false: closed.The default value is false.
-  * `instant_access_retention_days` - (Optional) - Set the usage time available for snapshot speed. Unit: days, value range: 1~65535.This parameter takes effect only when 'InstantAccess = true. Automatically turn off the snapshot speed function after expiration.Default value: null, indicating the same snapshot release time.
-  * `snapshot_group_name` - (Optional) - name
+
+  * `disk_ids` - (Optional) The IDs of the cloud disks for which you want to create a snapshot-consistent group. You can specify the IDs of cloud disks that are attached to multiple instances within the same zone. Valid values of N: 1 to 16. A snapshot-consistent group can contain snapshots of up to 16 cloud disks whose total disk size does not exceed 32 TiB. This parameter cannot be used together with `exclude_disk_ids`. If you set `instance_id`, this parameter can only specify disks attached to the specified instance.
+  * `exclude_disk_ids` - (Optional) The IDs of the cloud disks for which you do not want to create snapshots. After you specify the IDs of cloud disks, the snapshot-consistent group that you create does not contain the snapshots of the specified cloud disks. Valid values of N: 1 to 16. Default value: empty, which means snapshots are created for all disks of the instance. This parameter cannot be used together with `disk_ids`.
+  * `instance_id` - (Optional) The ID of the ECS instance. You can set this parameter to create a snapshot-consistent group for disks on a specific ECS instance.
+  * `snapshot_group_name` - (Optional) The name of the snapshot-consistent group. The name must be 2 to 128 characters in length, and can contain letters, digits, periods (.), underscores (_), hyphens (-), and colons (:). It must start with a letter or Chinese character and cannot start with `http://` or `https://`.
+  * `description` - (Optional) The description of the snapshot-consistent group. The description must be 2 to 256 characters in length and cannot start with `http://` or `https://`.
+  * `instant_access` - (Optional, Available in 3.18+) Specifies whether to enable the instant access feature for the snapshot. Valid values: `true`, `false`. Default value: `false`.
+  * `instant_access_retention_days` - (Optional, Available in 3.18+) The retention period for the instant access feature. Unit: days. Valid values: 1 to 65535. This parameter takes effect only when `instant_access` is set to `true`. After the retention period expires, the instant access feature is automatically disabled. Default value: empty, which means the instant access feature is disabled when the snapshot is released.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `create_time` - The creation time of the resource
-  * `disk_ids` - The disk IDs included in the snapshot group.
-  * `snapshot_group_id` - The first ID of the resource
-  * `status` - The status of the resource
+
+  * `id` - The ID of the snapshot-consistent group.
+  * `snapshot_group_id` - The ID of the snapshot-consistent group.
+  * `status` - The status of the snapshot-consistent group. Valid values: `progressing`, `accomplished`, `failed`.
+  * `create_time` - The time when the snapshot-consistent group was created.
+  * `disk_ids` - The IDs of the cloud disks included in the snapshot-consistent group.
+
+## Import
+
+ECS Snapshot Group can be imported using the snapshot group ID, e.g.
+
+```
+$ terraform import alibabacloudstack_ecs_snapshot_group.example ssg-j6ciyh3k52qp7ovm****
+```

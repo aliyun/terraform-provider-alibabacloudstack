@@ -8,7 +8,6 @@ description: |-
 ---
 
 # alibabacloudstack_edas_applications
--> **NOTE:** 该资源等效别名有: `alibabacloudstack_edas_slbattachments`
 
 根据指定过滤条件列出当前凭证权限可以访问的企业级分布式应用服务应用列表。
 
@@ -40,8 +39,7 @@ resource "alibabacloudstack_edas_application" "default" {
 
 data "alibabacloudstack_edas_applications" "default" {
   ids        = ["${alibabacloudstack_edas_application.default.id}"]
-  name_regex = "${alibabacloudstack_edas_application.default.application_name}"
-  output_file = "edas_applications_output.txt"
+  name_regex = "^${alibabacloudstack_edas_application.default.application_name}"
 }
 
 output "application_names" {
@@ -53,8 +51,9 @@ output "application_names" {
 
 以下参数是支持的：
 
-* `ids` - (可选) 应用程序ID列表，用于过滤结果。如果未提供，则会考虑所有应用程序。
-* `name_regex` - (可选) 用于按应用程序名称过滤结果的正则表达式字符串。
+* `ids` - (可选，ForceNew) 应用程序ID列表，用于过滤结果。如果未提供，则会考虑所有应用程序。
+* `name_regex` - (可选，ForceNew) 用于按应用程序名称过滤结果的正则表达式字符串。
+* `output_file` - (可选，Deprecated) 输出文件路径。该字段已被弃用，计划在 3.19.0 版本中移除。要将内容写入文件，请使用 `local_file` 提供商代替。
 
 ## 属性说明
 

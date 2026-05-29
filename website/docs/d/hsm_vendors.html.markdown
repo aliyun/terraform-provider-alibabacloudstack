@@ -1,5 +1,5 @@
 ---
-subcategory: "Hardware Security Module (HSM)"
+subcategory: "Key Management Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hsm_vendors"
 sidebar_current: "docs-alibabacloudstack-datasource-hsm-vendors"

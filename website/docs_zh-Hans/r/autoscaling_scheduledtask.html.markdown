@@ -8,7 +8,7 @@ description: |-
 ---
 
 # alibabacloudstack_autoscaling_scheduledtask
--> **NOTE:** 该资源等效别名有: `alibabacloudstack_ess_scheduled_task`
+-> **NOTE:** 该资源等效别名有: `alibabacloudstack_ess_scheduled_task`、`alibabacloudstack_autoscaling_scheduled_task`、`alibabacloudstack_autoscaling_scheduledtask`。
 
 使用Provider配置的凭证在指定的资源集下编排弹性伸缩定时任务。
 
@@ -152,20 +152,19 @@ resource "alibabacloudstack_ess_scheduled_task" "default" {
   * `scheduled_action` - (必填) - 定时任务触发时需要执行的操作。必须是伸缩规则的唯一标识符。
   * `launch_time` - (必填) - 定时任务触发的时间点。按照ISO 8601标准格式指定时间，格式为`YYYY-MM-DDThh:mm:ssZ`。时间必须为UTC。您不能输入创建计划任务日期之后90天以上的某个时间点。如果设置了`recurrence_type`参数，则任务会根据`launch_time`反复执行；否则，任务只会在`launch_time`指定的日期和时间执行一次。
   * `scheduled_task_name` - (选填) - 定时任务的名称，长度为2-40个字符(英文或中文)。
-  * `description` - (选填) - 定时任务的描述信息，长度为2-200个字符(英文或中文)。
+  * `description` - (选填, 可回读) - 定时任务的描述信息，长度为2-200个字符(英文或中文)。
   * `launch_expiration_time` - (选填) - 定时任务触发操作失败后，在此时间内重试。单位为秒，取值范围：0~21600，默认值：600。
-  * `recurrence_type` - (选填) - 重复执行定时任务的类型。有效值：
+  * `recurrence_type` - (选填, 可回读) - 重复执行定时任务的类型。有效值：
     * `Daily`: 定时任务每隔指定天数执行一次。
     * `Weekly`: 定时任务在每周的指定天执行。
     * `Monthly`: 定时任务在每月的指定天执行。
-    * `Cron`: 定时任务基于指定的cron表达式执行。
-  * `recurrence_value` - (选填) - 重复执行定时任务的数值。有效值取决于`recurrence_type`：
+  * `recurrence_value` - (选填, 可回读) - 重复执行定时任务的数值。有效值取决于`recurrence_type`：
     * `Daily`: 可以输入一个值。有效值：1到31。
     * `Weekly`: 可以输入多个值并用逗号(,)分隔。例如，值0到6分别对应星期日到星期六。
     * `Monthly`: 可以输入两个值，格式为A-B。有效值A和B：1到31。B的值必须大于或等于A的值。
-    * `Cron`: 可以输入一个cron表达式，该表达式以UTC编写，并由五个字段组成：分钟、小时、日期、月份和星期几。表达式可以包含通配符，包括逗号(,)、问号(?)、连字符(-)、星号(*)、井号(#)、正斜杠(/)以及字母L和W。
-  * `recurrence_end_time` - (选填) - 重复执行定时任务的结束时间。按照ISO 8601标准格式指定时间，格式为`YYYY-MM-DDThh:mm:ssZ`。时间必须为UTC。您不能输入创建计划任务日期之后365天以上的某个时间点。
+  * `recurrence_end_time` - (选填, 可回读) - 重复执行定时任务的结束时间。按照ISO 8601标准格式指定时间，格式为`YYYY-MM-DDThh:mm:ssZ`。时间必须为UTC。您不能输入创建计划任务日期之后365天以上的某个时间点。
   * `task_enabled` - (选填) - 是否启动定时任务。默认值：`true`。
+  * `scaling_group_id` - (选填, 可回读) - 定时任务所属的伸缩组ID。
 
 ## 属性说明
 
@@ -176,3 +175,12 @@ resource "alibabacloudstack_ess_scheduled_task" "default" {
   * `recurrence_value` - 重复执行定时任务的数值。
   * `recurrence_end_time` - 重复执行定时任务的结束时间。
   * `task_enabled` - 表明定时任务是否已启用。
+  * `scaling_group_id` - 定时任务所属的伸缩组ID。
+
+## Import
+
+弹性伸缩定时任务可以通过 ScheduledTaskId 导入，例如：
+
+```
+$ terraform import alibabacloudstack_ess_scheduled_task.example tsk-12345678
+```

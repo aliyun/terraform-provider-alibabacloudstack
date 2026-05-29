@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_record"
 sidebar_current: "docs-Alibabacloudstack-private-dns-record"
@@ -75,6 +75,12 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The resource ID, in the format {ZoneId}:{Id}.
-* `create_timestamp` - The creation timestamp (in seconds).
-* `update_timestamp` - The update timestamp (in seconds).
+* `id` - The resource ID, in the format `{ZoneId}:{Id}`.
+
+## Import
+
+DNS Private Record can be imported using the ZoneId and RecordId in the format `{ZoneId}:{Id}`, e.g.
+
+```
+$ terraform import alibabacloudstack_dns_private_record.example f27ffcc8-02a4-4ca1-9ca4-6bffc4e82034:record-12345
+```

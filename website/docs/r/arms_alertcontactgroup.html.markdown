@@ -1,5 +1,5 @@
 ---
-subcategory: "Application Real-Time Monitoring Service (ARMS)"
+subcategory: "Application Real-Time Monitoring Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_arms_alertcontactgroup"
 sidebar_current: "docs-Alibabacloudstack-arms-alertcontactgroup"
@@ -46,3 +46,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the alert contact group. This is automatically generated upon creation and can be used for importing the resource into Terraform.
+
+## Import
+
+Alert Contact Group can be imported using the ContactGroupId, e.g.
+
+```
+$ terraform import alibabacloudstack_arms_alert_contact_group.example 12345678
+```

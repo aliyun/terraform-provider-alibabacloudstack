@@ -37,6 +37,7 @@ The following arguments are supported:
 * `vswitch_id` - (Optional, ForceNew) ID of the VSwitch linked to the SLBs.
 * `address` - (Optional, ForceNew) Service address of the SLBs.
 * `tags` - (Optional, ForceNew) A map of tags assigned to the SLB instances. The tags can have a maximum of 5 key-value pairs.
+* `output_file` - (Optional, Deprecated) This field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the `local_file` provider instead.
 
 ## Attributes Reference
 
@@ -53,5 +54,10 @@ The following attributes are exported in addition to the arguments listed above:
   * `vpc_id` - ID of the VPC the SLB belongs to.
   * `vswitch_id` - ID of the VSwitch the SLB belongs to.
   * `address` - Service address of the SLB.
-  * `creation_time` - Creation time of the SLB.
   * `tags` - Tags assigned to the SLB.
+  * `address_type` - Address type of the SLB.
+  * `master_zone_id` - Master zone ID of the SLB.
+  * `delete_protection` - Delete protection status of the SLB.
+  * `internet_charge_type` - Internet charge type of the SLB.
+  * `create_time` - Creation time of the SLB.
+  * `load_balancer_spec` - Specification of the SLB.

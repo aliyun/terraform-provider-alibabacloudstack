@@ -1,5 +1,5 @@
 ---
-subcategory: "VPNGateway"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpngateway"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-vpngateway"
@@ -42,7 +42,7 @@ resource "alibabacloudstack_vpngateway_vpngateway" "default" {
   bandwidth         = "10"
   vswitch_id        = "${alibabacloudstack_vpc_vswitch.default.id}"
   vpc_id            = "${alibabacloudstack_vpc_vpc.default.id}"
-  enable_ssl        = true
+  ssl_vpn           = true
   instance_charge_type = "PostPaid"
 
   tags = {
@@ -56,36 +56,39 @@ resource "alibabacloudstack_vpngateway_vpngateway" "default" {
 
 The following arguments are supported:
 
-* `vpn_gateway_name` - (Optional) The name of the VPN gateway.
 * `vpc_id` - (Required, ForceNew) The ID of the VPC to which the VPN gateway belongs.
-* `instance_charge_type` - (Optional, ForceNew) The billing method of the instance. Valid values:
-  * **PrePaid**: Subscription.
-  * **PostPaid**: Pay-As-You-Go.
-  Default value: **PostPaid**.
-* `period` - (Optional) Duration of purchase. This parameter is required when `instance_charge_type` is set to `PrePaid`. Valid values: [1-9, 12, 24, 36]. Default value: 1.
-* `bandwidth` - (Required) The public network bandwidth of the VPN gateway. Unit: Mbps. Valid values for PostPaid instances: 10, 100, 200. Valid values for PrePaid instances: 5, 10, 20, 50, 100, 200.
-* `enable_ipsec` - (Optional) Specifies whether to enable the IPsec-VPN feature. Default value: **true**.
-* `enable_ssl` - (Optional) Specifies whether to enable the SSL-VPN feature. Default value: **false**.
-* `ssl_connections` - (Optional) The maximum number of concurrent SSL-VPN connections. Valid values: 5, 10, 20, 50, 100, 200. Default value: **5**. This parameter takes effect only when `enable_ssl` is set to **true**.
-* `description` - (Optional) The description of the VPN gateway.
+* `bandwidth` - (Required) The public network bandwidth of the VPN gateway. Unit: Mbps. Valid values: 5, 10, 20, 50, 100, 200, 500, 1000.
+* `vpn_gateway_name` - (Optional) The name of the VPN gateway. The name must be 1 to 128 characters in length.
+* `instance_charge_type` - (Optional, ForceNew) The billing method of the instance. Valid values: `PrePaid`, `PostPaid`. Default value: `PostPaid`.
+* `period` - (Optional) Duration of purchase. Valid values: 1 to 9, 12, 24, 36. Default value: 1.
 * `vswitch_id` - (Optional, ForceNew) The ID of the vSwitch to which the VPN gateway belongs.
+* `ipsec_vpn` - (Optional) Specifies whether to enable the IPsec-VPN feature.
+* `ssl_vpn` - (Optional) Specifies whether to enable the SSL-VPN feature.
+* `ssl_max_connections` - (Optional) The maximum number of concurrent SSL-VPN connections. Default value: 5.
+* `description` - (Optional) The description of the VPN gateway. The description must be 2 to 256 characters in length.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
-* `ipsec_vpn` - (Optional) Specifies whether to enable the IPsec-VPN feature. 
-* `ssl_vpn` - (Optional) Specifies whether to enable the SSL-VPN feature. 
-* `ssl_max_connections` - (Optional) The maximum number of concurrent SSL-VPN connections. 
+* `name` - (Optional, Deprecated) This parameter is deprecated. Use `vpn_gateway_name` instead.
+* `enable_ipsec` - (Optional, Deprecated) This parameter is deprecated. Use `ipsec_vpn` instead.
+* `enable_ssl` - (Optional, Deprecated) This parameter is deprecated. Use `ssl_vpn` instead.
+* `ssl_connections` - (Optional, Deprecated) This parameter is deprecated. Use `ssl_max_connections` instead.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
 
-* `id` - The ID of the resource.
+* `id` - The ID of the VPN gateway.
 * `internet_ip` - The public IP address of the VPN gateway.
-* `status` - The status of the resource. Valid values:
-  * **Creating**: The resource is being created.
-  * **Available**: The resource has been created and can be used normally.
-  * **Deleting**: The resource is being deleted.
-* `business_status` - The payment status of the VPN gateway. Valid values:
-  * **Normal**: The resource is normal.
-  * **Expired**: The resource has expired.
-  * **LockDown**: The resource has been locked.
-* `name` - The name of the VPN gateway. 
+* `status` - The status of the VPN gateway. Valid values: `provisioning`, `init`, `active`.
+* `business_status` - The payment status of the VPN gateway.
+* `vpn_gateway_name` - The name of the VPN gateway.
+* `ipsec_vpn` - Indicates whether the IPsec-VPN feature is enabled.
+* `ssl_vpn` - Indicates whether the SSL-VPN feature is enabled.
+* `ssl_max_connections` - The maximum number of concurrent SSL-VPN connections.
+
+## Import
+
+VPN Gateway can be imported using the VpnGatewayId, e.g.
+
+```
+$ terraform import alibabacloudstack_vpngateway_vpngateway.example vgw-xxxxxxxxx
+```

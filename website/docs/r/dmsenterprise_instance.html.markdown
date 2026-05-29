@@ -1,5 +1,5 @@
 ---
-subcategory: "DMS Enterprise"
+subcategory: "Data Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dmsenterprise_instance"
 sidebar_current: "docs-Alibabacloudstack-dmsenterprise-instance"
@@ -92,8 +92,9 @@ The following arguments are supported:
 * `port` - (Required, ForceNew) Access port of the target database.
 * `database_user` - (Required) Database access account.
 * `database_password` - (Required) Database access password.
-* `instance_name` - (Required) Instance name, to help users quickly distinguish positioning.
-* `dba_uid` - (Required, ForceNew) The DBA of the instance is passed into the Alibaba Cloud UID of the DBA.
+* `instance_name` - (Optional, Computed) Instance name, to help users quickly distinguish positioning. Conflicts with `instance_alias`.
+* `instance_alias` - (Optional, Computed, Deprecated) The alias of the database instance. **Deprecated:** Field 'instance_alias' has been deprecated from version 1.100.0. Use 'instance_name' instead. Conflicts with `instance_name`.
+* `dba_uid` - (Required, ForceNew) The DBA of the instance, which is the Alibaba Cloud UID of a registered DMS user.
 * `safe_rule` - (Required, ForceNew) The security rule of the instance is passed into the name of the security rule in the enterprise.
 * `query_timeout` - (Required) Query timeout time, unit: s (seconds).
 * `export_timeout` - (Required) Export timeout, unit: s (seconds).
@@ -105,6 +106,9 @@ The following arguments are supported:
 * `ddl_online` - (Optional) Whether to use online services, currently only supports MySQL and PolarDB. Valid values: `0` (Not used), `1` (Native online DDL priority), `2` (DMS lock-free table structure change priority).
 * `use_dsql` - (Optional) Whether to enable cross-instance query. Valid values: `0` (not open), `1` (open).
 * `skip_test` - (Optional) Whether the instance ignores test connectivity. Valid values: `true`, `false`.
+* `dba_id` - (Optional, Computed) The DBA ID of the database instance.
+* `safe_rule_id` - (Optional, Computed) The security rule ID of the database instance.
+* `instance_id` - (Optional, Computed) The ID of the database instance.
 
 ## Attributes Reference
 
@@ -113,11 +117,7 @@ The following attributes are exported in addition to the arguments listed above:
 * `id` - The ID of the DMS enterprise instance and format as `<host>:<port>`.
 * `dba_nick_name` - The instance DBA nickname.
 * `status` - The instance status.
-* `dba_id` - The DBA ID of the database instance.
-* `safe_rule_id` - The safe rule ID of the database instance.
-* `instance_id` - The ID of the database instance.
-* `skip_test` - Whether the instance ignores test connectivity. Valid values: `true`, `false`.
-* `instance_alias` - The alias of the database instance. Field 'instance_alias' has been deprecated from version 1.100.0. Use 'instance_name' instead.
+* `state` - (Deprecated) Field 'state' has been deprecated from version 1.100.0. Use 'status' instead.
 
 ## Import
 

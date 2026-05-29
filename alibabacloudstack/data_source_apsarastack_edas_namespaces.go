@@ -45,10 +45,10 @@ func dataSourceAlibabacloudStackEdasNamespaces() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						// 						"debug_enable": {
-						// 							Type:     schema.TypeBool,
-						// 							Computed: true,
-						// 						},
+						"debug_enable": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
 						"description": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -74,6 +74,14 @@ func dataSourceAlibabacloudStackEdasNamespaces() *schema.Resource {
 							Computed: true,
 						},
 						"user_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"mse_instance_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"registry_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -140,7 +148,7 @@ func dataSourceAlibabacloudStackEdasNamespacesRead(d *schema.ResourceData, meta 
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
 		mapping := map[string]interface{}{
-			// 			"debug_enable":         object["DebugEnable"],
+			"debug_enable":         object["DebugEnable"],
 			"description":          object["Description"],
 			"id":                   fmt.Sprint(object["Id"]),
 			"namespace_id":         fmt.Sprint(object["Id"]),
@@ -148,6 +156,8 @@ func dataSourceAlibabacloudStackEdasNamespacesRead(d *schema.ResourceData, meta 
 			"namespace_name":       object["RegionName"],
 			"user_id":              object["UserId"],
 			"belong_region":        object["BelongRegion"],
+			"mse_instance_id":      object["MseInstanceId"],
+			"registry_type":        object["RegistryType"],
 		}
 		ids = append(ids, fmt.Sprint(mapping["id"]))
 		names = append(names, object["RegionName"])

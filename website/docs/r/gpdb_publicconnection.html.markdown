@@ -1,5 +1,5 @@
 ---
-subcategory: "AnalyticDB for PostgreSQL(GPDB)"
+subcategory: "AnalyticDB for PostgreSQL"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_publicconnection"
 sidebar_current: "docs-Alibabacloudstack-gpdb-publicconnection"
@@ -56,8 +56,8 @@ resource "alibabacloudstack_gpdb_connection" "default" {
 The following arguments are supported:
 
 * `instance_id` - (Required, ForceNew) The ID of the GPDB instance for which the public connection will be created.
-* `connection_prefix` - (Optional, ForceNew) The prefix of the public connection string. It must start with a letter and can only contain lowercase letters, numbers, and underscores (`_`). The length cannot exceed 30 characters. If not specified, it defaults to `<instance_id>-tf`.
-* `port` - (Optional) The port number for the public connection. Valid values range from `3200` to `3999`. Default value is `3306`.
+* `connection_prefix` - (Optional, ForceNew, Computed) The prefix of the public connection string. It must start with a letter and can only contain lowercase letters, numbers, and underscores (`_`). The length cannot exceed 30 characters. If not specified, it defaults to `<instance_id>-tf`.
+* `port` - (Optional) The port number for the public connection. Valid values range from `1000` to `65534`. Default value is `3306`.
 
 ### Timeouts
 
@@ -74,3 +74,11 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The unique identifier of the GPDB public connection resource. It is composed of the instance ID and the connection prefix in the format `<instance_id>:<connection_prefix>`.
 * `connection_string` - The complete connection string for accessing the GPDB instance via the public network.
 * `ip_address` - The public IP address associated with the public connection string.
+
+## Import
+
+GPDB public connection can be imported using the instance_id and connection_prefix, e.g.
+
+```
+$ terraform import alibabacloudstack_gpdb_publicconnection.example <instance_id>:<connection_prefix>
+```

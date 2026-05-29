@@ -1,5 +1,5 @@
 ---
-subcategory: "KMS"
+subcategory: "Key Management Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_ciphertext"
 sidebar_current: "docs-alibabacloudstack-datasource-kms-ciphertext"
@@ -7,7 +7,7 @@ description: |-
     Encrypt data with KMS.
 ---
 
-# alibabacloudstack_kms_ciphertext
+# alibabacloudstack_kms_ciphertexts
 
 Encrypt a given plaintext with KMS. 
 
@@ -21,13 +21,13 @@ resource "alibabacloudstack_kms_key" "key" {
   is_enabled              = true
 }
 
-data "alibabacloudstack_kms_ciphertext" "encrypted" {
+data "alibabacloudstack_kms_ciphertexts" "encrypted" {
   key_id    = alibabacloudstack_kms_key.key.id
   plaintext = "example"
 }
 
-output "alibabacloudstack_kms_ciphertext" {
-  value = "${data.alibabacloudstack_kms_ciphertext.encrypted}"
+output "alibabacloudstack_kms_ciphertexts" {
+  value = "${data.alibabacloudstack_kms_ciphertexts.encrypted}"
 }
 ```
 
@@ -35,14 +35,12 @@ output "alibabacloudstack_kms_ciphertext" {
 
 The following arguments are supported:
 
-* `plaintext` - (Required, ForceNew) The plaintext to be encrypted which must be encoded in Base64.
-* `key_id` - (Required, ForceNew) The globally unique ID of the CMK.
-* `encryption_context` - (Optional, ForceNew) The Encryption context. If you specify this parameter here, it is also required when you call the Decrypt API operation.
-* `sensitive` - (Optional, ForceNew) Indicates whether the plaintext is sensitive.
+* `plaintext` - (Required) The plaintext data to be encrypted.
+* `key_id` - (Required) The globally unique ID of the CMK.
+* `encryption_context` - (Optional) The Encryption context. If you specify this parameter here, it is also required when you call the Decrypt API operation.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
 
-* `ciphertext_blob` - The ciphertext of the data key encrypted with the primary CMK version.
-* `sensitive` - Indicates whether the plaintext is sensitive. 
+* `ciphertext_blob` - The ciphertext of the data key encrypted with the primary CMK version. 

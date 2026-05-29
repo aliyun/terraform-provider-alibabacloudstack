@@ -1,5 +1,5 @@
 ---
-subcategory: "DRDS"
+subcategory: "PolarDB-X 1.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_database"
 sidebar_current: "docs-Alibabacloudstack-drds-database"
@@ -98,17 +98,30 @@ resource "alibabacloudstack_drds_database" "default" {
 ## 参数参考
 
 支持以下参数：
-  * `instance_id` - (必填) - 实例id。
-  * `drds_database_name` - (必填) - 数据库名称。
-  * `split_mode` - (选填) - 数据库拆分模式。水平拆分: HORIZONTAL或垂直拆分: VERTICAL。
-  * `encode` - (选填) - 数据库编码。
-  * `password` - (必填) - 密码
-  * `rds_instance_ids` - (必填) - 数据库实例id列表。
-  * `ip_white_list` - (选填) - 数据库白名单列表。
-  * `storage_type` - (选填) - 数据库存储模式。
+
+**必填参数：**
+  * `instance_id` - (必填) DRDS 实例 ID。
+  * `drds_database_name` - (必填) 数据库名称。长度为 1-24 个字符，只能包含小写字母、数字和下划线 (_)，且必须以字母开头。
+  * `password` - (必填) 数据库密码。长度为 8-30 个字符。该属性是敏感的。
+  * `rds_instance_ids` - (必填) RDS 实例 ID 列表。至少需要指定 1 个 RDS 实例。
+
+**可选参数：**
+  * `encode` - (选填) 数据库字符集编码。默认为 `utf8`。
+  * `ip_white_list` - (选填) 数据库 IP 白名单列表。键为分组名称，值为逗号分隔的 IP 地址。
+  * `split_mode` - (选填) 数据库拆分模式。`HORIZONTAL`（水平拆分）或 `VERTICAL`（垂直拆分）。默认为 `HORIZONTAL`。
+  * `storage_type` - (选填) 数据库存储类型。`RDS` 或其他存储类型。默认为 `RDS`。
 
 ## 属性参考
 
 除了上述所有参数外，还导出了以下属性：
-  * `create_time` - 数据库创建时间。
+  * `id` - 资源的唯一标识，格式为 `<instance_id>:<drds_database_name>`。
+  * `create_time` - 数据库创建时间（ISO 8601 格式）。
   * `status` - 数据库状态。
+
+## Import
+
+DRDS 数据库可以使用 `instance_id` 和 `drds_database_name` 的组合进行导入，格式为 `<instance_id>:<drds_database_name>`，例如：
+
+```
+$ terraform import alibabacloudstack_drds_database.example drds-abc123:my_database
+```

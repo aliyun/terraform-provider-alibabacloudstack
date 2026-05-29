@@ -79,8 +79,8 @@ resource "alibabacloudstack_cen_transit_router_connect_attachment" "default" {
 
 ## 导入
 
-CEN转发路由器VPC附件可以通过ID导入，例如：
+CEN转发路由器连接附件可以通过ID导入，例如：
 
 ```shell
-$ terraform import alibabacloudstack_cen_transit_router_vpc_attachment.default cen-abc12345678900001:tr-abc12345678900001:tr-attach-abc12345678900001:vpc-abc12345678900001
+$ terraform import alibabacloudstack_cen_transit_router_connect_attachment.default cen-abc12345678900001:tr-abc12345678900001:tr-attach-abc12345678900001
 ```

@@ -1,5 +1,5 @@
 ---
-subcategory: "Auto Scaling (ESS)"
+subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_notification"
 sidebar_current: "docs-Alibabacloudstack-autoscaling-notification"
@@ -67,7 +67,7 @@ resource "alibabacloudstack_autoscaling_notification" "default" {
 The following arguments are supported:
 
 * `scaling_group_id` - (Required, ForceNew) The ID of the Auto Scaling group. Changing this will force the creation of a new resource.
-* `notification_arn` - (Required, ForceNew) The AlibabaCloudStack Cloud Resource Name (ARN) for the notification object. The format of `notification_arn` is `acs:ess:{region}:{account-id}:{resource-relative-id}`. Valid values for `resource-relative-id` include:
+* `notification_arn` - (Optional, ForceNew, Computed) The AlibabaCloudStack Cloud Resource Name (ARN) for the notification object. If not specified, it defaults to `acs:ess:{region}:{account-id}:cloudmonitor` for CloudMonitor notifications. The format of `notification_arn` is `acs:ess:{region}:{account-id}:{resource-relative-id}`. Valid values for `resource-relative-id` include:
   * `cloudmonitor`: For CloudMonitor notifications.
   * `queue/{queue-name}`: For Message Queue (MNS) queue-based notifications.
   * `topic/{topic-name}`: For Message Queue (MNS) topic-based notifications.

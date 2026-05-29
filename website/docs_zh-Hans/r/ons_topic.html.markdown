@@ -49,16 +49,24 @@ resource "alibabacloudstack_ons_topic" "default" {
 支持以下参数：
 
 * `instance_id` - (可选) 拥有该主题的 ONS 实例的 ID。
-* `topic` - (必填) 主题名称。单个实例上的两个主题不能具有相同的名称，且名称不能以 'GID' 或 'CID' 开头。长度不得超过 64 个字符。
-* `message_type` - (必填) 消息类型。取值范围如下：
+* `topic` - (必填) 主题名称。单个实例上的两个主题不能具有相同的名称，且名称不能以 'GID' 或 'CID' 开头。长度必须在 1 到 128 个字符之间。
+* `message_type` - (必填) 消息类型。修改此参数会强制重新创建资源。取值范围如下：
   * `0` - 普通消息
   * `1` - 广播消息
   * `2` - 事务消息
   * `3` - 定时/延时消息
-* `remark` - (必填) 这是对主题的简要描述。长度不得超过 128。
+* `remark` - (必填) 主题的简要描述。长度必须在 1 到 128 个字符之间。
 
 ## 属性说明
 
 导出以下属性：
 
 * `id` - ONS 主题的主题和实例 ID。格式为 `Topic:InstanceID`，其中 `Topic` 是主题名称，`InstanceID` 是实例 ID。
+
+## Import
+
+可以使用 topic 和 instance_id 导入 ONS Topic，例如
+
+```
+$ terraform import alibabacloudstack_ons_topic.example tf-topic12345:mq-instance-abc
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "企业级分布式应用服务 EDAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_k8s_application_scaling_rule"
 sidebar_current: "docs-alibabacloudstack-resource-edas-k8s-application-scaling-rule"
@@ -140,8 +140,8 @@ resource "alibabacloudstack_edas_k8s_application_scaling_rule" "example_behavior
     * `at_time` - (必选) 当天的计划时间，例如 "08:00"。
     * `replicas` - (必选) 副本数。取值范围: 1 到 100。
     * `horizon_mode` - (可选) 是否启用水平模式。默认值: `false`。
-  * `timer_in_week` - (可选) 每周定时器配置。未设置时为计算值。
-  * `timer_in_month` - (可选) 每月定时器配置。未设置时为计算值。
+  * `timer_in_week` - (可选) 每周定时器配置。当 `period` 设置为 `weekly` 时生效。元素为星期缩写，如 `Mon`、`Tue` 等。未设置时为计算值。
+  * `timer_in_month` - (可选) 每月定时器配置。当 `period` 设置为 `monthly` 时生效。元素为日期数字，如 `1`、`2` 等。未设置时为计算值。
 
 ### 扩缩容行为参数
 

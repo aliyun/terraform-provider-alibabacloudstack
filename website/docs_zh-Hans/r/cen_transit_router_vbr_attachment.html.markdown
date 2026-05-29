@@ -4,12 +4,15 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_vbr_attachment"
 sidebar_current: "docs-alibabacloudstack-resource-cen-transit-router-vbr-attachment"
 description: |-
-  提供一种CEN转发路由器VBR附加资源。
+  提供CEN转发路由器VBR附加资源。
+
+-> **Note:** 该资源也可以通过以下别名引用：
+-> - `apsarastack_cen_transit_router_vbr_attachment`
 ---
 
 # alibabacloudstack\_cen\_transit_router_vbr_attachment
 
-提供一种CEN转发路由器VBR附加资源。
+提供CEN转发路由器VBR附加资源。
 
 ## Example Usage
 
@@ -40,25 +43,37 @@ resource "alibabacloudstack_cen_transit_router_vbr_attachment" "default" {
   vbr_id            = alibabacloudstack_express_connect_virtual_border_router.default.id
 }
 ```
+
 ## Argument Reference
+
 支持以下参数：
 
-* `cen_id` - （必选，ForceNew）CEN实例的ID。
-* `transit_router_id` - （必选，ForceNew）转发路由器的ID。
-* `vbr_id` - （必选，ForceNew）虚拟边界路由器（VBR）的ID。
-* `transit_router_attachment_name` - （可选）转发路由器附件的名称。
-* `transit_router_attachment_description` - （可选）转发路由器附件的描述。
-* `route_table_propagation_enabled` - （可选）是否启用路由表传播。
-* `route_table_association_enabled` - （可选）是否启用路由表关联。
-* `tags` - （可选）分配给资源的标签映射。
+* `cen_id` - （必选）CEN实例的ID。
+* `transit_router_id` - （必选）转发路由器的ID。
+* `vbr_id` - （必选）虚拟边界路由器（VBR）的ID。
+* `transit_router_attachment_name` - （可选）转发路由器附加项的名称。
+* `transit_router_attachment_description` - （可选）转发路由器附加项的描述。
+* `route_table_propagation_enabled` - （可选，ForceNew）是否启用路由表传播。修改此参数将强制重新创建资源。
+* `route_table_association_enabled` - （可选，ForceNew）是否启用路由表关联。修改此参数将强制重新创建资源。
+* `tags` - （可选）要分配给资源的标签映射。
+
 ## Attributes Reference
+
 导出以下属性：
 
-* `id` - 资源的ID，格式为 {cen_id}:{transit_router_id}:{transit_router_attachment_id}:{vbr_id}。
+* `id` - 资源的ID，格式为 `{cen_id}:{transit_router_id}:{transit_router_attachment_id}:{vbr_id}`。
+* `transit_router_attachment_id` - 转发路由器VBR附加项的ID。
 * `auto_publish_route_enabled` - 是否启用了自动路由发布。
-* `vcharge_type` - 转发路由器附件的计费类型。
-* `creation_time` - 转发路由器附件的创建时间。
-* `resource_type` - 转发路由器附件的资源类型。
-* `status` - 转发路由器附件的状态。
-* `transit_router_attachment_id` - 转发路由器附件的ID。
-* `vbr_owner_id` - VBR的所有者ID。
+* `charge_type` - 转发路由器VBR附加项的计费类型。
+* `creation_time` - 转发路由器VBR附加项的创建时间。
+* `resource_type` - 资源类型。取值：`VBR`。
+* `status` - 转发路由器VBR附加项的状态。
+* `vbr_owner_id` - VBR所有者的阿里云账号ID。
+
+## Import
+
+CEN转发路由器VBR附加项可以使用 cen_id、transit_router_id、transit_router_attachment_id 和 vbr_id（以冒号分隔）进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_cen_transit_router_vbr_attachment.example cen-xxxxxx:tr-xxxxxx:tr-attach-xxxxxx:vbr-xxxxxx
+```

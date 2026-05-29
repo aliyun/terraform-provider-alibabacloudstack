@@ -1,5 +1,5 @@
 ---
-subcategory: "AnalyticDB for PostgreSQL (GPDB)"
+subcategory: "云原生数据仓库 AnalyticDB PostgreSQL版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_backup_policy"
 sidebar_current: "docs-Alibabacloudstack-gpdb-backup_policy"
@@ -97,3 +97,11 @@ resource "alibabacloudstack_gpdb_backup_policy" "default" {
 * `preferred_backup_period` - 数据备份周期。
 * `preferred_backup_time` - 数据备份时间。
 * `recovery_point_period` - 恢复点频次。
+
+## Import
+
+GPDB 备份策略可以使用 DBInstanceId 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_gpdb_backup_policy.example pgm-xxxxxxxxx
+```

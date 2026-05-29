@@ -1,5 +1,5 @@
 ---
-subcategory: "Hologram"
+subcategory: "Hologres"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hologram_instance"
 sidebar_current: "docs-alibabacloudstack-resource-hologram-instance"
@@ -62,7 +62,7 @@ resource "alibabacloudstack_hologram_instance" "example" {
   node = 2
   cluster = "${data.alibabacloudstack_hologram_clusters.default.clusters.0.id}"
   vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  vswitch_id = "${data.alibabacloudstack_vpc_vswitch.default.id}"
+  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 }
 ```
 

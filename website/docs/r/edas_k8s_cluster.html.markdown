@@ -1,5 +1,5 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_k8s_cluster"
 sidebar_current: "docs-alibabacloudstack-resource-edas-k8s-cluster"
@@ -9,7 +9,7 @@ description: |-
 
 # alibabacloudstack_edas_k8s_cluster
 
-Provides an EDAS K8s cluster resource. For information about EDAS K8s Cluster and how to use it, see[What is EDAS K8s Cluster](https://www.alibabacloud.com/help/en/doc-detail/85108.htm).
+Provides an EDAS K8s cluster resource. For information about EDAS K8s Cluster and how to use it, see [What is EDAS K8s Cluster](https://www.alibabacloud.com/help/en/doc-detail/85108.htm).
 
 
 
@@ -27,31 +27,30 @@ resource "alibabacloudstack_edas_k8s_cluster" "default" {
 
 The following arguments are supported:
 
-* `cs_cluster_id` - (Required, ForceNew) The ID of the alibabacloudstack container service kubernetes cluster that you want to import.
-* `namespace_id` - (Optional, ForceNew) The ID of the namespace where you want to import. You can call the [ListUserDefineRegion](https://www.alibabacloud.com/help/en/doc-detail/149377.htm?spm=a2c63.p38356.879954.34.331054faK2yNvC#doc-api-Edas-ListUserDefineRegion) operation to query the namespace ID.
-* `vpc_id` - (Optional, ForceNew) The ID of the Virtual Private Cloud (VPC) for the cluster.
+* `cs_cluster_id` - (Required, ForceNew) The ID of the Container Service Kubernetes cluster that you want to import. You can call the [GetK8sCluster](https://www.alibabacloud.com/help/en/doc-detail/85108.htm) operation to query the cluster ID.
+* `namespace_id` - (Optional, ForceNew) The ID of the namespace where you want to import. You can call the [ListUserDefineRegion](https://www.alibabacloud.com/help/en/doc-detail/149377.htm) operation to query the namespace ID.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `cluster_name` - The name of the cluster that you want to create. 
-* `cluster_type` - The type of the cluster that you want to create. Valid values only: 5: K8s cluster. 
-* `network_mode` - The network type of the cluster that you want to create. Valid values: 1: classic network. 2: VPC. 
-* `region_id` - The ID of the region.
-* `vpc_id` - The ID of the Virtual Private Cloud (VPC) for the cluster. 
-* `cluster_import_status` - The import status of cluster: 
-    `1`: success.
-    `2`: failed.
-    `3`: importing. 
-    `4`: deleted. 
-* `cs_cluster_id` - The ID of the alibabacloudstack container service kubernetes cluster that you want to import.
+* `id` - The ID of the EDAS K8s cluster.
+* `cluster_name` - The name of the cluster.
+* `cluster_type` - The type of the cluster. Valid values: `5`: Container Service K8s cluster or Serverless K8s cluster.
+* `network_mode` - The network type of the cluster. Valid values: `1`: Classic network. `2`: VPC.
+* `vpc_id` - The ID of the Virtual Private Cloud (VPC) for the cluster.
+* `cluster_import_status` - The import status of the cluster. Valid values:
+    * `1`: Success.
+    * `2`: Failed.
+    * `3`: Importing.
+    * `4`: Deleted.
+* `cs_cluster_id` - The ID of the Container Service Kubernetes cluster that you want to import.
 * `namespace_id` - The ID of the namespace where you want to import.
 
 ## Import
 
-EDAS cluster can be imported using the id, e.g.
+EDAS K8s Cluster can be imported using the cluster ID (the EDAS internal cluster ID returned after import), e.g.
 
 ```
-$ terraform import alibabacloudstack_edas_k8s_cluster.cluster cluster_id
+$ terraform import alibabacloudstack_edas_k8s_cluster.example 81453e4b-4df0-4592-xxxx-b835a2eexxxx
 ```

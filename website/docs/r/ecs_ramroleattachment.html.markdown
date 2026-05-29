@@ -1,10 +1,12 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_ramroleattachment"
 sidebar_current: "docs-Alibabacloudstack-ecs-ramroleattachment"
-description: |- 
-  Provides a ecs Ramroleattachment resource.
+description: |-
+Provides a ECS Ramroleattachment resource to bind a RAM role to one or more ECS instances.
+
+-> **NOTE:** This resource can also be referred to by the following alias: `alibabacloudstack_ram_role_attachment`
 ---
 
 # alibabacloudstack_ecs_ramroleattachment
@@ -105,4 +107,12 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `role_name` - The name of the RAM role that has been attached.
-* `instance_ids` - The list of ECS instance IDs to which the RAM role has been attached.
+* `id` - The ID of the resource. The format is `<role_name>:<instance_ids>`, where `instance_ids` is a comma-separated list of ECS instance IDs enclosed in double quotes.
+
+## Import
+
+Ram Role Attachment can be imported using the role_name and instance_ids (joined by colon), e.g.
+
+```
+$ terraform import alibabacloudstack_ecs_ramroleattachment.example my-ram-role:i-uf6257yd1w3k1example
+```

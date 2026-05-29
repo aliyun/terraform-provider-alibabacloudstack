@@ -1,5 +1,5 @@
 ---
-subcategory: "API Gateway V2"
+subcategory: "云服务总线 CSB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_service_source"
 sidebar_current: "docs-Alibabacloudstack-api_gateway-api_gateway_v2_service_source"
@@ -138,3 +138,11 @@ resource "alibabacloudstack_api_gateway_v2_service_source" "example" {
 * `source_id` - 服务来源ID。
 * `source_type_name` - 服务来源类型名称。
 * `update_time` - 服务来源最后更新时间。
+
+## Import
+
+API网关v2服务来源可以使用 `instance_id` 和 `source_id` 导入，两者用冒号分隔，例如：
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_service_source.example gw-instance-123:source-456
+```

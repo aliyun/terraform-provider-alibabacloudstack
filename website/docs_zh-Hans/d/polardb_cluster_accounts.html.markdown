@@ -70,6 +70,5 @@ data "alibabacloudstack_polardb_cluster_accounts" "default" {
     * `account_lock_state` - 账户的锁定状态。
     * `status` - 资源的状态。
     * `database_privileges` - 目标账户的数据库权限。
-      * `account_privilege` - 账户的权限。
-      * `account_privilege_detail` - 账户的权限详情。
-      * `data_base_name` - 数据库的名称。
+      * `privilege` - 账户的权限。
+      * `db_name` - 数据库的名称。

@@ -1,5 +1,5 @@
 ---
-subcategory: "ASCM"
+subcategory: "Application"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_quota"
 sidebar_current: "docs-alibabacloudstack-resource-ascm-quota"
@@ -40,7 +40,7 @@ output "quota" {
 以下参数被支持：
 ### 在为组织的任何服务创建配额之前，首先通过使用该组织的parent_id创建父级配额。
 
-* `product_name` - (必填) 服务名称。有效值：ECS、OSS、VPC、RDS、SLB、ODPS、GPDB、DDS、R-KVSTORE 和 EIP。
+* `product_name` - (必填) 服务名称。有效值：ECS、OSS、VPC、DRDS、RDS、SLB、ODPS、EIP、GPDB、R-KVSTORE、NAS 和 DDS。
 * `region_name` - (可选) 应用配额的区域名称。
 * `quota_type` - (必填) 配额类型。有效值：organization 和 resourceGroup。
 * `quota_type_id` - (必填) 配额类型的ID。当QuotaType参数设置为organization时，指定组织ID；当QuotaType参数设置为resourceGroup时，指定资源组ID。
@@ -102,6 +102,22 @@ KVStore for Redis (R-KVSTORE)
 ApsaraDB for MongoDB (DDS)
 
 * `total_cpu`: 100, `total_mem`: 100, `total_disk`:100, `target_type`: "mongodb"
+
+DRDS
+
+* `total_cpu`: 100, `total_mem`: 100, `total_disk`: 100
+
+NAS
+
+* `total_amount`: 100
+
+## Import
+
+ASCM 配额可以使用 ProductName、QuotaType 和 QuotaTypeId 按格式 `ProductName:QuotaType:QuotaTypeId` 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_ascm_quota.example ECS:organization:1
+```
 
 ## 属性说明
 

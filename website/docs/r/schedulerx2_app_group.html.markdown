@@ -1,5 +1,5 @@
 ---
-subcategory: "SchedulerX2"
+subcategory: "SchedulerX"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_schedulerx2_app_group"
 sidebar_current: "docs-Alibabacloudstack-schedulerx2-app-group"
@@ -76,3 +76,11 @@ The following attributes are exported from the API response:
 
 * `id` - The ID of the application group.
 * `app_key` - The application key, used for application authentication.
+
+## Import
+
+SchedulerX2 App Group can be imported using the AppGroupId, e.g.
+
+```
+$ terraform import alibabacloudstack_schedulerx2_app_group.example <app_group_id>
+```

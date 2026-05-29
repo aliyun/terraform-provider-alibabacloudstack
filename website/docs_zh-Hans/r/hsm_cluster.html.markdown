@@ -87,7 +87,7 @@ resource "alibabacloudstack_hsm_cluster" "example" {
 
 以下参数被支持：
 
-* `cluster_name` - (必需, 强制新建) HSM集群名称。长度为2-128个字符，必须以英文字母或数字开头，支持英文、数字、中文、下划线(_)和短横线(-)。
+* `cluster_name` - (必需) HSM集群名称。长度为2-128个字符，必须以英文字母或数字开头，支持英文、数字、中文、下划线(_)和短横线(-)。
 * `master_instance_id` - (必需, 强制新建) 主HSM实例ID。
 * `vpc_id` - (必需, 强制新建) HSM集群所在VPC的ID。
 * `vswitch_ids` - (必需, 强制新建) 与VPC关联的交换机ID。

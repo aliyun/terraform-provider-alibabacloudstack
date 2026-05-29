@@ -50,26 +50,25 @@ output "security_group_rules" {
 * `direction` - (可选) 授权方向。有效值为：`ingress` 或 `egress`。
 * `ip_protocol` - (可选) IP 协议。有效值为：`tcp`、`udp`、`icmp`、`gre` 和 `all`。
 * `policy` - (可选) 授权策略。可以是 `accept` 或 `drop`。默认值为 `accept`。
-* `group_name` - (可选) 拥有规则的安全组的名称。
-* `group_desc` - (可选) 拥有规则的安全组的描述。
+* `output_file` - (可选，已弃用) 用于保存数据源结果的文件名。`output_file` 字段已被弃用，计划在 3.19.0 版本中移除。如需将内容写入文件，请使用 `local_file` provider。
 
 ## 属性说明
 
-除了上述参数外，还导出以下属性：
+导出以下属性：
 
+* `id` - 数据源的 ID。
 * `group_name` - 拥有规则的安全组的名称。
 * `group_desc` - 拥有规则的安全组的描述。
 * `rules` - 安全组规则列表。每个元素包含以下属性：
   * `ip_protocol` - 规则所使用的协议类型，可为 `tcp`、`udp`、`icmp`、`gre` 或 `all`。
-  * `port_range` - 端口范围，格式为“起始端口/结束端口”。
+  * `port_range` - 端口范围，格式为"起始端口/结束端口"。
   * `source_cidr_ip` - 入站规则的源 IP 地址段。
+  * `source_group_id` - 入站规则中的源安全组 ID。
   * `source_group_owner_account` - 入站规则中源安全组所属的阿里云账户。
   * `dest_cidr_ip` - 出站规则的目标 IP 地址段。
+  * `dest_group_id` - 出站规则中的目标安全组 ID。
   * `dest_group_owner_account` - 出站规则中目标安全组所属的阿里云账户。
   * `policy` - 授权策略，可为 `accept`（允许）或 `drop`（拒绝）。
   * `nic_type` - 网络类型，可为 `internet`（公网）或 `intranet`（内网）。
   * `priority` - 规则优先级，数值越小优先级越高。
   * `direction` - 授权方向，可为 `ingress`（入站）或 `egress`（出站）。
-  * `dest_group_id` - 出站规则中的目标安全组 ID。
-  * `source_group_id` - 入站规则中的源安全组 ID。
-  * `group_id` - 拥有该规则的安全组 ID。

@@ -1,8 +1,8 @@
 ---
-subcategory: "Realtime Compute for Apache (Flink)"
+subcategory: "Realtime Compute for Apache Flink"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack:alibabacloudstack_flink_namespace"
-sidebar_current: "docs-alibabacloudstack-resource-flink-namesapce"
+sidebar_current: "docs-alibabacloudstack-resource-flink-namespace"
 description: |-
   编排实时计算命名空间
 ---
@@ -37,9 +37,9 @@ resource "alibabacloudstack_ascm_user" "default" {
 
 resource "alibabacloudstack_flink_namespace" "default" {
   owner_uid = "${alibabacloudstack_ascm_user.default.user_uid}"
-  name = var.name"
-  cu = "1"
-  cpu_type = "Intel"
+  name      = var.name
+  cu        = 1
+  cpu_type  = "Intel"
 }
 ```
 
@@ -49,7 +49,7 @@ resource "alibabacloudstack_flink_namespace" "default" {
 
 * `name` - (必填，变更时重建) 仓库命名空间的名称。
 * `cu` -  (必填) 仓库命名空间保留的资源数量。
-* `cpu_type` - (必填)  资源CPU类型，有效值：`intel`。
+* `cpu_type` - (必填，变更时重建) 资源CPU类型。有效值：`Intel`。
 * `owner_uid` -  (可选，变更时重建) 仓库命名空间管理员Id。
 
 ## 属性说明

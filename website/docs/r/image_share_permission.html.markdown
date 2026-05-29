@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_share_permission"
 sidebar_current: "docs-alibabacloudstack-resource-image-share-permission"
@@ -37,7 +37,14 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - ID of the image. It formats as `<image_id>:<account_id>`
-* `image_id` - The source image ID. 
-* `account_id` - Alibabacloudstack Account ID. It is used to share images. 
-* `optional_key` - (Computed) An optional key added by AI.
+* `id` - ID of the resource. It formats as `<image_id>:<account_id>`, representing the unique identifier of the image sharing relationship.
+* `image_id` - The source image ID.
+* `account_id` - AlibabacloudStack Account ID. It is used to share images.
+
+## Import
+
+Image share permission can be imported using the `image_id:account_id`, e.g.
+
+```
+$ terraform import alibabacloudstack_image_share_permission.example m-bp1gxyh***:1234567890
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "SchedulerX2"
+subcategory: "SchedulerX"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_schedulerx2_workflow"
 sidebar_current: "docs-Alibabacloudstack-schedulerx2-workflow"
@@ -10,6 +10,8 @@ description: |-
 # alibabacloudstack_schedulerx2_workflow
 
 管理Schedulerx2工作流资源，用于创建、配置和调度定时任务流程。
+
+-> **注意:** 该资源也可以使用以下别名引用：`apsarastack_schedulerx2_workflow`。
 
 ## 示例用法
 
@@ -56,11 +58,11 @@ resource "alibabacloudstack_schedulerx2_workflow" "example" {
 
 支持以下参数：
 
-* `description` - (必填) 工作流的描述信息。长度1-256字符，不能以`http://`或`https://`开头。
+* `group_id` - (必填, ForceNew) 工作流所属的应用组ID。变更此参数将重新创建资源。
 * `name` - (必填) 工作流的名称。长度1-128字符，不能以`http://`或`https://`开头。
+* `description` - (必填) 工作流的描述信息。长度1-256字符，不能以`http://`或`https://`开头。
 * `time_type` - (必填) 时间触发类型。取值：`cron`（定时触发）或`api`（API触发）。
 * `time_zone` - (必填) 时区配置。取值范围：`PRC`, `Hongkong`, `Japan`, `Singapore`, `GTM`, `GTM-0`至`GTM-14`（含正负时区）。
-* `group_id` - (必填, 变更时重建) 工作流所属的组ID。创建后不可修改，变更时将重建资源。
 * `enabled` - (可选) 是否启用工作流。设置为`true`时启用，`false`时禁用。默认值：`false`。
 * `max_concurrency` - (可选) 最大并发执行任务数。取值范围：1-1000。
 * `namespace` - (可选) 命名空间。默认值：`system_namespace`。
@@ -72,3 +74,11 @@ resource "alibabacloudstack_schedulerx2_workflow" "example" {
 
 * `id` - 工作流ID（与`workflow_id`相同）。
 * `workflow_id` - 工作流ID（系统自动生成的唯一标识）。
+
+## Import
+
+Schedulerx2工作流可以使用工作流ID导入，例如：
+
+```
+$ terraform import alibabacloudstack_schedulerx2_workflow.example 12345
+```

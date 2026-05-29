@@ -1,10 +1,10 @@
 ---
-subcategory: "PolarDBX"
+subcategory: "Cloud-Native Distributed Database PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_accounts"
 sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-accounts"
 description: |-
-  Provides a list of polardbx accounts owned by an alibabacloudstack account.
+  Provides a list of PolarDB-X accounts owned by an alibabacloudstack account.
 ---
 
 # alibabacloudstack\_polardbx\_accounts
@@ -55,34 +55,33 @@ resource "alibabacloudstack_polardbx_instance" "default" {
 }
 
 resource "alibabacloudstack_polardbx_account" "default" {
-	instance_id = alibabacloudstack_polardbxx_instance.default.id
+	instance_id = alibabacloudstack_polardbx_instance.default.id
 	account_name = var.name
 	password = "${var.password}"
 	description = var.name
 }
 
 data "alibabacloudstack_polardbx_accounts" "default" {
+	instance_id = alibabacloudstack_polardbx_instance.default.id
 }
 ```
 
 ## Argument Reference
 
 The following arguments are supported:
-  * `ids` - (Optional) - A list of account IDs to filter results.
-  * `names` - (Optional) - A list of account names to filter results
-  * `account_name` - (Optional) - The account name.
-  * `instance_id` - (Required) - db instance id.
-  * `account_type` - (Optional) - Account type. The value range is as follows:-**Normal**: Normal account.-**Super**: a highly privileged account.
+  * `names` - (Optional) - A list of account names to filter results.
+  * `instance_id` - (Required) - The ID of the PolarDB-X DB instance.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
+  * `ids` - A list of account IDs.
+  * `names` - A list of account names.
   * `accounts` - A list of accounts. Each element contains the following attributes:
-    * `id` - The ID of the account.
+    * `id` - The ID of the account, formatted as `<instance_id>:<account_name>`.
+    * `account_name` - The account name.
     * `description` - The account description.
-    * `account_name` - The account name
-    * `account_type` - Account type. The value range is as follows:-**Normal**: Normal account.-**Super**: a highly privileged account.
-    * `instance_id` - The ID of the PolarDBX Db instance.
-    * `db_privileges` - The Database permissions of the account.
+    * `instance_id` - The ID of the PolarDB-X DB instance.
+    * `db_privileges` - A list of database privileges granted to the account. Each element contains:
       * `db_name` - The name of the database.
-      * `privilege` - The permissions of the target account on the database.
+      * `privilege` - The privilege level of the account on the database.

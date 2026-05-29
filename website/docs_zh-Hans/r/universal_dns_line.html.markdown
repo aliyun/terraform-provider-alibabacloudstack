@@ -1,5 +1,5 @@
 ---
-subcategory: "Universal DNS"
+subcategory: "Cross-Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_line"
 sidebar_current: "docs-Alibabacloudstack-resource-universal-dns-line"
@@ -48,3 +48,11 @@ resource "alibabacloudstack_universal_dns_line" "default" {
 
 * `id` - 跨云解析线路的ID。
 * `priority` - 跨云解析线路的优先级。1表示最高优先级，数值越大优先级越低。系统自动分配优先级值。
+
+## Import
+
+跨云解析线路可以使用线路 ID 导入，例如：
+
+```
+$ terraform import alibabacloudstack_universal_dns_line.example <line_id>
+```

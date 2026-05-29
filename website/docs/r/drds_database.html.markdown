@@ -1,5 +1,5 @@
 ---
-subcategory: "DRDS"
+subcategory: "PolarDB-X 1.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_database"
 sidebar_current: "docs-Alibabacloudstack-drds-database"
@@ -99,17 +99,30 @@ resource "alibabacloudstack_drds_database" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `instance_id` - (Required) - Instance ID.
-  * `drds_database_name` - (Required) - The name of the Drds database.
-  * `split_mode` - (Optional) - The split mode of the Drds database. HORIZONTAL or VERTICAL.
-  * `encode` - (Optional) - The charset of the Drds database.
-  * `password` - (Required) -  The password of the Drds database.
-  * `rds_instance_ids` - (Required) - The rds instance id list.
-  * `ip_white_list` - (Optional) - The Ip whitelist of the database.
-  * `storage_type` - (Optional) - The storage type of the Drds database.
+
+**Required Arguments:**
+  * `instance_id` - (Required) The ID of the DRDS instance.
+  * `drds_database_name` - (Required) The name of the DRDS database. The name must be 1 to 24 characters in length, can contain lowercase letters, digits, and underscores (_), and must start with a letter.
+  * `password` - (Required) The password of the DRDS database. The password must be 8 to 30 characters in length. This attribute is sensitive.
+  * `rds_instance_ids` - (Required) The list of RDS instance IDs. At least one RDS instance must be specified.
+
+**Optional Arguments:**
+  * `encode` - (Optional) The character set encoding of the database. Default value: `utf8`.
+  * `ip_white_list` - (Optional) The IP whitelist of the database. The key is the group name and the value is a comma-separated list of IP addresses.
+  * `split_mode` - (Optional) The database split mode. Valid values: `HORIZONTAL` (horizontal split) or `VERTICAL` (vertical split). Default value: `HORIZONTAL`.
+  * `storage_type` - (Optional) The storage type of the database. Valid values: `RDS` or other storage types. Default value: `RDS`.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `create_time` - Database creation timestamp.
-  * `status` - The status of the Drds database.
+  * `id` - The unique identifier of the resource, formatted as `<instance_id>:<drds_database_name>`.
+  * `create_time` - The creation timestamp of the database in ISO 8601 format.
+  * `status` - The status of the DRDS database.
+
+## Import
+
+DRDS Database can be imported using the combination of `instance_id` and `drds_database_name`, formatted as `<instance_id>:<drds_database_name>`, e.g.
+
+```
+$ terraform import alibabacloudstack_drds_database.example drds-abc123:my_database
+```

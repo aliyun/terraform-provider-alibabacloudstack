@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_autosnapshotpolicy"
 sidebar_current: "docs-Alibabacloudstack-ecs-autosnapshotpolicy"
@@ -38,12 +38,22 @@ The following arguments are supported:
   - `1` to `65535`: The number of days the snapshots are retained. After the retention period expires, the snapshots are automatically deleted.
   Default value: `-1`.
 * `time_points` - (Required) The time points at which the automatic snapshots are created. Valid values are `"0"` to `"23"`, representing the hours from `00:00` to `23:00`. You can specify up to 24 time points. The format is a JSON array, such as `["1", "22", "23"]`.
-* `disk_ids` - (Optional) The IDs of the disks for which you want to create automatic snapshots.
+* `disk_ids` - (Optional) The IDs of the disks to which the automatic snapshot policy is applied.
+* `tags` - (Optional) A map of tags assigned to the resource.
+* `name` - (**Deprecated**) It has been deprecated from version 1.63.0 and new field `auto_snapshot_policy_name` instead.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the automatic snapshot policy.
-* `name` - The name of the automatic snapshot policy.
-* `auto_snapshot_policy_name` - The name of the automatic snapshot policy. This attribute mirrors the `auto_snapshot_policy_name` argument.
+* `name` - (**Deprecated**) The name of the automatic snapshot_policy. This attribute mirrors the `auto_snapshot_policy_name` argument and has been deprecated in favor of `auto_snapshot_policy_name`.
+* `auto_snapshot_policy_name` - The name of the automatic snapshot policy.
+
+## Import
+
+ECS Auto Snapshot Policy can be imported using the id, e.g.
+
+```
+$ terraform import alibabacloudstack_snapshot_policy.example sp-12345678
+```

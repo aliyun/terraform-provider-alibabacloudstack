@@ -1,5 +1,5 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "企业级分布式应用服务 EDAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_instance_cluster_attachment"
 sidebar_current: "docs-Alibabacloudstack-edas-instance-cluster-attachment"
@@ -10,6 +10,9 @@ description: |-
 # alibabacloudstack_edas_cluster_member
 
 将ECS实例导入到EDAS集群，实现应用部署环境的统一管理。
+
+> **注意：** 该资源也可以使用以下别名引用：
+> - `alibabacloudstack_edas_instanceclusterattachment`
 
 ## 示例用法
 
@@ -162,13 +165,21 @@ resource "alibabacloudstack_edas_cluster_member" "default" {
 支持以下参数：
 
 * `cluster_id` - (必填, 变更时重建) EDAS集群ID。需为有效的EDAS集群标识符，格式为UUID字符串。
-* `instance_id` - (必填, 变更时重建) 要导入的ECS实例ID。需为当前账号下可用的ECS实例标识符，格式为`i-`开头的字符串。
+* `instance_ids` - (必填, 变更时重建) 要导入到EDAS集群的ECS实例ID列表。
 
 ## 属性说明
 
 导出以下属性：
 
-* `id` - 资源ID，格式为`cluster_id:instance_id`。
-* `status_map` -  A map indicating the status of each instance in the cluster. The keys are instance IDs, and the values represent the status: `1` (Running), `0` (Converting), `-1` (Failed), and `-2` (Offline).
-* `ecu_map` -  A map linking each instance to its corresponding ECU (Elastic Compute Unit). The keys are instance IDs, and the values are ECU IDs.
-* `cluster_member_ids` -  A map of cluster member IDs associated with each instance. The keys are instance IDs, and the values are the cluster member IDs.
+* `id` - 资源ID，格式为`cluster_id:instance_id1,instance_id2,...`（多个实例ID用逗号分隔）。
+* `status_map` - 实例在集群中的状态映射。键为实例ID，值为状态：`1`（运行中）、`0`（转换中）、`-1`（失败）、`-2`（离线）。
+* `ecu_map` - 实例与ECU（弹性计算单元）的映射关系。键为实例ID，值为ECU ID。
+* `cluster_member_ids` - 每个实例关联的集群成员ID映射。键为实例ID，值为集群成员ID。
+
+## Import
+
+EDAS Instance Cluster Attachment 可以使用 cluster_id 和 instance_ids 导入，格式为 `cluster_id:instance_id1,instance_id2,...`，例如：
+
+```
+$ terraform import alibabacloudstack_edas_instance_cluster_attachment.example cluster-abc123:i-xxx001,i-xxx002
+```

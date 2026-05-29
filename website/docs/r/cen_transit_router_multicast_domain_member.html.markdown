@@ -64,6 +64,7 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "example
   network_interface_id                  = alibabacloudstack_network_interface.example.id
   transit_router_multicast_domain_id    = alibabacloudstack_cen_transit_router_multicast_domain.example.id
   vswitch_id                            = alibabacloudstack_vswitch.example.id
+  resource_type                         = "VPC"
 }
 ```
 
@@ -71,17 +72,20 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "example
 
 The following arguments are supported:
 
-* `group_ip_address` - (Required, ForceNew) The multicast IP address. 
-* `network_interface_id` - (Required, ForceNew) The ID of the network interface. 
+* `group_ip_address` - (Required, ForceNew) The multicast IP address. Valid values: 224.0.0.1 to 239.255.255.254. 224.0.0.0 to 224.0.0.127 are reserved addresses and cannot be used.
 * `transit_router_multicast_domain_id` - (Required, ForceNew) The ID of the multicast domain to which the multicast member belongs.
-* `vswitch_id` - (Required, ForceNew) The ID of the switch to which the multicast member belongs.
+* `resource_type` - (Required, ForceNew) The type of the resource. Valid values: `VPC`, `Connect`.
+* `vswitch_id` - (Optional, ForceNew, Computed) The ID of the vSwitch. Required when `resource_type` is set to `VPC`.
+* `network_interface_id` - (Optional, ForceNew) The ID of the elastic network interface (ENI). Required when `resource_type` is set to `VPC`.
+* `connect_peer_id` - (Optional, ForceNew) The ID of the Connect peer. Required when `resource_type` is set to `Connect`.
+* `connect_attachment_id` - (Optional, ForceNew, Computed) The ID of the Connect attachment. Required when `resource_type` is set to `Connect`.
 
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The ID of the resource, formatted as `<group_ip_address>:<vswitch_id>:<transit_router_multicast_domain_id>:<network_interface_id>`.
+* `id` - The ID of the resource, formatted as `<group_ip_address>:<transit_router_multicast_domain_id>:<resource_type>:<key>`, where `<key>` is `network_interface_id` when `resource_type` is `VPC`, or `connect_peer_id` when `resource_type` is `Connect`.
 * `status` - The status of the multicast member.
 
 ## Import
@@ -89,5 +93,5 @@ The following attributes are exported:
 CEN transit router multicast domain member can be imported using the id, e.g.
 
 ```bash
-$ terraform import alibabacloudstack_cen_transit_router_multicast_domain_member.default 224.0.0.1:vsw-1234567890abcdef0:tr-mcast-domain-1234567890abcdef0:eni-1234567890abcdef0
+$ terraform import alibabacloudstack_cen_transit_router_multicast_domain_member.example 224.0.0.1:tr-mcast-domain-1234567890abcdef0:VPC:eni-1234567890abcdef0
 ```

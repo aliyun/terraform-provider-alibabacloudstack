@@ -26,17 +26,15 @@ output "first_tsdb_zones_id" {
 
 ## Argument Reference
 
-The following arguments are supported:
+This data source requires no arguments.
 
-* `ids` - (Required) A list of TSDB instance zone IDs.
+## Attributes Reference
 
-## Argument Reference
-
-The following attributes are exported in addition to the arguments listed above:
+The following attributes are exported:
 
 * `ids` - A list of TSDB instance zone IDs.
 * `zones` - A list of TSDB Instance zones. Each element contains the following attributes:
-  * `id` - The ID of zone.
+  * `id` - The ID of the zone.
   * `zone_id` - The zone ID.
-  * `local_name` - The local name.
-  * `computed_attribute` - This is a computed attribute.
+
+> **NOTE:** The `local_name` attribute is not supported in Apsara Stack v3.16 and later versions.

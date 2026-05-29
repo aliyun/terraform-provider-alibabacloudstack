@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_domain"
 sidebar_current: "docs-Alibabacloudstack-dns-private_domain"
@@ -64,3 +64,11 @@ resource "alibabacloudstack_dns_private_domain" "default" {
 * `record_count` - 解析记录集总数。
 
 * `update_timestamp` - 修改时间戳（秒）。
+
+## Import
+
+DNS Private Domain 可以使用 ID 导入，例如：
+
+```
+$ terraform import alibabacloudstack_dns_private_domain.example <id>
+```

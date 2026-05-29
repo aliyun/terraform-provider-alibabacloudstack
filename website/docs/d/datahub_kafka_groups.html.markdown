@@ -41,7 +41,7 @@ resource "alibabacloudstack_datahub_kafka_group" "default" {
 }
 
 data "alibabacloudstack_datahub_kafka_groups" "default" {
-  project_name = "${alibabacloudstack_datahub_project.default.name}_fake"
+  project_name = alibabacloudstack_datahub_project.default.name
 }
 ```
 

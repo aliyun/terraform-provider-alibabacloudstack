@@ -65,17 +65,25 @@ resource "alibabacloudstack_cloudfw_vpc_control_policy" "default" {
 * `new_order` - (可选) 新的策略顺序。默认值：`-1`（表示添加到策略列表末尾）。
 * `release` - (可选) 是否发布策略。取值：`true`（发布）、`false`（不发布）。
 * `vpc_firewall_id` - (可选) VPC防火墙实例ID。当未指定时，使用默认防火墙实例。
-* `direction` - (可选) 策略方向。取值：`inout`（双向流量）（默认）、`out`（出站流量）、`in`（入站流量）。
+* `direction` - (可选，可回读) 策略方向。取值：`inout`（双向流量）（默认）、`in`（入站流量）、`out`（出站流量）。
 
 ## 属性说明
 
 以下属性导出为资源属性：
 
-* `id` - 策略ID（AclUuid）。
+* `id` - 策略ID，格式为 `<acl_uuid>:<direction>`。
 * `acl_uuid` - 策略唯一标识符（AclUuid）。
-* `direction` - 策略方向。取值：`inout`（双向流量）。
+* `dest_port_group` - 目的端口组ID（由API返回）。
 * `dest_port_group_ports` - 目的端口组端口列表（当`dest_port_type`为`group`时返回）。
 * `destination_group_cidrs` - 目的地址组CIDR列表（当`destination_type`为`group`时返回）。
 * `hit_times` - 策略命中次数（自创建以来匹配的流量次数）。
 * `order` - 策略当前顺序值（用于策略优先级排序）。
 * `source_group_cidrs` - 源地址组CIDR列表（当`source_type`为`group`时返回）。
+
+## Import
+
+云防火墙VPC控制策略可以使用ID（格式：`<acl_uuid>:<direction>`）导入，例如：
+
+```
+$ terraform import alibabacloudstack_cloudfw_vpc_control_policy.example acl-12345678:inout
+```

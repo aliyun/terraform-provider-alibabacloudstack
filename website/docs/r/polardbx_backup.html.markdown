@@ -1,15 +1,17 @@
 ---
-subcategory: "PolarDBX"
+subcategory: "Cloud-Native Distributed Database PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_backup"
 sidebar_current: "docs-Alibabacloudstack-polardbx-backup"
 description: |-
-  Provides a polardbx Backup resource.
+  Provides a PolarDB-X Backup resource.
 ---
 
 # alibabacloudstack\_polardbx\_backup
 
-Provides a polardbx Backup resource.
+Provides a PolarDB-X backup resource. This resource allows you to create and manage backups for PolarDB-X instances.
+
+-> **Note:** This resource does not support update operations. Modifying any argument will force a new resource to be created.
 
 ## Example Usage
 ```
@@ -58,15 +60,26 @@ resource "alibabacloudstack_polardbx_backup" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `instance_id` - (Required) - The ID of the PolarDBX Instance.
-  * `backup_type` - (Optional) - The backup type. Currently only supports "0".
+
+  * `instance_id` - (Required, ForceNew) The ID of the PolarDB-X instance. Modifying this parameter will force a new resource to be created.
+  * `backup_type` - (Optional, ForceNew) The type of backup. Valid values: `0` (physical backup). Default to `0`. Modifying this parameter will force a new resource to be created.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `backup_mode` - Backup mode. Currently only supports "0".
-  * `backup_set_size` - The size of the backup.
-  * `backup_set_id` - The backup set ID.
-  * `status` - The status of the backup.
-  * `end_time` - The end time of this backup (UTC time).
-  * `begin_time` - The backup start time (UTC time).
+
+  * `id` - The ID of the backup. The format is `<instance_id>:<backup_set_id>`.
+  * `backup_model` - The backup mode. Valid values: `0` (physical backup), `1` (logical backup).
+  * `backup_set_size` - The size of the backup set, in bytes.
+  * `backup_set_id` - The ID of the backup set.
+  * `status` - The status of the backup. Valid values: `0` (creating), `1` (success), `2` (failed).
+  * `end_time` - The end time of the backup in UTC format.
+  * `begin_time` - The start time of the backup in UTC format.
+
+## Import
+
+PolarDB-X Backup can be imported using the instance ID and backup set ID separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_polardbx_backup.example pc-xxxxxxxxxxxxx:1234567890
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_addresspool"
 sidebar_current: "docs-alibabacloudstack-dns-dns_gtm_addresspool"
@@ -54,3 +54,11 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The ID of the address pool.
+
+## Import
+
+DNS GTM Address Pool can be imported using the address pool ID, e.g.
+
+```
+$ terraform import alibabacloudstack_dns_gtm_addresspool.example <address_pool_id>
+```

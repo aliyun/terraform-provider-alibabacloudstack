@@ -35,6 +35,7 @@ output "first_slb_vserver_group_id" {
 * `load_balancer_id` - (必填) 负载均衡实例的ID。
 * `ids` - (可选) 用于过滤结果的SLB VServer组ID列表。此参数允许用户通过指定的VServer组ID来筛选结果。
 * `name_regex` - (可选，变更时重建) 用于通过VServer组名称过滤结果的正则表达式字符串。此参数允许用户通过名称模式匹配来筛选VServer组。
+* `output_file` - (可选，已弃用) 此字段已弃用，将在 3.19.0 版本中移除。请使用 `local_file` provider 代替。
 
 ## 属性说明
 

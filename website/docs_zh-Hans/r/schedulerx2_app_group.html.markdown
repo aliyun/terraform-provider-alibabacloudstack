@@ -1,5 +1,5 @@
 ---
-subcategory: "SchedulerX2"
+subcategory: "SchedulerX"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_schedulerx2_app_group"
 sidebar_current: "docs-Alibabacloudstack-schedulerx2-app_group"
@@ -76,3 +76,11 @@ resource "alibabacloudstack_schedulerx2_app_group" "example" {
 
 * `id` - 应用组ID。
 * `app_key` - 应用密钥，用于应用认证。
+
+## Import
+
+SchedulerX2 应用组可以使用 AppGroupId 导入，例如：
+
+```
+$ terraform import alibabacloudstack_schedulerx2_app_group.example <app_group_id>
+```

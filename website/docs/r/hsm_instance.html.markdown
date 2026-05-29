@@ -61,12 +61,12 @@ The following arguments are supported:
   * `gvsm`: General server HSM.
   * `svsm`: Signature verification server HSM.
 * `zone_no` - (Required, Forces new resource) The zone ID where the HSM instance is located. You can obtain this parameter through the DescribeZones API.
-* `hsm_id` - (Optional) The ID of the HSM device. When this parameter is specified, an HSM instance for the specified device will be created.
-* `ip` - (Optional) The classic network IP address corresponding to the HSM instance. If this parameter is not provided, the system will automatically assign an available IP based on the VPC and VSwitch.
+* `hsm_id` - (Optional, Computed) The ID of the HSM device. When this parameter is specified, an HSM instance for the specified device will be created. This attribute is also returned by the API.
+* `ip` - (Optional, Computed) The classic network IP address corresponding to the HSM instance. If this parameter is not provided, the system will automatically assign an available IP based on the VPC and VSwitch. This attribute is also returned by the API.
 * `remark` - (Optional) The alias of the HSM instance.
-* `vpc_id` - (Optional) The VPC ID configured for the HSM instance. You can obtain this parameter through the DescribeVpc API.
-* `vswitch_id` - (Optional) The VSwitch ID configured for the HSM instance. You can obtain this parameter through the DescribeVpc API.
-* `white_list` - (Optional) The whitelist IP addresses that can access the HSM instance. Multiple values are supported and can be separated by commas.
+* `vpc_id` - (Optional, Computed) The VPC ID configured for the HSM instance. You can obtain this parameter through the DescribeVpc API. This attribute is also returned by the API.
+* `vswitch_id` - (Optional, Computed) The VSwitch ID configured for the HSM instance. You can obtain this parameter through the DescribeVpc API. This attribute is also returned by the API.
+* `white_list` - (Optional, Computed) The whitelist IP addresses that can access the HSM instance. Multiple values are supported and can be separated by commas. This attribute is also returned by the API.
 
 ## Attributes Reference
 
@@ -93,3 +93,11 @@ The following attributes are exported:
   * `7`: Resetting.
   * `8`: Disabled.
 * `vendor_name` - The vendor name of the HSM instance.
+
+## Import
+
+HSM Instance can be imported using the instance ID, e.g.
+
+```
+$ terraform import alibabacloudstack_hsm_instance.example hsm-12345678
+```

@@ -40,14 +40,24 @@ resource "alibabacloudstack_slb_cacertificate" "file_example" {
 
 The following arguments are supported:
 
-* `name` - (Optional) The name of the CA Certificate. This can be used to identify the certificate.
-* `ca_certificate_name` - (Optional) The name of the CA Certificate, which serves as an identifier for the certificate.
-* `ca_certificate` - (Required, ForceNew) The content of the CA certificate in PEM format. This field is immutable and cannot be updated after creation.
+* `name` - (Optional, Deprecated) The name of the CA Certificate. **This field is deprecated**, please use `ca_certificate_name` instead. Conflicts with `ca_certificate_name`.
+* `ca_certificate_name` - (Optional) The name of the CA certificate. Conflicts with `name`.
+* `ca_certificate` - (Required, ForceNew) The content of the CA certificate in PEM format. This field is immutable; modifying it will force the creation of a new resource.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the CA Certificate, which uniquely identifies the resource.
-* `name` - The name of the CA Certificate as provided during creation.
-* `ca_certificate_name` - The name of the CA Certificate, which is useful for referencing the certificate in other resources or configurations.
+* `id` - The ID of the CA Certificate, which is the `CACertificateId` returned by the API.
+* `name` - The name of the CA Certificate.
+* `ca_certificate_name` - The name of the CA Certificate.
+
+## Import
+
+SLB CA Certificate can be imported using the `CACertificateId`, e.g.
+
+```
+$ terraform import alibabacloudstack_slb_cacertificate.example CACertificateId
+```
+
+-> **NOTE:** The `ca_certificate` argument cannot be imported as it does not echo back from the API. Use `ImportStateVerifyIgnore` in tests or expect a non-empty plan after import.

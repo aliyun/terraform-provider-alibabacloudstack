@@ -16,12 +16,7 @@ description: |-
 ## Example Usage
 
 ```
-resource "alibabacloudstack_ascm_organization" "default" {
-    name = "Dummy_Test_1"
-}
-
 resource "alibabacloudstack_ascm_resource_group" "default" {
-    organization_id = alibabacloudstack_ascm_organization.default.org_id
     name = "Resource_Group_Name"
 }
 
@@ -36,16 +31,23 @@ output "rg" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the resource group. This name can have a string of 2 to 128 characters, must contain only alphanumeric characters or hyphens, such as "-",".","_", and must not begin or end with a hyphen, and must not begin with http:// or https://. Default value is null. 
-* `organization_id` - (Required) ID of an Organization.
+* `name` - (Required) The name of the resource group. This name can have a string of 2 to 128 characters.
 
-* `rg_id` - (Optional) The ID of the resource group. 
+* `organization_id` - (Deprecated, Optional) This parameter has been deprecated. The resource group will be created under the organization to which the current user belongs. Modifying this parameter will force a new resource to be created.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - Name and ID of the resource group. The value is in format `Name:ID`
+* `id` - The ID of the resource group. The value is in format `<organization_id>:<resource_group_id>`.
+* `name` - The name of the resource group.
+* `rg_id` - The ID of the resource group (internal ID returned by API).
+* `organization_id` - The ID of the organization to which the resource group belongs.
 
-* `name` - The name of the resource group. 
-* `rg_id` - The ID of the resource group.
+## Import
+
+ASCM Resource Group can be imported using the organization ID and resource group ID separated by colon, e.g.
+
+```
+$ terraform import alibabacloudstack_ascm_resource_group.example 12345:67890
+```

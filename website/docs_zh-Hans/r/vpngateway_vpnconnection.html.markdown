@@ -1,5 +1,5 @@
 ---
-subcategory: "VPNGateway"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnconnection"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-vpnconnection"
@@ -84,11 +84,10 @@ resource "alibabacloudstack_vpn_connection" "default" {
 支持以下参数：
   * `customer_gateway_id` - (必填, 变更时重建) - 客户网关的 ID。
   * `vpn_gateway_id` - (必填, 变更时重建) - VPN 网关的 ID。
-  * `name` - (选填) - IPsec 连接的名称，与 `vpn_connection_name` 功能相同。
   * `vpn_connection_name` - (选填) - IPsec 连接的名称。
   * `local_subnet` - (必填) - 虚拟私有云 (VPC) 的 CIDR 块。此参数用于第二阶段协商。
   * `remote_subnet` - (必填) - 本地数据中心的 CIDR 块。此参数用于第二阶段协商。
-  * `effect_immediately` - (选填) - 是否立即启动 IPsec-VPN 协商。有效值：`true`(配置变更时触发重连)、`false`(有流量时触发重连)。默认值为 `true`。
+  * `effect_immediately` - (选填) - 是否立即启动 IPsec-VPN 协商。有效值：`true`(配置变更时触发重连)、`false`(有流量时触发重连)。默认值为 `false`。
   * `ike_config` - (选填) - 第一阶段协商的配置。
     
     * `psk` - (选填) - 用于验证 IPsec VPN 网关和客户网关之间身份的预共享密钥。
@@ -106,6 +105,7 @@ resource "alibabacloudstack_vpn_connection" "default" {
     * `ipsec_auth_alg` - (选填) - 第二阶段协商的身份验证算法。有效值：`md5` | `sha1` | `sha256` | `sha384` | `sha512`。默认值：`sha1`。
     * `ipsec_pfs` - (选填) - 第二阶段协商使用的 Diffie-Hellman 密钥交换算法。有效值：`group1` | `group2` | `group5` | `group14` | `group24` | `disabled`。默认值：`group2`。
     * `ipsec_lifetime` - (选填) - 第二阶段协商结果的 SA 生命周期。有效值范围为 [0, 86400]，单位为秒，默认值为 86400。
+  * `name` - (选填, 已弃用) - IPsec 连接的名称。该字段已弃用，将在未来版本中移除。请使用 `vpn_connection_name` 代替。
 
 ## 属性说明
 
@@ -129,3 +129,11 @@ resource "alibabacloudstack_vpn_connection" "default" {
     * `ipsec_pfs` - Diffie-Hellman 组。
     * `ipsec_lifetime` - SA 生命周期。
   * `status` - 资源的状态。
+
+## 导入
+
+VPN 连接可以使用 ID 导入，例如：
+
+```bash
+$ terraform import alibabacloudstack_vpn_connection.example vco-abc123456
+```

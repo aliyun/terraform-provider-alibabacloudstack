@@ -50,27 +50,25 @@ The following arguments are supported:
 * `direction` - (Optional) Authorization direction. Valid values are: `ingress` or `egress`.
 * `ip_protocol` - (Optional) The IP protocol. Valid values are: `tcp`, `udp`, `icmp`, `gre` and `all`.
 * `policy` - (Optional) Authorization policy. Can be either `accept` or `drop`. The default value is `accept`.
-* `group_name` - (Optional) The name of the security group that owns the rules.
-* `group_desc` - (Optional) The description of the security group that owns the rules.
+* `output_file` - (Optional, Deprecated) File name where to save data source results. The `output_file` field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the `local_file` provider instead.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
 
+* `id` - The ID of the data source.
 * `group_name` - The name of the security group that owns the rules.
 * `group_desc` - The description of the security group that owns the rules.
 * `rules` - A list of security group rules. Each element contains the following attributes:
   * `ip_protocol` - The protocol. Can be `tcp`, `udp`, `icmp`, `gre` or `all`.
   * `port_range` - The range of port numbers.
   * `source_cidr_ip` - Source IP address segment for ingress authorization.
+  * `source_group_id` - Source security group ID for ingress authorization.
   * `source_group_owner_account` - Alibabacloudstack Cloud account of the source security group.
   * `dest_cidr_ip` - Target IP address segment for egress authorization.
+  * `dest_group_id` - Target security group ID for egress authorization.
   * `dest_group_owner_account` - Alibabacloudstack Cloud account of the target security group.
   * `policy` - Authorization policy. Can be either `accept` or `drop`.
   * `nic_type` - Network type, `internet` or `intranet`.
   * `priority` - Rule priority.
   * `direction` - Authorization direction, `ingress` or `egress`.
-  * `dest_group_id` - Target security group id for ingress authorization.
-  * `source_group_id` - Source security group ID for ingress authorization.
-  * `group_id` - The ID of the security group that owns the rules.
-  * `output_file` - File name where to save data source results (after running `terraform plan`).

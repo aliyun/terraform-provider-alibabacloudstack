@@ -1,5 +1,5 @@
 ---
-subcategory: "NATGateway"
+subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_forwardentry"
 sidebar_current: "docs-Alibabacloudstack-natgateway-forwardentry"
@@ -67,19 +67,27 @@ resource "alibabacloudstack_forward_entry" "default" {
 
 支持以下参数：
 
-* `forward_table_id` - (必填，变更时重建) DNAT 条目所属的 DNAT 表的 ID。此字段在创建后不可更改。
+* `forward_table_id` - (必填，变更时重建) 转发条目所属的转发表的 ID。此字段在创建后不可更改。
 * `external_ip` - (必填) 公网 IP 地址。该地址用于 ECS 实例接收来自互联网的请求。
-* `external_port` - (必填) 外部端口。该端口用于 ECS 实例接收来自互联网的请求。有效值为 1 到 65535 或 "any"。
+* `external_port` - (必填) 外部端口。该端口用于 ECS 实例接收来自互联网的请求。有效值为 `1` 到 `65535` 之间的整数或 `"any"`。
 * `ip_protocol` - (必填) 协议类型。有效值为 `tcp`、`udp` 或 `any`。
-* `name` - (可选) DNAT 条目的名称。如果未提供，则默认使用 `forward_entry_name` 的值。
-* `forward_entry_name` - (可选) DNAT 条目的名称。如果未提供，则默认使用 `name` 的值。
+* `name` - (**已废弃**) 该字段已废弃，将在未来版本中移除。请使用 `forward_entry_name` 代替。该字段与 `forward_entry_name` 互斥，不能同时使用。
+* `forward_entry_name` - (可选，可回读) 转发条目的名称。长度限制为 2 到 128 个字符。该字段与 `name` 互斥，不能同时使用。
 * `internal_ip` - (必填) 私网 IP 地址。它必须是 VPC 内的有效私有 IP 地址。
-* `internal_port` - (必填) 目标私网端口。有效值为 1 到 65535 或 "any"。
+* `internal_port` - (必填) 内部端口。有效值为 `1` 到 `65535` 之间的整数或 `"any"`。
 
 ## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
-* `id` - DNAT 条目的唯一标识符。格式为 `<forward_table_id>:<forward_entry_id>`。
-* `forward_entry_id` - DNAT 条目在服务器上的唯一标识符。
-* `forward_entry_name` - DNAT 条目的名称。如果未明确设置，默认为 `name` 字段的值。
+* `id` - 转发条目的唯一标识符。格式为 `<forward_table_id>:<forward_entry_id>`。
+* `forward_entry_id` - 转发条目在服务端的唯一标识符。
+* `forward_entry_name` - 转发条目的名称。如果未明确设置，服务端可能返回默认值。
+
+## Import
+
+转发条目可以使用转发表 ID 和转发条目 ID（以冒号分隔）进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_forward_entry.example ftb-xxxxxxxxxx:fwd-xxxxxxxxxx
+```

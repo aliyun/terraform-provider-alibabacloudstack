@@ -25,8 +25,8 @@ resource "alibabacloudstack_polardb_dbconnection" "default" {
 The following arguments are supported:
 
 * `instance_id` - (Required, ForceNew) - The ID of the PolarDB instance.
-* `connection_prefix` - (Optional, ForceNew) - The prefix of the connection string. It must be 1 to 31 characters in length and can contain numbers, letters, underscores, underscores (_), and hyphens (-). It must start with a letter, a number, or a Chinese character. If not specified, it defaults to the instance ID followed by tf.
-* `port` - (Optional) - The port number for the connection. Default is 3306. Valid values are between 1024 and 65535.
+* `connection_prefix` - (Optional, Computed) - The prefix of the connection string. It must be 1 to 31 characters in length and can contain numbers, letters, underscores (_), and hyphens (-). If not specified, the system will automatically generate a default value. Modifying this parameter will not recreate the resource; it can be updated in-place.
+* `port` - (Optional) - The port number for the connection. Default is 3306. Valid values range from 1000 to 65534.
 
 
 ## Attributes Reference

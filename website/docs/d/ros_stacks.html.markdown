@@ -1,5 +1,5 @@
 ---
-subcategory: "ROS"
+subcategory: "Resource Orchestration Service (ROS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ros_stacks"
 sidebar_current: "docs-Alibabacloudstack-datasource-ros-stacks"
@@ -49,7 +49,6 @@ output "stack_ids" {
 
 The following arguments are supported:
 
-* `enable_details` - (Optional) Default to `false`. Set it to `true` can output more details about resource attributes.
 * `ids` - (Optional, ForceNew) A list of Stack IDs.
 * `name_regex` - (Optional, ForceNew) A regex string to filter results by Stack name.
 * `parent_stack_id` - (Optional, ForceNew) The ID of the parent stack.
@@ -57,6 +56,8 @@ The following arguments are supported:
 * `stack_name` - (Optional, ForceNew) The name of the stack. The name can be up to 255 characters in length, and can contain digits, letters, hyphens (-), and underscores (_). It must start with a digit or letter.
 * `status` - (Optional, ForceNew) The status of the stack. Valid values: `CREATE_COMPLETE`, `CREATE_FAILED`, `CREATE_IN_PROGRESS`, `DELETE_COMPLETE`, `DELETE_FAILED`, `DELETE_IN_PROGRESS`, `ROLLBACK_COMPLETE`, `ROLLBACK_FAILED`, `ROLLBACK_IN_PROGRESS`.
 * `tags` - (Optional) Query the instance bound to the tag. The format of the incoming value is `json` string, including `TagKey` and `TagValue`. `TagKey` cannot be null, and `TagValue` can be empty. Format example `{"key1":"value1"}`.
+* `enable_details` - (Optional) Default to `false`. Set it to `true` can output more details about resource attributes.
+* `output_file` - (Optional, Deprecated) The output file path. This field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.
 
 ## Attributes Reference
 

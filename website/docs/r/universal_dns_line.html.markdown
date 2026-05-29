@@ -1,5 +1,5 @@
 ---
-subcategory: "Universal DNS"
+subcategory: "Cross-Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_line"
 sidebar_current: "docs-Alibabacloudstack-resource-universal-dns-line"
@@ -46,3 +46,11 @@ The following attributes are exported:
 
 * `id` - The ID of the Universal DNS line.
 * `priority` - The priority of the Universal DNS line. 1 indicates the highest priority, and a larger value indicates a lower priority. The system automatically assigns the priority value.
+
+## Import
+
+Universal DNS Line can be imported using the line ID, e.g.
+
+```
+$ terraform import alibabacloudstack_universal_dns_line.example <line_id>
+```

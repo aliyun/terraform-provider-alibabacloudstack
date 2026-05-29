@@ -1,32 +1,30 @@
 ---
-subcategory: "CSB"
+subcategory: "Cloud Service Bus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_csb_project"
 sidebar_current: "docs-alibabacloudstack-resource-csb-project"
 description: |-
-  Provides a Alibabacloudstack resource to manage CSB Project .
+  Provides a Alibabacloudstack resource to manage CSB Project.
 ---
 
 # alibabacloudstack_csb_project
 
-This resource will help you to manager CSB Project.
+This resource will help you to manage CSB Project.
 
-For information about CSB Project and how to use it, see [Create a Project](https://help.aliyun.com/apsara/enterprise/v_3_17_0_30393230/csb/apsarastack-developer-guide/obtains-information-about-a-single-service-group.html?spm=a2c4g.14484438.10001.97)
-
-
-
--> **NOTE:** You need to set your registry password in CSB Project console before use this resource.
+For information about CSB Project and how to use it, see [Create a Project](https://help.aliyun.com/apsara/enterprise/v_3_18_0_30393230/csb/apsarastack-developer-guide/obtains-information-about-a-single-service-group.html?spm=a2c4g.14484438.10001.97)
 
 ## Example Usage
 
 Basic Usage
 
-```
-
+```hcl
 resource "alibabacloudstack_csb_project" "project" {
- "data":         "{\\\"projectName\\\":\\\"test17\\\",\\\"projectOwnerName\\\":\\\"test17\\\",\\\"projectOwnerEmail\\\":\\\"\\\",\\\"projectOwnerPhoneNum\\\":\\\"\\\",\\\"description\\\":\\\"\\\"}",
- "csb_id":       "134",
- "project_name": "test17",
+  csb_id            = "your-csb-id"
+  project_name      = "example-project"
+  owner_name        = "project-owner"
+  owner_email       = "owner@example.com"
+  owner_phone_num   = "13800138000"
+  description       = "Example CSB project"
 }
 ```
 
@@ -34,24 +32,32 @@ resource "alibabacloudstack_csb_project" "project" {
 
 The following arguments are supported:
 
-* `data` - (Optional) Infomation of CSB Project. 
-* `csb_id` - (Required, ForceNew) id of  CSB instance  where repository is created. 
-* `project_name` - (Required, ForceNew) Name of CSB Project. It can contain 2 to 64 characters.
-
+* `csb_id` - (Required, ForceNew) The ID of the CSB instance. Modifying this parameter will force the creation of a new resource.
+* `project_name` - (Required) The name of the CSB project. Length constraint: 1 to 128 characters.
+* `owner_name` - (Required) The name of the project owner.
+* `owner_email` - (Optional) The email address of the project owner.
+* `owner_phone_num` - (Optional) The phone number of the project owner.
+* `description` - (Optional) The description of the project.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `csb_id` - The id of CSB instance. 
-* `project_name` - The project name of CSB Project.
-* `project_owner_name` - The project owner name of CSB Project.
-* `gmt_modified` - The project modified time of CSB Project.
-* `gmt_create` - The project create time of CSB Project.
-* `owner_id` - The owner id of CSB Project.
-* `api_num` - The api num of CSB Project.
-* `user_id` - The user id of CSB Project.
-* `delete_flag` - The delete flag of CSB Project.
-* `cs_id` - The project id of CSB Project.
-* `status` - The project status of CSB Project.
-* `data` - Infomation of CSB Project. 
+* `id` - The unique identifier of the resource, in the format `csb_id:project_name`.
+* `csb_id` - The ID of the CSB instance.
+* `project_name` - The name of the CSB project.
+* `project_id` - The internal ID of the CSB project.
+* `owner_name` - The name of the project owner.
+* `owner_email` - The email address of the project owner.
+* `owner_phone_num` - The phone number of the project owner.
+* `description` - The description of the project.
+* `owner_id` - The owner ID of the CSB project.
+* `api_num` - The number of APIs published in the CSB project.
+
+## Import
+
+CSB Project can be imported using the combination of `csb_id` and `project_name`, separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_csb_project.example <csb_id>:<project_name>
+```

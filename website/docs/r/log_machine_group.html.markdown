@@ -1,5 +1,5 @@
 ---
-subcategory: "Log Service (SLS)"
+subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_machine_group"
 sidebar_current: "docs-alibabacloudstack-resource-log-machine-group"
@@ -36,10 +36,11 @@ resource "alibabacloudstack_log_machine_group" "example" {
 
 The following arguments are supported:
 
-* `project` - (Required, ForceNew) The project name to the machine group belongs. 
-* `name` - (Required, ForceNew) The machine group name, which is unique in the same project. 
-* `identify_type` - (Optional) The machine identification type.
+* `project` - (Required, ForceNew) The project name to the machine group belongs.
+* `name` - (Required, ForceNew) The machine group name, which is unique in the same project.
+* `identify_type` - (Optional) The machine identification type. Valid values: `ip`, `userdefined`. Default to `ip`.
 * `topic` - (Optional) The machine group topic.
+* `identify_list` - (Required) The machine identification list. If `identify_type` is `ip`, this list contains IP addresses. If `identify_type` is `userdefined`, this list contains user-defined identifiers. At least one item is required.
 
 ## Attributes Reference
 

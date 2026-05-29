@@ -35,6 +35,7 @@ The following arguments are supported:
 * `load_balancer_id` - (Required) The ID of the SLB instance.
 * `ids` - (Optional) A list of SLB VServer group IDs to filter results.
 * `name_regex` - (Optional, ForceNew) A regex string to filter results by VServer group name.
+* `output_file` - (Optional, Deprecated) This field is deprecated and will be removed in version 3.19.0. Use the `local_file` provider instead.
 
 ## Attributes Reference
 

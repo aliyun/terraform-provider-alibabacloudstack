@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Enterprise Network (CEN)"
+subcategory: "云企业网 CEN"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_transitroutermulticastdomainassociation"
 sidebar_current: "docs-Alibabacloudstack-cen-transitroutermulticastdomainassociation"
@@ -82,3 +82,11 @@ The following arguments are supported:
 
 The following attributes are exported in addition to the arguments listed above:
   * `status` - the status of the resource.
+
+## Import
+
+CEN Transit Router Multicast Domain Association can be imported using the transit_router_attachment_id, transit_router_multicast_domain_id, and vswitch_id separated by colons, e.g.
+
+```
+$ terraform import alibabacloudstack_cen_transit_router_multicast_domain_association.example <transit_router_attachment_id>:<transit_router_multicast_domain_id>:<vswitch_id>
+```

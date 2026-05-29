@@ -94,6 +94,14 @@ resource "alibabacloudstack_polardbx_account_database_binding" "default" {
 支持以下参数：
   * `account_name` - (必填) - 账户名称
   * `instance_id` - (必填) - PolarDBX 实例的 ID。
-  * `db_privileges` - 账户的数据库权限。
-    * `db_name` - 数据库的名称。
-    * `privilege` - 目标账户在数据库上的权限。
+  * `db_privileges` - (必填) - 账户的数据库权限。
+    * `db_name` - (必填) - 数据库的名称。
+    * `privilege` - (必填) - 目标账户在数据库上的权限。取值：ReadOnly（只读）、ReadWrite（读写）、DMLOnly（仅 DML）、DDLOnly（仅 DDL）。
+
+## Import
+
+PolarDBX Account Database Binding 可以使用 instance_id 和 account_name 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_polardbx_account_database_binding.example pxc-12345678:myaccount
+```

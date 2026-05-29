@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_export"
 sidebar_current: "docs-alibabacloudstack-resource-image-export"
@@ -33,6 +33,7 @@ resource "alibabacloudstack_image_export" "default" {
 
 * `image_id` - (必填，变更时重建) 源镜像ID。
 * `oss_bucket` - (必填，变更时重建) 保存导出文件的OSS Bucket名称。
+* `oss_cluster` - (可选，变更时重建) OSS集群ID。此参数为专有云特有参数。
 * `oss_prefix` - (可选，变更时重建) OSS Object的前缀。可以由数字或字母组成，字符长度为1 ~ 30。
 
 ## 超时时间
@@ -46,3 +47,8 @@ resource "alibabacloudstack_image_export" "default" {
 以下属性将会被导出：
 
 * `id` - 镜像的ID。
+* `oss_object` - 导出的OSS Object名称。格式为 `<image_id>_system.raw.tar.gz`，如果指定了 `oss_prefix`，则格式为 `<oss_prefix>_<image_id>_system.raw.tar.gz`。
+
+## Import
+
+此资源不支持导入。

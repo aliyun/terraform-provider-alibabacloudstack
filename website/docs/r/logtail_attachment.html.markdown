@@ -1,5 +1,5 @@
 ---
-subcategory: "Log Service (SLS)"
+subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_logtail_attachment"
 sidebar_current: "docs-alibabacloudstack-resource-logtail-attachment"
@@ -78,22 +78,22 @@ resource "alibabacloudstack_logtail_attachment" "test" {
 
 The following arguments are supported:
 
-* `project` - (Required, ForceNew) The project name to the log store belongs. 
-* `logtail_config_name` - (Required, ForceNew) The Logtail configuration name, which is unique in the same project. 
-* `machine_group_name` - (Required, ForceNew) The machine group name, which is unique in the same project. 
-* `force_new_property` - (Optional, ForceNew) This is an additional property added by AI.
+* `project` - (Required, ForceNew) The name of the Log Service project to which the Logtail configuration and machine group belong.
+
+* `logtail_config_name` - (Required, ForceNew) The name of the Logtail configuration. It must be unique within the same project.
+
+* `machine_group_name` - (Required, ForceNew) The name of the machine group. It must be unique within the same project.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The ID of the logtail to machine group. It formats of `<project>:<logtail_config_name>:<machine_group_name>`. 
-* `computed_property` - (Computed) This is an additional computed property added by AI.
+* `id` - The ID of the Logtail attachment. It is formatted as `<project>:<logtail_config_name>:<machine_group_name>`.
 
 ## Import
 
-Logtial to machine group can be imported using the id, e.g.
+Logtail Attachment can be imported using the project name, logtail config name, and machine group name separated by colons, e.g.
 
-```
-$ terraform import alibabacloudstack_logtail_to_machine_group.example tf-log:tf-log-config:tf-log-machine-group
+```bash
+$ terraform import alibabacloudstack_logtail_attachment.example tf-log:tf-log-config:tf-log-machine-group
 ```

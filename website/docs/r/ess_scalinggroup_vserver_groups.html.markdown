@@ -1,5 +1,5 @@
 ---
-subcategory: "Auto Scaling (ESS)"
+subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_scalinggroup_vserver_groups"
 sidebar_current: "docs-Alibabacloudstack-ess-scalinggroup-vserver-groups"
@@ -8,6 +8,8 @@ description: |-
 ---
 
 # alibabacloudstack_ess_scalinggroup_vserver_groups
+
+-> **DEPRECATION:** This resource is unsupported on ApsaraStack and will be removed in version 3.21.0.
 
 Attaches/Detaches vserver groups to a specified scaling group.
 
@@ -23,9 +25,9 @@ Attaches/Detaches vserver groups to a specified scaling group.
 
 -> **NOTE:** Detach action will be executed before attach action.
 
--> **NOTE:** Vserver group is defined uniquely by `loadbalancer_id`, `vserver_group_id`, `port`.
+-> **NOTE:** Vserver group is defined uniquely by `loadbalancer_id`, `vserver_group_id`, `port`, `weight`.
 
--> **NOTE:** Modifing `weight` attribute means detach vserver group first and then, attach with new weight parameter.
+-> **NOTE:** Modifying `weight` attribute means detach vserver group first and then, attach with new weight parameter.
 
 ## Example Usage
 
@@ -68,4 +70,12 @@ The following arguments are supported:
 ### Attributes Reference
 The following attributes are exported in addition to the arguments listed above:
 
-* `id` - (Required, ForceNew) The ESS vserver groups attachment resource ID.
+* `id` - The unique ID of the ESS vserver groups attachment resource, formatted as `<scaling_group_id>`.
+
+## Import
+
+ESS Scaling Group VServer Groups can be imported using the scaling_group_id, e.g.
+
+```
+$ terraform import alibabacloudstack_ess_scalinggroup_vserver_groups.example sg-12345678
+```

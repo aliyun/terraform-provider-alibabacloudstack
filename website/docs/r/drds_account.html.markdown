@@ -108,15 +108,23 @@ The following arguments are supported:
   * `instance_id` - (Required, ForceNew) - The ID of the instance.
   * `drds_account_name` - (Required, ForceNew) - The name of the account.
   * `description` - (Optional) - Account remarks. The default value of the advanced account is **Created by DRDS**, and the normal account does not have any comments. Remarks can be customized in account management.
-  * `password` - (Required) - The updated password.
+  * `password` - (Required) The password of the DRDS account.
   * `db_privileges` - (Required) - Database permission information.
     
     * `db_name` - (Required) - The name of the database.
     
-    * `privilege` - (Required) - The permission of the database.
+    * `privilege` - (Required) The permission of the database. Valid values: `R`, `RW`, `DDL`, `DML`.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
   * `host` - You can access the IP address of the database. <note>**%** indicates that any IP address can be accessed. </note>
-  * `account_type` - Account type.-**0** indicates an advanced account.-**1** indicates a common account.
+  * `account_type` - Account type. **0** indicates an advanced account. **1** indicates a common account.
+
+## Import
+
+DRDS Account can be imported using the instance ID and account name joined with a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_drds_account.example <instance_id>:<account_name>@%
+```

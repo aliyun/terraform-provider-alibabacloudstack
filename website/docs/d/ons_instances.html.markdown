@@ -35,7 +35,7 @@ data "alibabacloudstack_ons_instances" "instances_ds" {
 }
 
 output "first_instance_id" {
-  value = data.alibabacloudstack_ons_instances.instances_ds.*
+  value = data.alibabacloudstack_ons_instances.instances_ds.instances[0].id
 }
 ```
 
@@ -44,7 +44,8 @@ output "first_instance_id" {
 The following arguments are supported:
 
 * `ids` - (Optional) A list of instance IDs to filter results.
-* `name_regex` - (Optional) A regex string to filter results by the instance name. 
+* `name_regex` - (Optional) A regex string to filter results by the instance name.
+* `output_file` - (Optional, Deprecated) This field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the `local_file` provider instead. 
 
 ## Attributes Reference
 
@@ -56,12 +57,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `id` - ID of the instance.
   * `instance_id` - ID of the instance.
   * `instance_name` - Name of the instance.
-  * `instance_type` - The type of the instance. 
+  * `instance_type` - The type of the instance.
   * `instance_status` - The status of the instance.
-  * `independent_naming` - Indicates whether namespaces are available.
-  * `tps_receive_max` - This attribute is used to set the message receiving transactions per second (TPS) of the topic during a certain period of time.
-  * `tps_send_max` - This attribute is used to set the message sending transactions per second (TPS) of the topic during a certain period of time.
-  * `topic_capacity` - This attribute is used to set the topic capacity.
-  * `cluster` - This attribute is a used to add cluster name.
-  * `create_time` - Create time of the instance.
-  * `computed_property_example` - An example of a computed property.
+  * `independent_naming` - Indicates whether the instance supports independent namespace naming.
+  * `tps_receive_max` - The maximum message receiving transactions per second (TPS) of the instance.
+  * `tps_send_max` - The maximum message sending transactions per second (TPS) of the instance.
+  * `topic_capacity` - The maximum number of topics that the instance can hold.
+  * `cluster` - The name of the cluster to which the instance belongs.
+  * `create_time` - The time when the instance was created, in timestamp format.

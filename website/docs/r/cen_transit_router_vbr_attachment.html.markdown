@@ -5,6 +5,9 @@ page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_vbr_attachm
 sidebar_current: "docs-alibabacloudstack-resource-cen-transit-router-vbr-attachment"
 description: |-
   Provides a CEN transit router VBR attachment resource.
+
+-> **Note:** This resource can also be referred to by the following alias:
+-> - `apsarastack_cen_transit_router_vbr_attachment`
 ---
 
 # alibabacloudstack\_cen\_transit_router_vbr_attachment
@@ -40,25 +43,37 @@ resource "alibabacloudstack_cen_transit_router_vbr_attachment" "default" {
   vbr_id            = alibabacloudstack_express_connect_virtual_border_router.default.id
 }
 ```
+
 ## Argument Reference
+
 The following arguments are supported:
 
-* `cen_id` - (Required, ForceNew) The ID of the CEN instance.
-* `transit_router_id` - (Required, ForceNew) The ID of the transit router.
-* `vbr_id` - (Required, ForceNew) The ID of the Virtual Border Router (VBR).
+* `cen_id` - (Required) The ID of the CEN instance.
+* `transit_router_id` - (Required) The ID of the transit router.
+* `vbr_id` - (Required) The ID of the Virtual Border Router (VBR).
 * `transit_router_attachment_name` - (Optional) The name of the transit router attachment.
 * `transit_router_attachment_description` - (Optional) The description of the transit router attachment.
-* `route_table_propagation_enabled` - (Optional) Whether to enable route table propagation.
-* `route_table_association_enabled` - (Optional) Whether to enable route table association.
+* `route_table_propagation_enabled` - (Optional, ForceNew) Specifies whether to enable route table propagation. Modifying this parameter will force the recreation of the resource.
+* `route_table_association_enabled` - (Optional, ForceNew) Specifies whether to enable route table association. Modifying this parameter will force the recreation of the resource.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
+
 ## Attributes Reference
+
 The following attributes are exported:
 
-* `id` - The ID of the resource, formatted as {cen_id}:{transit_router_id}:{transit_router_attachment_id}:{vbr_id}.
-* `auto_publish_route_enabled` - Whether automatic route publishing is enabled.
-* `charge_type` - The charge type of the transit router attachment.
-* `creation_time` - The creation time of the transit router attachment.
-* `resource_type` - The resource type of the transit router attachment.
-* `status` - The status of the transit router attachment.
-* `transit_router_attachment_id` - The ID of the transit router attachment.
-* `vbr_owner_id` - The owner ID of the VBR.
+* `id` - The ID of the resource, formatted as `{cen_id}:{transit_router_id}:{transit_router_attachment_id}:{vbr_id}`.
+* `transit_router_attachment_id` - The ID of the transit router VBR attachment.
+* `auto_publish_route_enabled` - Indicates whether automatic route publishing is enabled.
+* `charge_type` - The billing method of the transit router VBR attachment.
+* `creation_time` - The time when the transit router VBR attachment was created.
+* `resource_type` - The resource type. Valid value: `VBR`.
+* `status` - The status of the transit router VBR attachment.
+* `vbr_owner_id` - The Alibaba Cloud account ID of the VBR owner.
+
+## Import
+
+CEN Transit Router VBR Attachment can be imported using the cen_id, transit_router_id, transit_router_attachment_id and vbr_id (separated by colons), e.g.
+
+```
+$ terraform import alibabacloudstack_cen_transit_router_vbr_attachment.example cen-xxxxxx:tr-xxxxxx:tr-attach-xxxxxx:vbr-xxxxxx
+```

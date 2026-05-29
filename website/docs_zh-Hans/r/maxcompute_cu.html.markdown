@@ -28,7 +28,7 @@ resource "alibabacloudstack_maxcompute_cu" "example" {
 
 支持以下参数：
 * `cu_name` - (必填，变更时重建，1.110.0+可用) MaxCompute CU 的名称。必须为 3 到 27 个字符。
-* `cu_num` - (必填，变更时重建) MaxCompute CU 的 CU 数量。必须至少为 1。
+* `cu_num` - (必填) MaxCompute CU 的 CU 数量。必须至少为 1。
 * `cluster_name` - (必填，变更时重建) MaxCompute CU 所属的集群名称。
 
 ## 属性说明
@@ -38,8 +38,8 @@ resource "alibabacloudstack_maxcompute_cu" "example" {
 
 ## 导入
 
-MaxCompute 项目可以通过 *name* 或 ID 导入，例如
+MaxCompute CU 可以通过 CuId 导入，例如
 
 ```bash
-$ terraform import alibabacloudstack_maxcompute_project.example tf_maxcompute_project
+$ terraform import alibabacloudstack_maxcompute_cu.example <cu_id>
 ```

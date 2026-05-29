@@ -1,5 +1,5 @@
 ---
-subcategory: "EIP"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_eip_addresses"
 sidebar_current: "docs-Alibabacloudstack-datasource-eip-addresses"
@@ -33,6 +33,7 @@ The following arguments are supported:
 
 * `ids` - (Optional) A list of EIP IDs. If specified, the data source will return only those EIPs whose IDs match the ones provided.
 * `ip_addresses` - (Optional) A list of EIP public IP addresses. If specified, the data source will return only those EIPs whose IP addresses match the ones provided.
+* `output_file` - (Optional, Deprecated) This field is deprecated and will be removed in version 3.19.0. To write content to a file, use the `local_file` provider instead.
 
 
 ## Attributes Reference

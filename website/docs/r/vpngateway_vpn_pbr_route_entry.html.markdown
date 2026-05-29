@@ -1,5 +1,5 @@
 ---
-subcategory: "VPNGateway"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnpbrrouteentry"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-vpnpbrrouteentry"
@@ -61,16 +61,25 @@ resource "alibabacloudstack_vpngateway_vpn_pbr_route_entry" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `next_hop` - (Required, ForceNew) - The next hop of the destination route entry.
-  * `overlay_mode` - (Optional, ForceNew) - Tunnel protocol. Value: **Ipsec**(IPsec tunnel protocol).
-  * `publish_vpc` - (Required) - Whether to publish a policy route to a VPC. Value:-**true**: The publish policy is routed to the VPC.-**false**: does not publish the policy route to the VPC.
-  * `route_dest` - (Required, ForceNew) - The destination CIDR block of the destination route.
-  * `route_source` - (Required, ForceNew) - The source CIDR block of the policy route.
-  * `vpn_gateway_id` - (Required, ForceNew) - The ID of the VPN Gateway.
-  * `weight` - (Required) - The weight of the destination route.
+  * `vpn_gateway_id` - (Required, ForceNew) The ID of the VPN Gateway.
+  * `route_source` - (Required, ForceNew) The source CIDR block of the policy route.
+  * `route_dest` - (Required, ForceNew) The destination CIDR block of the destination route.
+  * `next_hop` - (Required, ForceNew) The next hop of the destination route entry.
+  * `weight` - (Required) The weight of the destination route. Valid values: `0` and `100`.
+  * `publish_vpc` - (Required) Whether to publish the policy route to a VPC. Valid values: `true` and `false`.
+  * `overlay_mode` - (Optional) The tunnel protocol. Default value: `Ipsec`. Valid value: `Ipsec` (IPsec tunnel protocol).
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `create_time` - The time when the VPN route was created.
-  * `status` - The status of the VPN destination route.
+  * `id` - The ID of the resource. The format is `<vpn_gateway_id>_<route_source>_<route_dest>_<next_hop>`.
+  * `create_time` - The time when the VPN PBR route entry was created.
+  * `status` - The status of the VPN PBR route entry.
+
+## Import
+
+VPN PBR Route Entry can be imported using the composite ID, e.g.
+
+```
+$ terraform import alibabacloudstack_vpngateway_vpn_pbr_route_entry.example <vpn_gateway_id>_<route_source>_<route_dest>_<next_hop>
+```

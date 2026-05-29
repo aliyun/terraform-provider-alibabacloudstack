@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_securitygroup"
 sidebar_current: "docs-Alibabacloudstack-ecs-securitygroup"
@@ -71,23 +71,26 @@ The following arguments are supported:
 * `vpc_id` - (Optional, ForceNew) The ID of the VPC in which you want to create the security group. This parameter is required only if you want to create security groups of the VPC type. In regions that support the classic network, you can create security groups of the classic network type without specifying the `vpc_id`.
 
 * `type` - (Optional, ForceNew) The type of the security group. Valid values:
-  * `normal`: Standard security group (default).
+  * `normal`: Standard security group. This is the default value.
   * `enterprise`: Enterprise-level security group.
 
 * `inner_access_policy` - (Optional) The internal access policy of the security group. Valid values:
   * `Accept`: All instances in the security group can communicate with each other.
   * `Drop`: All instances in the security group are isolated from each other.
-  The value of this parameter is not case-sensitive. Default value is `Accept`.
+  **NOTE:** This attribute is computed and can be read back from the API. The value of this parameter is not case-sensitive. Default value is `Accept`.
 
 * `tags` - (Optional) A mapping of tags to assign to the resource. Each tag consists of a key-value pair. Tag keys must be unique within the resource.
+
+## Import
+
+Security Group can be imported using the SecurityGroupId, e.g.
+
+```
+$ terraform import alibabacloudstack_ecs_securitygroup.example sg-12345678
+```
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the security group.
-
-* `inner_access_policy` - The internal access policy of the security group. Valid values:
-  * `Accept`: All instances in the security group can communicate with each other.
-  * `Drop`: All instances in the security group are isolated from each other.
-  The value of this parameter is not case-sensitive. This attribute reflects the actual configuration of the security group.

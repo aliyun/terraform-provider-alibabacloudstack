@@ -1,5 +1,5 @@
 ---
-subcategory: "Alikafka"
+subcategory: "ApsaraMQ for Kafka"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_topic"
 sidebar_current: "docs-Alibabacloudstack-alikafka-topic"
@@ -59,10 +59,10 @@ The following arguments are supported:
 
 * `instance_id` - (Required, ForceNew) Resource id of your Kafka resource, the topic will be created in this instance.
 * `topic` - (Required, ForceNew) Name of the topic. Two topics on a single instance cannot have the same name. The length cannot exceed 64 characters.
-* `local_topic` - (Optional, ForceNew) Indicates whether the topic is a local topic or not. Default value is `false`.
-* `compact_topic` - (Optional, ForceNew) Indicates whether the topic is a compact topic or not. Compact topic must be a local topic. Default value is `false`.
-* `partition_num` - (Optional) The number of partitions of the topic. The number should be between 1 and 48. Default value is `1`.
-* `remark` - (Required) A concise description of the topic. The length cannot exceed 64 characters.
+* `local_topic` - (Optional, Computed, Deprecated) Indicates whether the topic is a local topic or not. This field has been deprecated and is scheduled for removal in version 3.21.0.
+* `compact_topic` - (Optional, ForceNew, Deprecated) Indicates whether the topic is a compact topic or not. Compact topic must be a local topic. Default value is `false`. This field has been deprecated and is scheduled for removal in version 3.21.0.
+* `partition_num` - (Optional) The number of additional partitions of the topic. The number should be between 0 and 360. Default value is `12`.
+* `remark` - (Required, Deprecated) A concise description of the topic. The length cannot exceed 64 characters. This field has been deprecated and is scheduled for removal in version 3.21.0.
 * `tags` - (Optional, Available in v1.63.0+) A mapping of tags to assign to the resource.
 
 ## Attributes Reference

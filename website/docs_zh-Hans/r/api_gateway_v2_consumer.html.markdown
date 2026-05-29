@@ -142,6 +142,7 @@ resource "alibabacloudstack_api_gateway_v2_consumer" "default" {
 * `gw_instance_id` - (必填, 变更时重建) 网关实例ID，格式为`i-xxx`。
 * `app_code` - (可选) API Gateway认证方式的应用代码。
 * `app_secret` - (可选) 应用密钥，用于API Key、JWT等认证方式。
+* `cascade_link_ids` - (可选, 变更时重建) 级联链接的ID列表, 设置该参数以创建源消费者。
 * `description` - (可选) 应用描述信息，长度为1-256个字符。
 * `expire_time` - (可选) 令牌过期时间（毫秒），默认值根据认证方式不同而不同。
 * `groups` - (可选) 应用所属的分组列表，用于权限控制。
@@ -159,14 +160,13 @@ resource "alibabacloudstack_api_gateway_v2_consumer" "default" {
   * `client_secret` - (可选) 客户端密钥。
   * `redirect_uris` - (可选) 重定向URI，多个URI用逗号分隔。
 * `password` - (可选) Basic认证方式的密码。
-* `payload` - (可选) JWT认证方式的负载信息，格式为键值对。
-* `cascade_link_ids` - (可选) 级联链接的ID列表, 设置该参数以创建源消费者.
+* `payload` - (可选) JWT认证方式的负载信息，格式为字符串键值对映射。
 
 ## 属性说明
 
 以下属性会从API中导出：
 
-* `id` - 资源ID，格式为`{gwInstanceId:appId}`。
+* `id` - 资源ID，格式为`{prefix}:{gwInstanceId}:{appId}`，其中 `prefix` 为 `app` 或 `sourceApp`。
 * `access_key` - CSB认证方式的访问密钥。
 * `app_id` - 应用ID，由系统生成的唯一标识。
 * `auth_type_name` - 认证方式名称，如"API_KEY"、"BASIC"等。
@@ -175,3 +175,11 @@ resource "alibabacloudstack_api_gateway_v2_consumer" "default" {
 * `secret_key` - CSB认证方式的密钥。
 * `token` - 生成的访问令牌，不同认证方式生成的令牌格式不同。
 * `use_white_list` - 是否启用白名单，`true`表示启用，`false`表示禁用。
+
+## Import
+
+API 网关 V2 消费者可以使用 `{prefix}:{gwInstanceId}:{appId}` 格式导入，例如：
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_consumer.example app:i-xxxxxxxxxxxx:xxxxxxxxxx
+```

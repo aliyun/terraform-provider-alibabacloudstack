@@ -1,15 +1,17 @@
 ---
-subcategory: "ASCM"
+subcategory: "Application"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_custom_role"
 sidebar_current: "docs-alibabacloudstack-resource-ascm-custom-role"
 description: |-
-  Provides Ascm custom role.
+  Provides an ASCM custom role resource.
 ---
 
 # alibabacloudstack_ascm_custom_role
 
-Provides Ascm custom role.
+Provides an ASCM custom role resource.
+
+-> **NOTE:** The Update operation is not implemented for this resource. Once created, the resource cannot be modified. Changing any arguments will not trigger an update.
 
 ## Example Usage
 
@@ -74,15 +76,26 @@ output "Custom_role" {
 
 The following arguments are supported:
 
-* `role_name` - (Required) Custom Role name. 
-* `organization_visibility` - (Required) organization visibility. Valid Values are - "organizationVisibility.organization", "organizationVisibility.orgAndSubOrgs" and "organizationVisibility.global".
-* `description` - (Optional) Description for the custom role. Note - It should not contain any spaces.
-* `role_range` - (Required) Role Range for the custom role.
-* `privileges` - (Required) Privileges assign to that role. 
+* `role_name` - (Required, ForceNew) The name of the custom role. The length is between 2 and 128 characters.
+* `organization_visibility` - (Required, ForceNew) The organization visibility of the custom role. Valid values: `organizationVisibility.organization`, `organizationVisibility.orgAndSubOrgs`, `organizationVisibility.global`.
+* `role_range` - (Required, ForceNew) The range of the custom role. Valid values: `roleRange.allOrganizations`, `roleRange.currentOrganization`.
+* `privileges` - (Required, ForceNew) A list of privileges assigned to the custom role. At least one privilege must be specified. Each privilege is represented as a string.
+* `description` - (Optional, ForceNew) The description of the custom role.
+
+-> **NOTE:** Since the Update operation is not supported, all arguments are effectively ForceNew. Modifying any argument will force the resource to be recreated.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - Custom Role Name and ID of the user.
-* `role_id` - The ID of the custom role.
+* `id` - The ID of the custom role. The format is `<role_name>:<role_id>`.
+* `role_id` - The internal ID of the custom role.
+* `role_name` - The name of the custom role.
+
+## Import
+
+ASCM custom role can be imported using the role name and role ID separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_ascm_custom_role.example my-custom-role:12345
+```

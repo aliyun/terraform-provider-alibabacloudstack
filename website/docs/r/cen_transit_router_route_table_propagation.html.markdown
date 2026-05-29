@@ -80,4 +80,12 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
   * `resource_id` - the id of the resource.
   * `resource_type` - the type of the resource.
-  * `status` - the status of the resource.
+  * `status` - the status of the Propagation.
+
+## Import
+
+CEN Transit Router Route Table Propagation can be imported using the transit_router_route_table_id and transit_router_attachment_id separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_cen_transit_router_route_table_propagation.example <transit_router_route_table_id>:<transit_router_attachment_id>
+```

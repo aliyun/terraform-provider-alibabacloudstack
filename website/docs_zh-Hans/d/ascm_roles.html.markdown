@@ -6,6 +6,9 @@ sidebar_current: "docs-alibabacloudstack-datasource-ascm-roles"
 description: |-
     查询角色列表
 
+> **注意：** 此数据源也可以使用以下别名引用：
+> - `alibabacloudstack_ascm_ram_roles`
+
 ---
 
 # alibabacloudstack_ascm_roles
@@ -36,10 +39,12 @@ output "roles" {
 
 支持以下参数：
 
-* `id` - (可选) 用于通过角色ID过滤结果。
-* `name_regex` - (可选) 用于通过角色名称过滤结果的正则表达式字符串。
-* `description` - (可选) 角色的描述信息。
-* `role_type` - (可选) 角色类型，例如 `"ROLETYPE_RAM"` 表示 RAM 类型的角色。
+* `id` - （可选，已废弃）用于通过角色 ID 过滤结果。该字段已废弃，将在 3.21.0 版本中移除，请使用 `ids` 代替。
+* `ids` - （可选）角色 ID 列表。用于通过角色 ID 过滤结果。
+* `name_regex` - （可选）用于通过角色名称过滤结果的正则表达式字符串。
+* `description` - （可选）角色的描述信息。
+* `role_type` - （可选）角色类型，例如 `"ROLETYPE_RAM"` 表示 RAM 类型的角色。
+* `output_file` - （可选，已废弃）数据源的输出文件。该字段已废弃，将在 3.19.0 版本中移除。如需将内容写入文件，请使用 `local_file` 提供者。
 
 ## 属性说明
 
@@ -59,3 +64,9 @@ output "roles" {
     * `active` - 角色的状态，表示是否处于活动状态（布尔值）。
     * `owner_organization_id` - 角色所属的组织所有者的ID。
     * `code` - 角色代码，通常用于标识角色的唯一性。
+    * `assume_role_policy_document` - RAM 授权角色的信任策略文档。
+    * `organization_visibility` - 角色的组织可见性范围。
+
+## 导入
+
+此数据源为只读数据源，不支持导入。

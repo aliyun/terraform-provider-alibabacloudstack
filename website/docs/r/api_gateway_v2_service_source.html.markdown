@@ -1,5 +1,5 @@
 ---
-subcategory: "API Gateway V2"
+subcategory: "Cloud Service Bus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_service_source"
 sidebar_current: "docs-Alibabacloudstack-api_gateway-api_gateway_v2_service_source"
@@ -127,3 +127,21 @@ The following arguments are supported:
 * `type` - (Optional) The type identifier.
 * `username` - (Optional) The database username.
 * `check_type` - (Optional) The check type.
+
+## Attributes Reference
+
+The following attributes are exported:
+
+* `id` - The ID of the resource. The value format is `<instance_id>:<source_id>`.
+* `source_id` - The ID of the service source.
+* `create_time` - The creation time of the service source.
+* `update_time` - The last update time of the service source.
+* `source_type_name` - The name of the service source type.
+
+## Import
+
+API Gateway V2 Service Source can be imported using the `instance_id` and `source_id` separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_service_source.example gw-instance-123:source-456
+```

@@ -1,8 +1,8 @@
 ---
-subcategory: "Realtime Compute for Apache (Flink)"
+subcategory: "Realtime Compute for Apache Flink"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack:alibabacloudstack_flink_namespace"
-sidebar_current: "docs-alibabacloudstack-resource-flink-namesapce"
+sidebar_current: "docs-alibabacloudstack-resource-flink-namespace"
 description: |-
   Provides a Alibabacloudstack resource to manage Flink namespaces.
 ---
@@ -37,9 +37,9 @@ resource "alibabacloudstack_ascm_user" "default" {
 
 resource "alibabacloudstack_flink_namespace" "default" {
   owner_uid = "${alibabacloudstack_ascm_user.default.user_uid}"
-  name = var.name"
-  cu = "1"
-  cpu_type = "Intel"
+  name      = var.name
+  cu        = 1
+  cpu_type  = "Intel"
 }
 ```
 
@@ -49,14 +49,14 @@ The following arguments are supported:
 
 * `name` - (Required, ForceNew) Name of Flink Registry namespace. 
 * `cu` - (Required) Integer. Guaranteed Resources for Cpu.
-* `cpu_type` - (Required) The CPU type of the resource. Valid values: `intel`.
+* `cpu_type` - (Required, ForceNew) The CPU type of the resource. Valid values: `Intel`.
 * `owner_uid` - (Optional, ForceNew) Owner ID for this Namesapce.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The id of Fink namespace. The value is same as its name.
+* `id` - The id of Flink namespace. The value is same as its name.
 
 
 ## Import

@@ -1,5 +1,5 @@
 ---
-subcategory: "ASCM"
+subcategory: "Application"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_ram_policy_for_role"
 sidebar_current: "docs-alibabacloudstack-resource-ascm-ram-policy-for-role"
@@ -9,7 +9,9 @@ description: |-
 
 # alibabacloudstack_ascm_ram_policy_for_role
 
-Provides a Ascm ram policy for role.
+Provides a ASCM RAM policy for role resource to bind a RAM policy to a RAM role.
+
+-> **Note:** This resource can also be referred to by the following alias: `apsarastack_ascm_ram_policy_for_role`.
 
 ## Example Usage
 
@@ -31,18 +33,23 @@ resource "alibabacloudstack_ascm_ram_policy_for_role" "default" {
   ram_policy_id = alibabacloudstack_ascm_ram_policy.default.ram_id
   role_id = alibabacloudstack_ascm_ram_role.default.role_id
 }
-output "ramrolebinder" {
-  value = alibabacloudstack_ascm_ram_policy_for_role.default.*
-}
-
 ```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `ram_policy_id` - (Required) ID of the ram_policy_id which will be used to bind.
-* `role_id` - (Required, ForceNew) ID of the role which will be used to bind.
+* `ram_policy_id` - (Required, ForceNew) The ID of the RAM policy to bind to the role. Changing this forces a new resource to be created.
+* `role_id` - (Required, ForceNew) The ID of the RAM role to which the policy will be bound. Changing this forces a new resource to be created.
 
 ## Attributes Reference
 
 No attributes are currently defined for this resource.
+
+## Import
+
+ASCM RAM policy for role can be imported using the ram_policy_id and role_id separated by colon, e.g.
+
+```
+$ terraform import alibabacloudstack_ascm_ram_policy_for_role.example <ram_policy_id>:<role_id>
+```

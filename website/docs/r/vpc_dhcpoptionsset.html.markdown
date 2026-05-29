@@ -1,5 +1,5 @@
 ---
-subcategory: "VPC"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_dhcpoptionsset"
 sidebar_current: "docs-Alibabacloudstack-vpc-dhcpoptionsset"
@@ -62,6 +62,13 @@ The following arguments are supported:
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `associate_vpcs` - Field 'associate_vpcs' has been deprecated from provider version 1.153.0 and it will be removed in the future version. Please use the new resource 'alicloud_vpc_dhcp_options_set_attachment' to attach DhcpOptionsSet and Vpc.
-  * `dhcp_options_set_id` - The first ID of the resource
-  * `status` - The status of the resource.
+  * `dhcp_options_set_id` - The ID of the DHCP options set
+  * `status` - The status of the DHCP options set. Valid values: `Available`, `Pending`, `Deleting`
+
+## Import
+
+DHCP options set can be imported using the DhcpOptionsSetId, e.g.
+
+```
+$ terraform import alibabacloudstack_vpc_dhcp_options_set.example dos-12345678
+```

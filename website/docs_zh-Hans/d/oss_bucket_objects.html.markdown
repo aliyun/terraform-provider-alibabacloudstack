@@ -1,5 +1,5 @@
 ---
-subcategory: "OSS"
+subcategory: "Object Storage Service (OSS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_objects"
 sidebar_current: "docs-alibabacloudstack-datasource-oss-bucket-objects"
@@ -29,10 +29,11 @@ output "first_object_key" {
 
 支持以下参数：
 
-* `bucket_name` - （必需）包含要查找的对象的存储桶名称。
-* `oss_cluster` - （可选）OSS 集群名称。如果不指定，将使用默认集群。
-* `key_regex` - （可选）用于通过键过滤结果的正则表达式字符串。此参数可用于精确匹配或部分匹配对象键。
-* `key_prefix` - （可选）通过给定的键前缀过滤结果（例如"path/to/folder/logs-"）。此参数可用于筛选具有特定前缀的对象。
+* `bucket_name` -（必需）包含要查找的对象的存储桶名称。
+* `oss_cluster` -（可选）OSS 集群名称。如果不指定，将使用默认集群。
+* `key_prefix` -（可选）通过给定的键前缀过滤结果（例如"path/to/folder/logs-"）。此参数可用于筛选具有特定前缀的对象。
+* `key_regex` -（可选）用于通过键过滤结果的正则表达式字符串。此参数可用于精确匹配或部分匹配对象键。
+* `output_file` -（已废弃）该字段已被废弃，计划在 3.19.0 版本中移除。如需将内容写入文件，请使用 `local_file` provider。
 ## 属性说明
 
 除了上述参数外，还导出以下属性：
@@ -50,4 +51,3 @@ output "first_object_key" {
   * `sse_kms_key_id` - 如果存在，则指定用于该对象的密钥管理服务(KMS)主加密密钥ID。
   * `storage_class` - 对象存储类型。可能的值包括：`Standard`（标准存储）、`IA`（低频访问存储）和 `Archive`（归档存储）。
   * `last_modification_time` - 对象的最后修改时间，表示对象最后一次被更新的时间。
-  * `computed_attribute` - 计算属性的描述，通常由系统自动生成，用户无需手动设置。

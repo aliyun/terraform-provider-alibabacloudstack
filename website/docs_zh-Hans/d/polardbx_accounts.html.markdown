@@ -1,10 +1,10 @@
 ---
-subcategory: "PolarDBX"
+subcategory: "Cloud-Native Distributed Database PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_accounts"
 sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-accounts"
 description: |-
-  提供阿里云账号下拥有的polardbx accounts列表。
+  提供阿里云账号下拥有的 PolarDB-X 账户列表。
 ---
 
 # alibabacloudstack\_polardbx\_accounts
@@ -54,34 +54,33 @@ resource "alibabacloudstack_polardbx_instance" "default" {
 }
 
 resource "alibabacloudstack_polardbx_account" "default" {
-	instance_id = alibabacloudstack_polardbxx_instance.default.id
+	instance_id = alibabacloudstack_polardbx_instance.default.id
 	account_name = var.name
 	password = "${var.password}"
 	description = var.name
 }
 
 data "alibabacloudstack_polardbx_accounts" "default" {
+	instance_id = alibabacloudstack_polardbx_instance.default.id
 }
 ```
 
 ## 参数参考
 
 支持以下参数：
-  * `ids` - (可选) - 用于过滤结果的账户 ID 列表。
   * `names` - (可选) - 用于过滤结果的账户名称列表。
-  * `account_name` - (可选) - 账户名称。
-  * `instance_id` - (必填) - 数据库实例 ID。
-  * `account_type` - (可选) - 账户类型。取值范围如下：-**Normal**：普通账户。-**Super**：高权限账户。
+  * `instance_id` - (必填) - PolarDB-X 数据库实例 ID。
 
 ## 属性参考
 
 除上述参数外，还导出以下属性：
+  * `ids` - 账户 ID 列表。
+  * `names` - 账户名称列表。
   * `accounts` - 账户列表。每个元素包含以下属性：
-    * `id` - 账户 ID。
-    * `description` - 账户描述。
+    * `id` - 账户 ID，格式为 `<instance_id>:<account_name>`。
     * `account_name` - 账户名称。
-    * `account_type` - 账户类型。取值范围如下：-**Normal**：普通账户。-**Super**：高权限账户。
-    * `instance_id` - PolarDBX 数据库实例的 ID。
-    * `db_privileges` - 当前账户的数据库权限。
+    * `description` - 账户描述。
+    * `instance_id` - PolarDB-X 数据库实例的 ID。
+    * `db_privileges` - 账户的数据库权限列表。每个元素包含：
       * `db_name` - 数据库名称。
-      * `privilege` - 数据库权限。
+      * `privilege` - 账户在该数据库上的权限级别。

@@ -77,3 +77,11 @@ The following attributes are exported:
 * `modified_time` - The modification time of the rule, in Unix timestamp (milliseconds).
 * `rule_id` - The ID of the retention policy rule.
 * `schedule` - The scheduling method. Fixed as `MANUAL`, indicating manual execution of the rule.
+
+## Import
+
+Artifact Lifecycle Rule can be imported using the instance_id and rule_id separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_cr_ee_attestor_lifecycle_rule.example <instance_id>:<rule_id>
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "OSS"
+subcategory: "Object Storage Service (OSS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_objects"
 sidebar_current: "docs-alibabacloudstack-datasource-oss-bucket-objects"
@@ -29,10 +29,11 @@ output "first_object_key" {
 
 The following arguments are supported:
 
-* `bucket_name` - Name of the bucket that contains the objects to find.
+* `bucket_name` - (Required) Name of the bucket that contains the objects to find.
 * `oss_cluster` - (Optional) The name of the OSS cluster. If not specified, the default cluster will be used.
-* `key_regex` - (Optional) A regex string to filter results by key.
 * `key_prefix` - (Optional) Filter results by the given key prefix (such as "path/to/folder/logs-").
+* `key_regex` - (Optional) A regex string to filter results by key.
+* `output_file` - (Deprecated) This field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the `local_file` provider instead.
 
 ## Attributes Reference
 
@@ -51,5 +52,3 @@ The following attributes are exported in addition to the arguments listed above:
   * `sse_kms_key_id` - If present, specifies the ID of the Key Management Service(KMS) master encryption key that was used for the object.
   * `storage_class` - Object storage type. Possible values: `Standard`, `IA` and `Archive`.
   * `last_modification_time` - Last modification time of the object.
-
-  * `computed_attribute` - Description for computed attribute. 

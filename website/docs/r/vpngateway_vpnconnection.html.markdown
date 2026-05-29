@@ -1,5 +1,5 @@
 ---
-subcategory: "VPNGateway"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnconnection"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-vpnconnection"
@@ -88,7 +88,7 @@ The following arguments are supported:
 * `vpn_connection_name` - (Optional) The name of the IPsec-VPN connection.
 * `local_subnet` - (Required, Type:Set) The CIDR block of the virtual private cloud (VPC). This parameter is used for phase-two negotiation.
 * `remote_subnet` - (Required, Type:Set) The CIDR block of the on-premises data center. This parameter is used for phase-two negotiation.
-* `effect_immediately` - (Optional) Indicates whether IPsec-VPN negotiations are initiated immediately. Valid values: `true`, `false`.
+* `effect_immediately` - (Optional) Indicates whether IPsec-VPN negotiations are initiated immediately. Valid values: `true` (initiate immediately after configuration), `false` (initiate when there is traffic). Default value: `false`.
 * `ike_config` - (Optional) The configuration of Phase 1 negotiations. The `ike_config` mapping supports the following:
   * `psk` - (Optional) Used for authentication between the IPsec VPN gateway and the customer gateway.
   * `ike_version` - (Optional) The version of the IKE protocol. Valid value: `ikev1` | `ikev2`. Default value: `ikev1`.
@@ -104,7 +104,7 @@ The following arguments are supported:
   * `ipsec_auth_alg` - (Optional) The authentication algorithm of phase-two negotiation. Valid value: `md5` | `sha1` | `sha256` | `sha384` | `sha512`. Default value: `sha1`.
   * `ipsec_pfs` - (Optional) The Diffie-Hellman key exchange algorithm used by phase-two negotiation. Valid value: `group1` | `group2` | `group5` | `group14` | `group24` | `disabled`. Default value: `group2`.
   * `ipsec_lifetime` - (Optional) The SA lifecycle as the result of phase-two negotiation. The valid value is [0, 86400], the unit is second and the default value is 86400.
-* `name` - (Optional) The name of the IPsec-VPN connection.
+* `name` - (Optional, Deprecated) The name of the IPsec-VPN connection. This field is deprecated and will be removed in a future release. Please use `vpn_connection_name` instead.
 
 ## Attributes Reference
 

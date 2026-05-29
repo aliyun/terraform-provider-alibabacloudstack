@@ -1,5 +1,5 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_application"
 sidebar_current: "docs-Alibabacloudstack-edas-application"
@@ -33,16 +33,16 @@ resource "alibabacloudstack_edas_cluster" "default" {
 }
 
 resource "alibabacloudstack_edas_application" "default" {
-    component_id     = "7"
+    component_id     = 7
     application_name = "${var.name}"
     package_type     = "WAR"
     cluster_id       = "${alibabacloudstack_edas_cluster.default.id}"
-    build_pack_id   = 1
+    build_pack_id    = 1
     descriotion      = "Test Description"
-    health_check_url = "/health"
-    group_id         = "group-id-12345"
+    group_id         = "all"
     package_version  = "v1.0.0"
     war_url          = "http://example.com/app.war"
+    health_check_url = "/health"
 }
 ```
 
@@ -51,20 +51,28 @@ resource "alibabacloudstack_edas_application" "default" {
 The following arguments are supported:
 
 * `application_name` - (Required) The name of the EDAS application. Only letters, numbers, '-', and '_' are allowed. The length cannot exceed 36 characters.
-* `package_type` - (Required, ForceNew) The type of the package for the deployment of the application. Valid values are `WAR` and `JAR`.
-* `cluster_id` - (Required, ForceNew) The ID of the cluster where the application will be deployed. If not specified, the default cluster will be used.
-* `build_pack_id` - (Optional) The package ID of the EDAS container. This is required when creating a High-speed Service Framework (HSF) application.
-* `component_id` - (Optional) The ID of the component in the container where the application is going to be deployed. When deploying a native Dubbo or Spring Cloud application using a WAR package for the first time, you must specify the version of the Apache Tomcat component based on the deployed application. You can call the `ListClusterOperation` interface to query the components.
+* `package_type` - (Required, ForceNew) The type of the package for the deployment of the application. Valid values are `WAR`, `JAR`, and `Image`.
+* `cluster_id` - (Required, ForceNew) The ID of the cluster where the application will be deployed.
+* `build_pack_id` - (Optional) The build pack ID of the EDAS container. This is required when creating a High-speed Service Framework (HSF) application.
+* `component_id` - (Optional) The ID of the component in the container where the application is going to be deployed. When deploying a native Dubbo or Spring Cloud application using a WAR package for the first time, you must specify the Apache Tomcat component version based on the deployed application. You can call the `ListClusterOperation` API to query the components.
 * `descriotion` - (Optional) A description of the application.
 * `health_check_url` - (Optional) The URL used for health checking of the application.
-* `region_id` - (Optional) The ID of the region where the application will be created. You can call the `ListUserDefineRegion` operation to query the region ID.
+* `ecu_info` - (Optional) A list of Elastic Compute Unit (ECU) information associated with the application.
 * `group_id` - (Optional) The ID of the instance group where the application will be deployed. Set this parameter to `all` if you want to deploy the application to all groups.
-* `package_version` - (Optional) The version of the application that you want to deploy. It must be unique for every application. The length cannot exceed 64 characters. We recommend using a timestamp.
-* `war_url` - (Optional) The address to store the uploaded web application (WAR) package for application deployment. This parameter is required when the `deployType` parameter is set as `url`.
-* `ecu_info` - (Optional) Information about the Elastic Compute Unit (ECU) associated with the application.
+* `package_version` - (Optional) The version of the application that you want to deploy. It must be unique for every application. The length cannot exceed 64 characters. A timestamp is recommended.
+* `war_url` - (Optional) The storage address of the uploaded web application (WAR) package for application deployment. This parameter is needed when the `deployType` parameter is set to `url`.
+* `logical_region_id` - (Optional, Deprecated) This field is not supported on ApsaraStack and will be removed in version 3.21.0.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the resource. The value is formulated as `app_Id`.
+* `id` - The ID of the resource. The value is the application's AppId.
+
+## Import
+
+EDAS Application can be imported using the AppId, e.g.
+
+```
+$ terraform import alibabacloudstack_edas_application.example app-id-12345
+```

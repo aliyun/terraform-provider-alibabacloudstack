@@ -28,9 +28,10 @@ output "first_key_id" {
 
 以下参数被支持：
 
-* `ids` - (可选) 用于筛选结果的KMS密钥ID列表。
+* `ids` - (可选，可计算) 用于筛选结果的KMS密钥ID列表。
 * `description_regex` - (可选) 用于通过KMS密钥描述筛选结果的正则表达式字符串。此参数可以帮助您精确匹配特定描述的密钥。
 * `status` - (可选) 用于通过KMS密钥状态筛选结果。有效值包括：`Enabled`（已启用）、`Disabled`（已禁用）和`PendingDeletion`（待删除）。
+* `output_file` - (已弃用) 该字段已被弃用，计划在 3.19.0 版本中移除。如需将内容写入文件，请改用 'local_file' provider。
 
 ## 属性说明
 
@@ -45,4 +46,3 @@ output "first_key_id" {
   * `creation_date` - 密钥的创建时间，格式为标准时间戳。
   * `delete_date` - 如果密钥处于`PendingDeletion`状态，则此字段表示密钥的计划删除时间。
   * `creator` - 密钥的创建者或所有者信息。
-  * `computed_property` - 密钥的计算属性，通常由系统生成，具体含义取决于密钥类型及其配置。

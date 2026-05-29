@@ -1,5 +1,5 @@
 ---
-subcategory: "Log Service (SLS)"
+subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_machine_group"
 sidebar_current: "docs-alibabacloudstack-resource-log-machine-group"
@@ -38,8 +38,9 @@ resource "alibabacloudstack_log_machine_group" "example" {
 
 * `project` - (必填，变更时重建) 机器组所属的日志项目名称。
 * `name` - (必填，变更时重建) 机器组名称，在同一项目中必须唯一。
-* `identify_type` - (可选) 机器标识类型。例如，可以设置为 `ip` 表示通过 IP 地址标识机器。
+* `identify_type` - (可选) 机器标识类型。有效值：`ip`、`userdefined`。默认值为 `ip`。
 * `topic` - (可选) 机器组主题。用于对日志进行分类或标记。
+* `identify_list` - (必填) 机器标识列表。如果 `identify_type` 为 `ip`，则此列表包含 IP 地址；如果 `identify_type` 为 `userdefined`，则此列表包含用户自定义标识。至少需要包含一项。
 
 ## 属性说明
 

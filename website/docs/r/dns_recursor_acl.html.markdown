@@ -55,5 +55,11 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The ID of the ACL policy.
-* `create_timestamp` - The creation timestamp in seconds.
-* `update_timestamp` - The update timestamp in seconds.
+
+## Import
+
+DNS Recursor ACL can be imported using the ACL ID, e.g.
+
+```
+$ terraform import alibabacloudstack_dns_recursor_acl.example acl-12345678
+```

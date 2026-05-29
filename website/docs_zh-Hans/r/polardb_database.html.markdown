@@ -50,14 +50,7 @@ resource "alibabacloudstack_polardb_database" "default" {
   data_base_name         = "tf-testaccdbdatabase_basic"
   character_set_name     = "utf8"
   data_base_instance_id  = "${alibabacloudstack_polardb_dbinstance.instance.id}"
-
-  accounts {
-    account               = "test_account"
-    account_privilege     = "ReadWrite"
-    account_privilege_detail = "Full access to the database"
-  }
-
-  data_base_description   = "This is a test database"
+  data_base_description  = "This is a test database"
 }
 ```
 
@@ -65,54 +58,29 @@ resource "alibabacloudstack_polardb_database" "default" {
 
 支持以下参数：
 
-  * `accounts` - (选填) - 数据库账号信息详情。当集群为PolarDB MySQL引擎时，不含高权限账号。
-    
-    * `account` - (选填) - 数据库账户名称。
-    
-    * `account_privilege` - (选填) - 账户权限。取值范围如下：
-      * **ReadWrite**: 读写权限
-      * **ReadOnly**: 只读权限
-      * **DMLOnly**: 仅允许DML操作
-      * **DDLOnly**: 仅允许DDL操作
-      * **ReadIndex**: 只读+索引
-    
-    * `account_privilege_detail` - (选填) - 账户权限详细信息。
-
   * `character_set_name` - (必填) - 字符集，详情请参见[字符集表](~~99716~~)。
 
+  * `data_base_instance_id` - (必填/强制新建) - 将关联的PolarDB实例ID。修改此参数会强制重新创建资源。
+
+  * `data_base_name` - (必填) - 数据库名称。不区分大小写。
+
   * `data_base_description` - (选填) - 数据库的描述。
-
-  * `data_base_instance_id` - (必填) - 将关联的PolarDB实例ID。
-
-  * `data_base_name` - (必填) - 数据库名称。
 
   * `engine` - (选填) - 数据库引擎类型，取值范围如下：
     * **MySQL**
     * **Oracle**
     * **PostgreSQL**
 
-  * `status` - (选填) - 资源状态。
-
 ## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
-  * `accounts` - 数据库账号信息详情。当集群为PolarDB MySQL引擎时，不含高权限账号。
-    * `account` - 数据库账户名称。
-    * `account_privilege` - 账号权限，取值范围如下：
-      * **ReadWrite**: 读写
-      * **ReadOnly**: 只读
-      * **DMLOnly**: 仅允许DML
-      * **DDLOnly**: 仅允许DDL
-      * **ReadIndex**: 只读+索引
-    * `account_privilege_detail` - 账户权限详细信息。
+  * `status` - 数据库状态。
 
-  * `data_base_description` - 数据库的描述。
+## 导入
 
-  * `engine` - 数据库引擎类型，取值范围如下：
-    * **MySQL**
-    * **Oracle**
-    * **PostgreSQL**
+PolarDB 数据库可以使用 `data_base_instance_id` 和 `data_base_name` 以冒号分隔进行导入，例如：
 
-  * `status` - 资源状态。
-  * `data_base_instance_id` - 关联的PolarDB实例ID。
+```
+$ terraform import alibabacloudstack_polardb_database.example <data_base_instance_id>:<data_base_name>
+```

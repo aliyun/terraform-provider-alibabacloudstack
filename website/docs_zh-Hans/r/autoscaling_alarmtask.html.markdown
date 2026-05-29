@@ -1,5 +1,5 @@
 ---
-subcategory: "Auto Scaling (ESS)"
+subcategory: "弹性伸缩 ESS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_alarmtask"
 sidebar_current: "docs-Alibabacloudstack-autoscaling-alarmtask"
@@ -70,11 +70,12 @@ resource "alibabacloudstack_autoscaling_alarmtask" "foo" {
   alarm_task_name   = "tf-testAccEssAlarm_basic"
   description       = "Acc alarm test"
   scaling_group_id  = alibabacloudstack_autoscaling_group.foo.id
+  alarm_actions     = [alibabacloudstack_autoscaling_rule.foo.scaling_rule_arn]
   metric_type       = "system"
   metric_name       = "CpuUtilization"
   period            = 300
   statistics        = "Average"
-  threshold         = 200.3
+  threshold         = "200.3"
   comparison_operator = ">="
   evaluation_count  = 2
 }
@@ -84,20 +85,27 @@ resource "alibabacloudstack_autoscaling_alarmtask" "foo" {
 
 支持以下参数：
 
+* `alarm_actions` - (必填) 告警触发时执行的操作列表。最多 5 项，最少 1 项。
+* `scaling_group_id` - (必填, 变更时重建) 告警任务关联的伸缩组的 ID。
+* `metric_name` - (必填) 监控项名称。详见下方 [Block_metricNames_and_dimensions](#block-metricnames_and_dimensions)。
+* `threshold` - (必填) 要比较的指定统计量的值。
 * `alarm_task_name` - (选填) 报警任务的名称。
 * `description` - (选填) 报警任务的描述。
-* `enable` - (选填) 是否启用特定的报警任务。默认值为 `true`。
 * `status` - (选填) 报警任务的状态。
-* `scaling_group_id` - (必填, 变更时重建) 报警任务关联的伸缩组的 ID。
 * `metric_type` - (选填, 变更时重建) 监控项类型。支持值：`system`、`custom`。`"system"` 表示指标数据由阿里云监控服务(CMS)收集，`"custom"` 表示指标数据由用户上传到 CMS。默认为 `system`。
-* `metric_name` - (必填) 监控项名称。详见下方 [Block_metricNames_and_dimensions](#block-metricnames_and_dimensions)。
 * `period` - (选填, 变更时重建) 指定统计量应用的时间段(秒)。支持值：`60`、`120`、`300`、`900`。默认为 `300`。
 * `statistics` - (选填) 要应用于报警关联指标的统计量。支持值：`Average`、`Minimum`、`Maximum`。默认为 `Average`。
-* `threshold` - (必填) 要比较的指定统计量的值。
 * `comparison_operator` - (选填) 比较指定统计量和阈值时使用的算术运算符。指定的统计量值用作第一个操作数。支持值：`>=`、`<=`、`>`、`<`。默认为 `>=`。
 * `evaluation_count` - (选填) 在进入 ALARM 状态之前需要满足比较条件的次数。默认为 `3`。
-* `cloud_monitor_group_id` - (选填) CMS 定义的应用程序组 ID，在您将自定义指标上传到 CMS 时分配，仅适用于自定义指标。
-* `dimensions` - (选填) 报警关联指标的维度映射。对于所有指标，不能将维度键设置为 `scaling_group` 或 `userId`，这是默认设置的。某些指标的第二个维度(如 `PackagesNetIn` 的 `device`)需要由用户设置。
+
+### 已弃用参数
+
+> **警告：** 以下参数已弃用，将在未来版本中移除。
+
+* `name` - (已弃用) 请使用 `alarm_task_name` 代替。与 `alarm_task_name` 冲突。
+* `enable` - (已弃用) 请使用 `status` 代替。与 `status` 冲突。
+* `cloud_monitor_group_id` - (已弃用, 3.21.0 移除) CMS 定义的应用程序组 ID，在您将自定义指标上传到 CMS 时分配，仅适用于自定义指标。
+* `dimensions` - (已弃用, 3.21.0 移除) 报警关联指标的维度映射。对于所有指标，不能将维度键设置为 `scaling_group` 或 `userId`，这是默认设置的。
 
 ### Block metricNames_and_dimensions
 
@@ -128,11 +136,25 @@ resource "alibabacloudstack_autoscaling_alarmtask" "foo" {
 
 除了上述所有参数外，还导出了以下属性：
 
+* `id` - 告警任务的 ID。
 * `alarm_task_name` - 报警任务的名称。
 * `status` - 报警任务的状态。
-* `dimensions` - 报警关联指标的维度。
-* `state` - 指定报警的状态。
 * `alarm_trigger_state` - 报警任务的触发状态。可能值：
   * `ALARM`: 报警，已满足 ALARM 条件。
   * `OK`: 正常，未满足报警条件。
   * `INSUFFICIENT_DATA`: 数据不足，无法确定是否满足报警条件。
+
+### 已弃用属性
+
+> **警告：** 以下属性已弃用，将在未来版本中移除。
+
+* `state` - (已弃用) 请使用 `alarm_trigger_state` 代替。
+* `dimensions` - (已弃用) 报警关联指标的维度。
+
+## Import
+
+ESS 告警任务可以通过告警任务 ID 导入，例如：
+
+```
+$ terraform import alibabacloudstack_ess_alarm.example at-12345678
+```

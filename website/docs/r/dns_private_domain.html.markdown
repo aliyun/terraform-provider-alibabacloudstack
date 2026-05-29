@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_domain"
 sidebar_current: "docs-Alibabacloudstack-dns-private_domain"
@@ -62,3 +62,11 @@ The following attributes are exported:
 * `record_count` - The total number of DNS record sets.
 
 * `update_timestamp` - The last update timestamp in seconds.
+
+## Import
+
+DNS Private Domain can be imported using the ID, e.g.
+
+```
+$ terraform import alibabacloudstack_dns_private_domain.example <id>
+```

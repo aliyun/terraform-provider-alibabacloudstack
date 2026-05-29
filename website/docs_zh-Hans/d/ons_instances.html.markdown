@@ -35,7 +35,7 @@ data "alibabacloudstack_ons_instances" "instances_ds" {
 }
 
 output "first_instance_id" {
-  value = data.alibabacloudstack_ons_instances.instances_ds.*
+  value = data.alibabacloudstack_ons_instances.instances_ds.instances[0].id
 }
 ```
 
@@ -45,6 +45,7 @@ output "first_instance_id" {
 
 * `ids` - (可选) 用于过滤结果的实例ID列表。
 * `name_regex` - (可选) 用于通过实例名称过滤结果的正则表达式字符串。
+* `output_file` - (可选, 已弃用) 该字段已弃用，计划于 3.19.0 版本移除。如需将内容写入文件，请使用 `local_file` provider。
 
 ## 属性说明
 
@@ -58,10 +59,9 @@ output "first_instance_id" {
   * `instance_name` - 实例名称。
   * `instance_type` - 实例类型。
   * `instance_status` - 实例状态。
-  * `independent_naming` - 指示是否启用独立命名空间。
-  * `tps_receive_max` - 设置主题在某段时间内的最大消息接收吞吐量（TPS）。
-  * `tps_send_max` - 设置主题在某段时间内的最大消息发送吞吐量（TPS）。
-  * `topic_capacity` - 主题容量，表示该实例支持的主题数量上限。
-  * `cluster` - 集群名称，表示该实例所属的集群。
-  * `create_time` - 实例创建时间，格式为标准时间戳。
-  * `computed_property_example` - 计算属性示例，表示某些动态计算的结果（如果存在）。
+  * `independent_naming` - 指示实例是否支持独立命名空间命名。
+  * `tps_receive_max` - 实例的最大消息接收吞吐量（TPS）。
+  * `tps_send_max` - 实例的最大消息发送吞吐量（TPS）。
+  * `topic_capacity` - 实例可容纳的最大主题数量。
+  * `cluster` - 实例所属集群名称。
+  * `create_time` - 实例创建时间，时间戳格式。

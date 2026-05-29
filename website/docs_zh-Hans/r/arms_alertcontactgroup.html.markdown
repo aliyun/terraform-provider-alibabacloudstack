@@ -1,5 +1,5 @@
 ---
-subcategory: "Application Real-Time Monitoring Service (ARMS)"
+subcategory: "Application Real-Time Monitoring Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_arms_alertcontactgroup"
 sidebar_current: "docs-Alibabacloudstack-arms-alertcontactgroup"
@@ -46,3 +46,11 @@ resource "alibabacloudstack_arms_alert_contact_group" "default" {
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 告警联系组的唯一标识符（ID）。此 ID 在创建时自动生成，并可用于将资源导入 Terraform。
+
+## Import
+
+告警联系人组可以使用 ContactGroupId 导入，例如：
+
+```
+$ terraform import alibabacloudstack_arms_alert_contact_group.example 12345678
+```

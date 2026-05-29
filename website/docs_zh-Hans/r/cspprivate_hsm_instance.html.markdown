@@ -89,7 +89,7 @@ resource "alibabacloudstack_cspprivate_hsm_instance" "default" {
 * `vendor_code` - (必填, 强制新建) HSM设备的供应商代码。
 * `vsm_type` - (必填, 强制新建) HSM实例的类型。可选值: `evsm`, `gvsm`, `svsm`。
 * `zone_id` - (必填, 强制新建) HSM实例所在的可用区ID。
-* `device_id` - (可选, 自动计算, 强制新建) HSM设备的ID。
+* `device_id` - (可选, 自动计算) HSM设备的ID。
 * `vpc_id` - (可选, 自动计算) HSM实例所在的VPC ID。
 * `vpc_cidr_block` - (可选, 自动计算) VPC的CIDR块。
 * `vswitch_id` - (可选, 自动计算) HSM实例所在的VSwitch ID。

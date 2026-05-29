@@ -1,10 +1,10 @@
 ---
-subcategory: "ECS"
+subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_ramroleattachment"
 sidebar_current: "docs-Alibabacloudstack-ecs-ramroleattachment"
-description: |- 
-  编排绑定云服务器（Ecs）实例和RAM角色
+description: |-
+  编排绑定云服务器（ECS）实例和RAM角色
 ---
 
 # alibabacloudstack_ecs_ramroleattachment
@@ -105,4 +105,13 @@ resource "alibabacloudstack_ecs_ramroleattachment" "default" {
 除了上述所有参数外，还导出以下属性：
 
 * `role_name` - 已附加的 RAM 角色名称。此属性表示当前资源所绑定的 RAM 角色。
+* `id` - 资源的 ID。格式为 `<role_name>:<instance_ids>`，其中 `instance_ids` 是用双引号括起来的逗号分隔的 ECS 实例 ID 列表。
 * `instance_ids` - 已附加 RAM 角色的 ECS 实例 ID 列表。此属性返回所有成功绑定到指定 RAM 角色的实例 ID。
+
+## Import
+
+RAM 角色附加资源可以使用 role_name 和 instance_ids（用冒号连接）进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_ecs_ramroleattachment.example my-ram-role:i-uf6257yd1w3k1example
+```

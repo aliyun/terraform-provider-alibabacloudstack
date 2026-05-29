@@ -1,5 +1,5 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_slbattachment"
 sidebar_current: "docs-Alibabacloudstack-edas-slbattachment"
@@ -37,19 +37,25 @@ The following arguments are supported:
 * `type` - (Required, ForceNew) The network type of the SLB instance. Valid values:
   * `internet`: Internet instance.
   * `intranet`: Intranet instance.
-* `listener_port` - (Optional, ForceNew) The listening port for the bound SLB instance.
+* `listener_port` - (Optional, ForceNew) The listening port for the bound SLB instance. Value range: 1 to 65535.
 * `vserver_group_id` - (Optional, ForceNew) The ID of the virtual server (VServer) group associated with the intranet SLB instance.
-* `slb_status` - (ForceNew) Running status of the SLB instance. Possible values include:
-  * `Inactive`: The instance is stopped, and the listener will not monitor or forward traffic.
-  * `Active`: The instance is running. After the instance is created, the default state is active.
-  * `Locked`: The instance is locked, usually due to overdue payments or being locked by Alibaba Cloud.
-  * `Expired`: The instance has expired.
-* `vswitch_id` - (ForceNew) The ID of the VSwitch in the VPC to which the SLB instance belongs.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The unique identifier of the resource, formulated as `<app_id>:<slb_id>`.
-* `slb_status` - The current running status of the SLB instance.
+* `slb_status` - The current running status of the SLB instance. Possible values include:
+  * `Inactive`: The instance is stopped, and the listener will not monitor or forward traffic.
+  * `Active`: The instance is running. After the instance is created, the default state is active.
+  * `Locked`: The instance is locked, usually due to overdue payments or being locked by Alibaba Cloud.
+  * `Expired`: The instance has expired.
 * `vswitch_id` - The ID of the VSwitch in the VPC associated with the SLB instance.
+
+## Import
+
+EDAS SLB Attachment can be imported using the app_id and slb_id separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_edas_slbattachment.example app-12345:slb-abc123
+```

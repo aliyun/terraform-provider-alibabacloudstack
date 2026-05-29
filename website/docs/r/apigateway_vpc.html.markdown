@@ -82,7 +82,6 @@ The following arguments are supported:
 * `vpc_id` - (Required, ForceNew) The ID of the VPC that you want to authorize the API Gateway to access.
 * `instance_id` - (Required, ForceNew) The ID of the ECS or Server Load Balancer instance in the VPC that you want to authorize the API Gateway to access.
 * `port` - (Required, ForceNew) The port number on the instance that the API Gateway should connect to. Valid values range from 1 to 65535.
-* `child` - (Optional, ForceNew) A placeholder argument for future child configurations.
 
 ## Attributes Reference
 
@@ -92,8 +91,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ### Import
 
-API Gateway VPC access can be imported using the combined ID format `<VPC_ID>:<INSTANCE_ID>:<PORT>`, e.g.,
+API Gateway VPC access can be imported using the combined ID format `<NAME>:<VPC_ID>:<INSTANCE_ID>:<PORT>`, e.g.,
 
 ```sh
-$ terraform import alibabacloudstack_api_gateway_vpc_access.example "vpc-aswcj19ajsz:i-ajdjfsdlf:8080"
+$ terraform import alibabacloudstack_api_gateway_vpc_access.example "my-vpc-name:vpc-aswcj19ajsz:i-ajdjfsdlf:8080"
 ```

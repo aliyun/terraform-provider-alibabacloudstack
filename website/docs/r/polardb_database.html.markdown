@@ -61,28 +61,21 @@ resource "alibabacloudstack_polardb_database" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `accounts` - (Optional) - Database account information details.> when the cluster is a PolarDB MySQL engine, it does not include a highly privileged account.
-    
-    * `account` - (Optional) - The name of the database account.
-    
-    * `account_privilege` - (Optional) - Account permissions. The value range is as follows:* **ReadWrite**: read and write* **ReadOnly**: Read-only* **DMLOnly**: only DML is allowed.* **DDLOnly**: only DDL is allowed* **ReadIndex**: Read-only + index
-    
-    * `account_privilege_detail` - (Optional) - Detailed information about the account privileges.
   * `character_set_name` - (Required) - Character set. For more information, see [Character Set Table](~~ 99716 ~~).
+  * `data_base_instance_id` - (Required/ForceNew) - The ID of the PolarDB instance to which the database will be associated. Modification of this parameter forces a new resource to be created.
+  * `data_base_name` - (Required) - The name of the database. Case-insensitive.
   * `data_base_description` - (Optional) - The description of the database.
-  * `data_base_instance_id` - (Required) -  The ID of the PolarDB instance to which the database will be associated.
-  * `data_base_name` - (Required) - The name of the database.
-  * `engine` - (Optional) - The database engine type. The value range is as follows:* **MySQL*** **Oracle*** **PostgreSQL**
-  * `status` - (Optional) - The status of the resource.
+  * `engine` - (Optional) - The database engine type. Valid values: **MySQL**, **Oracle**, **PostgreSQL**.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `accounts` - Database account information details.> when the cluster is a PolarDB MySQL engine, it does not include a highly privileged account.
-    * `account` - The name of the database account.
-    * `account_privilege` - Account permissions. The value range is as follows:* **ReadWrite**: read and write* **ReadOnly**: Read-only* **DMLOnly**: only DML is allowed.* **DDLOnly**: only DDL is allowed* **ReadIndex**: Read-only + index
-    * `account_privilege_detail` - Detailed information about the account privileges.
-  * `data_base_description` - The description of the database.
-  * `engine` - The database engine type. The value range is as follows:* **MySQL*** **Oracle*** **PostgreSQL**
-  * `status` - The status of the resource
-  * `data_base_instance_id` - The ID of the PolarDB instance to which the database will be associated.
+  * `status` - The status of the database.
+
+## Import
+
+PolarDB Database can be imported using the `data_base_instance_id` and `data_base_name` separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_polardb_database.example <data_base_instance_id>:<data_base_name>
+```

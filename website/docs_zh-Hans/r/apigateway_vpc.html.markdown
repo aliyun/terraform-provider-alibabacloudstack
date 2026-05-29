@@ -76,7 +76,6 @@ resource "alibabacloudstack_api_gateway_vpc_access" "default" {
 * `vpc_id` - (必填，变更时重建) 您要授权API网关访问的VPC的ID。
 * `instance_id` - (必填，变更时重建) 您要授权API网关访问的VPC中的ECS或服务器负载均衡器实例的ID。
 * `port` - (必填，变更时重建) API网关应连接到实例上的端口号。有效值范围为1到65535。
-* `child` - (可选，变更时重建) 用于未来子配置的占位符参数。
 
 ## 属性说明
 
@@ -86,8 +85,8 @@ resource "alibabacloudstack_api_gateway_vpc_access" "default" {
 
 ### 导入
 
-API Gateway VPC访问可以通过组合ID格式 `<VPC_ID>:<INSTANCE_ID>:<PORT>` 导入，例如：
+API Gateway VPC访问可以通过组合ID格式 `<NAME>:<VPC_ID>:<INSTANCE_ID>:<PORT>` 导入，例如：
 
 ```sh
-$ terraform import alibabacloudstack_api_gateway_vpc_access.example "vpc-aswcj19ajsz:i-ajdjfsdlf:8080"
+$ terraform import alibabacloudstack_api_gateway_vpc_access.example "my-vpc-name:vpc-aswcj19ajsz:i-ajdjfsdlf:8080"
 ``` 

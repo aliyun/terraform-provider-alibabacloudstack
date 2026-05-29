@@ -37,8 +37,8 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
   gw_instance_id    = alibabacloudstack_api_gateway_v2_instance.default.id
   service_nodes {
     ip     = "127.0.0.1"
-    port   = "80"
-    weight = "100"
+    port   = 80
+    weight = 100
     enable = "true"
   }
 }
@@ -79,14 +79,14 @@ resource "alibabacloudstack_api_gateway_v2_route" "default" {
     value = "ccccc"
   }
 
-  strip_prefix = "2"
+  strip_prefix = 2
   service_ids {
     service_id = alibabacloudstack_api_gateway_v2_service.default.service_id
-    weight     = "100"
+    weight     = 100
   }
 
   gw_instance_id = alibabacloudstack_api_gateway_v2_instance.default.id
-  order          = "100"
+  order          = 100
 }
 ```
 
@@ -100,8 +100,8 @@ The following arguments are supported:
 * `cookie` - (Optional) A list of cookie matching rules. Each rule contains the following attributes:
   * `key` - (Required) The name of the cookie.
   * `value` - (Required) The value of the cookie.
-* `domain_ids` - (Optional) A list of domain IDs to bind.
-* `enable_status` - (Optional) Whether to enable the route.
+* `domain_ids` - (Optional, Computed) A list of domain IDs to bind.
+* `enable_status` - (Optional, Computed) Whether to enable the route.
 * `header` - (Optional) A list of request header matching rules. Each rule contains the following attributes:
   * `key` - (Required) The name of the request header.
   * `value` - (Required) The value of the request header.
@@ -120,7 +120,7 @@ The following arguments are supported:
   * `service_id` - (Optional) The backend service ID.
   * `weight` - (Optional) The weight, ranging from 1 to 100.
 * `strip_prefix` - (Optional) The length of the prefix to strip. When the value is greater than 0, the prefix stripping feature is automatically enabled.
-* `cascade_link_ids` - (Optional) The list of cascade link IDs, used for CSB authentication. Set this attribute to create the source route. 
+* `cascade_link_ids` - (Optional, ForceNew) The list of cascade link IDs, used for CSB authentication. Set this attribute to create the source route. 
 
 -> **NOTE:** When `cascade_link_ids` is not empty, only the `service_id` attribute is supported for setting the server.
 
@@ -131,3 +131,13 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
 
 * `route_id` - The ID of the route.
+
+## Import
+
+API Gateway V2 Route can be imported using the resource ID in the format `<type>:<gw_instance_id>:<route_id>`, e.g.
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_route.example route:gw-12345678:route-87654321
+```
+
+-> **NOTE:** If the route is a source route (created with `cascade_link_ids`), the type prefix should be `sourceRoute` instead of `route`.

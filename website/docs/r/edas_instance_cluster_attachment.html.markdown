@@ -11,6 +11,9 @@ description: |-
 
 Import ECS instances into EDAS cluster to achieve unified management of application deployment environments.
 
+> **Note:** This resource can also be referred to by the following aliases:
+> - `alibabacloudstack_edas_instanceclusterattachment`
+
 ## Example Usage
 
 ### Basic Usage
@@ -167,7 +170,15 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The resource ID in the format `cluster_id:instance_id`.
+* `id` - The resource ID in the format `cluster_id:instance_id1,instance_id2,...` (comma-separated instance IDs).
 * `status_map` -  A map indicating the status of each instance in the cluster. The keys are instance IDs, and the values represent the status: `1` (Running), `0` (Converting), `-1` (Failed), and `-2` (Offline).
 * `ecu_map` -  A map linking each instance to its corresponding ECU (Elastic Compute Unit). The keys are instance IDs, and the values are ECU IDs.
 * `cluster_member_ids` -  A map of cluster member IDs associated with each instance. The keys are instance IDs, and the values are the cluster member IDs.
+
+## Import
+
+EDAS Instance Cluster Attachment can be imported using the cluster_id and instance_ids in the format `cluster_id:instance_id1,instance_id2,...`, e.g.
+
+```
+$ terraform import alibabacloudstack_edas_instance_cluster_attachment.example cluster-abc123:i-xxx001,i-xxx002
+```

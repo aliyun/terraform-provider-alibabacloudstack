@@ -1,15 +1,15 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_edas_namespace"
 sidebar_current: "docs-Alibabacloudstack-edas-namespace"
-description: |- 
-  Provides a Edas Namespace resource.
+description: |-
+  Provides a EDAS Namespace resource.
 ---
 
 # alibabacloudstack_edas_namespace
 
-Provides a Edas Namespace resource.
+Provides a EDAS Namespace resource.
 
 For information about EDAS Namespace and how to use it, see [What is Namespace](https://www.alibabacloud.com/help/en/enterprise-distributed-application-service/latest/insertorupdateregion).
 
@@ -33,12 +33,12 @@ provider "alibabacloudstack" {
 variable "region" {
   default = "cn-hangzhou"
 }
+
 variable "name" {
   default = "tfexample"
 }
 
 resource "alibabacloudstack_edas_namespace" "default" {
-  debug_enable         = false
   description          = var.name
   namespace_logical_id = "${var.region}:${var.name}"
   namespace_name       = var.name
@@ -49,11 +49,9 @@ resource "alibabacloudstack_edas_namespace" "default" {
 
 The following arguments are supported:
 
-* `description` - (Optional) The description of the namespace. It can be up to `128` characters in length.
-* `namespace_logical_id` - (Required, ForceNew) The ID of the namespace.  
-  - For custom namespaces, the format is `region ID:namespace identifier`, e.g., `cn-beijing:tdy218`.
-  - For default namespaces, the format is just the `region ID`, e.g., `cn-beijing`.
-* `namespace_name` - (Required) The name of the namespace. It can be up to `63` characters in length.
+* `namespace_logical_id` - (Required, ForceNew) The logical ID of the namespace. Changing this parameter forces a new resource to be created. For custom namespaces, the format is `region ID:namespace identifier`, e.g., `cn-beijing:tdy218`. For default namespaces, the format is just the `region ID`, e.g., `cn-beijing`.
+* `namespace_name` - (Required) The name of the namespace. It can be up to 63 characters in length.
+* `description` - (Optional) The description of the namespace. It can be up to 128 characters in length.
 
 ## Attributes Reference
 
@@ -66,6 +64,14 @@ In addition to all arguments above, the following attributes are exported:
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 
-* `create` - (Default to 1 minute) Used when creating the Namespace.
-* `delete` - (Default to 1 minute) Used when deleting the Namespace.
-* `update` - (Default to 1 minute) Used when updating the Namespace.
+* `create` - (Defaults to 1 minute) Used when creating the namespace.
+* `delete` - (Defaults to 1 minute) Used when deleting the namespace.
+* `update` - (Defaults to 1 minute) Used when updating the namespace.
+
+## Import
+
+EDAS Namespace can be imported using the namespace ID, e.g.
+
+```
+$ terraform import alibabacloudstack_edas_namespace.example 123456
+```

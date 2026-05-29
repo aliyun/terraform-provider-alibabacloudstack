@@ -61,12 +61,12 @@ resource "alibabacloudstack_hsm_instance" "default" {
   * `gvsm`：通用服务器密码机。
   * `svsm`：签名验签服务器密码机。
 * `zone_no` - (必填, 变更时重建) 密码机实例所在的可用区编号。您可以通过DescribeZones接口获取该参数。
-* `hsm_id` - (可选) 密码机ID。当指定此参数时，将创建指定设备的密码机实例。
-* `ip` - (可选) 密码机实例对应的经典网络的IP地址。不传该参数时，系统将根据VPC和VSwitch自动分配一个可用IP。
+* `hsm_id` - (可选, 可回读) 密码机ID。当指定此参数时，将创建指定设备的密码机实例。此属性由 API 返回，无法手动设置。
+* `ip` - (可选, 可回读) 密码机实例对应的经典网络的IP地址。不传该参数时，系统将根据VPC和VSwitch自动分配一个可用IP。此属性由 API 返回，无法手动设置。
 * `remark` - (可选) 密码机实例的别名。
-* `vpc_id` - (可选) 配置给密码机实例的VPC实例ID。您可以通过DescribeVpc接口获取该参数。
-* `vswitch_id` - (可选) 配置给密码机实例的交换机实例ID。您可以通过DescribeVpc接口获取该参数。
-* `white_list` - (可选) 可访问密码机实例的白名单IP。支持配置多个值，可以使用","分隔。
+* `vpc_id` - (可选, 可回读) 配置给密码机实例的VPC实例ID。您可以通过DescribeVpc接口获取该参数。此属性由 API 返回，无法手动设置。
+* `vswitch_id` - (可选, 可回读) 配置给密码机实例的交换机实例ID。您可以通过DescribeVpc接口获取该参数。此属性由 API 返回，无法手动设置。
+* `white_list` - (可选, 可回读) 可访问密码机实例的白名单IP。支持配置多个值，可以使用","分隔。此属性由 API 返回，无法手动设置。
 
 ## 属性说明
 
@@ -93,3 +93,11 @@ resource "alibabacloudstack_hsm_instance" "default" {
   * `7`：重置中。
   * `8`：已停用。
 * `vendor_name` - 密码机实例所用设备的设备厂商名称。
+
+## Import
+
+密码机实例可以使用 instance_id 导入，例如：
+
+```
+$ terraform import alibabacloudstack_hsm_instance.example hsm-12345678
+```

@@ -48,12 +48,20 @@ resource "alibabacloudstack_ons_topic" "default" {
 The following arguments are supported:
 
 * `instance_id` - (Optional) ID of the ONS Instance that owns the topics. 
-* `topic` - (Required) Name of the topic. Two topics on a single instance cannot have the same name and the name cannot start with 'GID' or 'CID'. The length cannot exceed 64 characters.
-* `message_type` - (Required) The type of the message.
-* `remark` - (Required) This attribute is a concise description of topic. The length cannot exceed 128.
+* `topic` - (Required) Name of the topic. Two topics on a single instance cannot have the same name and the name cannot start with 'GID' or 'CID'. The length must be between 1 and 128 characters.
+* `message_type` - (Required) The type of the message. Modifying this argument forces the creation of a new resource.
+* `remark` - (Required) A concise description of the topic. The length must be between 1 and 128 characters.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - Topic and InstanceID of the ONS Topic. The value is in format `Topic:InstanceID`.
+
+## Import
+
+ONS Topic can be imported using the topic and instance_id, e.g.
+
+```
+$ terraform import alibabacloudstack_ons_topic.example tf-topic12345:mq-instance-abc
+```

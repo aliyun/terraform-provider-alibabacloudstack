@@ -18,12 +18,7 @@ description: |-
 ## 示例用法
 
 ```
-resource "alibabacloudstack_ascm_organization" "default" {
-    name = "Dummy_Test_1"
-}
-
 resource "alibabacloudstack_ascm_resource_group" "default" {
-    organization_id = alibabacloudstack_ascm_organization.default.org_id
     name = "Resource_Group_Name"
 }
 
@@ -39,14 +34,23 @@ output "rg" {
 
 支持以下参数：
 
-* `name` - (必填) 资源组的名称。该名称可以包含2到128个字符的字符串，必须仅包含字母数字字符或连字符（例如“-”、“.”、“_”），并且不能以连字符开头或结尾，也不能以`http://`或`https://`开头。默认值为`null`。
-* `organization_id` - (必填) 组织的ID。
-* `rg_id` - (可选) 资源组的ID。如果已知资源组ID，可以通过此参数直接引用现有资源组。
+* `name` - (必填) 资源组的名称。该名称可以包含 2 到 128 个字符。
+
+* `organization_id` - (已弃用, 可选) 该参数已弃用。资源组将创建在当前用户所属的组织下。修改此参数将强制创建新资源。
 
 ## 属性说明
 
 导出以下属性：
 
-* `id` - 资源组的名称和ID。格式为`Name:ID`。
+* `id` - 资源组的 ID。格式为 `<organization_id>:<resource_group_id>`。
 * `name` - 资源组的名称。
-* `rg_id` - 资源组的ID。
+* `rg_id` - 资源组的内部 ID（API 返回的 ID）。
+* `organization_id` - 资源组所属的组织 ID。
+
+## Import
+
+ASCM 资源组可以通过组织 ID 和资源组 ID（用冒号分隔）导入，例如：
+
+```
+$ terraform import alibabacloudstack_ascm_resource_group.example 12345:67890
+```

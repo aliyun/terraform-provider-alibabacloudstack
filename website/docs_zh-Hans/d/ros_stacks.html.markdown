@@ -1,5 +1,5 @@
 ---
-subcategory: "ROS"
+subcategory: "Resource Orchestration Service (ROS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ros_stacks"
 sidebar_current: "docs-Alibabacloudstack-datasource-ros-stacks"
@@ -64,7 +64,6 @@ output "stack_ids" {
 
 以下参数是支持的：
 
-* `enable_details` - (可选) 默认值为 `false`。将其设置为 `true` 可以输出更多关于资源属性的详细信息。
 * `ids` - (可选，强制更新) 堆栈 ID 列表。
 * `name_regex` - (可选，强制更新) 用于通过堆栈名称筛选结果的正则表达式字符串。
 * `parent_stack_id` - (可选，强制更新) 父堆栈的 ID。
@@ -72,6 +71,8 @@ output "stack_ids" {
 * `stack_name` - (可选，强制更新) 堆栈的名称。名称长度最多为 255 个字符，可以包含数字、字母、连字符 (-) 和下划线 (_)。必须以数字或字母开头。
 * `status` - (可选，强制更新) 堆栈的状态。有效值：`CREATE_COMPLETE`, `CREATE_FAILED`, `CREATE_IN_PROGRESS`, `DELETE_COMPLETE`, `DELETE_FAILED`, `DELETE_IN_PROGRESS`, `ROLLBACK_COMPLETE`, `ROLLBACK_FAILED`, `ROLLBACK_IN_PROGRESS`。
 * `tags` - (可选) 查询绑定到标签的实例。传入值的格式为 `json` 字符串，包括 `TagKey` 和 `TagValue`。`TagKey` 不可以为空，而 `TagValue` 可以为空。格式示例 `{"key1":"value1"}`。
+* `enable_details` - (可选) 默认值为 `false`。将其设置为 `true` 可以输出更多关于资源属性的详细信息。
+* `output_file` - (可选，已弃用) 输出文件路径。该字段已弃用，计划在 3.19.0 版本中移除。要将内容写入文件，请使用 'local_file' provider。
 
 ## 属性说明
 

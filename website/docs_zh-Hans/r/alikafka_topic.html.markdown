@@ -1,5 +1,5 @@
 ---
-subcategory: "Alikafka"
+subcategory: "ApsaraMQ for Kafka"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_topic"
 sidebar_current: "docs-Alibabacloudstack-alikafka-topic"
@@ -54,10 +54,10 @@ resource "alibabacloudstack_alikafka_topic" "default" {
 
 * `instance_id` - (必填，变更时重建) Kafka 实例的资源 ID。主题将在此实例中创建。
 * `topic` - (必填，变更时重建) 主题的名称。单个实例上的两个主题不能具有相同的名称。长度不得超过 64 个字符。
-* `local_topic` - (可选，变更时重建) 指示该主题是否为本地主题。默认值为 `false`。
-* `compact_topic` - (可选，变更时重建) 指示该主题是否为紧凑主题。紧凑主题必须是本地主题。默认值为 `false`。
-* `partition_num` - (可选) 主题的分区数。数量应在 1 到 48 之间。默认值为 `1`。
-* `remark` - (必填) 主题的简要描述。长度不得超过 64 个字符。
+* `local_topic` - (可选，已计算，已弃用) 指示该主题是否为本地主题。该字段已弃用，计划在 3.21.0 版本中移除。
+* `compact_topic` - (可选，变更时重建，已弃用) 指示该主题是否为紧凑主题。紧凑主题必须是本地主题。默认值为 `false`。该字段已弃用，计划在 3.21.0 版本中移除。
+* `partition_num` - (可选) 主题的额外分区数。数量应在 0 到 360 之间。默认值为 `12`。
+* `remark` - (必填，已弃用) 主题的简要描述。长度不得超过 64 个字符。该字段已弃用，计划在 3.21.0 版本中移除。
 * `tags` - (可选，v1.63.0+可用) 分配给资源的标签映射。
 
 ## 属性说明

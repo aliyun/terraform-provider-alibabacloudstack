@@ -77,3 +77,11 @@ resource "alibabacloudstack_cr_ee_attestor_lifecycle_rule" "default" {
 * `modified_time` - 规则修改时间，Unix时间戳（毫秒）。
 * `rule_id` - 保留策略规则ID。
 * `schedule` - 调度方式。固定为`MANUAL`表示手动执行规则。
+
+## Import
+
+镜像生命周期规则可以使用 instance_id 和 rule_id 进行导入，两者之间用冒号分隔，例如：
+
+```
+$ terraform import alibabacloudstack_cr_ee_attestor_lifecycle_rule.example <instance_id>:<rule_id>
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "RocketMQ (ONS)"
+subcategory: "ApsaraMQ for RocketMQ"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_instance"
 sidebar_current: "docs-alibabacloudstack-resource-ons-instance"
@@ -15,7 +15,7 @@ Provides an ONS instance resource.
 
 Basic Usage
 
-```
+```hcl
 resource "alibabacloudstack_ons_instance" "default" {
   tps_receive_max = 500
   tps_send_max = 500
@@ -42,7 +42,7 @@ The following arguments are supported:
 * `topic_capacity` - (Required)This attribute is used to set the topic capacity.
 * `independent_naming` - (Required)This attribute is used to define an independent name or not. It takes only bool value.
 * `cluster` - (Required)This attribute is a used to add cluster name.
-* `remark` - (Optional)This attribute is a concise description of instance. The length cannot exceed 128.
+* `remark` - (Optional) This attribute is a concise description of instance. The length must be 2 to 128 characters.
 
 ## Attributes Reference
 
@@ -59,5 +59,11 @@ The following attributes are exported:
 * `independent_naming` -  This attribute indicates whether the instance has independent naming.
 * `cluster` -  This attribute indicates the cluster associated with the instance.
 * `remark` -  This attribute indicates the remark of the instance.
-* `instance_type` - This attribute specifies the type of the instance.
-* `instance_status` - This attribute specifies the status of the instance.
+
+## Import
+
+ONS Instance can be imported using the InstanceId, e.g.
+
+```
+$ terraform import alibabacloudstack_ons_instance.example mq_INST_XXXXXXX
+```

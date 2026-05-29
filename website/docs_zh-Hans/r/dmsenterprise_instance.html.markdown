@@ -1,5 +1,5 @@
 ---
-subcategory: "DMS Enterprise"
+subcategory: "数据管理 DMS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dmsenterprise_instance"
 sidebar_current: "docs-Alibabacloudstack-dmsenterprise-instance"
@@ -69,9 +69,9 @@ resource "alibabacloudstack_dms_enterprise_instance" "default" {
     port              = 3306
     database_user     = alibabacloudstack_db_account.account.name
     database_password = alibabacloudstack_db_account.account.password
-    instance_alias    = "tf-testAccDmsEnterpriseInstance4641"
+    instance_name     = "tf-testAccDmsEnterpriseInstance4641"
     dba_uid           = alibabacloudstack_dms_enterprise_user.default.uid
-    safe_rule         = "自由操作"
+    safe_rule         = "Free Operations"
     query_timeout     = 70
     export_timeout    = 2000
     ecs_region        = "cn-shanghai"
@@ -93,7 +93,8 @@ resource "alibabacloudstack_dms_enterprise_instance" "default" {
 * `port` - (必填, 变更时重建) 目标数据库访问端口。
 * `database_user` - (必填) 数据库访问账号。
 * `database_password` - (必填) 数据库访问密码。
-* `instance_name` - (必填) 实例名称，帮助用户快速区分定位。
+* `instance_name` - (可选) 实例名称，帮助用户快速区分定位。与 `instance_alias` 互斥。
+* `instance_alias` - (可选, 已废弃) 数据库实例的别名。**已废弃：** 字段 `instance_alias` 从版本 1.100.0 起已被废弃，建议使用 `instance_name` 替代。与 `instance_name` 互斥。
 * `dba_uid` - (必填, 变更时重建) 实例DBA的UID，必须为已注册用户的UID。
 * `safe_rule` - (必填, 变更时重建) 实例的安全规则名称。
 * `query_timeout` - (必填) 查询超时时间，单位：秒。
@@ -106,6 +107,9 @@ resource "alibabacloudstack_dms_enterprise_instance" "default" {
 * `ddl_online` - (可选) 是否使用在线服务，目前仅支持MySQL和PolarDB。有效值：`0`（不使用），`1`（原生在线DDL优先），`2`（DMS无锁表结构变更优先）。
 * `use_dsql` - (可选) 是否开启跨实例查询。有效值：`0`（未开启），`1`（开启）。
 * `skip_test` - (可选) 是否忽略实例连通性测试。有效值：`true`, `false`。
+* `dba_id` - (可选) 数据库实例的DBA ID。
+* `safe_rule_id` - (可选) 数据库实例的安全规则ID。
+* `instance_id` - (可选) 数据库实例的ID。
 
 ## 属性说明
 
@@ -114,8 +118,12 @@ resource "alibabacloudstack_dms_enterprise_instance" "default" {
 * `id` - DMS企业实例的ID，格式为 `<host>:<port>`。
 * `dba_nick_name` - 实例DBA的昵称。
 * `status` - 实例状态。
-* `dba_id` - 数据库实例的DBA ID。
-* `safe_rule_id` - 数据库实例的安全规则ID。
-* `instance_id` - 数据库实例的ID。
-* `skip_test` - 是否忽略实例连通性测试。有效值：`true`, `false`。
-* `instance_alias` - 数据库实例的别名。字段`instance_alias`从版本1.100.0起已被废弃，建议使用`instance_name`替代。
+* `state` - (已废弃) 字段 `state` 从版本 1.100.0 起已被废弃，建议使用 `status` 替代。
+
+## 导入
+
+DMS 企业实例可以通过 host 和 port 导入，例如：
+
+```bash
+$ terraform import alibabacloudstack_dms_enterprise_instance.example rm-uf648hgs7874xxxx.mysql.rds.aliyuncs.com:3306
+```

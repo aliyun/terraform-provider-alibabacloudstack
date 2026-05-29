@@ -200,46 +200,54 @@ The following arguments are supported:
 * `gw_instance_id` - (Required, ForceNew) The ID of the API Gateway instance.
 * `name` - (Required, ForceNew) The name of the service.
 * `description` - (Optional) The description of the service.
-* `load_balance_type` - (Optional) The load balancing type.
-* `protocol` - (Optional) The service protocol type, such as HTTP.
+* `upstream_type` - (Optional, Computed) The upstream type.
+* `load_balance_type` - (Optional, Computed) The load balancing type.
+* `protocol` - (Optional, Computed) The service protocol type, such as HTTP.
 * `real_service_name` - (Optional) The real service name.
 * `service_group` - (Optional) The service group.
 * `service_version` - (Optional) The service version.
-* `source_group` - (Optional) The source group.
-* `service_source_type` - (Optional) service source type, optional values: `dns`, `ip`, required when creating AI gateway service.
 * `source_id` - (Optional) The source ID.
-* `upstream_type` - (Optional) The upstream type.
-* `health_check_struct` - (Optional) The health check configuration structure.
-  * `health_interval` - (Optional) The health check interval in seconds.
-  * `health_path` - (Optional) The health check path.
-  * `http_failures` - (Optional) The number of HTTP failures to determine unhealthy status.
-  * `http_statuses` - (Optional) The HTTP status codes for health check.
-  * `http_successes` - (Optional) The number of HTTP successes to determine healthy status.
-  * `timeout` - (Optional) The health check timeout in milliseconds.
+* `source_group` - (Optional, Computed) The source group.
+* `service_source_type` - (Optional) The service source type. Valid values: `dns`, `ip`. Required when creating AI Gateway service.
+* `health_check_struct` - (Optional, Max Items: 1) The health check configuration structure.
   * `type` - (Required) The health check type.
+  * `health_path` - (Optional) The health check path.
+  * `http_statuses` - (Optional) The HTTP status codes for health check.
+  * `timeout` - (Optional) The health check timeout in milliseconds.
+  * `health_interval` - (Optional) The health check interval in seconds.
   * `un_health_interval` - (Optional) The unhealthy check interval in seconds.
+  * `http_successes` - (Optional) The number of HTTP successes to determine healthy status.
+  * `http_failures` - (Optional) The number of HTTP failures to determine unhealthy status.
 * `service_nodes` - (Optional) The list of service nodes.
-  * `enable` - (Optional) Whether the node is enabled.
   * `ip` - (Required) The IP address of the node.
   * `port` - (Required) The port of the node.
-  * `weight` - (Optional) The weight of the node.
+  * `weight` - (Optional, Computed) The weight of the node.
+  * `enable` - (Optional, Computed) Whether the node is enabled.
 * `sql_input_parameters` - (Optional) The SQL input parameter configuration.
-  * `description` - (Required) The parameter description.
-  * `isoptional` - (Optional) Whether the parameter is optional.
   * `original_name` - (Required) The original parameter name.
-  * `sample` - (Required) The sample value of the parameter.
   * `target_name` - (Required) The target parameter name.
+  * `isoptional` - (Optional) Whether the parameter is optional.
+  * `description` - (Required) The parameter description.
+  * `sample` - (Required) The sample value of the parameter.
 * `sql_output_parameters` - (Optional) The SQL output parameter configuration.
-  * `description` - (Required) The parameter description.
-  * `isoptional` - (Optional) Whether the parameter is optional.
   * `original_name` - (Required) The original parameter name.
-  * `param_type` - (Optional) The parameter type, default is "java.lang.String".
-  * `sample` - (Required) The sample value of the parameter.
   * `target_name` - (Required) The target parameter name.
+  * `param_type` - (Optional) The parameter type. Default: `java.lang.String`.
+  * `isoptional` - (Optional) Whether the parameter is optional.
+  * `description` - (Required) The parameter description.
+  * `sample` - (Required) The sample value of the parameter.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The resource ID in the format of `{gwInstanceId:serviceId}`.
+* `id` - The resource ID in the format of `<gw_instance_id>^<service_id>`.
 * `service_id` - The ID of the service.
+
+## Import
+
+API Gateway V2 Service can be imported using the composite ID (gw_instance_id^service_id), e.g.
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_service.example gw-inst-123456^svc-789012
+```

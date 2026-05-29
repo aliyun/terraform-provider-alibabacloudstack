@@ -28,7 +28,7 @@ resource "alibabacloudstack_maxcompute_cu" "example" {
 
 The following arguments are supported:
 * `cu_name` - (Required, ForceNew, Available in 1.110.0+) The name of the maxcompute cu. Must be between 3 and 27 characters. <!--  AI CREATE  -->
-* `cu_num` - (Required, ForceNew) The number of CUs for the maxcompute cu. Must be at least 1. 
+* `cu_num` - (Required) The number of CUs for the maxcompute cu. Must be at least 1. 
 * `cluster_name` - (Required, ForceNew) The cluster name of the maxcompute cu.
 
 ## Attributes Reference
@@ -38,8 +38,8 @@ The following attributes are exported:
 
 ## Import
 
-MaxCompute project can be imported using the *name* or ID, e.g.
+MaxCompute CU can be imported using the CuId, e.g.
 
 ```
-$ terraform import alibabacloudstack_maxcompute_project.example tf_maxcompute_project
+$ terraform import alibabacloudstack_maxcompute_cu.example <cu_id>
 ```

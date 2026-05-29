@@ -48,32 +48,39 @@ resource "alibabacloudstack_expressconnect_bgp_peer" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `auth_key` - (Optional) - The authentication key of the BGP group.
-  * `bfd_multi_hop` - (Optional) - Number of reflexes
-  * `bgp_group_id` - (Required) - The ID of the BGP group.
-  * `bgp_peer_name` - (Optional) - The name of the BGP neighbor.
-  * `description` - (Optional) - Description of the BGP group.
-  * `enable_bfd` - (Optional) - Whether the BFD protocol is enabled.
-  * `ip_version` - (Optional) - IP version
-  * `peer_ip_address` - (Optional) - The IP address of the BGP neighbor.
-  * `region_id` - (Optional) - The ID of the region to which the BGP group belongs.
-  * `router_id` - (Optional) - The ID of the router.
-  * `status` - (Optional) - Status of BGP neighbors
+
+  * `bgp_group_id` - (Required) The ID of the BGP group.
+  * `router_id` - (Optional) The ID of the VBR (Virtual Border Router).
+  * `peer_ip_address` - (Optional) The IP address of the BGP peer.
+  * `enable_bfd` - (Optional) Whether to enable BFD (Bidirectional Forwarding Detection). Valid values: `true`, `false`.
+  * `bfd_multi_hop` - (Optional) The number of BFD multi-hop hops.
+  * `bgp_peer_name` - (Optional, Available in 1.0.0+) The name of the BGP peer.
+  * `description` - (Optional, Available in 1.0.0+) The description of the BGP peer.
+  * `status` - (Optional, Deprecated) The status of the BGP peer. This parameter is not effective.
+  * `auth_key` - (Optional, Available in 1.0.0+) The authentication key of the BGP peer.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `auth_key` - The authentication key of the BGP group.
-  * `bgp_peer_id` - The ID of the BGP neighbor.
-  * `bgp_peer_name` - The name of the BGP neighbor.
-  * `bgp_status` - The connection status of BGP, including the following states:* creating: creating.* working: in use.* modifying: Under Modification.* deleting: deleting.* deleted: deleted.
-  * `description` - Description of the BGP group.
-  * `hold` - Hold time.
-  * `ip_version` - IP version
-  * `is_fake` - Whether the Fake AS number is enabled.
-  * `keepalive` - Live time.
-  * `local_asn` - Local ASN number
-  * `peer_asn` - ASN of BGP neighbor.
-  * `region_id` - The ID of the region to which the BGP group belongs.
-  * `route_limit` - Routing restrictions.
-  * `status` - Status of BGP neighbors
+
+  * `id` - The ID of the BGP peer.
+  * `bgp_peer_id` - The ID of the BGP peer.
+  * `bgp_status` - The status of the BGP peer. Valid values: `Idle`, `Connect`, `Active`, `OpenSent`, `OpenConfirm`, `Established`.
+  * `local_asn` - The local autonomous system number.
+  * `peer_asn` - The autonomous system number of the BGP peer.
+  * `ip_version` - The IP version. Valid values: `IPv4`, `IPv6`.
+  * `is_fake` - Whether the secondary ASN is enabled.
+  * `hold` - The BGP Hold time.
+  * `keepalive` - The BGP Keepalive time.
+  * `route_limit` - The maximum number of routes that the BGP peer can learn.
+  * `bgp_peer_name` - The name of the BGP peer.
+  * `description` - The description of the BGP peer.
+  * `auth_key` - The authentication key of the BGP peer.
+
+## Import
+
+Express Connect BGP Peer can be imported using the BGP peer ID, e.g.
+
+```
+$ terraform import alibabacloudstack_expressconnect_bgp_peer.example bgppeer-12345678
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "NATGateway"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_forwardentry"
 sidebar_current: "docs-Alibabacloudstack-natgateway-forwardentry"
@@ -67,19 +67,27 @@ resource "alibabacloudstack_forward_entry" "default" {
 
 The following arguments are supported:
 
-* `forward_table_id` - (Required, ForceNew) The ID of the DNAT table to which the DNAT entry belongs.
-* `external_ip` - (Required) The public IP address in the DNAT entry. The public IP address is used by the ECS instance to receive requests from the Internet.
-* `external_port` - (Required) The external port in the DNAT entry. The external port is used by the ECS instance to receive requests from the Internet. Valid values are integers between 1 and 65535 or "any".
+* `forward_table_id` - (Required, ForceNew) The ID of the forward table to which the forward entry belongs. Changing this parameter forces a new resource to be created.
+* `external_ip` - (Required) The public IP address in the forward entry. The public IP address is used by the ECS instance to receive requests from the Internet.
+* `external_port` - (Required) The external port in the forward entry. The external port is used by the ECS instance to receive requests from the Internet. Valid values are integers between `1` and `65535` or `"any"`.
 * `ip_protocol` - (Required) The type of the protocol. Valid values are `tcp`, `udp`, or `any`.
-* `name` - (Optional) The name of the DNAT entry. This field can be used interchangeably with `forward_entry_name`.
-* `forward_entry_name` - (Optional) The name of the DNAT entry. If not provided, the `name` field will be used.
-* `internal_ip` - (Required) The private IP address that is mapped to the public IP address in the DNAT entry. It must be a valid private IP within the VPC.
-* `internal_port` - (Required) The internal port that is mapped to the external port in the DNAT entry. Valid values are integers between 1 and 65535 or "any".
+* `name` - (**Deprecated**) This field is deprecated and will be removed in a future release. Please use `forward_entry_name` instead. This field and `forward_entry_name` are mutually exclusive and cannot be used together.
+* `forward_entry_name` - (Optional, Computed) The name of the forward entry. The length is limited to 2 to 128 characters. This field and `name` are mutually exclusive and cannot be used together.
+* `internal_ip` - (Required) The private IP address that is mapped to the public IP address in the forward entry. It must be a valid private IP within the VPC.
+* `internal_port` - (Required) The internal port that is mapped to the external port in the forward entry. Valid values are integers between `1` and `65535` or `"any"`.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the DNAT entry. The value is formatted as `<forward_table_id>:<forward_entry_id>`.
-* `forward_entry_id` - The unique identifier for the DNAT entry on the server.
-* `forward_entry_name` - The name of the DNAT entry. If not explicitly set, it defaults to the value of the `name` field.
+* `id` - The ID of the forward entry. The value is formatted as `<forward_table_id>:<forward_entry_id>`.
+* `forward_entry_id` - The unique identifier for the forward entry on the server.
+* `forward_entry_name` - The name of the forward entry. If not explicitly set, the server may return a default value.
+
+## Import
+
+Forward Entry can be imported using the forward table ID and forward entry ID separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_forward_entry.example ftb-xxxxxxxxxx:fwd-xxxxxxxxxx
+```

@@ -76,8 +76,8 @@ The following attributes are exported:
 
 ## Import
 
-CEN transit router VPC attachment can be imported using the ID, e.g.
+CEN transit router connect attachment can be imported using the ID, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_cen_transit_router_vpc_attachment.default cen-abc12345678900001:tr-abc12345678900001:tr-attach-abc12345678900001:vpc-abc12345678900001
+$ terraform import alibabacloudstack_cen_transit_router_connect_attachment.default cen-abc12345678900001:tr-abc12345678900001:tr-attach-abc12345678900001
 ```

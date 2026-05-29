@@ -1,5 +1,5 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_deploygroup"
 sidebar_current: "docs-Alibabacloudstack-edas-deploygroup"
@@ -41,7 +41,6 @@ resource "alibabacloudstack_edas_application" "default" {
 resource "alibabacloudstack_edas_deploy_group" "default" {
   app_id       = alibabacloudstack_edas_application.default.id
   group_name   = var.name
-  group_type   = 2 # Traffic Management Enable Grayscale
 }
 ```
 
@@ -63,3 +62,11 @@ In addition to all arguments above, the following attributes are exported:
   - `2`: Traffic Management Enable Grayscale.
 
 This attribute helps identify the configuration of the deploy group and its capabilities within the EDAS environment.
+
+## Import
+
+Edas Deploy Group can be imported using the resource ID formatted as `<app_id>:<group_name>:<group_id>`, e.g.
+
+```
+$ terraform import alibabacloudstack_edas_deploy_group.example <app_id>:<group_name>:<group_id>
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_domain"
 sidebar_current: "docs-alibabacloudstack-resource-dns-domain"
@@ -13,34 +13,37 @@ Provides a DNS domain resource.
 
 -> **NOTE:** The domain name which you want to add must be already registered and had not added by another account. Every domain name can only exist in a unique group.
 
+-> **NOTE:** This resource can also be referred to by the alias `apsarastack_dns_domain`.
+
 ## Example Usage
 
 ```
 # Add a new Domain.
 resource "alibabacloudstack_dns_domain" "default" {
-  domain_name     = "starmove."
-  remark   =  "testing Domain"
-}
-output "dns" {
-  value = alibabacloudstack_dns_domain.default.*
+  domain_name = "tfacc-test."
+  remark      = "testing Domain"
 }
 ```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `domain_name` - (Required, ForceNew) Name of the domain. This name without suffix can have a string of 1 to 63 characters(domain name subject, excluding suffix), must contain only alphanumeric characters or "-", and must not begin or end with "-", and "-" must not in the 3th and 4th character positions at the same time. Suffix `.sh` and `.tel` are not supported.
-* `group_id` - (Optional) Id of the group in which the domain will add. If not supplied, then use default group.
-* `resource_group_id` - (Optional, ForceNew) The Id of resource group which the dns domain belongs.
-* `lang` - (Optional) User language.
+* `domain_name` - (Required, ForceNew) Name of the domain. Modifying this parameter will force a new resource to be created.
 * `remark` - (Optional) Remarks information for your domain name.
-* `domain_name` - (Required) Name of the domain. 
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - This ID of this resource. The value is set to `domain_name`.
+* `id` - The ID of the resource. Format: `domain_name:domain_id`.
 * `domain_id` - The domain ID.
-* `dns_servers` - A list of the dns server name.
-* `domain_name` - The name of the domain. 
+* `domain_name` - The name of the domain.
+
+## Import
+
+DNS Domain can be imported using the `domain_name` and `domain_id` separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_dns_domain.example example.com:12345678
+```

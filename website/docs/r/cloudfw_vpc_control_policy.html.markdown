@@ -61,17 +61,25 @@ The following arguments are supported:
 * `new_order` - (Optional) The new policy order. Default value: `-1` (indicating adding to the end of the policy list).
 * `release` - (Optional) Whether to publish the policy. Valid values: `true` (publish), `false` (do not publish).
 * `vpc_firewall_id` - (Optional) The VPC firewall instance ID. If not specified, the default firewall instance is used.
-* `direction` - The policy direction. Valid value: `inout` (bidirectional traffic)、`in` (inbound traffic)、`out` (outbound traffic).
+* `direction` - (Optional, Computed) The policy direction. Valid values: `inout` (bidirectional traffic), `in` (inbound traffic), `out` (outbound traffic).
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
 
-* `id` - The policy ID (AclUuid).
+* `id` - The policy ID, formatted as `<acl_uuid>:<direction>`.
 * `acl_uuid` - The unique identifier of the policy (AclUuid).
-* `direction` - The policy direction. Valid value: `inout` (bidirectional traffic).
+* `dest_port_group` - The destination port group ID (returned by the API).
 * `dest_port_group_ports` - The destination port group port list (returned when `dest_port_type` is `group`).
 * `destination_group_cidrs` - The destination address group CIDR list (returned when `destination_type` is `group`).
-* `hit_times` - The number of times the policy has been hit (the number of matching traffic since creation).
+* `hit_times` - The number of times the policy has been matched (the number of matching traffic since creation).
 * `order` - The current order value of the policy (used for policy priority sorting).
 * `source_group_cidrs` - The source address group CIDR list (returned when `source_type` is `group`).
+
+## Import
+
+Cloud Firewall VPC Control Policy can be imported using the ID (format: `<acl_uuid>:<direction>`), e.g.
+
+```
+$ terraform import alibabacloudstack_cloudfw_vpc_control_policy.example acl-12345678:inout
+```

@@ -106,15 +106,23 @@ resource "alibabacloudstack_drds_account" "default" {
   * `instance_id` - (必填, 强制新建) - 实例ID。
   * `drds_account_name` - (必填, 强制新建) - 账号名称。
   * `description` - (选填) - 账号备注。高级账号默认为**Created by DRDS**，普通账号无任何备注。备注信息可以在账号管理中自定义修改。
-  * `password` - (必填) - 更新后的密码。
+  * `password` - (必填) DRDS 账号的密码。
   * `db_privileges` - (必填) - 数据库权限信息。
     
     * `db_name` - (必填) - 数据库名称。
     
-    * `privilege` - (必填) - 权限信息。
+    * `privilege` - (必填) 数据库权限。取值：`R`（只读）、`RW`（读写）、`DDL`（数据定义语言）、`DML`（数据操作语言）。
 
 ## 属性参考
 
 除了上述所有参数外，还导出了以下属性：
   * `host` - 可以访问数据库的IP地址。<note>**%**表示任何IP地址都能访问。</note>
-  * `account_type` - 账号类型。- **0**表示高级账号。- **1**表示普通账号。
+  * `account_type` - 账号类型。**0** 表示高级账号。**1** 表示普通账号。
+
+## 导入
+
+DRDS 账号可以使用 instance_id 和 account_name 进行导入，用冒号连接，例如：
+
+```
+$ terraform import alibabacloudstack_drds_account.example <instance_id>:<account_name>@%
+```

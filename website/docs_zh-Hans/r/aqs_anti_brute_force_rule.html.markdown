@@ -104,12 +104,14 @@ resource "alibabacloudstack_aqs_anti_brute_force_rule" "default" {
 
 支持以下参数：
 
-* `default_rule` - (可选) 是否默认规则。默认值为`false`。
-* `fail_count` - (可选) 登录失败次数阈值。当登录失败次数达到此值时，触发防暴力破解规则。
-* `forbidden_time` - (可选) 禁止登录时间，单位分钟。触发规则后，禁止登录的时长。
-* `instance_ids` - (可选) 关联的ECS实例ID列表。指定应用此规则的ECS实例（需转换为UUID格式）。
 * `name` - (可选) 规则名称。用于标识规则。
-* `span` - (可选) 登录失败次数统计时间范围，单位分钟。在此时间范围内统计登录失败次数。
+* `span` - (可选) 登录失败次数统计时间范围，单位分钟。在此时间范围内统计登录失败次数。取值：`1`、`2`、`5`、`10`、`15`。
+* `fail_count` - (可选) 登录失败次数阈值。当登录失败次数达到此值时，触发防暴力破解规则。取值：`2`、`3`、`4`、`5`、`10`、`50`、`80`、`100`。
+* `forbidden_time` - (可选) 禁止登录时间，单位分钟。触发规则后，禁止登录的时长。取值：`5`、`15`、`30`、`60`、`120`、`360`、`720`、`1440`、`10080`、`52560000`（永久）。
+* `default_rule` - (可选) 是否默认规则。资产不在其他规则时，会使用默认规则。默认值为 `false`。
+* `instance_ids` - (可选) 关联的ECS实例ID列表。指定应用此规则的ECS实例（需转换为UUID格式）。
+
+-> **注意**：`span`、`fail_count`、`forbidden_time` 三个参数组合成一个防暴力破解规则，表示 XX 分钟内账号登录失败超过 XX 次，该账号禁止登录 XX 分钟。
 
 ## 属性说明
 
@@ -119,3 +121,11 @@ resource "alibabacloudstack_aqs_anti_brute_force_rule" "default" {
 * `create_timestamp` - 规则创建时间戳（Unix时间戳，毫秒）。
 * `enable_smart_rule` - 是否启用智能规则。
 * `machine_count` - 关联的机器数量。
+
+## Import
+
+安骑士主机防暴力破解规则可以通过规则ID导入，例如：
+
+```
+$ terraform import alibabacloudstack_aqs_anti_brute_force_rule.example 65778
+```

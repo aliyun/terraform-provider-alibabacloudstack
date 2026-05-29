@@ -1,5 +1,5 @@
 ---
-subcategory: "Bare Metal Server (BMS)"
+subcategory: "Bare-Metal Management Service (BMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bms_keypair"
 sidebar_current: "docs-Alibabacloudstack-bms-keypair"
@@ -47,3 +47,11 @@ The following attributes are exported:
 * `key_pair_fingerprint` - The fingerprint of the key pair, in the format "[bit length] [algorithm]:[hash value] [comment]", for example "4096 SHA256:+MiS793F6Nxn/ygAGtquHw2e5grziG/AA+0ESwvF3VM root@vm010017040011 (RSA)".
 * `private_key` - The private key content (sensitive information), which is only returned during creation and will be empty for subsequent reads. The format is PEM format RSA private key.
 * `public_key` - The public key content, in SSH public key format. If a public key was provided during creation, the provided public key is returned; if the system generated the key pair, the generated public key is returned.
+
+## Import
+
+BMS Key Pair can be imported using the key pair name, e.g.
+
+```
+$ terraform import alibabacloudstack_bms_keypair.example my-keypair-name
+```

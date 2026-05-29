@@ -69,6 +69,7 @@ The following arguments are supported:
 * `lindorm_num` - (Required) The number of Lindorm nodes.
 * `local_disk_num` - (Optional) The number of local disks. Valid values: 1 to 10. Default value: 1.
 * `local_disk_size` - (Required, ForceNew) The size of the local disk. Unit: GiB.
+* `deletion_protection` - (Optional) Indicates whether deletion protection is enabled.
 
 ## Attributes Reference
 
@@ -79,7 +80,6 @@ The following attributes are exported:
 * `instance_status` - The status of the instance.
 * `create_time` - The creation time of the instance.
 * `instance_storage` - The storage capacity of the instance.
-* `deletion_protection` - Indicates whether deletion protection is enabled.
 * `disk_usage` - The usage of the disk.
 * `enable_fs` - Indicates whether the file system is enabled.
 * `switch_l_proxy_flag` - Indicates whether the L_Proxy switch is enabled.

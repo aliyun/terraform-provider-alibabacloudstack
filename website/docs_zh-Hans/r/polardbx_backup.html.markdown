@@ -1,15 +1,17 @@
 ---
-subcategory: "PolarDBX"
+subcategory: "云原生分布式数据库PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_backup"
 sidebar_current: "docs-Alibabacloudstack-polardbx-backup"
 description: |-
-  提供一个polardbx备份资源。
+  提供一个 PolarDB-X 备份资源。
 ---
 
 # alibabacloudstack\_polardbx\_backup
 
-提供一个polardbx备份资源。
+提供一个 PolarDB-X 备份资源。该资源允许您创建和管理 PolarDB-X 实例的备份。
+
+-> **注意：** 该资源不支持更新操作。修改任何参数都会强制创建新资源。
 
 ## 使用示例
 ```
@@ -58,15 +60,26 @@ resource "alibabacloudstack_polardbx_backup" "default" {
 ## 参数参考
 
 支持以下参数：
-  * `instance_id` - (必填) - PolarDBX实例的ID。
-  * `backup_type` - (可选) - 备份类型。目前仅支持"0"。
+
+  * `instance_id` - (必填，ForceNew) PolarDB-X 实例的 ID。修改此参数会强制重新创建资源。
+  * `backup_type` - (可选，ForceNew) 备份类型。有效值：`0`（物理备份）。默认值为 `0`。修改此参数会强制重新创建资源。
 
 ## 属性参考
 
 除了上述参数外，还导出以下属性：
-  * `backup_mode` - 备份模式。目前仅支持"0"。
-  * `backup_set_size` - 备份的大小。
-  * `backup_set_id` - 备份集ID。
-  * `status` - 备份的状态。
-  * `end_time` - 此备份的结束时间（UTC时间）。
-  * `begin_time` - 备份开始时间（UTC时间）。
+
+  * `id` - 备份的 ID。格式为 `<instance_id>:<backup_set_id>`。
+  * `backup_model` - 备份模式。有效值：`0`（物理备份），`1`（逻辑备份）。
+  * `backup_set_size` - 备份集的大小，单位为字节。
+  * `backup_set_id` - 备份集 ID。
+  * `status` - 备份的状态。有效值：`0`（创建中），`1`（成功），`2`（失败）。
+  * `end_time` - 备份结束时间，UTC 格式。
+  * `begin_time` - 备份开始时间，UTC 格式。
+
+## Import
+
+PolarDB-X 备份可以使用实例 ID 和备份集 ID（用冒号分隔）导入，例如：
+
+```
+$ terraform import alibabacloudstack_polardbx_backup.example pc-xxxxxxxxxxxxx:1234567890
+```

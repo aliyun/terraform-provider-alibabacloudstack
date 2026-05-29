@@ -13,10 +13,11 @@ description: |-
 
 ## 示例用法
 
-```
-data "alibabacloudstack_elasticsearch_instances" "instances" {
-  description_regex = "myes"
-  version           = "5.5.3_with_X-Pack"
+```hcl
+data "alibabacloudstack_elasticsearch_instances" "default" {
+  description_regex = "my-es-instance"
+  version           = "6.7.0_with_X-Pack"
+  vpc_id            = "vpc-xxxxxxxxxxxxx"
 }
 ```
 
@@ -24,34 +25,36 @@ data "alibabacloudstack_elasticsearch_instances" "instances" {
 
 以下是支持的参数：
 
-* `description_regex` - (可选) 应用于实例描述的正则表达式字符串。
-* `ids` - (可选, 1.52.1+可用) Elasticsearch实例ID列表。
-* `version` - (可选) Elasticsearch版本。选项包括 `5.5.3_with_X-Pack`, `6.3.2_with_X-Pack` 和 `6.7.0_with_X-Pack`。如果不指定值，则返回所有版本。
-* `tags` - (可选, 1.74.0+可用) 分配给实例的标签映射。
+* `description_regex` - (可选) 用于过滤实例描述的正则表达式字符串。
+* `ids` - (可选) Elasticsearch 实例 ID 列表。
+* `version` - (可选) Elasticsearch 版本。如果不指定，则返回所有版本的实例。
+* `vpc_id` - (可选) Elasticsearch 实例所属的 VPC ID。
+* `output_file` - (可选, 已弃用) 该字段已弃用，计划在 3.19.0 版本中移除。如需将内容写入文件，请使用 `local_file` provider。
 
 ## 属性说明
 
 除了上述列出的参数外，还导出以下属性：
 
-* `ids` - Elasticsearch实例ID列表。
-* `descriptions` - Elasticsearch实例描述列表。
-* `instances` - Elasticsearch实例列表。每个元素包含以下属性：
-  * `id` - Elasticsearch实例的ID。
-  * `zone_id` - Elasticsearch实例所属的可用区。
-  * `cpu_type` - Elasticsearch实例的CPU类型。
-  * `version` - 要部署的Elasticsearch版本。
-  * `description` - Elasticsearch实例的描述。长度必须在0到30个字符之间，可以包含数字、字母、下划线和连字符。必须以字母、数字或中文字符开头。
-  * `scense` - 实例应用场景。
-  * `data_node_amount` - Elasticsearch集群中的数据节点数量。
+* `ids` - Elasticsearch 实例 ID 列表。
+* `descriptions` - Elasticsearch 实例描述列表。
+* `instances` - Elasticsearch 实例列表。每个元素包含以下属性：
+  * `id` - Elasticsearch 实例的 ID。
+  * `version` - Elasticsearch 版本。
+  * `description` - Elasticsearch 实例的描述。
+  * `data_node_amount` - Elasticsearch 集群中的数据节点数量。
   * `data_node_spec` - 数据节点的规格。
   * `data_node_disk_size` - 数据节点的磁盘大小。
   * `data_node_disk_type` - 数据节点的磁盘类型。
-  * `kibana_node_spec` - Kibana节点的规格。
-  * `kibana_node_password` - Kibana节点密码。
-  * `master_node_amount` - Elasticsearch集群中的主节点数量。
-  * `master_node_spec` - 主节点的规格。
-  * `master_node_disk_size` - 主节点的磁盘大小。
-  * `master_node_disk_type` - 主节点的磁盘类型。
-  * `client_node_amount` - Elasticsearch集群中的客户端节点数量。
+  * `kibana_node_spec` - Kibana 节点的规格（仅在启用 Kibana 时可用）。
+  * `kibana_slb_address` - Kibana 的 SLB 地址（仅在启用 Kibana 时可用）。
+  * `kibana_domain` - Kibana 的域名（仅在启用 Kibana 时可用）。
+  * `kibana_protocol` - Kibana 使用的协议（仅在启用 Kibana 时可用）。
+  * `kibana_port` - Kibana 的端口号（仅在启用 Kibana 时可用）。
+  * `master_node_amount` - 专用主节点数量（仅在启用专用主节点时可用）。
+  * `master_node_spec` - 专用主节点的规格。
+  * `master_node_disk_size` - 专用主节点的磁盘大小。
+  * `master_node_disk_type` - 专用主节点的磁盘类型。
+  * `client_node_amount` - 客户端节点数量（仅在启用客户端节点时可用）。
   * `client_node_spec` - 客户端节点的规格。
-  * `vswitch_id` - 启动Elasticsearch实例的VSwitch的ID。
+  * `vswitch_id` - 启动 Elasticsearch 实例的 VSwitch 的 ID。
+  * `status` - Elasticsearch 实例的状态。

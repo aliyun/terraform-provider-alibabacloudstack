@@ -1,5 +1,5 @@
 ---
-subcategory: "ASCM"
+subcategory: "Application"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_ram_service_role"
 sidebar_current: "docs-alibabacloudstack-resource-ascm-ram-service-role"
@@ -10,6 +10,9 @@ description: |-
 # alibabacloudstack_ascm_ram_service_role
 
 Provides Ascm service ram role.
+
+~> **Note:** This resource can also be referred to by the following aliases:
+- `alibabacloudstack_ascm_service_ram_role`
 
 ## Example Usage
 
@@ -64,3 +67,11 @@ The following attributes are exported:
     * `resource_set_id` - The resource set ID.
     * `privilege_id` - The privilege ID.
     * `ram_role_id` - The RAM role ID.
+
+## Import
+
+ASCM Service RAM Role can be imported using the organization_id and product_name in the format `<organization_id>:<product_name>`, e.g.
+
+```
+$ terraform import alibabacloudstack_ascm_ram_service_role.example 1:ECS
+```

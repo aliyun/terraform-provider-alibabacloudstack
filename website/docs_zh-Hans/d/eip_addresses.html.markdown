@@ -1,5 +1,5 @@
 ---
-subcategory: "EIP"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_eip_addresses"
 sidebar_current: "docs-Alibabacloudstack-datasource-eip-addresses"
@@ -41,6 +41,7 @@ output "first_eip_id" {
 
 * `ids` - (可选) 弹性公网 IP 的 ID 列表。如果指定，数据源将仅返回与提供的 ID 匹配的弹性公网 IP。
 * `ip_addresses` - (可选) 弹性公网 IP 的公共 IP 地址列表。如果指定，数据源将仅返回与提供的 IP 地址匹配的弹性公网 IP。
+* `output_file` - (可选, 已弃用) 该字段已被弃用，将在 3.19.0 版本中移除。如需将内容写入文件，请使用 `local_file` provider。
 
 ## 属性说明
 

@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_share_permission"
 sidebar_current: "docs-alibabacloudstack-resource-image-share-permission"
@@ -38,7 +38,14 @@ resource "alibabacloudstack_image_share_permission" "default" {
 
 导出以下属性：
 
-* `id` - 镜像ID。格式为 `<image_id>:<account_id>`，表示共享关系的唯一标识。
-* `image_id` - 源镜像ID。这是共享的镜像的唯一标识符。
-* `account_id` - 阿里云账号ID。表示与之共享镜像的目标阿里云账户。
-* `optional_key` - (Computed) 可选键，由AI添加。此属性为计算字段，可能包含额外的信息（如果适用）。
+* `id` - 资源ID。格式为 `<image_id>:<account_id>`，表示镜像共享关系的唯一标识。
+* `image_id` - 源镜像ID。
+* `account_id` - 阿里云账号ID。用于指定要与之共享镜像的目标阿里云账户。
+
+## Import
+
+镜像共享权限可以使用 `image_id:account_id` 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_image_share_permission.example m-bp1gxyh***:1234567890
+```

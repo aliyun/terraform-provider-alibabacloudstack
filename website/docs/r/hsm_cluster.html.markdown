@@ -89,7 +89,7 @@ resource "alibabacloudstack_hsm_cluster" "example" {
 
 The following arguments are supported:
 
-* `cluster_name` - (Required, ForceNew) The name of the HSM cluster. The length is 2 to 128 English or Chinese characters. It must start with a digit or letter and support digits, letters, Chinese characters, underscores (_), and hyphens (-).
+* `cluster_name` - (Required) The name of the HSM cluster. The length is 2 to 128 English or Chinese characters. It must start with a digit or letter and support digits, letters, Chinese characters, underscores (_), and hyphens (-).
 * `master_instance_id` - (Required, ForceNew) The ID of the master HSM instance.
 * `vpc_id` - (Required, ForceNew) The ID of the VPC where the HSM cluster resides.
 * `vswitch_ids` - (Required, ForceNew) The ID of the vSwitch that is associated with the VPC.

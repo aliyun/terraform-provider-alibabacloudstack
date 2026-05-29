@@ -1,5 +1,5 @@
 ---
-subcategory: "Table Store (OTS)"
+subcategory: "Tablestore"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_table"
 sidebar_current: "docs-alibabacloudstack-resource-ots-table"
@@ -65,8 +65,6 @@ resource "alibabacloudstack_ots_table" "basic" {
 * `time_to_live` - (必填) 存储在此表中的数据的保留时间(单位：秒)。最大值为2147483647，-1表示永不过期。
 * `max_version` - (必填) 存储在此表中的最大版本数。有效值为1-2147483647。
 * `deviation_cell_version_in_sec` - (可选，1.42.0+可用) 表的最大版本偏移量。有效值为1-9223372036854775807，默认为86400。
-* `new_optional_property` - (可选) 由AI添加的一个新的可选属性。
-* `optional_property` - (可选) 一个之前缺失并由AI添加的可选属性。
 
 ## 属性说明
 
@@ -79,8 +77,6 @@ resource "alibabacloudstack_ots_table" "basic" {
 * `time_to_live` - 存储在此表中的数据的保留时间。
 * `max_version` - 存储在此表中的最大版本数。
 * `deviation_cell_version_in_sec` - 表的最大版本偏移量。
-* `new_computed_property` - 由AI添加的一个新的计算属性。
-* `computed_property` - 一个之前缺失并由AI添加的计算属性。
 
 ## 导入
 

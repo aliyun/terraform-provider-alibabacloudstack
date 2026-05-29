@@ -61,9 +61,6 @@ data "alibabacloudstack_slb_loadbalancers" "default" {
     Environment = "Test"
     Owner      = "Terraform"
   }
-
-  # 输出结果保存到文件
-  output_file = "slb_output.txt"
 }
 
 output "first_slb_id" {
@@ -84,6 +81,7 @@ output "first_slb_id" {
 * `vswitch_id` - (可选，变更时重建) 与SLB关联的交换机ID。用于筛选属于特定交换机的负载均衡器。
 * `address` - (可选，变更时重建) SLB的服务地址。用于筛选具有特定服务地址的负载均衡器。
 * `tags` - (可选，变更时重建) 分配给SLB实例的标签映射。每个标签最多可以有5个键值对。例如：`{Environment="Test", Owner="Terraform"}`。
+* `output_file` - (可选，已废弃) 该字段已被废弃，计划在 3.19.0 版本中移除。如需将内容写入文件，请使用 `local_file` provider 代替。
 
 ## 属性说明
 
@@ -100,5 +98,10 @@ output "first_slb_id" {
   * `vpc_id` - SLB所属的VPC ID。
   * `vswitch_id` - SLB所属的交换机ID。
   * `address` - SLB的服务地址。
-  * `creation_time` - SLB的创建时间。
   * `tags` - 分配给SLB的标签。
+  * `address_type` - SLB的地址类型。
+  * `master_zone_id` - SLB的主可用区ID。
+  * `delete_protection` - SLB的删除保护状态。
+  * `internet_charge_type` - SLB的公网计费类型。
+  * `create_time` - SLB的创建时间。
+  * `load_balancer_spec` - SLB的规格。

@@ -1,5 +1,3 @@
-# alibabacloudstack_datahub_kafka_groups
-
 ---
 subcategory: "DataHub"
 layout: "alibabacloudstack"
@@ -9,7 +7,7 @@ description: |-
   查询阿里云DataHub Kafka Group列表
 ---
 
-## alibabacloudstack_datahub_kafka_groups
+# alibabacloudstack_datahub_kafka_groups
 
 查询阿里云DataHub Kafka Group列表，用于获取指定项目下的Kafka Group信息。
 
@@ -45,7 +43,7 @@ resource "alibabacloudstack_datahub_kafka_group" "default" {
 
 
 data "alibabacloudstack_datahub_kafka_groups" "default" {
-  project_name = "${alibabacloudstack_datahub_project.default.name}_fake"
+  project_name = alibabacloudstack_datahub_project.default.name
 }
 ```
 

@@ -1,5 +1,5 @@
 ---
-subcategory: "Auto Scaling (ESS)"
+subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_attachment"
 sidebar_current: "docs-alibabacloudstack-resource-ess-attachment"
@@ -132,9 +132,7 @@ not.
 
 The following attributes are exported:
 
-* `id` - (Required, ForceNew) The ESS attachment resource ID.
-* `instance_ids` - (Required)ID of list "Attached" ECS instance.
-* `force` - Whether to delete "AutoCreated" ECS instances.
+* `id` - The ESS attachment resource ID. It is the same as the `scaling_group_id`.
 
 ## Import
 

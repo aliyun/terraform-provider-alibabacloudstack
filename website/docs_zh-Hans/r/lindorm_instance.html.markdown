@@ -69,6 +69,7 @@ resource "alibabacloudstack_lindorm_instance" "example" {
 * `lindorm_num` - （必需）Lindorm节点数量。
 * `local_disk_num` - （可选）本地磁盘数量。取值范围：1到10。默认值：1。
 * `local_disk_size` - （必需，强制新建）本地磁盘大小。单位：GiB。
+* `deletion_protection` - （可选）是否启用了删除保护。
 
 ## 属性参考
 
@@ -79,7 +80,6 @@ resource "alibabacloudstack_lindorm_instance" "example" {
 * `instance_status` - 实例状态。
 * `create_time` - 实例创建时间。
 * `instance_storage` - 实例存储容量。
-* `deletion_protection` - 是否启用了删除保护。
 * `disk_usage` - 磁盘使用情况。
 * `enable_fs` - 是否启用了文件系统。
 * `switch_l_proxy_flag` - L_Proxy开关是否启用。

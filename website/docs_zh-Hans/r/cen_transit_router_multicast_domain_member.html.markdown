@@ -63,6 +63,7 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "example
   network_interface_id                  = alibabacloudstack_network_interface.example.id
   transit_router_multicast_domain_id    = alibabacloudstack_cen_transit_router_multicast_domain.example.id
   vswitch_id                            = alibabacloudstack_vswitch.example.id
+  resource_type                         = "VPC"
 }
 ```
 
@@ -70,16 +71,19 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "example
 
 以下参数被支持:
 
-* `group_ip_address` - (必填, ForceNew) 组播IP地址。
-* `network_interface_id` - (必填, ForceNew) 网络接口ID。
+* `group_ip_address` - (必填, ForceNew) 组播IP地址。取值范围：224.0.0.1~239.255.255.254。224.0.0.0～224.0.0.127 为系统保留地址，不支持作为组播组 IP 地址。
 * `transit_router_multicast_domain_id` - (必填, ForceNew) 组播成员所属的组播域ID。
-* `vswitch_id` - (必填, ForceNew) 组播成员所属的交换机ID。
+* `resource_type` - (必填, ForceNew) 资源类型。取值范围：`VPC`、`Connect`。
+* `vswitch_id` - (可选, ForceNew, Computed) 交换机ID。当 `resource_type` 为 `VPC` 时必填。
+* `network_interface_id` - (可选, ForceNew) 弹性网卡 ENI ID。当 `resource_type` 为 `VPC` 时必填。
+* `connect_peer_id` - (可选, ForceNew) Connect Peer ID。当 `resource_type` 为 `Connect` 时必填。
+* `connect_attachment_id` - (可选, ForceNew, Computed) Connect Attachment ID。当 `resource_type` 为 `Connect` 时必填。
 
 ## 属性参考
 
 以下属性会被导出:
 
-* `id` - 资源ID，格式为 `<group_ip_address>:<vswitch_id>:<transit_router_multicast_domain_id>:<network_interface_id>`。
+* `id` - 资源ID，格式为 `<group_ip_address>:<transit_router_multicast_domain_id>:<resource_type>:<key>`，其中当 `resource_type` 为 `VPC` 时 `<key>` 为 `network_interface_id`，当 `resource_type` 为 `Connect` 时 `<key>` 为 `connect_peer_id`。
 * `status` - 组播成员的状态。
 
 ## 导入说明
@@ -87,5 +91,5 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "example
 CEN转发路由器组播域成员可以通过ID导入，例如：
 
 ```bash
-$ terraform import alibabacloudstack_cen_transit_router_multicast_domain_member.default 224.0.0.1:vsw-1234567890abcdef0:tr-mcast-domain-1234567890abcdef0:eni-1234567890abcdef0
+$ terraform import alibabacloudstack_cen_transit_router_multicast_domain_member.example 224.0.0.1:tr-mcast-domain-1234567890abcdef0:VPC:eni-1234567890abcdef0
 ```

@@ -1,5 +1,5 @@
 ---
-subcategory: "KVStore"
+subcategory: "Tair (Redis-Compatible)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_backup_policy"
 sidebar_current: "docs-alibabacloudstack-resource-kvstore-backup-policy"
@@ -9,7 +9,10 @@ description: |-
 
 # alibabacloudstack_kvstore_backup_policy
 
-Provides a backup policy for ApsaraDB Redis / Memcache instance resource. 
+Provides a backup policy for ApsaraDB Redis / Memcache instance resource.
+
+> **Note:** This resource can also be referred to by the following aliases:
+> - `apsarastack_kvstore_backup_policy`
 
 ## Example Usage
 

@@ -1,5 +1,5 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_k8s_cluster"
 sidebar_current: "docs-alibabacloudstack-resource-edas-k8s-cluster"
@@ -28,31 +28,30 @@ resource "alibabacloudstack_edas_k8s_cluster" "default" {
 
 支持以下参数：
 
-* `cs_cluster_id` - (必填，变更时重建) 要导入的阿里云容器服务 Kubernetes 集群的 ID。
-* `namespace_id` - (可选，变更时重建) 您要导入的命名空间的 ID。您可以调用 [ListUserDefineRegion](https://www.alibabacloud.com/help/en/doc-detail/149377.htm?spm=a2c63.p38356.879954.34.331054faK2yNvC#doc-api-Edas-ListUserDefineRegion) 操作查询命名空间 ID。
-* `vpc_id` - (可选，变更时重建) 集群所属的虚拟私有云（VPC）的 ID。
+* `cs_cluster_id` - (必填，变更时重建) 要导入的容器服务 Kubernetes 集群的 ID。您可以调用 [GetK8sCluster](https://www.alibabacloud.com/help/en/doc-detail/85108.htm) 接口查询集群 ID。
+* `namespace_id` - (可选，变更时重建) 您要导入的命名空间的 ID。您可以调用 [ListUserDefineRegion](https://www.alibabacloud.com/help/en/doc-detail/149377.htm) 接口查询命名空间 ID。
 
 ## 属性说明
 
 导出以下属性：
 
-* `cluster_name` - 要创建的集群名称。
-* `cluster_type` - 要创建的集群类型。有效值仅：5: K8s 集群。
-* `network_mode` - 要创建的集群的网络类型。有效值：1: 经典网络。2: VPC。
-* `region_id` - 区域 ID。
-* `vpc_id` - 集群的虚拟私有云(VPC)ID。
-* `cluster_import_status` - 集群的导入状态：
-    * `1`: 成功。
-    * `2`: 失败。
-    * `3`: 正在导入。
-    * `4`: 已删除。
-* `cs_cluster_id` - 要导入的阿里云容器服务 Kubernetes 集群的 ID。
+* `id` - EDAS K8s 集群的 ID。
+* `cluster_name` - 集群名称。
+* `cluster_type` - 集群类型。有效值：`5`：容器服务 K8s 集群或 Serverless K8s 集群。
+* `network_mode` - 集群的网络类型。有效值：`1`：经典网络。`2`：VPC。
+* `vpc_id` - 集群的虚拟私有云（VPC）ID。
+* `cluster_import_status` - 集群的导入状态。有效值：
+    * `1`：成功。
+    * `2`：失败。
+    * `3`：正在导入。
+    * `4`：已删除。
+* `cs_cluster_id` - 要导入的容器服务 Kubernetes 集群的 ID。
 * `namespace_id` - 要导入的命名空间的 ID。
 
 ## 导入
 
-EDAS 集群可以使用 id 导入，例如：
+EDAS K8s 集群可以使用集群 ID（导入后返回的 EDAS 内部集群 ID）导入，例如：
 
 ```bash
-$ terraform import alibabacloudstack_edas_k8s_cluster.cluster cluster_id
+$ terraform import alibabacloudstack_edas_k8s_cluster.example 81453e4b-4df0-4592-xxxx-b835a2eexxxx
 ```

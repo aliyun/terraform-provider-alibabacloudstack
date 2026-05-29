@@ -1,5 +1,5 @@
 ---
-subcategory: "DRDS"
+subcategory: "PolarDB-X 1.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_databases"
 sidebar_current: "docs-Alibabacloudstack-datasource-drds-databases"
@@ -103,6 +103,7 @@ The following arguments are supported:
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
+  * `drds_database_names` - A list of database names.
   * `databases` - The list of databases.
     * `create_time` - Database creation timestamp.
     * `drds_database_name` - The name of the Drds database.

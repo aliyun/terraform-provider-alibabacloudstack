@@ -1,5 +1,5 @@
 ---
-subcategory: "AnalyticDB for PostgreSQL(GPDB)"
+subcategory: "AnalyticDB for PostgreSQL"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_publicconnection"
 sidebar_current: "docs-Alibabacloudstack-gpdb-publicconnection"
@@ -56,8 +56,8 @@ resource "alibabacloudstack_gpdb_connection" "default" {
 支持以下参数：
 
 * `instance_id` - （必填，变更时重建）：要为其创建公网连接的GPDB实例的ID。
-* `connection_prefix` - （选填，变更时重建）：公网连接字符串的前缀。它必须以字母开头，并且只能包含小写字母、数字和下划线（`_`）。长度不能超过30个字符。如果不指定，默认为`<instance_id>-tf`。
-* `port` - （选填）：公网连接的端口号。有效值范围从`3200`到`3999`。默认值是`3306`。
+* `connection_prefix` - （选填，强制新建，计算值）：公网连接字符串的前缀。它必须以字母开头，并且只能包含小写字母、数字和下划线（`_`）。长度不能超过30个字符。如果不指定，默认为`<instance_id>-tf`。
+* `port` - （选填）：公网连接的端口号。有效值范围从`1000`到`65534`。默认值是`3306`。
 
 ### 超时设置
 
@@ -74,3 +74,11 @@ resource "alibabacloudstack_gpdb_connection" "default" {
 * `id` - GPDB公网连接资源的唯一标识符。它由实例ID和连接前缀组成，格式为`<instance_id>:<connection_prefix>`。
 * `connection_string` - 通过公网访问GPDB实例的完整连接字符串。
 * `ip_address` - 与公网连接字符串关联的公网IP地址。
+
+## Import
+
+GPDB 公网连接可以使用 instance_id 和 connection_prefix 导入，例如：
+
+```
+$ terraform import alibabacloudstack_gpdb_publicconnection.example <instance_id>:<connection_prefix>
+```

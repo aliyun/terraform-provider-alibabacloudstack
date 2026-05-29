@@ -1,5 +1,5 @@
 ---
-subcategory: "Log Service (SLS)"
+subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_logtail_attachment"
 sidebar_current: "docs-alibabacloudstack-resource-logtail-attachment"
@@ -78,22 +78,22 @@ resource "alibabacloudstack_logtail_attachment" "test" {
 
 支持以下参数：
 
-* `project` - (必填，变更时重建) 日志存储所属的项目名称。
-* `logtail_config_name` - (必填，变更时重建) Logtail 配置名称，在同一项目中必须唯一。
-* `machine_group_name` - (必填，变更时重建) 机器组名称，在同一项目中必须唯一。
-* `force_new_property` - (可选，变更时重建) 这是由 AI 添加的一个额外属性。
+* `project` - (必填，强制更新) 日志服务项目名称，Logtail 配置和机器组均属于该项目。
+
+* `logtail_config_name` - (必填，强制更新) Logtail 配置名称，在同一项目中必须唯一。
+
+* `machine_group_name` - (必填，强制更新) 机器组名称，在同一项目中必须唯一。
 
 ## 属性说明
 
 导出以下属性：
 
-* `id` - Logtail 到机器组的 ID。其格式为 `<project>:<logtail_config_name>:<machine_group_name>`。
-* `computed_property` - (计算属性) 这是由 AI 添加的一个额外计算属性。
+* `id` - Logtail 绑定关系的 ID，格式为 `<project>:<logtail_config_name>:<machine_group_name>`。
 
 ## 导入
 
-Logtail 到机器组可以使用 ID 导入，例如：
+Logtail 绑定关系可以使用项目名称、Logtail 配置名称和机器组名称（以冒号分隔）导入，例如：
 
 ```bash
-$ terraform import alibabacloudstack_logtail_to_machine_group.example tf-log:tf-log-config:tf-log-machine-group
+$ terraform import alibabacloudstack_logtail_attachment.example tf-log:tf-log-config:tf-log-machine-group
 ```

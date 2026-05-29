@@ -1,5 +1,5 @@
 ---
-subcategory: "API Gateway V2"
+subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_route_group"
 sidebar_current: "docs-Alibabacloudstack-api-gateway-v2-route-group"
@@ -90,3 +90,11 @@ resource "alibabacloudstack_api_gateway_v2_route_group" "default" {
 * `editable` - 是否可编辑（布尔值）。当路由分组处于可编辑状态时返回 `true`。
 * `group_id` - 路由分组唯一标识ID。
 * `update_time` - 路由分组的最后更新时间，格式为 "YYYY-MM-DD HH:MM:SS"。
+
+## Import
+
+API网关V2路由分组可以使用 instance_id 和 group_id（用冒号分隔）进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_route_group.example gw-instance-123456:group-789
+```

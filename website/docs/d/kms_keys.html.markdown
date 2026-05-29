@@ -28,9 +28,10 @@ output "first_key_id" {
 
 The following arguments are supported:
 
-* `ids` - (Optional) A list of KMS key IDs.
+* `ids` - (Optional, Computed) A list of KMS key IDs.
 * `description_regex` - (Optional) A regex string to filter the results by the KMS key description.
 * `status` - (Optional) Filter the results by status of the KMS keys. Valid values: `Enabled`, `Disabled`, `PendingDeletion`.
+* `output_file` - (Deprecated) The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.
 
 ## Attributes Reference
 
@@ -39,10 +40,9 @@ The following attributes are exported in addition to the arguments listed above:
 * `ids` -  A list of KMS key IDs.
 * `keys` - A list of KMS keys. Each element contains the following attributes:
   * `id` - ID of the key.
-  * `arn` - The alibabacloudstack Cloud Resource Name (ARN) of the key.
+  * `arn` - The Alibabacloudstack Cloud Resource Name (ARN) of the key.
   * `description` - Description of the key.
   * `status` - Status of the key. Possible values: `Enabled`, `Disabled` and `PendingDeletion`.
   * `creation_date` - Creation date of key.
   * `delete_date` - Deletion date of key.
   * `creator` - The owner of the key.
-  * `computed_property` - Indicates a computed property of the key.

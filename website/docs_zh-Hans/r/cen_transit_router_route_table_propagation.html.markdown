@@ -81,4 +81,12 @@ resource "alibabacloudstack_cen_transit_router_route_table_propagation" "default
 除上述参数外，还导出以下属性：
   * `resource_id` - 资源的 id。
   * `resource_type` - 资源的类型。
-  * `status` - 资源的状态。
+  * `status` - 传播的状态。
+
+## Import
+
+CEN 转发路由器路由表传播可以使用转发路由器路由表 ID 和转发路由器附件 ID（以冒号分隔）导入，例如：
+
+```
+$ terraform import alibabacloudstack_cen_transit_router_route_table_propagation.example <transit_router_route_table_id>:<transit_router_attachment_id>
+```

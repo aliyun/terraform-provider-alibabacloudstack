@@ -1,5 +1,5 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_k8s_application_scaling_rule"
 sidebar_current: "docs-alibabacloudstack-resource-edas-k8s-application-scaling-rule"
@@ -140,8 +140,8 @@ When `scaling_rule_type` is set to `trigger`, the following arguments are suppor
     * `at_time` - (Required) The scheduled time in the day, e.g. "08:00".
     * `replicas` - (Required) The number of replicas. Valid values: 1 to 100.
     * `horizon_mode` - (Optional) Whether to enable horizon mode. Default: `false`.
-  * `timer_in_week` - (Optional) The timer configuration in a week. Computed when not set.
-  * `timer_in_month` - (Optional) The timer configuration in a month. Computed when not set.
+  * `timer_in_week` - (Optional) The timer configuration in a week. Effective when `period` is set to `weekly`. Elements are day abbreviations like `Mon`, `Tue`, etc. Computed when not set.
+  * `timer_in_month` - (Optional) The timer configuration in a month. Effective when `period` is set to `monthly`. Elements are day numbers like `1`, `2`, etc. Computed when not set.
 
 ### Scaling Behavior Arguments
 

@@ -8,9 +8,9 @@ description: |-
 ---
 
 # alibabacloudstack_autoscaling_scheduledtask
--> **NOTE:** Alias name has: `alibabacloudstack_ess_scheduled_task`
+-> **NOTE:** This resource can also be referred to by the following aliases: `alibabacloudstack_ess_scheduled_task`, `alibabacloudstack_autoscaling_scheduled_task`, `alibabacloudstack_autoscaling_scheduledtask`.
 
-Provides a autoscaling Scheduledtask resource.
+Provides a Auto Scaling Scheduled Task resource.
 
 ## Example Usage
 
@@ -153,20 +153,19 @@ The following arguments are supported:
 * `scheduled_action` - (Required) The action to be performed when the scheduled task is triggered. It must be the unique identifier of a scaling rule.
 * `launch_time` - (Required) The time at which the scheduled task is triggered. Specify the time in the ISO 8601 standard in the `YYYY-MM-DDThh:mm:ssZ` format. The time must be in UTC. You cannot enter a time point later than 90 days from the date of scheduled task creation. If the `recurrence_type` parameter is specified, the task is executed repeatedly at the time specified by `launch_time`. Otherwise, the task is only executed once at the date and time specified by `launch_time`.
 * `scheduled_task_name` - (Optional) Display name of the scheduled task, which must be 2-40 characters (English or Chinese) long.
-* `description` - (Optional) Description of the scheduled task, which is 2-200 characters (English or Chinese) long.
+* `description` - (Optional, Computed) Description of the scheduled task, which is 2-200 characters (English or Chinese) long.
 * `launch_expiration_time` - (Optional) After the scheduled task trigger operation fails, retry within this time. The unit is seconds, and the value range is 0~21600. Default value: 600.
-* `recurrence_type` - (Optional) Specifies the recurrence type of the scheduled task. If set, both `recurrence_value` and `recurrence_end_time` must be set. Valid values:
+* `recurrence_type` - (Optional, Computed) Specifies the recurrence type of the scheduled task. If set, both `recurrence_value` and `recurrence_end_time` must be set. Valid values:
   * `Daily`: The scheduled task is executed once every specified number of days.
   * `Weekly`: The scheduled task is executed on each specified day of a week.
   * `Monthly`: The scheduled task is executed on each specified day of a month.
-  *  `Cron`: The scheduled task is executed based on the specified cron expression.
-* `recurrence_value` - (Optional) Specifies how often a scheduled task recurs. The valid value depends on `recurrence_type`:
+* `recurrence_value` - (Optional, Computed) Specifies how often a scheduled task recurs. The valid value depends on `recurrence_type`:
   * `Daily`: You can enter one value. Valid values: 1 to 31.
   * `Weekly`: You can enter multiple values and separate them with commas (,). For example, the values 0 to 6 correspond to the days of the week in sequence from Sunday to Saturday.
   * `Monthly`: You can enter two values in A-B format. Valid values of A and B: 1 to 31. The value of B must be greater than or equal to the value of A.
-  *  `Cron`: You can enter a cron expression which is written in UTC and consists of five fields: minute, hour, day of month (date), month, and day of week. The expression can contain wildcard characters including commas (,), question marks (?), hyphens (-), asterisks (*), number signs (#), forward slashes (/), and the L and W letters.
-* `recurrence_end_time` - (Optional) Specifies the end time after which the scheduled task is no longer repeated. Specify the time in the ISO 8601 standard in the `YYYY-MM-DDThh:mm:ssZ` format. The time must be in UTC. You cannot enter a time point later than 365 days from the date of scheduled task creation.
+* `recurrence_end_time` - (Optional, Computed) Specifies the end time after which the scheduled task is no longer repeated. Specify the time in the ISO 8601 standard in the `YYYY-MM-DDThh:mm:ssZ` format. The time must be in UTC. You cannot enter a time point later than 365 days from the date of scheduled task creation.
 * `task_enabled` - (Optional) Specifies whether to start the scheduled task. Default value: `true`.
+* `scaling_group_id` - (Optional, Computed) The ID of the scaling group to which the scheduled task belongs.
 
 ## Attributes Reference
 
@@ -177,4 +176,13 @@ In addition to all arguments above, the following attributes are exported:
 * `recurrence_type` - The type of the scheduled task that is repeated.
 * `recurrence_value` - The value of the repeated execution of the scheduled task.
 * `recurrence_end_time` - The end time of the recurring scheduled task. 
-* `task_enabled` - Indicates whether the scheduled task is enabled. 
+* `task_enabled` - Indicates whether the scheduled task is enabled.
+* `scaling_group_id` - The ID of the scaling group to which the scheduled task belongs.
+
+## Import
+
+ESS Scheduled Task can be imported using the ScheduledTaskId, e.g.
+
+```
+$ terraform import alibabacloudstack_ess_scheduled_task.example tsk-12345678
+```

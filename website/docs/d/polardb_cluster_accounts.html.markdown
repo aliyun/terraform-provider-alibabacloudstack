@@ -84,6 +84,5 @@ The following attributes are exported in addition to the arguments listed above:
     * `account_lock_state` - The lock state of the account.
     * `status` - The status of the resource.
     * `database_privileges` - The Database permissions of the target account.
-      * `account_privilege` - The privilege of the account.
-      * `account_privilege_detail` - The privilege detail of the account.
-      * `data_base_name` - The name of the database.
+      * `privilege` - The privilege of the account.
+      * `db_name` - The name of the database.

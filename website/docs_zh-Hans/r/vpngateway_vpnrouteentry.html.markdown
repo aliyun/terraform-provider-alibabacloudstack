@@ -1,5 +1,5 @@
 ---
-subcategory: "VPNGateway"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnrouteentry"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-vpnrouteentry"
@@ -79,3 +79,11 @@ resource "alibabacloudstack_vpn_route_entry" "default" {
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - VPN路由条目的唯一标识符。它由`VpnGatewayId`、`NextHop`和`RouteDest`组合而成，用于唯一标识一个路由条目。
+
+## Import
+
+VPN路由条目可以使用 `vpn_gateway_id:next_hop:route_dest` 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_vpn_route_entry.example vgw-xxxxxxxx:vpn-xxxxxxxx:xx.xx.xx.xx/xx
+```

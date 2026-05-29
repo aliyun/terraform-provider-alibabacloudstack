@@ -40,17 +40,23 @@ resource "alibabacloudstack_slb_servercertificate" "foo" {
 
 The following arguments are supported:
 
-* `name` - (Optional) The name of the server certificate. If not provided, Terraform will auto-generate a unique name.
+* `name` - (Optional, Deprecated) The name of the server certificate. This parameter has been replaced by `server_certificate_name` and will be removed in a future release. If not provided, Terraform will auto-generate a unique name.
 * `server_certificate_name` - (Optional) The name of the server certificate. This can be used to identify the certificate in the SLB service.
-* `server_certificate` - (Required, ForceNew) The public key certificate to be uploaded. This parameter is required if you do not use an Alibaba Cloud-managed certificate.
-* `private_key` - (Required, ForceNew) The private key corresponding to the public key certificate specified in `server_certificate`. This parameter is required if you do not use an Alibaba Cloud-managed certificate.
+* `server_certificate` - (Optional, ForceNew) The public key certificate to be uploaded. This parameter must be provided together with `private_key` when not using an Alibaba Cloud-managed certificate.
+* `private_key` - (Required, ForceNew) The private key corresponding to the public key certificate specified in `server_certificate`.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the server certificate (SSL Certificate).
-* `name` - The name of the server certificate.
+* `id` - The ID of the server certificate.
+* `name` - The name of the server certificate (Deprecated, use `server_certificate_name` instead).
 * `server_certificate_name` - The name of the server certificate as specified during creation.
-* `server_certificate` -  Represents the public key certificate that was uploaded.
-* `private_key` -  Represents the private key corresponding to the uploaded public key certificate.
+
+## Import
+
+SLB Server Certificate can be imported using the ServerCertificateId, e.g.
+
+```
+$ terraform import alibabacloudstack_slb_servercertificate.example sc-12345678
+```

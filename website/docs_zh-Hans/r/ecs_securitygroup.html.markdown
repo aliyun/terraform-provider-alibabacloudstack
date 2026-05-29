@@ -1,10 +1,10 @@
 ---
-subcategory: "ECS"
+subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_securitygroup"
 sidebar_current: "docs-Alibabacloudstack-ecs-securitygroup"
 description: |- 
-  编排云服务器（Ecs）安全组
+  编排云服务器（ECS）安全组资源。
 ---
 
 # alibabacloudstack_ecs_securitygroup
@@ -85,23 +85,20 @@ resource "alibabacloudstack_security_group" "tagged_group" {
 * `vpc_id` - (可选，强制更新) 要创建安全组的VPC的ID。如果要创建VPC类型的安全组，则此参数是必填的。在支持经典网络的区域中，您可以不指定 `vpc_id` 来创建经典网络类型的安全组。
 
 * `type` - (可选，强制更新) 安全组的类型。有效值：
-  * `normal`: 标准安全组(默认)。
+  * `normal`: 标准安全组。这是默认值。
   * `enterprise`: 企业级安全组。
 
 * `inner_access_policy` - (可选) 安全组的内部访问策略。有效值：
   * `Accept`: 安全组中的所有实例可以相互通信。
   * `Drop`: 安全组中的所有实例相互隔离。
-  此参数的值不区分大小写。默认值为 `Accept`。
+  **注意：** 此属性为计算属性，可从 API 回读。此参数的值不区分大小写。默认值为 `Accept`。
 
 * `tags` - (可选) 要分配给资源的标签映射。每个标签由键值对组成。标签键必须在资源内唯一。
 
-## 属性说明
+## Import
 
-除了上述所有参数外，还导出以下属性：
+安全组可以使用 SecurityGroupId 导入，例如：
 
-* `id` - 安全组的ID。
-
-* `inner_access_policy` - 安全组的内部访问策略。有效值：
-  * `Accept`: 安全组中的所有实例可以相互通信。
-  * `Drop`: 安全组中的所有实例相互隔离。
-  此参数的值不区分大小写。此属性反映了安全组的实际配置。
+```
+$ terraform import alibabacloudstack_ecs_securitygroup.example sg-12345678
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DNS"
+subcategory: "云解析 DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_forward_domain"
 sidebar_current: "docs-Alibabacloudstack-dns-dns_forward_domain"
@@ -10,6 +10,8 @@ description: |-
 # alibabacloudstack_dns_forward_domain
 
 使用Provider配置的凭证在指定的资源集创建云解析全局转发域名。
+
+-> **注意:** 该资源也可以使用以下别名引用：`apsarastack_dns_forward_domain`。
 
 ## 示例用法
 
@@ -51,3 +53,11 @@ resource "alibabacloudstack_dns_forward_domain" "default" {
 * `caller_uid` - 系统参数，标识创建该资源的调用者。
 * `create_timestamp` - 创建时间戳（秒）。
 * `update_timestamp` - 修改时间戳（秒）。
+
+## Import
+
+转发域名可以使用资源 ID 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_dns_forward_domain.example <resource_id>
+```

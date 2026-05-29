@@ -38,8 +38,8 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
   gw_instance_id    = alibabacloudstack_api_gateway_v2_instance.default.id
   service_nodes {
     ip     = "127.0.0.1"
-    port   = "80"
-    weight = "100"
+    port   = 80
+    weight = 100
     enable = "true"
   }
 }
@@ -82,14 +82,14 @@ resource "alibabacloudstack_api_gateway_v2_route" "default" {
     value = "ccccc"
   }
 
-  strip_prefix = "2"
+  strip_prefix = 2
   service_ids {
     service_id = alibabacloudstack_api_gateway_v2_service.default.service_id
-    weight     = "100"
+    weight     = 100
   }
 
   gw_instance_id = alibabacloudstack_api_gateway_v2_instance.default.id
-  order          = "100"
+  order          = 100
 }
 ```
 
@@ -103,8 +103,8 @@ resource "alibabacloudstack_api_gateway_v2_route" "default" {
 * `cookie` - (可选) Cookie匹配规则列表。每个规则包含以下属性：
   * `key` - (必填) Cookie名称。
   * `value` - (必填) Cookie值。
-* `domain_ids` - (可选) 绑定的域名ID列表。
-* `enable_status` - (可选) 是否启用路由。
+* `domain_ids` - (可选, 可回读) 绑定的域名ID列表。
+* `enable_status` - (可选, 可回读) 是否启用路由。
 * `header` - (可选) 请求头匹配规则列表。每个规则包含以下属性：
   * `key` - (必填) 请求头名称。
   * `value` - (必填) 请求头值。
@@ -123,7 +123,7 @@ resource "alibabacloudstack_api_gateway_v2_route" "default" {
   * `service_id` - (可选) 后端服务ID。
   * `weight` - (可选) 权重，取值范围1-100。
 * `strip_prefix` - (可选) 需要剥离的前缀长度。当值大于0时，会自动启用前缀剥离功能。
-* `cascade_link_ids` - (可选) 级联链接的ID列表, 设置该参数以创建源路由.
+* `cascade_link_ids` - (可选, 变更时重建) 级联链接的ID列表, 设置该参数以创建源路由.
 
 -> **注意:**  当`cascade_link_ids` 不为空时，仅支持使用`service_id`设置服务。
 -> **注意:**  `service_ids`和`service_id`是互斥的，只能设置其中一个。
@@ -133,3 +133,13 @@ resource "alibabacloudstack_api_gateway_v2_route" "default" {
 除了上述所有参数外，还导出了以下属性：
 
 * `route_id` - 路由ID。
+
+## 导入
+
+API 网关 V2 路由可以通过资源 ID 导入，格式为 `<类型>:<网关实例ID>:<路由ID>`，例如：
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_route.example route:gw-12345678:route-87654321
+```
+
+-> **注意:** 如果是源路由（使用 `cascade_link_ids` 创建的路由），类型前缀应为 `sourceRoute` 而非 `route`。

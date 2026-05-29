@@ -1,5 +1,5 @@
 ---
-subcategory: "API Gateway V2"
+subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_signature"
 sidebar_current: "docs-Alibabacloudstack-api-gateway-v2-signature"
@@ -17,8 +17,8 @@ Manages signature schemes for API Gateway v2 version, used to configure the sign
 
 ```hcl
 
-variable "signature_name" {
-  default = "test"
+variable "name" {
+  default = "tf-testacc-sign79175"
 }
 
 variable "signature_algorithm" {
@@ -26,19 +26,15 @@ variable "signature_algorithm" {
 }
 
 resource "alibabacloudstack_api_gateway_v2_instance" "default" {
-  instance_name      = "testtf-apigw-instance"
+  instance_name      = var.name
   node_number        = "1"
   instance_class     = "mini"
   broker_engine_type = "SCG"
   deploy_mode        = "custom"
 }
 
-data "alibabacloudstack_api_gateway_v2_instances" "default" {
-  name_regex = alibabacloudstack_api_gateway_v2_instance.default.instance_name
-}
-
 resource "alibabacloudstack_api_gateway_v2_signature" "default" {
-  sig_scheme_name = var.signature_name
+  sig_scheme_name = var.name
   sig_alg         = var.signature_algorithm
   gw_instance_id  = alibabacloudstack_api_gateway_v2_instance.default.id
 }
@@ -60,8 +56,22 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The resource ID in the format `{gwInstanceId}:{sigSchemeId}`.
+* `id` - The resource ID in the format `{idpre}:{gwInstanceId}:{sigSchemeId}`. The `idpre` is `sig` for regular signatures or `sourceSig` for cascade source signatures.
 * `create_time` - The creation time of the signature scheme in the format `YYYY-MM-DD HH:mm:ss`.
 * `secret_key` - The secret key of the signature scheme, used to generate and verify signatures.
 * `sig_scheme_id` - The unique identifier ID of the signature scheme.
 * `update_time` - The last update time of the signature scheme in the format `YYYY-MM-DD HH:mm:ss`.
+
+## Import
+
+API Gateway V2 Signature can be imported using the resource ID in the format `{idpre}:{gwInstanceId}:{sigSchemeId}`, e.g.
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_signature.example sig:gw-12345678:signature123
+```
+
+For cascade source signatures, the `idpre` is `sourceSig`:
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_signature.example sourceSig:gw-12345678:signature456
+```

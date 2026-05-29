@@ -1,5 +1,5 @@
 ---
-subcategory: "Auto Scaling (ESS)"
+subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_scalinggroup_vserver_groups"
 sidebar_current: "docs-Alibabacloudstack-ess-scalinggroup-vserver-groups"
@@ -8,6 +8,8 @@ description: |-
 ---
 
 # alibabacloudstack_ess_scalinggroup_vserver_groups
+
+-> **警告（已弃用）**：该资源在 ApsaraStack 上不受支持，将于版本 3.21.0 中移除。
 
 使用Provider配置的凭证在指定的资源集下编排绑定虚拟服务组到指定的缩放组。
 
@@ -68,4 +70,12 @@ resource "alibabacloudstack_ess_scalinggroup_vserver_groups" "default" {
 
 除了上述列出的参数外，还导出以下属性：
 
-* `id` - (必填，变更时重建) - ESS vserver 组绑定资源的唯一标识符（ID）。该 ID 唯一标识了绑定关系，并在创建时生成。
+* `id` - ESS vserver 组绑定资源的唯一标识符，格式为 `<scaling_group_id>`。
+
+## Import
+
+ESS Scaling Group VServer Groups 可以使用 scaling_group_id 导入，例如：
+
+```
+$ terraform import alibabacloudstack_ess_scalinggroup_vserver_groups.example sg-12345678
+```

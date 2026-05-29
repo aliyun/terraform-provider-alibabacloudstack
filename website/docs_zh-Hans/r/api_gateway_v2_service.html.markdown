@@ -201,46 +201,54 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
 * `gw_instance_id` - (必填, 变更时重建) API网关实例ID。
 * `name` - (必填, 变更时重建) 服务名称。
 * `description` - (可选) 服务描述信息。
-* `load_balance_type` - (可选) 负载均衡类型。
-* `protocol` - (可选) 服务协议类型，如HTTP。
+* `upstream_type` - (可选, 可回读) 上游类型。
+* `load_balance_type` - (可选, 可回读) 负载均衡类型。
+* `protocol` - (可选, 可回读) 服务协议类型，如HTTP。
 * `real_service_name` - (可选) 真实服务名称。
 * `service_group` - (可选) 服务分组。
 * `service_version` - (可选) 服务版本。
-* `source_group` - (可选) 源分组。
-* `service_source_type` - (可选) 源类型, 可选值：`dns`, `ip`, 创建AI网关的服务时必填。
 * `source_id` - (可选) 源ID。
-* `upstream_type` - (可选) 上游类型。
-* `health_check_struct` - (可选) 健康检查配置结构。
-  * `health_interval` - (可选) 健康检查间隔时间（秒）。
-  * `health_path` - (可选) 健康检查路径。
-  * `http_failures` - (可选) 判定为不健康的HTTP失败次数。
-  * `http_statuses` - (可选) 健康检查的HTTP状态码。
-  * `http_successes` - (可选) 判定为健康的HTTP成功次数。
-  * `timeout` - (可选) 健康检查超时时间（毫秒）。
+* `source_group` - (可选, 可回读) 源分组。
+* `service_source_type` - (可选) 服务源类型。可选值：`dns`、`ip`。创建AI网关服务时必填。
+* `health_check_struct` - (可选, 最多1项) 健康检查配置结构。
   * `type` - (必填) 健康检查类型。
+  * `health_path` - (可选) 健康检查路径。
+  * `http_statuses` - (可选) 健康检查的HTTP状态码。
+  * `timeout` - (可选) 健康检查超时时间（毫秒）。
+  * `health_interval` - (可选) 健康检查间隔时间（秒）。
   * `un_health_interval` - (可选) 不健康检查间隔时间（秒）。
+  * `http_successes` - (可选) 判定为健康的HTTP成功次数。
+  * `http_failures` - (可选) 判定为不健康的HTTP失败次数。
 * `service_nodes` - (可选) 服务节点列表。
-  * `enable` - (可选) 节点是否启用。
   * `ip` - (必填) 节点IP地址。
   * `port` - (必填) 节点端口。
-  * `weight` - (可选) 节点权重。
+  * `weight` - (可选, 可回读) 节点权重。
+  * `enable` - (可选, 可回读) 节点是否启用。
 * `sql_input_parameters` - (可选) SQL输入参数配置。
-  * `description` - (必填) 参数描述。
-  * `isoptional` - (可选) 是否可选参数。
   * `original_name` - (必填) 原始参数名称。
-  * `sample` - (必填) 参数示例值。
   * `target_name` - (必填) 目标参数名称。
+  * `isoptional` - (可选) 是否可选参数。
+  * `description` - (必填) 参数描述。
+  * `sample` - (必填) 参数示例值。
 * `sql_output_parameters` - (可选) SQL输出参数配置。
-  * `description` - (必填) 参数描述。
-  * `isoptional` - (可选) 是否可选参数。
   * `original_name` - (必填) 原始参数名称。
-  * `param_type` - (可选) 参数类型，默认为"java.lang.String"。
-  * `sample` - (必填) 参数示例值。
   * `target_name` - (必填) 目标参数名称。
+  * `param_type` - (可选) 参数类型。默认值：`java.lang.String`。
+  * `isoptional` - (可选) 是否可选参数。
+  * `description` - (必填) 参数描述。
+  * `sample` - (必填) 参数示例值。
 
 ## 属性说明
 
 以下属性会从API网关服务资源导出：
 
-* `id` - 资源ID，格式为`{gwInstanceId:serviceId}`。
+* `id` - 资源ID，格式为 `<gw_instance_id>^<service_id>`。
 * `service_id` - 服务ID。
+
+## 导入
+
+API网关V2服务可以通过组合ID（gw_instance_id^service_id）导入，例如：
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_service.example gw-inst-123456^svc-789012
+```

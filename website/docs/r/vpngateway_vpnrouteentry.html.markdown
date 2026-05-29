@@ -1,5 +1,5 @@
 ---
-subcategory: "VPNGateway"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnrouteentry"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-vpnrouteentry"
@@ -79,3 +79,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The unique identifier of the VPN Route Entry. It is composed of `VpnGatewayId`, `NextHop`, and `RouteDest`.
+
+## Import
+
+VPN Route Entry can be imported using the `vpn_gateway_id:next_hop:route_dest`, e.g.
+
+```
+$ terraform import alibabacloudstack_vpn_route_entry.example vgw-xxxxxxxx:vpn-xxxxxxxx:xx.xx.xx.xx/xx
+```

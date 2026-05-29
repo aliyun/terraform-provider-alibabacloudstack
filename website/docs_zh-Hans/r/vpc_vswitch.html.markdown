@@ -1,5 +1,5 @@
 ---
-subcategory: "VPC"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_vswitch"
 sidebar_current: "docs-Alibabacloudstack-vpc-vswitch"
@@ -63,19 +63,23 @@ resource "alibabacloudstack_vpc_vswitch" "ipv6_vswitch" {
 
 支持以下参数：
 
-* `zone_id` - (必填) 交换机所属的可用区ID。您可以通过调用 [DescribeZones](https://www.alibabacloud.com/help/en/doc-detail/36064.html) 操作查询最新的可用区列表。
-* `vpc_id` - (必填，变更时重建) 交换机所属的虚拟私有云(VPC)的ID。
-* `cidr_block` - (必填，变更时重建) 交换机的CIDR块。交换机网段要求如下：
+* `vpc_id` - (可选，变更时重建) 交换机所属的虚拟私有云(VPC)的ID。
+* `cidr_block` - (可选，变更时重建) 交换机的CIDR块。交换机网段要求如下：
   * 交换机的网段的掩码长度范围为16～29位。
   * 交换机的网段必须从属于所在VPC的网段。
   * 交换机的网段不能与所在VPC中路由条目的目标网段相同，但可以是目标网段的子集。
   * 交换机的网段不能是100.64.0.0/10及其子网网段。
-* `enable_ipv6` - (可选，变更时重建) 指定是否启用交换机IPv6 CIDR块。有效值：
-  * `false`(默认)：禁用IPv6 CIDR块。
-  * `true`：启用IPv6 CIDR块。如果 `enable_ipv6` 为 `true`，则通过 `vpc_id` 指向的VPC也必须启用IPv6。系统将自动为您创建免费版本的IPv6网关，并分配一个/56的IPv6网络段。
+* `zone_id` - (可选) 交换机所属的可用区ID。您可以通过调用 [DescribeZones](https://www.alibabacloud.com/help/en/doc-detail/36064.html) 操作查询最新的可用区列表。
 * `vswitch_name` - (可选) 交换机的名称。默认为null。
 * `description` - (可选) 交换机的描述。描述必须是1到256个字符的长度，并且不能以 `http://` 或 `https://` 开头。
+* `enable_ipv6` - (可选) 指定是否启用交换机IPv6 CIDR块。有效值：
+  * `false`(默认)：禁用IPv6 CIDR块。
+  * `true`：启用IPv6 CIDR块。如果 `enable_ipv6` 为 `true`，则通过 `vpc_id` 指向的VPC也必须启用IPv6。系统将自动为您创建免费版本的IPv6网关，并分配一个/56的IPv6网络段。
+* `is_cgw` - (可选) 指定是否为CGW(云网关)交换机。
 * `tags` - (可选，映射) 交换机的标签。
+
+-> **NOTE:** 参数 `availability_zone` 已弃用，请使用 `zone_id` 替代。
+-> **NOTE:** 参数 `name` 已弃用，请使用 `vswitch_name` 替代。
 
 ## 属性说明
 
@@ -83,9 +87,19 @@ resource "alibabacloudstack_vpc_vswitch" "ipv6_vswitch" {
 
 * `id` - 交换机的ID。
 * `zone_id` - 交换机所属的可用区ID。
-* `availability_zone` - 交换机的可用区。
+* `availability_zone` - (已弃用) 交换机的可用区，请使用 `zone_id`。
 * `cidr_block` - 交换机的CIDR块。
 * `ipv6_cidr_block` - 交换机的IPv6 CIDR块。
 * `vpc_id` - VPC ID。
 * `vswitch_name` - 交换机的名称。
+* `name` - (已弃用) 交换机的名称，请使用 `vswitch_name`。
 * `description` - 交换机的描述。
+* `is_cgw` - 是否为CGW交换机。
+
+## Import
+
+VSwitch 可以使用 VSwitchId 导入，例如：
+
+```
+$ terraform import alibabacloudstack_vswitch.example vsw-12345678
+```

@@ -56,17 +56,23 @@ resource "alibabacloudstack_slb_servercertificate" "default" {
 
 支持以下参数：
 
-* `name` - (选填) - 服务器证书的名称。如果未提供，Terraform将自动生成一个唯一名称。
+* `name` - (选填, 已过时) - 服务器证书的名称。此参数已被 `server_certificate_name` 替代,在将来版本中将被移除。如果未提供,Terraform将自动生成一个唯一名称。
 * `server_certificate_name` - (选填) - 服务器证书的名称。这可以用来在SLB服务中标识该证书。
-* `server_certificate` - (必填, 变更时重建) - 需要上传的公钥证书。如果不使用阿里云托管的证书，则此参数是必填的。
-* `private_key` - (必填, 变更时重建) - 对应于`server_certificate`中指定的公钥证书的私钥。如果不使用阿里云托管的证书，则此参数是必填的。
+* `server_certificate` - (选填, 变更时重建) - 需要上传的公钥证书。当不使用阿里云托管证书时,此参数与 `private_key` 必须同时提供。
+* `private_key` - (必填, 变更时重建) - 对应于`server_certificate`中指定的公钥证书的私钥。
 
 ## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
-* `id` - 服务器证书(SSL Certificate)的ID。
-* `name` - 服务器证书的名称。
+* `id` - 服务器证书的ID。
+* `name` - 服务器证书的名称(已过时,请使用 `server_certificate_name`)。
 * `server_certificate_name` - 创建时指定的服务器证书的名称。
-* `server_certificate` - 已上传的公钥证书的内容。
-* `private_key` - 与已上传的公钥证书对应的私钥内容。
+
+## Import
+
+SLB 服务器证书可以使用 ServerCertificateId 导入，例如：
+
+```
+$ terraform import alibabacloudstack_slb_servercertificate.example sc-12345678
+```

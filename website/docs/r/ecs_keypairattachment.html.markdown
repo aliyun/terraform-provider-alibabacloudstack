@@ -1,16 +1,17 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_keypairattachment"
 sidebar_current: "docs-Alibabacloudstack-ecs-keypairattachment"
-description: |- 
-  Provides a ecs Keypairattachment resource.
+description: |-
+  Provides a ECS Key Pair Attachment resource.
 ---
 
 # alibabacloudstack_ecs_keypairattachment
--> **NOTE:** Alias name has: `alibabacloudstack_key_pair_attachment`
 
-Provides a ecs Keypairattachment resource.
+-> **NOTE:** This resource can also be referred to by the following alias: `alibabacloudstack_key_pair_attachment`.
+
+Provides a ECS Key Pair Attachment resource to bind an SSH key pair to one or more Linux instances.
 
 ## Example Usage
 
@@ -82,13 +83,22 @@ resource "alibabacloudstack_ecs_keypairattachment" "attachment" {
 
 The following arguments are supported:
 
-* `key_name` - (Required, ForceNew) The name of the key pair used to bind.
-* `instance_ids` - (Required, ForceNew) The list of ECS instance IDs to which the key pair will be attached.
-* `force` - (Optional, ForceNew) If set to `true`, the instances will be rebooted immediately after attaching the key pair to ensure that the key pair takes effect without requiring manual intervention.
+* `key_name` - (Required, ForceNew) The name of the SSH key pair to bind. The name must be 2 to 128 characters in length. Changing this parameter forces a new resource to be created.
+* `instance_ids` - (Required, ForceNew) A list of ECS instance IDs to which the SSH key pair will be bound. Up to 50 instance IDs can be specified in a JSON array format. Changing this parameter forces a new resource to be created.
+* `force` - (Optional, ForceNew) If set to `true`, the instances will be rebooted automatically after binding the key pair to ensure it takes effect immediately. Default to `false`. Changing this parameter forces a new resource to be created.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `key_name` - The name of the key pair that has been attached.
-* `instance_ids` - The list of ECS instance IDs to which the key pair is attached.
+* `id` - The resource ID, formatted as `<key_name>:<instance_ids>` where `instance_ids` is a JSON array string.
+* `key_name` - The name of the SSH key pair that has been bound.
+* `instance_ids` - A list of ECS instance IDs to which the SSH key pair is bound.
+
+## Import
+
+ECS Key Pair Attachment can be imported using the key pair name and instance IDs in the format `<key_name>:<instance_ids>`, e.g.
+
+```
+$ terraform import alibabacloudstack_ecs_keypairattachment.example test-key-pair:["i-bp1d6tsvznfghy7y****","i-bp1ippxbaql9zet7****"]
+```

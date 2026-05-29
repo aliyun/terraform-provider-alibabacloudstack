@@ -89,7 +89,7 @@ The following arguments are supported:
 * `vendor_code` - (Required, ForceNew) The vendor code of the HSM device.
 * `vsm_type` - (Required, ForceNew) The type of the HSM instance. Valid values: `evsm`, `gvsm`, `svsm`.
 * `zone_id` - (Required, ForceNew) The zone ID where the HSM instance is located.
-* `device_id` - (Optional, Computed, ForceNew) The ID of the HSM device.
+* `device_id` - (Optional, Computed) The ID of the HSM device.
 * `vpc_id` - (Optional, Computed) The ID of the VPC where the HSM instance is located.
 * `vpc_cidr_block` - (Optional, Computed) The CIDR block of the VPC.
 * `vswitch_id` - (Optional, Computed) The ID of the VSwitch where the HSM instance is located.

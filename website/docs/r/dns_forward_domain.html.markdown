@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_forward_domain"
 sidebar_current: "docs-Alibabacloudstack-dns-dns_forward_domain"
@@ -10,6 +10,8 @@ description: |-
 # alibabacloudstack_dns_forward_domain
 
 This resource creates a global DNS forward domain in the specified resource set using the credentials configured in the provider.
+
+-> **Note:** This resource can also be referred to by the following alias: `apsarastack_dns_forward_domain`.
 
 ## Example Usage
 
@@ -49,3 +51,11 @@ In addition to all arguments above, the following attributes are exported:
 * `caller_uid` - A system parameter identifying the caller who created the resource.
 * `create_timestamp` - The creation timestamp in seconds.
 * `update_timestamp` - The update timestamp in seconds.
+
+## Import
+
+DNS Forward Domain can be imported using the resource ID, e.g.
+
+```
+$ terraform import alibabacloudstack_dns_forward_domain.example <resource_id>
+```

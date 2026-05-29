@@ -55,13 +55,13 @@ resource "alibabacloudstack_api_gateway_v2_cascade_link" "default" {
 
 支持以下参数：
 
-* `cascade_instance_id` - (必填, 变更时重建) 级联实例ID。指定目标API网关实例的唯一标识符，用于建立级联关系。
-* `link_name` - (必填, 变更时重建) 链路名称。自定义链路的名称，用于标识该级联链路。
-* `source_instance_address` - (必填) 源实例地址。源服务实例的IP地址或域名，用于API请求路由。
-* `source_instance_id` - (必填, 变更时重建) 源实例ID。源服务实例的唯一标识符，必须与源实例地址匹配。
-* `cascade_instance_name` - (可选) 级联实例名称。级联API网关实例的显示名称，仅用于标识。
-* `cascade_service_id` - (可选) 级联服务ID。关联的级联服务唯一标识符，用于服务级联管理。
-* `source_instance_name` - (可选) 源实例名称。源服务实例的显示名称，仅用于标识。
+* `cascade_instance_id` - (必填) 级联实例ID。指定目标API网关实例的唯一标识符，用于建立级联关系。修改此参数不会触发更新。
+* `link_name` - (必填) 链路名称。级联链路的自定义名称，用于标识。修改此参数不会触发更新。
+* `source_instance_address` - (必填, 支持更新) 源实例地址。源服务实例的IP地址或域名，用于API请求路由。
+* `source_instance_id` - (必填) 源实例ID。源服务实例的唯一标识符，必须与源实例地址匹配。修改此参数不会触发更新。
+* `cascade_instance_name` - (可选, API返回) 级联实例名称。级联API网关实例的显示名称，由API返回，仅用于标识。
+* `cascade_service_id` - (可选, API返回) 级联服务ID。关联的级联服务唯一标识符，由API返回，用于服务级联管理。
+* `source_instance_name` - (可选, API返回) 源实例名称。源服务实例的显示名称，由API返回，仅用于标识。
 
 ## 属性说明
 
@@ -69,3 +69,13 @@ resource "alibabacloudstack_api_gateway_v2_cascade_link" "default" {
 
 * `id` - 级联链路的唯一ID，与`link_id`值相同。
 * `link_id` - 级联链路的系统生成ID，用于唯一标识该资源。
+
+## Import
+
+API网关V2级联链路可以使用 linkId 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_cascade_link.default <link_id>
+```
+
+-> **注意**: 该资源也可以使用别名 `apsarastack_api_gateway_v2_cascade_link` 引用。

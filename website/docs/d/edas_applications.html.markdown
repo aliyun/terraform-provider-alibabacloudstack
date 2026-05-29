@@ -8,9 +8,8 @@ description: |-
 ---
 
 # alibabacloudstack_edas_applications
--> **NOTE:** Alias name has: `alibabacloudstack_edas_slbattachments`
 
-This data source provides a list of edas applications in an alibabacloudstack account according to the specified filters.
+This data source provides a list of EDAS applications in an Alibaba Cloud account according to the specified filters.
 
 ## Example Usage
 
@@ -18,7 +17,6 @@ This data source provides a list of edas applications in an alibabacloudstack ac
 data "alibabacloudstack_edas_applications" "applications" {
   ids        = ["app12345"]
   name_regex = "example-application-.*"
-  output_file = "application_list.txt"
 }
 
 output "first_application_name" {
@@ -30,8 +28,9 @@ output "first_application_name" {
 
 The following arguments are supported:
 
-* `ids` - (Optional) A list of application IDs to filter results. If not provided, all applications will be considered.
-* `name_regex` - (Optional) A regex string to filter results by the application name.
+* `ids` - (Optional, ForceNew) A list of application IDs to filter results. If not provided, all applications will be considered.
+* `name_regex` - (Optional, ForceNew) A regex string to filter results by the application name.
+* `output_file` - (Optional, Deprecated) The output file path. This field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the `local_file` provider instead.
 
 ## Attributes Reference
 

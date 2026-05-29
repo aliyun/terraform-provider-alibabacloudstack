@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_export"
 sidebar_current: "docs-alibabacloudstack-resource-image-export"
@@ -32,18 +32,24 @@ resource "alibabacloudstack_image_export" "default" {
 The following arguments are supported:
 
 * `image_id` - (Required, ForceNew) The source image ID.
-* `oss_bucket` - (Required, ForceNew) Save the exported OSS bucket.
-* `oss_prefix` - (Optional, ForceNew) The prefix of your OSS Object. It can be composed of numbers or letters, and the character length is 1 ~ 30. 
-   
+* `oss_bucket` - (Required, ForceNew) The name of the OSS bucket to save the exported image.
+* `oss_cluster` - (Optional, ForceNew) The OSS cluster ID. This parameter is specific to Apsara Stack.
+* `oss_prefix` - (Optional, ForceNew) The prefix of your OSS Object. It can be composed of numbers or letters, and the character length is 1 ~ 30.
+
 ## Timeouts
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 
-* `create` - (Defaults to 20 mins) Used when exporting the image (until it reaches the initial `Available` status). 
-   
-   
+* `create` - (Defaults to 20 mins) Used when exporting the image (until it reaches the initial `Available` status).
+
+
 ## Attributes Reference
- 
- The following attributes are exported:
- 
-* `id` - ID of the image. 
+
+The following attributes are exported:
+
+* `id` - The ID of the image.
+* `oss_object` - The name of the exported OSS object. It is computed as `<image_id>_system.raw.tar.gz` or `<oss_prefix>_<image_id>_system.raw.tar.gz` if `oss_prefix` is specified.
+
+## Import
+
+This resource does not support import. 

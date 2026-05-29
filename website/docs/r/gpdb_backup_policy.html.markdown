@@ -1,5 +1,5 @@
 ---
-subcategory: "AnalyticDB for PostgreSQL (GPDB)"
+subcategory: "AnalyticDB for PostgreSQL"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_backup_policy"
 sidebar_current: "docs-alibabacloudstack-resource-gpdb-backup_policy"
@@ -93,3 +93,11 @@ The following attributes are exported:
 * `preferred_backup_period` - The backup period.
 * `preferred_backup_time` - The backup time.
 * `recovery_point_period` - The frequency of recovery points.
+
+## Import
+
+GPDB Backup Policy can be imported using the DBInstanceId, e.g.
+
+```
+$ terraform import alibabacloudstack_gpdb_backup_policy.example pgm-xxxxxxxxx
+```

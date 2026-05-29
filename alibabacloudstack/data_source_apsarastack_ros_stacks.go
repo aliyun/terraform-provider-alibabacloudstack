@@ -148,6 +148,16 @@ func dataSourceAlibabacloudStackRosStacks() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"parent_stack_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"show_nested_stack": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }

@@ -94,6 +94,15 @@ resource "alibabacloudstack_polardbx_account_database_binding" "default" {
 The following arguments are supported:
   * `account_name` - (Required) - The account name
   * `instance_id` - (Required) -  The ID of the PolarDBX instance.
-  * `db_privileges` - The Database permissions of the account.
-    * `db_name` - The name of the database.
-    * `privilege` - The permissions of the target account on the database.
+  * `db_privileges` - (Required) - The Database permissions of the account.
+    * `db_name` - (Required) - The name of the database.
+    * `privilege` - (Required) - The permissions of the target account on the database. Valid values: ReadOnly, ReadWrite, DMLOnly, DDLOnly.
+
+## Import
+
+PolarDBX Account Database Binding can be imported using the instance_id and account_name, e.g.
+
+```
+$ terraform import alibabacloudstack_polardbx_account_database_binding.example pxc-12345678:myaccount
+```
+

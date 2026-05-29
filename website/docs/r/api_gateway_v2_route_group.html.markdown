@@ -1,5 +1,5 @@
 ---
-subcategory: "API Gateway V2"
+subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_route_group"
 sidebar_current: "docs-Alibabacloudstack-api-gateway-v2-route-group"
@@ -90,3 +90,11 @@ The following attributes are exported from the API Gateway service:
 * `editable` - Whether the route group is editable (boolean value). Returns `true` when the route group is in an editable state.
 * `group_id` - The unique identifier ID of the route group.
 * `update_time` - The last update time of the route group, formatted as "YYYY-MM-DD HH:MM:SS".
+
+## Import
+
+API Gateway V2 Route Group can be imported using the instance_id and group_id separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_api_gateway_v2_route_group.example gw-instance-123456:group-789
+```

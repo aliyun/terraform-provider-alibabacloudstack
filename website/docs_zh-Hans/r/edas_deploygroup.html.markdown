@@ -1,5 +1,5 @@
 ---
-subcategory: "Enterprise Distributed Application Service (EDAS)"
+subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_deploygroup"
 sidebar_current: "docs-Alibabacloudstack-edas-deploygroup"
@@ -41,7 +41,6 @@ resource "alibabacloudstack_edas_application" "default" {
 resource "alibabacloudstack_edas_deploy_group" "default" {
   app_id       = alibabacloudstack_edas_application.default.id
   group_name   = var.name
-  group_type   = 2 # 流量管理启用灰度
 }
 ```
 
@@ -49,21 +48,26 @@ resource "alibabacloudstack_edas_deploy_group" "default" {
 
 支持以下参数：
 
-* `app_id` - (必填，变更时重建) 应用的唯一标识符。这是 EDAS 中应用程序的唯一 ID。
-* `group_name` - (必填，变更时重建) 部署组的名称。它必须在同一个应用内是唯一的，并且创建后无法修改。
-* `group_type` - (可选，变更时重建) 部署组的类型。有效值为：
-  - `0`：默认分组。
-  - `1`：流量管理未启用灰度。
-  - `2`：流量管理启用灰度。此选项允许使用分阶段发布和流量管理功能。
+* `app_id` - (必填，变更时重建) 需要部署的应用 ID。这是 EDAS 中应用程序的唯一标识符。
+* `group_name` - (必填，变更时重建) 要创建的部署组名称。它在同一个应用内必须唯一，且创建后无法修改。
 
 ## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 部署组资源的唯一标识符。其格式为 `<app_id>:<group_name>:<group_id>`。
-* `group_type` - 部署组的类型。该属性反映了创建时设置的值，并表示分组的行为：
+* `group_id` - 部署组的 ID，由 EDAS API 返回。
+* `group_type` - 部署组的类型。该属性由 API 自动返回，表示分组的行为：
   - `0`：默认分组。
   - `1`：流量管理未启用灰度。
   - `2`：流量管理启用灰度。
 
 此属性有助于识别部署组的配置及其在 EDAS 环境中的功能。
+
+## Import
+
+EDAS 部署组可以通过资源 ID 导入，ID 格式为 `<app_id>:<group_name>:<group_id>`，例如：
+
+```
+$ terraform import alibabacloudstack_edas_deploy_group.example <app_id>:<group_name>:<group_id>
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "KMS"
+subcategory: "Key Management Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_alias"
 sidebar_current: "docs-alibabacloudstack-resource-kms-alias"
@@ -44,3 +44,11 @@ The following arguments are supported:
 ## Attributes Reference
 
 * `id` - The ID of the alias.
+
+## Import
+
+KMS Alias can be imported using the alias_name, e.g.
+
+```
+$ terraform import alibabacloudstack_kms_alias.example alias/test_kms_alias
+```

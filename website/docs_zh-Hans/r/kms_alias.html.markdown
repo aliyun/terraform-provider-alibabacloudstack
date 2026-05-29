@@ -1,5 +1,5 @@
 ---
-subcategory: "KMS"
+subcategory: "Key Management Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_alias"
 sidebar_current: "docs-alibabacloudstack-resource-kms-alias"
@@ -42,3 +42,11 @@ resource "alibabacloudstack_kms_alias" "alias" {
 ## 属性说明
 
 * `id` - 别名的唯一标识符，用于标识该别名资源。
+
+## Import
+
+KMS Alias 可以使用 alias_name 导入，例如:
+
+```
+$ terraform import alibabacloudstack_kms_alias.example alias/test_kms_alias
+```

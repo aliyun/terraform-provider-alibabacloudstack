@@ -56,5 +56,11 @@ resource "alibabacloudstack_dns_recursor_acl" "default" {
 以下属性会从API响应中导出：
 
 * `id` - ACL策略的ID。
-* `create_timestamp` - 创建时间戳（秒）。
-* `update_timestamp` - 修改时间戳（秒）。
+
+## 导入
+
+DNS递归ACL策略可以通过ACL ID导入，例如：
+
+```
+$ terraform import alibabacloudstack_dns_recursor_acl.example acl-12345678
+```

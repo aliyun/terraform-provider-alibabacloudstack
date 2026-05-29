@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_record"
 sidebar_current: "docs-Alibabacloudstack-dns-private-record"
@@ -76,8 +76,14 @@ resource "alibabacloudstack_dns_private_record" "default" {
 
 ## 属性说明
 
-以下属性会从API响应中导出：
+以下属性会从 API 响应中导出：
 
-* `id` - 资源ID，格式为{ZoneId}:{Id}。
-* `create_timestamp` - 创建时间戳（秒）。
-* `update_timestamp` - 修改时间戳（秒）。
+* `id` - 资源 ID，格式为 `{ZoneId}:{Id}`。
+
+## Import
+
+DNS 私有解析记录可以通过 ZoneId 和 RecordId 导入，格式为 `{ZoneId}:{Id}`，例如：
+
+```
+$ terraform import alibabacloudstack_dns_private_record.example f27ffcc8-02a4-4ca1-9ca4-6bffc4e82034:record-12345
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "Auto Scaling (ESS)"
+subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_lifecycle_hook"
 sidebar_current: "docs-alibabacloudstack-resource-ess-lifecycle-hook"
@@ -8,11 +8,15 @@ description: |-
 ---
 
 # alibabacloudstack_ess_lifecycle_hook
+
+-> **NOTE:** This resource is unsupported on ApsaraStack and will be removed in version 3.21.0.
+
 -> **NOTE:** Alias name has: `alibabacloudstack_autoscaling_lifecyclehook`
 
 Provides a ESS lifecycle hook resource.
 
 ## Example Usage
+
 ```
 data "alibabacloudstack_zones" "default" {
   available_disk_category     = "cloud_efficiency"
@@ -46,7 +50,7 @@ resource "alibabacloudstack_ess_scaling_group" "foo" {
 
 resource "alibabacloudstack_ess_lifecycle_hook" "foo" {
   scaling_group_id      = "${alibabacloudstack_ess_scaling_group.foo.id}"
-  name                  = "testAccEssLifecycle_hook"
+  lifecycle_hook_name   = "testAccEssLifecycle_hook"
   lifecycle_transition  = "SCALE_OUT"
   heartbeat_timeout     = 400
   notification_metadata = "helloworld"
@@ -58,22 +62,47 @@ resource "alibabacloudstack_ess_lifecycle_hook" "foo" {
 The following arguments are supported:
 
 * `scaling_group_id` - (Required, ForceNew) The ID of the Auto Scaling group to which you want to assign the lifecycle hook.
-* `name` - (Optional, ForceNew) The name of the lifecycle hook, which must contain 2-64 characters (English or Chinese), starting with numbers, English letters or Chinese characters, and can contain number, underscores `_`, hypens `-`, and decimal point `.`. If this parameter value is not specified, the default value is lifecycle hook id.
-* `lifecycle_transition` - (Required) Type of Scaling activity attached to lifecycle hook. Supported value: SCALE_OUT, SCALE_IN.
-* `heartbeat_timeout` - (Optional) Defines the amount of time, in seconds, that can elapse before the lifecycle hook times out. When the lifecycle hook times out, Auto Scaling performs the action defined in the default_result parameter. Default value: 600.
-* `default_result` - (Optional) Defines the action the Auto Scaling group should take when the lifecycle hook timeout elapses. Applicable value: CONTINUE, ABANDON, default value: CONTINUE.
-* `notification_arn` - (Optional) The Arn of notification target.
-* `notification_metadata` - (Optional) Additional information that you want to include when Auto Scaling sends a message to the notification target.
 
-## Attribute Reference
+* `lifecycle_hook_name` - (Optional, ForceNew) The name of the lifecycle hook. The name must contain 2 to 128 characters. It must start with a letter and cannot start with http:// or https://. It can contain letters, digits, underscores (_), hyphens (-), and periods (.). This parameter conflicts with the `name` parameter.
+
+* `lifecycle_transition` - (Required) The type of lifecycle hook. Valid values: `SCALE_IN`, `SCALE_OUT`.
+
+* `heartbeat_timeout` - (Optional) The maximum waiting time before the lifecycle hook times out. Valid values: 30 to 21600. Unit: seconds. Default value: 600.
+
+* `default_result` - (Optional) The action that Auto Scaling takes when the lifecycle hook times out. Valid values: `CONTINUE`, `ABANDON`. Default value: `CONTINUE`.
+
+* `notification_arn` - (Optional) The ARN of the EventBridge event bus to which notifications are sent when the lifecycle hook is triggered.
+
+* `notification_metadata` - (Optional) The additional information that you want to include when Auto Scaling sends a message to the notification target.
+
+* `name` - (Optional, ForceNew, Deprecated) The name of the lifecycle hook. This field is deprecated. Use `lifecycle_hook_name` instead. If this parameter value is not specified, the default value is lifecycle hook id. This parameter conflicts with the `lifecycle_hook_name` parameter.
+
+## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The ID of lifecycle hook.
-* `scaling_group_id` - The scalingGroupId to which lifecycle belongs.
-* `name` - The name of lifecycle hook.
-* `default_result` - The action the Auto Scaling group should take when the lifecycle hook timeout elapses.
-* `heartbeat_timeout` - The amount of time that can elapse before the lifecycle hook time out.
-* `lifecycle_transition` - Type of Scaling activity attached to lifecycle hook.
-* `notification_metadata` - Additional information that will be sent to notification target.
-* `notification_arn` - The arn of notification target.
+* `id` - The ID of the lifecycle hook.
+
+* `scaling_group_id` - The ID of the Auto Scaling group to which the lifecycle hook belongs.
+
+* `lifecycle_hook_name` - The name of the lifecycle hook.
+
+* `name` - (Deprecated) The name of the lifecycle hook.
+
+* `lifecycle_transition` - The type of lifecycle hook.
+
+* `heartbeat_timeout` - The maximum waiting time before the lifecycle hook times out.
+
+* `default_result` - The action that Auto Scaling takes when the lifecycle hook times out.
+
+* `notification_arn` - The ARN of the EventBridge event bus to which notifications are sent.
+
+* `notification_metadata` - The additional information that is sent when the lifecycle hook is triggered.
+
+## Import
+
+ESS Lifecycle Hook can be imported using the lifecycle hook ID, e.g.
+
+```
+$ terraform import alibabacloudstack_ess_lifecycle_hook.example lch-bp1234567890abcdef
+```

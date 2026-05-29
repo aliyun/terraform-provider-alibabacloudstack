@@ -11,6 +11,9 @@ description: |-
 
 This data source provides the roles of the current Apsara Stack Cloud user.
 
+> **NOTE:** This data source can also be referred to by the following alias:
+> - `alibabacloudstack_ascm_ram_roles`
+
 ## Example Usage
 
 ```
@@ -37,10 +40,12 @@ output "roles" {
 
 The following arguments are supported:
 
-* `id` - (Optional) It is used to filter results by role ID.
+* `id` - (Optional, Deprecated) It is used to filter results by role ID. This field is deprecated and will be removed in version 3.21.0. Please use `ids` instead.
+* `ids` - (Optional, Available in v1.68.0+) A list of role IDs. The field is used to filter results by role IDs.
 * `name_regex` - (Optional) A regex string to filter results by role name.
 * `description` - (Optional) Description about the role.
 * `role_type` - (Optional) Types of role.
+* `output_file` - (Optional, Deprecated) The output file for the data source. This field is deprecated and will be removed in version 3.19.0. To write content to a file, use the `local_file` provider instead.
 
 ## Attributes Reference
 
@@ -60,3 +65,9 @@ The following attributes are exported in addition to the arguments listed above:
     * `active` - Role status.
     * `owner_organization_id` - ID of the owner organization where role belongs.
     * `code` - Role code.
+    * `assume_role_policy_document` - The assume role policy document for RAM-authorized roles.
+    * `organization_visibility` - The organization visibility scope for the role.
+
+## Import
+
+This data source does not support importing because it is a read-only data source.

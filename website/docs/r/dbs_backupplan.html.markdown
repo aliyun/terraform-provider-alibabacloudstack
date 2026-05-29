@@ -1,5 +1,5 @@
 ---
-subcategory: "DBS"
+subcategory: "Database Backup"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dbs_backupplan"
 sidebar_current: "docs-Alibabacloudstack-dbs-backupplan"
@@ -9,6 +9,8 @@ description: |-
 
 # alibabacloudstack_dbs_backupplan
 -> **NOTE:** Alias name has: `alibabacloudstack_dbs_backup_plan`
+
+-> **NOTE:** This resource is deprecated and will be removed in version 3.21.0.
 
 Provides a dbs Backupplan resource.
 
@@ -29,7 +31,7 @@ resource "alibabacloudstack_dbs_backup_plan" "default" {
   database_region   = "cn-hangzhou"
   storage_region    = "cn-hangzhou"
   instance_type     = "RDS"
-  from_app          = "OpenAPI"
+  from_app          = "OpenApi"
 }
 ```
 
@@ -37,7 +39,7 @@ resource "alibabacloudstack_dbs_backup_plan" "default" {
 
 The following arguments are supported:
 
-* `backup_plan_id` - (ForceNew) The unique identifier for the backup plan. This ID is automatically generated upon creation and cannot be modified afterward.
+* `backup_plan_name` - (Required) The name of the backup plan.
 * `backup_method` - (Required) The backup method to be used. Valid values include:
   * `logical`: Logical backup.
   * `physical`: Physical backup.
@@ -50,7 +52,6 @@ The following arguments are supported:
 * `instance_class` - (Required) The class of the backup instance. Valid values include:
   * `small`: Small instance.
   * `large`: Large instance.
-* `backup_plan_name` - (Optional) The name of the backup plan. If not specified, Terraform will auto-generate a name.
 * `database_region` - (Optional) The region where the source database resides. For example, `cn-hangzhou`.
 * `storage_region` - (Optional) The region where the backup data will be stored. It can be the same or different from the `database_region`.
 * `instance_type` - (Optional) The type of the database instance. Valid values include:
@@ -59,7 +60,8 @@ The following arguments are supported:
   * `DDS`: Document Database Service.
   * `Kvstore`: Key-Value Store.
   * `Other`: Other types.
-* `from_app` - (Optional) Indicates the source of the request. The default value is `OpenAPI`. Manual setting is generally unnecessary.
+* `from_app` - (Optional) Indicates the source of the request. The default value is `OpenApi`. Manual setting is generally unnecessary.
+* `backup_plan_id` - (ForceNew, Computed) The unique identifier for the backup plan. This ID is automatically generated upon creation and cannot be modified afterward.
 
 ## Attributes Reference
 

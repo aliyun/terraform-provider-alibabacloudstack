@@ -1,5 +1,5 @@
 ---
-subcategory: "DRDS"
+subcategory: "云原生分布式数据库PolarDB-X 1.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_databases"
 sidebar_current: "docs-Alibabacloudstack-datasource-drds-databases"
@@ -101,6 +101,7 @@ data "alibabacloudstack_drds_databases" "default" {
 
 ## Attributes Reference
 除了上述参数外，还导出以下属性：
+  * `drds_database_names` - 数据库名称列表。
   * `databases` - 数据库列表。
     * `create_time` - 数据库创建时间。
     * `drds_database_name` - 数据库名称。

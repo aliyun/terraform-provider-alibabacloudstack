@@ -1,5 +1,5 @@
 ---
-subcategory: "VPNGateway"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_sslvpnserver"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-sslvpnserver"
@@ -10,6 +10,10 @@ description: |-
 # alibabacloudstack\_vpngateway\_sslvpnserver
 
 Provides a vpngateway Sslvpnserver resource.
+
+-> **Note:** This resource can also be referred to by the following aliases:
+- `alibabacloudstack_vpngateway_ssl_vpn_server`
+- `alibabacloudstack_vpngateway_ssl_vpnserver`
 
 ## Example Usage
 ```
@@ -65,23 +69,34 @@ resource "alibabacloudstack_vpngateway_ssl_vpnserver" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `cipher` - (Optional) - The encryption algorithm that is used in the SSL-VPN connection.
-  * `client_ip_pool` - (Required) - The CIDR block of the client.
-  * `compress` - (Optional) - Specifies whether to enable data compression
-  * `local_subnet` - (Required) - The local CIDR block.
-  * `port` - (Optional) - The port that is used by the SSL-VPN server.
-  * `proto` - (Optional) - The protocol that is used by the SSL-VPN server.
-  * `ssl_vpn_server_name` - (Required) - The name of the SSL-VPN server.
-  * `vpn_gateway_id` - (Required, ForceNew) - The ID of the VPN gateway.
+
+* `vpn_gateway_id` - (Required, ForceNew) The ID of the VPN gateway. Modifying this parameter will force a new resource to be created.
+* `client_ip_pool` - (Required) The client CIDR block. This is the CIDR block from which the VPN gateway allocates IP addresses to clients connecting via SSL-VPN.
+* `local_subnet` - (Required) The local CIDR block. This is the CIDR block that clients need to access through the SSL-VPN connection.
+* `ssl_vpn_server_name` - (Required) The name of the SSL-VPN server. The length is 2~100 characters. It cannot start with `http://` or `https://`.
+* `cipher` - (Optional) The encryption algorithm used in the SSL-VPN connection. Valid values: `AES-128-CBC` (default), `AES-192-CBC`, `AES-256-CBC`, `none`.
+* `proto` - (Optional) The protocol used by the SSL-VPN server. Valid values: `TCP` (default), `UDP`.
+* `port` - (Optional) The port used by the SSL-VPN server. Valid values: 1~65535. Default value: 1194. The following ports are not supported: 22, 2222, 22222, 9000, 9001, 9002, 7505, 80, 443, 53, 68, 123, 4510, 4560, 500, 4500.
+* `compress` - (Optional) Specifies whether to enable data compression on the SSL-VPN connection. Valid values: `true`, `false` (default).
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `cipher` - The encryption algorithm that is used in the SSL-VPN connection.
-  * `connections` - The total number of current connections.
-  * `create_time` - The time when the SSL-VPN server was created.
-  * `internet_ip` - The public IP address.
-  * `max_connections` - The maximum number of connections.
-  * `port` - The port that is used by the SSL-VPN server.
-  * `proto` - The protocol that is used by the SSL-VPN server.
-  * `ssl_vpn_server_id` - The ID of the SSL-VPN server.
+
+* `id` - The ID of the SSL-VPN server.
+* `ssl_vpn_server_id` - The ID of the SSL-VPN server.
+* `cipher` - The encryption algorithm used in the SSL-VPN connection.
+* `proto` - The protocol used by the SSL-VPN server.
+* `port` - The port used by the SSL-VPN server.
+* `connections` - The total number of current connections.
+* `max_connections` - The maximum number of connections.
+* `create_time` - The time when the SSL-VPN server was created.
+* `internet_ip` - The public IP address of the SSL-VPN server.
+
+## Import
+
+SSL-VPN Server can be imported using the `ssl_vpn_server_id`, e.g.
+
+```
+$ terraform import alibabacloudstack_vpngateway_ssl_vpn_server.example vss-12345678
+```

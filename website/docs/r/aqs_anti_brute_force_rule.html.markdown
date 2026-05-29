@@ -104,12 +104,14 @@ resource "alibabacloudstack_aqs_anti_brute_force_rule" "default" {
 
 The following arguments are supported:
 
-* `default_rule` - (Optional) Whether it is a default rule. Default value is `false`.
-* `fail_count` - (Optional) Threshold of login failure count. When the login failure count reaches this value, the anti-brute force rule is triggered.
-* `forbidden_time` - (Optional) Login ban duration in minutes. The duration of login ban after the rule is triggered.
-* `instance_ids` - (Optional) List of associated ECS instance IDs. Specifies the ECS instances to which this rule applies (needs to be converted to UUID format).
 * `name` - (Optional) Rule name. Used to identify the rule.
-* `span` - (Optional) Time range for counting login failures in minutes. The time range within which login failures are counted.
+* `span` - (Optional) Time range for counting login failures in minutes. The time range within which login failures are counted. Valid values: `1`, `2`, `5`, `10`, `15`.
+* `fail_count` - (Optional) Threshold of login failure count. When the login failure count reaches this value, the anti-brute force rule is triggered. Valid values: `2`, `3`, `4`, `5`, `10`, `50`, `80`, `100`.
+* `forbidden_time` - (Optional) Login ban duration in minutes. The duration of login ban after the rule is triggered. Valid values: `5`, `15`, `30`, `60`, `120`, `360`, `720`, `1440`, `10080`, `52560000` (permanent).
+* `default_rule` - (Optional) Whether it is a default rule. When the asset is not in any other rule, the default rule will be used. Default value is `false`.
+* `instance_ids` - (Optional) List of associated ECS instance IDs. Specifies the ECS instances to which this rule applies (needs to be converted to UUID format).
+
+-> **Note**: The `span`, `fail_count`, and `forbidden_time` parameters combine to form an anti-brute force rule, meaning that if an account fails to log in more than XX times within XX minutes, the account will be locked out for XX minutes.
 
 ## Attributes Reference
 
@@ -119,3 +121,11 @@ The following attributes are exported:
 * `create_timestamp` - Rule creation timestamp (Unix timestamp in milliseconds).
 * `enable_smart_rule` - Whether smart rule is enabled.
 * `machine_count` - Number of associated machines.
+
+## Import
+
+Anti-brute force rule can be imported using the rule ID, e.g.
+
+```
+$ terraform import alibabacloudstack_aqs_anti_brute_force_rule.example 65778
+```

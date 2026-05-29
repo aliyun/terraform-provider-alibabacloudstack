@@ -1,5 +1,5 @@
 ---
-subcategory: "Elastic Block Storage (EBS)"
+subcategory: "Elastic Block Storage"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ebs_diskreplicapair"
 sidebar_current: "docs-Alibabacloudstack-ebs-diskreplicapair"
@@ -68,24 +68,31 @@ resource "alibabacloudstack_ebs_diskreplicapair" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `description` - (Optional) - The description of the asynchronous replication relationship. 2 to 256 English or Chinese characters in length and cannot start with' http:// 'or' https.
-  * `destination_disk_id` - (Required) - The ID of the standby disk.
-  * `destination_region_id` - (Required) - The ID of the region to which the disaster recovery site belongs.
-  * `destination_zone_id` - (Required) - The ID of the zone to which the disaster recovery site belongs.
-  * `source_disk_id` - (Required) - The ID of the disk to be replicated.
-  * `disk_replica_pair_name` - (Optional) - The name of the asynchronous replication relationship. The length must be 2 to 128 characters in length and must start with a letter or Chinese name. It cannot start with http:// or https. It can contain Chinese, English, numbers, half-width colons (:), underscores (_), half-width periods (.), or dashes (-).
-  * `last_recover_point` - (Optional) - The time when data was last replicated from the primary disk to the secondary disk in the replication pair. 
-  * `one_shot` - (Optional) - Whether to synchronize immediately. Value range:-true: Start data synchronization immediately.-false: Data Synchronization starts after the RPO time period.Default value: false.
-  * `rpo` - (Optional) - The Rpo of the asynchronous replication relationship. The unit is seconds. Value range: 300 to 86400.Default value: 300.
-  * `source_region_id` - (Required) - The ID of the region to which the production site belongs.
-  * `replica_group_id` - (Optional) - The ID of the replication group.
-  * `source_zone_id` - (Required) - The ID of the zone to which the production site belongs.
-  * `status` - (Optional) - The status of the resource
+  * `source_region_id` - (Required) The ID of the region to which the primary disk belongs.
+  * `source_zone_id` - (Required) The ID of the zone to which the primary disk belongs.
+  * `source_disk_id` - (Required) The ID of the primary disk.
+  * `destination_region_id` - (Required) The ID of the region to which the secondary disk belongs.
+  * `destination_zone_id` - (Required) The ID of the zone to which the secondary disk belongs.
+  * `destination_disk_id` - (Required) The ID of the secondary disk.
+  * `disk_replica_pair_name` - (Optional) The name of the async replication pair. It must be 2 to 128 characters in length, start with a letter, and cannot start with http:// or https://. It can contain letters, digits, colons (:), underscores (_), periods (.), and hyphens (-).
+  * `description` - (Optional) The description of the async replication pair. It must be 2 to 256 characters in length and cannot start with http:// or https://.
+  * `rpo` - (Optional) The Recovery Point Objective (RPO) of the async replication pair. Unit: seconds. Valid values: 300 to 86400. Default value: 300.
+  * `one_shot` - (Optional) Specifies whether to perform immediate synchronization. Valid values: `true` (start data synchronization immediately), `false` (start data synchronization after the RPO period). Default value: `false`.
+  * `replica_group_id` - (Optional) The ID of the replication group to which the pair belongs.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `last_recover_point` - The time when data was last replicated from the primary disk to the secondary disk in the replication pair. 
-  * `replica_pair_id` - The first ID of the resource
-  * `create_time` - The creation time of the resource
-  * `status` - The status of the resource
+  * `id` - The ID of the async replication pair.
+  * `replica_pair_id` - The ID of the async replication pair.
+  * `create_time` - The creation time of the async replication pair in UTC format (e.g., 2006-01-02T15:04:05-07:00).
+  * `last_recover_point` - The timestamp when data was last replicated from the primary disk to the secondary disk. Unit: seconds.
+  * `status` - The status of the async replication pair. Valid values: `creating`, `created`, `syncing`, `normal`, `stopped`, `failovered`, `deleting`, `failed`, etc.
+
+## Import
+
+EBS Disk Replica Pair can be imported using the replica pair ID, e.g.
+
+```
+$ terraform import alibabacloudstack_ebs_diskreplicapair.example rp-xxxxxxxxx
+```

@@ -1,5 +1,5 @@
 ---
-subcategory: "Prometheus"
+subcategory: "Prometheus 监控 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_contact"
 sidebar_current: "docs-alibabacloudstack-resource-prometheus-v2-contact"
@@ -42,3 +42,11 @@ resource "alibabacloudstack_prometheus_v2_contact" "default" {
 导出以下属性（按规则排序）：
 
 * `id` - 联系人的唯一系统标识ID，由Prometheus服务自动生成。
+
+## Import
+
+联系人可以使用联系人 ID 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_prometheus_v2_contact.example 12345
+```
