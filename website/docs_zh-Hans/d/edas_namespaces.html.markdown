@@ -67,12 +67,9 @@ output "namespace_by_name_regex" {
 * `names` - 命名空间名称列表。
 * `namespaces` - Edas命名空间列表。每个元素包含以下属性：
   * `belong_region` - 命名空间所属的物理区域ID。这表示命名空间所在的地理位置。
-  * `debug_enable` - 指示是否允许在此命名空间中进行远程调试。
   * `description` - 命名空间的描述。它是对命名空间的简要说明，长度不得超过128个字符。
   * `id` - 资源ID，它在Terraform中唯一标识命名空间。
-  * `mse_instance_id` - 与此命名空间关联的MSE（微服务引擎）注册中心实例ID。
   * `namespace_id` - 由企业分布式应用服务（EDAS）生成的命名空间唯一ID。此ID由EDAS内部使用来管理命名空间。
   * `namespace_logical_id` - 命名空间的逻辑ID。**注意：** 创建命名空间后，逻辑ID不能更改。其格式为`物理区域ID:逻辑区域标识符`。
   * `namespace_name` - 命名空间的名称。这是用户定义的命名空间名称，在阿里云账户内必须是唯一的。
-  * `registry_type` - 注册中心类型。有效值：`default`（EDAS共享注册中心）、`exclusive_mse`（MSE Nacos注册中心）。
   * `user_id` - 命名空间所属的阿里云账户ID。这有助于识别命名空间的所有者。

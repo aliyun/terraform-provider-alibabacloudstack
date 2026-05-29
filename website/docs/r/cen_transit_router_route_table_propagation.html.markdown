@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cen_transitrouterroutetablepropagation"
+page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_route_table_propagation"
 sidebar_current: "docs-Alibabacloudstack-cen-transitrouterroutetablepropagation"
 description: |-
   Provides a cen Transitrouterroutetablepropagation resource.

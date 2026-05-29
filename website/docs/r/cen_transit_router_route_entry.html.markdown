@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cen_transitrouterrouteentry"
+page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_route_entry"
 sidebar_current: "docs-Alibabacloudstack-cen-transitrouterrouteentry"
 description: |-
   Provides a cen Transitrouterrouteentry resource.

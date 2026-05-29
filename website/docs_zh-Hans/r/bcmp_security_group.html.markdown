@@ -1,4 +1,4 @@
----
+﻿---
 layout: "alicloud-doc"
 page_title: "Resource: alibabacloudstack_bcmp_security_group"
 subcategory: "裸金属算力平台 BMCP"
@@ -9,7 +9,7 @@ subcategory: "裸金属算力平台 BMCP"
 提供 BMCP 安全组资源。
 
 -> **注意：** 该资源也可以通过以下别名引用：
-- `alibabacloudstack_bmcp_security_group`
+- `alibabacloudstack_bcmp_security_group`
 
 ## 示例
 

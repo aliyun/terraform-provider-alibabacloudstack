@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "Express Connect"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_vbrpconnassociation"
+page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_vbr_pconn_association"
 sidebar_current: "docs-Alibabacloudstack-expressconnect-vbrpconnassociation"
 description: |-
   Provides a expressconnect Vbrpconnassociation resource.

@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "高速通道"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgppeers"
+page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgp_peers"
 sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-bgppeers"
 description: |-
   提供阿里云账号下拥有的expressconnect bgppeers列表。

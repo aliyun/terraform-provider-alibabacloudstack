@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "云企业网"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cen_transitroutermulticastdomainassociation"
+page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_multicast_domain_association"
 sidebar_current: "docs-Alibabacloudstack-cen-transitroutermulticastdomainassociation"
 description: |-
   提供 cen Transitroutermulticastdomainassociation 资源。

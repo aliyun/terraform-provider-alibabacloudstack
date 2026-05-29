@@ -1,7 +1,7 @@
 ---
 subcategory: "VPN网关"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_sslvpnservers"
+page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_ssl_vpnservers"
 sidebar_current: "docs-Alibabacloudstack-datasource-vpngateway-sslvpnservers"
 description: |-
   提供当前 AlibabacloudStack 账户下所有 SSL VPN 服务器的列表。

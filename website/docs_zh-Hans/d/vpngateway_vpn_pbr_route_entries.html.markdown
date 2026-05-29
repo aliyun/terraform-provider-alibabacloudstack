@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "VPN网关"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnpbrrouteentries"
+page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpn_pbr_route_entries"
 sidebar_current: "docs-Alibabacloudstack-datasource-vpngateway-vpnpbrrouteentries"
 description: |-
   提供阿里云账号下拥有的vpngateway vpnpbrrouteentries列表。

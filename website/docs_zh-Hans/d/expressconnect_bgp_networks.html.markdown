@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "高速通道"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgpnetworks"
+page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgp_networks"
 sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-bgpnetworks"
 description: |-
   提供阿里云账号下拥有的expressconnect bgpnetworks列表。
@@ -13,7 +13,7 @@ description: |-
 
 ## 示例用法
 ```
-data "alibabacloudstack_expressconnect_bgpnetworks" "default" {
+data "alibabacloudstack_expressconnect_bgp_networks" "default" {
   router_id = "vbr-bp1d8yqvswjk4qr6i***"
   dst_cidr_block = "192.168.0.0/16"
 }

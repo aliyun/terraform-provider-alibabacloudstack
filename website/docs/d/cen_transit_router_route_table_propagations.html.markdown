@@ -1,15 +1,15 @@
----
+﻿---
 subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cen_transitrouterroutetablepropagations"
-sidebar_current: "docs-Alibabacloudstack-datasource-cen-transitrouterroutetablepropagations"
+page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_route_table_propagations"
+sidebar_current: "docs-Alibabacloudstack-datasource-cen-transit-router-route-table-propagations"
 description: |-
-  Provides a list of cen transitrouterroutetablepropagations owned by an alibabacloudstack account.
+  Provides a list of cen transit router route table propagations owned by an alibabacloudstack account.
 ---
 
-# alibabacloudstack\_cen\_transitrouterroutetablepropagations
+# alibabacloudstack\_cen\_transit_router_route_table_propagations
 
-This data source provides a list of cen transitrouterroutetablepropagations in an alibabacloudstack account according to the specified filters.
+This data source provides a list of cen transit router route table propagations in an alibabacloudstack account according to the specified filters.
 
 ## Example Usage
 ```

@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "Express Connect"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgpnetworks"
+page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgp_networks"
 sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-bgpnetworks"
 description: |-
   Provides a list of expressconnect bgpnetworks owned by an alibabacloudstack account.
@@ -13,7 +13,7 @@ This data source provides a list of expressconnect bgpnetworks in an alibabaclou
 
 ## Example Usage
 ```
-data "alibabacloudstack_expressconnect_bgpnetworks" "example" {
+data "alibabacloudstack_expressconnect_bgp_networks" "example" {
   router_id = "vbr-bp1d8yixxxxxxxxxxx"
   dst_cidr_block = "192.168.0.0/16"
 }

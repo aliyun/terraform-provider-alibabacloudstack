@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_sslvpnserver"
+page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_ssl_vpn_server"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-sslvpnserver"
 description: |-
   Provides a vpngateway Sslvpnserver resource.

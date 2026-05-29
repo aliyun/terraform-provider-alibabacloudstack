@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_nas_lifecyclepolicy"
+page_title: "Alibabacloudstack: alibabacloudstack_nas_lifecycle_policy"
 sidebar_current: "docs-Alibabacloudstack-nas-lifecyclepolicy"
 description: |-
   Provides a nas Lifecyclepolicy resource.

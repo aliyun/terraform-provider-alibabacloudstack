@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "云企业网"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cen_transitrouterroutetableassociation"
+page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_route_table_association"
 sidebar_current: "docs-Alibabacloudstack-cen-transitrouterroutetableassociation"
 description: |-
   提供一个cen转发路由器路由表关联资源。

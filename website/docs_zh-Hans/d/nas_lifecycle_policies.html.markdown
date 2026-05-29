@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "文件存储 NAS"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_nas_lifecyclepolicies"
+page_title: "Alibabacloudstack: alibabacloudstack_nas_lifecycle_policies"
 sidebar_current: "docs-Alibabacloudstack-datasource-nas-lifecyclepolicies"
 description: |-
   提供阿里云账号下拥有的nas lifecyclepolicies列表。

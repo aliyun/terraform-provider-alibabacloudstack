@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "云企业网"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cen_transitrouterroutetablepropagation"
+page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_route_table_propagation"
 sidebar_current: "docs-Alibabacloudstack-cen-transitrouterroutetablepropagation"
 description: |-
   提供一个 cen Transitrouterroutetablepropagation 资源。

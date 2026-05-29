@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnpbrrouteentries"
+page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpn_pbr_route_entries"
 sidebar_current: "docs-Alibabacloudstack-datasource-vpngateway-vpnpbrrouteentries"
 description: |-
   Provides a list of vpngateway vpnpbrrouteentries owned by an alibabacloudstack account.

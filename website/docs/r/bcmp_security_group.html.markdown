@@ -1,4 +1,4 @@
----
+﻿---
 layout: "alicloud-doc"
 page_title: "Resource: alibabacloudstack_bcmp_security_group"
 subcategory: "Bare Metal Computing Platform (BMCP)"
@@ -9,7 +9,7 @@ subcategory: "Bare Metal Computing Platform (BMCP)"
 Provides a BMCP Security Group resource.
 
 -> **Note:** This resource can also be referred to by the following alias:
-- `alibabacloudstack_bmcp_security_group`
+- `alibabacloudstack_bcmp_security_group`
 
 ## Example Usage
 

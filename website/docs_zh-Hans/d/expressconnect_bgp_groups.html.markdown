@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "高速通道"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgpgroups"
+page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgp_groups"
 sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-bgpgroups"
 description: |-
   提供阿里云账号下拥有的expressconnect bgpgroups列表。

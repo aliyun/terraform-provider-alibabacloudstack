@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "云企业网"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cen_transitroutermulticastdomains"
+page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_multicast_domains"
 sidebar_current: "docs-Alibabacloudstack-datasource-cen-transitroutermulticastdomains"
 description: |-
   提供阿里云账户拥有的 cen transitroutermulticastdomains 列表。

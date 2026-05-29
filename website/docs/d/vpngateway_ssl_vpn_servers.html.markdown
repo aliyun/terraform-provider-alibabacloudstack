@@ -1,13 +1,13 @@
 ---
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_sslvpnservers"
-sidebar_current: "docs-Alibabacloudstack-datasource-vpngateway-sslvpnservers"
+page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_ssl_vpnservers"
+sidebar_current: "docs-Alibabacloudstack-datasource-vpngateway-ssl-vpn-servers"
 description: |-
-  Provides a list of vpngateway sslvpnservers owned by an alibabacloudstack account.
+  Provides a list of vpngateway ssl vpn servers owned by an alibabacloudstack account.
 ---
 
-# alibabacloudstack\_vpngateway\_sslvpnservers
+# alibabacloudstack\_vpngateway\_ssl\_vpn\_servers
 
 This data source provides a list of vpngateway sslvpnservers in an alibabacloudstack account according to the specified filters.
 

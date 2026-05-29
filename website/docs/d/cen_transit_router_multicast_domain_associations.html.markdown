@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cen_transitroutermulticastdomainassociations"
+page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_multicast_domain_associations"
 sidebar_current: "docs-Alibabacloudstack-datasource-cen-transitroutermulticastdomainassociations"
 description: |-
   Provides a list of cen transitroutermulticastdomainassociations owned by an alibabacloudstack account.

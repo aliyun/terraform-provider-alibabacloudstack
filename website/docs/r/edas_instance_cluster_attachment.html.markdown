@@ -1,13 +1,13 @@
----
+﻿---
 subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_edas_cluster_member"
+page_title: "Alibabacloudstack: alibabacloudstack_edas_instance_cluster_attachment"
 sidebar_current: "docs-Alibabacloudstack-edas-cluster-member"
 description: |-
   Import ECS instances into EDAS cluster
 ---
 
-# alibabacloudstack_edas_cluster_member
+# alibabacloudstack_edas_instance_cluster_attachment
 
 Import ECS instances into EDAS cluster to achieve unified management of application deployment environments.
 
@@ -153,7 +153,7 @@ resource "alibabacloudstack_edas_cluster" "default" {
 
 
 
-resource "alibabacloudstack_edas_cluster_member" "default" {
+resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
   cluster_id  = alibabacloudstack_edas_cluster.default.id
   instance_ids = [alibabacloudstack_ecs_instance.default.id]
 }

@@ -1,4 +1,4 @@
----
+﻿---
 subcategory: "企业级分布式应用服务 EDAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_instance_cluster_attachment"
@@ -7,7 +7,7 @@ description: |-
   将ECS实例导入到EDAS集群
 ---
 
-# alibabacloudstack_edas_cluster_member
+# alibabacloudstack_edas_instance_cluster_attachment
 
 将ECS实例导入到EDAS集群，实现应用部署环境的统一管理。
 
@@ -154,7 +154,7 @@ resource "alibabacloudstack_edas_cluster" "default" {
 
 
 
-resource "alibabacloudstack_edas_cluster_member" "default" {
+resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
   cluster_id  = alibabacloudstack_edas_cluster.default.id
   instance_ids = [alibabacloudstack_ecs_instance.default.id]
 }

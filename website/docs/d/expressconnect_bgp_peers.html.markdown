@@ -1,7 +1,7 @@
----
+﻿---
 subcategory: "Express Connect"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgppeers"
+page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgp_peers"
 sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-bgppeers"
 description: |-
   Provides a list of expressconnect bgppeers owned by an alibabacloudstack account.
