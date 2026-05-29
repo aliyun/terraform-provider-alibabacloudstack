@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Network Address Translation Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_natgateway"
-sidebar_current: "docs-Alibabacloudstack-natgateway-natgateway"
+sidebar_current: "docs-Alibabacloudstack-resource-natgateway-natgateway"
 description: |- 
   Provides a natgateway Natgateway resource.
 ---

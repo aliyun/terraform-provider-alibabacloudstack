@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Table Store (OTS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_clusters"
-sidebar_current: "docs-alibabacloudstack-datasource-ots-clusters"
+sidebar_current: "docs-Alibabacloudstack-datasource-ots-clusters"
 description: |-
   Provides a datasource to retrieve the list of available Tablestore clusters.
 ---

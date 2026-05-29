@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Container Registry (ACR)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_sync_rule"
-sidebar_current: "docs-alibabacloudstack-resource-cr-ee-sync-rule"
+sidebar_current: "docs-Alibabacloudstack-resource-cr-ee-sync-rule"
 description: |-
   Provides a Alibabacloudstack resource to manage Container Registry Enterprise Edition sync rules.
 ---

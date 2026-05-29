@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "日志服务 SLS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_project"
-sidebar_current: "docs-alibabacloudstack-resource-log-project"
+sidebar_current: "docs-Alibabacloudstack-resource-log-project"
 description: |-
   编排日志告警的项目
 ---

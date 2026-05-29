@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云解析 DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_access_strategy"
-sidebar_current: "docs-Alibabacloudstack-dns-dns_gtm_access_strategy"
+sidebar_current: "docs-Alibabacloudstack-resource-dns-gtm-access-strategy"
 description: |-
   云解析全局调度实例访问策略
 ---

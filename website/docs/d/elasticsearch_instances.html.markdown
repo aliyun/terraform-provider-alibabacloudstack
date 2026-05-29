@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Elasticsearch"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_elasticsearch_instances"
-sidebar_current: "docs-alibabacloudstack-datasource-elasticsearch-instances"
+sidebar_current: "docs-Alibabacloudstack-datasource-elasticsearch-instances"
 description: |-
   Provides a collection of Elasticsearch instances according to the specified filters.
 ---

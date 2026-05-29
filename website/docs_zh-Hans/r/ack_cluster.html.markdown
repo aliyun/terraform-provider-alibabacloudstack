@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Kubernetes容器监控"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ack_cluster"
-sidebar_current: "docs-Alibabacloudstack-ack-cluster"
+sidebar_current: "docs-Alibabacloudstack-resource-ack-cluster"
 description: |- 
   编排ack集群
 ---

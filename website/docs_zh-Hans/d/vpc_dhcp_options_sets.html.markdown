@@ -2,7 +2,7 @@
 subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_dhcp_options_sets"
-sidebar_current: "docs-Alibabacloudstack-datasource-vpc-dhcpoptionssets"
+sidebar_current: "docs-Alibabacloudstack-datasource-vpc-dhcp-options-sets"
 description: |-
   提供阿里云账号下拥有的vpc dhcpoptionssets列表�?
 ---

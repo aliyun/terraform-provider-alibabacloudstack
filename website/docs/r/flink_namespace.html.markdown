@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Realtime Compute for Apache Flink"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack:alibabacloudstack_flink_namespace"
-sidebar_current: "docs-alibabacloudstack-resource-flink-namespace"
+sidebar_current: "docs-Alibabacloudstack-resource-flink-namespace"
 description: |-
   Provides a Alibabacloudstack resource to manage Flink namespaces.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "文件存储 NAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_namespace_filesystem_attachment"
-sidebar_current: "docs-Alibabacloudstack-nas-nas_namespace_filesystem_attachment"
+sidebar_current: "docs-Alibabacloudstack-resource-nas-namespace-filesystem-attachment"
 description: |-
   编排NAS统一命名空间文件存储映射
 ---

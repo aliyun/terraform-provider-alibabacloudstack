@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6egressrule"
-sidebar_current: "docs-Alibabacloudstack-vpc-ipv6egressrule"
+sidebar_current: "docs-Alibabacloudstack-resource-vpc-ipv6egressrule"
 description: |- 
   Provides a vpc Ipv6Egressrule resource.
 ---

@@ -1,9 +1,9 @@
----
+﻿---
 subcategory: "云数据库 MongoDB 版" 
 layout: "alibabacloudstack" 
 page_title: "Alibabacloudstack: 
 alibabacloudstack_mongodb_shardinginstance_mongosnode_address" 
-sidebar_current: "docs-Alibabacloudstack-shardinginstance-mongosnode-address" description: |- 
+sidebar_current: "docs-Alibabacloudstack-resource-mongodb-shardinginstance-mongosnode-address" description: |- 
 管理Mongodb分片实例Mongos节点的网络链接地址。
 ---
 

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_instance"
-sidebar_current: "docs-Alibabacloudstack-ecs-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-instance"
 description: |- 
   Provides a ecs Instance resource.
 ---

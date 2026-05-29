@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业级分布式应用服务 EDAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_k8s_application_scaling_rules"
-sidebar_current: "docs-alibabacloudstack-datasource-edas-k8s-application-scaling-rules"
+sidebar_current: "docs-Alibabacloudstack-datasource-edas-k8s-application-scaling-rules"
 description: |-
   提供EDAS K8s应用扩缩容规则列表供调用方使用
 ---

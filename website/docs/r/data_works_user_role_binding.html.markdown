@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "One-stop Big Data Development and Governance Platform"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_data_works_user_role_binding"
-sidebar_current: "docs-alibabacloudstack-resource-data-works-user-role-binding"
+sidebar_current: "docs-Alibabacloudstack-resource-data-works-user-role-binding"
 description: |-
   Provides a AlibabacloudStack Data Works UserRoleBinding resource.
 ---

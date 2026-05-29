@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云企业网"
 layout: "alibabacloudstack"
 page_title: "阿里云: alibabacloudstack_cen_transit_router_connect_peers"
-sidebar_current: "docs-alibabacloudstack-datasource-cen-transit-router-connect-peers"
+sidebar_current: "docs-Alibabacloudstack-datasource-cen-transit-router-connect-peers"
 description: |-
   提供阿里云CEN转发路由器连接对等点列表，供 alibabacloudstack_cen_transit_router_connect_peer 资源使用。
 ---

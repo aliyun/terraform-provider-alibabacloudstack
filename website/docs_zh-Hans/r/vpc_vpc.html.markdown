@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_vpc"
-sidebar_current: "docs-Alibabacloudstack-vpc-vpc"
+sidebar_current: "docs-Alibabacloudstack-resource-vpc-vpc"
 description: |- 
   编排VPC实例
 ---

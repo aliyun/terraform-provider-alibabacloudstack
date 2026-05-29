@@ -2,7 +2,7 @@
 subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_instance_cluster_attachment"
-sidebar_current: "docs-Alibabacloudstack-edas-cluster-member"
+sidebar_current: "docs-Alibabacloudstack-resource-edas-instance-cluster-attachment"
 description: |-
   Import ECS instances into EDAS cluster
 ---

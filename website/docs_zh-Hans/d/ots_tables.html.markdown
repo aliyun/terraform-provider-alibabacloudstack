@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "表格存储"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_tables"
-sidebar_current: "docs-alibabacloudstack-datasource-ots-tables"
+sidebar_current: "docs-Alibabacloudstack-datasource-ots-tables"
 description: |-
     查询表格存储（OTS）数据表
 ---

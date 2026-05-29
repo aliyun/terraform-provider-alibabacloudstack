@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API Gateway V2"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_api_gateway_v2_domains"
-sidebar_current: "docs-alibabacloudstack-datasource-api-gateway-v2-domains"
+sidebar_current: "docs-Alibabacloudstack-datasource-api-gateway-v2-domains"
 description: |-
   Provides a list of Api Gateway V2 Domains to the user.
 ---

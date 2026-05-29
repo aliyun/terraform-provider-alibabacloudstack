@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据库 PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_cluster_account_database_binding"
-sidebar_current: "docs-alibabacloudstack-resource-polardb-cluster-account-database-binding"
+sidebar_current: "docs-Alibabacloudstack-resource-polardb-cluster-account-database-binding"
 description: |-
   提供 PolarDB 集群账户数据库绑定资源。
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6egressrule"
-sidebar_current: "docs-Alibabacloudstack-vpc-ipv6egressrule"
+sidebar_current: "docs-Alibabacloudstack-resource-vpc-ipv6egressrule"
 description: |- 
   编排VPC的IPv6 出口规则
 ---

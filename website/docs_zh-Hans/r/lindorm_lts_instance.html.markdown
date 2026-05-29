@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生多模数据库 Lindorm"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_lindorm_lts_instance"
-sidebar_current: "docs-alibabacloudstack-resource-lindorm-lts-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-lindorm-lts-instance"
 description: |-
   提供阿里云 Lindorm LTS 实例资源
 ---

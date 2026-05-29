@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_zones"
-sidebar_current: "docs-alibabacloudstack-datasource-slb-zones"
+sidebar_current: "docs-Alibabacloudstack-datasource-slb-zones"
 description: |-
     Provides a list of availability zones for SLB that can be used by an AlibabacloudStack Cloud account.
 ---

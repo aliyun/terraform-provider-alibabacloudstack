@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Prometheus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_instances"
-sidebar_current: "docs-alibabacloudstack-datasource-prometheus-v2-instances"
+sidebar_current: "docs-Alibabacloudstack-datasource-prometheus-v2-instances"
 description: |-
   Queries the list of Prometheus V2 instances in Alibaba Cloud.
 ---

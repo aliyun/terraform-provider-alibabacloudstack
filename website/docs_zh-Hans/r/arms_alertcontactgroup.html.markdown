@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "应用实时监控服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_arms_alertcontactgroup"
-sidebar_current: "docs-Alibabacloudstack-arms-alertcontactgroup"
+sidebar_current: "docs-Alibabacloudstack-resource-arms-alertcontactgroup"
 description: |- 
   编排应用实时监控服务(ARMS)警报联系人组
 ---

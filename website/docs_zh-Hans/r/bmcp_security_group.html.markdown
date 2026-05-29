@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "裸金属算力平台 BMCP"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bmcp_security_group"
-sidebar_current: "docs-Alibabacloudstack-bmcp-security-group"
+sidebar_current: "docs-Alibabacloudstack-resource-bmcp-security-group"
 description: |-
   编排BMCP安全组资源
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "阿里云并行文件系统(APFS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_apfs_file_system"
-sidebar_current: "docs-Alibabacloudstack-storage-apfs_file_system"
+sidebar_current: "docs-Alibabacloudstack-resource-apfs-file-system"
 description: |-
   管理APFS文件存储系统
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_user_groups"
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-user-groups"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-user-groups"
 description: |-
     查询ascm用户组
 ---

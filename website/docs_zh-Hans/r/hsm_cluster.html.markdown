@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "硬件安全模块"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hsm_cluster"
-sidebar_current: "docs-alibabacloudstack-resource-hsm-cluster"
+sidebar_current: "docs-Alibabacloudstack-resource-hsm-cluster"
 description: |-
   提供阿里云专有云HSM密码机集群资源。
 ---

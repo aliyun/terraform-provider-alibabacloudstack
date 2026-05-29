@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API 网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_apigateway_apigroup"
-sidebar_current: "docs-Alibabacloudstack-apigateway-apigroup"
+sidebar_current: "docs-Alibabacloudstack-resource-apigateway-apigroup"
 description: |- 
   编排API网关下的API组
 ---

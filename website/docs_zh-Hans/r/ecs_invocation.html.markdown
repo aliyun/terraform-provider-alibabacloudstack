@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_invocation"
-sidebar_current: "docs-Alibabacloudstack-ecs-invocation"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-invocation"
 description: |-
   提供一个 ECS 命令执行记录（Invocation）资源。
 ---

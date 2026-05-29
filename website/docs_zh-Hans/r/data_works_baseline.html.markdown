@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "一站式大数据开发治理平台"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_data_works_baseline"
-sidebar_current: "docs-Alibabacloudstack-data-works-baseline"
+sidebar_current: "docs-Alibabacloudstack-resource-data-works-baseline"
 description: |-
   提供 DataWorks 基线资源。
 ---

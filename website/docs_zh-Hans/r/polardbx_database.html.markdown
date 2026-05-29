@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生分布式数据库PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_database"
-sidebar_current: "docs-Alibabacloudstack-polardbx-database"
+sidebar_current: "docs-Alibabacloudstack-resource-polardbx-database"
 description: |- 
   编排polardb数据库表
 ---

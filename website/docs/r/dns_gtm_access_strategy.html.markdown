@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Universal DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_access_strategy"
-sidebar_current: "docs-Alibabacloudstack-dns-dns_gtm_access_strategy"
+sidebar_current: "docs-Alibabacloudstack-resource-dns-gtm-access-strategy"
 description: |-
   Access strategy for Global Traffic Manager (GTM) instance in Alibaba Cloud DNS
 ---

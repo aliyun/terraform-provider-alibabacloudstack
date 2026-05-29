@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_users"
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-users"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-users"
 description: |-
     Provides a list of users to the user.
 ---

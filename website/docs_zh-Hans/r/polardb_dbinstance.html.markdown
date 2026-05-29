@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据库 PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_dbinstance"
-sidebar_current: "docs-Alibabacloudstack-polardb-dbinstance"
+sidebar_current: "docs-Alibabacloudstack-resource-polardb-dbinstance"
 description: |- 
   编排polardb数据库实例
 ---

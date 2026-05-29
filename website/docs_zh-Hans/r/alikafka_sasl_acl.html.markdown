@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "消息队列 Kafka 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_sasl_acl"
-sidebar_current: "docs-alibabacloudstack-resource-alikafka-sasl_acl"
+sidebar_current: "docs-Alibabacloudstack-resource-alikafka-sasl-acl"
 description: |-
   编排Alikafka SASL ACL资源
 ---

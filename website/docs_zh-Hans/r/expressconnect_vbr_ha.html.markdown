@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "高速通道"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_vbr_ha"
-sidebar_current: "docs-Alibabacloudstack-expressconnect-vbr_ha"
+sidebar_current: "docs-Alibabacloudstack-resource-expressconnect-vbr-ha"
 description: |-
   高速通道 VBR 快速倒换组
 ---

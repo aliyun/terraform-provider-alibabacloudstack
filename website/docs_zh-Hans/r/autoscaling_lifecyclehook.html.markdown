@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "弹性伸缩"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_lifecyclehook"
-sidebar_current: "docs-Alibabacloudstack-autoscaling-lifecyclehook"
+sidebar_current: "docs-Alibabacloudstack-resource-autoscaling-lifecyclehook"
 description: |- 
   编排弹性伸缩的生命周期钩子
 ---

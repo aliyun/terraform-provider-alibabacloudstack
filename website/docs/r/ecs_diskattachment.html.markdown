@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_diskattachment"
-sidebar_current: "docs-Alibabacloudstack-ecs-diskattachment"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-diskattachment"
 description: |- 
   Provides a ecs Diskattachment resource.
 ---

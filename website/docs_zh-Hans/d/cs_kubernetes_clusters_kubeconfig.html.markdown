@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Kubernetes容器监控"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cs_kubernetes_clusters_kubeconfig"
-sidebar_current: "docs-alibabacloudstack-datasource-cs-kubernetes-clusters-kubeconfig"
+sidebar_current: "docs-Alibabacloudstack-datasource-cs-kubernetes-clusters-kubeconfig"
 description: |-
   查询K8s集群的配置信息
 ---

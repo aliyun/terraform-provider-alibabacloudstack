@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "MaxCompute"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_cus"
-sidebar_current: "docs-alibabacloudstack-datasource-maxcompute-cus"
+sidebar_current: "docs-Alibabacloudstack-datasource-maxcompute-cus"
 description: |-
   Provides a datasource of Max Compute Cus
 ---

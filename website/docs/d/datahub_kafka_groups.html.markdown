@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "DataHub"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_datahub_kafka_groups"
-sidebar_current: "docs-alibabacloudstack-datasource-datahub-kafka-groups"
+sidebar_current: "docs-Alibabacloudstack-datasource-datahub-kafka-groups"
 description: |-
   Provides a list of DataHub Kafka Groups for a specified project.
 ---

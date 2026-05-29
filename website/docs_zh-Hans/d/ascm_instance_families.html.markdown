@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_instance_families"
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-instance-families"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-instance-families"
 description: |-
     查询ascm实例族
 ---

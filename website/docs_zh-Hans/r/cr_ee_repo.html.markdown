@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "容器镜像服务 ACR"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_repo"
-sidebar_current: "docs-alibabacloudstack-resource-cr-ee-repo"
+sidebar_current: "docs-Alibabacloudstack-resource-cr-ee-repo"
 description: |-
   编排容器镜像企业版仓库
 ---

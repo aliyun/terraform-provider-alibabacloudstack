@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Quick BI"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_quick_bi_user_group"
-sidebar_current: "docs-alibabacloudstack-resource-quick-bi-user-group"
+sidebar_current: "docs-Alibabacloudstack-resource-quick-bi-user-group"
 description: |-
   Provides a Alibabacloudstack Quick BI UserGroup resource.
 ---

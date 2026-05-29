@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云密码机"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cspprivate_hsm_group"
-sidebar_current: "docs-Alibabacloudstack-cspprivate-hsm_group"
+sidebar_current: "docs-Alibabacloudstack-resource-cspprivate-hsm-group"
 description: |-
   管理阿里云密码机组资源
 ---

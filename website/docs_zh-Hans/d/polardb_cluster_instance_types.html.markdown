@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据库 PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_cluster_instance_types"
-sidebar_current: "docs-alibabacloudstack-datasource-polardb-cluster-instance-types"
+sidebar_current: "docs-Alibabacloudstack-datasource-polardb-cluster-instance-types"
 description: |-
   提供 PolarDB 集群实例类型列表。
 ---

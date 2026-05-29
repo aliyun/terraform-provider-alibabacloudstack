@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Prometheus 监控服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_alert"
-sidebar_current: "docs-Alibabacloudstack-prometheus-prometheus_v2_alert"
+sidebar_current: "docs-Alibabacloudstack-resource-prometheus-v2-alert"
 description: |-
   管理Prometheus v2警告规则
 ---

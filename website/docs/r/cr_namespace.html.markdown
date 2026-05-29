@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Container Registry (ACR)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack:alibabacloudstack_cr_namespace"
-sidebar_current: "docs-alibabacloudstack-resource-container-registry"
+sidebar_current: "docs-Alibabacloudstack-resource-cr-namespace"
 description: |-
   Provides a Alibabacloudstack resource to manage Container Registry namespaces.
 ---

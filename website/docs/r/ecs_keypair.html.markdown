@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_keypair"
-sidebar_current: "docs-Alibabacloudstack-ecs-keypair"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-keypair"
 description: |- 
   Provides a ecs Keypair resource.
 ---

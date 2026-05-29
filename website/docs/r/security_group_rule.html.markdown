@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_security_group_rule"
-sidebar_current: "docs-alibabacloudstack-resource-security-group-rule"
+sidebar_current: "docs-Alibabacloudstack-resource-security-group-rule"
 description: |-
   Provides a Alibabacloudstack Security Group Rule resource.
 ---

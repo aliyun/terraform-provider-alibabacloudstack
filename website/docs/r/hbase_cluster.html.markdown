@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Hadoop Database"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hbase_cluster"
-sidebar_current: "docs-Alibabacloudstack-hbase-cluster"
+sidebar_current: "docs-Alibabacloudstack-resource-hbase-cluster"
 description: |- 
   Provides a hbase Cluster resource.
 ---

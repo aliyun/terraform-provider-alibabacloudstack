@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Table Store (OTS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_tables"
-sidebar_current: "docs-alibabacloudstack-datasource-ots-tables"
+sidebar_current: "docs-Alibabacloudstack-datasource-ots-tables"
 description: |-
     Provides a list of ots tables to the user.
 ---

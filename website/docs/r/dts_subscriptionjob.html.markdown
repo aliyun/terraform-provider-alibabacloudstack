@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Data Transmission Service (DTS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dts_subscriptionjob"
-sidebar_current: "docs-Alibabacloudstack-dts-subscriptionjob"
+sidebar_current: "docs-Alibabacloudstack-resource-dts-subscriptionjob"
 description: |- 
   Provides a dts Subscriptionjob resource.
 ---

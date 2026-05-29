@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_securitygroup"
-sidebar_current: "docs-Alibabacloudstack-ecs-securitygroup"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-securitygroup"
 description: |- 
   编排云服务器（ECS）安全组资源。
 ---

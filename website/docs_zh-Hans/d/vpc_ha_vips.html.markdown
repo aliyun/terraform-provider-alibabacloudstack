@@ -2,7 +2,7 @@
 subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_ha_vips"
-sidebar_current: "docs-Alibabacloudstack-datasource-vpc-havips"
+sidebar_current: "docs-Alibabacloudstack-datasource-vpc-ha-vips"
 description: |-
   提供阿里云账号下拥有的vpc havips列表。
 ---

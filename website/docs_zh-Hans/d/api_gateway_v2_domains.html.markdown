@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API 网关（API Gateway）V2 版"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_api_gateway_v2_domains"
-sidebar_current: "docs-alibabacloudstack-datasource-api-gateway-v2-domains"
+sidebar_current: "docs-Alibabacloudstack-datasource-api-gateway-v2-domains"
 description: |-
   提供 API 网关 V2 域名列表给用户。
 ---

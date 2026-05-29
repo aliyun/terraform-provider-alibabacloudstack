@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_diskattachment"
-sidebar_current: "docs-Alibabacloudstack-ecs-diskattachment"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-diskattachment"
 description: |- 
   编排云绑定服务器（Ecs）磁盘和实例
 ---

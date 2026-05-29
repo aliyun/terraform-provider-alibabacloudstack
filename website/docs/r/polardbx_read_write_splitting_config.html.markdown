@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Cloud-Native Distributed Database PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_read_write_splitting_config"
-sidebar_current: "docs-Alibabacloudstack-polardbx-read-write-splitting-config"
+sidebar_current: "docs-Alibabacloudstack-resource-polardbx-read-write-splitting-config"
 description: |-
   Provides a PolarDBX read-write splitting configuration resource.
 ---

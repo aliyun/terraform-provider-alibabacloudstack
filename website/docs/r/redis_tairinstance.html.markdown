@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "ApsaraDB for Redis"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_redis_tairinstance"
-sidebar_current: "docs-Alibabacloudstack-redis-tairinstance"
+sidebar_current: "docs-Alibabacloudstack-resource-redis-tairinstance"
 description: |- 
   Provides a redis Tairinstance resource.
 ---

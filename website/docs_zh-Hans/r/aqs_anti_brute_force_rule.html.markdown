@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "防暴力破解安全服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_aqs_anti_brute_force_rule"
-sidebar_current: "docs-Alibabacloudstack-aqs-anti_brute_force_rule"
+sidebar_current: "docs-Alibabacloudstack-resource-aqs-anti-brute-force-rule"
 description: |-
   安骑士主机防暴力破解规则
 ---

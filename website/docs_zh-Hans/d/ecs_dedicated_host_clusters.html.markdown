@@ -2,7 +2,7 @@
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_dedicated_host_clusters"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-dedicatedhostclusters"
+sidebar_current: "docs-Alibabacloudstack-datasource-ecs-dedicated-host-clusters"
 description: |-
   提供阿里云账号下拥有的ecs dedicatedhostclusters列表。
 ---

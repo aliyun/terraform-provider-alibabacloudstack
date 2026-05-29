@@ -1,4 +1,4 @@
----
+﻿---
 subcategory: "资源编排 ROS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ros_templates"

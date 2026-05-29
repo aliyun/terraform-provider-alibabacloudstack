@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_cluster_backup_policies"
-sidebar_current: "docs-alibabacloudstack-data-source-polardb-cluster-backup-policies"
+sidebar_current: "docs-Alibabacloudstack-datasource-polardb-cluster-backup-policies"
 description: |-
   Provides a PolarDB cluster backup policies data source.
 ---

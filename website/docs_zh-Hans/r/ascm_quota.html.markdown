@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_quota"
-sidebar_current: "docs-alibabacloudstack-resource-ascm-quota"
+sidebar_current: "docs-Alibabacloudstack-resource-ascm-quota"
 description: |-
   编排Ascm配额
 ---

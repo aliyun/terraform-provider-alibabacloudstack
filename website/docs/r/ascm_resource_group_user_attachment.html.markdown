@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_resource_group_user_attachment"
-sidebar_current: "docs-alibabacloudstack-resource-ascm-resource-group-user-attachment"
+sidebar_current: "docs-Alibabacloudstack-resource-ascm-resource-group-user-attachment"
 description: |-
   Provides a ASCM resource group user attachment resource.
 ---

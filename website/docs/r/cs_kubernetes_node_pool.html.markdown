@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Container Service for Kubernetes (ACK)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cs_kubernetes_node_pool"
-sidebar_current: "docs-alibabacloudstack-resource-cs-kubernetes-node-pool"
+sidebar_current: "docs-Alibabacloudstack-resource-cs-kubernetes-node-pool"
 description: |-
   Provides a Alibabacloudstack resource to manage container kubernetes node pool.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_ramroleattachment"
-sidebar_current: "docs-Alibabacloudstack-ecs-ramroleattachment"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-ramroleattachment"
 description: |-
   编排绑定云服务器（ECS）实例和RAM角色
 ---

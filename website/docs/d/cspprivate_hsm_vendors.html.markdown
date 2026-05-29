@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Cspprivate HSM"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cspprivate_hsm_vendors"
-sidebar_current: "docs-alibabacloudstack-datasource-cspprivate-hsm-vendors"
+sidebar_current: "docs-Alibabacloudstack-datasource-cspprivate-hsm-vendors"
 description: |-
   Query Alibaba Cloud Hardware Security Module (HSM) vendors and their products.
 ---

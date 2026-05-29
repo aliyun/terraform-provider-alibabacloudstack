@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "RocketMQ (ONS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_topic"
-sidebar_current: "docs-alibabacloudstack-resource-ons-topic"
+sidebar_current: "docs-Alibabacloudstack-resource-ons-topic"
 description: |-
   Provides a alibabacloudstack ONS Topic resource.
 ---

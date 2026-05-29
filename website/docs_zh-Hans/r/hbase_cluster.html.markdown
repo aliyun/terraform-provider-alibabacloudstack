@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 HBase 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hbase_cluster"
-sidebar_current: "docs-Alibabacloudstack-hbase-cluster"
+sidebar_current: "docs-Alibabacloudstack-resource-hbase-cluster"
 description: |- 
   编排云数据库hbase集群
 ---

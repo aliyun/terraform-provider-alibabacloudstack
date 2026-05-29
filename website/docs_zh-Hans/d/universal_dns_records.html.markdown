@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云解析 DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_records"
-sidebar_current: "docs-Alibabacloudstack-datasource-universal_dns_records"
+sidebar_current: "docs-Alibabacloudstack-datasource-universal-dns-records"
 description: |-
   查询阿里云跨云解析域名解析记录
 ---

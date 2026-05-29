@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_mounttarget"
-sidebar_current: "docs-Alibabacloudstack-nas-mounttarget"
+sidebar_current: "docs-Alibabacloudstack-resource-nas-mounttarget"
 description: |- 
   Provides a nas Mounttarget resource.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "弹性公网 IP"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_eip_association"
-sidebar_current: "docs-Alibabacloudstack-eip-association"
+sidebar_current: "docs-Alibabacloudstack-resource-eip-association"
 description: |- 
   编排绑定弹性公网地址和云服务器（Ecs）实例
 ---

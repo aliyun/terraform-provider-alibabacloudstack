@@ -2,7 +2,7 @@
 subcategory: "云数据库 RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_proxies"
-sidebar_current: "docs-Alibabacloudstack-datasource-rds-dbproxies"
+sidebar_current: "docs-Alibabacloudstack-datasource-db-proxies"
 description: |-
   提供阿里云账号下拥有的rds dbproxies列表�?
 ---

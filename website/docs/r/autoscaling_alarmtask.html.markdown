@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Auto Scaling (ESS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_alarmtask"
-sidebar_current: "docs-Alibabacloudstack-autoscaling-alarmtask"
+sidebar_current: "docs-Alibabacloudstack-resource-autoscaling-alarmtask"
 description: |- 
   Provides a autoscaling Alarmtask resource.
 ---

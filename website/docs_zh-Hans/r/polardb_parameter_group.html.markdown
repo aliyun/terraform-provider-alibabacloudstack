@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据库 PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_parameter_group"
-sidebar_current: "docs-Alibabacloudstack-polardb-parameter-group"
+sidebar_current: "docs-Alibabacloudstack-resource-polardb-parameter-group"
 description: |-
   编排 PolarDB 参数模板资源。
 ---

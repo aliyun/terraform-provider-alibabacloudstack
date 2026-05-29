@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "负载均衡 SLB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_domainextension"
-sidebar_current: "docs-Alibabacloudstack-slb-domainextension"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-domainextension"
 description: |- 
   编排负载均衡(SLB)域名扩展列表
 ---

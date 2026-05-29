@@ -1,4 +1,4 @@
----
+﻿---
 subcategory: "运维编排 OOS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oos_templates"

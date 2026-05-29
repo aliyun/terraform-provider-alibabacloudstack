@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Quick BI"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_quick_bi_user"
-sidebar_current: "docs-alibabacloudstack-resource-quick-bi-user"
+sidebar_current: "docs-Alibabacloudstack-resource-quick-bi-user"
 description: |-
   Provides a Alibabacloudstack Quick BI User resource.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Auto Scaling (ESS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_notification"
-sidebar_current: "docs-Alibabacloudstack-autoscaling-notification"
+sidebar_current: "docs-Alibabacloudstack-resource-autoscaling-notification"
 description: |- 
   Provides a autoscaling Notification resource.
 ---

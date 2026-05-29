@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "消息队列 Kafka 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_sasl_user"
-sidebar_current: "docs-alibabacloudstack-resource-alikafka-sasl_user"
+sidebar_current: "docs-Alibabacloudstack-resource-alikafka-sasl-user"
 description: |-
   编排Alikafka SASL用户
 ---

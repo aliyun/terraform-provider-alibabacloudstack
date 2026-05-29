@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_ascm_roles"
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-roles"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-roles"
 description: |-
     查询角色列表
 

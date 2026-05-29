@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API 网关（API Gateway）V2 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_service_source"
-sidebar_current: "docs-Alibabacloudstack-api_gateway-api_gateway_v2_service_source"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-service-source"
 description: |-
   创建和管理API网关v2版本的服务来源
 ---

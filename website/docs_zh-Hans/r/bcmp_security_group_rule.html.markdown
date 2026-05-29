@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "裸金属算力平台 BMCP"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bcmp_security_group_rule"
-sidebar_current: "docs-Alibabacloudstack-bcmp-security-group-rule"
+sidebar_current: "docs-Alibabacloudstack-resource-bcmp-security-group-rule"
 description: |- 
   提供 BCMP 安全组规则资源。
 ---

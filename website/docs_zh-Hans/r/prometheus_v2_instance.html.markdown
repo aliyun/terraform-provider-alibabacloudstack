@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Prometheus 监控服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_instance"
-sidebar_current: "docs-Alibabacloudstack-prometheus-prometheus_v2_instance"
+sidebar_current: "docs-Alibabacloudstack-resource-prometheus-v2-instance"
 description: |-
   管理Prometheus V2实例资源
 ---

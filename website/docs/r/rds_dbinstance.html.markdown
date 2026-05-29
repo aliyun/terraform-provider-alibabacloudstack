@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Relational Database Service(RDS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_dbinstance"
-sidebar_current: "docs-Alibabacloudstack-rds-dbinstance"
+sidebar_current: "docs-Alibabacloudstack-resource-rds-dbinstance"
 description: |- 
   Provides a rds Dbinstance resource.
 ---

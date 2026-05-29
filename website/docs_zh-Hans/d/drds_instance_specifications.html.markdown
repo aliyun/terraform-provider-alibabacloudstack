@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "分布式关系型数据库"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_instance_specifications"
-sidebar_current: "docs-alibabacloudstack-drds-instance-specifications"
+sidebar_current: "docs-Alibabacloudstack-datasource-drds-instance-specifications"
 description: |-
   查询DRDS实例规格
 ---

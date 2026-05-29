@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Web应用防火墙" 
 layout: "alibabacloudstack" 
 page_title: "Alibabacloudstack: alibabacloudstack_waf_instances" 
-sidebar_current: "docs-alibabacloudstack-resource_waf_instances" 
+sidebar_current: "docs-Alibabacloudstack-datasource-waf-instances" 
 description: |- 
 提供一个基于过滤条件的 Alibaba Cloud Stack WAF 实例列表。
 ---

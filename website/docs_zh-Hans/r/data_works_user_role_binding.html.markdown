@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "一站式大数据开发治理平台"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_data_works_user_role_binding"
-sidebar_current: "docs-alibabacloudstack-resource-data-works-user-role-binding"
+sidebar_current: "docs-Alibabacloudstack-resource-data-works-user-role-binding"
 description: |-
   提供阿里云专有云 DataWorks 用户角色绑定资源。
 ---

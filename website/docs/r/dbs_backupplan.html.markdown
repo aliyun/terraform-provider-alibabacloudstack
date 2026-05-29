@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Database Backup"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dbs_backupplan"
-sidebar_current: "docs-Alibabacloudstack-dbs-backupplan"
+sidebar_current: "docs-Alibabacloudstack-resource-dbs-backupplan"
 description: |- 
   Provides a dbs Backupplan resource.
 ---

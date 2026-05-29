@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "日志服务 SLS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_logtail_config"
-sidebar_current: "docs-alibabacloudstack-resource-logtail-config"
+sidebar_current: "docs-Alibabacloudstack-resource-logtail-config"
 description: |-
   编排日志接入配置
 ---

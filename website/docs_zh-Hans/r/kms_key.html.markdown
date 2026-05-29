@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "密钥管理服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_key"
-sidebar_current: "docs-alibabacloudstack-resource-kms-key"
+sidebar_current: "docs-Alibabacloudstack-resource-kms-key"
 description: |-
   编排KMS密钥
 ---

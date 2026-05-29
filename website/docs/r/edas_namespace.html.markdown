@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_edas_namespace"
-sidebar_current: "docs-Alibabacloudstack-edas-namespace"
+sidebar_current: "docs-Alibabacloudstack-resource-edas-namespace"
 description: |-
   Provides a EDAS Namespace resource.
 ---

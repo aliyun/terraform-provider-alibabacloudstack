@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "消息队列 Kafka 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_topic"
-sidebar_current: "docs-Alibabacloudstack-alikafka-topic"
+sidebar_current: "docs-Alibabacloudstack-resource-alikafka-topic"
 description: |- 
   编排Alikafka主题资源
 ---

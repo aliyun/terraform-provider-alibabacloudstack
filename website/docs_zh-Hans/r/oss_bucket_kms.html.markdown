@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "对象存储 OSS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_kms"
-sidebar_current: "docs-Alibabacloudstack-oss-bucket-kms"
+sidebar_current: "docs-Alibabacloudstack-resource-oss-bucket-kms"
 description: |-
   编排对象存储服务（OSS）加密配置
 ---

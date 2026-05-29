@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Relational Database Service(RDS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_account"
-sidebar_current: "docs-Alibabacloudstack-rds-account"
+sidebar_current: "docs-Alibabacloudstack-resource-rds-account"
 description: |- 
   Provides a rds Account resource.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "高速通道"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_physicalconnection"
-sidebar_current: "docs-Alibabacloudstack-expressconnect-physicalconnection"
+sidebar_current: "docs-Alibabacloudstack-resource-expressconnect-physicalconnection"
 description: |- 
   编排高速物理通道
 ---

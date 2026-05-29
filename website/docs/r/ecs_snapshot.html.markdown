@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_snapshot"
-sidebar_current: "docs-Alibabacloudstack-ecs-snapshot"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-snapshot"
 description: |- 
   Provides a ecs Snapshot resource.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_instance"
-sidebar_current: "docs-Alibabacloudstack-ecs-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-instance"
 description: |- 
   使用Provider配置的凭证在指定的资源集下编排云服务器（Ecs）实例
 ---

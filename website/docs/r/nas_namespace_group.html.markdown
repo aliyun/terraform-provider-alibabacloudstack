@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_namespace_group"
-sidebar_current: "docs-Alibabacloudstack-nas-namespace-group"
+sidebar_current: "docs-Alibabacloudstack-resource-nas-namespace-group"
 description: |-
   Orchestrate NAS cross-domain mount orchestration
 ---

@@ -2,7 +2,7 @@
 subcategory: "高速通道"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_vbr_pconn_associations"
-sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-vbrpconnassociations"
+sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-vbr-pconn-associations"
 description: |-
   提供阿里云账号下拥有的expressconnect vbrpconnassociations列表。
 ---

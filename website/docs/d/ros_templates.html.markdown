@@ -1,4 +1,4 @@
----
+﻿---
 subcategory: "Resource Orchestration Service (ROS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ros_templates"

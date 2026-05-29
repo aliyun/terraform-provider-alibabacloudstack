@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_store"
-sidebar_current: "docs-alibabacloudstack-resource-log-store"
+sidebar_current: "docs-Alibabacloudstack-resource-log-store"
 description: |-
   Provides a Alibabacloudstack log store resource.
 ---

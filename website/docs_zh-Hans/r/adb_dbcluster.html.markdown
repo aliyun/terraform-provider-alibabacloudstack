@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据库(ADB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_dbcluster"
-sidebar_current: "docs-Alibabacloudstack-adb-dbcluster"
+sidebar_current: "docs-Alibabacloudstack-resource-adb-dbcluster"
 description: |-
   编排adb数据库集群
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_deploygroup"
-sidebar_current: "docs-Alibabacloudstack-edas-deploygroup"
+sidebar_current: "docs-Alibabacloudstack-resource-edas-deploygroup"
 description: |- 
   Provides a Edas Deploygroup resource.
 ---

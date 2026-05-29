@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "负载均衡 SLB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_cacertificate"
-sidebar_current: "docs-Alibabacloudstack-slb-cacertificate"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-cacertificate"
 description: |- 
   编排负载均衡(SLB)CA证书
 ---

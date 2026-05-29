@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "ApsaraDB for Redis"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_instance_classes"
-sidebar_current: "docs-alibabacloudstack-datasource-kvstore-instance-classes"
+sidebar_current: "docs-Alibabacloudstack-datasource-kvstore-instance-classes"
 description: |-
     Provides a list of KVStore instacne classes info.
 ---

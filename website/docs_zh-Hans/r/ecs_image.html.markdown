@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_image"
-sidebar_current: "docs-Alibabacloudstack-ecs-image"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-image"
 description: |-  
   编排云服务器（Ecs）镜像
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Relational Database Service(RDS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_instance_types"
-sidebar_current: "docs-alibabacloudstack-rds-instance-types"
+sidebar_current: "docs-Alibabacloudstack-datasource-rds-instance-types"
 description: |-
   Provides a list of Rds Instance types to be used by the alibabacloudstack_rds_instance resource.
 ---

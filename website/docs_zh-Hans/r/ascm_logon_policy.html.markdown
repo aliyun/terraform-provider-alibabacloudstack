@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_logon_policy"
-sidebar_current: "docs-alibabacloudstack_ascm_logon_policy"
+sidebar_current: "docs-Alibabacloudstack-resource-ascm-logon-policy"
 description: |-
   编排登录策略资源
 ---

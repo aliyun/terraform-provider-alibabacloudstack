@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业控制台(ASCM)"  
 layout: "alibabacloudstack"  
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_password_policies"  
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-password-policies"  
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-password-policies"  
 description: |-  
     查询用户密码策略  
 

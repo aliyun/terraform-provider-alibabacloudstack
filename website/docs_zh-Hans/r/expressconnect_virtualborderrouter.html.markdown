@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "高速通道"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_virtualborderrouter"
-sidebar_current: "docs-Alibabacloudstack-expressconnect-virtualborderrouter"
+sidebar_current: "docs-Alibabacloudstack-resource-expressconnect-virtualborderrouter"
 description: |- 
   编排高速通道虚拟边界路由器
 ---

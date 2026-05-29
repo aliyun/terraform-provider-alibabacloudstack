@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API 网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_app"
-sidebar_current: "docs-alibabacloudstack-resource-api-gateway-app"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-app"
 description: |-
   提供阿里云 API 网关应用资源。
 ---

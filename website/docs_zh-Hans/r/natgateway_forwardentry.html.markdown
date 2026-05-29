@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "NAT网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_forwardentry"
-sidebar_current: "docs-Alibabacloudstack-natgateway-forwardentry"
+sidebar_current: "docs-Alibabacloudstack-resource-natgateway-forwardentry"
 description: |- 
   编排专有网络的NAT网关DNAT表规则
 ---

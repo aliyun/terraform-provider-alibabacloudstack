@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务总线 CSB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_csb_project"
-sidebar_current: "docs-alibabacloudstack-resource-csb-project"
+sidebar_current: "docs-Alibabacloudstack-resource-csb-project"
 description: |-
   编排CSB项目
 ---

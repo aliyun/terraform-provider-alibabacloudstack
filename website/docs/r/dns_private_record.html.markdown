@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Universal DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_record"
-sidebar_current: "docs-Alibabacloudstack-private-dns-record"
+sidebar_current: "docs-Alibabacloudstack-resource-dns-private-record"
 description: |-
   Manages a private DNS record in Alibaba Cloud.
 ---

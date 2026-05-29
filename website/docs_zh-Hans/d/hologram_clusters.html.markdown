@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "实时数仓 Hologres"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hologram_clusters"
-sidebar_current: "docs-alibabacloudstack-datasource-hologram-clusters"
+sidebar_current: "docs-Alibabacloudstack-datasource-hologram-clusters"
 description: |-
   提供Hologram集群列表
 ---

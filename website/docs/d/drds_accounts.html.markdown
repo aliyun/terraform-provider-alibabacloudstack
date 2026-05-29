@@ -1,4 +1,4 @@
----
+﻿---
 subcategory: "Distributed Relational Database Service(DRDS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_accounts"

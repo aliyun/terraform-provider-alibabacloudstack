@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云监控"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_metricalarmrule"
-sidebar_current: "docs-Alibabacloudstack-cloudmonitorservice-metricalarmrule"
+sidebar_current: "docs-Alibabacloudstack-resource-cloudmonitorservice-metricalarmrule"
 description: |- 
   云监控服务（CMS）报警监控项规则
 ---

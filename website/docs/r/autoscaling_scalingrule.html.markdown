@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Auto Scaling (ESS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_scalingrule"
-sidebar_current: "docs-Alibabacloudstack-autoscaling-scalingrule"
+sidebar_current: "docs-Alibabacloudstack-resource-autoscaling-scalingrule"
 description: |- 
   Provides a autoscaling Scalingrule resource.
 ---

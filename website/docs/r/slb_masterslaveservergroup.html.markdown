@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_masterslaveservergroup"
-sidebar_current: "docs-Alibabacloudstack-slb-masterslaveservergroup"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-masterslaveservergroup"
 description: |- 
   Provides a slb Masterslaveservergroup resource.
 ---

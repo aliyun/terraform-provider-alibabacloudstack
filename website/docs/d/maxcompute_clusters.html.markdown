@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "MaxCompute"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_clusters"
-sidebar_current: "docs-alibabacloudstack-datasource-maxcompute-clusters"
+sidebar_current: "docs-Alibabacloudstack-datasource-maxcompute-clusters"
 description: |-
   Provides a datasource of Max Compute Clusters owned by an Alibaba Cloud account.
 ---

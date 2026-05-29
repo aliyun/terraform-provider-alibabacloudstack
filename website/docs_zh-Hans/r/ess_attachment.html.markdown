@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "弹性伸缩 ESS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_attachment"
-sidebar_current: "docs-alibabacloudstack-resource-ess-attachment"
+sidebar_current: "docs-Alibabacloudstack-resource-ess-attachment"
 description: |- 
   编排绑定多台ECS实例附加到指定的伸缩组
 ---

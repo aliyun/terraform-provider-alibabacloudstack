@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_machine_group"
-sidebar_current: "docs-alibabacloudstack-resource-log-machine-group"
+sidebar_current: "docs-Alibabacloudstack-resource-log-machine-group"
 description: |-
   Provides a Alibabacloudstack log tail machine group resource.
 ---

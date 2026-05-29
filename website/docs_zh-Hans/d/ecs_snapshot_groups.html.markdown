@@ -2,7 +2,7 @@
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_snapshot_groups"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-snapshotgroups"
+sidebar_current: "docs-Alibabacloudstack-datasource-ecs-snapshot-groups"
 description: |-
   提供阿里云账号下拥有的ecs snapshotgroups列表�?
 ---

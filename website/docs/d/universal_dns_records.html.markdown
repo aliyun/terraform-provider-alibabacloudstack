@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Universal DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_records"
-sidebar_current: "docs-Alibabacloudstack-datasource-universal_dns_records"
+sidebar_current: "docs-Alibabacloudstack-datasource-universal-dns-records"
 description: |-
   Query Alibaba Cloud Universal DNS domain resolution records
 ---

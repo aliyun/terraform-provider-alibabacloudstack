@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API 网关（API Gateway）V2 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_signature"
-sidebar_current: "docs-Alibabacloudstack-api-gateway-v2-signature"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-signature"
 description: |-
   api网关 v2 版本 签名管理
 ---

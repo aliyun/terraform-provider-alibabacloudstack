@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "物联网平台"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mqtt_group"
-sidebar_current: "docs-Alibabacloudstack-resource-mqtt-mqtt_group"
+sidebar_current: "docs-Alibabacloudstack-resource-mqtt-group"
 description: |-
   管理阿里云MQTT Group资源
 ---

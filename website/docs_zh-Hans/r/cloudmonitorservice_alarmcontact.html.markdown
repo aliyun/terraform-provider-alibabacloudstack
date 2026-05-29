@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云监控"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_alarmcontact"
-sidebar_current: "docs-Alibabacloudstack-cloudmonitorservice-alarmcontact"
+sidebar_current: "docs-Alibabacloudstack-resource-cloudmonitorservice-alarmcontact"
 description: |- 
   云监控服务（CMS）报警联系人
 ---

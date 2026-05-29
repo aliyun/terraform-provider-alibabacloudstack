@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "表格存储"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_clusters"
-sidebar_current: "docs-alibabacloudstack-datasource-ots-clusters"
+sidebar_current: "docs-Alibabacloudstack-datasource-ots-clusters"
 description: |-
   获取阿里云表格存储（Tablestore）可用的集群列表。
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "ApsaraMQ for Kafka"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_sasl_acl"
-sidebar_current: "docs-alibabacloudstack-resource-alikafka-sasl_acl"
+sidebar_current: "docs-Alibabacloudstack-resource-alikafka-sasl-acl"
 description: |-
   Provides a Alibabacloudstack Alikafka Sasl Acl resource.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Auto Scaling (ESS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_attachment"
-sidebar_current: "docs-alibabacloudstack-resource-ess-attachment"
+sidebar_current: "docs-Alibabacloudstack-resource-ess-attachment"
 description: |- 
   Provides an ESS Attachment resource to attach or remove ECS instances.
 ---

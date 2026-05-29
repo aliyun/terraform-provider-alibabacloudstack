@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Table Store (OTS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_instance"
-sidebar_current: "docs-Alibabacloudstack-ots-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-ots-instance"
 description: |- 
   Provides a ots Instance resource.
 ---

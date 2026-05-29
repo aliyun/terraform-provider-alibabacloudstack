@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "表格存储"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_instance_attachments"
-sidebar_current: "docs-Alibabacloudstack-datasource-ots-instance_attachments"
+sidebar_current: "docs-Alibabacloudstack-datasource-ots-instance-attachments"
 description: |- 
   查询表格存储（OTS）实例关联
 ---

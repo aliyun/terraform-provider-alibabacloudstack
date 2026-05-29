@@ -2,7 +2,7 @@
 subcategory: "Relational Database Service(RDS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_proxies"
-sidebar_current: "docs-Alibabacloudstack-datasource-rds-dbproxies"
+sidebar_current: "docs-Alibabacloudstack-datasource-db-proxies"
 description: |-
   Provides a list of rds dbproxies owned by an alibabacloudstack account.
 ---

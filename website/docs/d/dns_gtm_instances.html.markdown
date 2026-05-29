@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Universal DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_instances"
-sidebar_current: "docs-alibabacloudstack-datasource-dns_gtm_instances"
+sidebar_current: "docs-Alibabacloudstack-datasource-dns-gtm-instances"
 description: |-
   Provides a list of DNS GTM (Global Traffic Management) instances.
 ---

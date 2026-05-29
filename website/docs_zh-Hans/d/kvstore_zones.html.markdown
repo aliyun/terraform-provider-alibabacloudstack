@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 Redis 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_zones"
-sidebar_current: "docs-alibabacloudstack-datasource-kvstore-zones"
+sidebar_current: "docs-Alibabacloudstack-datasource-kvstore-zones"
 description: |-
    查询KVStore可用区
 ---

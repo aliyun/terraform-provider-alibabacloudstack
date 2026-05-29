@@ -2,7 +2,7 @@
 subcategory: "Bare Metal Computing Platform (BMCP)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bcmp_security_groups"
-sidebar_current: "docs-Alibabacloudstack-datasource-bmcp-security-groups"
+sidebar_current: "docs-Alibabacloudstack-datasource-bcmp-security-groups"
 description: |- 
   Provides a list of BMCP Security Groups owned by an AlibabacloudStack account.
 ---

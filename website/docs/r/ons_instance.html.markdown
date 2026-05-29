@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "RocketMQ (ONS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_instance"
-sidebar_current: "docs-alibabacloudstack-resource-ons-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-ons-instance"
 description: |-
   Provides a alibabacloudstack ONS Instance resource.
 ---

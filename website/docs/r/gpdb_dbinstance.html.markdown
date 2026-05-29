@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "AnalyticDB for PostgreSQL"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_dbinstance"
-sidebar_current: "docs-Alibabacloudstack-gpdb-dbinstance"
+sidebar_current: "docs-Alibabacloudstack-resource-gpdb-dbinstance"
 description: |- 
   Provides a GPDB DB Instance resource.
 ---

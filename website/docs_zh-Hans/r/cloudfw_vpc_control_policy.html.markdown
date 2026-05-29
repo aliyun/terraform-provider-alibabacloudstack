@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云防火墙"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudfw_vpc_control_policy"
-sidebar_current: "docs-Alibabacloudstack-cloudfw-vpc-control-policy"
+sidebar_current: "docs-Alibabacloudstack-resource-cloudfw-vpc-control-policy"
 description: |-
   管理云防火墙VPC控制策略。
 ---

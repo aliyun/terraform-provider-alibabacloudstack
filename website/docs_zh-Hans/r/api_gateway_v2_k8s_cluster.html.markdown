@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API 网关（API Gateway）V2 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_k8s_cluster"
-sidebar_current: "docs-Alibabacloudstack-api-gateway-v2-k8s-cluster"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-k8s-cluster"
 description: |-
   导入K8s集群到API网关V2版本
 ---

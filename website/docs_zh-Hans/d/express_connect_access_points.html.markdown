@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "高速通道"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_express_connect_access_points"
-sidebar_current: "docs-alibabacloudstack-datasource-express-connect-access-points"
+sidebar_current: "docs-Alibabacloudstack-datasource-express-connect-access-points"
 description: |-
   提供给当前阿里云用户 Express Connect 接入点列表。
 ---

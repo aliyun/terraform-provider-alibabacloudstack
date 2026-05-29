@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "NAT网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_network_acl_entries"
-sidebar_current: "docs-alibabacloudstack-resource-network-acl-entries"
+sidebar_current: "docs-Alibabacloudstack-resource-network-acl-entries"
 description: |-
   编排网络ACL条目资源
 ---

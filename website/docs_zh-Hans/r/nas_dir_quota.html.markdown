@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "文件存储 NAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_dir_quota"
-sidebar_current: "docs-Alibabacloudstack-nas-dir-quota"
+sidebar_current: "docs-Alibabacloudstack-resource-nas-dir-quota"
 description: |-
   管理NAS目录配额
 ---

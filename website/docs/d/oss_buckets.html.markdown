@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "OSS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_buckets"
-sidebar_current: "docs-alibabacloudstack-datasource-oss-buckets"
+sidebar_current: "docs-Alibabacloudstack-datasource-oss-buckets"
 description: |-
     Provides a list of OSS buckets to the user.
 ---

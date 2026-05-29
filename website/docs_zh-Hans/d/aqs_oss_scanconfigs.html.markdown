@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "防暴力破解安全服务"
 layout: "alibabacloudstack"
 page_title: "阿里云专有云: alibabacloudstack_aqs_oss_scanconfigs"
-sidebar_current: "docs-alibabacloudstack-datasource-aqs-oss-scanconfigs"
+sidebar_current: "docs-Alibabacloudstack-datasource-aqs-oss-scanconfigs"
 description: |-
   提供阿里云专有云用户可用的AQS OSS扫描配置列表。
 ---

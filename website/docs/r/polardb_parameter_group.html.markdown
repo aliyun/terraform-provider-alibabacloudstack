@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_parameter_group"
-sidebar_current: "docs-Alibabacloudstack-polardb-parameter-group"
+sidebar_current: "docs-Alibabacloudstack-resource-polardb-parameter-group"
 description: |-
   Provides a PolarDB Parameter Group resource.
 ---

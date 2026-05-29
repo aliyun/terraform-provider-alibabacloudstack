@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_resource_group"
-sidebar_current: "docs-alibabacloudstack-resource-ascm-resource-group"
+sidebar_current: "docs-Alibabacloudstack-resource-ascm-resource-group"
 description: |-
   编排Ascm资源组
 ---

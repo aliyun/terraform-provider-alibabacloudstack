@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_user_group"
-sidebar_current: "docs-alibabacloudstack-resource-ascm-user-group"
+sidebar_current: "docs-Alibabacloudstack-resource-ascm-user-group"
 description: |-
   Provides a Ascm user group resource.
 ---

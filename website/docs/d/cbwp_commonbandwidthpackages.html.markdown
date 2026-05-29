@@ -1,4 +1,4 @@
----
+﻿---
 subcategory: "Common Bandwidth Package"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cbwp_commonbandwidthpackages"

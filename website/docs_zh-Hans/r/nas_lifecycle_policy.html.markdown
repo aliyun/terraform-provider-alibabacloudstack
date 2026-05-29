@@ -2,7 +2,7 @@
 subcategory: "文件存储 NAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_lifecycle_policy"
-sidebar_current: "docs-Alibabacloudstack-nas-lifecyclepolicy"
+sidebar_current: "docs-Alibabacloudstack-resource-nas-lifecycle-policy"
 description: |-
   Provides a nas Lifecyclepolicy resource.
 ---

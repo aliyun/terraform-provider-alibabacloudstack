@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Container Registry (ACR)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_namespaces"
-sidebar_current: "docs-alibabacloudstack-datasource-cr-ee-namespaces"
+sidebar_current: "docs-Alibabacloudstack-datasource-cr-ee-namespaces"
 description: |-
   Provides a list of Container Registry Enterprise Edition namespaces.
 ---

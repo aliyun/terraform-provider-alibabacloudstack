@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "弹性高性能计算"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ehpc_job_template"
-sidebar_current: "docs-alibabacloudstack-resource-ehpc-job-template"
+sidebar_current: "docs-Alibabacloudstack-resource-ehpc-job-template"
 description: |-
   编排弹性高性能计算(EHPC)作业模板
 ---

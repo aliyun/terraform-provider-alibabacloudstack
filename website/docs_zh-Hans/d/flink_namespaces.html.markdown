@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "实时计算 Flink 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_flink_namespaces"
-sidebar_current: "docs-alibabacloudstack-datasource-flink-namespaces"
+sidebar_current: "docs-Alibabacloudstack-datasource-flink-namespaces"
 description: |-
   查询Flink命名空间
 ---

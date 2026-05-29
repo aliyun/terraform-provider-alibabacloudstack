@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "实时数仓 Hologres"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hologram_instances"
-sidebar_current: "docs-alibabacloudstack-datasource-hologram-instances"
+sidebar_current: "docs-Alibabacloudstack-datasource-hologram-instances"
 description: |-
   提供Hologram实例列表
 ---

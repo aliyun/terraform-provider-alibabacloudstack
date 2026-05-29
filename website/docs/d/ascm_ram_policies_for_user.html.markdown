@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_ascm_ram_policies_for_user"
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-ram-policies-for-user"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-ram-policies-for-user"
 description: |-
     Provides a list of ram policy of the user.
 ---

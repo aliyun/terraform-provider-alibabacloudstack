@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API Gateway V2"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_signature"
-sidebar_current: "docs-Alibabacloudstack-api-gateway-v2-signature"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-signature"
 description: |-
   Manages signature schemes for API Gateway v2 version, used to configure the signature verification mechanism for API requests.
 ---

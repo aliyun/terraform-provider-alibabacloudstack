@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据仓库 AnalyticDB PostgreSQL版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_dbinstance"
-sidebar_current: "docs-Alibabacloudstack-gpdb-dbinstance"
+sidebar_current: "docs-Alibabacloudstack-resource-gpdb-dbinstance"
 description: |- 
   编排云原生数据仓库 AnalyticDB PostgreSQL版实例
 ---

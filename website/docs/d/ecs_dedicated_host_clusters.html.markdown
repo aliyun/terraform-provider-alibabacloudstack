@@ -2,7 +2,7 @@
 subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_dedicated_host_clusters"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-dedicatedhostclusters"
+sidebar_current: "docs-Alibabacloudstack-datasource-ecs-dedicated-host-clusters"
 description: |-
   Provides a list of ecs dedicatedhostclusters owned by an alibabacloudstack account.
 ---

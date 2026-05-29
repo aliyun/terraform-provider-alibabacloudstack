@@ -2,7 +2,7 @@
 subcategory: "负载均衡 SLB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_access_logs"
-sidebar_current: "docs-Alibabacloudstack-datasource-slb-accesslogs"
+sidebar_current: "docs-Alibabacloudstack-datasource-slb-access-logs"
 description: |-
   提供阿里云账号下拥有的slb accesslogs列表�?
 ---

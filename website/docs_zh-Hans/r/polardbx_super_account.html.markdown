@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生分布式数据库PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_super_account"
-sidebar_current: "docs-Alibabacloudstack-polardbx-super-account"
+sidebar_current: "docs-Alibabacloudstack-resource-polardbx-super-account"
 description: |-
   编排PolarDB-X实例的高权限账号及三权分立配置
 ---

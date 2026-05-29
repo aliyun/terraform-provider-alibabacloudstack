@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "弹性伸缩 ESS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_scalinggroup_vserver_groups"
-sidebar_current: "docs-Alibabacloudstack-ess-scalinggroup-vserver-groups"
+sidebar_current: "docs-Alibabacloudstack-resource-ess-scalinggroup-vserver-groups"
 description: |-
   绑定虚拟服务组到指定的缩放组
 ---

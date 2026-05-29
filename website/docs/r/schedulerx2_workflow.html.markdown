@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "SchedulerX2"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_schedulerx2_workflow"
-sidebar_current: "docs-Alibabacloudstack-schedulerx2-workflow"
+sidebar_current: "docs-Alibabacloudstack-resource-schedulerx2-workflow"
 description: |-
   Manages Schedulerx2 workflow resources
 ---

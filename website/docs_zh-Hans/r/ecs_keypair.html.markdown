@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_keypair"
-sidebar_current: "docs-Alibabacloudstack-ecs-keypair"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-keypair"
 description: |- 
   编排云服务器（Ecs）密钥对
 ---

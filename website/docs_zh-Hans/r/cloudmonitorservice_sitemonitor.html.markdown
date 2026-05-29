@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云监控"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_sitemonitor"
-sidebar_current: "docs-Alibabacloudstack-cloudmonitorservice-sitemonitor"
+sidebar_current: "docs-Alibabacloudstack-resource-cloudmonitorservice-sitemonitor"
 description: |- 
   编排云监控服务（CMS）站点监控
 ---

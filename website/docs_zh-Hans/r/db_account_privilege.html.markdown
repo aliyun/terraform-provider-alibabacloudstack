@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_account_privilege"
-sidebar_current: "docs-alibabacloudstack-resource-db-account-privilege"
+sidebar_current: "docs-Alibabacloudstack-resource-db-account-privilege"
 description: |-
   RDS实例授权
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "裸金属算力平台 BMCP"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bcmp_keypair"
-sidebar_current: "docs-Alibabacloudstack-bcmp-keypair"
+sidebar_current: "docs-Alibabacloudstack-resource-bcmp-keypair"
 description: |-
   提供 BCMP 密钥对资源。
 ---

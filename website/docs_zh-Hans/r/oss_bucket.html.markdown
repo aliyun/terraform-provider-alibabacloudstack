@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "对象存储 OSS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket"
-sidebar_current: "docs-alibabacloudstack-resource-oss-bucket"
+sidebar_current: "docs-Alibabacloudstack-resource-oss-bucket"
 description: |-
   编排对象存储服务（OSS）存储桶
 ---

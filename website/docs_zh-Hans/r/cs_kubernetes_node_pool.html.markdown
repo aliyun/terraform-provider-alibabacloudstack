@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Kubernetes容器监控"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cs_kubernetes_node_pool"
-sidebar_current: "docs-alibabacloudstack-resource-cs-kubernetes-node-pool"
+sidebar_current: "docs-Alibabacloudstack-resource-cs-kubernetes-node-pool"
 description: |-
   编排 Kubernetes 集群中的节点池
 ---

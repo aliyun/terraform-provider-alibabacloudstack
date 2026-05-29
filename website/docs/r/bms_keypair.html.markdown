@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Bare-Metal Management Service (BMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bms_keypair"
-sidebar_current: "docs-Alibabacloudstack-bms-keypair"
+sidebar_current: "docs-Alibabacloudstack-resource-bms-keypair"
 description: |-
   Manage Bare Metal Server key pairs
 ---

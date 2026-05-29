@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "ApsaraDB for Redis"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_redis_account"
-sidebar_current: "docs-Alibabacloudstack-redis-account"
+sidebar_current: "docs-Alibabacloudstack-resource-redis-account"
 description: |- 
   Provides a redis Account resource.
 ---

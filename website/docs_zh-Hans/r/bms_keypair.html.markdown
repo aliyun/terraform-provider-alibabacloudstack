@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "裸机管理 BMS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bms_keypair"
-sidebar_current: "docs-Alibabacloudstack-bms-keypair"
+sidebar_current: "docs-Alibabacloudstack-resource-bms-keypair"
 description: |-
   管理裸金属服务器密钥对
 ---

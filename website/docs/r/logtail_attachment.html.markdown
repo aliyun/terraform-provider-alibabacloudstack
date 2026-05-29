@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_logtail_attachment"
-sidebar_current: "docs-alibabacloudstack-resource-logtail-attachment"
+sidebar_current: "docs-Alibabacloudstack-resource-logtail-attachment"
 description: |-
   Provides a Alibabacloudstack logtail attachment resource.
 ---

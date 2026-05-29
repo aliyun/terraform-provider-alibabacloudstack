@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 Redis 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_parameter_group"
-sidebar_current: "docs-Alibabacloudstack-kvstore-parameter_group"
+sidebar_current: "docs-Alibabacloudstack-resource-kvstore-parameter-group"
 description: |-
   管理R-kvstore参数模板
 ---

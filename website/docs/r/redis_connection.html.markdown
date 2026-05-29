@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "ApsaraDB for Redis"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_redis_connection"
-sidebar_current: "docs-Alibabacloudstack-redis-connection"
+sidebar_current: "docs-Alibabacloudstack-resource-redis-connection"
 description: |- 
   Provides a Redis Connection resource.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpngateway"
-sidebar_current: "docs-Alibabacloudstack-vpngateway-vpngateway"
+sidebar_current: "docs-Alibabacloudstack-resource-vpngateway-vpngateway"
 description: |- 
   Provides a vpngateway Vpngateway resource.
 ---

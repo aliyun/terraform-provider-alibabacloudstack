@@ -2,7 +2,7 @@
 subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_vpc_attachments"
-sidebar_current: "docs-Alibabacloudstack-datasource-cen-transitroutervpcattachments"
+sidebar_current: "docs-Alibabacloudstack-datasource-cen-transit-router-vpc-attachments"
 description: |-
   Provides a list of cen transitroutervpcattachments owned by an alibabacloudstack account.
 ---

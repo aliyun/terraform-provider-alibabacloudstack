@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "分布式搜索与数据分析引擎"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_elasticsearch_instances"
-sidebar_current: "docs-alibabacloudstack-datasource-elasticsearch-instances"
+sidebar_current: "docs-Alibabacloudstack-datasource-elasticsearch-instances"
 description: |-
   查询Elasticsearch。
 ---

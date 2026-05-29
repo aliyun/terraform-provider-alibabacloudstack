@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_routetableattachment"
-sidebar_current: "docs-Alibabacloudstack-vpc-routetableattachment"
+sidebar_current: "docs-Alibabacloudstack-resource-vpc-routetableattachment"
 description: |- 
   编排绑定交换机和路由表
 ---

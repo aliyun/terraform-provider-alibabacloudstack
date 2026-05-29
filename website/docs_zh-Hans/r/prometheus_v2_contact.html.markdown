@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Prometheus 监控服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_contact"
-sidebar_current: "docs-alibabacloudstack-resource-prometheus-v2-contact"
+sidebar_current: "docs-Alibabacloudstack-resource-prometheus-v2-contact"
 description: |-
   管理阿里云Prometheus v2联系人资源
 ---

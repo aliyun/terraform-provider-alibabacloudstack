@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Bare Metal Computing Platform (BMCP)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bmcp_security_group"
-sidebar_current: "docs-Alibabacloudstack-bmcp-security-group"
+sidebar_current: "docs-Alibabacloudstack-resource-bmcp-security-group"
 description: |-
   Provides a BMCP Security Group resource.
 ---

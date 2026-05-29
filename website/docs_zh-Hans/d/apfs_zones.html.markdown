@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "阿里云并行文件系统(APFS)"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_apfs_zones"
-sidebar_current: "docs-alibabacloudstack-datasource-apfs-zones"
+sidebar_current: "docs-Alibabacloudstack-datasource-apfs-zones"
 description: |-
   Provides a list of Apfs Zones to the user.
 ---

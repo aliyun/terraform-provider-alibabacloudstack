@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "RocketMQ (ONS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_groups"
-sidebar_current: "docs-alibabacloudstack-datasource-ons-groups"
+sidebar_current: "docs-Alibabacloudstack-datasource-ons-groups"
 description: |-
     Provides a list of ons groups available to the user.
 ---

@@ -2,7 +2,7 @@
 subcategory: "云企业网"
 layout: "alibabacloudstack"
 page_title: "阿里云栈: alibabacloudstack_cen_transit_router_vpc_attachment"
-sidebar_current: "docs-Alibabacloudstack-cen-transitroutervpcattachment"
+sidebar_current: "docs-Alibabacloudstack-resource-cen-transit-router-vpc-attachment"
 description: |-
   提供一个cen Transitroutervpcattachment资源。
 ---

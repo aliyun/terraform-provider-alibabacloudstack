@@ -2,7 +2,7 @@
 subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_route_map"
-sidebar_current: "docs-Alibabacloudstack-cen-route-map"
+sidebar_current: "docs-Alibabacloudstack-resource-cen-route-map"
 description: |-
   Provides a cen Route maps resource.
 ---

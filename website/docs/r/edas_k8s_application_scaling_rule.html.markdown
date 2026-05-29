@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Enterprise Distributed Application Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_k8s_application_scaling_rule"
-sidebar_current: "docs-alibabacloudstack-resource-edas-k8s-application-scaling-rule"
+sidebar_current: "docs-Alibabacloudstack-resource-edas-k8s-application-scaling-rule"
 description: |-
   Provides an EDAS K8s Application Scaling Rule resource.
 ---

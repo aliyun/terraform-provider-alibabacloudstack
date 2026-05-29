@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "负载均衡 SLB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_accesscontrollist"
-sidebar_current: "docs-Alibabacloudstack-slb-accesscontrollist"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-accesscontrollist"
 description: |- 
   编排负载均衡(SLB)访问控制
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "负载均衡 SLB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_loadbalancer"
-sidebar_current: "docs-Alibabacloudstack-slb-loadbalancer"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-loadbalancer"
 description: |- 
   编排负载均衡(SLB)实例
 ---

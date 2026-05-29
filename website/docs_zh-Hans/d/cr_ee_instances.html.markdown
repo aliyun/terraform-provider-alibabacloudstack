@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "容器镜像服务 ACR"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_instances"
-sidebar_current: "docs-alibabacloudstack-datasource-cr-ee-instances"
+sidebar_current: "docs-Alibabacloudstack-datasource-cr-ee-instances"
 description: |-
   查询容器镜像企业版实例
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 MongoDB 版" 
 layout: "alibabacloudstack" 
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_backup" 
-sidebar_current: "docs-Alibabacloudstack-mongodb-backup" 
+sidebar_current: "docs-Alibabacloudstack-resource-mongodb-backup" 
 description: |- 
 提供一个 MongoDB 备份资源。
 ---

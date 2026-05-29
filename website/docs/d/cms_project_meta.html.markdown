@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Cloud Monitor Service (CMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cms_project_meta"
-sidebar_current: "docs-alibabacloudstack-datasource-cms-project-meta"
+sidebar_current: "docs-Alibabacloudstack-datasource-cms-project-meta"
 description: |-
     Provides a list of project meta owned by an Alibabacloudstack Cloud account.
 ---

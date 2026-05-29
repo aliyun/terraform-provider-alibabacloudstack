@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_listener"
-sidebar_current: "docs-Alibabacloudstack-slb-listener"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-listener"
 description: |- 
   Provides a slb Listener resource.
 ---

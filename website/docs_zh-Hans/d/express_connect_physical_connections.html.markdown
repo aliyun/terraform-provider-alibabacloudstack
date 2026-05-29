@@ -2,7 +2,7 @@
 subcategory: "高速通道"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_express_connect_physical_connections"
-sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-physicalconnections"
+sidebar_current: "docs-Alibabacloudstack-datasource-express-connect-physical-connections"
 description: |- 
   查询高速通道物理连接
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "数据管理 DMS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dmsenterprise_instance"
-sidebar_current: "docs-Alibabacloudstack-dmsenterprise-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-dmsenterprise-instance"
 description: |- 
   编排企业版数据库管理实例
 ---

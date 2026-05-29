@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业级分布式应用服务 EDAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_swimming_lane"
-sidebar_current: "docs-alibabacloudstack-resource-edas-swimming-lane"
+sidebar_current: "docs-Alibabacloudstack-resource-edas-swimming-lane"
 description: |-
   提供阿里云EDAS泳道（Swimming Lane）资源
 ---

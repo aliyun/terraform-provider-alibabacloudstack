@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据库 PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_backuppolicy"
-sidebar_current: "docs-Alibabacloudstack-polardb-backuppolicy"
+sidebar_current: "docs-Alibabacloudstack-resource-polardb-backuppolicy"
 description: |- 
   编排polardb备份规则
 ---

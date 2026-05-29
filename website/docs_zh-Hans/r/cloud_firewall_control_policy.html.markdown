@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云防火墙"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloud_firewall_control_policy"
-sidebar_current: "docs-Alibabacloudstack-cloud-firewall-control-policy"
+sidebar_current: "docs-Alibabacloudstack-resource-cloud-firewall-control-policy"
 description: |-
   管理云防火墙访问控制策略。
 ---

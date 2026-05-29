@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "消息队列 RocketMQ 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_groups"
-sidebar_current: "docs-alibabacloudstack-datasource-ons-groups"
+sidebar_current: "docs-Alibabacloudstack-datasource-ons-groups"
 description: |-
     查询消息队列服务组
 ---

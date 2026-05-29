@@ -2,7 +2,7 @@
 subcategory: "Network Address Translation Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_common_bandwidth_package"
-sidebar_current: "docs-Alibabacloudstack-common-bandwidth-package"
+sidebar_current: "docs-Alibabacloudstack-resource-common-bandwidth-package"
 description: |-
   Provides a common Bandwidth package resource.
 ---

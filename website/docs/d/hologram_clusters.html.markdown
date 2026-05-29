@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Hologres"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hologram_clusters"
-sidebar_current: "docs-alibabacloudstack-datasource-hologram-clusters"
+sidebar_current: "docs-Alibabacloudstack-datasource-hologram-clusters"
 description: |-
   Provides a list of Hologram Clusters to the user.
 ---

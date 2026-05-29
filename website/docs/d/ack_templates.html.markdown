@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Container Service for Kubernetes (ACK)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ack_templates"
-sidebar_current: "docs-alibabacloudstack-datasource-ack-templates"
+sidebar_current: "docs-Alibabacloudstack-datasource-ack-templates"
 description: |-
   Provides a list of Ack Templates available to the user.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_zones"
-sidebar_current: "docs-alibabacloudstack-datasource-db-zones"
+sidebar_current: "docs-Alibabacloudstack-datasource-db-zones"
 description: |-
     查询RDS数据库服务可用区
 ---

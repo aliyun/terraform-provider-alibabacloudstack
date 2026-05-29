@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "弹性伸缩"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_alarmtask"
-sidebar_current: "docs-Alibabacloudstack-autoscaling-alarmtask"
+sidebar_current: "docs-Alibabacloudstack-resource-autoscaling-alarmtask"
 description: |- 
   编排弹性伸缩的告警任务
 ---

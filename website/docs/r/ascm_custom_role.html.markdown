@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_custom_role"
-sidebar_current: "docs-alibabacloudstack-resource-ascm-custom-role"
+sidebar_current: "docs-Alibabacloudstack-resource-ascm-custom-role"
 description: |-
   Provides an ASCM custom role resource.
 ---

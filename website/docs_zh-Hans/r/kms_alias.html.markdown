@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "密钥管理服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_alias"
-sidebar_current: "docs-alibabacloudstack-resource-kms-alias"
+sidebar_current: "docs-Alibabacloudstack-resource-kms-alias"
 description: |-
   编排加密主密钥 (CMK) 的别名
 ---

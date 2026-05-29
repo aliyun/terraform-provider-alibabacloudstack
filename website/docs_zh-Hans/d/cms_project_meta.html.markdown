@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云监控"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cms_project_meta"
-sidebar_current: "docs-alibabacloudstack-datasource-cms-project-meta"
+sidebar_current: "docs-Alibabacloudstack-datasource-cms-project-meta"
 description: |-
     查询云监控项目元数据
 ---

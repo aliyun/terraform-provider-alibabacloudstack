@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_instance_families"
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-instance-families"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-instance-families"
 description: |-
     Provides a list of instance families to the user.
 ---

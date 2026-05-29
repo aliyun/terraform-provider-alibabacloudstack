@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业级分布式应用服务 EDAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_application"
-sidebar_current: "docs-Alibabacloudstack-edas-application"
+sidebar_current: "docs-Alibabacloudstack-resource-edas-application"
 description: |- 
   编排企业级分布式应用服务（Edas）应用
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Hardware Security Module (HSM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hsm_vendors"
-sidebar_current: "docs-alibabacloudstack-datasource-hsm-vendors"
+sidebar_current: "docs-Alibabacloudstack-datasource-hsm-vendors"
 description: |-
   Query Alibaba Cloud Hardware Security Module (HSM) vendors and their products.
 ---

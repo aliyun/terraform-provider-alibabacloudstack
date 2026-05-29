@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_route_entries"
-sidebar_current: "docs-alibabacloudstack-datasource-route-entries"
+sidebar_current: "docs-Alibabacloudstack-datasource-route-entries"
 description: |-
     查询路由规则
 ---

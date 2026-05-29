@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API Gateway V2"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_route"
-sidebar_current: "docs-Alibabacloudstack-api-gateway-api-gateway-v2-route"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-route"
 description: |-
   Manages API Gateway v2 routes.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API Gateway V2"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_consumer"
-sidebar_current: "docs-Alibabacloudstack-api-gateway-api_gateway_v2_consumer"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-consumer"
 description: |-
   Manage API Gateway V2 consumers for configuring access credentials for applications with different authentication methods.
 ---

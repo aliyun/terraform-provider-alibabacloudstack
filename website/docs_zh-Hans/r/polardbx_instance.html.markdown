@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生分布式数据库PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_instance"
-sidebar_current: "docs-alibabacloudstack-polardbx-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-polardbx-instance"
 description: |-
   Provides a Polardbx instance resource.
 ---

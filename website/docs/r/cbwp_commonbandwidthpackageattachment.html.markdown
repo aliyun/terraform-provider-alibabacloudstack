@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Common Bandwidth Package"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cbwp_commonbandwidthpackageattachment"
-sidebar_current: "docs-Alibabacloudstack-cbwp-commonbandwidthpackageattachment"
+sidebar_current: "docs-Alibabacloudstack-resource-cbwp-commonbandwidthpackageattachment"
 description: |- 
   Provides a cbwp Commonbandwidthpackageattachment resource.
 ---

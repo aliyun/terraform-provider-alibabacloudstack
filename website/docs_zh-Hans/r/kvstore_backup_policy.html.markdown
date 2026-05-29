@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 Redis 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_backup_policy"
-sidebar_current: "docs-alibabacloudstack-resource-kvstore-backup-policy"
+sidebar_current: "docs-Alibabacloudstack-resource-kvstore-backup-policy"
 description: |-
   编排Redis或Memcache实例的备份策略
 ---

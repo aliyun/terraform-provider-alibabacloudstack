@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "大数据计算服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_cus"
-sidebar_current: "docs-alibabacloudstack-datasource-maxcompute-cus"
+sidebar_current: "docs-Alibabacloudstack-datasource-maxcompute-cus"
 description: |-
   查询Max Compute Cus
 ---

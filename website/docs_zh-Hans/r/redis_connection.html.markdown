@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 Redis 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_redis_connection"
-sidebar_current: "docs-Alibabacloudstack-redis-connection"
+sidebar_current: "docs-Alibabacloudstack-resource-redis-connection"
 description: |- 
   在指定的资源集中编排Redis互联网连接字符串。
 ---

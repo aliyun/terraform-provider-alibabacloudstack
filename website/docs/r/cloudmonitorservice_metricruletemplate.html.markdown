@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Cloud Monitor Service (CMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_metricruletemplate"
-sidebar_current: "docs-Alibabacloudstack-cloudmonitorservice-metricruletemplate"
+sidebar_current: "docs-Alibabacloudstack-resource-cloudmonitorservice-metricruletemplate"
 description: |- 
   Provides a cloudmonitorservice Metricruletemplate resource.
 ---

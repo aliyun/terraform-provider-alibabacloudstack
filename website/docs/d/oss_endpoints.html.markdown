@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "OSS"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_oss_endpoints"
-sidebar_current: "docs-alibabacloudstack-datasource-oss-endpoints"
+sidebar_current: "docs-Alibabacloudstack-datasource-oss-endpoints"
 description: |-
   Provides a list of OSS Endpoints to the user.
 ---

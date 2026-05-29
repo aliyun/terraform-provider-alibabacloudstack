@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_quota"
-sidebar_current: "docs-alibabacloudstack-resource-ascm-quota"
+sidebar_current: "docs-Alibabacloudstack-resource-ascm-quota"
 description: |-
   Provides a Ascm quota resource.
 ---

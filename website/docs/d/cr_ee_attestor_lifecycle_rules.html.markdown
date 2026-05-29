@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Container Registry (ACR)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_attestor_lifecycle_rules"
-sidebar_current: "docs-Alibabacloudstack-datasource-cr_ee_attestor_lifecycle_rules"
+sidebar_current: "docs-Alibabacloudstack-datasource-cr-ee-attestor-lifecycle-rules"
 description: |-
   Retrieves lifecycle rule configurations for Alibaba Cloud Container Registry (ACR) Enterprise Edition.
 ---

@@ -2,7 +2,7 @@
 subcategory: "VPN网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpn_pbr_route_entry"
-sidebar_current: "docs-Alibabacloudstack-vpngateway-vpnpbrrouteentry"
+sidebar_current: "docs-Alibabacloudstack-resource-vpngateway-vpn-pbr-route-entry"
 description: |-
   Provides a vpngateway Vpnpbrrouteentry resource.
 ---

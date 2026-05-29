@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Relational Database Service(RDS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_backup"
-sidebar_current: "docs-Alibabacloudstack-rds-backup"
+sidebar_current: "docs-Alibabacloudstack-resource-rds-backup"
 description: |-
   Provides a rds Backup resource.
 ---

@@ -2,7 +2,7 @@
 subcategory: "云企业网"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_route_maps"
-sidebar_current: "docs-Alibabacloudstack-datasource-cen-cenroutemaps"
+sidebar_current: "docs-Alibabacloudstack-datasource-cen-route-maps"
 description: |-
   提供阿里云账户下拥有的cen路由映射列表�?
 ---

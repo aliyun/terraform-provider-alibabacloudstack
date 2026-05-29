@@ -2,7 +2,7 @@
 subcategory: "NAT网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_common_bandwidth_packages"
-sidebar_current: "docs-Alibabacloudstack-datasource-natgateway-bandwidthpackages"
+sidebar_current: "docs-Alibabacloudstack-datasource-common-bandwidth-packages"
 description: |-
   提供阿里云账号下拥有的natgateway bandwidthpackages列表�?
 ---

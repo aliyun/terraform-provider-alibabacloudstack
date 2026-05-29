@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云解析 DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_addresspool"
-sidebar_current: "docs-Alibabacloudstack-dns-dns_gtm_addresspool"
+sidebar_current: "docs-Alibabacloudstack-resource-dns-gtm-addresspool"
 description: |-
   云解析全局调度地址池
 ---

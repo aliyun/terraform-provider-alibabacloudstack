@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "MaxCompute"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_projects"
-sidebar_current: "docs-alibabacloudstack-datasource-maxcompute-projects"
+sidebar_current: "docs-Alibabacloudstack-datasource-maxcompute-projects"
 description: |-
   Provides a datasource of Max Compute Project owned by an Alibaba Cloud account.
 ---

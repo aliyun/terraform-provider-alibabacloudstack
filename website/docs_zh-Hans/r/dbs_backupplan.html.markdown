@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "数据库备份服务 DBS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dbs_backupplan"
-sidebar_current: "docs-Alibabacloudstack-dbs-backupplan"
+sidebar_current: "docs-Alibabacloudstack-resource-dbs-backupplan"
 description: |- 
   编排Dbs备份计划
 ---

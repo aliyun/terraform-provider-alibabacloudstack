@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_instance_types"
-sidebar_current: "docs-alibabacloudstack-rds-instance-types"
+sidebar_current: "docs-Alibabacloudstack-datasource-rds-instance-types"
 description: |-
   查询RDS实例规格
 ---

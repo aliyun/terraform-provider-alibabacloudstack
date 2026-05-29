@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "VPN网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnconnection"
-sidebar_current: "docs-Alibabacloudstack-vpngateway-vpnconnection"
+sidebar_current: "docs-Alibabacloudstack-resource-vpngateway-vpnconnection"
 description: |- 
   编排PN网关VPN连接
 ---

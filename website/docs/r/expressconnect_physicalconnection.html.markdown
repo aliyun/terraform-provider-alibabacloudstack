@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Express Connect"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_physicalconnection"
-sidebar_current: "docs-Alibabacloudstack-expressconnect-physicalconnection"
+sidebar_current: "docs-Alibabacloudstack-resource-expressconnect-physicalconnection"
 description: |- 
   Provides a expressconnect Physicalconnection resource.
 ---

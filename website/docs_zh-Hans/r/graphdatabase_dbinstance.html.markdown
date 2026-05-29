@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "图数据库 GDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_graphdatabase_dbinstance"
-sidebar_current: "docs-Alibabacloudstack-graphdatabase-dbinstance"
+sidebar_current: "docs-Alibabacloudstack-resource-graphdatabase-dbinstance"
 description: |- 
   编排图数据库实例
 ---

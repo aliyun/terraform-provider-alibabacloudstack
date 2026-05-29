@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6gateway"
-sidebar_current: "docs-Alibabacloudstack-vpc-ipv6gateway"
+sidebar_current: "docs-Alibabacloudstack-resource-vpc-ipv6gateway"
 description: |- 
   编排VPC的IPv6网关。
 ---

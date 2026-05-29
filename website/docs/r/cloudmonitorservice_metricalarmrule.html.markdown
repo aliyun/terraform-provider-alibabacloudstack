@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Cloud Monitor Service (CMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_metricalarmrule"
-sidebar_current: "docs-Alibabacloudstack-cloudmonitorservice-metricalarmrule"
+sidebar_current: "docs-Alibabacloudstack-resource-cloudmonitorservice-metricalarmrule"
 description: |- 
   Provides a cloudmonitorservice Metricalarmrule resource.
 ---

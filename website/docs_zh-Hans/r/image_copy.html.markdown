@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_copy"
-sidebar_current: "docs-alibabacloudstack-resource-image-copy"
+sidebar_current: "docs-Alibabacloudstack-resource-image-copy"
 description: |-
   编排实现自定义镜像从一个区域复制到另一个区域
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "大数据计算服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_projects"
-sidebar_current: "docs-alibabacloudstack-datasource-maxcompute-projects"
+sidebar_current: "docs-Alibabacloudstack-datasource-maxcompute-projects"
 description: |-
   查询Max Compute Project
 ---

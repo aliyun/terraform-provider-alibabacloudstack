@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 MongoDB 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_shardinginstance"
-sidebar_current: "docs-Alibabacloudstack-mongodb-shardinginstance"
+sidebar_current: "docs-Alibabacloudstack-resource-mongodb-shardinginstance"
 description: |- 
   编排mongodb共享实例
 ---

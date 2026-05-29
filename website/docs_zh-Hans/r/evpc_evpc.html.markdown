@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "智能开放平台"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_evpc_evpc"
-sidebar_current: "docs-Alibabacloudstack-evpc-evpc"
+sidebar_current: "docs-Alibabacloudstack-resource-evpc-evpc"
 description: |- 
   编排EVPC资源
 ---

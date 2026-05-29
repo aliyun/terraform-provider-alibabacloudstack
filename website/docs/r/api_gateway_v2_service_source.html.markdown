@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API Gateway V2"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_service_source"
-sidebar_current: "docs-Alibabacloudstack-api_gateway-api_gateway_v2_service_source"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-service-source"
 description: |-
   Create and manage service sources for API Gateway v2
 ---

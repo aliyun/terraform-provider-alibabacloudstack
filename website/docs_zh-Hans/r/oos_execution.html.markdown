@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "运维编排 OOS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oos_execution"
-sidebar_current: "docs-Alibabacloudstack-oos-execution"
+sidebar_current: "docs-Alibabacloudstack-resource-oos-execution"
 description: |- 
   编排运维编排（OOS）任务执行
 ---

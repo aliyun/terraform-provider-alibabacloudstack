@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "AnalyticDB for MySQL (ADB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_zones"
-sidebar_current: "docs-alibabacloudstack-datasource-adb-zones"
+sidebar_current: "docs-Alibabacloudstack-datasource-adb-zones"
 description: |-
     Provides a list of availability zones for ADB that can be used by an Alibaba Cloud account.
 ---

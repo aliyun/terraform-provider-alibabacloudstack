@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_service"
-sidebar_current: "docs-alibabacloudstack-datasource-api-gateway-service"
+sidebar_current: "docs-Alibabacloudstack-datasource-api-gateway-service"
 description: |-
     Provides a datasource to open the API gateway service automatically.
 ---

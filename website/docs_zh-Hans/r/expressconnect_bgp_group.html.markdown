@@ -2,7 +2,7 @@
 subcategory: "高速通道"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgp_group"
-sidebar_current: "docs-Alibabacloudstack-expressconnect-bgpgroup"
+sidebar_current: "docs-Alibabacloudstack-resource-expressconnect-bgp-group"
 description: |-
   Provides a expressconnect Bgpgroup resource.
 ---

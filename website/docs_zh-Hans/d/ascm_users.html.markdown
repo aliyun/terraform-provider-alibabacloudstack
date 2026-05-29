@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_users"
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-users"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-users"
 description: |-
     查询ascm用户
 ---

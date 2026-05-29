@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "防暴力破解安全服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_aqs_web_lock"
-sidebar_current: "docs-Alibabacloudstack-aqs-web_lock"
+sidebar_current: "docs-Alibabacloudstack-resource-aqs-web-lock"
 description: |-
   安骑士防篡改设置
 ---

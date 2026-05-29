@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "负载均衡 SLB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_listener"
-sidebar_current: "docs-Alibabacloudstack-slb-listener"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-listener"
 description: |- 
   编排负载均衡(SLB)监听器
 ---

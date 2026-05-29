@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_loadbalancer"
-sidebar_current: "docs-Alibabacloudstack-slb-loadbalancer"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-loadbalancer"
 description: |- 
   Provides a slb Loadbalancer resource.
 ---

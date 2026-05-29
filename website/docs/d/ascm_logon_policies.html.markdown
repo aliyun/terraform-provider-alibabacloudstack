@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_logon_policies"
-sidebar_current: "docs-alibabacloudstack-ascm-logon-policies"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-logon-policies"
 description: |-
   Provides a list of Logon Policies.
 ---

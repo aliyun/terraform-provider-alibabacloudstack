@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_database"
-sidebar_current: "docs-Alibabacloudstack-rds-database"
+sidebar_current: "docs-Alibabacloudstack-resource-rds-database"
 description: |- 
   编排RDS数据库
 ---

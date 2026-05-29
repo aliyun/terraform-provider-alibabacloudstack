@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API Gateway V2"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_cascade_instance"
-sidebar_current: "docs-Alibabacloudstack-api-gateway-v2-cascade-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-cascade-instance"
 description: |-
   Manage API Gateway V2 Cascade Gateway Instances
 ---

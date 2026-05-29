@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "密钥管理服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_ciphertext"
-sidebar_current: "docs-alibabacloudstack-datasource-kms-ciphertext"
+sidebar_current: "docs-Alibabacloudstack-resource-kms-ciphertext"
 description: |-
     使用KMS加密给定的明文
 ---

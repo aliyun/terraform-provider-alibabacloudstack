@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "文件存储 NAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_zones"
-sidebar_current: "docs-alibabacloudstack-datasource-nas-zones"
+sidebar_current: "docs-Alibabacloudstack-datasource-nas-zones"
 description: |-
   查询 NAS 可用区信息
 ---

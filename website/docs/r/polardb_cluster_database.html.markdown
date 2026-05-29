@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_cluster_database"
-sidebar_current: "docs-alibabacloudstack-resource-polardb-cluster-database"
+sidebar_current: "docs-Alibabacloudstack-resource-polardb-cluster-database"
 description: |-
   Provides a PolarDB cluster database resource.
 ---

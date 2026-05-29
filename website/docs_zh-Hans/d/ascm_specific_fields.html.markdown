@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_specific_fields"
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-specific-fields"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-specific-fields"
 description: |-
     查询特定字段
 ---

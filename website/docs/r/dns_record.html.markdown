@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Universal DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_record"
-sidebar_current: "docs-alibabacloudstack-resource-dns-record"
+sidebar_current: "docs-Alibabacloudstack-resource-dns-record"
 description: |-
   Provides a DNS Record resource.
 ---

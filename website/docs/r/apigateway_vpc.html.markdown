@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_apigateway_vpc"
-sidebar_current: "docs-Alibabacloudstack-apigateway-vpc"
+sidebar_current: "docs-Alibabacloudstack-resource-apigateway-vpc"
 description: |- 
   Provides a apigateway Vpc resource.
 ---

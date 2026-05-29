@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云企业网"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_vbr_health_check"
-sidebar_current: "docs-alibabacloudstack-resource-cen-vbr-health-check"
+sidebar_current: "docs-Alibabacloudstack-resource-cen-vbr-health-check"
 description: |-
   提供阿里云CEN VBR健康检查资源
 ---

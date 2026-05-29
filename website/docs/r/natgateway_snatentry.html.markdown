@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Network Address Translation Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_snatentry"
-sidebar_current: "docs-Alibabacloudstack-natgateway-snatentry"
+sidebar_current: "docs-Alibabacloudstack-resource-natgateway-snatentry"
 description: |- 
   Provides a natgateway Snatentry resource.
 ---

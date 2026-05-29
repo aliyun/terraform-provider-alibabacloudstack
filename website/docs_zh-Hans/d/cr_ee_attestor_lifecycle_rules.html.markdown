@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "容器镜像服务 ACR"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_attestor_lifecycle_rules"
-sidebar_current: "docs-Alibabacloudstack-datasource-cr_ee_attestor_lifecycle_rules"
+sidebar_current: "docs-Alibabacloudstack-datasource-cr-ee-attestor-lifecycle-rules"
 description: |-
   查询阿里云容器镜像服务（ACR）企业版的保留策略规则
 ---

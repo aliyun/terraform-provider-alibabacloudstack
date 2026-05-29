@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "EasyAI"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_evpc_evpc"
-sidebar_current: "docs-Alibabacloudstack-evpc-evpc"
+sidebar_current: "docs-Alibabacloudstack-resource-evpc-evpc"
 description: |- 
   Provides an EVPC resource.
 ---

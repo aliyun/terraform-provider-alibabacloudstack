@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云解析 DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_instance"
-sidebar_current: "docs-Alibabacloudstack-dns-dns_gtm_instance"
+sidebar_current: "docs-Alibabacloudstack-resource-dns-gtm-instance"
 description: |-
   创建和管理云解析全局流量管理(GTM)实例
 ---

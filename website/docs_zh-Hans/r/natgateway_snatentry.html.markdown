@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "NAT网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_snatentry"
-sidebar_current: "docs-Alibabacloudstack-natgateway-snatentry"
+sidebar_current: "docs-Alibabacloudstack-resource-natgateway-snatentry"
 description: |- 
   编排专有网络的NAT网关SNAT表规则
 ---

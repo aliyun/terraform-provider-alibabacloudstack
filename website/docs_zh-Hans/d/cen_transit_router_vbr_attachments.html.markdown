@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云企业网"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_vbr_attachments"
-sidebar_current: "docs-alibabacloudstack-datasource-cen-transit-router-vbr-attachments"
+sidebar_current: "docs-Alibabacloudstack-datasource-cen-transit-router-vbr-attachments"
 description: |-
   提供阿里云账户拥有的CEN转发路由器VBR附件列表。
 ---

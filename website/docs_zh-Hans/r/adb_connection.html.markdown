@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据库(ADB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_connection"
-sidebar_current: "docs-Alibabacloudstack-adb-connection"
+sidebar_current: "docs-Alibabacloudstack-resource-adb-connection"
 description: |- 
   编排adb连接信息。
 ---

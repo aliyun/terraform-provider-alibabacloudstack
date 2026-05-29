@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据仓库 AnalyticDB PostgreSQL版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_account"
-sidebar_current: "docs-Alibabacloudstack-gpdb-account"
+sidebar_current: "docs-Alibabacloudstack-resource-gpdb-account"
 description: |- 
   编排云原生数据仓库 AnalyticDB PostgreSQL版帐号
 ---

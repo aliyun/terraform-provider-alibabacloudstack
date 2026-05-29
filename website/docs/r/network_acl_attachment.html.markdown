@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Network Address Translation Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_network_acl_attachment"
-sidebar_current: "docs-alibabacloudstack-resource-network-acl-attachment"
+sidebar_current: "docs-Alibabacloudstack-resource-network-acl-attachment"
 description: |-
   Provides a Alibabacloudstack Network Acl Attachment resource.
 ---

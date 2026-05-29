@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_autosnapshotpolicy"
-sidebar_current: "docs-Alibabacloudstack-ecs-autosnapshotpolicy"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-autosnapshotpolicy"
 description: |- 
   编排云服务器（Ecs）自动快照策略
 ---

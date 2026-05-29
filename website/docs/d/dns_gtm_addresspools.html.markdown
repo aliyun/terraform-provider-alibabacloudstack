@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Universal DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_addresspools"
-sidebar_current: "docs-alibabacloudstack-datasource-dns-gtm-addresspools"
+sidebar_current: "docs-Alibabacloudstack-datasource-dns-gtm-addresspools"
 description: |-
   Queries the list of DNS GTM (Global Traffic Management) address pools in Alibaba Cloud.
 ---

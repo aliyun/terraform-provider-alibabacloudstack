@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据仓库 AnalyticDB PostgreSQL版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_backup_policy"
-sidebar_current: "docs-Alibabacloudstack-gpdb-backup_policy"
+sidebar_current: "docs-Alibabacloudstack-resource-gpdb-backup-policy"
 description: |-
   配置AnalyticDB PostgreSQL版实例的备份策略
 ---

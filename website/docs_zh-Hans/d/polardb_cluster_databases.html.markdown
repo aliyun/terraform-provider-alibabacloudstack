@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据库 PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_cluster_databases"
-sidebar_current: "docs-alibabacloudstack-datasource-polardb-cluster-databases"
+sidebar_current: "docs-Alibabacloudstack-datasource-polardb-cluster-databases"
 description: |-
   提供 PolarDB 集群数据库列表。
 ---

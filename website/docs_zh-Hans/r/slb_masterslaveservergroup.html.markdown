@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "负载均衡 SLB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_masterslaveservergroup"
-sidebar_current: "docs-Alibabacloudstack-slb-masterslaveservergroup"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-masterslaveservergroup"
 description: |- 
   编排负载均衡(SLB)主备服务器组
 ---

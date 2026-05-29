@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "OSS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket"
-sidebar_current: "docs-alibabacloudstack-resource-oss-bucket"
+sidebar_current: "docs-Alibabacloudstack-resource-oss-bucket"
 description: |-
   Provides a resource to create an oss bucket.
 ---

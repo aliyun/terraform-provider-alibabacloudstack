@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API 网关（API Gateway）V2 版"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_api_gateway_v2_certificate"
-sidebar_current: "docs-alibabacloudstack-resource-api-gateway-v2-certificate"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-certificate"
 description: |-
   提供 AlibabacloudStack API 网关 V2 证书资源。
 ---

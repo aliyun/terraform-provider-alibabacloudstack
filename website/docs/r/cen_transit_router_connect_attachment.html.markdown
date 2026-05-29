@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_connect_attachment"
-sidebar_current: "docs-alibabacloudstack-resource-cen-transit-router-connect-attachment"
+sidebar_current: "docs-Alibabacloudstack-resource-cen-transit-router-connect-attachment"
 description: |-
   Provides a CEN transit router connect attachment resource.
 ---

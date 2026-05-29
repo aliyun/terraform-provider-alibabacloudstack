@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Cloud Monitor Service (CMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_sitemonitor"
-sidebar_current: "docs-Alibabacloudstack-cloudmonitorservice-sitemonitor"
+sidebar_current: "docs-Alibabacloudstack-resource-cloudmonitorservice-sitemonitor"
 description: |- 
   Provides a cloudmonitorservice Sitemonitor resource.
 ---

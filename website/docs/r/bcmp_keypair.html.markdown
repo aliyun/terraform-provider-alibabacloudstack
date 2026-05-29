@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Bare Metal Computing Platform (BMCP)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bcmp_keypair"
-sidebar_current: "docs-Alibabacloudstack-bcmp-keypair"
+sidebar_current: "docs-Alibabacloudstack-resource-bcmp-keypair"
 description: |-
   Provides a BCMP Keypair resource.
 ---

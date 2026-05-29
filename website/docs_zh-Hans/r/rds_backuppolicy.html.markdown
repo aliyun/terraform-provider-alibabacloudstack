@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_backuppolicy"
-sidebar_current: "docs-Alibabacloudstack-rds-backuppolicy"
+sidebar_current: "docs-Alibabacloudstack-resource-rds-backuppolicy"
 description: |- 
   编排RDS备份策略资源
 ---

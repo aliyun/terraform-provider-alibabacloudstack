@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "VPN网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_customergateway"
-sidebar_current: "docs-Alibabacloudstack-vpngateway-customergateway"
+sidebar_current: "docs-Alibabacloudstack-resource-vpngateway-customergateway"
 description: |-
   编排VPN网关客户网关
 ---

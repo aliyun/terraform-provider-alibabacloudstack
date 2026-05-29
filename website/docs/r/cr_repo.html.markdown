@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Container Registry (ACR)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_repo"
-sidebar_current: "docs-alibabacloudstack-resource-container-registry"
+sidebar_current: "docs-Alibabacloudstack-resource-cr-repo"
 description: |-
   Provides a Alibabacloudstack resource to manage Container Registry repositories.
 ---

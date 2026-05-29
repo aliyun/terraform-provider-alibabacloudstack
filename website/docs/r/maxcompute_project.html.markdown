@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "MaxCompute"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_project"
-sidebar_current: "docs-alibabacloudstack-resource-maxcompute-project"
+sidebar_current: "docs-Alibabacloudstack-resource-maxcompute-project"
 description: |-
   Provides a Alibabacloudstack maxcompute project resource.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "GraphDatabase (GDB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_graphdatabase_dbinstance"
-sidebar_current: "docs-Alibabacloudstack-graphdatabase-dbinstance"
+sidebar_current: "docs-Alibabacloudstack-resource-graphdatabase-dbinstance"
 description: |- 
   Provides a graphdatabase Dbinstance resource.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_routetableattachment"
-sidebar_current: "docs-Alibabacloudstack-vpc-routetableattachment"
+sidebar_current: "docs-Alibabacloudstack-resource-vpc-routetableattachment"
 description: |- 
   Provides a vpc Routetableattachment resource.
 ---

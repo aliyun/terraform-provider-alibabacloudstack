@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Cloud Monitor Service (CMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cms_metric_metalist"
-sidebar_current: "docs-alibabacloudstack-datasource-cms-metric-metalist"
+sidebar_current: "docs-Alibabacloudstack-datasource-cms-metric-metalist"
 description: |-
     Provides a Metalist owned by an Alibabacloudstack Cloud account.
 

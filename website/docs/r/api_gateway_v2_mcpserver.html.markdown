@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API Gateway V2"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_mcpserver"
-sidebar_current: "docs-Alibabacloudstack-api_gateway-api_gateway_v2_mcpserver"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-mcpserver"
 description: |-
   Manage MCP servers for API Gateway V2
 ---

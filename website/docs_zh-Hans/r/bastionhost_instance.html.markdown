@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "堡垒机"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bastionhost_instance"
-sidebar_current: "docs-alibabacloudstack-resource-bastionhost_instance"
+sidebar_current: "docs-Alibabacloudstack-resource-bastionhost-instance"
 description: |-
   提供一个 Alibabacloudstack 堡垒机实例资源
 ---

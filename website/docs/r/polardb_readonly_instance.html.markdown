@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_readonly_instance"
-sidebar_current: "docs-alibabacloudstack-resource-polardb-readonly-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-polardb-readonly-instance"
 description: |-
   Provides an PolarDB readonly instance resource.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "MongoDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_backup"
-sidebar_current: "docs-Alibabacloudstack-mongodb-backup"
+sidebar_current: "docs-Alibabacloudstack-resource-mongodb-backup"
 description: |-
   Provides a mongodb Backup resource.
 ---

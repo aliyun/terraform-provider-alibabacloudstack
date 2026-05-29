@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云原生数据库 PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_cluster_proxy"
-sidebar_current: "docs-alibabacloudstack-resource-polardb-cluster-proxy"
+sidebar_current: "docs-Alibabacloudstack-resource-polardb-cluster-proxy"
 description: |-
   提供 PolarDB 集群代理资源。
 ---

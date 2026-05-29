@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "容器镜像服务 ACR"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_namespace"
-sidebar_current: "docs-alibabacloudstack-resource-cr-ee-namespace"
+sidebar_current: "docs-Alibabacloudstack-resource-cr-ee-namespace"
 description: |-
   编排容器镜像企业版命名空间
 ---

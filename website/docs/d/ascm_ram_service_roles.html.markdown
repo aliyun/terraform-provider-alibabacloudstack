@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_ram_service_roles"
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-ram-service-roles"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-ram-service-roles"
 description: |-
     Provides a list of RAM Service roles to the user.
 ---

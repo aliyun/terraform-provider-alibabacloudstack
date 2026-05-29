@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API 网关（API Gateway）V2 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_cascade_instance"
-sidebar_current: "docs-Alibabacloudstack-api-gateway-v2-cascade-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-cascade-instance"
 description: |-
   管理API网关V2级联网关实例
 ---

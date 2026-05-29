@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 MongoDB 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_zones"
-sidebar_current: "docs-alibabacloudstack-datasource-mongodb-zones"
+sidebar_current: "docs-Alibabacloudstack-datasource-mongodb-zones"
 description: |-
     查询MongoDB可用区
 ---

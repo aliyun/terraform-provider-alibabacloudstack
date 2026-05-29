@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_securitygroup"
-sidebar_current: "docs-Alibabacloudstack-ecs-securitygroup"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-securitygroup"
 description: |- 
   Provides a ecs Securitygroup resource.
 ---

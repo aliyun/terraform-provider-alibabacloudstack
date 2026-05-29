@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_accesscontrollist"
-sidebar_current: "docs-Alibabacloudstack-slb-accesscontrollist"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-accesscontrollist"
 description: |- 
   Provides a slb Accesscontrollist resource.
 ---

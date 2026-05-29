@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_networkinterface"
-sidebar_current: "docs-Alibabacloudstack-ecs-networkinterface"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-networkinterface"
 description: |- 
   编排云服务器（Ecs）弹性网卡。
 ---

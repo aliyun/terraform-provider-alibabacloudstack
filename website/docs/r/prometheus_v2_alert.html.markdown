@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Prometheus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_alert"
-sidebar_current: "docs-alibabacloudstack-prometheus-prometheus_v2_alert"
+sidebar_current: "docs-Alibabacloudstack-resource-prometheus-v2-alert"
 description: |-
   Manage Prometheus v2 alert rules
 ---

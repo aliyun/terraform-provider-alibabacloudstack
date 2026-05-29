@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_route_entries"
-sidebar_current: "docs-alibabacloudstack-datasource-route-entries"
+sidebar_current: "docs-Alibabacloudstack-datasource-route-entries"
 description: |-
     Provides a list of Route Entries owned by an Alibabacloudstack Cloud account.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "API 网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_service"
-sidebar_current: "docs-alibabacloudstack-datasource-api-gateway-service"
+sidebar_current: "docs-Alibabacloudstack-datasource-api-gateway-service"
 description: |-
     提供一个数据源以自动开启 API 网关服务。
 ---

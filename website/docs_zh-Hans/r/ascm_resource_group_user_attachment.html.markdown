@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "企业控制台(ASCM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_resource_group_user_attachment"
-sidebar_current: "docs-alibabacloudstack-resource-ascm-resource-group-user-attachment"
+sidebar_current: "docs-Alibabacloudstack-resource-ascm-resource-group-user-attachment"
 description: |-
   提供 ASCM 资源组用户绑定资源。
 ---

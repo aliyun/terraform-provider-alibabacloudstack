@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_regions_by_product"
-sidebar_current: "docs-alibabacloudstack-datasource-ascm-regions-by-product"
+sidebar_current: "docs-Alibabacloudstack-datasource-ascm-regions-by-product"
 description: |-
     Provides a list of regions to the user.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 Redis 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_instance_classes"
-sidebar_current: "docs-alibabacloudstack-datasource-kvstore-instance-classes"
+sidebar_current: "docs-Alibabacloudstack-datasource-kvstore-instance-classes"
 description: |-
    查询KVStore实例类信息
 ---

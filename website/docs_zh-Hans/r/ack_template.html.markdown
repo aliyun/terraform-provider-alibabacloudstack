@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Kubernetes容器监控"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ack_template"
-sidebar_current: "docs-alibabacloudstack-resource-ack-template"
+sidebar_current: "docs-Alibabacloudstack-resource-ack-template"
 description: |-
   提供一种 ACK 模板资源。
 ---

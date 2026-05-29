@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "硬件安全模块"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hsm_instance"
-sidebar_current: "docs-Alibabacloudstack-hsm-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-hsm-instance"
 description: |-
   创建和管理密码机实例
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_reservedinstance"
-sidebar_current: "docs-Alibabacloudstack-ecs-reservedinstance"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-reservedinstance"
 description: |- 
   编排云服务器（Ecs）预留实例
 ---

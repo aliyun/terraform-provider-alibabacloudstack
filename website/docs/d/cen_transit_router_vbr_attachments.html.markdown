@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Cloud Enterprise Network (CEN)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_vbr_attachments"
-sidebar_current: "docs-alibabacloudstack-datasource-cen-transit-router-vbr-attachments"
+sidebar_current: "docs-Alibabacloudstack-datasource-cen-transit-router-vbr-attachments"
 description: |-
   Provides a list of CEN transit router VBR attachments owned by an Alibaba Cloud account.
 ---

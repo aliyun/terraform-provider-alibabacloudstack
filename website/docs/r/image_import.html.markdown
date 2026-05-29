@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_import"
-sidebar_current: "docs-alibabacloudstack-resource-image-import"
+sidebar_current: "docs-Alibabacloudstack-resource-image-import"
 description: |-
   Provides an ECS image import resource.
 ---

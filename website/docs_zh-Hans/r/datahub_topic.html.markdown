@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "数据总线 DataHub"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_datahub_topic"
-sidebar_current: "docs-Alibabacloudstack-datahub-topic"
+sidebar_current: "docs-Alibabacloudstack-resource-datahub-topic"
 description: |- 
   编排datahub主题
 ---

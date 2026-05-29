@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Hologres"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hologram_instance_backup_policy"
-sidebar_current: "docs-alibabacloudstack-resource-hologram-instance-backup-policy"
+sidebar_current: "docs-Alibabacloudstack-resource-hologram-instance-backup-policy"
 description: |-
   Provides a Hologram Instance Backup Policy resource.
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Lindorm"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_lindorm_instance"
-sidebar_current: "docs-alibabacloudstack-resource-lindorm-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-lindorm-instance"
 description: |-
   Provides a AlibabacloudStack Lindorm Instance resource.
 ---

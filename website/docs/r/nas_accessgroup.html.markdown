@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_accessgroup"
-sidebar_current: "docs-Alibabacloudstack-nas-accessgroup"
+sidebar_current: "docs-Alibabacloudstack-resource-nas-accessgroup"
 description: |- 
   Provides a nas Accessgroup resource.
 ---

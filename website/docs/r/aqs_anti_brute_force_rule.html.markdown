@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Anti-Brute Force Security (AQS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_aqs_anti_brute_force_rule"
-sidebar_current: "docs-Alibabacloudstack-aqs-anti_brute_force_rule"
+sidebar_current: "docs-Alibabacloudstack-resource-aqs-anti-brute-force-rule"
 description: |-
   Anti-brute force rule for Security Center (AQS)
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云数据库 MongoDB 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_instance_types"
-sidebar_current: "docs-alibabacloudstack-mongodb-instance-types"
+sidebar_current: "docs-Alibabacloudstack-datasource-mongodb-instance-types"
 description: |-
   查询Mongodb实例规格
 ---

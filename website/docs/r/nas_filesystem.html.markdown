@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_filesystem"
-sidebar_current: "docs-Alibabacloudstack-nas-filesystem"
+sidebar_current: "docs-Alibabacloudstack-resource-nas-filesystem"
 description: |- 
   Provides a nas Filesystem resource.
 ---

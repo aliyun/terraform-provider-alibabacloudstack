@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Time Series Database (TSDB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_tsdb_zones"
-sidebar_current: "docs-alibabacloudstack-datasource-tsdb-zones"
+sidebar_current: "docs-Alibabacloudstack-datasource-tsdb-zones"
 description: |-
   Provides a list of Time Series Database (TSDB) instance available zones to the user.
 ---

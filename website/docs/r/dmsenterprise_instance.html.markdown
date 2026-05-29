@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Data Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dmsenterprise_instance"
-sidebar_current: "docs-Alibabacloudstack-dmsenterprise-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-dmsenterprise-instance"
 description: |-  
   Provides a dmsenterprise Instance resource.
 ---

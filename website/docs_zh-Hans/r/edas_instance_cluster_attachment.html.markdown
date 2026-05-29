@@ -2,7 +2,7 @@
 subcategory: "企业级分布式应用服务 EDAS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_instance_cluster_attachment"
-sidebar_current: "docs-Alibabacloudstack-edas-instance-cluster-attachment"
+sidebar_current: "docs-Alibabacloudstack-resource-edas-instance-cluster-attachment"
 description: |-
   将ECS实例导入到EDAS集群
 ---

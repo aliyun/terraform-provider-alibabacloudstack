@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Cloud-Native Distributed Database PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_super_account"
-sidebar_current: "docs-Alibabacloudstack-polardbx-super-account"
+sidebar_current: "docs-Alibabacloudstack-resource-polardbx-super-account"
 description: |-
   Orchestrates super accounts and ternary authorization configurations for POLARDB-X instances
 

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "日志服务 SLS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_store_index"
-sidebar_current: "docs-alibabacloudstack-resource-log-store-index"
+sidebar_current: "docs-Alibabacloudstack-resource-log-store-index"
 description: |-
   编排日志告警的日志库索引
 ---

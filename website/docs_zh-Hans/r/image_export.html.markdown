@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_export"
-sidebar_current: "docs-alibabacloudstack-resource-image-export"
+sidebar_current: "docs-Alibabacloudstack-resource-image-export"
 description: |-
   编排导出自定义镜像到OSS的资源
 ---

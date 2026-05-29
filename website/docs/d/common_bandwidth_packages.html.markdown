@@ -2,7 +2,7 @@
 subcategory: "Network Address Translation Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_common_bandwidth_packages"
-sidebar_current: "docs-Alibabacloudstack-datasource-natgateway-bandwidthpackages"
+sidebar_current: "docs-Alibabacloudstack-datasource-common-bandwidth-packages"
 description: |-
   Provides a list of natgateway bandwidthpackages owned by an alibabacloudstack account.
 ---

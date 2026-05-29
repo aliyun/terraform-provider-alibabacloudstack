@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "AnalyticDB for MySQL (ADB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_dbcluster"
-sidebar_current: "docs-Alibabacloudstack-adb-dbcluster"
+sidebar_current: "docs-Alibabacloudstack-resource-adb-dbcluster"
 description: |- 
   Provides a adb Dbcluster resource.
 ---

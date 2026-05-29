@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_dedicatedhost"
-sidebar_current: "docs-Alibabacloudstack-ecs-dedicatedhost"
+sidebar_current: "docs-Alibabacloudstack-resource-ecs-dedicatedhost"
 description: |- 
   编排云服务器（Ecs）专有宿主机
 ---

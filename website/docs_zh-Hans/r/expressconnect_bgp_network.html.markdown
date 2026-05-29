@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "高速通道"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgp_network"
-sidebar_current: "docs-Alibabacloudstack-expressconnect-bgp-network"
+sidebar_current: "docs-Alibabacloudstack-resource-expressconnect-bgp-network"
 description: |-
   提供高速通道 BGP 网络资源。
 ---

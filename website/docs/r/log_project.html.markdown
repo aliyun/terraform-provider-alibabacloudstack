@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_project"
-sidebar_current: "docs-alibabacloudstack-resource-log-project"
+sidebar_current: "docs-Alibabacloudstack-resource-log-project"
 description: |-
   Provides a Alibabacloudstack log project resource.
 ---

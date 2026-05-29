@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "弹性伸缩"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_scalingrule"
-sidebar_current: "docs-Alibabacloudstack-autoscaling-scalingrule"
+sidebar_current: "docs-Alibabacloudstack-resource-autoscaling-scalingrule"
 description: |- 
   编排弹性伸缩规则
 ---

@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "负载均衡 SLB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_zones"
-sidebar_current: "docs-alibabacloudstack-datasource-slb-zones"
+sidebar_current: "docs-Alibabacloudstack-datasource-slb-zones"
 description: |-
     查询负载均衡(SLB)可用区
 ---

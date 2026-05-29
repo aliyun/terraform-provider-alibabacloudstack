@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云企业网"
 layout: "alibabacloudstack"
 page_title: "阿里云专有云: alibabacloudstack_cen_transit_router_multicast_domain_source"
-sidebar_current: "docs-alibabacloudstack-resource-cen-transit-router-multicast-domain-source"
+sidebar_current: "docs-Alibabacloudstack-resource-cen-transit-router-multicast-domain-source"
 description: |-
   提供阿里云专有云CEN转发路由器组播域源资源。
 ---

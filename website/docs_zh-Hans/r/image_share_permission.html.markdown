@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_share_permission"
-sidebar_current: "docs-alibabacloudstack-resource-image-share-permission"
+sidebar_current: "docs-Alibabacloudstack-resource-image-share-permission"
 description: |-
   编排管理ECS镜像共享权限
 ---

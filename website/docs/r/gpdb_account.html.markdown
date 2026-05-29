@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "AnalyticDB for PostgreSQL"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_account"
-sidebar_current: "docs-Alibabacloudstack-gpdb-account"
+sidebar_current: "docs-Alibabacloudstack-resource-gpdb-account"
 description: |- 
   Provides a gpdb Account resource.
 ---

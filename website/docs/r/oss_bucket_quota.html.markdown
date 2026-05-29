@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "OSS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_quota"
-sidebar_current: "docs-Alibabacloudstack-oss-bucket-quota"
+sidebar_current: "docs-Alibabacloudstack-resource-oss-bucket-quota"
 description: |-
   Provides a OSS Bucket Quota resource.
 ---

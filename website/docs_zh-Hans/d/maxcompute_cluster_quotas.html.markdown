@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "大数据计算服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_cluster_quotas"
-sidebar_current: "docs-alibabacloudstack-datasource-maxcompute-cluster-quotas"
+sidebar_current: "docs-Alibabacloudstack-datasource-maxcompute-cluster-quotas"
 description: |-
   查询Max Compute集群配额
 ---

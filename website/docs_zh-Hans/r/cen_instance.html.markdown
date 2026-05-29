@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云企业网"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_instance"
-sidebar_current: "docs-Alibabacloudstack-cen-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-cen-instance"
 description: |-
   提供一个CEN实例资源�?
 ---

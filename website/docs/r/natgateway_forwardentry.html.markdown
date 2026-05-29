@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Network Address Translation Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_forwardentry"
-sidebar_current: "docs-Alibabacloudstack-natgateway-forwardentry"
+sidebar_current: "docs-Alibabacloudstack-resource-natgateway-forwardentry"
 description: |- 
   Provides a natgateway Forwardentry resource.
 ---

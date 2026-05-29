@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_instance_type_families"
-sidebar_current: "docs-alibabacloudstack-datasource-instance-type-families"
+sidebar_current: "docs-Alibabacloudstack-datasource-instance-type-families"
 description: |-
   查询云服务器实例类型族
 ---

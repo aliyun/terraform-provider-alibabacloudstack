@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "对象存储 OSS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_single_tunnel"
-sidebar_current: "docs-Alibabacloudstack-oss-single_tunnel"
+sidebar_current: "docs-Alibabacloudstack-resource-oss-single-tunnel"
 description: |-
   创建OSS单隧道资源，用于在OSS服务和VPC网络之间建立安全连接通道。
 ---

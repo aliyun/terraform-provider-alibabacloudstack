@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_cluster_proxy"
-sidebar_current: "docs-alibabacloudstack-resource-polardb-cluster-proxy"
+sidebar_current: "docs-Alibabacloudstack-resource-polardb-cluster-proxy"
 description: |-
   Provides a PolarDB cluster proxy resource.
 ---

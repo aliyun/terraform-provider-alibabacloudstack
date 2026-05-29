@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_vservergroup"
-sidebar_current: "docs-Alibabacloudstack-slb-vservergroup"
+sidebar_current: "docs-Alibabacloudstack-resource-slb-vservergroup"
 description: |- 
   Provides a slb Vservergroup resource.
 ---

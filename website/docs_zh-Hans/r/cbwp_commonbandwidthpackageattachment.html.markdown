@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "共享带宽包"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cbwp_commonbandwidthpackageattachment"
-sidebar_current: "docs-Alibabacloudstack-cbwp-commonbandwidthpackageattachment"
+sidebar_current: "docs-Alibabacloudstack-resource-cbwp-commonbandwidthpackageattachment"
 description: |- 
   编排绑定共享带宽包和弹性公网IP(EIP)
 ---

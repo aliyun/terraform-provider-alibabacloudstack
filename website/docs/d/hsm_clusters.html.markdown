@@ -1,8 +1,8 @@
----
+﻿---
 subcategory: "Hardware Security Module (HSM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hsm_clusters"
-sidebar_current: "docs-alibabacloudstack-datasource-hsm-clusters"
+sidebar_current: "docs-Alibabacloudstack-datasource-hsm-clusters"
 description: |-
     Provides information about Alibaba Cloud HSM Clusters.
 ---
