@@ -1,5 +1,5 @@
 ---
-subcategory: "DRDS"
+subcategory: "分布式关系型数据库"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_instances"
 sidebar_current: "docs-Alibabacloudstack-datasource-drds-instances"

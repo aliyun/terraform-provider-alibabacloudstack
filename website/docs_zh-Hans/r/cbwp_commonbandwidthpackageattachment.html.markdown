@@ -1,5 +1,5 @@
 ---
-subcategory: "CBWP"
+subcategory: "共享带宽包"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cbwp_commonbandwidthpackageattachment"
 sidebar_current: "docs-Alibabacloudstack-cbwp-commonbandwidthpackageattachment"

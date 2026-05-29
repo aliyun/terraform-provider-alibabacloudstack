@@ -1,5 +1,5 @@
 ---
-subcategory: "Bastion Host"
+subcategory: "堡垒机"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bastionhost-instance"
 sidebar_current: "docs-alibabacloudstack-resource-bastionhost-instance"

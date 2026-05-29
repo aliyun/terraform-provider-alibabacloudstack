@@ -1,5 +1,5 @@
 ---
-subcategory: "Anti-Brute Force Security (AQS)"
+subcategory: "防暴力破解安全服务"
 layout: "alibabacloudstack"
 page_title: "阿里云专有云: alibabacloudstack_aqs_oss_scanconfigs"
 sidebar_current: "docs-alibabacloudstack-datasource-aqs-oss-scanconfigs"

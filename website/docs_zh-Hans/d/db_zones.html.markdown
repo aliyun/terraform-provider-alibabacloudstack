@@ -1,5 +1,5 @@
 ---
-subcategory: "RDS"
+subcategory: "云数据库 RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_zones"
 sidebar_current: "docs-alibabacloudstack-datasource-db-zones"

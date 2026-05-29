@@ -1,5 +1,5 @@
 ---
-subcategory: "NATGateway"
+subcategory: "NAT网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_snatentries"
 sidebar_current: "docs-Alibabacloudstack-datasource-natgateway-snatentries"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Monitor Service (CMS)"
+subcategory: "云监控"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_metricalarmrule"
 sidebar_current: "docs-Alibabacloudstack-cloudmonitorservice-metricalarmrule"

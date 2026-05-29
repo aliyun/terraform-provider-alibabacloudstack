@@ -1,5 +1,5 @@
 ---
-subcategory: "AnalyticDB for MySQL (ADB)"  
+subcategory: "云原生数据库(ADB)"  
 layout: "alibabacloudstack"  
 page_title: "Alibabacloudstack: alibabacloudstack_adb_zones"  
 sidebar_current: "docs-alibabacloudstack-datasource-adb-zones"  

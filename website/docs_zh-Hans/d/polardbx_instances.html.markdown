@@ -1,5 +1,5 @@
 ---
-subcategory: "PolarDBX"
+subcategory: "PolarDB-X"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_instances"
 sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-instances"

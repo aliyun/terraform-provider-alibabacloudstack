@@ -1,5 +1,5 @@
 ---
-subcategory: "PolarDBX"
+subcategory: "PolarDB-X"
 layout: "alibabacloudstack"
 page_title: "阿里云栈：alibabacloudstack_polardbx_backups"
 sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-backups"

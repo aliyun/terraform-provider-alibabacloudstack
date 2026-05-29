@@ -1,5 +1,5 @@
 ---
-subcategory: "DMS Enterprise"
+subcategory: "数据管理"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dmsenterprise_user"
 sidebar_current: "docs-Alibabacloudstack-dmsenterprise-user"

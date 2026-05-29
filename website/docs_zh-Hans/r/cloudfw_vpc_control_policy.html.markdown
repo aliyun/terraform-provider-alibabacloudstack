@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Firewall"
+subcategory: "云防火墙"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudfw_vpc_control_policy"
 sidebar_current: "docs-Alibabacloudstack-cloudfw-vpc-control-policy"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Zone"
+subcategory: "可用区"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack"
 sidebar_current: "docs-alibabacloudstack-datasource-zones"

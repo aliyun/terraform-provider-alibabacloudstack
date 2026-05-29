@@ -1,5 +1,5 @@
 ---
-subcategory: "GraphDatabase (GDB)"
+subcategory: "图数据库 GDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_graphdatabase_dbinstance"
 sidebar_current: "docs-Alibabacloudstack-graphdatabase-dbinstance"

@@ -1,5 +1,5 @@
 ---
-subcategory: "PolarDBX"
+subcategory: "PolarDB-X"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_account_database_binding"
 sidebar_current: "docs-Alibabacloudstack-polardbx-account-database-binding"

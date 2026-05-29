@@ -1,5 +1,5 @@
 ---
-subcategory: "RDS"
+subcategory: "云数据库 RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_read_write_splitting_connection"
 sidebar_current: "docs-alibabacloudstack-resource-db-read-write-splitting-connection"

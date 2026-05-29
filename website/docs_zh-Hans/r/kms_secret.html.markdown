@@ -1,5 +1,5 @@
 ---
-subcategory: "KMS"
+subcategory: "密钥管理服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_secret"
 sidebar_current: "docs-alibabacloudstack-resource-kms-secret"

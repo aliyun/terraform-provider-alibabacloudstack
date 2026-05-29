@@ -1,5 +1,5 @@
 ---
-subcategory: "Application"
+subcategory: "应用"
 layout: "alibabacloudstack"
 page_title: "阿里云专有云: alibabacloudstack_ascm_ram_service_role"
 sidebar_current: "docs-alibabacloudstack-resource-ascm-ram-service-role"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Bare Metal Compute Platform (BMCP)"
+subcategory: "裸金属计算平台"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bmcp_security_groups"
 sidebar_current: "docs-Alibabacloudstack-datasource-bmcp-security-groups"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Application Real-Time Monitoring Service (ARMS)"
+subcategory: "应用实时监控服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_arms_dispatch_rule"
 sidebar_current: "docs-alibabacloudstack-resource-arms-dispatch-rule"

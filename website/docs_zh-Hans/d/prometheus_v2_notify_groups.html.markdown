@@ -1,5 +1,5 @@
 ---
-subcategory: "Prometheus"
+subcategory: "Prometheus 监控服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_notify_group"
 sidebar_current: "docs-Alibabacloudstack-datasource-prometheus_v2_notify_group"

@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "云服务器 ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_import"
 sidebar_current: "docs-alibabacloudstack-resource-image-import"

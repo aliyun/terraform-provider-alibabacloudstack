@@ -1,5 +1,5 @@
 ---
-subcategory: "VPNGateway"
+subcategory: "VPN网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_customergateways"
 sidebar_current: "docs-Alibabacloudstack-datasource-vpngateway-customergateways"

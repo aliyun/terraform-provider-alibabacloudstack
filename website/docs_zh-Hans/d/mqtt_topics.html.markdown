@@ -1,5 +1,5 @@
 ---
-subcategory: "MQTT"
+subcategory: "物联网平台"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mqtt_topic"
 sidebar_current: "docs-Alibabacloudstack-resource-mqtt-topic"

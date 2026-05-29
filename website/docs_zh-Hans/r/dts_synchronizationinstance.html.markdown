@@ -1,5 +1,5 @@
 ---
-subcategory: "Data Transmission Service (DTS)"
+subcategory: "数据传输服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dts_synchronization_instance"
 sidebar_current: "docs-alibabacloudstack-resource-dts-synchronization-instance"

@@ -1,5 +1,5 @@
 ---
-subcategory: "KVStore"
+subcategory: "云数据库 Redis 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_zones"
 sidebar_current: "docs-alibabacloudstack-datasource-kvstore-zones"

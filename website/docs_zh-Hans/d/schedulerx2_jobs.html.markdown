@@ -1,5 +1,5 @@
 ---
-subcategory: "SchedulerX2"
+subcategory: "分布式任务调度 SchedulerX"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_schedulerx2_job"
 sidebar_current: "docs-Alibabacloudstack-resource-schedulerx2-job"

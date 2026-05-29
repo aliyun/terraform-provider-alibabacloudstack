@@ -1,5 +1,5 @@
 ---
-subcategory: "Hardware Security Module (HSM)"
+subcategory: "硬件加密机"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hsm_instance"
 sidebar_current: "docs-Alibabacloudstack-hsm-instance"

@@ -1,5 +1,5 @@
 ---
-subcategory: "OSS"
+subcategory: "对象存储 OSS"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_oss_endpoints"
 sidebar_current: "docs-alibabacloudstack-datasource-oss-endpoints"

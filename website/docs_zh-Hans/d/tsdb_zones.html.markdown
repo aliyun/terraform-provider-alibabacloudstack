@@ -1,5 +1,5 @@
 ---
-subcategory: "Time Series Database (TSDB)"
+subcategory: "时间序列数据库"
 layout: "alibabacloudstack"
 page_title: "阿里云：alibabacloudstack_tsdb_zones"
 sidebar_current: "docs-alibabacloudstack-datasource-tsdb-zones"

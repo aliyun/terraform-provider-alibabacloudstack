@@ -1,5 +1,5 @@
 ---
-subcategory: "KVStore"
+subcategory: "云数据库 Redis 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_redis_tairinstance"
 sidebar_current: "docs-Alibabacloudstack-redis-tairinstance"

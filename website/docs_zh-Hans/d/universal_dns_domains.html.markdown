@@ -1,5 +1,5 @@
 ---
-subcategory: "Universal DNS"
+subcategory: "云解析 DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_domains"
 sidebar_current: "docs-Alibabacloudstack-datasource-universal-dns-domains"

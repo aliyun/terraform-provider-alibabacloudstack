@@ -1,6 +1,6 @@
 ---
 page_title: "alibabacloudstack_oss_single_tunnels"
-subcategory: "OSS"
+subcategory: "对象存储 OSS"
 description: |-
   提供阿里云专有云中 OSS 单隧道的列表。
 ---

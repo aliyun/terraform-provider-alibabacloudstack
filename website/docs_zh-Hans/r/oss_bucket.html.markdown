@@ -1,5 +1,5 @@
 ---
-subcategory: "OSS"
+subcategory: "对象存储 OSS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket"
 sidebar_current: "docs-alibabacloudstack-resource-oss-bucket"

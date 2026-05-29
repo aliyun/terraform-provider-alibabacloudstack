@@ -1,5 +1,5 @@
 ---
-subcategory: "VPNGateway"
+subcategory: "VPN网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_sslvpnclientcert"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-sslvpnclientcert"

@@ -1,5 +1,5 @@
 ---
-subcategory: "PolarDBX"
+subcategory: "PolarDB-X"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_read_write_splitting_config"
 sidebar_current: "docs-Alibabacloudstack-polardbx-read-write-splitting-config"

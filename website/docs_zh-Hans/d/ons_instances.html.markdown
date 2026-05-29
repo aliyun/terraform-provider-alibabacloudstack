@@ -1,5 +1,5 @@
 ---
-subcategory: "RocketMQ (ONS)"
+subcategory: "消息队列 RocketMQ 版"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_instances"
 sidebar_current: "docs-alibabacloudstack-datasource-ons-instances"

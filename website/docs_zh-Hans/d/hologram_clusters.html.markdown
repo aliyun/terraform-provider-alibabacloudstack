@@ -1,5 +1,5 @@
 ---
-subcategory: "Hologram"
+subcategory: "Hologres"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hologram_clusters"
 sidebar_current: "docs-alibabacloudstack-datasource-hologram-clusters"
