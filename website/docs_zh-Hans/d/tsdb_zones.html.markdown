@@ -1,7 +1,7 @@
 ---
 subcategory: "时间序列数据库"
 layout: "alibabacloudstack"
-page_title: "阿里云：alibabacloudstack_tsdb_zones"
+page_title: "Alibabacloudstack：alibabacloudstack_tsdb_zones"
 sidebar_current: "docs-alibabacloudstack-datasource-tsdb-zones"
 description: |-
   查询时间序列数据库(TSDB)实例区域

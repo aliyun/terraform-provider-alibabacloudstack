@@ -1,7 +1,7 @@
 ---
 subcategory: "PolarDB-X"
 layout: "alibabacloudstack"
-page_title: "阿里云栈：alibabacloudstack_polardbx_backups"
+page_title: "Alibabacloudstack：alibabacloudstack_polardbx_backups"
 sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-backups"
 description: |-
   提供阿里云栈账户拥有的polardbx备份列表。

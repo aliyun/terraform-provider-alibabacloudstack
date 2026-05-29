@@ -1,13 +1,13 @@
 ---
 subcategory: "云原生数据库 PolarDB"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_polardb_database"
-sidebar_current: "docs-Alibabacloudstack-polardb-database"
+page_title: "Alibabacloudstack: alibabacloudstack_polardbx_database"
+sidebar_current: "docs-Alibabacloudstack-polardbx-database"
 description: |- 
   编排polardb数据库表
 ---
 
-# alibabacloudstack_polardb_database
+# alibabacloudstack_polardbx_database
 
 使用Provider配置的凭证在指定的资源集编排polardb数据库表。
 

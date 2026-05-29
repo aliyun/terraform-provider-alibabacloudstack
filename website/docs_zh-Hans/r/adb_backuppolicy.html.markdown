@@ -1,7 +1,7 @@
 ---
 subcategory: "云原生数据库(ADB)"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_adb_backuppolicy"
+page_title: "Alibabacloudstack: alibabacloudstack_adb_backup_policy"
 sidebar_current: "docs-Alibabacloudstack-adb-backuppolicy"
 description: |- 
   编排adb备份规则

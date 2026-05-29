@@ -1,7 +1,7 @@
 ---
 subcategory: "弹性伸缩"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_configuration"
+page_title: "Alibabacloudstack: alibabacloudstack_ess_scaling_configuration"
 sidebar_current: "docs-Alibabacloudstack-autoscaling-configuration"
 description: |- 
   编排弹性伸缩配置
