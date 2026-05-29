@@ -1,5 +1,5 @@
 ---
-subcategory: "Bare Metal Server (BMS)"
+subcategory: "Bare-Metal Management Service (BMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bms_keypairs"
 sidebar_current: "docs-Alibabacloudstack-datasource-bms-keypairs"

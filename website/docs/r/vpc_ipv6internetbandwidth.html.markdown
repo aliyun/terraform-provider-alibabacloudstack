@@ -1,5 +1,5 @@
 ---
-subcategory: "VPC"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6internetbandwidth"
 sidebar_current: "docs-Alibabacloudstack-vpc-ipv6internetbandwidth"

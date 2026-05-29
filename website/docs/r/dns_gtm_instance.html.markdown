@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DNS"
+subcategory: "Universal DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_instance"
 sidebar_current: "docs-Alibabacloudstack-dns-dns_gtm_instance"

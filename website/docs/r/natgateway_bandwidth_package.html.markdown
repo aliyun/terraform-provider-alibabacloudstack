@@ -1,5 +1,5 @@
 ---
-subcategory: "NATGateway"
+subcategory: "Network Address Translation Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_bandwidthpackage"
 sidebar_current: "docs-Alibabacloudstack-natgateway-bandwidthpackage"

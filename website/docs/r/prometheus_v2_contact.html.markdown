@@ -1,5 +1,5 @@
 ---
-subcategory: "Prometheus Monitoring 2.0"
+subcategory: "Prometheus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_contact"
 sidebar_current: "docs-alibabacloudstack-resource-prometheus-v2-contact"

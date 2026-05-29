@@ -1,5 +1,5 @@
 ---
-subcategory: "MQTT"
+subcategory: "Message Queuing Telemetry Transport"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mqtt_instances"
 sidebar_current: "docs-Alibabacloudstack-datasource-mqtt-instances"

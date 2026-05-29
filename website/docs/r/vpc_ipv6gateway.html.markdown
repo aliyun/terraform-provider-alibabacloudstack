@@ -1,5 +1,5 @@
 ---
-subcategory: "VPC"
+subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6_gateway"
 sidebar_current: "docs-alibabacloudstack-resource-vpc-ipv6-gateway"

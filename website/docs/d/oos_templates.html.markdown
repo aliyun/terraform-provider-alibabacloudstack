@@ -1,5 +1,5 @@
 ---
-subcategory: "OOS"
+subcategory: "CloudOps Orchestration Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oos_templates"
 sidebar_current: "docs-Alibabacloudstack-datasource-oos-templates"

@@ -1,5 +1,5 @@
 ---
-subcategory: "EIP"
+subcategory: "Elastic IP Address"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_eip_association"
 sidebar_current: "docs-Alibabacloudstack-eip-association"

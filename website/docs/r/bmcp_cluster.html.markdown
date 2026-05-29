@@ -1,5 +1,5 @@
 ---
-subcategory: "Bare Metal Compute Platform (BMCP)"
+subcategory: "Bare Metal Computing Platform (BMCP)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bmcp_cluster"
 sidebar_current: "docs-Alibabacloudstack-bmcp-cluster"

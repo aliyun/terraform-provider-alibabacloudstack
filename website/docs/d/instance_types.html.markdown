@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_instance_types"
 sidebar_current: "docs-alibabacloudstack-datasource-instance-types"

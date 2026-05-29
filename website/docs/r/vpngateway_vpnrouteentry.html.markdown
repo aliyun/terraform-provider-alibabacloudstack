@@ -1,5 +1,5 @@
 ---
-subcategory: "Virtual Private Cloud (VPC)"
+subcategory: "VPNGateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnrouteentry"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-vpnrouteentry"

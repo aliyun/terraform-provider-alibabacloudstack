@@ -1,5 +1,5 @@
 ---
-subcategory: "KVStore"
+subcategory: "ApsaraDB for Redis"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_redis_tairinstance"
 sidebar_current: "docs-Alibabacloudstack-redis-tairinstance"

@@ -1,5 +1,5 @@
 ---
-subcategory: "ASCM"
+subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_ascm_ram_policies"
 sidebar_current: "docs-alibabacloudstack-datasource-ascm-ram-policies"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Elastic Compute Service"
+subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_securitygroup"
 sidebar_current: "docs-Alibabacloudstack-ecs-securitygroup"

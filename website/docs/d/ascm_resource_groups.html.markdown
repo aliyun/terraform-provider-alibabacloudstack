@@ -1,5 +1,5 @@
 ---
-subcategory: "ASCM"
+subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_resource_groups"
 sidebar_current: "docs-alibabacloudstack-datasource-alibabacloudstack-ascm-resource-groups"

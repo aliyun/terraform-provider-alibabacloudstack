@@ -1,5 +1,5 @@
 ---
-subcategory: "RDS"
+subcategory: "Relational Database Service(RDS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_account_privilege"
 sidebar_current: "docs-alibabacloudstack-resource-db-account-privilege"

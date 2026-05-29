@@ -1,5 +1,5 @@
 ---
-subcategory: "AnalyticDB for MySQL V3.0"
+subcategory: "AnalyticDB for MySQL (ADB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_connection"
 sidebar_current: "docs-Alibabacloudstack-adb-connection"

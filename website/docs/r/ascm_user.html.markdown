@@ -1,5 +1,5 @@
 ---
-subcategory: "Application"
+subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_user"
 sidebar_current: "docs-alibabacloudstack-resource-ascm-user"

@@ -1,5 +1,5 @@
 ---
-subcategory: "HBase"
+subcategory: "Hadoop Database"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hbase_clusters"
 sidebar_current: "docs-Alibabacloudstack-datasource-hbase-clusters"

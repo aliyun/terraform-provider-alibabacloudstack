@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_disk"
 sidebar_current: "docs-alibabacloudstack-resource-disk"

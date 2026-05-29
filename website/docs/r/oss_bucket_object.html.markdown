@@ -1,5 +1,5 @@
 ---
-subcategory: "Object Storage Service (OSS)"
+subcategory: "OSS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_object"
 sidebar_current: "docs-alibabacloudstack-resource-oss-bucket-object"

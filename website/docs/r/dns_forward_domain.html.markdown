@@ -1,5 +1,5 @@
 ---
-subcategory: "Alibaba Cloud DNS"
+subcategory: "Universal DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_forward_domain"
 sidebar_current: "docs-Alibabacloudstack-dns-dns_forward_domain"
