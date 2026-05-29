@@ -1,15 +1,15 @@
 ---
 subcategory: "Container Registry (ACR)"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_artifact_lifecycle_rule"
-sidebar_current: "docs-Alibabacloudstack-cr-cr_ee_artifact_lifecycle_rule"
+page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_attestor_lifecycle_rule"
+sidebar_current: "docs-Alibabacloudstack-cr-cr_ee_attestor_lifecycle_rule"
 description: |-
-  Manages artifact lifecycle rules for ACR Enterprise Edition to automatically clean up expired image tags and manifests.
+  Manages attestor lifecycle rules for ACR Enterprise Edition to automatically clean up expired image tags and manifests.
 ---
 
-# alibabacloudstack_cr_ee_artifact_lifecycle_rule
+# alibabacloudstack_cr_ee_attestor_lifecycle_rule
 
-Manages artifact lifecycle rules for ACR Enterprise Edition, used to automatically clean up expired image tags and manifests.
+Manages attestor lifecycle rules for ACR Enterprise Edition, used to automatically clean up expired image tags and manifests.
 
 ## Example Usage
 
