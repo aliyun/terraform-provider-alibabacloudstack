@@ -1,7 +1,7 @@
 ---
 subcategory: "Elastic Compute Service(ECS)"
 layout: "alibabacloudstack"
-page_title: "AlibabacloudStack: alibabacloudstack_disk"
+page_title: "AlibabacloudStack: alibabacloudstack_ecs_disk"
 sidebar_current: "docs-alibabacloudstack-resource-disk"
 description: |- 
   Provides a ECS Disk resource.
