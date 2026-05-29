@@ -1,8 +1,8 @@
 ---
 subcategory: "Web应用防火墙"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_waf-instance"
-sidebar_current: "docs-alibabacloudstack-resource-waf-instance"
+page_title: "Alibabacloudstack: alibabacloudstack_waf_instance"
+sidebar_current: "docs-alibabacloudstack-resource-waf_instance"
 description: |-
   提供Alibabacloudstack waf-onecs交换机资源。
 ---

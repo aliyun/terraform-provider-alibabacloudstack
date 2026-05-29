@@ -1,7 +1,7 @@
 ---
 subcategory: "专有网络 VPC"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_vpngateway-sslvpnserver"
+page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_sslvpnserver"
 sidebar_current: "docs-Alibabacloudstack-vpngateway-sslvpnserver"
 description: |-
   提供一个 VPNGateway 的 SSL-VPN 服务器资源。
