@@ -1,5 +1,5 @@
 ---
-subcategory: "专有网络 VPC"
+subcategory: "NAT网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_network_acl_entries"
 sidebar_current: "docs-alibabacloudstack-resource-network-acl-entries"

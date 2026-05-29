@@ -1,5 +1,5 @@
 ---
-subcategory: "硬件加密机"
+subcategory: "硬件安全模块"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hsms"
 sidebar_current: "docs-alibabacloudstack-datasource-hsms"

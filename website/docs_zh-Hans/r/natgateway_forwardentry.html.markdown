@@ -1,5 +1,5 @@
 ---
-subcategory: "专有网络 VPC"
+subcategory: "NAT网关"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_forwardentry"
 sidebar_current: "docs-Alibabacloudstack-natgateway-forwardentry"
