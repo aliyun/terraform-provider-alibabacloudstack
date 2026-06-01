@@ -11,14 +11,48 @@ description: |-
 
 提供PolarDB读写分离连接资源，允许您为PolarDB集群配置读写分离。
 
--> **注意：** 版本 v3.20.0+ 可用。
-
 ## 示例用法
 
+### 基础用法
+
 ```hcl
-resource "alibabacloudstack_polardb_readwrite_splitting_connection" "example" {
-  instance_id       = "pc-xxxxxxxxxxxxx"
-  connection_id     = "pe-xxxxxxxxxxxxx"
+variable "name" {
+  default = "tf-testAccPolarDB"
+}
+
+data "alibabacloudstack_zones" "default" {
+  available_resource_creation = "VSwitch"
+}
+
+resource "alibabacloudstack_polardb_dbinstance" "default" {
+  db_type              = "MySQL"
+  db_version           = "8.0"
+  pay_type             = "Postpaid"
+  db_node_class        = "polar.mysql.x4.medium"
+  zone_id              = data.alibabacloudstack_zones.default.zones.0.id
+  vswitch_id           = alibabacloudstack_vswitch.default.id
+  security_ip_list     = ["10.168.1.12", "100.69.7.112"]
+  instance_network_type = "VPC"
+}
+
+resource "alibabacloudstack_polardb_readonly_instance" "default" {
+  master_db_instance_id = alibabacloudstack_polardb_dbinstance.default.id
+  zone_id               = alibabacloudstack_polardb_dbinstance.default.zone_id
+  engine_version        = alibabacloudstack_polardb_dbinstance.default.engine_version
+  instance_type         = alibabacloudstack_polardb_dbinstance.default.instance_type
+  instance_storage      = alibabacloudstack_polardb_dbinstance.default.instance_storage
+  instance_name         = var.name
+  db_instance_storage_type = alibabacloudstack_polardb_dbinstance.default.storage_type
+}
+
+resource "alibabacloudstack_polardb_proxy" "default" {
+  db_instance_id        = alibabacloudstack_polardb_dbinstance.default.id
+  db_proxy_instance_num = 1
+}
+
+resource "alibabacloudstack_polardb_readwrite_splitting_connection" "default" {
+  instance_id       = alibabacloudstack_polardb_dbinstance.default.id
+  connection_id     = alibabacloudstack_polardb_proxy.default.db_proxy_endpoint_name
   distribution_type = "Standard"
   max_delay_time    = 30
 }
