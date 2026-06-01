@@ -1,15 +1,15 @@
 ﻿---
-subcategory: "Universal DNS"
+subcategory: "Cross-Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_line"
 sidebar_current: "docs-Alibabacloudstack-resource-universal-dns-line"
 description: |-
-  Manage Alibaba Cloud Universal DNS lines
+  Manage Alibaba Cloud Cross-Cloud DNS lines
 ---
 
 # alibabacloudstack_universal_dns_line
 
-Manage Alibaba Cloud Universal DNS lines, used to configure line information for Universal DNS service.
+Manage Alibaba Cloud Cross-Cloud DNS lines, used to configure line information for Cross-Cloud DNS service.
 
 ## Example Usage
 
@@ -36,7 +36,7 @@ resource "alibabacloudstack_universal_dns_line" "default" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the Universal DNS line. The name is used to identify the line. For length and format restrictions, refer to the Alibaba Cloud API documentation.
+* `name` - (Required) The name of the Cross-Cloud DNS line. The name is used to identify the line. For length and format restrictions, refer to the Alibaba Cloud API documentation.
 * `v4_addresses` - (Optional) A list of IPv4 addresses. At least one of IPv4 or IPv6 addresses must be specified. Fuzzy query is supported for IPv4 addresses.
 * `v6_addresses` - (Optional) A list of IPv6 addresses. At least one of IPv4 or IPv6 addresses must be specified. IPv6 addresses only support exact query.
 
@@ -44,12 +44,12 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The ID of the Universal DNS line.
-* `priority` - The priority of the Universal DNS line. 1 indicates the highest priority, and a larger value indicates a lower priority. The system automatically assigns the priority value.
+* `id` - The ID of the Cross-Cloud DNS line.
+* `priority` - The priority of the Cross-Cloud DNS line. 1 indicates the highest priority, and a larger value indicates a lower priority. The system automatically assigns the priority value.
 
 ## Import
 
-Universal DNS Line can be imported using the line ID, e.g.
+Cross-Cloud DNS Line can be imported using the line ID, e.g.
 
 ```
 $ terraform import alibabacloudstack_universal_dns_line.example <line_id>

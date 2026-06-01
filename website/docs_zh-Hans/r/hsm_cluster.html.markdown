@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "硬件安全模块"
+subcategory: "硬件加密机"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hsm_cluster"
 sidebar_current: "docs-Alibabacloudstack-resource-hsm-cluster"

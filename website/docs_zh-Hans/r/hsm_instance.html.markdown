@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "硬件安全模块"
+subcategory: "硬件加密机"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hsm_instance"
 sidebar_current: "docs-Alibabacloudstack-resource-hsm-instance"
@@ -100,4 +100,4 @@ resource "alibabacloudstack_hsm_instance" "default" {
 
 ```
 $ terraform import alibabacloudstack_hsm_instance.example hsm-12345678
-```
+``````

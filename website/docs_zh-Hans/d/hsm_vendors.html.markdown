@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "硬件安全模块"
+subcategory: "密钥管理服务"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hsm_vendors"
 sidebar_current: "docs-Alibabacloudstack-datasource-hsm-vendors"

@@ -1,15 +1,15 @@
 ﻿---
-subcategory: "Alibaba Cloud DNS"
+subcategory: "Universal DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_access_strategy"
 sidebar_current: "docs-Alibabacloudstack-resource-dns-gtm-access-strategy"
 description: |-
-  Access strategy for Global Traffic Manager (GTM) instance in Alibaba Cloud DNS
+  Access strategy for Global Traffic Manager (GTM) instance in Universal DNS
 ---
 
 # alibabacloudstack_dns_gtm_access_strategy
 
-Creates an access strategy for Global Traffic Manager (GTM) instance in Alibaba Cloud DNS using the credentials configured in the provider.
+Creates an access strategy for Global Traffic Manager (GTM) instance in Universal DNS using the credentials configured in the provider.
 
 ## Example Usage
 
@@ -118,4 +118,6 @@ DNS GTM Access Strategy can be imported using the GTM instance ID and access str
 
 ```
 $ terraform import alibabacloudstack_dns_gtm_access_strategy.example instance-12345:strategy-67890
+```
+67890
 ```

@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "ACM"
+subcategory: "应用配置管理"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_acm_configuration"
 sidebar_current: "docs-Alibabacloudstack-resource-acm-configuration"
