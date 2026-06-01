@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Universal DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_access_strategy"
 sidebar_current: "docs-Alibabacloudstack-resource-dns-gtm-access-strategy"
