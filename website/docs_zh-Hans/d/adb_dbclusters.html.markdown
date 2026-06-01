@@ -80,13 +80,11 @@ output "first_adb_dbcluster_id" {
 
 以下参数是支持的：
 
-* `description` - (可选，变更时重建) DBCluster 的描述。这可以用来通过其描述过滤集群。
-* `description_regex` - (可选，变更时重建) 用于按 DBCluster 描述过滤结果的正则表达式字符串。
-* `enable_details` - (可选) 默认为 `false`。将其设置为 `true` 以输出更多关于资源属性的详细信息。
-* `ids` - (可选，变更时重建) DBCluster ID 列表。这可以用来通过其唯一标识符过滤集群。
-* `resource_group_id` - (可选，变更时重建) 资源组的 ID。这可以用来过滤属于特定资源组的集群。
-* `status` - (可选，变更时重建) 资源的状态。有效值包括 `Creating`（创建中）、`Running`（运行中）、`Stopping`（停止中）、`Stopped`（已停止）和 `Starting`（启动中）。
-* `tags` - (可选) 分配给集群的标签映射。这可以用来通过其标签过滤集群。
+* `description` - (可选，变更时重建) ADB 集群的描述。可用于按描述过滤集群。
+* `description_regex` - (可选，变更时重建) 用于按 ADB 集群描述过滤结果的正则表达式字符串。
+* `enable_details` - (可选) 默认为 `false`。设置为 `true` 以输出更多关于资源属性的详细信息。
+* `ids` - (可选，变更时重建) ADB 集群 ID 列表。可用于按唯一标识符过滤集群。
+* `status` - (可选，变更时重建) 资源的状态。有效值包括 `ClassChanging`、`Creating`、`Deleting`、`NetAddressCreating`、`NetAddressDeleting`、`Preparing`、`Restoring`、`Running`。
 
 ## 属性说明
 

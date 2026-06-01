@@ -30,13 +30,11 @@ output "first_adb_dbcluster_id" {
 
 The following arguments are supported:
 
-* `description` - (Optional, ForceNew) The description of the DBCluster. This can be used to filter clusters by their description.
-* `description_regex` - (Optional, ForceNew) A regex string to filter results by DBCluster description.
+* `description` - (Optional, ForceNew) The description of the ADB cluster. This can be used to filter clusters by their description.
+* `description_regex` - (Optional, ForceNew) A regex string to filter results by ADB cluster description.
 * `enable_details` - (Optional) Default to `false`. Set it to `true` to output more details about resource attributes.
-* `ids` - (Optional, ForceNew) A list of DBCluster IDs. This can be used to filter clusters by their unique identifiers.
-* `resource_group_id` - (Optional, ForceNew) The ID of the resource group. This can be used to filter clusters belonging to a specific resource group.
-* `status` - (Optional, ForceNew) The status of the resource. Valid values include `Creating`, `Running`, `Stopping`, `Stopped`, and `Starting`.
-* `tags` - (Optional) A map of tags assigned to the cluster. This can be used to filter clusters by their tags.
+* `ids` - (Optional, ForceNew) A list of ADB cluster IDs. This can be used to filter clusters by their unique identifiers.
+* `status` - (Optional, ForceNew) The status of the resource. Valid values include `ClassChanging`, `Creating`, `Deleting`, `NetAddressCreating`, `NetAddressDeleting`, `Preparing`, `Restoring`, and `Running`.
 
 ## Attributes Reference
 
