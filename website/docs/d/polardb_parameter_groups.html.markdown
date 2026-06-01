@@ -11,8 +11,6 @@ description: |-
 
 This data source provides a list of PolarDB parameter groups in an Alibaba Cloud Stack account according to the specified filters.
 
--> **Note:** This data source can also be referred to by the following alias: `apsarastack_polardb_parameter_groups`.
-
 ## Example Usage
 
 ```hcl

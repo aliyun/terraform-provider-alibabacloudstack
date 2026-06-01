@@ -13,8 +13,6 @@ Provides a DNS domain resource.
 
 -> **NOTE:** The domain name which you want to add must be already registered and had not added by another account. Every domain name can only exist in a unique group.
 
--> **NOTE:** This resource can also be referred to by the alias `apsarastack_dns_domain`.
-
 ## Example Usage
 
 ```

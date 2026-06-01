@@ -11,9 +11,6 @@ description: |-
 
 提供 PolarDBX 账户资源。
 
-> **注意：** 该资源也可通过以下别名引用：
-> - `apsarastack_polardbx_account`
-
 ## 示例用法
 
 ```hcl

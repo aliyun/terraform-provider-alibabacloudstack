@@ -11,9 +11,6 @@ description: |-
 
 Provides a PolarDB-X read-only instance resource.
 
--> **Note:** This resource can also be referred to by the following aliases:
-- `apsarastack_polardbx_readonly_instance`
-
 ## Example Usage
 
 ```hcl

@@ -11,9 +11,6 @@ description: |-
 
 Creates and manages MQTT instances in the specified region using the credentials configured in the Provider.
 
-~> **Note:** This resource can also be referred to by the following aliases:
-- `apsarastack_mqtt_instance`
-
 ## Example Usage
 
 ### Basic Usage

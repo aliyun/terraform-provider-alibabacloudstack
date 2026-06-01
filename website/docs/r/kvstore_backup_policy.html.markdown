@@ -11,9 +11,6 @@ description: |-
 
 Provides a backup policy for ApsaraDB Redis / Memcache instance resource.
 
-> **Note:** This resource can also be referred to by the following aliases:
-> - `apsarastack_kvstore_backup_policy`
-
 ## Example Usage
 
 Basic Usage

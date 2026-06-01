@@ -11,9 +11,6 @@ description: |-
 
 根据指定过滤条件，列出与 DRDS 实例关联的所有私有定制 RDS 实例。
 
-> **注意:** 该资源也可以使用以下别名引用：
-> - `apsarastack_drds_rds_instances`
-
 ## 示例用法
 
 ```hcl

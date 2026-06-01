@@ -11,8 +11,6 @@ description: |-
 
 This resource creates a global DNS forward domain in the specified resource set using the credentials configured in the provider.
 
--> **Note:** This resource can also be referred to by the following alias: `apsarastack_dns_forward_domain`.
-
 ## Example Usage
 
 ### Basic Usage

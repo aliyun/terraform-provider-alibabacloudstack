@@ -11,9 +11,6 @@ description: |-
 
 提供 PolarDB-X 实例资源。
 
--> **注意：** 此资源也可以使用以下别名引用：
-- `apsarastack_polardbx_instance`
-
 ## 示例用法
 ```hcl
 variable "name" {

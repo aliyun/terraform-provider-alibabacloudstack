@@ -5,9 +5,6 @@ page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_vbr_attachm
 sidebar_current: "docs-Alibabacloudstack-resource-cen-transit-router-vbr-attachment"
 description: |-
   提供CEN转发路由器VBR附加资源。
-
--> **Note:** 该资源也可以通过以下别名引用：
--> - `apsarastack_cen_transit_router_vbr_attachment`
 ---
 
 # alibabacloudstack\_cen\_transit_router_vbr_attachment

@@ -77,5 +77,3 @@ API网关V2级联链路可以使用 linkId 进行导入，例如：
 ```
 $ terraform import alibabacloudstack_api_gateway_v2_cascade_link.default <link_id>
 ```
-
--> **注意**: 该资源也可以使用别名 `apsarastack_api_gateway_v2_cascade_link` 引用。

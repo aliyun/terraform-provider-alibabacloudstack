@@ -10,10 +10,6 @@ description: |-
 # alibabacloudstack_mqtt_instance
 
 使用Provider配置的凭证在指定的区域创建和管理MQTT实例。
-
-~> **注意:** 此资源也可以使用以下别名引用：
-- `apsarastack_mqtt_instance`
-
 ## 示例用法
 
 ### 基础用法

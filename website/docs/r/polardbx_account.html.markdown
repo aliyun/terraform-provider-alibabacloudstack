@@ -11,9 +11,6 @@ description: |-
 
 Provides a PolarDBX Account resource.
 
-> **Note:** This resource can also be referred to by the following aliases:
-> - `apsarastack_polardbx_account`
-
 ## Example Usage
 
 ```hcl

@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "云解析 DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_access_strategy"
 sidebar_current: "docs-Alibabacloudstack-resource-dns-gtm-access-strategy"
@@ -9,7 +9,8 @@ description: |-
 
 # alibabacloudstack_dns_gtm_access_strategy
 
-使用Provider配置的凭证在指定的资源集创建云解析全局调度实例访问策略。
+使用 Provider 配置的凭证在指定的资源集创建云解析全局调度实例访问策略。
+
 
 ## 示例用法
 
@@ -89,26 +90,34 @@ resource "alibabacloudstack_dns_gtm_access_strategy" "default" {
 
 支持以下参数：
 
-* `default_gtm_address_pool_id` - (必填) 主地址池ID。
-* `default_gtm_address_pool_type` - (必填) 主地址池类型。取值：DOMAIN（域名）、IPV6（IPV6类型）、IPV4（IPV4类型）。
+* `default_gtm_address_pool_id` - (必填) 主地址池 ID。
+* `default_gtm_address_pool_type` - (必填) 主地址池类型。取值：`DOMAIN`（域名）、`IPV6`（IPv6 类型）、`IPV4`（IPv4 类型）。
 * `default_min_available_addr_num` - (必填) 主地址池最小可用地址数量。
-* `line_ids` - (必填) 线路ID列表，用于指定访问策略适用的线路。
+* `gtm_instance_id` - (必填，变更时重建) 调度实例 ID。修改此参数会强制重新创建资源。
+* `line_ids` - (必填) 线路 ID 列表，用于指定访问策略适用的线路。
 * `name` - (必填) 访问策略的名称。
-* `switch_mode` - (必填) 生效地址池切换策略。取值：BY_HAND（手动）、BY_PROBE_RESULT（自动）。
-* `gtm_instance_id` - (必填, 变更时重建) 调度实例ID。
-* `failover_gtm_address_pool_id` - (可选) 备用地址池ID。
-* `failover_gtm_address_pool_type` - (可选) 备用地址池类型。取值：DOMAIN（域名）、IPV6（IPV6类型）、IPV4（IPV4类型）。
+* `switch_mode` - (必填) 生效地址池切换策略。取值：`BY_HAND`（手动）、`BY_PROBE_RESULT`（自动）。
+* `failover_gtm_address_pool_id` - (可选) 备用地址池 ID。
+* `failover_gtm_address_pool_type` - (可选) 备用地址池类型。取值：`DOMAIN`（域名）、`IPV6`（IPv6 类型）、`IPV4`（IPv4 类型）。
 * `failover_min_available_addr_num` - (可选) 备用地址池最小可用地址数量。
-* `specified_gtm_address_pool` - (可选) 手动指定当前使用的地址池。取值：DEFAULT（主地址池）、FAILOVER（备用地址池）。
+* `specified_gtm_address_pool` - (可选，可回读) 手动指定当前使用的地址池。此属性由 API 返回。取值：`DEFAULT`（主地址池）、`FAILOVER`（备用地址池）。
 
 ## 属性说明
 
-以下属性会从API中导出：
+以下属性会从 API 中导出：
 
-* `id` - 访问策略ID。
+* `id` - 访问策略 ID。ID 格式为 `<gtm_instance_id>:<access_strategy_id>`。
 * `default_available_addr_num` - 主地址池当前可用地址数量。
 * `default_gtm_address_pool_name` - 主地址池名称。
 * `failover_available_addr_num` - 备用地址池当前可用地址数量。
 * `failover_gtm_address_pool_name` - 备用地址池名称。
-* `in_use_gtm_address_pool_id` - 当前使用的地址池ID。
+* `in_use_gtm_address_pool_id` - 当前使用的地址池 ID。
 * `in_use_gtm_address_pool_name` - 当前使用的地址池名称。
+
+## Import
+
+DNS GTM 访问策略可以使用 GTM 实例 ID 和访问策略 ID（以冒号分隔）进行导入，例如
+
+```
+$ terraform import alibabacloudstack_dns_gtm_access_strategy.example instance-12345:strategy-67890
+```

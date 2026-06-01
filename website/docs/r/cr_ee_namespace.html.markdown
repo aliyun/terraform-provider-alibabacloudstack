@@ -9,8 +9,6 @@ description: |-
 
 # alibabacloudstack_cr_ee_namespace
 
--> **Note:** This resource can also be referred to by the following alias:
-> - `apsarastack_cr_ee_namespace`
 
 This resource will help you to manager Container Registry Enterprise Edition namespaces.
 

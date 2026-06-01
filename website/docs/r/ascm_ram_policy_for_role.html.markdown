@@ -11,8 +11,6 @@ description: |-
 
 Provides a ASCM RAM policy for role resource to bind a RAM policy to a RAM role.
 
--> **Note:** This resource can also be referred to by the following alias: `apsarastack_ascm_ram_policy_for_role`.
-
 ## Example Usage
 
 ```

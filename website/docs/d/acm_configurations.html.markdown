@@ -27,7 +27,7 @@ resource "alibabacloudstack_edas_namespace" "default" {
 	namespace_logical_id = "${var.logical_id}"
 }
 
-resource "apsarastack_acm_configuration" "default" {
+resource "alibabacloudstack_acm_configuration" "default" {
 	app_name = "${var.name}"
 	content = "test"
 	data_id = "${var.name}"

@@ -8,10 +8,6 @@ description: |-
 ---
 
 # alibabacloudstack_kms_key
-
-> **注意：** 此资源也可以使用以下别名进行引用：
-> - `apsarastack_kms_key`
-
 使用Provider配置的凭证在指定的资源集编排KMS密钥。
 KMS密钥可以帮助用户在传输过程中保护数据安全。
 

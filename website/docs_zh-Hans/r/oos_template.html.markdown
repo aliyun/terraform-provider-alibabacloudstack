@@ -11,9 +11,6 @@ description: |-
 
 使用Provider配置的凭证在指定的资源集编排运维编排（OOS）模板。
 
--> **注意：** 该资源也可以使用以下别名引用：
-> - `apsarastack_oos_template`
-
 ## 示例用法
 
 ```terraform

@@ -11,8 +11,6 @@ description: |-
 
 Manage APFS (Alibaba Parallel File System) file storage systems using credentials configured in the Provider within the specified resource set.
 
--> **Note:** This resource can also be referred to by the following alias: `apsarastack_apfs_file_system`.
-
 ## Example Usage
 
 ### Basic Usage

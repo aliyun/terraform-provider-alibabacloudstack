@@ -11,8 +11,6 @@ description: |-
 
 管理Schedulerx2工作流资源，用于创建、配置和调度定时任务流程。
 
--> **注意:** 该资源也可以使用以下别名引用：`apsarastack_schedulerx2_workflow`。
-
 ## 示例用法
 
 ### 基础用法

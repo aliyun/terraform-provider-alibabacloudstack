@@ -10,9 +10,6 @@ description: |-
 # alibabacloudstack_ascm_user
 
 使用 Provider 配置的凭证在指定的资源集下编排 ASCM 用户。
-
--> **注意:** 该资源同时支持以下别名：`apsarastack_ascm_user`。
-
 ## 示例用法
 
 ```terraform

@@ -11,9 +11,6 @@ description: |-
 
 This data source provides a list of DRDS RDS instances associated with a DRDS instance in an Alibabacloudstack account.
 
-> **Note:** This resource can also be referred to by the following aliases:
-> - `apsarastack_drds_rds_instances`
-
 ## Example Usage
 
 ```hcl

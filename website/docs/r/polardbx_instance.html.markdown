@@ -11,9 +11,6 @@ description: |-
 
 Provides a PolarDB-X instance resource.
 
--> **Note:** This resource can also be referred to by the following aliases:
-- `apsarastack_polardbx_instance`
-
 ## Example Usage
 ```hcl
 variable "name" {

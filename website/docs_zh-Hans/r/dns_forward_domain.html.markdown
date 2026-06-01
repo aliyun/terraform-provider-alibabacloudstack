@@ -11,8 +11,6 @@ description: |-
 
 使用Provider配置的凭证在指定的资源集创建云解析全局转发域名。
 
--> **注意:** 该资源也可以使用以下别名引用：`apsarastack_dns_forward_domain`。
-
 ## 示例用法
 
 ### 基础用法

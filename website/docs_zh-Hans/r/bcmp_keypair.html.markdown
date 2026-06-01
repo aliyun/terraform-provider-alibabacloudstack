@@ -11,9 +11,6 @@ description: |-
 
 提供 BCMP 密钥对资源。
 
-> **注意：** 此资源也可以使用以下别名引用：
-> - `apsarastack_bcmp_keypair`
-
 ## 示例用法
 
 基本用法

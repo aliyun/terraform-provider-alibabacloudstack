@@ -11,8 +11,6 @@ description: |-
 
 Provides a resource to put a object(content or file) to a oss bucket.
 
--> **Note:** This resource can also be referred to by the following alias: `apsarastack_oss_bucket_object`
-
 ## Example Usage
 
 ### Adjusting the configuration in provider.tf

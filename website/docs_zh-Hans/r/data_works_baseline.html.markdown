@@ -11,9 +11,6 @@ description: |-
 
 提供 DataWorks 基线资源。
 
--> **注意：** 该资源也可以使用以下别名引用：
--> - `apsarastack_data_works_baseline`
-
 ## 示例
 
 基本用法

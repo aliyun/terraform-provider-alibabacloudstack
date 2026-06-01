@@ -11,9 +11,6 @@ description: |-
 
 Provides a OOS Template resource. For information about Alibaba Cloud OOS Template and how to use it, see [What is Resource Alibaba Cloud OOS Template](https://www.alibabacloud.com/help/doc-detail/120761.htm).
 
--> **Note:** This resource can also be referred to by the following alias:
-> - `apsarastack_oos_template`
-
 ## Example Usage
 
 ```terraform

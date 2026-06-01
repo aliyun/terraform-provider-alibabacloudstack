@@ -11,8 +11,6 @@ description: |-
 
 使用Provider配置的凭证在指定的资源集编排Redis或Memcache实例的备份策略。
 
-> **注意：** 当前资源也可通过以下别名引用：
-> - `apsarastack_kvstore_backup_policy`
 
 ## 示例用法
 

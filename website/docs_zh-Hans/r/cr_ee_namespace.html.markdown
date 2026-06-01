@@ -9,9 +9,6 @@ description: |-
 
 # alibabacloudstack_cr_ee_namespace
 
--> **注意：** 该资源也可以使用以下别名引用：
-> - `apsarastack_cr_ee_namespace`
-
 使用 Provider 配置的凭证在指定的资源集下编排容器镜像企业版命名空间。
 
 有关容器镜像企业版命名空间的信息以及如何使用它，请参阅 [创建命名空间](https://www.alibabacloud.com/help/doc-detail/145483.htm)。

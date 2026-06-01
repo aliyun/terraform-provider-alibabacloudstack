@@ -1,15 +1,15 @@
 ﻿---
 subcategory: "Message Queuing Telemetry Transport"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_mqtt_group"
-sidebar_current: "docs-Alibabacloudstack-datasource-mqtt-group"
+page_title: "Alibabacloudstack: alibabacloudstack_mqtt_groups"
+sidebar_current: "docs-Alibabacloudstack-datasource-mqtt-groups"
 description: |-
-  Used to create and manage MQTT Group resources.
+  Query AlibabacloudStack MQTT Group resources.
 ---
 
-# alibabacloudstack_mqtt_group
+# alibabacloudstack_mqtt_groups
 
-Used to create and manage MQTT Group resources.
+Query AlibabacloudStack MQTT Group resources.
 
 ## Example Usage
 

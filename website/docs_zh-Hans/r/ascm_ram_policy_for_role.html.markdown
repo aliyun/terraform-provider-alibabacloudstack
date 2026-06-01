@@ -11,8 +11,6 @@ description: |-
 
 使用Provider配置的凭证在ASCM中绑定RAM策略到RAM角色。
 
--> **注意:** 此资源也可以使用以下别名引用：`apsarastack_ascm_ram_policy_for_role`。
-
 ## 示例用法
 
 ```

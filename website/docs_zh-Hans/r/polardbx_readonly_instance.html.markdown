@@ -11,8 +11,6 @@ description: |-
 
 提供 PolarDB-X 只读实例资源。
 
--> **注意：** 此资源也可以使用以下别名引用：
-- `apsarastack_polardbx_readonly_instance`
 
 ## 示例用法
 

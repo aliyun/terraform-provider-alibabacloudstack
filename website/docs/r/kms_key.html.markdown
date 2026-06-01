@@ -9,9 +9,6 @@ description: |-
 
 # alibabacloudstack_kms_key
 
-> **Note:** This resource can also be referred to by the following aliases:
-> - `apsarastack_kms_key`
-
 A KMS key can help users to protect data security during transmission.
 
 

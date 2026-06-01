@@ -75,5 +75,3 @@ API Gateway V2 Cascade Link can be imported using the linkId, e.g.
 ```
 $ terraform import alibabacloudstack_api_gateway_v2_cascade_link.default <link_id>
 ```
-
--> **Note**: This resource can also be referred to by the alias `apsarastack_api_gateway_v2_cascade_link`.

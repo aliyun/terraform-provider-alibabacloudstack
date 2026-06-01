@@ -11,8 +11,6 @@ description: |-
 
 Manages Schedulerx2 workflow resources, used for creating, configuring, and scheduling timed task workflows.
 
--> **Note:** This resource can also be referred to by the following alias: `apsarastack_schedulerx2_workflow`.
-
 ## Example Usage
 
 ### Basic Usage

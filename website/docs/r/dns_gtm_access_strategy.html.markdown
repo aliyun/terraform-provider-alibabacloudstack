@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Universal DNS"
+subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_access_strategy"
 sidebar_current: "docs-Alibabacloudstack-resource-dns-gtm-access-strategy"
@@ -89,25 +89,33 @@ resource "alibabacloudstack_dns_gtm_access_strategy" "default" {
 The following arguments are supported:
 
 * `default_gtm_address_pool_id` - (Required) The ID of the primary address pool.
-* `default_gtm_address_pool_type` - (Required) The type of the primary address pool. Valid values: DOMAIN (domain name), IPV6 (IPv6), IPV4 (IPv4).
+* `default_gtm_address_pool_type` - (Required) The type of the primary address pool. Valid values: `DOMAIN` (domain name), `IPV6` (IPv6), `IPV4` (IPv4).
 * `default_min_available_addr_num` - (Required) The minimum number of available addresses in the primary address pool.
+* `gtm_instance_id` - (Required, ForceNew) The ID of the GTM instance. Changing this value will recreate the resource.
 * `line_ids` - (Required) A list of line IDs to specify the lines to which the access strategy applies.
 * `name` - (Required) The name of the access strategy.
-* `switch_mode` - (Required) The address pool switching strategy. Valid values: BY_HAND (manual), BY_PROBE_RESULT (automatic).
-* `gtm_instance_id` - (Required, ForceNew) The ID of the GTM instance. Changing this value will recreate the resource.
+* `switch_mode` - (Required) The address pool switching strategy. Valid values: `BY_HAND` (manual), `BY_PROBE_RESULT` (automatic).
 * `failover_gtm_address_pool_id` - (Optional) The ID of the failover address pool.
-* `failover_gtm_address_pool_type` - (Optional) The type of the failover address pool. Valid values: DOMAIN (domain name), IPV6 (IPv6), IPV4 (IPv4).
+* `failover_gtm_address_pool_type` - (Optional) The type of the failover address pool. Valid values: `DOMAIN` (domain name), `IPV6` (IPv6), `IPV4` (IPv4).
 * `failover_min_available_addr_num` - (Optional) The minimum number of available addresses in the failover address pool.
-* `specified_gtm_address_pool` - (Optional) Manually specify the address pool currently in use. Valid values: DEFAULT (primary address pool), FAILOVER (failover address pool).
+* `specified_gtm_address_pool` - (Optional, Computed) Manually specify the address pool currently in use. This attribute is read from the API. Valid values: `DEFAULT` (primary address pool), `FAILOVER` (failover address pool).
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The ID of the access strategy.
+* `id` - The ID of the access strategy. The ID format is `<gtm_instance_id>:<access_strategy_id>`.
 * `default_available_addr_num` - The current number of available addresses in the primary address pool.
 * `default_gtm_address_pool_name` - The name of the primary address pool.
 * `failover_available_addr_num` - The current number of available addresses in the failover address pool.
 * `failover_gtm_address_pool_name` - The name of the failover address pool.
 * `in_use_gtm_address_pool_id` - The ID of the address pool currently in use.
 * `in_use_gtm_address_pool_name` - The name of the address pool currently in use.
+
+## Import
+
+DNS GTM Access Strategy can be imported using the GTM instance ID and access strategy ID separated by a colon, e.g.
+
+```
+$ terraform import alibabacloudstack_dns_gtm_access_strategy.example instance-12345:strategy-67890
+```

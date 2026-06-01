@@ -11,8 +11,6 @@ description: |-
 
 使用 Provider 配置的凭证编排 ASCM 组织资源。
 
--> **Note:** 该资源也可以使用以下别名引用：
-- `apsarastack_ascm_organization`
 
 ## 示例用法
 

@@ -5,9 +5,6 @@ page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_vbr_attachm
 sidebar_current: "docs-Alibabacloudstack-resource-cen-transit-router-vbr-attachment"
 description: |-
   Provides a CEN transit router VBR attachment resource.
-
--> **Note:** This resource can also be referred to by the following alias:
--> - `apsarastack_cen_transit_router_vbr_attachment`
 ---
 
 # alibabacloudstack\_cen\_transit_router_vbr_attachment

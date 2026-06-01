@@ -11,8 +11,6 @@ description: |-
 
 使用Provider配置的凭证将对象(内容或文件)上传到OSS存储桶。
 
--> **注意:** 此资源也可以使用以下别名引用: `apsarastack_oss_bucket_object`
-
 ## 示例用法
 
 ### 调整provider.tf中的配置

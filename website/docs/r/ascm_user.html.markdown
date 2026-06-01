@@ -11,8 +11,6 @@ description: |-
 
 Provides a ASCM user resource.
 
--> **Note:** The resource also supports the following alias: `apsarastack_ascm_user`.
-
 ## Example Usage
 
 ```terraform

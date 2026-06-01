@@ -11,9 +11,6 @@ description: |-
 
 Provides a BCMP Keypair resource.
 
-> **Note:** This resource can also be referred to by the following alias:
-> - `apsarastack_bcmp_keypair`
-
 ## Example Usage
 
 Basic Usage

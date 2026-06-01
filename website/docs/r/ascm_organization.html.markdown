@@ -11,9 +11,6 @@ description: |-
 
 Provides an Ascm organization resource.
 
--> **Note:** This resource can also be referred to by the following aliases:
-- `apsarastack_ascm_organization`
-
 ## Example Usage
 
 ```hcl

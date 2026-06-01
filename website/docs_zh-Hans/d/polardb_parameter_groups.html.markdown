@@ -11,8 +11,6 @@ description: |-
 
 此数据源提供根据指定过滤条件列出的阿里云账号下的 PolarDB 参数模板资源列表。
 
--> **注意：** 该数据源也可使用以下别名引用：`apsarastack_polardb_parameter_groups`。
-
 ## 示例用法
 
 ```hcl

@@ -11,7 +11,6 @@ description: |-
 
 This data source provides a list of PolarDB cluster proxy types in an Alibaba Cloud Stack environment.
 
--> **Note:** This data source can also be referred to by the following alias: `apsarastack_polardb_cluster_proxy_types`.
 
 ## Example Usage
 
