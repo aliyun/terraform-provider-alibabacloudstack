@@ -1,13 +1,13 @@
 ﻿---
 subcategory: "云防火墙"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cloudfw_vpc_control_policy"
-sidebar_current: "docs-Alibabacloudstack-datasource-cloudfw-vpc-control-policy"
+page_title: "Alibabacloudstack: alibabacloudstack_cloudfw_vpc_control_policies"
+sidebar_current: "docs-Alibabacloudstack-datasource-cloudfw-vpc-control-policies"
 description: |-
   查询云防火墙VPC控制策略
 ---
 
-# alibabacloudstack_cloudfw_vpc_control_policy
+# alibabacloudstack_cloudfw_vpc_control_policies
 
 查询云防火墙VPC控制策略，用于获取已配置的VPC防火墙访问控制规则信息。
 

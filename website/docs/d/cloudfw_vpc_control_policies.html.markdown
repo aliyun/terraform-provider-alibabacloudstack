@@ -1,13 +1,13 @@
 ﻿---
 subcategory: "Cloud Firewall"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_cloudfw_vpc_control_policy"
-sidebar_current: "docs-Alibabacloudstack-datasource-cloudfw-vpc-control-policy"
+page_title: "Alibabacloudstack: alibabacloudstack_cloudfw_vpc_control_policies"
+sidebar_current: "docs-Alibabacloudstack-datasource-cloudfw-vpc-control-policies"
 description: |-
   Query VPC control policies of Cloud Firewall.
 ---
 
-# alibabacloudstack_cloudfw_vpc_control_policy
+# alibabacloudstack_cloudfw_vpc_control_policies
 
 This data source queries VPC control policies of Cloud Firewall to obtain information about configured VPC firewall access control rules.
 
