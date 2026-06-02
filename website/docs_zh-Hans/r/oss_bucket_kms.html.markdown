@@ -32,10 +32,10 @@ resource "alibabacloudstack_oss_bucket_kms" "default" {
 
 支持以下参数：
 
-* `bucket` - (必填，变更后重建) OSS 存储桶的名称。此参数用于指定要配置加密的 OSS 存储桶。
-* `oss_cluster` - (可选，变更后重建) OSS 集群的 ID。修改此参数会强制重新创建资源。
-* `sse_algorithm` - (必填，变更后重建) 服务器端加密算法。有效值为：`KMS`，表示使用 KMS 进行服务器端加密。修改此参数会强制重新创建资源。
-* `kms_master_key_id` - (可选，变更后重建) 用于加密的 KMS 主密钥 ID。当 `sse_algorithm` 设置为 `KMS` 时需要指定此参数。修改此参数会强制重新创建资源。
+* `bucket` - (必填，变更时强制重建) OSS 存储桶的名称。此参数用于指定要配置加密的 OSS 存储桶。
+* `oss_cluster` - (可选，变更时强制重建) OSS 集群的 ID。修改此参数会强制重新创建资源。
+* `sse_algorithm` - (必填，变更时强制重建) 服务器端加密算法。有效值为：`KMS`，表示使用 KMS 进行服务器端加密。修改此参数会强制重新创建资源。
+* `kms_master_key_id` - (可选，变更时强制重建) 用于加密的 KMS 主密钥 ID。当 `sse_algorithm` 设置为 `KMS` 时需要指定此参数。修改此参数会强制重新创建资源。
 
 ## 属性说明
 

@@ -179,9 +179,9 @@ resource "alibabacloudstack_slb_access_log" "default" {
 ## 参数参�?
 
 支持以下参数�?
-  * `load_balancer_id` - (选填, 强制新建) - slb实例id
-  * `log_project` - (选填, 强制新建) - 用户SLS的LogProject
-  * `log_store` - (选填, 强制新建) - 用户SLS的LogStore
+  * `load_balancer_id` - (选填, 变更时强制重建) - slb实例id
+  * `log_project` - (选填, 变更时强制重建) - 用户SLS的LogProject
+  * `log_store` - (选填, 变更时强制重建) - 用户SLS的LogStore
   * `log_type` - (选填) - 访问日志，默认为layer7
   * `role_name` - (选填) - 用户SLS的访问RoleName，默认为aliyunlogwriteonlyrole
 

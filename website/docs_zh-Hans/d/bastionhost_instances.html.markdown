@@ -27,7 +27,7 @@ output "instances" {
 * `description_regex` - (可选) 用于根据实例描述进行过滤的正则表达式。
 * `output_file` - (可选) 将结果保存为 JSON 格式的文件名。
 * `Deprecated`: 此字段已弃用，将在版本 3.19.0 中移除。请改用 local_file 提供程序。
-* `ids` - (可选, 变更后重建) 要过滤的一组 Bastionhost 实例 ID。
+* `ids` - (可选, 变更时强制重建) 要过滤的一组 Bastionhost 实例 ID。
 * `tags` - (可选) 用于按标签过滤 Bastionhost 实例的键值对映射。
 ## 属性参考
 除了上述所有参数外，还导出以下属性：

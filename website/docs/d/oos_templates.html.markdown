@@ -54,7 +54,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `ids` - A list of OOS Template IDs. Each element in the list is the same as `template_name`.
-* `names` - (Available in v1.114.0+) A list of OOS Template names.
+* `names` - A list of OOS Template names.
 * `templates` - A list of OOS Templates. Each element contains the following attributes:
   * `id` - The ID of the OOS Template. Same as `template_name`.
   * `template_name` - The name of the OOS Template.

@@ -11,8 +11,6 @@ description: |-
 
 The cu is the basic unit of operation in maxcompute. 
 
-->**NOTE:** Available in 1.77.0+.
-
 ## Example Usage
 
 Basic Usage
@@ -27,7 +25,7 @@ resource "alibabacloudstack_maxcompute_cu" "example" {
 ## Argument Reference
 
 The following arguments are supported:
-* `cu_name` - (Required, ForceNew, Available in 1.110.0+) The name of the maxcompute cu. Must be between 3 and 27 characters. <!--  AI CREATE  -->
+* `cu_name` - (Required, ForceNew) The name of the maxcompute cu. Must be between 3 and 27 characters. <!--  AI CREATE  -->
 * `cu_num` - (Required) The number of CUs for the maxcompute cu. Must be at least 1. 
 * `cluster_name` - (Required, ForceNew) The cluster name of the maxcompute cu.
 

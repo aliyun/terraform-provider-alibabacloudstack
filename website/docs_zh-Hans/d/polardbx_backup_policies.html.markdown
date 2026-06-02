@@ -59,7 +59,7 @@ data "alibabacloudstack_polardbx_backup_policies" "default" {
 ## 参数参考
 支持以下参数：
 
-* `db_instance_id` - (必填, 变更后重建) PolarDBX实例的ID。
+* `db_instance_id` - (必填, 变更时强制重建) PolarDBX实例的ID。
 
 ## 属性参考
 除了上述参数外，还导出以下属性：

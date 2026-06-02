@@ -72,7 +72,7 @@ data "alibabacloudstack_vpngateway_ssl_vpnservers" "default" {
 
 以下参数支持配置：
 * `ids` - (可选) SSL VPN 服务器 ID 列表。若设置此参数，数据源将返回匹配的 SSL VPN 服务器。
-* `name_regex` - (可选, 变更后重建) 用于通过名称模式匹配 SSL VPN 服务器的正则表达式。可以使用该参数筛选出符合特定命名规则的 SSL VPN 服务器。
+* `name_regex` - (可选, 变更时强制重建) 用于通过名称模式匹配 SSL VPN 服务器的正则表达式。可以使用该参数筛选出符合特定命名规则的 SSL VPN 服务器。
 
 ## 属性说明
 

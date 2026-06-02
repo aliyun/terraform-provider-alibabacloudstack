@@ -161,16 +161,16 @@ resource "alibabacloudstack_api_gateway_v2_instance" "custom_example" {
 支持以下参数：
 
 * `instance_name` - (必需) API 网关实例的名称。
-* `deploy_mode` - (可选，强制新建) 实例的部署模式。有效值：`k8s`、`edas`、`custom`、`apig_k8s`。
-* `broker_engine_type` - (可选，强制新建) broker 引擎类型。有效值：`HIGRESS`(AI网关)、`SCG`(API网关)。
-* `instance_class` - (可选，强制新建) 实例类别/规格。
-* `node_number` - (可选，强制新建) 实例的节点数量。
-* `edas_namespace_id` - (可选，强制新建) EDAS 命名空间 ID。
+* `deploy_mode` - (可选，变更时强制重建) 实例的部署模式。有效值：`k8s`、`edas`、`custom`、`apig_k8s`。
+* `broker_engine_type` - (可选，变更时强制重建) broker 引擎类型。有效值：`HIGRESS`(AI网关)、`SCG`(API网关)。
+* `instance_class` - (可选，变更时强制重建) 实例类别/规格。
+* `node_number` - (可选，变更时强制重建) 实例的节点数量。
+* `edas_namespace_id` - (可选，变更时强制重建) EDAS 命名空间 ID。
 * `deploy_cluster_code` - (可选) 部署集群代码。
-* `deploy_cluster_namespace` - (可选，强制新建) 部署集群命名空间。
-* `ingress_class_name` - (可选，强制新建) ingress 类名。
-* `prometheus_enabled` - (可选，强制新建) 是否启用 Prometheus 监控。
-* `sls_enabled` - (可选，强制新建) 是否启用 SLS 日志记录。
+* `deploy_cluster_namespace` - (可选，变更时强制重建) 部署集群命名空间。
+* `ingress_class_name` - (可选，变更时强制重建) ingress 类名。
+* `prometheus_enabled` - (可选，变更时强制重建) 是否启用 Prometheus 监控。
+* `sls_enabled` - (可选，变更时强制重建) 是否启用 SLS 日志记录。
 * `edas_app_infos` - (可选) EDAS 应用信息块集合。每个块包含：
   * `edas_namespace` - (可选) EDAS 命名空间。
   * `k8s_cluster_id` - (可选) Kubernetes 集群 ID。

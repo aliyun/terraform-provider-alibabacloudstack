@@ -11,8 +11,6 @@ description: |-
 
 This data source provides the BMS Machine Types available to the user.
 
--> **NOTE:** Available in v3.16.0+.
-
 ## Example Usage
 
 ```hcl

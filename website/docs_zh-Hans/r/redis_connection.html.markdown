@@ -34,7 +34,7 @@ resource "alibabacloudstack_redis_connection" "default" {
 
 支持以下参数：
 
-* `instance_id` - (必填，变更后重建) Redis实例的ID。修改此参数将强制重新创建资源。
+* `instance_id` - (必填，变更时强制重建) Redis实例的ID。修改此参数将强制重新创建资源。
 * `connection_string_prefix` - (必填) 连接字符串的前缀。前缀长度可以为8到64个字符，可以包含小写字母和数字。必须以小写字母开头。
 * `port` - (必填) Redis实例的服务端口号。有效范围：`1024` 到 `65535`。
 * `connection_string` - (可选，Computed) Redis实例的连接字符串。此属性由API返回，无法手动设置。

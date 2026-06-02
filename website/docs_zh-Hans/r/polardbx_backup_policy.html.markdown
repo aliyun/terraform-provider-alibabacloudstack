@@ -67,7 +67,7 @@ resource "alibabacloudstack_polardbx_backup_policy" "default" {
 ## 参数参考
 支持以下参数：
 
-* `db_instance_id` - (必填, 变更后重建) PolarDBX实例的ID。
+* `db_instance_id` - (必填, 变更时强制重建) PolarDBX实例的ID。
 * `backup_period` - (必填) 备份周期。您可以选择一周中的多天。有效值：Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday。多个值用逗号分隔。
 * `backup_set_retention` - (必填) 备份集的保留周期。有效值：7到730天。
 * `backup_plan_begin` - (必填) 备份开始时间。时间格式为HH:mmZ，例如03:00Z。

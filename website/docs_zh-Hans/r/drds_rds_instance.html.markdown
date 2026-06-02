@@ -60,10 +60,10 @@ resource "alibabacloudstack_drds_rds_instance" "default" {
 
 支持以下参数：
 
-* `storage_type` - （必填，变更后重建）RDS 实例的存储类型。有效值：`local_ssd`、`cloud_ssd`、`cloud_essd`。修改此参数会强制重新创建资源。
-* `category` - （必填，变更后重建）RDS 实例的系列。有效值：`HighAvailability`（高可用版）、`Finance`（三节点企业版）。修改此参数会强制重新创建资源。
-* `drds_instance_id` - （必填，变更后重建）RDS 实例所属的 DRDS 实例 ID。修改此参数会强制重新创建资源。
-* `zone_id` - （必填，变更后重建）RDS 实例所在的可用区 ID。修改此参数会强制重新创建资源。
+* `storage_type` - （必填，变更时强制重建）RDS 实例的存储类型。有效值：`local_ssd`、`cloud_ssd`、`cloud_essd`。修改此参数会强制重新创建资源。
+* `category` - （必填，变更时强制重建）RDS 实例的系列。有效值：`HighAvailability`（高可用版）、`Finance`（三节点企业版）。修改此参数会强制重新创建资源。
+* `drds_instance_id` - （必填，变更时强制重建）RDS 实例所属的 DRDS 实例 ID。修改此参数会强制重新创建资源。
+* `zone_id` - （必填，变更时强制重建）RDS 实例所在的可用区 ID。修改此参数会强制重新创建资源。
 * `db_instance_class` - （必填）RDS 实例的规格（实例等级）。示例值：`rds.mysql.s1.small`。
 * `db_instance_storage` - （必填）RDS 实例的存储容量，单位：GB。
 * `force_remove` - （可选）销毁时是否强制删除 RDS 实例。有效值：`true`、`false`。默认值为 `false`。

@@ -71,7 +71,7 @@ resource "alibabacloudstack_cloudfirewall_controlpolicy" "example" {
   - **drop**：拒绝
   - **log**：观察
 
-* `acl_uuid` - (强制新建, 可选) - 安全访问控制策略的唯一标识ID。如果未指定，Terraform将自动生成一个。
+* `acl_uuid` - (变更时强制重建, 可选) - 安全访问控制策略的唯一标识ID。如果未指定，Terraform将自动生成一个。
 
 * `application_name` - (必填) - 安全访问控制策略支持的应用类型。
   - 如果 `direction` 为 `in`，有效值为 `ANY`。
@@ -93,7 +93,7 @@ resource "alibabacloudstack_cloudfirewall_controlpolicy" "example" {
   - 如果 `direction` 为 `in`，有效值为 `net`, `group`。
   - 如果 `direction` 为 `out`，有效值为 `net`, `group`, `domain`, `location`。
 
-* `direction` - (必填, 强制新建) - 安全访问控制策略的流量方向。
+* `direction` - (必填, 变更时强制重建) - 安全访问控制策略的流量方向。
   - **in**：外对内流量访问控制
   - **out**：内对外流量访问控制
 

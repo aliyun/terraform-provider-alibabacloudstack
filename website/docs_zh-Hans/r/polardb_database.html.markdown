@@ -60,7 +60,7 @@ resource "alibabacloudstack_polardb_database" "default" {
 
   * `character_set_name` - (必填) - 字符集，详情请参见[字符集表](~~99716~~)。
 
-  * `data_base_instance_id` - (必填/强制新建) - 将关联的PolarDB实例ID。修改此参数会强制重新创建资源。
+  * `data_base_instance_id` - (必填/变更时强制重建) - 将关联的PolarDB实例ID。修改此参数会强制重新创建资源。
 
   * `data_base_name` - (必填) - 数据库名称。不区分大小写。
 

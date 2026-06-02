@@ -73,8 +73,8 @@ resource "alibabacloudstack_vpngateway_sslvpnclientcert" "default" {
 以下参数支持配置：
 
 * `ssl_vpn_client_cert_name` - (必需) - 客户端证书的名称。
-* `vpn_gateway_id` - (必需, 变更后重建) - VPN 网关的 ID。
-* `ssl_vpn_server_id` - (必需, 变更后重建) - SSL 服务器的 ID。
+* `vpn_gateway_id` - (必需, 变更时强制重建) - VPN 网关的 ID。
+* `ssl_vpn_server_id` - (必需, 变更时强制重建) - SSL 服务器的 ID。
 ## 属性说明
 除上述参数外，还将导出以下属性：
 

@@ -76,23 +76,23 @@ output "first_execution_id" {
 
 以下参数是支持的：
 
-* `category` - (可选, 强制新建) 模板的类别。有效值：`AlarmTrigger`、`EventTrigger`、`Other` 和 `TimerTrigger`。
-* `end_date` - (可选, 强制新建) 执行结束的时间。
-* `end_date_after` - (可选, 强制新建) 结束时间小于或等于指定时间的执行。
-* `executed_by` - (可选, 强制新建) 执行模板的用户。
-* `ids` - (可选, 强制新建) OOS 执行 ID 列表。
-* `include_child_execution` - (可选, 强制新建) 是否包含子执行。
-* `mode` - (可选, 强制新建) OOS 执行的模式。有效值：`Automatic`、`Debug`。
-* `parent_execution_id` - (可选, 强制新建) 父 OOS 执行的 ID。
-* `ram_role` - (可选, 强制新建) 执行当前模板的角色。
-* `sort_field` - (可选, 强制新建) 排序字段。
-* `sort_order` - (可选, 强制新建) 排序顺序。
-* `start_date_after` - (可选, 强制新建) 开始时间大于或等于指定时间的执行。
-* `start_date_before` - (可选, 强制新建) 开始时间小于或等于指定时间的执行。
-* `status` - (可选, 强制新建) OOS 执行的状态。有效值：`Cancelled`、`Failed`、`Queued`、`Running`、`Started`、`Success`、`Waiting`。
-* `template_name` - (可选, 强制新建) 执行模板的名称。
+* `category` - (可选, 变更时强制重建) 模板的类别。有效值：`AlarmTrigger`、`EventTrigger`、`Other` 和 `TimerTrigger`。
+* `end_date` - (可选, 变更时强制重建) 执行结束的时间。
+* `end_date_after` - (可选, 变更时强制重建) 结束时间小于或等于指定时间的执行。
+* `executed_by` - (可选, 变更时强制重建) 执行模板的用户。
+* `ids` - (可选, 变更时强制重建) OOS 执行 ID 列表。
+* `include_child_execution` - (可选, 变更时强制重建) 是否包含子执行。
+* `mode` - (可选, 变更时强制重建) OOS 执行的模式。有效值：`Automatic`、`Debug`。
+* `parent_execution_id` - (可选, 变更时强制重建) 父 OOS 执行的 ID。
+* `ram_role` - (可选, 变更时强制重建) 执行当前模板的角色。
+* `sort_field` - (可选, 变更时强制重建) 排序字段。
+* `sort_order` - (可选, 变更时强制重建) 排序顺序。
+* `start_date_after` - (可选, 变更时强制重建) 开始时间大于或等于指定时间的执行。
+* `start_date_before` - (可选, 变更时强制重建) 开始时间小于或等于指定时间的执行。
+* `status` - (可选, 变更时强制重建) OOS 执行的状态。有效值：`Cancelled`、`Failed`、`Queued`、`Running`、`Started`、`Success`、`Waiting`。
+* `template_name` - (可选, 变更时强制重建) 执行模板的名称。
 
-> **注意**：所有标记为“强制新建”的参数表示如果这些参数被修改，则会触发新资源的创建。
+> **注意**：所有标记为“变更时强制重建”的参数表示如果这些参数被修改，则会触发新资源的创建。
 
 ## 属性说明
 

@@ -52,8 +52,8 @@ resource "alibabacloudstack_mongodb_backup" "default" {
 ## 参数说明
 支持以下参数：
 
-* `backup_method` - (必填, 强制新建) - 备份方法。
-* `db_instance_id` - (必填, 强制新建) - 数据库实例 ID。
+* `backup_method` - (必填, 变更时强制重建) - 备份方法。
+* `db_instance_id` - (必填, 变更时强制重建) - 数据库实例 ID。
 ## 导出属性
 除了上述列出的参数外，还导出了以下属性：
 

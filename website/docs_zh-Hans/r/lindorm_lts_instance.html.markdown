@@ -45,9 +45,9 @@ resource "alibabacloudstack_lindorm_lts_instance" "example" {
 
 以下参数是可支持的：
 
-* `zone_id` - （必选，变更后重建）实例的可用区 ID。
+* `zone_id` - （必选，变更时强制重建）实例的可用区 ID。
 * `instance_alias` - （必选）实例的别名。
-* `cpu_brand` - （必选，变更后重建）CPU 品牌。
+* `cpu_brand` - （必选，变更时强制重建）CPU 品牌。
 * `instance_type` - （必选）实例规格
 * `lts_num` - （必选）LTS 节点数量。
 * `deletion_protection` - （可选，计算得出）是否为实例开启删除保护。默认值：`false`。

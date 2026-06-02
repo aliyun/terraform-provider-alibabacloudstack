@@ -69,7 +69,7 @@ The following arguments are supported:
     * `include_chinese` - (Optional) Whether includes the chinese for the field. Default to false. It is valid when "type" is "text" or "json".
     * `token` - (Optional) The string of several split words, like "\r", "#". It is valid when "type" is "text" or "json".
     * `enable_analytics` - (Optional) Whether to enable field analytics. Default to true.
-    * `json_keys` - (Optional, Available in 1.66.0+) Use nested index when type is json
+    * `json_keys` - (Optional) Use nested index when type is json
         * `name` - (Required) When using the json_keys field, this field is required.
         * `type` - (Optional) The type of one field. Valid values: ["long", "text", "double"]. Default to "long"
         * `alias` - (Optional) The alias of one field.

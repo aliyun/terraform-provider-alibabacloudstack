@@ -33,10 +33,10 @@ output "adb_cluster_types" {
 * `cpu_type` - (可选) ADB集群的CPU类型。
 * `cpu` - (可选) CPU核心数。
 * `memory` - (可选) 内存大小（单位：GB）。
-* `sorted_by` - (可选, 变更后重建) 排序字段。有效值：`CPU`、`Memory`。
+* `sorted_by` - (可选, 变更时强制重建) 排序字段。有效值：`CPU`、`Memory`。
 * `status` - (可选) 集群类型的状态。
 * `cluster_type` - (可选) 集群类型。
-* `ids` - (可选, 变更后重建) 集群类型ID列表。
+* `ids` - (可选, 变更时强制重建) 集群类型ID列表。
 
 ## 属性参考
 

@@ -11,8 +11,6 @@ description: |-
 
 This data source provides the MQTT Topics available in ApsaraStack.
 
--> **NOTE:** Available in ApsaraStack.
-
 ## Example Usage
 
 ```hcl

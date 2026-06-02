@@ -44,7 +44,7 @@ data "alibabacloudstack_polardb_backups" "default" {
 ## 参数参考
 以下参数是支持的：
   * `ids` - (选填) - 备份ID列表
-  * `db_instance_id` - (必填, 强制新建) - 备份所属数据库实例ID
+  * `db_instance_id` - (必填, 变更时强制重建) - 备份所属数据库实例ID
 
 ## Attributes Reference
 除了上述参数外，还导出以下属性：

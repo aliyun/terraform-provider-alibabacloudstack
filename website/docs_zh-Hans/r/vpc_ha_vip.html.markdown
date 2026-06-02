@@ -157,9 +157,9 @@ resource "alibabacloudstack_vpc_ha_vip" "default" {
   * `associated_instances` - (选填) - 与HaVip绑定的ECS实例
   * `description` - (选填) - HaVip实例的描述，长度为2到256个字符。
   * `ha_vip_name` - (选填) - HaVip实例的名称
-  * `ip_address` - (选填, 强制新建) - HaVip的私网IP地址
-  * `vswitch_id` - (必填, 强制新建) - HaVip实例所属的VSwitch ID
-  * `vpc_id` - (选填, 强制新建) - HaVip实例所属的VPC ID
+  * `ip_address` - (选填, 变更时强制重建) - HaVip的私网IP地址
+  * `vswitch_id` - (必填, 变更时强制重建) - HaVip实例所属的VSwitch ID
+  * `vpc_id` - (选填, 变更时强制重建) - HaVip实例所属的VPC ID
 
 ## 属性参考
 

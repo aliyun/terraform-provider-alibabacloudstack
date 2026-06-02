@@ -50,8 +50,8 @@ resource "alibabacloudstack_cen_transit_router_vbr_attachment" "default" {
 * `vbr_id` - （必选）虚拟边界路由器（VBR）的ID。
 * `transit_router_attachment_name` - （可选）转发路由器附加项的名称。
 * `transit_router_attachment_description` - （可选）转发路由器附加项的描述。
-* `route_table_propagation_enabled` - （可选，变更后重建）是否启用路由表传播。修改此参数将强制重新创建资源。
-* `route_table_association_enabled` - （可选，变更后重建）是否启用路由表关联。修改此参数将强制重新创建资源。
+* `route_table_propagation_enabled` - （可选，变更时强制重建）是否启用路由表传播。修改此参数将强制重新创建资源。
+* `route_table_association_enabled` - （可选，变更时强制重建）是否启用路由表关联。修改此参数将强制重新创建资源。
 * `tags` - （可选）要分配给资源的标签映射。
 
 ## Attributes Reference

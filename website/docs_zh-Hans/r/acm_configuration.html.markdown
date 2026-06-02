@@ -46,11 +46,11 @@ resource "alibabacloudstack_acm_configuration" "default" {
 支持以下参数：
   * `app_name` - (选填) - 配置归属的应用名称
   * `content` - (必填) - 配置内容
-  * `data_id` - (必填, 强制新建) - 配置ID
+  * `data_id` - (必填, 变更时强制重建) - 配置ID
   * `desc` - (选填) - 配置描述
-  * `group` - (必填, 强制新建) - 分组
+  * `group` - (必填, 变更时强制重建) - 分组
   * `beta_ips` - (选填) - beta发布的ip，多个ip使用“,”连接。
-  * `namespace_id` - (必填, 强制新建) - Edas命名空间ID
+  * `namespace_id` - (必填, 变更时强制重建) - Edas命名空间ID
   * `tags` - (选填) - 配置的标签
   * `type` - (必填) - 配置内容的格式
   <!-- * `encrypt_algorithm` - (选填) - 加密方式 -->

@@ -28,8 +28,8 @@ resource "alibabacloudstack_api_gateway_v2_certificate" "example" {
 
 ## 参数说明
 
-* `cert_type` - (必选, 强制新建) 证书类型。可选值: `0` (服务器证书), `1` (CA证书)。
-* `instance_id` - (必选, 强制新建) API网关实例的ID。
+* `cert_type` - (必选, 变更时强制重建) 证书类型。可选值: `0` (服务器证书), `1` (CA证书)。
+* `instance_id` - (必选, 变更时强制重建) API网关实例的ID。
 * `certificates` - (必选) 证书内容。当 `cert_type` 为 `0` 时，此参数表示服务器证书；当 `cert_type` 为 `1` 时，此参数表示CA证书。
 * `private_key` - (可选) 私钥。当 `cert_type` 为 `0` 时，此参数为必填项。
 * `certificate_name` - (必选) 证书名称。

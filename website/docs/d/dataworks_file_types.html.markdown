@@ -11,8 +11,6 @@ description: |-
 
 This data source provides the DataWorks File Types available in ApsaraStack.
 
--> **NOTE:** Available in ApsaraStack.
-
 ## Example Usage
 
 ```hcl

@@ -54,10 +54,10 @@ resource "alibabacloudstack_expressconnect_bgp_peer" "default" {
   * `peer_ip_address` - (选填) BGP 邻居的 IP 地址。
   * `enable_bfd` - (选填) 是否启用 BFD（双向转发检测）。取值：`true`、`false`。
   * `bfd_multi_hop` - (选填) BFD 多跳的跳数。
-  * `bgp_peer_name` - (选填， Available in 1.0.0+) BGP 邻居的名称。
-  * `description` - (选填， Available in 1.0.0+) BGP 邻居的描述。
+  * `bgp_peer_name` - (选填) BGP 邻居的名称。
+  * `description` - (选填) BGP 邻居的描述。
   * `status` - (选填，已废弃) BGP 邻居的状态。该参数不生效。
-  * `auth_key` - (选填， Available in 1.0.0+) BGP 邻居的认证密钥。
+  * `auth_key` - (选填) BGP 邻居的认证密钥。
 
 ## 属性参考
 

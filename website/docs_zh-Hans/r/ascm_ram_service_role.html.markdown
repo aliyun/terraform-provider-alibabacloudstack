@@ -31,8 +31,8 @@ resource "alibabacloudstack_ascm_organization" "default" {
 
 以下参数被支持：
 
-* `product_name` - (必选, 变更后重建) 产品名称。
-* `organization_id` - (必选, 变更后重建) 组织ID。
+* `product_name` - (必选, 变更时强制重建) 产品名称。
+* `organization_id` - (必选, 变更时强制重建) 组织ID。
 
 ## 属性引用
 

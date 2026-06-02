@@ -62,8 +62,8 @@ resource "alibabacloudstack_polardb_readwrite_splitting_connection" "default" {
 
 支持以下参数：
 
-* `instance_id` - (必填, 变更后重建) PolarDB集群ID。
-* `connection_id` - (必填, 变更后重建) 代理终端ID。
+* `instance_id` - (必填, 变更时强制重建) PolarDB集群ID。
+* `connection_id` - (必填, 变更时强制重建) 代理终端ID。
 * `distribution_type` - (必填) 读请求分发类型。取值：`Standard`、`Custom`。
   - `Standard`：系统根据只读节点的权重自动分发读请求。
   - `Custom`：您可以自定义每个只读节点的权重。

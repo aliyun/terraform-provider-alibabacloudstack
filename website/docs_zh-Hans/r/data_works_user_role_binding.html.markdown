@@ -32,9 +32,9 @@ resource "alibabacloudstack_data_works_user_role_binding" "default" {
 
 支持以下参数：
 
-* `project_id` - （必选，变更后重建）DataWorks 项目的 ID。修改此参数将强制创建新资源。
-* `user_id` - （必选，变更后重建）要绑定角色的用户 ID。修改此参数将强制创建新资源。
-* `role_code` - （必选，变更后重建）DataWorks 项目成员的角色代码。有效值：`role_project_owner`、`role_project_admin`、`role_project_dev`、`role_project_pe`、`role_project_deploy`、`role_project_guest`、`role_project_security`。修改此参数将强制创建新资源。
+* `project_id` - （必选，变更时强制重建）DataWorks 项目的 ID。修改此参数将强制创建新资源。
+* `user_id` - （必选，变更时强制重建）要绑定角色的用户 ID。修改此参数将强制创建新资源。
+* `role_code` - （必选，变更时强制重建）DataWorks 项目成员的角色代码。有效值：`role_project_owner`、`role_project_admin`、`role_project_dev`、`role_project_pe`、`role_project_deploy`、`role_project_guest`、`role_project_security`。修改此参数将强制创建新资源。
 
 ## 属性说明
 

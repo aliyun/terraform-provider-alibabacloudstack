@@ -72,9 +72,9 @@ resource "alibabacloudstack_oss_bucket_object" "encrypted-object" {
 
 以下是支持的参数：
 
-* `bucket` - (必填，变更后重建) 要上传文件的目标存储桶名称。修改此参数会强制重新创建资源。
-* `key` - (必填，变更后重建) 对象在存储桶中的名称。修改此参数会强制重新创建资源。
-* `oss_cluster` - (可选，变更后重建) OSS集群标识符。如果未指定，将使用默认集群。修改此参数会强制重新创建资源。
+* `bucket` - (必填，变更时强制重建) 要上传文件的目标存储桶名称。修改此参数会强制重新创建资源。
+* `key` - (必填，变更时强制重建) 对象在存储桶中的名称。修改此参数会强制重新创建资源。
+* `oss_cluster` - (可选，变更时强制重建) OSS集群标识符。如果未指定，将使用默认集群。修改此参数会强制重新创建资源。
 * `source` - (可选) 要上传到存储桶的源文件路径。与`content`互斥。必须提供`source`或`content`之一。
 * `content` - (可选) 要上传到存储桶的字面内容。与`source`互斥。必须提供`source`或`content`之一。
 * `acl` - (可选) 要应用的[标准ACL](https://www.alibabacloud.com/help/doc-detail/52284.htm)。有效值：`private`、`public-read`、`public-read-write`。默认值为`private`。

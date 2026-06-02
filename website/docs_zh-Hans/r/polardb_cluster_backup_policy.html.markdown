@@ -89,7 +89,7 @@ resource "alibabacloudstack_polardb_cluster_backup_policy" "example" {
 
 支持以下参数：
 
-* `db_cluster_id` - (必需, 变更后重建) PolarDB 集群的 ID。
+* `db_cluster_id` - (必需, 变更时强制重建) PolarDB 集群的 ID。
 * `data_level1_backup_period` - (可选) 一级数据备份周期（天）。
 * `data_level1_backup_time` - (可选) 一级数据备份时间。
 * `data_level1_backup_retention_period` - (可选) 一级数据备份保留周期（天）。

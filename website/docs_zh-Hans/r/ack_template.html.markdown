@@ -51,10 +51,10 @@ resource "alibabacloudstack_ack_template" "example" {
 
 支持以下参数：
 
-* `name` - (必填, 变更后重建) 编排模板名称。名称长度为 1~63 个字符，可包含数字、字母和短划线（-），不能以短划线（-）开头。
+* `name` - (必填, 变更时强制重建) 编排模板名称。名称长度为 1~63 个字符，可包含数字、字母和短划线（-），不能以短划线（-）开头。
 * `template` - (必填) YAML 格式的模板内容。
 * `description` - (可选) 模板描述。
-* `template_type` - (必填, 变更后重建) 模板类型。设置为 `kubernetes` 时，模板会在控制台的模板页面中显示。建议设置为 `kubernetes`。
+* `template_type` - (必填, 变更时强制重建) 模板类型。设置为 `kubernetes` 时，模板会在控制台的模板页面中显示。建议设置为 `kubernetes`。
 
 ## 属性参考
 

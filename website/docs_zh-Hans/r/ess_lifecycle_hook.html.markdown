@@ -61,9 +61,9 @@ resource "alibabacloudstack_ess_lifecycle_hook" "foo" {
 
 支持以下参数：
 
-* `scaling_group_id` - （必填，变更后重建）要为其分配生命周期挂钩的弹性伸缩组的 ID。
+* `scaling_group_id` - （必填，变更时强制重建）要为其分配生命周期挂钩的弹性伸缩组的 ID。
 
-* `lifecycle_hook_name` - （可选，变更后重建）生命周期挂钩的名称。名称长度为 2~128 个字符，必须以字母开头，不能以 http:// 或 https:// 开头，可以包含字母、数字、下划线（_）、连字符（-）和半角句号（.）。该参数与 `name` 参数互斥。
+* `lifecycle_hook_name` - （可选，变更时强制重建）生命周期挂钩的名称。名称长度为 2~128 个字符，必须以字母开头，不能以 http:// 或 https:// 开头，可以包含字母、数字、下划线（_）、连字符（-）和半角句号（.）。该参数与 `name` 参数互斥。
 
 * `lifecycle_transition` - （必填）生命周期挂钩的类型。取值：`SCALE_IN`（弹性收缩）、`SCALE_OUT`（弹性扩张）。
 
@@ -75,7 +75,7 @@ resource "alibabacloudstack_ess_lifecycle_hook" "foo" {
 
 * `notification_metadata` - （可选）弹性伸缩向通知目标发送消息时包含的附加信息。
 
-* `name` - （可选，变更后重建，已弃用）生命周期挂钩的名称。该字段已弃用，请使用 `lifecycle_hook_name` 替代。如果不指定此参数值，默认值为生命周期挂钩的 ID。该参数与 `lifecycle_hook_name` 参数互斥。
+* `name` - （可选，变更时强制重建，已弃用）生命周期挂钩的名称。该字段已弃用，请使用 `lifecycle_hook_name` 替代。如果不指定此参数值，默认值为生命周期挂钩的 ID。该参数与 `lifecycle_hook_name` 参数互斥。
 
 ## 属性说明
 

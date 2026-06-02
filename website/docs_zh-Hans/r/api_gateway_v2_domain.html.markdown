@@ -54,8 +54,8 @@ resource "alibabacloudstack_api_gateway_v2_domain" "default" {
 
 以下参数是可支持的：
 
-* `instance_id` - (必选, 变更后重建) API 网关实例的 ID。
-* `domain` - (必选, 变更后重建) API 网关的自定义域名。
+* `instance_id` - (必选, 变更时强制重建) API 网关实例的 ID。
+* `domain` - (必选, 变更时强制重建) API 网关的自定义域名。
 * `protocol` - (必选) 域名使用的协议。有效值：`HTTP`、`HTTPS`。
 * `certificate_id` - (可选) 证书的 ID。当协议为 `HTTPS` 时必选。
 * `ca_certificate_id` - (可选) 客户端证书认证的 CA 证书 ID, `client_auth`为 `1` 时必选。。

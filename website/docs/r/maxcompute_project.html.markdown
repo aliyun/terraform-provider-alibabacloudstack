@@ -11,8 +11,6 @@ description: |-
 
 The project is the basic unit of operation in maxcompute. 
 
-->**NOTE:** Available in 1.77.0+.
-
 ## Example Usage
 
 Basic Usage

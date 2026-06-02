@@ -29,7 +29,7 @@ resource "alibabacloudstack_polardbx_read_write_splitting_config" "example" {
 
 The following arguments are supported:
 
-* `db_instance_id` - (必填, 强制新建) PolarDBX 实例的 ID。
+* `db_instance_id` - (必填, 变更时强制重建) PolarDBX 实例的 ID。
 * `attend_htap_list` - (可选) 关联实例列表
 * `auto_attend_htap` - (可选) 是否自动将只读实例自动加入读写分离
 * `delay_execution_strategy` - (可选) 只读流量切回主实例

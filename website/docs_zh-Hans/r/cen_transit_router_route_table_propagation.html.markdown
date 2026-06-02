@@ -74,7 +74,7 @@ resource "alibabacloudstack_cen_transit_router_route_table_propagation" "default
 
 支持以下参数：
   * `transit_router_attachment_id` - (必填) - 转发路由器附件的 id。
-  * `transit_router_route_table_id` - (必填, 变更后重建) - 转发路由器路由表的 id。
+  * `transit_router_route_table_id` - (必填, 变更时强制重建) - 转发路由器路由表的 id。
 
 ## Attributes Reference
 

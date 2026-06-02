@@ -11,8 +11,6 @@ description: |-
 
 This data source provides the CSP Private HSM Groups available in ApsaraStack.
 
--> **NOTE:** Available in ApsaraStack.
-
 ## Example Usage
 
 ```hcl

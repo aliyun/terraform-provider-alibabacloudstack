@@ -12,8 +12,6 @@ description: |-
 
 Provides a NAS Mount Target resource. For information about NAS Mount Target and how to use it, see [Manage NAS Mount Targets](https://www.alibabacloud.com/help/en/doc-detail/27531.htm).
 
--> **NOTE**: Available in v1.34.0+.
-
 -> **NOTE**: Currently this resource supports creating a mount point in a classic network only when the current region is China mainland regions.
 
 -> **NOTE**: You must grant NAS with specific RAM permissions when creating a classic mount target, and it only can be achieved by creating a classic mount target manually. See [Add a mount point](https://www.alibabacloud.com/help/doc-detail/60431.htm) and [Why do I need RAM permissions to create a mount point in a classic network](https://www.alibabacloud.com/help/faq-detail/42176.htm).
@@ -77,7 +75,7 @@ The following arguments are supported:
 * `file_system_id` - (Required, ForceNew) The ID of the file system.
 * `vswitch_id` - (Optional, ForceNew) The ID of the VSwitch in the VPC where the mount target resides.
 * `status` - (Optional) The status of the mount target. Valid values: `Active` and `Inactive`. Default value is `Active`. Before you mount a file system, make sure that the mount target is in the Active state.
-* `security_group_id` - (Optional, ForceNew, Available in v1.95.0+) The ID of the security group.
+* `security_group_id` - (Optional, ForceNew) The ID of the security group.
 
 ## Attributes Reference
 

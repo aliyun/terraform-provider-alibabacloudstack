@@ -70,21 +70,21 @@ resource "alibabacloudstack_bmcp_cluster" "default" {
 
 支持以下参数：
 
-* `cluster_name` - (必填，强制新建) BMCP 集群的名称。
-* `vpc_id` - (必填，强制新建) 集群所在 VPC 的 ID。
-* `evpc_id` - (必填，强制新建) 与集群关联的企业 VPC (EVPC) 的 ID。
-* `zone_id` - (必填，强制新建) 集群所在可用区的 ID。
-* `standard_vswitch_id` - (必填，强制新建) 集群标准交换机的 ID。
-* `machine_type` - (必填，强制新建) 集群节点的机器类型。可使用 `alibabacloudstack_bmcp_machinetypes` 数据源查询可用的机器类型。
+* `cluster_name` - (必填，变更时强制重建) BMCP 集群的名称。
+* `vpc_id` - (必填，变更时强制重建) 集群所在 VPC 的 ID。
+* `evpc_id` - (必填，变更时强制重建) 与集群关联的企业 VPC (EVPC) 的 ID。
+* `zone_id` - (必填，变更时强制重建) 集群所在可用区的 ID。
+* `standard_vswitch_id` - (必填，变更时强制重建) 集群标准交换机的 ID。
+* `machine_type` - (必填，变更时强制重建) 集群节点的机器类型。可使用 `alibabacloudstack_bmcp_machinetypes` 数据源查询可用的机器类型。
 * `node_count` - (必填) 集群中的节点数量。
-* `vswitch_id` - (必填，强制新建) 集群节点所用交换机的 ID。
-* `password` - (可选，强制新建，敏感) 集群节点的密码。必须提供 `password` 或 `activation_code` 之一。
-* `activation_code` - (可选，强制新建，敏感) 集群的激活码。必须提供 `password` 或 `activation_code` 之一。
-* `switch_method` - (可选，强制新建) 集群的交换方法。有效值：`CHSW` (默认)，`ROCE`。
-* `cluster_arch_type` - (可选，强制新建) 集群的架构类型。有效值：`standard` (默认)，`high_performance`。
-* `is_install_yundun_aegis` - (可选，强制新建) 是否安装云盾安骑士安全代理。默认值：`true`。
-* `is_create_cpfs_cluster` - (可选，强制新建) 是否创建 CPFS 集群。默认值：`false`。
-* `enable_ipv6` - (可选，强制新建) 是否启用 IPv6。默认值：`false`。
+* `vswitch_id` - (必填，变更时强制重建) 集群节点所用交换机的 ID。
+* `password` - (可选，变更时强制重建，敏感) 集群节点的密码。必须提供 `password` 或 `activation_code` 之一。
+* `activation_code` - (可选，变更时强制重建，敏感) 集群的激活码。必须提供 `password` 或 `activation_code` 之一。
+* `switch_method` - (可选，变更时强制重建) 集群的交换方法。有效值：`CHSW` (默认)，`ROCE`。
+* `cluster_arch_type` - (可选，变更时强制重建) 集群的架构类型。有效值：`standard` (默认)，`high_performance`。
+* `is_install_yundun_aegis` - (可选，变更时强制重建) 是否安装云盾安骑士安全代理。默认值：`true`。
+* `is_create_cpfs_cluster` - (可选，变更时强制重建) 是否创建 CPFS 集群。默认值：`false`。
+* `enable_ipv6` - (可选，变更时强制重建) 是否启用 IPv6。默认值：`false`。
 
 ## 属性参考
 

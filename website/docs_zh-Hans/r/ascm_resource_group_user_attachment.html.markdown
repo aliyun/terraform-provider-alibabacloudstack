@@ -26,8 +26,8 @@ resource "alibabacloudstack_ascm_resource_group_user_attachment" "default" {
 
 以下参数用于配置资源组用户绑定：
 
-* `user_id` - （必填，变更后重建）要绑定到资源组的用户 ID。修改此参数将强制创建新资源。
-* `rg_id` - （可选，变更后重建）资源组 ID。修改此参数将强制创建新资源。
+* `user_id` - （必填，变更时强制重建）要绑定到资源组的用户 ID。修改此参数将强制创建新资源。
+* `rg_id` - （可选，变更时强制重建）资源组 ID。修改此参数将强制创建新资源。
 
 ## 属性说明
 

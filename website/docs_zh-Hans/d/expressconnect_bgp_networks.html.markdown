@@ -22,7 +22,7 @@ data "alibabacloudstack_expressconnect_bgp_networks" "default" {
 ## 参数参考
 以下参数是支持的：
   * `ids` - (选填) - 已宣告的BGP网络的id列表。
-  * `router_id` - (必填, 强制新建) - 路由器的ID。
+  * `router_id` - (必填, 变更时强制重建) - 路由器的ID。
   * `dst_cidr_block` - (选填) - 已宣告的BGP网络。
 
 ## Attributes Reference

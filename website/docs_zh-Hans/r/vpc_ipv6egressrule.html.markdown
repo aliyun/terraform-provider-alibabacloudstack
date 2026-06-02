@@ -56,11 +56,11 @@ resource "alibabacloudstack_vpc_ipv6_egress_rule" "default" {
 
 支持以下参数：
 
-* `description` - (可选，强制新建) 出口规则的描述。描述必须在 `2` 到 `256` 个字符之间，不能以 `http://` 或 `https://` 开头。
-* `instance_id` - (必填，强制新建) 要应用出口规则的 IPv6 地址的 ID。
-* `instance_type` - (可选，强制新建) 要应用出口规则的实例类型。有效值：`Ipv6Address`（默认值），表示一个 IPv6 地址。
-* `ipv6_egress_rule_name` - (可选，强制新建) 出口规则的名称。名称必须在 `2` 到 `128` 个字符之间，可以包含字母、数字、下划线 (`_`) 和连字符 (`-`)。名称必须以字母开头，但不能以 `http://` 或 `https://` 开头。
-* `ipv6_gateway_id` - (必填，强制新建) IPv6 网关的 ID。
+* `description` - (可选，变更时强制重建) 出口规则的描述。描述必须在 `2` 到 `256` 个字符之间，不能以 `http://` 或 `https://` 开头。
+* `instance_id` - (必填，变更时强制重建) 要应用出口规则的 IPv6 地址的 ID。
+* `instance_type` - (可选，变更时强制重建) 要应用出口规则的实例类型。有效值：`Ipv6Address`（默认值），表示一个 IPv6 地址。
+* `ipv6_egress_rule_name` - (可选，变更时强制重建) 出口规则的名称。名称必须在 `2` 到 `128` 个字符之间，可以包含字母、数字、下划线 (`_`) 和连字符 (`-`)。名称必须以字母开头，但不能以 `http://` 或 `https://` 开头。
+* `ipv6_gateway_id` - (必填，变更时强制重建) IPv6 网关的 ID。
 
 ## 属性说明
 

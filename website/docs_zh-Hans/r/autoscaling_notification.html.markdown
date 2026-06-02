@@ -70,7 +70,7 @@ resource "alibabacloudstack_autoscaling_notification" "default" {
 支持以下参数：
 
 * `scaling_group_id` - (必填，变更时重建) 自动伸缩组的ID。更改此参数将强制创建新资源。
-* `notification_arn` - (可选，变更后重建，Computed) 通知对象的阿里云资源名称(ARN)。如果不指定，默认使用 `acs:ess:{region}:{account-id}:cloudmonitor` 作为云监控通知。`notification_arn` 的格式为 `acs:ess:{region}:{account-id}:{resource-relative-id}`。其中：
+* `notification_arn` - (可选，变更时强制重建，Computed) 通知对象的阿里云资源名称(ARN)。如果不指定，默认使用 `acs:ess:{region}:{account-id}:cloudmonitor` 作为云监控通知。`notification_arn` 的格式为 `acs:ess:{region}:{account-id}:{resource-relative-id}`。其中：
   * `{region}` 是区域标识符。
   * `{account-id}` 是用户的阿里云账户ID。
   * `{resource-relative-id}` 是通知目标的相对ID，有效值包括：

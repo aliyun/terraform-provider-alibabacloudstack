@@ -56,13 +56,13 @@ resource "alibabacloudstack_nas_lifecycle_policy" "default" {
 ## 参数参考
 
 支持以下参数：
-  * `lifecycle_policy_name` - (必填, 强制新建) - 代表资源一级ID的资源属性字段
-  * `storage_type` - (选填, 强制新建) - 数据转储后的存储类型。默认值：InfrequentAccess（低频介质存储）
-  * `file_system_id` - (必填, 强制新建) - 文件系统ID。
-  * `path` - (必填, 强制新建) - 生命周期管理策略关联目录的绝对路径。仅支持关联单个目录。必须以正斜线（/）开头，并且是挂载点中真实存在的路径。> 建议您配置Paths.N，可以同时关联多个目录。
+  * `lifecycle_policy_name` - (必填, 变更时强制重建) - 代表资源一级ID的资源属性字段
+  * `storage_type` - (选填, 变更时强制重建) - 数据转储后的存储类型。默认值：InfrequentAccess（低频介质存储）
+  * `file_system_id` - (必填, 变更时强制重建) - 文件系统ID。
+  * `path` - (必填, 变更时强制重建) - 生命周期管理策略关联目录的绝对路径。仅支持关联单个目录。必须以正斜线（/）开头，并且是挂载点中真实存在的路径。> 建议您配置Paths.N，可以同时关联多个目录。
   * `recursive` - (选填) - 是否递归应用子路径。
   * `lifecycle_rule_name` - (必填) - 生命周期管理策略关联的管理规则。取值：- DEFAULT_ATIME_14：距今14天未访问的文件- DEFAULT_ATIME_30：距今30天未访问的文件- DEFAULT_ATIME_60：距今60天未访问的文件 - DEFAULT_ATIME_90：距今90天未访问的文件
-  * `oss_bucket` - (必填, 强制新建) - OSS存储桶名称。
+  * `oss_bucket` - (必填, 变更时强制重建) - OSS存储桶名称。
 
 ## 属性参考
 

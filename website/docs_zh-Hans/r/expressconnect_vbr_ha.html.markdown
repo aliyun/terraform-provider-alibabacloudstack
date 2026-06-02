@@ -51,10 +51,10 @@ resource "alibabacloudstack_expressconnect_vbr_ha" "default" {
 
 支持以下参数：
 
-* `name` -（必填，变更后重建）VBR 快速倒换组名称。
-* `vbr_id` -（必填，变更后重建）VBR 实例 ID。
-* `peer_vbr_id` -（必填，变更后重建）VBR 快速倒换组中另一个 VBR 的实例 ID。
-* `description` -（选填，变更后重建）VBR 快速倒换组的描述信息。长度为 2～256 个字符，必须以字母或中文开头，但不能以 `http://` 或 `https://` 开头。
+* `name` -（必填，变更时强制重建）VBR 快速倒换组名称。
+* `vbr_id` -（必填，变更时强制重建）VBR 实例 ID。
+* `peer_vbr_id` -（必填，变更时强制重建）VBR 快速倒换组中另一个 VBR 的实例 ID。
+* `description` -（选填，变更时强制重建）VBR 快速倒换组的描述信息。长度为 2～256 个字符，必须以字母或中文开头，但不能以 `http://` 或 `https://` 开头。
 
 ## 属性参考
 

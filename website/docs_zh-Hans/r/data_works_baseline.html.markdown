@@ -65,7 +65,7 @@ resource "alibabacloudstack_data_works_baseline" "default" {
 
 * `baseline_name` - （必填）基线名称。
 
-* `project_id` - （必填，变更后重建）DataWorks 工作空间（项目）的 ID。更改此参数将强制创建新资源。
+* `project_id` - （必填，变更时强制重建）DataWorks 工作空间（项目）的 ID。更改此参数将强制创建新资源。
 
 * `owner` - （必填）基线责任人的阿里云 UID。
 

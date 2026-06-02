@@ -62,8 +62,8 @@ resource "alibabacloudstack_polardb_cluster_account" "example" {
 
 支持以下参数：
 
-* `db_cluster_id` - (必填, 变更后重建) PolarDB 集群的 ID。
-* `account_name` - (必填, 变更后重建) 账户名称。
+* `db_cluster_id` - (必填, 变更时强制重建) PolarDB 集群的 ID。
+* `account_name` - (必填, 变更时强制重建) 账户名称。
 * `account_password` - (可选, 敏感) 账户密码。
 * `account_type` - (可选) 账户类型。
 * `account_description` - (可选) 账户描述。

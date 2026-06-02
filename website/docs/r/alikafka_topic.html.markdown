@@ -63,7 +63,7 @@ The following arguments are supported:
 * `compact_topic` - (Optional, ForceNew, Deprecated) Indicates whether the topic is a compact topic or not. Compact topic must be a local topic. Default value is `false`. This field has been deprecated and is scheduled for removal in version 3.21.0.
 * `partition_num` - (Optional) The number of additional partitions of the topic. The number should be between 0 and 360. Default value is `12`.
 * `remark` - (Required, Deprecated) A concise description of the topic. The length cannot exceed 64 characters. This field has been deprecated and is scheduled for removal in version 3.21.0.
-* `tags` - (Optional, Available in v1.63.0+) A mapping of tags to assign to the resource.
+* `tags` - (Optional) A mapping of tags to assign to the resource.
 
 ## Attributes Reference
 

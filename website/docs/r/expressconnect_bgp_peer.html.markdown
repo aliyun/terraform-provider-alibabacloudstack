@@ -54,10 +54,10 @@ The following arguments are supported:
   * `peer_ip_address` - (Optional) The IP address of the BGP peer.
   * `enable_bfd` - (Optional) Whether to enable BFD (Bidirectional Forwarding Detection). Valid values: `true`, `false`.
   * `bfd_multi_hop` - (Optional) The number of BFD multi-hop hops.
-  * `bgp_peer_name` - (Optional, Available in 1.0.0+) The name of the BGP peer.
-  * `description` - (Optional, Available in 1.0.0+) The description of the BGP peer.
+  * `bgp_peer_name` - (Optional) The name of the BGP peer.
+  * `description` - (Optional) The description of the BGP peer.
   * `status` - (Optional, Deprecated) The status of the BGP peer. This parameter is not effective.
-  * `auth_key` - (Optional, Available in 1.0.0+) The authentication key of the BGP peer.
+  * `auth_key` - (Optional) The authentication key of the BGP peer.
 
 ## Attributes Reference
 

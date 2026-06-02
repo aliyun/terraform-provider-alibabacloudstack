@@ -103,8 +103,8 @@ resource "alibabacloudstack_drds_account" "default" {
 ## 参数参考
 
 支持以下参数：
-  * `instance_id` - (必填, 强制新建) - 实例ID。
-  * `drds_account_name` - (必填, 强制新建) - 账号名称。
+  * `instance_id` - (必填, 变更时强制重建) - 实例ID。
+  * `drds_account_name` - (必填, 变更时强制重建) - 账号名称。
   * `description` - (选填) - 账号备注。高级账号默认为**Created by DRDS**，普通账号无任何备注。备注信息可以在账号管理中自定义修改。
   * `password` - (必填) DRDS 账号的密码。
   * `db_privileges` - (必填) - 数据库权限信息。

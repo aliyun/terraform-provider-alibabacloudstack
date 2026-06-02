@@ -27,7 +27,7 @@ resource "alibabacloudstack_dns_domain_attachment" "dns" {
 
 以下参数是支持的：
 
-* `instance_id` - (必填，变更后重建) DNS实例的ID。此参数在创建后不可更改。
+* `instance_id` - (必填，变更时强制重建) DNS实例的ID。此参数在创建后不可更改。
 * `domain_names` - (必填) 需要绑定到DNS实例的域名列表。可以指定多个域名进行批量绑定。
 
 ## 属性说明

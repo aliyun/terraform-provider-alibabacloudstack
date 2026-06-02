@@ -32,7 +32,7 @@ resource "alibabacloudstack_csb_project" "project" {
 
 支持以下参数：
 
-* `csb_id` - (必填，变更后重建) CSB 实例的 ID。修改此参数会强制重新创建资源。
+* `csb_id` - (必填，变更时强制重建) CSB 实例的 ID。修改此参数会强制重新创建资源。
 * `project_name` - (必填) CSB 项目的名称。长度限制为 1 到 128 个字符。
 * `owner_name` - (必填) 项目所有者的名称。
 * `owner_email` - (可选) 项目所有者的电子邮件地址。

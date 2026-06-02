@@ -36,7 +36,7 @@ resource "alibabacloudstack_cen_transit_router_route_table" "default" {
 ## 参数引用
 
 支持以下参数：
-  * `transit_router_id` - (必填, 变更后重建) - 转发路由器ID。修改此参数会强制重新创建资源。
+  * `transit_router_id` - (必填, 变更时强制重建) - 转发路由器ID。修改此参数会强制重新创建资源。
   * `transit_router_route_table_name` - (可选, 可回读) - 路由表名称。此属性由 API 返回，可手动设置。
   * `transit_router_route_table_description` - (可选, 可回读) - 路由表描述。此属性由 API 返回，可手动设置。
   * `tags` - (可选) - 转发路由器路由表的标签。

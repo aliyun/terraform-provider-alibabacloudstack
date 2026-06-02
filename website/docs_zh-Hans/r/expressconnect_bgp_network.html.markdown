@@ -39,7 +39,7 @@ resource "alibabacloudstack_expressconnect_bgp_network" "default" {
 支持以下参数：
 
 * `dst_cidr_block` - (必填) 需要和本地数据中心（IDC）互连的 VPC 或交换机的网段。
-* `router_id` - (必填, 强制新建) 路由器接口关联的路由器（VBR）ID。修改此参数会强制重新创建资源。
+* `router_id` - (必填, 变更时强制重建) 路由器接口关联的路由器（VBR）ID。修改此参数会强制重新创建资源。
 
 ## 属性参考
 

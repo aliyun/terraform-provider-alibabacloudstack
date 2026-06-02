@@ -11,8 +11,6 @@ description: |-
 
 This data source provides a list of Common Bandwidth Packages in an Alibaba Cloud account according to the specified filters.
 
--> **NOTE:** Available in v1.59.0+.
-
 ## Example Usage
 
 ```hcl

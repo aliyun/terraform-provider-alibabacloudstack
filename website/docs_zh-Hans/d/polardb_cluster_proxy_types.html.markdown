@@ -25,9 +25,9 @@ data "alibabacloudstack_polardb_cluster_proxy_types" "default" {
 
 以下参数适用于该数据源：
 
-* `db_type` -（可选，变更后重建）数据库引擎类型。有效值：`MySQL`、`PostgreSQL`、`Oracle`。
+* `db_type` -（可选，变更时强制重建）数据库引擎类型。有效值：`MySQL`、`PostgreSQL`、`Oracle`。
 * `db_version` -（可选）数据库引擎版本。
-* `ids` -（可选，变更后重建）用于过滤结果的代理类型 ID 列表。
+* `ids` -（可选，变更时强制重建）用于过滤结果的代理类型 ID 列表。
 * `core_count` -（可选）CPU 核数。
 
 ## 属性说明

@@ -60,7 +60,7 @@ resource "alibabacloudstack_kvstore_backup_policy" "default" {
 
 支持以下参数：
 
-* `instance_id` - (必填，变更后重建) ApsaraDB for Redis 或 Memcache 实例的ID。修改此参数会强制重新创建资源。
+* `instance_id` - (必填，变更时强制重建) ApsaraDB for Redis 或 Memcache 实例的ID。修改此参数会强制重新创建资源。
 * `preferred_backup_time` - (可选，Computed) 首选备份时间，格式为HH:mmZ-HH:mmZ。例如：`02:00Z-03:00Z` 表示每天凌晨2点到3点之间进行备份。此属性由 API 返回，无法手动设置。
 * `preferred_backup_period` - (可选，Computed) 首选备份周期。允许的值为：`Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday`, `Sunday`。例如：`["Monday", "Wednesday"]` 表示每周一和周三进行备份。此属性由 API 返回，无法手动设置。
 * `backup_time` - (可选，已弃用，Computed) **此参数已弃用**，将在未来版本中移除。请使用 `preferred_backup_time` 替代。与 `preferred_backup_time` 参数互斥。

@@ -35,11 +35,11 @@ output "mongodb_instance_names" {
 The following arguments are supported:
 
 * `name_regex` - (Optional) A regex string to apply to the instance name. This allows filtering instances based on their names using regular expressions.
-* `ids` - (Optional, Available in v1.53.0+) The list of MongoDB instance IDs. Use this parameter to filter results by specific instance IDs.
+* `ids` - (Optional) The list of MongoDB instance IDs. Use this parameter to filter results by specific instance IDs.
 * `instance_type` - (Optional) Type of the instance to be queried. If set to `sharding`, the sharded cluster instances are listed. If set to `replicate`, replica set instances are listed. Default value is `replicate`.
 * `instance_class` - (Optional) Sizing of the instance to be queried. This corresponds to the performance class of the MongoDB instance.
 * `availability_zone` - (Optional) Instance availability zone. Use this parameter to filter results by a specific availability zone.
-* `tags` - (Optional, Available in v1.66.0+) A mapping of tags to assign to the resource. Use this parameter to filter results by tags.
+* `tags` - (Optional) A mapping of tags to assign to the resource. Use this parameter to filter results by tags.
 
 ## Attributes Reference
 

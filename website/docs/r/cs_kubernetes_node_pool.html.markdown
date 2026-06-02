@@ -299,7 +299,7 @@ The following attributes are exported:
 * `vswitch_ids` - The vswitches used by node pool workers.
 * `image_id` - The image used by node pool workers.
 * `security_group_id` - The ID of security group where the current cluster worker node is located.
-* `scaling_group_id` - (Available in 1.105.0+) Id of the Scaling Group.
+* `scaling_group_id` - Id of the Scaling Group.
 * `system_disk_performance_level` - The performance level (PL) of the system disk that you want to use for the node. This parameter takes effect only for ESSDs. Its valid value is one of {"PL0", "PL1", "PL2", "PL3"}.
 * `platform` - The platform. One of `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`, `Custom`.
 * `instance_charge_type` - Node payment type. Valid values: `PostPaid`, `PrePaid`.

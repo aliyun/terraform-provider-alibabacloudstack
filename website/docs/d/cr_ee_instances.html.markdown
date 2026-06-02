@@ -33,7 +33,7 @@ The following arguments are supported:
 
 * `ids` - (Optional) A list of ids to filter results by instance id.
 * `name_regex` - (Optional) A regex string to filter results by instance name.
-* `enable_details` - (Optional, Available in 1.132.0+) Default to `true`. Set it to true can output instance authorization token.
+* `enable_details` - (Optional) Default to `true`. Set it to true can output instance authorization token.
 
 ## Attributes Reference
 

@@ -41,7 +41,7 @@ output "roles" {
 The following arguments are supported:
 
 * `id` - (Optional, Deprecated) It is used to filter results by role ID. This field is deprecated and will be removed in version 3.21.0. Please use `ids` instead.
-* `ids` - (Optional, Available in v1.68.0+) A list of role IDs. The field is used to filter results by role IDs.
+* `ids` - (Optional) A list of role IDs. The field is used to filter results by role IDs.
 * `name_regex` - (Optional) A regex string to filter results by role name.
 * `description` - (Optional) Description about the role.
 * `role_type` - (Optional) Types of role.

@@ -128,7 +128,7 @@ resource "alibabacloudstack_ess_attachment" "default" {
 
 导出以下属性：
 
-* `id` - (必填，变更后重建) ESS附件资源ID。
+* `id` - (必填，变更时强制重建) ESS附件资源ID。
 * `instance_ids` - (必填) 已附加到伸缩组的“Attached”ECS实例的ID列表。
 * `force` - 是否强制删除“AutoCreated”ECS实例以释放伸缩组容量“MaxSize”。
 

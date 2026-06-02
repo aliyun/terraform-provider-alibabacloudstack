@@ -38,11 +38,11 @@ output "certificate_names" {
 
 ## 参数说明
 
-* `instance_id` - (必选, 强制新建) API网关实例的ID。
-* `cert_type` - (可选, 强制新建) 证书类型。可选值: `0` (服务器证书), `1` (CA证书)。
-* `name_regex` - (可选, 强制新建) 用于按证书名称过滤结果的正则表达式。
-* `sni` - (可选, 强制新建) 证书的SNI (Server Name Indication)。
-* `ids` - (可选, 强制新建) 证书ID列表。
+* `instance_id` - (必选, 变更时强制重建) API网关实例的ID。
+* `cert_type` - (可选, 变更时强制重建) 证书类型。可选值: `0` (服务器证书), `1` (CA证书)。
+* `name_regex` - (可选, 变更时强制重建) 用于按证书名称过滤结果的正则表达式。
+* `sni` - (可选, 变更时强制重建) 证书的SNI (Server Name Indication)。
+* `ids` - (可选, 变更时强制重建) 证书ID列表。
 
 ## 属性说明
 

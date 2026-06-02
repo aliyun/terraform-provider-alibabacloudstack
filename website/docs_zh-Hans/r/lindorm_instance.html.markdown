@@ -58,17 +58,17 @@ resource "alibabacloudstack_lindorm_instance" "example" {
 
 以下参数被支持：
 
-* `zone_id` - （必需，强制新建）部署实例的可用区ID。
+* `zone_id` - （必需，变更时强制重建）部署实例的可用区ID。
 * `instance_alias` - （必需）实例别名。
-* `cpu_brand` - （必需，强制新建）要使用的CPU品牌。
-* `disk_category` - （可选，强制新建）磁盘类别。
-* `engine_type` - （必需，强制新建）要使用的引擎类型。
+* `cpu_brand` - （必需，变更时强制重建）要使用的CPU品牌。
+* `disk_category` - （可选，变更时强制重建）磁盘类别。
+* `engine_type` - （必需，变更时强制重建）要使用的引擎类型。
 * `instance_type` - （必需）实例规格。
-* `vpc_id` - （必需，强制新建）部署实例的专有网络ID。
-* `vswitch_id` - （必需，强制新建）与指定专有网络关联的交换机ID。
+* `vpc_id` - （必需，变更时强制重建）部署实例的专有网络ID。
+* `vswitch_id` - （必需，变更时强制重建）与指定专有网络关联的交换机ID。
 * `lindorm_num` - （必需）Lindorm节点数量。
 * `local_disk_num` - （可选）本地磁盘数量。取值范围：1到10。默认值：1。
-* `local_disk_size` - （必需，强制新建）本地磁盘大小。单位：GiB。
+* `local_disk_size` - （必需，变更时强制重建）本地磁盘大小。单位：GiB。
 * `deletion_protection` - （可选）是否启用了删除保护。
 
 ## 属性参考

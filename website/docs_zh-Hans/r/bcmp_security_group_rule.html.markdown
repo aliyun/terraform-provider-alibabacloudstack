@@ -65,7 +65,7 @@ resource "alibabacloudstack_bcmp_security_group_rule" "with_source_sg" {
 
 支持以下参数：
 
-* `type` - (必填, 变更后重建) 规则类型，`ingress`（入方向）或 `egress`（出方向）。修改此参数会强制重新创建资源。
+* `type` - (必填, 变更时强制重建) 规则类型，`ingress`（入方向）或 `egress`（出方向）。修改此参数会强制重新创建资源。
 * `ip_protocol` - (必填) IP 协议类型。有效值为 `tcp`、`udp`、`icmp`、`gre` 和 `all`。
 * `policy` - (选填) 规则的策略。有效值为 `accept` 和 `drop`。默认为 `accept`。
 * `port_range` - (必填) 端口范围。对于 `tcp` 和 `udp`，格式为 `start/end`（例如 `22/22`）。对于 `icmp`、`gre` 和 `all`，使用 `-1/-1`。

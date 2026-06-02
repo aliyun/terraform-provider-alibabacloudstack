@@ -11,8 +11,6 @@ description: |-
 
 This data source provides a list of cloud firewall control policies in an alibabacloudstack account according to the specified filters.
 
--> **NOTE:** Available in v1.213.0+
-
 ## Example Usage
 
 ```terraform
