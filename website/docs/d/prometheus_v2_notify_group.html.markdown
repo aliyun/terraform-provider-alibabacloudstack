@@ -22,7 +22,7 @@ resource "alibabacloudstack_prometheus_v2_notify_group" "default" {
   name        = var.name
   type        = "WEBHOOK"
   description = var.name
-  webhook_url = "https://oapi.dingtalk.com/robot/send?access_token=56b42bc6e7cad53bab514a583847db73c68fa1804b0e72af7167954b66f7aea8"
+  webhook_url = "https://oapi.dingtalk.com/robot/send?access_token=56b4xxxxxxxxaea8"
   webhook_header_params {
     key   = "aaaa"
     value = "1111"
