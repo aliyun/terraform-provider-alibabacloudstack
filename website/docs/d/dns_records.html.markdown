@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_records"
-sidebar_current: "docs-Alibabacloudstack-datasource-dns-records"
 description: |-
     Provides a list of records available to the dns.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_route_entry"
-sidebar_current: "docs-Alibabacloudstack-resource-route-entry"
 description: |-
   Provides a Alibabacloudstack Route Entry resource.
 ---

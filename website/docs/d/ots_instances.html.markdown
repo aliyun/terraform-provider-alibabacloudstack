@@ -2,7 +2,6 @@
 subcategory: "Table Store (OTS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_instances"
-sidebar_current: "docs-Alibabacloudstack-datasource-ots-instances"
 description: |- 
   Provides a list of ots instances owned by an Alibabacloudstack account.
 ---

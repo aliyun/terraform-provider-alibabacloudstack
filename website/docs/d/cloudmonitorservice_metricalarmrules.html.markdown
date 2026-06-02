@@ -2,7 +2,6 @@
 subcategory: "Cloud Monitor"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_metricalarmrules"
-sidebar_current: "docs-Alibabacloudstack-datasource-cloudmonitorservice-metricalarmrules"
 description: |- 
   Provides a list of cloudmonitorservice metricalarmrules owned by an alibabacloudstack account.
 ---

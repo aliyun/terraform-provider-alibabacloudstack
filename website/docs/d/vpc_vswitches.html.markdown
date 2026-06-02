@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_vswitches"
-sidebar_current: "docs-Alibabacloudstack-datasource-vpc-vswitches"
 description: |- 
   Provides a list of vpc vswitches owned by an alibabacloudstack account.
 ---

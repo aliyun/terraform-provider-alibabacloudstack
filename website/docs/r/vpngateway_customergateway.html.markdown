@@ -2,7 +2,6 @@
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_customergateway"
-sidebar_current: "docs-Alibabacloudstack-resource-vpngateway-customergateway"
 description: |-
   Provides a vpngateway Customergateway resource.
 ---

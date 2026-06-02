@@ -2,7 +2,6 @@
 subcategory: "ApsaraMQ for RocketMQ"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_topics"
-sidebar_current: "docs-Alibabacloudstack-datasource-ons-topics"
 description: |-
     Provides a list of ons topics available to the user.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_keypairattachment"
-sidebar_current: "docs-Alibabacloudstack-resource-ecs-keypairattachment"
 description: |-
   Provides a ECS Key Pair Attachment resource.
 ---

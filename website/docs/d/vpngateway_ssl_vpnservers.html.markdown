@@ -2,7 +2,6 @@
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_ssl_vpnservers"
-sidebar_current: "docs-Alibabacloudstack-datasource-vpngateway-ssl-vpn-servers"
 description: |-
   Provides a list of vpngateway ssl vpn servers owned by an alibabacloudstack account.
 ---

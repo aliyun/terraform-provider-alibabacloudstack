@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB for Redis"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_redis_tairinstances"
-sidebar_current: "docs-Alibabacloudstack-datasource-redis-tairinstances"
 description: |- 
   Provides a list of redis tairinstances owned by an Alibabacloudstack account.
 

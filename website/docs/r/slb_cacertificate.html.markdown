@@ -2,7 +2,6 @@
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_cacertificate"
-sidebar_current: "docs-Alibabacloudstack-resource-slb-cacertificate"
 description: |- 
   Provides a slb Cacertificate resource.
 ---

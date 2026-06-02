@@ -2,7 +2,6 @@
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpngateways"
-sidebar_current: "docs-Alibabacloudstack-datasource-vpngateway-vpngateways"
 description: |- 
   Provides a list of vpngateway vpngateways owned by an alibabacloudstack account.
 ---

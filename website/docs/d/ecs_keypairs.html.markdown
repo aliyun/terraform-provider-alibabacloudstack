@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_keypairs"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-keypairs"
 description: |- 
   Provides a list of ecs keypairs owned by an alibabacloudstack account.
 ---

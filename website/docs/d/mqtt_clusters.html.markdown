@@ -2,7 +2,6 @@
 subcategory: "Message Queuing Telemetry Transport"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mqtt_clusters"
-sidebar_current: "docs-Alibabacloudstack-datasource-mqtt-clusters"
 description: |-
   Provides a list of MQTT Clusters.
 ---

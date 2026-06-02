@@ -2,7 +2,6 @@
 subcategory: "One-stop Big Data Development and Governance Platform"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_data_works_business"
-sidebar_current: "docs-Alibabacloudstack-resource-data-works-business"
 description: |-
   Provides a DataWorks Business resource.
 ---

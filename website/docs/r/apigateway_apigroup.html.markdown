@@ -2,7 +2,6 @@
 subcategory: "API Gateway (Legacy)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_apigateway_apigroup"
-sidebar_current: "docs-Alibabacloudstack-resource-apigateway-apigroup"
 description: |- 
   Provides a apigateway Apigroup resource.
 ---

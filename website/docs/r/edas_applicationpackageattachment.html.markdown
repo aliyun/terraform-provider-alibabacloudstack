@@ -2,7 +2,6 @@
 subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_applicationpackageattachment"
-sidebar_current: "docs-Alibabacloudstack-resource-edas-applicationpackageattachment"
 description: |-
   Provides a Edas Applicationpackageattachment resource.
 ---

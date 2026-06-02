@@ -2,7 +2,6 @@
 subcategory: "AnalyticDB for PostgreSQL"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_instance_types"
-sidebar_current: "docs-Alibabacloudstack-datasource-gpdb-instance-types"
 description: |-
   Provides a list of GPDB Instance Types.
 ---

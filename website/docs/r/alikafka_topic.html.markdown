@@ -2,7 +2,6 @@
 subcategory: "ApsaraMQ for Kafka"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_topic"
-sidebar_current: "docs-Alibabacloudstack-resource-alikafka-topic"
 description: |- 
   Provides a alikafka Topic resource.
 ---

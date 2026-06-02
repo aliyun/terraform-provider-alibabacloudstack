@@ -2,7 +2,6 @@
 subcategory: "Bare Metal Computing Platform (BMCP)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bmcp_machinetypes"
-sidebar_current: "docs-Alibabacloudstack-datasource-bmcp-machinetypes"
 description: |-
   Provides a list of BMCP (Bare Metal Compute Platform) machine types owned by an alibabacloudstack account.
 ---

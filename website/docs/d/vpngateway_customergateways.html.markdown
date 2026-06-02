@@ -2,7 +2,6 @@
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_customergateways"
-sidebar_current: "docs-Alibabacloudstack-datasource-vpngateway-customergateways"
 description: |- 
   Provides a list of vpngateway customergateways owned by an alibabacloudstack account.
 ---

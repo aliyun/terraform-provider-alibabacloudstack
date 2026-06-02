@@ -2,7 +2,6 @@
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_route_group"
-sidebar_current: "docs-Alibabacloudstack-datasource-api-gateway-v2-route-group"
 description: |-
   Query the route groups of API Gateway V2
 ---

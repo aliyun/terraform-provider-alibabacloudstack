@@ -2,7 +2,6 @@
 subcategory: "AnalyticDB for PostgreSQL"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_dbinstances"
-sidebar_current: "docs-Alibabacloudstack-datasource-gpdb-dbinstances"
 description: |- 
   Provides a list of gpdb dbinstances owned by an alibabacloudstack account.
 ---

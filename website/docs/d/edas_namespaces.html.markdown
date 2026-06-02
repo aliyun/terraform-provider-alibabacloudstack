@@ -2,7 +2,6 @@
 subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_namespaces"
-sidebar_current: "docs-Alibabacloudstack-datasource-edas-namespaces"
 description: |- 
   Provides a list of edas namespaces owned by an alibabacloudstack account.
 ---

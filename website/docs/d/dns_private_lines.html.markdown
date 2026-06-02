@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_lines"
-sidebar_current: "docs-Alibabacloudstack-datasource-dns-private-lines"
 description: |-
   Provides a list of private lines for DNS that can be used by an Alibaba Cloud account.
 ---

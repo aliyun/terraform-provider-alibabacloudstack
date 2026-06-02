@@ -2,7 +2,6 @@
 subcategory: "Cross-Cloud DNS Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_record"
-sidebar_current: "docs-Alibabacloudstack-resource-universal-dns-record"
 description: |-
   Cross-cloud domain name resolution
 ---

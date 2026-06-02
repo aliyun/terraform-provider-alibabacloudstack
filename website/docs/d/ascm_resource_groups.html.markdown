@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_resource_groups"
-sidebar_current: "docs-Alibabacloudstack-datasource-ascm-resource-groups"
 description: |-
     Provides a list of Resource Groups owned by an Alibabacloudstack Cloud account.
 ---

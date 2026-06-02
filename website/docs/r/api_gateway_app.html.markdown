@@ -2,7 +2,6 @@
 subcategory: "API Gateway (Legacy)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_app"
-sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-app"
 description: |-
   Provides a Alibabacloudstack Api Gateway App Resource.
 ---

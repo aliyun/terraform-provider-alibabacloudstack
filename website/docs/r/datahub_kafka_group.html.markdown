@@ -2,7 +2,6 @@
 subcategory: "DataHub"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_datahub_kafka_group"
-sidebar_current: "docs-Alibabacloudstack-resource-datahub-kafka-group"
 description: |-
   Manages DataHub Kafka group resources
 ---

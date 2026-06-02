@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_specific_fields"
-sidebar_current: "docs-Alibabacloudstack-datasource-ascm-specific-fields"
 description: |-
     Provides a list of specific fields to the user.
 ---

@@ -2,7 +2,6 @@
 subcategory: "DataHub"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_datahub_projects"
-sidebar_current: "docs-Alibabacloudstack-datasource-datahub-projects"
 description: |-
   Provides a list of DataHub Projects.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Hologres"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hologram_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-hologram-instance"
 description: |-
   Provides a Alibaba Cloud Hologram Instance resource.
 ---

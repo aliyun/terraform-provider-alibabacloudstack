@@ -2,7 +2,6 @@
 subcategory: "Bare Metal Computing Platform (BMCP)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bmcp_cluster"
-sidebar_current: "docs-Alibabacloudstack-resource-bmcp-cluster"
 description: |-
   Provides a BMCP (Bare Metal Compute Platform) Cluster resource.
 ---

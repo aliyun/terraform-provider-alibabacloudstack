@@ -2,7 +2,6 @@
 subcategory: "Cloud Firewall"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudfirewall_controlpolicyorder"
-sidebar_current: "docs-Alibabacloudstack-resource-cloudfirewall-controlpolicyorder"
 description: |- 
   Provides a cloudfirewall Controlpolicyorder resource.
 ---

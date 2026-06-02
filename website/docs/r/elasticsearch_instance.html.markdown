@@ -2,7 +2,6 @@
 subcategory: "Elasticsearch (Earlier Version)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_elasticsearch_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-elasticsearch-instance"
 description: |-
   Provides a Elasticsearch on K8s instance resource.
 ---

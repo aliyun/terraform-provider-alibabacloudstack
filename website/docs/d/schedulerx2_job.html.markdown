@@ -2,7 +2,6 @@
 subcategory: "SchedulerX"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_schedulerx2_job"
-sidebar_current: "docs-Alibabacloudstack-datasource-schedulerx2-job"
 description: |-
   Manage SchedulerX2 jobs
 ---

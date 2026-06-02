@@ -2,7 +2,6 @@
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_namespace_group"
-sidebar_current: "docs-Alibabacloudstack-datasource-nas-namespace-group"
 description: |-
   Query Alibaba Cloud NAS cross-region mount orchestration information
 ---

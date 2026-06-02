@@ -2,7 +2,6 @@
 subcategory: "Common Bandwidth Package"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_common_bandwidth_packages"
-sidebar_current: "docs-Alibabacloudstack-datasource-common-bandwidth-packages"
 description: |-
   Provides a list of Common Bandwidth Packages owned by an Alibaba Cloud account.
 ---

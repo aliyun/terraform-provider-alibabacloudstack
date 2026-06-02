@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_proxy"
-sidebar_current: "docs-Alibabacloudstack-resource-db-proxy"
 description: |-
   Provides a rds Dbproxy resource.
 ---

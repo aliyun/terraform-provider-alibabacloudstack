@@ -2,7 +2,6 @@
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_accessrules"
-sidebar_current: "docs-Alibabacloudstack-datasource-nas-accessrules"
 description: |- 
   Provides a list of nas accessrules owned by an alibabacloudstack account.
 ---

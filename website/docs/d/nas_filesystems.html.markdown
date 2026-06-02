@@ -2,7 +2,6 @@
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_filesystems"
-sidebar_current: "docs-Alibabacloudstack-datasource-nas-filesystems"
 description: |- 
   Provides a list of nas filesystems owned by an alibabacloudstack account.
 ---

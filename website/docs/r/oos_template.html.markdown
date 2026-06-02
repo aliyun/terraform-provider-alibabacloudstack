@@ -2,7 +2,6 @@
 subcategory: "CloudOps Orchestration Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oos_template"
-sidebar_current: "docs-Alibabacloudstack-resource-oos-template"
 description: |-
   Provides a oos Template resource.
 ---

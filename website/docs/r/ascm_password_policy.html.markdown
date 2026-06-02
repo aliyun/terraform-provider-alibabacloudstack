@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_password_policy"
-sidebar_current: "docs-Alibabacloudstack-resource-ascm-password-policy"
 description: |-
    Provides a Ascm password policy configuration.
 ---

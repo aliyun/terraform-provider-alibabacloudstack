@@ -2,7 +2,6 @@
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_mounttargets"
-sidebar_current: "docs-Alibabacloudstack-datasource-nas-mounttargets"
 description: |- 
   Provides a list of nas mounttargets owned by an alibabacloudstack account.
 ---

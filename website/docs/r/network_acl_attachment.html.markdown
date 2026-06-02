@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_network_acl_attachment"
-sidebar_current: "docs-Alibabacloudstack-resource-network-acl-attachment"
 description: |-
   Provides a Alibabacloudstack Network Acl Attachment resource.
 ---

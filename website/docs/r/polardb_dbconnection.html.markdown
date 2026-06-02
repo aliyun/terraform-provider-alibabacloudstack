@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_dbconnection"
-sidebar_current: "docs-Alibabacloudstack-resource-polardb-dbconnection"
 description: |-
   Provides a PolarDB DB Connection resource.
 ---

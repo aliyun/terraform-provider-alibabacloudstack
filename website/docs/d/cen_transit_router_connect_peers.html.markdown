@@ -2,7 +2,6 @@
 subcategory: "Cloud Enterprise Network"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_connect_peers"
-sidebar_current: "docs-Alibabacloudstack-datasource-cen-transit-router-connect-peers"
 description: |-
   Provides a list of CEN Transit Router Connect Peers to be used by the alibabacloudstack_cen_transit_router_connect_peer resource.
 ---

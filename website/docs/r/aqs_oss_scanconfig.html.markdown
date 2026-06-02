@@ -2,7 +2,6 @@
 subcategory: "Server Guard"
 layout: "alibabacloudstack"
 page_title: "Alibaba Cloud Stack: alibabacloudstack_aqs_oss_scanconfig"
-sidebar_current: "docs-Alibabacloudstack-resource-aqs-oss-scanconfig"
 description: |-
   Provides a Alibaba Cloud Stack AQS OSS Scan Config resource.
 ---

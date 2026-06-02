@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_zones"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardb-zones"
 description: |-
   Provides a list of polardb zones owned by an alibabacloudstack account.
 ---

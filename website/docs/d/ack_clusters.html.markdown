@@ -2,7 +2,6 @@
 subcategory: "Container Service for Kubernetes"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ack_clusters"
-sidebar_current: "docs-Alibabacloudstack-datasource-ack-clusters"
 description: |- 
   Provides a list of ack clusters owned by an AlibabacloudStack account.
 ---

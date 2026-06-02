@@ -2,7 +2,6 @@
 subcategory: "Bare Metal Computing Platform (BMCP)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bmcp_images"
-sidebar_current: "docs-Alibabacloudstack-datasource-bmcp-images"
 description: |-
   Provides a list of BMCP (Bare Metal Compute Platform) images owned by an alibabacloudstack account.
 ---

@@ -2,7 +2,6 @@
 subcategory: "AnalyticDB for MySQL V3.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_backup_policy"
-sidebar_current: "docs-Alibabacloudstack-resource-adb-backup-policy"
 description: |- 
   Provides a adb Backup Policy resource.
 ---

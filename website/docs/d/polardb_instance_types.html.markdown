@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_instance_types"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardb-instance-types"
 description: |-
   Provides a list of PolarDB instance types owned by an Alibaba Cloud Stack account.
 ---

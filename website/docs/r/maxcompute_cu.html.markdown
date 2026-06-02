@@ -2,7 +2,6 @@
 subcategory: "MaxCompute"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_cu"
-sidebar_current: "docs-Alibabacloudstack-resource-maxcompute-cu"
 description: |-
   Provides a Alibabacloudstack maxcompute cu resource.
 ---

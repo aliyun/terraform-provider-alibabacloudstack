@@ -2,7 +2,6 @@
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_service_sources"
-sidebar_current: "docs-Alibabacloudstack-datasource-api-gateway-v2-service-sources"
 description: |-
     Provides service sources for API Gateway V2 that can be accessed by an Alibaba Cloud account within the region configured in the provider.
 ---

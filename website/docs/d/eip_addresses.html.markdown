@@ -2,7 +2,6 @@
 subcategory: "Elastic IP Address"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_eip_addresses"
-sidebar_current: "docs-Alibabacloudstack-datasource-eip-addresses"
 description: |- 
   Provides a list of eip addresses owned by an alibabacloudstack account.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_deploygroups"
-sidebar_current: "docs-Alibabacloudstack-datasource-edas-deploygroups"
 description: |- 
   Provides a list of edas deploygroups owned by an alibabacloudstack account.
 ---

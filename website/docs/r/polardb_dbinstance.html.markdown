@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_dbinstance"
-sidebar_current: "docs-Alibabacloudstack-resource-polardb-dbinstance"
 description: |-
   Provides a polardb Dbinstance resource.
 ---

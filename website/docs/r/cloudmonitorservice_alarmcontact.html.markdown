@@ -2,7 +2,6 @@
 subcategory: "Cloud Monitor"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_alarmcontact"
-sidebar_current: "docs-Alibabacloudstack-resource-cloudmonitorservice-alarmcontact"
 description: |- 
   Provides a cloudmonitorservice Alarmcontact resource.
 ---

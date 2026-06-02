@@ -2,7 +2,6 @@
 subcategory: "Cspprivate HSM"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cspprivate_hsm_group"
-sidebar_current: "docs-Alibabacloudstack-resource-cspprivate-hsm-group"
 description: |-
   Manages Alibaba Cloud HSM Group resources
 ---

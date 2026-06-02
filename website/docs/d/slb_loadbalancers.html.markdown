@@ -2,7 +2,6 @@
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_loadbalancers"
-sidebar_current: "docs-Alibabacloudstack-datasource-slb-loadbalancers"
 description: |- 
   Provides a list of slb loadbalancers owned by an alibabacloudstack account.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Express Connect"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_virtualborderrouters"
-sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-virtualborderrouters"
 description: |- 
   Provides a list of expressconnect virtualborderrouters owned by an alibabacloudstack account.
 ---

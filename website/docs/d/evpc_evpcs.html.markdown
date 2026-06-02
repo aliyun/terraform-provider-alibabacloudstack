@@ -2,7 +2,6 @@
 subcategory: "EasyAI"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_evpc_evpcs"
-sidebar_current: "docs-Alibabacloudstack-datasource-evpc-evpcs"
 description: |- 
   Provides a list of EVPCs owned by an AlibabacloudStack account.
 ---

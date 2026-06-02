@@ -2,7 +2,6 @@
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnrouteentry"
-sidebar_current: "docs-Alibabacloudstack-resource-vpngateway-vpnrouteentry"
 description: |- 
   Provides a vpngateway Vpnrouteentry resource.
 ---

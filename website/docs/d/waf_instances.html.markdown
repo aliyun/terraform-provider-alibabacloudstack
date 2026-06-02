@@ -2,7 +2,6 @@
 subcategory: "Web Application Firewall"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_waf_instances"
-sidebar_current: "docs-Alibabacloudstack-datasource-waf-instances"
 description: |-
   provides a list of WAF instances in Alibaba Cloud Stack based on the provided filters.
 ---

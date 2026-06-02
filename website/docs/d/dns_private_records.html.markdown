@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_records"
-sidebar_current: "docs-Alibabacloudstack-datasource-dns-private-records"
 description: |-
   Query Alibaba Cloud DNS private domain resolution records
 ---

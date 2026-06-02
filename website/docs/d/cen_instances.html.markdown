@@ -2,7 +2,6 @@
 subcategory: "Cloud Enterprise Network"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_instances"
-sidebar_current: "docs-Alibabacloudstack-datasource-cen-instances"
 description: |-
   Provides a list of cen Instances owned by an alibabacloudstack account.
 ---

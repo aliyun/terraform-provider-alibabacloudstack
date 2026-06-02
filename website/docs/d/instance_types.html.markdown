@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_instance_types"
-sidebar_current: "docs-Alibabacloudstack-datasource-instance-types"
 description: |-
     Provides a list of ECS Instance Types to be used by the alibabacloudstack_instance resource.
 ---

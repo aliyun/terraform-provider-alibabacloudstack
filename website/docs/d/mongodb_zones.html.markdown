@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB for MongoDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_zones"
-sidebar_current: "docs-Alibabacloudstack-datasource-mongodb-zones"
 description: |-
     Provides a list of availability zones for mongoDB that can be used by an Alibaba Cloud account.
 ---

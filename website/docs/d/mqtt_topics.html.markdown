@@ -2,7 +2,6 @@
 subcategory: "Message Queuing Telemetry Transport"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mqtt_topics"
-sidebar_current: "docs-Alibabacloudstack-datasource-mqtt-topics"
 description: |-
   Provides a list of MQTT Topics.
 ---

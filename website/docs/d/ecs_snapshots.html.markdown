@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_snapshots"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-snapshots"
 description: |- 
   Provides a list of ecs snapshots owned by an alibabacloudstack account according to the specified filters.
 ---

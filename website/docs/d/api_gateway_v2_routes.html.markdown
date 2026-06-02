@@ -2,7 +2,6 @@
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_api_gateway_v2_routes"
-sidebar_current: "docs-Alibabacloudstack-datasource-api-gateway-v2-routes"
 description: |-
   Provides a list of Api Gateway V2 Routes to be used by the Terraform engine.
 ---

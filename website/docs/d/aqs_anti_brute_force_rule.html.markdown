@@ -2,7 +2,6 @@
 subcategory: "Server Guard"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_aqs_anti_brute_force_rule"
-sidebar_current: "docs-Alibabacloudstack-datasource-aqs-anti-brute-force-rule"
 description: |-
   Query Anti-Brute Force Security rules for servers
 ---

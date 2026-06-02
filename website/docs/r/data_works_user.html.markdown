@@ -2,7 +2,6 @@
 subcategory: "One-stop Big Data Development and Governance Platform"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_data_works_user"
-sidebar_current: "docs-Alibabacloudstack-resource-data-works-user"
 description: |-
   Provides a AlibabacloudStack Data Works User resource.
 ---

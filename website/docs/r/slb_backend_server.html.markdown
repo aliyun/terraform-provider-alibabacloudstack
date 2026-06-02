@@ -6,7 +6,6 @@ layout: "alibabacloudstack"
 
 page_title: "Alibabacloudstack: alibabacloudstack_slb_backend_server"
 
-sidebar_current: "docs-Alibabacloudstack-resource-slb-backend-server"
 
 description: |-
 

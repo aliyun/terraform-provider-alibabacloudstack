@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_account"
-sidebar_current: "docs-Alibabacloudstack-datasource-account"
 description: |- 
   Provides Id of AlibabacloudStack account.
 ---

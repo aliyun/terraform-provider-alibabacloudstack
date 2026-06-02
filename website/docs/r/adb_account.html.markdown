@@ -2,7 +2,6 @@
 subcategory: "AnalyticDB for MySQL V3.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_account"
-sidebar_current: "docs-Alibabacloudstack-resource-adb-account"
 description: |- 
   Provides a adb Account resource.
 ---

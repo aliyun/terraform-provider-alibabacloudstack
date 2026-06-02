@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-dns-gtm-instance"
 description: |-
   Create and manage Global Traffic Manager (GTM) instances for Alibaba Cloud DNS
 ---

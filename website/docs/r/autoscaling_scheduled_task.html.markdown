@@ -2,7 +2,6 @@
 subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_scheduled_task"
-sidebar_current: "docs-Alibabacloudstack-resource-autoscaling-scheduled-task"
 description: |-
   Provides an Auto Scaling Scheduled Task resource.
 ---

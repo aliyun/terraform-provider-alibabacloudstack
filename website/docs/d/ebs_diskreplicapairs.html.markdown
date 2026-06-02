@@ -2,7 +2,6 @@
 subcategory: "Elastic Block Storage"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ebs_diskreplicapairs"
-sidebar_current: "docs-Alibabacloudstack-datasource-ebs-diskreplicapairs"
 description: |-
   Provides a list of ebs diskreplicapairs owned by an alibabacloudstack account.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Bastion Host"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bastionhost_instances"
-sidebar_current: "docs-Alibabacloudstack-datasource-bastionhost-instances"
 description: |-
   Provides a list of Bastionhost instances in Alibaba Cloud Stack based on the provided filters.
 ---

@@ -2,7 +2,6 @@
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_sslvpnclientcert"
-sidebar_current: "docs-Alibabacloudstack-resource-vpngateway-sslvpnclientcert"
 description: |-
   Provides a vpngateway Sslvpnclientcert resource.
 ---

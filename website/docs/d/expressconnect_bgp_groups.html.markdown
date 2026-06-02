@@ -2,7 +2,6 @@
 subcategory: "Express Connect"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgp_groups"
-sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-bgp-groups"
 description: |-
   Provides a list of expressconnect bgpgroups owned by an alibabacloudstack account.
 ---

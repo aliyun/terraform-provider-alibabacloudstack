@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB for Redis"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_zones"
-sidebar_current: "docs-Alibabacloudstack-datasource-kvstore-zones"
 description: |-
     Provides a list of availability zones for KVStore that can be used by an Apsara Stack Cloud account.
 ---

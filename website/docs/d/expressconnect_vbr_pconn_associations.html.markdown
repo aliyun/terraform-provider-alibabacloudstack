@@ -2,7 +2,6 @@
 subcategory: "Express Connect"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_vbr_pconn_associations"
-sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-vbr-pconn-associations"
 description: |-
   Provides a list of expressconnect vbrpconnassociations owned by an alibabacloudstack account.
 ---

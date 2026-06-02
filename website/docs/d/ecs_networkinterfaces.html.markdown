@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_networkinterfaces"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-networkinterfaces"
 description: |- 
   Provides a list of ecs networkinterfaces owned by an alibabacloudstack account.
 ---

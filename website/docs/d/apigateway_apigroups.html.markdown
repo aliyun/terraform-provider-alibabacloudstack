@@ -2,7 +2,6 @@
 subcategory: "API Gateway (Legacy)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_apigateway_apigroups"
-sidebar_current: "docs-Alibabacloudstack-datasource-apigateway-apigroups"
 description: |- 
   Provides a list of apigateway apigroups owned by an alibabacloudstack account.
 ---

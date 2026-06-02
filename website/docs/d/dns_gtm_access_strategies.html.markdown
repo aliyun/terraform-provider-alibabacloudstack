@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_gtm_access_strategies"
-sidebar_current: "docs-Alibabacloudstack-datasource-dns-gtm-access-strategies"
 description: |-
   Provides a list of DNS GTM Access Strategies.
 ---

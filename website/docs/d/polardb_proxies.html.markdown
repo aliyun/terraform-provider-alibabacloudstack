@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_proxies"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardb-proxies"
 description: |-
   Provides a list of rds dbproxies owned by an alibabacloudstack account.
 ---

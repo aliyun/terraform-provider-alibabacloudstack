@@ -2,7 +2,6 @@
 subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_lifecycle_hook"
-sidebar_current: "docs-Alibabacloudstack-resource-ess-lifecycle-hook"
 description: |-
   Provides a ESS lifecycle hook resource.
 ---

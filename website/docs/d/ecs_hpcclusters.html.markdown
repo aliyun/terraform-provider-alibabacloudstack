@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_hpcclusters"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-hpcclusters"
 description: |- 
   Provides a list of ecs hpcclusters owned by an alibabacloudstack account.
 ---

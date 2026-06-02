@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ram_role_attachment"
-sidebar_current: "docs-Alibabacloudstack-resource-ram-role-attachment"
 description: |-
   Provides a ECS Ramroleattachment resource to bind a RAM role to one or more ECS instances.
 ---

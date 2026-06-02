@@ -2,7 +2,6 @@
 subcategory: "Key Management Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_ciphertext"
-sidebar_current: "docs-Alibabacloudstack-resource-kms-ciphertext"
 description: |-
     Encrypt data with KMS.
 ---

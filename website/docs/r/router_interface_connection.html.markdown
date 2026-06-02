@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_router_interface_connection"
-sidebar_current: "docs-Alibabacloudstack-resource-router-interface-connection"
 description: |-
   Provides a Alibabacloudstack Router Interface Connection resource.
 ---

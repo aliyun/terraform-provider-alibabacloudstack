@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_domain_attachment"
-sidebar_current: "docs-Alibabacloudstack-resource-dns-domain-attachment"
 description: |-
   Provides bind the domain name to the DNS instance resource.
 ---

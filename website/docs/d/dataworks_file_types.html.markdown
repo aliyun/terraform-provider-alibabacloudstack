@@ -2,7 +2,6 @@
 subcategory: "One-stop Big Data Development and Governance Platform"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dataworks_file_types"
-sidebar_current: "docs-Alibabacloudstack-datasource-dataworks-file-types"
 description: |-
   Provides a list of DataWorks File Types.
 ---

@@ -2,7 +2,6 @@
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_api_gateway_v2_certificate"
-sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-certificate"
 description: |-
   Provides a AlibabacloudStack API Gateway V2 Certificate resource.
 ---

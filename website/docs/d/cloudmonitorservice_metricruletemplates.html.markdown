@@ -2,7 +2,6 @@
 subcategory: "Cloud Monitor"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_metricruletemplates"
-sidebar_current: "docs-Alibabacloudstack-datasource-cloudmonitorservice-metricruletemplates"
 description: |- 
   Provides a list of cloudmonitorservice metricruletemplates owned by an alibabacloudstack account.
 ---

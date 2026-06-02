@@ -2,7 +2,6 @@
 subcategory: "Cross-Cloud DNS Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_lines"
-sidebar_current: "docs-Alibabacloudstack-datasource-universal-dns-lines"
 description: |-
   Queries the list of cross-cloud DNS lins.
 ---

@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_cluster_account_database_binding"
-sidebar_current: "docs-Alibabacloudstack-resource-polardb-cluster-account-database-binding"
 description: |-
   Provides a PolarDB cluster account database binding resource.
 ---

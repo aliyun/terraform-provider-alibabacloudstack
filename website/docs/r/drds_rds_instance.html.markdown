@@ -2,7 +2,6 @@
 subcategory: "Distributed Relational Database Service(DRDS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_rds_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-drds-rds-instance"
 description: |-
   Provides a DRDS RDS Instance resource.
 ---

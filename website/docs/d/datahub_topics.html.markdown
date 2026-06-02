@@ -2,7 +2,6 @@
 subcategory: "DataHub"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_datahub_topics"
-sidebar_current: "docs-Alibabacloudstack-datasource-datahub-topics"
 description: |-
   Provides a list of DataHub Topics.
 ---

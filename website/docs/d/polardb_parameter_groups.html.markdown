@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_parameter_groups"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardb-parameter-groups"
 description: |-
   Provides a list of PolarDB parameter groups owned by an Alibaba Cloud Stack account.
 ---

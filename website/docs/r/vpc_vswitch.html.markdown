@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_vswitch"
-sidebar_current: "docs-Alibabacloudstack-resource-vpc-vswitch"
 description: |- 
   Provides a vpc VSwitch resource.
 ---

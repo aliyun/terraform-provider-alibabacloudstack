@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_deploymentset"
-sidebar_current: "docs-Alibabacloudstack-resource-ecs-deploymentset"
 description: |-
   Provides a ecs Deploymentset resource.
 ---

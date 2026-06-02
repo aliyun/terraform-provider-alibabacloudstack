@@ -2,7 +2,6 @@
 subcategory: "AnalyticDB for PostgreSQL"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_accounts"
-sidebar_current: "docs-Alibabacloudstack-datasource-gpdb-accounts"
 description: |- 
   Provides a list of gpdb accounts owned by an alibabacloudstack account.
 ---

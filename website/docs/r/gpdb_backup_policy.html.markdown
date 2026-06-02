@@ -2,7 +2,6 @@
 subcategory: "AnalyticDB for PostgreSQL"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_backup_policy"
-sidebar_current: "docs-Alibabacloudstack-resource-gpdb-backup-policy"
 description: |-
   Configures the backup policy for an AnalyticDB PostgreSQL instance.
 ---

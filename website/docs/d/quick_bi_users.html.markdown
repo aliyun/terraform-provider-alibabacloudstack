@@ -2,7 +2,6 @@
 subcategory: "QuickBI"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_quick_bi_users"
-sidebar_current: "docs-Alibabacloudstack-datasource-quick-bi-users"
 description: |-
   Provides a list of Quick BI Users to the user.
 ---

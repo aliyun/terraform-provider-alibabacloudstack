@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_vpcs"
-sidebar_current: "docs-Alibabacloudstack-datasource-vpc-vpcs"
 description: |- 
   Provides a list of vpc vpcs owned by an alibabacloudstack account.
 ---

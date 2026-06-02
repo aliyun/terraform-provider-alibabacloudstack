@@ -2,7 +2,6 @@
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_vservergroups"
-sidebar_current: "docs-Alibabacloudstack-datasource-slb-vservergroups"
 description: |- 
   Provides a list of slb vservergroups owned by an alibabacloudstack account.
 ---

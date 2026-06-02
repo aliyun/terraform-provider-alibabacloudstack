@@ -2,7 +2,6 @@
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_namespace_filesystem_attachment"
-sidebar_current: "docs-Alibabacloudstack-datasource-nas-namespace-filesystem-attachment"
 description: |-
   Provides information about Alibaba Cloud NAS namespace filesystem attachments.
 ---

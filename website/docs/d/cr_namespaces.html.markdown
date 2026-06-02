@@ -2,7 +2,6 @@
 subcategory: "Container Registry"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_namespaces"
-sidebar_current: "docs-Alibabacloudstack-datasource-cr-namespaces"
 description: |-
   Provides a list of Container Registry namespaces.
 ---

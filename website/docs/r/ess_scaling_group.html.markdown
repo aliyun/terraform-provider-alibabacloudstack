@@ -2,7 +2,6 @@
 subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_scaling_group"
-sidebar_current: "docs-Alibabacloudstack-resource-ess-scaling-group"
 description: |-
   Provides a ESS scaling group resource.
 ---

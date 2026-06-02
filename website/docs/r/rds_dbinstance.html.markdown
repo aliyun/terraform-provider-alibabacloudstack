@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_dbinstance"
-sidebar_current: "docs-Alibabacloudstack-resource-rds-dbinstance"
 description: |- 
   Provides a rds Dbinstance resource.
 ---

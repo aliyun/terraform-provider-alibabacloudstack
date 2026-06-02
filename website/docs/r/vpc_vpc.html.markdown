@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_vpc"
-sidebar_current: "docs-Alibabacloudstack-resource-vpc-vpc"
 description: |- 
   Provides a vpc Vpc resource.
 ---

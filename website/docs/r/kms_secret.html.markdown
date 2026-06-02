@@ -2,7 +2,6 @@
 subcategory: "Key Management Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_secret"
-sidebar_current: "docs-Alibabacloudstack-resource-kms-secret"
 description: |-
   Provides a Alibabacloudstack Cloud kms secret resource.
 ---

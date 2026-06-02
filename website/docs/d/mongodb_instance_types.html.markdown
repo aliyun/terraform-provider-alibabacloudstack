@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB for MongoDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_instance_types"
-sidebar_current: "docs-Alibabacloudstack-datasource-mongodb-instance-types"
 description: |-
   Provides a list of Mongodb Instance types to be used by the alibabacloudstack_mongodb_instance resource.
 ---

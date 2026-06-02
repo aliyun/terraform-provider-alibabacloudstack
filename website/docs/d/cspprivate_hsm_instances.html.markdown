@@ -2,7 +2,6 @@
 subcategory: "Cspprivate HSM"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cspprivate_hsm_instances"
-sidebar_current: "docs-Alibabacloudstack-datasource-cspprivate-hsm-instances"
 description: |-
   Query Alibaba Cloud Hardware Security Module (HSM) instances.
 ---

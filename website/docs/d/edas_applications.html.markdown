@@ -2,7 +2,6 @@
 subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_applications"
-sidebar_current: "docs-Alibabacloudstack-datasource-edas-applications"
 description: |- 
   Provides a list of edas applications owned by an alibabacloudstack account.
 ---

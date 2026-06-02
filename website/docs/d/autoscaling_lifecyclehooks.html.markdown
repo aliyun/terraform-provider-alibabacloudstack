@@ -2,7 +2,6 @@
 subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_lifecyclehooks"
-sidebar_current: "docs-Alibabacloudstack-datasource-autoscaling-lifecyclehooks"
 description: |- 
   Provides a list of autoscaling lifecyclehooks owned by an alibabacloudstack account.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Cspprivate HSM"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cspprivate_hsm_groups"
-sidebar_current: "docs-Alibabacloudstack-datasource-cspprivate-hsm-groups"
 description: |-
   Provides a list of CSP Private HSM Groups.
 ---

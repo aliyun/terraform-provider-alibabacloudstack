@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_cluster_proxies"
-sidebar_current: "docs-alibabacloudstack-datasource-polardb-cluster-proxies"
 description: |-
   Provides a list of PolarDB cluster proxies owned by an alibabacloudstack account.
 ---

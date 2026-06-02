@@ -2,7 +2,6 @@
 subcategory: "Cloud Service Bus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_csb_service"
-sidebar_current: "docs-Alibabacloudstack-resource-csb-service"
 description: |-
   Provides a Alibabacloudstack resource to manage CSB Service.
 ---

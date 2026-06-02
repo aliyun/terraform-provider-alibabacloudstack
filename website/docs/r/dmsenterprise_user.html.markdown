@@ -2,7 +2,6 @@
 subcategory: "Data Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dmsenterprise_user"
-sidebar_current: "docs-Alibabacloudstack-resource-dmsenterprise-user"
 description: |- 
   Provides a dmsenterprise User resource.
 ---

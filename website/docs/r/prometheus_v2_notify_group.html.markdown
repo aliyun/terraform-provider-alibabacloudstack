@@ -2,7 +2,6 @@
 subcategory: "Managed Service for Prometheus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_notify_group"
-sidebar_current: "docs-Alibabacloudstack-resource-prometheus-v2-notify-group"
 description: |-
   Manages Prometheus v2 notification groups.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Object Storage Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_kms"
-sidebar_current: "docs-Alibabacloudstack-resource-oss-bucket-kms"
 description: |-
   Provides a OSS Bucket KMS resource.
 ---

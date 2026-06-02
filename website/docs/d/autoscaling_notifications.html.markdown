@@ -2,7 +2,6 @@
 subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_notifications"
-sidebar_current: "docs-Alibabacloudstack-datasource-autoscaling-notifications"
 description: |- 
   Provides a list of autoscaling notifications owned by an alibabacloudstack account.
 ---

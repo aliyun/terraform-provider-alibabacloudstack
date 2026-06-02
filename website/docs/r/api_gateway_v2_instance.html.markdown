@@ -2,7 +2,6 @@
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-instance"
 description: |-
     Provides a Alibabacloudstack Api Gateway V2 Instance Resource.
 ---

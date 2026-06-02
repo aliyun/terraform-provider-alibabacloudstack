@@ -2,7 +2,6 @@
 subcategory: "Cloud Enterprise Network"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_route_table_associations"
-sidebar_current: "docs-Alibabacloudstack-datasource-cen-transit-router-route-table-associations"
 description: |-
   Provides a list of cen transitrouterroutetableassociations owned by an alibabacloudstack account.
 ---

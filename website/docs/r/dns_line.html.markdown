@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_line"
-sidebar_current: "docs-Alibabacloudstack-resource-dns-line"
 description: |-
   Manage Alibaba Cloud DNS Global lines
 ---

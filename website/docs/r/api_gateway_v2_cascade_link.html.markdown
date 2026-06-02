@@ -2,7 +2,6 @@
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_api_gateway_v2_cascade_link"
-sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-v2-cascade-link"
 description: |-
   Create and manage API Gateway v2 cascade link resources
 ---

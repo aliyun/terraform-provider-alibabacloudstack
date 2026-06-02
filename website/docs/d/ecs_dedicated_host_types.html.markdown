@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_dedicated_host_types"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-dedicated-host-types"
 description: |-
   Provides a list of available dedicated host types.
 ---

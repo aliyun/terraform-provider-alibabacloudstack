@@ -2,7 +2,6 @@
 subcategory: "Application Configuration Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_acm_configuration"
-sidebar_current: "docs-Alibabacloudstack-resource-acm-configuration"
 description: |-
   Provides a acm Configuration resource.
 ---

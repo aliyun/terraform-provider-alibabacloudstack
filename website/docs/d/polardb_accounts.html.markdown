@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_accounts"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardb-accounts"
 description: |-
   Provides a list of polardb accounts owned by an alibabacloudstack account.
 ---

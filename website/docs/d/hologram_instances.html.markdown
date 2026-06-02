@@ -2,7 +2,6 @@
 subcategory: "Hologres"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_hologram_instances"
-sidebar_current: "docs-Alibabacloudstack-datasource-hologram-instances"
 description: |-
   Provides a list of Hologram Instances to the user.
 ---

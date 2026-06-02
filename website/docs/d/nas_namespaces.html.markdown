@@ -2,7 +2,6 @@
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_namespaces"
-sidebar_current: "docs-Alibabacloudstack-datasource-nas-namespaces"
 description: |-
   Query Alibaba Cloud NAS namespace information
 ---

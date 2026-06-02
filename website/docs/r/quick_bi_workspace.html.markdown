@@ -2,7 +2,6 @@
 subcategory: "QuickBI"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_quick_bi_workspace"
-sidebar_current: "docs-Alibabacloudstack-resource-quick-bi-workspace"
 description: |-
   Provides a Alibabacloudstack Quick BI Workspace resource.
 ---

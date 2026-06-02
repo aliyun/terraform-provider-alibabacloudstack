@@ -2,7 +2,6 @@
 subcategory: "Resource Orchestration Service (ROS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ros_stacks"
-sidebar_current: "docs-Alibabacloudstack-datasource-ros-stacks"
 description: |- 
   Provides a list of ros stacks owned by an Alibabacloudstack account.
 ---

@@ -2,7 +2,6 @@
 subcategory: "CloudOps Orchestration Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oos_executions"
-sidebar_current: "docs-Alibabacloudstack-datasource-oos-executions"
 description: |- 
   Provides a list of oos executions owned by an alibabacloudstack account.
 ---

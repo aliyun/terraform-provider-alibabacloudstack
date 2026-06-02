@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_quotas"
-sidebar_current: "docs-Alibabacloudstack-datasource-ascm-quotas"
 description: |-
     Provides a list of quota to the user.
 ---

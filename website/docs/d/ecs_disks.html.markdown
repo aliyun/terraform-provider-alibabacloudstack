@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_disks"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-disks"
 description: |- 
   Provides a list of ecs disks owned by an alibabacloudstack account.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_swimming_lane_group"
-sidebar_current: "docs-Alibabacloudstack-resource-edas-swimming-lane-group"
 description: |-
   Provides a AlibabacloudStack EDAS Swimming Lane Group resource.
 ---

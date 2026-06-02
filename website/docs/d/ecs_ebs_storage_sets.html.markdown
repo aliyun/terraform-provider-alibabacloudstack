@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_ebs_storage_sets"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-ebs-storage-sets"
 description: |- 
   Provides a list of ecs ebs storage sets
 ---

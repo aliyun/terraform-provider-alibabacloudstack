@@ -2,7 +2,6 @@
 subcategory: "Cspprivate HSM"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cspprivate_hsms"
-sidebar_current: "docs-alibabacloudstack-datasource-cspprivate-hsms"
 description: |-
   Provides a list of CSP Private HSM instances available to Alibaba Cloud Stack.
 ---

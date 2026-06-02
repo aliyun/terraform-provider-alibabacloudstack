@@ -2,7 +2,6 @@
 subcategory: "Network Address Translation Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_natgateway_natgateways"
-sidebar_current: "docs-Alibabacloudstack-datasource-natgateway-natgateways"
 description: |- 
   Provides a list of natgateway natgateways owned by an alibabacloudstack account.
 ---

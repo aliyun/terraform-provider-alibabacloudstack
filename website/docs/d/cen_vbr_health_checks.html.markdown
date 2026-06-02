@@ -2,7 +2,6 @@
 subcategory: "Cloud Enterprise Network"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_vbr_health_checks"
-sidebar_current: "docs-Alibabacloudstack-datasource-cen-vbr-health-checks"
 description: |-
   Provides a list of CEN VBR Health Checks to the user.
 ---

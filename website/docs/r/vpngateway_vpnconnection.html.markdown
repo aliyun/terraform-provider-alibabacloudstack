@@ -2,7 +2,6 @@
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnconnection"
-sidebar_current: "docs-Alibabacloudstack-resource-vpngateway-vpnconnection"
 description: |- 
   Provides a vpngateway Vpnconnection resource.
 ---

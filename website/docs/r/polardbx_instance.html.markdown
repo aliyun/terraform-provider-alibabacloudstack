@@ -2,7 +2,6 @@
 subcategory: "Cloud-Native Distributed Database PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-polardbx-instance"
 description: |-
   Provides a PolarDB-X instance resource.
 ---

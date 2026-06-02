@@ -2,7 +2,6 @@
 subcategory: "MaxCompute"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_cluster_quotas"
-sidebar_current: "docs-Alibabacloudstack-datasource-maxcompute-cluster-quotas"
 description: |-
   Provides a datasource of Max Compute cluster Quotas
 ---

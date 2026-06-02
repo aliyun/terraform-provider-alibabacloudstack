@@ -2,7 +2,6 @@
 subcategory: "Cloud Monitor"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_alarmcontactgroups"
-sidebar_current: "docs-Alibabacloudstack-datasource-cloudmonitorservice-alarmcontactgroups"
 description: |- 
   Provides a list of cloudmonitorservice alarmcontactgroups owned by an alibabacloudstack account.
 ---

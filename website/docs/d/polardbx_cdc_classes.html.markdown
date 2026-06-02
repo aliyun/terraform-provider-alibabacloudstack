@@ -2,7 +2,6 @@
 subcategory: "Cloud-Native Distributed Database PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_cdc_classes"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-cdc-classes"
 description: |-
   Query the available CDC (Change Data Capture) classes for a PolarDB-X instance.
 ---

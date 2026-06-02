@@ -2,7 +2,6 @@
 subcategory: "Object Storage Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_object"
-sidebar_current: "docs-Alibabacloudstack-resource-oss-bucket-object"
 description: |-
   Provides a resource to create a oss bucket object.
 ---

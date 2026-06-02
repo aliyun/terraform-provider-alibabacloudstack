@@ -2,7 +2,6 @@
 subcategory: "Distributed Relational Database Service(DRDS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_accounts"
-sidebar_current: "docs-Alibabacloudstack-datasource-drds-accounts"
 description: |-
   Provides a list of drds accounts owned by an alibabacloudstack account.
 ---

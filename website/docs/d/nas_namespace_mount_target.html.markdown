@@ -2,7 +2,6 @@
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_namespace_mount_target"
-sidebar_current: "docs-Alibabacloudstack-datasource-nas-namespace-mount-target"
 description: |-
   Manages NAS namespace mount targets for configuring file system access permissions and network connections.
 ---

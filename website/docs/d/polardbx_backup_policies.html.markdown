@@ -2,7 +2,6 @@
 subcategory: "Cloud-Native Distributed Database PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_backup_policies"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-backup-policies"
 description: |-
   Provides a list of PolarDBX backup policies owned by an Alibaba Cloud Stack account.
 ---

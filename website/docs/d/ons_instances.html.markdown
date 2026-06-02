@@ -2,7 +2,6 @@
 subcategory: "ApsaraMQ for RocketMQ"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_instances"
-sidebar_current: "docs-Alibabacloudstack-datasource-ons-instances"
 description: |-
     Provides a list of ons instances available to the user.
 ---

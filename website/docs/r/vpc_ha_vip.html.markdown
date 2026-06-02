@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_ha_vip"
-sidebar_current: "docs-Alibabacloudstack-resource-vpc-ha-vip"
 description: |-
   Provides a vpc Havip resource.
 ---

@@ -2,7 +2,6 @@
 subcategory: "AnalyticDB for MySQL V3.0"
 layout: "alibabacloudstack"
 page_title: "ApsaraStack: alibabacloudstack_adb_cluster_types"
-sidebar_current: "docs-apsarastack-data-source-adb-cluster-types"
 description: |-
   Provides a list of ADB cluster types.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Express Connect"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_routerinterfaces"
-sidebar_current: "docs-Alibabacloudstack-datasource-expressconnect-routerinterfaces"
 description: |- 
   Provides a list of expressconnect routerinterfaces owned by an alibabacloudstack account.
 ---

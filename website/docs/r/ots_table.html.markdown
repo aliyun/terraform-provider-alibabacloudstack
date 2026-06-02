@@ -2,7 +2,6 @@
 subcategory: "Table Store (OTS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_table"
-sidebar_current: "docs-Alibabacloudstack-resource-ots-table"
 description: |-
   Provides an OTS (Open Table Service) table resource.
 ---

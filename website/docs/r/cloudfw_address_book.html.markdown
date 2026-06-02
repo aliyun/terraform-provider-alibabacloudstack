@@ -2,7 +2,6 @@
 subcategory: "Cloud Firewall"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudfw_address_book"
-sidebar_current: "docs-Alibabacloudstack-resource-cloudfw-address-book"
 description: |-
   The Cloud Firewall address book resource, used to manage IP or port address books in Alibaba Cloud Cloud Firewall.
 ---

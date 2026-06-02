@@ -2,7 +2,6 @@
 subcategory: "Cloud Firewall"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudfw_address_books"
-sidebar_current: "docs-Alibabacloudstack-datasource-cloudfw-address-books"
 description: |-
   Provides information about Cloud Firewall address books
 ---

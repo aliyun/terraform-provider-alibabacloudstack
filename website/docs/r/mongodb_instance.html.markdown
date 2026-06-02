@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB for MongoDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-mongodb-instance"
 description: |-  
   Provides a MongoDB instance resource supports replica set instances only. the MongoDB provides stable, reliable, and automatic scalable database services. It offers a full range of database solutions, such as disaster recovery, backup, recovery, monitoring, and alarms.  
 ---

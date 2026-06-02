@@ -2,7 +2,6 @@
 subcategory: "Server Guard"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_aqs_web_locks"
-sidebar_current: "docs-Alibabacloudstack-datasource-aqs-web-locks"
 description: |-
   Query Web tamper-proof configurations of Server Guard (AQS).
 ---

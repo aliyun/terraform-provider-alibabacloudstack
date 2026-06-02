@@ -2,7 +2,6 @@
 subcategory: "Cloud Enterprise Network"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_transit_router_multicast_domain"
-sidebar_current: "docs-Alibabacloudstack-resource-cen-transit-router-multicast-domain"
 description: |-
   Provides a cen Transitroutermulticastdomain resource.
 ---

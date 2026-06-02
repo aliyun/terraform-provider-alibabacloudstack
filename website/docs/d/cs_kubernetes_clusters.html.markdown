@@ -2,7 +2,6 @@
 subcategory: "Container Service for Kubernetes"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cs_kubernetes_clusters"
-sidebar_current: "docs-Alibabacloudstack-datasource-cs-kubernetes-clusters"
 description: |-
   Provides a list of Container Service Kubernetes Clusters to be used by the alibabacloudstack_cs_kubernetes_cluster resource.
 ---

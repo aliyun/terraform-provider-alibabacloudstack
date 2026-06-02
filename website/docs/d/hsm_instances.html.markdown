@@ -2,7 +2,6 @@
 subcategory: "Hardware Security Module (HSM)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_hsm_instances"
-sidebar_current: "docs-Alibabacloudstack-datasource-hsm-instances"
 description: |-
   Query Alibaba Cloud Hardware Security Module (HSM) instances.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Object Storage Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_single_tunnel"
-sidebar_current: "docs-Alibabacloudstack-resource-oss-single-tunnel"
 description: |-
   Creates an OSS single tunnel resource to establish a secure connection channel between OSS service and VPC network.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Managed Service for Prometheus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-prometheus-v2-instance"
 description: |-
   Manages Prometheus V2 instance resources
 ---

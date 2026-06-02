@@ -1,7 +1,6 @@
 ---
 layout: "alibabacloudstack"
 page_title: "Provider: alibabacloudstack"
-sidebar_current: "docs-alibabacloudstack-index"
 description: |-
   AlibabaCloudStack Provider Configuration Guide.
 ---

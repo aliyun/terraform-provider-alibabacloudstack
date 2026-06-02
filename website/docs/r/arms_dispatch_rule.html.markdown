@@ -2,7 +2,6 @@
 subcategory: "Application Real-Time Monitoring Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_arms_dispatch_rule"
-sidebar_current: "docs-Alibabacloudstack-resource-arms-dispatch-rule"
 description: |-
   Provides a Alibabacloudstack Application Real-Time Monitoring Service (ARMS) Alert Dispatch rule resource.
 ---

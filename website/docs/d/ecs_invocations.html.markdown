@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_invocations"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-invocations"
 description: |-
   Provides a list of ecs invocations owned by an alibabacloudstack account.
 ---

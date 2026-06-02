@@ -2,7 +2,6 @@
 subcategory: "AnalyticDB for PostgreSQL"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_publicconnection"
-sidebar_current: "docs-Alibabacloudstack-resource-gpdb-publicconnection"
 description: |- 
   Provides a gpdb Publicconnection resource.
 ---

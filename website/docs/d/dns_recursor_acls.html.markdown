@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_recursor_acls"
-sidebar_current: "docs-Alibabacloudstack-datasource-dns-recursor-acls"
 description: |-
   Provides a list of DNS Recursor ACL policies for managing access control policies for cross-cloud domain name resolution.
 ---

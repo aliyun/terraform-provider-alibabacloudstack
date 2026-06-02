@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_database"
-sidebar_current: "docs-Alibabacloudstack-resource-rds-database"
 description: |- 
   Provides a rds Database resource.
 ---

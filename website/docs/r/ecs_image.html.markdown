@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"  
 layout: "alibabacloudstack"  
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_image"  
-sidebar_current: "docs-Alibabacloudstack-resource-ecs-image"  
 description: |-  
   Provides a ecs Image resource.  
 ---

@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_dbinstances"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardb-dbinstances"
 description: |-
   Provides a list of polardb dbinstances owned by an alibabacloudstack account.
 ---

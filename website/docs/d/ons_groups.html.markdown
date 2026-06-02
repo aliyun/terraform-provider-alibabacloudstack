@@ -2,7 +2,6 @@
 subcategory: "ApsaraMQ for RocketMQ"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_groups"
-sidebar_current: "docs-Alibabacloudstack-datasource-ons-groups"
 description: |-
     Provides a list of ons groups available to the user.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Cloud Monitor"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_sitemonitor"
-sidebar_current: "docs-Alibabacloudstack-resource-cloudmonitorservice-sitemonitor"
 description: |- 
   Provides a cloudmonitorservice Sitemonitor resource.
 ---

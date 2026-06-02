@@ -2,7 +2,6 @@
 subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_dir_quota"
-sidebar_current: "docs-Alibabacloudstack-datasource-nas-dir-quota"
 description: |-
   Query NAS directory quota information
 ---

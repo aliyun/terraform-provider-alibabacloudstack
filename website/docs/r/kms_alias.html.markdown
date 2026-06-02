@@ -2,7 +2,6 @@
 subcategory: "Key Management Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kms_alias"
-sidebar_current: "docs-Alibabacloudstack-resource-kms-alias"
 description: |-
   Provides a AlibabacloudStack KMS Alias resource.
 ---

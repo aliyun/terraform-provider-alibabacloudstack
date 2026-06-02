@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_backup"
-sidebar_current: "docs-Alibabacloudstack-resource-polardb-backup"
 description: |-
   Provides a polardb Backup resource.
 ---

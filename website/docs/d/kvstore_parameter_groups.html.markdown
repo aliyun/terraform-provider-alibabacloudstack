@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB for Redis"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_parameter_groups"
-sidebar_current: "docs-Alibabacloudstack-datasource-kvstore-parameter-groups"
 description: |-
   Queries the list of parameter templates for ApsaraDB for Redis (KVStore).
 ---

@@ -2,7 +2,6 @@
 subcategory: "Cloud-Native Distributed Database PolarDB-X 2.0"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_account"
-sidebar_current: "docs-Alibabacloudstack-resource-polardbx-account"
 description: |-
   Provides a PolarDBX Account resource.
 ---

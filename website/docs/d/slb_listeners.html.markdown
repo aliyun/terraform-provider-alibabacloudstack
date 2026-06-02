@@ -2,7 +2,6 @@
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_listeners"
-sidebar_current: "docs-Alibabacloudstack-datasource-slb-listeners"
 description: |- 
   Provides a list of slb listeners owned by an alibabacloudstack account.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Elastic IP Address"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_eip_association"
-sidebar_current: "docs-Alibabacloudstack-resource-eip-association"
 description: |- 
   Provides a eip Association resource.
 ---

@@ -2,7 +2,6 @@
 subcategory: "VPNGateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpngateway_vpnconnections"
-sidebar_current: "docs-Alibabacloudstack-datasource-vpngateway-vpnconnections"
 description: |- 
   Provides a list of vpngateway vpnconnections owned by an alibabacloudstack account.
 ---

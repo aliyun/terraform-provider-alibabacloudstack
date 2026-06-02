@@ -2,7 +2,6 @@
 subcategory: "Bastion Host"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bastionhost_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-bastionhost-instance"
 description: |-
   Provides a Alibabacloudstack bastionhostprivate switch resource.
 ---

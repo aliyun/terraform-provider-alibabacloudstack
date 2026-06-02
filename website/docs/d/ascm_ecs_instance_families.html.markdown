@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_ecs_instance_families"
-sidebar_current: "docs-Alibabacloudstack-datasource-ascm-ecs-instance-families"
 description: |-
     Provides a list of ecs instance families to the user.
 ---

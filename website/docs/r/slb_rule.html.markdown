@@ -2,7 +2,6 @@
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_rule"
-sidebar_current: "docs-Alibabacloudstack-resource-slb-rule"
 description: |- 
   Provides a slb Rule resource.
 ---

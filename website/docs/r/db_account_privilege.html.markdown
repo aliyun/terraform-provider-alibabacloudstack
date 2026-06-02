@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_account_privilege"
-sidebar_current: "docs-Alibabacloudstack-resource-db-account-privilege"
 description: |-
   Provides an RDS account privilege resource.
 ---

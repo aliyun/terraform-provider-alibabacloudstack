@@ -2,7 +2,6 @@
 subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_scalingrules"
-sidebar_current: "docs-Alibabacloudstack-datasource-autoscaling-scalingrules"
 description: |- 
   Provides a list of autoscaling scalingrules owned by an AlibabaCloudStack account.
 ---

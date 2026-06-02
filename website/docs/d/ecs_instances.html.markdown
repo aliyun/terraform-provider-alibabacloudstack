@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_instances"
-sidebar_current: "docs-Alibabacloudstack-datasource-ecs-instances"
 description: |- 
   Provides a list of ecs instances owned by an alibabacloudstack account.
 ---

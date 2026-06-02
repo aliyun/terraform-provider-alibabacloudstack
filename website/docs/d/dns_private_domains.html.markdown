@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_domains"
-sidebar_current: "docs-Alibabacloudstack-datasource-dns-private-domains"
 description: |-
   Provides a list of private domains for DNS that can be used by an Alibaba Cloud account.
 ---

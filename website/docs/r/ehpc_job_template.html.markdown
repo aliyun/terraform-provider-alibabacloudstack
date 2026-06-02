@@ -2,7 +2,6 @@
 subcategory: "Elastic High Performance Computing (EHPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ehpc_job_template"
-sidebar_current: "docs-Alibabacloudstack-resource-ehpc-job-template"
 description: |-
   Provides a Alibabacloudstack Ehpc Job Template resource.
 ---

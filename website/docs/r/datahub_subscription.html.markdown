@@ -2,7 +2,6 @@
 subcategory: "DataHub"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_datahub_subscription"
-sidebar_current: "docs-Alibabacloudstack-resource-datahub-subscription"
 description: |- 
   Provides a datahub Subscription resource.
 ---

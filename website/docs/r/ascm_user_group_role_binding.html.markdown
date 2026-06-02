@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_user_group_role_binding"
-sidebar_current: "docs-Alibabacloudstack-resource-ascm-user-group-role-binding"
 description: |-
   Provides Ascm User Group Role Binding.
 ---

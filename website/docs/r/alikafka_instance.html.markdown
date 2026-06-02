@@ -2,7 +2,6 @@
 subcategory: "ApsaraMQ for Kafka"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-alikafka-instance"
 description: |-
   Provides a AliKafka Instance resource.
 ---

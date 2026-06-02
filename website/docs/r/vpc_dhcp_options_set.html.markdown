@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_dhcp_options_set"
-sidebar_current: "docs-Alibabacloudstack-resource-vpc-dhcp-options-set"
 description: |-
   Provides a vpc Dhcpoptionsset resource.
 ---

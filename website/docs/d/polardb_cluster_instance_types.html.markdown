@@ -2,7 +2,6 @@
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_cluster_instance_types"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardb-cluster-instance-types"
 description: |-
   Provides a list of PolarDB cluster instance types.
 ---

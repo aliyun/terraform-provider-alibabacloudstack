@@ -2,7 +2,6 @@
 subcategory: "Cloud Monitor"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_alarmcontacts"
-sidebar_current: "docs-Alibabacloudstack-datasource-cloudmonitorservice-alarmcontacts"
 description: |- 
   Provides a list of cloudmonitorservice alarmcontacts in an Alibabacloudstack account according to the specified filters.
 

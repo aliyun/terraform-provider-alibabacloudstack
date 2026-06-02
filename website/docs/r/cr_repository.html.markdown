@@ -2,7 +2,6 @@
 subcategory: "Container Registry"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cr_ee_repo"
-sidebar_current: "docs-alibabacloudstack-resource-cr-ee-repo"
 description: |-
   Provides a Alibabacloudstack resource to manage Container Registry Enterprise Edition repositories.
 ---

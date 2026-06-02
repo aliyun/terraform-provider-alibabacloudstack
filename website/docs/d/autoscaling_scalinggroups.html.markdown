@@ -2,7 +2,6 @@
 subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_scalinggroups"
-sidebar_current: "docs-Alibabacloudstack-datasource-autoscaling-scalinggroups"
 description: |- 
   Provides a list of autoscaling scalinggroups owned by an AlibabaCloudStack account.
 ---

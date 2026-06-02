@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_connection"
-sidebar_current: "docs-Alibabacloudstack-resource-db-connection"
 description: |-
   Provides an RDS instance connection resource.
 ---

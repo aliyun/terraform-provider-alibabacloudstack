@@ -2,7 +2,6 @@
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_v2_services"
-sidebar_current: "docs-Alibabacloudstack-datasource-api-gateway-v2-services"
 description: |-
   Queries the list of services for Alibaba Cloud API Gateway v2.
 ---

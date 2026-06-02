@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_ascm_roles"
-sidebar_current: "docs-Alibabacloudstack-datasource-ascm-roles"
 description: |-
     Provides a list of roles to the user.
 ---

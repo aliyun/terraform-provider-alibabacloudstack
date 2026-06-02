@@ -2,7 +2,6 @@
 subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_slbattachment"
-sidebar_current: "docs-Alibabacloudstack-resource-edas-slbattachment"
 description: |- 
   Orchestrate the Enterprise Distributed Application Service (EDAS) SLBAttachment resource under the specified resource set using credentials configured in the Provider.
 ---

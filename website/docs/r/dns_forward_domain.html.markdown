@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_forward_domain"
-sidebar_current: "docs-Alibabacloudstack-resource-dns-forward-domain"
 description: |-
   Global DNS Forward Domain
 ---

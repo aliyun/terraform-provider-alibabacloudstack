@@ -2,7 +2,6 @@
 subcategory: "Managed Service for Prometheus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_contact"
-sidebar_current: "docs-Alibabacloudstack-datasource-prometheus-v2-contact"
 description: |-
   Queries Prometheus v2 contact information of Alibaba Cloud
 ---

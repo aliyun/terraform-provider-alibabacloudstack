@@ -2,7 +2,6 @@
 subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_k8s_cluster"
-sidebar_current: "docs-Alibabacloudstack-resource-edas-k8s-cluster"
 description: |-
   Provides an EDAS K8s cluster resource.
 ---

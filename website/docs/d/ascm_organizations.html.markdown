@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_organizations"
-sidebar_current: "docs-Alibabacloudstack-datasource-ascm-organizations"
 description: |-
     Provides a list of organizations to the user.
 ---

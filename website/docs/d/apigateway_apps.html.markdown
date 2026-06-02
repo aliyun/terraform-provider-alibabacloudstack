@@ -2,7 +2,6 @@
 subcategory: "API Gateway (Legacy)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_apigateway_apps"
-sidebar_current: "docs-Alibabacloudstack-datasource-apigateway-apps"
 description: |- 
   Provides a list of apigateway apps owned by an alibabacloudstack account.
 ---

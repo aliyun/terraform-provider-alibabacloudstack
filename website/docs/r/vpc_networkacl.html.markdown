@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_networkacl"
-sidebar_current: "docs-Alibabacloudstack-resource-vpc-networkacl"
 description: |- 
   Provides a vpc Networkacl resource.
 ---

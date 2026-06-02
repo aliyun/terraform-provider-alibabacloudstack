@@ -2,7 +2,6 @@
 subcategory: "CloudOps Orchestration Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oos_execution"
-sidebar_current: "docs-Alibabacloudstack-resource-oos-execution"
 description: |- 
   Provides a oos Execution resource.
 ---

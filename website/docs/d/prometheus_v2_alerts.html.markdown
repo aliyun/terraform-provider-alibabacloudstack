@@ -2,7 +2,6 @@
 subcategory: "Managed Service for Prometheus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_prometheus_v2_alerts"
-sidebar_current: "docs-Alibabacloudstack-datasource-prometheus-v2-alerts"
 description: |-
   Provides a list of Prometheus V2 Alerts to the user.
 ---

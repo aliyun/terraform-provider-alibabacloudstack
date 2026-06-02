@@ -2,7 +2,6 @@
 subcategory: "Message Queuing Telemetry Transport"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mqtt_group"
-sidebar_current: "docs-Alibabacloudstack-resource-mqtt-group"
 description: |-
   Manages Alibaba Cloud MQTT Group resources.
 ---

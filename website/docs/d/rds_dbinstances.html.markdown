@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_rds_dbinstances"
-sidebar_current: "docs-Alibabacloudstack-datasource-rds-dbinstances"
 description: |- 
   Provides a list of rds dbinstances owned by an alibabacloudstack account.
 ---

@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_zones"
-sidebar_current: "docs-Alibabacloudstack-datasource-db-zones"
 description: |-
     Provides a list of availability zones for RDS that can be used by an Alibabacloudstack Cloud account.
 ---

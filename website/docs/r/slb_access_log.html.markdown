@@ -2,7 +2,6 @@
 subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_access_log"
-sidebar_current: "docs-Alibabacloudstack-resource-slb-access-log"
 description: |-
   Provides a slb Access logs resource.
 ---

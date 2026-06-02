@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB for Redis"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_kvstore_backup_policy"
-sidebar_current: "docs-Alibabacloudstack-resource-kvstore-backup-policy"
 description: |-
   Provides a backup policy for ApsaraDB Redis / Memcache instance resource.
 ---

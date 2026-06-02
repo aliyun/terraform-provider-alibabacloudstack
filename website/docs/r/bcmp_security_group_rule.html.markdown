@@ -2,7 +2,6 @@
 subcategory: "Bare Metal Computing Platform (BMCP)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bcmp_security_group_rule"
-sidebar_current: "docs-Alibabacloudstack-resource-bcmp-security-group-rule"
 description: |- 
   Provides a BCMP Security Group Rule resource.
 ---

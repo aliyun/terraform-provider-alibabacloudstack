@@ -2,7 +2,6 @@
 subcategory: "Express Connect"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_bgp_group"
-sidebar_current: "docs-Alibabacloudstack-resource-expressconnect-bgp-group"
 description: |-
   Provides a expressconnect Bgpgroup resource.
 ---

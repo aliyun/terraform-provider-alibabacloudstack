@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB for MongoDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_shardinginstance"
-sidebar_current: "docs-Alibabacloudstack-resource-mongodb-shardinginstance"
 description: |- 
   Provides a mongodb Shardinginstance resource.
 ---

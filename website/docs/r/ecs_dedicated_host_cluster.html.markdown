@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_dedicated_host_cluster"
-sidebar_current: "docs-Alibabacloudstack-resource-ecs-dedicated-host-cluster"
 description: |-
   Provides a ecs Dedicatedhostcluster resource.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Message Queuing Telemetry Transport"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mqtt_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-mqtt-instance"
 description: |-
     Provides a MQTT instance resource
 ---

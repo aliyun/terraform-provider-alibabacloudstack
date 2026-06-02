@@ -2,7 +2,6 @@
 subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_logtail_config"
-sidebar_current: "docs-Alibabacloudstack-resource-logtail-config"
 description: |-
   Provides a Alibabacloudstack logtail config resource.
 ---

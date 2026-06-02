@@ -2,7 +2,6 @@
 subcategory: "Bare-Metal Management Service (BMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bms_keypairs"
-sidebar_current: "docs-Alibabacloudstack-datasource-bms-keypairs"
 description: |-
     Query key pair information of Alibaba Cloud Bare Metal Server (BMS)
 ---

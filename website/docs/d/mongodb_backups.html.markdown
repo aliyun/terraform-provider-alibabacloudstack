@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB for MongoDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_backups"
-sidebar_current: "docs-Alibabacloudstack-datasource-mongodb-backups"
 description: |-
   Provides a list of MongoDB backups owned by an Alibabacloudstack account.
 ---

@@ -2,7 +2,6 @@
 subcategory: "ApsaraMQ for RocketMQ"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_clusters"
-sidebar_current: "docs-Alibabacloudstack-datasource-ons-clusters"
 description: |-
     Retrieves a list of Message Queue clusters
 ---

@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_user"
-sidebar_current: "docs-Alibabacloudstack-resource-ascm-user"
 description: |-
   Provides a ASCM user resource.
 ---

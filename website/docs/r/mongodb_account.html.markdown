@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB for MongoDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_account"
-sidebar_current: "docs-Alibabacloudstack-resource-mongodb-account"
 description: |-
   Provides a mongodb Account resource.
 ---

@@ -2,7 +2,6 @@
 subcategory: "ApsaraDB RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_readonly_instance"
-sidebar_current: "docs-Alibabacloudstack-resource-db-readonly-instance"
 description: |-
   Provides an RDS readonly instance resource.
 ---

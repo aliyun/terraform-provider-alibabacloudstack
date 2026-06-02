@@ -2,7 +2,6 @@
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_domain"
-sidebar_current: "docs-Alibabacloudstack-resource-dns-domain"
 description: |-
   Provides a DNS domain resource.
 ---

@@ -2,7 +2,6 @@
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_ram_policy_for_role"
-sidebar_current: "docs-Alibabacloudstack-resource-ascm-ram-policy-for-role"
 description: |-
     Provides Ascm ram policy for role resource.
 ---

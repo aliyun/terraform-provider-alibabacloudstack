@@ -2,7 +2,6 @@
 subcategory: "Object Storage Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_objects"
-sidebar_current: "docs-Alibabacloudstack-datasource-oss-bucket-objects"
 description: |-
     Provides a list of bucket objects to the user.
 ---

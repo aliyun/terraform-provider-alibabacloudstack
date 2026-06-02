@@ -2,7 +2,6 @@
 subcategory: "Table Store (OTS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_instance_attachment"
-sidebar_current: "docs-Alibabacloudstack-resource-ots-instance-attachment"
 description: |- 
   Provides an OTS (Open Table Service) resource to attach VPC to instance.
 ---

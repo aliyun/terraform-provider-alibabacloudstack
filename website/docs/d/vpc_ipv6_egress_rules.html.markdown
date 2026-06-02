@@ -2,7 +2,6 @@
 subcategory: "Virtual Private Cloud (VPC)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6_egress_rules"
-sidebar_current: "docs-Alibabacloudstack-datasource-vpc-ipv6-egress-rules"
 description: |- 
   Provides a list of vpc ipv6egressrules owned by an Alibabacloudstack account.
 ---

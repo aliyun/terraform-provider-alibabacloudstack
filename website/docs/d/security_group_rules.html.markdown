@@ -2,7 +2,6 @@
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_security_group_rules"
-sidebar_current: "docs-Alibabacloudstack-datasource-security-group-rules"
 description: |-
     Provides a collection of Security Group Rules available to the user.
 ---
