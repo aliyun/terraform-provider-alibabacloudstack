@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Enterprise Distributed Application Service"
+subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_instance_cluster_attachments"
 sidebar_current: "docs-Alibabacloudstack-datasource-edas-instance-cluster-attachments"

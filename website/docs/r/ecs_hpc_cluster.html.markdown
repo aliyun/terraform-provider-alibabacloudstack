@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Elastic Compute Service(ECS)"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_hpc_cluster"
 sidebar_current: "docs-Alibabacloudstack-resource-ecs-hpc-cluster"

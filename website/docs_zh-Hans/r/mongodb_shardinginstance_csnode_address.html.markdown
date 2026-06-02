@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "云数据库 MongoDB 版" 
+subcategory: "云数据库 MongoDB" 
 layout: "alibabacloudstack" 
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_shardinginstance_csnode_address" 
 sidebar_current: "docs-Alibabacloudstack-resource-mongodb-shardinginstance-csnode-address"

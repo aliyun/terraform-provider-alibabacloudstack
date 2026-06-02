@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "表格存储"
+subcategory: "表格存储 Tablestore"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_table"
 sidebar_current: "docs-Alibabacloudstack-resource-ots-table"

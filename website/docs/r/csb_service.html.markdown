@@ -1,5 +1,5 @@
----
-subcategory: "云服务总线 CSB"
+﻿---
+subcategory: "Cloud Service Bus"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_csb_service"
 sidebar_current: "docs-Alibabacloudstack-resource-csb-service"

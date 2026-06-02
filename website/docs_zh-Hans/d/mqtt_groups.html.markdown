@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Message Queuing Telemetry Transport"
+subcategory: "物联网平台(连接版)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mqtt_groups"
 sidebar_current: "docs-Alibabacloudstack-datasource-mqtt-groups"

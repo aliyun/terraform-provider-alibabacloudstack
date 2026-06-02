@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "云数据库 MongoDB 版"
+subcategory: "云数据库 MongoDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_instances"
 sidebar_current: "docs-Alibabacloudstack-datasource-mongodb-instances"

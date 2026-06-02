@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Relational Database Service(RDS)"
+subcategory: "ApsaraDB RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_zones"
 sidebar_current: "docs-Alibabacloudstack-datasource-db-zones"

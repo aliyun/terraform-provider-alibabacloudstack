@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "弹性伸缩"
+subcategory: "弹性伸缩 ESS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_scalinggroups"
 sidebar_current: "docs-Alibabacloudstack-datasource-autoscaling-scalinggroups"

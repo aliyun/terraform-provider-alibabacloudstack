@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "物联网平台"
+subcategory: "物联网平台(连接版)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mqtt_instances"
 sidebar_current: "docs-Alibabacloudstack-datasource-mqtt-instances"

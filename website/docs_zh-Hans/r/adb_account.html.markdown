@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "云原生数据库(ADB)"
+subcategory: "云原生数据库 MySQL版 (ADB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_account"
 sidebar_current: "docs-Alibabacloudstack-resource-adb-account"

@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Cloud Enterprise Network (CEN)"
+subcategory: "Cloud Enterprise Network"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cen_instances"
 sidebar_current: "docs-Alibabacloudstack-datasource-cen-instances"

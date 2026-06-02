@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "SchedulerX2"
+subcategory: "SchedulerX"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_schedulerx2_app_groups"
 sidebar_current: "docs-Alibabacloudstack-datasource-schedulerx2-app-groups"

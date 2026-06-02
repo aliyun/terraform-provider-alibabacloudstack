@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Container Service for Kubernetes (ACK)"
+subcategory: "Container Service for Kubernetes"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cs_kubernetes_clusters"
 sidebar_current: "docs-Alibabacloudstack-datasource-cs-kubernetes-clusters"

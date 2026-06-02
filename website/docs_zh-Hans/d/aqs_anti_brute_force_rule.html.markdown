@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "防暴力破解安全服务"
+subcategory: "安骑士"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_aqs_anti_brute_force_rule"
 sidebar_current: "docs-Alibabacloudstack-datasource-aqs-anti-brute-force-rule"

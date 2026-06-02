@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "API 网关"
+subcategory: "API 网关（旧）"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_app_attachment"
 sidebar_current: "docs-Alibabacloudstack-resource-api-gateway-app-attachment"

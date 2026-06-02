@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Container Registry (ACR)"
+subcategory: "Container Registry"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack:alibabacloudstack_cr_namespace"
 sidebar_current: "docs-Alibabacloudstack-resource-cr-namespace"

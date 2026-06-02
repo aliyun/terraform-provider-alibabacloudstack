@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "自助式 BI（商业智能）工具"
+subcategory: "QuickBI"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_quick_bi_user_group"
 sidebar_current: "docs-Alibabacloudstack-resource-quick-bi-user-group"

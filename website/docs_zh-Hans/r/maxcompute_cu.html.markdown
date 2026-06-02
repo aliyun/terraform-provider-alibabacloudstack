@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "大数据计算服务"
+subcategory: "云原生大数据计算服务 MaxCompute"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_cu"
 sidebar_current: "docs-Alibabacloudstack-resource-maxcompute-cu"

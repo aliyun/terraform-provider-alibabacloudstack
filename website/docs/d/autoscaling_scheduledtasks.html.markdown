@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Auto Scaling (ESS)"
+subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_scheduledtasks"
 sidebar_current: "docs-Alibabacloudstack-datasource-autoscaling-scheduledtasks"

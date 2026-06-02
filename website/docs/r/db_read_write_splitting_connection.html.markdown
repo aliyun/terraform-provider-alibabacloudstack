@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Relational Database Service(RDS)"
+subcategory: "ApsaraDB RDS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_db_read_write_splitting_connection"
 sidebar_current: "docs-Alibabacloudstack-resource-db-read-write-splitting-connection"

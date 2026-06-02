@@ -1,5 +1,5 @@
----
-subcategory: "ApsaraDB for PolarDB"
+﻿---
+subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_readwrite_splitting_connection"
 sidebar_current: "docs-Alibabacloudstack-resource-polardb-readwrite-splitting-connection"

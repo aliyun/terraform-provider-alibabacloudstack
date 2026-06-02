@@ -1,5 +1,5 @@
----
-subcategory: "AnalyticDB for MySQL (ADB)"
+﻿---
+subcategory: "云原生数据库 MySQL版 (ADB)"
 layout: "alibabacloudstack"
 page_title: "ApsaraStack: alibabacloudstack_adb_cluster_types"
 sidebar_current: "docs-apsarastack-data-source-adb-cluster-types"

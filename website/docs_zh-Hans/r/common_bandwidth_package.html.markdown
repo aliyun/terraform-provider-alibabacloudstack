@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "NAT网关"
+subcategory: "共享带宽包"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_common_bandwidth_package"
 sidebar_current: "docs-Alibabacloudstack-resource-common-bandwidth-package"

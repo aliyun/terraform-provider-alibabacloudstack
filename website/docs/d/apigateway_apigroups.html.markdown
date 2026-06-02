@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "API Gateway"
+subcategory: "API Gateway (Legacy)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_apigateway_apigroups"
 sidebar_current: "docs-Alibabacloudstack-datasource-apigateway-apigroups"

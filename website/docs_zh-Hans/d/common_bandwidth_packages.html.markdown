@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "专有网络 VPC"
+subcategory: "共享带宽包"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_common_bandwidth_packages"
 sidebar_current: "docs-Alibabacloudstack-datasource-common-bandwidth-packages"

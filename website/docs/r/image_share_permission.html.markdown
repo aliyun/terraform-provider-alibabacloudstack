@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "Elastic Compute Service(ECS)"
+subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_share_permission"
 sidebar_current: "docs-Alibabacloudstack-resource-image-share-permission"

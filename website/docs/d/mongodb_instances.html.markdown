@@ -1,5 +1,5 @@
 ﻿---
-subcategory: "MongoDB"
+subcategory: "ApsaraDB for MongoDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_instances"
 sidebar_current: "docs-Alibabacloudstack-datasource-mongodb-instances"
