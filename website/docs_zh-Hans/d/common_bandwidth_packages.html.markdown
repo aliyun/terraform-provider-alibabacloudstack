@@ -29,9 +29,9 @@ output "first_cbwp_id" {
 
 支持以下参数：
 
-* `ids` - (可选, ForceNew) 共享带宽包ID列表。
-* `name_regex` - (可选, ForceNew) 用于按共享带宽包名称过滤结果的正则表达式字符串。
-* `resource_group_id` - (可选, ForceNew) 资源组ID。
+* `ids` - (可选, 变更后重建) 共享带宽包ID列表。
+* `name_regex` - (可选, 变更后重建) 用于按共享带宽包名称过滤结果的正则表达式字符串。
+* `resource_group_id` - (可选, 变更后重建) 资源组ID。
 * `output_file` - (可选, 已废弃) 输出文件路径。此字段已废弃，计划在 3.19.0 版本中移除。要将内容写入文件，请使用 `local_file` provider。
 
 ## 属性说明

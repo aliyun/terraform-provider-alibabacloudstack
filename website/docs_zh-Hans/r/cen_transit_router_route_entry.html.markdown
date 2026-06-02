@@ -44,11 +44,11 @@ resource "alibabacloudstack_cen_transit_router_route_entry" "default" {
 
 支持以下参数：
   * `transit_router_route_entry_description` - (可选) - 路由条目的描述。
-  * `transit_router_route_entry_destination_cidr_block` - (必填, ForceNew) - 路由条目的目标CIDR块。
+  * `transit_router_route_entry_destination_cidr_block` - (必填, 变更后重建) - 路由条目的目标CIDR块。
   * `transit_router_route_entry_name` - (可选) - 路由条目的名称。
   * `transit_router_route_entry_next_hop_id` - (可选) - 路由条目的下一跳ID。
-  * `transit_router_route_entry_next_hop_type` - (必填, ForceNew) - 路由条目的下一跳类型。
-  * `transit_router_route_table_id` - (必填, ForceNew) - 路由条目所属的路由表ID。
+  * `transit_router_route_entry_next_hop_type` - (必填, 变更后重建) - 路由条目的下一跳类型。
+  * `transit_router_route_table_id` - (必填, 变更后重建) - 路由条目所属的路由表ID。
 
 ## 属性引用
 

@@ -65,8 +65,8 @@ resource "alibabacloudstack_polardbx_account" "default" {
 
 支持以下参数：
 
-* `instance_id` - (必填，ForceNew) PolarDBX 实例的 ID。修改此参数会强制重新创建资源。
-* `account_name` - (必填，ForceNew) 账户名称。修改此参数会强制重新创建资源。账户名称必须满足以下要求：
+* `instance_id` - (必填，变更后重建) PolarDBX 实例的 ID。修改此参数会强制重新创建资源。
+* `account_name` - (必填，变更后重建) 账户名称。修改此参数会强制重新创建资源。账户名称必须满足以下要求：
   * 以小写字母开头，以字母或数字结尾
   * 由小写字母、数字或下划线组成
   * 长度为 2 到 16 个字符

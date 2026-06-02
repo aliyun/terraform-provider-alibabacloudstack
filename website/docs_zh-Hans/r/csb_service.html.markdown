@@ -40,10 +40,10 @@ resource "alibabacloudstack_csb_service" "service" {
 
 支持以下参数：
 
-* `csb_id` - （必填，ForceNew，Int）CSB 实例的唯一 ID。修改此参数将强制创建新资源。
+* `csb_id` - （必填，变更后重建，Int）CSB 实例的唯一 ID。修改此参数将强制创建新资源。
 * `project_id` - （必填，String）服务所属项目的 ID。
-* `service_name` - （必填，ForceNew，String）服务名称。修改此参数将强制创建新资源。
-* `service_version` - （必填，ForceNew，String）服务版本（例如 '1.0.0'）。修改此参数将强制创建新资源。
+* `service_name` - （必填，变更后重建，String）服务名称。修改此参数将强制创建新资源。
+* `service_version` - （必填，变更后重建，String）服务版本（例如 '1.0.0'）。修改此参数将强制创建新资源。
 * `route_conf_json` - （必填，String）JSON 格式的路由配置。该字段包含导入配置和访问端点设置。
 * `alias` - （可选，String）服务的别名。
 * `model_version` - （可选，String）服务的模型版本。默认值：`2.0`。

@@ -47,8 +47,8 @@ resource "alibabacloudstack_ascm_user_role_binding" "default" {
 
 以下参数为支持的配置项：
 
-* `login_name` - （必填，ForceNew）要绑定角色的用户登录名。修改此参数会强制重新创建资源。
-* `role_id` - （可选，ForceNew）要绑定到用户的单个角色 ID。该参数与 `role_ids` 互斥。修改此参数会强制重新创建资源。
+* `login_name` - （必填，变更后重建）要绑定角色的用户登录名。修改此参数会强制重新创建资源。
+* `role_id` - （可选，变更后重建）要绑定到用户的单个角色 ID。该参数与 `role_ids` 互斥。修改此参数会强制重新创建资源。
 
 -> **注意：** 使用 `role_id` 时，资源 ID 格式为 `login_name:role_id`。
 

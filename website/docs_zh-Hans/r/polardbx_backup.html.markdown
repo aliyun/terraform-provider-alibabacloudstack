@@ -61,8 +61,8 @@ resource "alibabacloudstack_polardbx_backup" "default" {
 
 支持以下参数：
 
-  * `instance_id` - (必填，ForceNew) PolarDB-X 实例的 ID。修改此参数会强制重新创建资源。
-  * `backup_type` - (可选，ForceNew) 备份类型。有效值：`0`（物理备份）。默认值为 `0`。修改此参数会强制重新创建资源。
+  * `instance_id` - (必填，变更后重建) PolarDB-X 实例的 ID。修改此参数会强制重新创建资源。
+  * `backup_type` - (可选，变更后重建) 备份类型。有效值：`0`（物理备份）。默认值为 `0`。修改此参数会强制重新创建资源。
 
 ## 属性参考
 

@@ -31,8 +31,8 @@ resource "alibabacloudstack_image_share_permission" "default" {
 
 支持以下参数：
 
-* `image_id` - (Required, ForceNew) 源镜像ID。这是需要共享的镜像的唯一标识符。
-* `account_id` - (Required, ForceNew) 阿里云账号ID。用于指定要与之共享镜像的目标阿里云账户。
+* `image_id` - (Required, 变更后重建) 源镜像ID。这是需要共享的镜像的唯一标识符。
+* `account_id` - (Required, 变更后重建) 阿里云账号ID。用于指定要与之共享镜像的目标阿里云账户。
 
 ## 属性说明
 

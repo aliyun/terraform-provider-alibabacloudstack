@@ -88,7 +88,7 @@ resource "alibabacloudstack_polardb_cluster_proxy" "default" {
 
 以下参数为支持的配置项：
 
-* `db_cluster_id` - （必填，ForceNew）PolarDB 集群的 ID。更改此参数将强制重新创建资源。
+* `db_cluster_id` - （必填，变更后重建）PolarDB 集群的 ID。更改此参数将强制重新创建资源。
 * `db_proxy_cluster_class` - （必填）代理集群节点的规格。
 
 ## 属性说明

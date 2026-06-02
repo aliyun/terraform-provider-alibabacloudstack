@@ -97,8 +97,8 @@ resource "alibabacloudstack_ram_role_attachment" "default" {
 
 支持以下参数：
 
-* `role_name` - （必填，ForceNew）要附加的 RAM 角色名称。该名称必须在 1 到 64 个字符之间，并且只能包含字母数字字符或连字符（`-`、`_`）。它不能以连字符开头。
-* `instance_ids` - （必填，ForceNew）要附加 RAM 角色的 ECS 实例 ID 列表。
+* `role_name` - （必填，变更后重建）要附加的 RAM 角色名称。该名称必须在 1 到 64 个字符之间，并且只能包含字母数字字符或连字符（`-`、`_`）。它不能以连字符开头。
+* `instance_ids` - （必填，变更后重建）要附加 RAM 角色的 ECS 实例 ID 列表。
 
 ## 属性说明
 

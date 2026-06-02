@@ -43,8 +43,8 @@ resource "alibabacloudstack_cen_route_map" "default" {
 ## 参数引用
 
 支持以下参数�?
-  * `cen_id` - (必填, ForceNew) - CEN实例ID
-  * `transit_router_route_table_id` - (必填, ForceNew) - CEN路由表ID
+  * `cen_id` - (必填, 变更后重建) - CEN实例ID
+  * `transit_router_route_table_id` - (必填, 变更后重建) - CEN路由表ID
   * `priority` - (必填) - 策略优先�?
   * `transmit_direction` - (必填) - 应用方向("RegionIn", "RegionOut")
   * `map_result` - (必填) - 所有匹配条件通过后的策略行为。支持以下行�?("Permit", "Deny")

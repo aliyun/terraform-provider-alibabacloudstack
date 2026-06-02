@@ -30,11 +30,11 @@ data "alibabacloudstack_polardb_cluster_instance_types" "default" {
 * `ids` - (可选) 实例类型 ID 列表。
 * `db_version` - (可选) 数据库引擎版本。
 * `cpu` - (可选) CPU 核心数量。
-* `cpu_type` - (可选, ForceNew) CPU 类型。有效值：`intel`、`arm64`、`hygon`。
+* `cpu_type` - (可选, 变更后重建) CPU 类型。有效值：`intel`、`arm64`、`hygon`。
 * `memory` - (可选) 内存大小（GB）。
-* `sorted_by` - (可选, ForceNew) 排序方法。有效值：`CPU`、`Memory`。
-* `sub_category` - (可选, ForceNew) 子类别。有效值：`normal_general`、`normal_exclusive`。
-* `db_type` - (可选, ForceNew) 数据库引擎类型。有效值：`MySQL`、`PostgreSQL`、`Oracle`。
+* `sorted_by` - (可选, 变更后重建) 排序方法。有效值：`CPU`、`Memory`。
+* `sub_category` - (可选, 变更后重建) 子类别。有效值：`normal_general`、`normal_exclusive`。
+* `db_type` - (可选, 变更后重建) 数据库引擎类型。有效值：`MySQL`、`PostgreSQL`、`Oracle`。
 
 ## 属性参考
 

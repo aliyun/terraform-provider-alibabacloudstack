@@ -28,7 +28,7 @@ resource "alibabacloudstack_bmcp_security_group" "default" {
 
 支持以下参数：
 
-* `vpc_id` - （必填，ForceNew）安全组所在的 VPC 的 ID。修改此参数将强制创建新资源。
+* `vpc_id` - （必填，变更后重建）安全组所在的 VPC 的 ID。修改此参数将强制创建新资源。
 * `name` - （必填）安全组的名称。长度必须为2到128个字符。
 * `description` - （可选）安全组的描述。长度必须为0到256个字符。
 

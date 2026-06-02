@@ -34,7 +34,7 @@ resource "alibabacloudstack_ascm_user" "default" {
 
 支持以下参数：
 
-* `login_name` - (必填，ForceNew) 用户登录名。该参数唯一标识一个用户。修改此参数会强制重新创建资源。
+* `login_name` - (必填，变更后重建) 用户登录名。该参数唯一标识一个用户。修改此参数会强制重新创建资源。
 * `display_name` - (必填) 用户的显示名称。
 * `email` - (必填) 用户的电子邮件地址。
 * `cellphone_number` - (必填) 用户的手机号码。
@@ -42,7 +42,7 @@ resource "alibabacloudstack_ascm_user" "default" {
 * `login_policy_id` - (必填) 与用户关联的登录策略 ID。
 * `role_ids` - (可选) 要分配给用户的角色 ID 列表。如果指定，则必须至少包含一个角色 ID。
 * `telephone_number` - (可选) 用户的固定电话号码。
-* `organization_id` - (已废弃，ForceNew) 用户所属的组织 ID。该字段自 provider 版本 1.0.32 起已废弃。用户将创建在 Provider 配置的组织下。
+* `organization_id` - (已废弃，变更后重建) 用户所属的组织 ID。该字段自 provider 版本 1.0.32 起已废弃。用户将创建在 Provider 配置的组织下。
 
 ## 属性说明
 

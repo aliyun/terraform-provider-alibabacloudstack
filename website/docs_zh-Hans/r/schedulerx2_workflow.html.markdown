@@ -56,7 +56,7 @@ resource "alibabacloudstack_schedulerx2_workflow" "example" {
 
 支持以下参数：
 
-* `group_id` - (必填, ForceNew) 工作流所属的应用组ID。变更此参数将重新创建资源。
+* `group_id` - (必填, 变更后重建) 工作流所属的应用组ID。变更此参数将重新创建资源。
 * `name` - (必填) 工作流的名称。长度1-128字符，不能以`http://`或`https://`开头。
 * `description` - (必填) 工作流的描述信息。长度1-256字符，不能以`http://`或`https://`开头。
 * `time_type` - (必填) 时间触发类型。取值：`cron`（定时触发）或`api`（API触发）。

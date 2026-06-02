@@ -69,7 +69,7 @@ resource "alibabacloudstack_vpngateway_ssl_vpnserver" "default" {
 ## 参数说明
 以下参数支持配置：
 
-* `vpn_gateway_id` - (必需, ForceNew) VPN 网关的 ID。修改此参数会强制重新创建资源。
+* `vpn_gateway_id` - (必需, 变更后重建) VPN 网关的 ID。修改此参数会强制重新创建资源。
 * `client_ip_pool` - (必需) 客户端 IP 地址段。VPN 网关从该地址段为 SSL-VPN 客户端分配 IP 地址。
 * `local_subnet` - (必需) 本地子网 CIDR 段。客户端通过 SSL-VPN 连接需要访问的地址段。
 * `ssl_vpn_server_name` - (必需) SSL-VPN 服务器的名称。长度为 2~100 个字符，不能以 `http://` 或 `https://` 开头。

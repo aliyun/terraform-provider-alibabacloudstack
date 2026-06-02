@@ -77,18 +77,18 @@ output "Custom_role" {
 
 支持以下参数：
 
-* `role_name` -（必填，ForceNew）自定义角色名称。长度介于 2 到 128 个字符之间。
-* `organization_visibility` -（必填，ForceNew）自定义角色的组织可见性。有效值：
+* `role_name` -（必填，变更后重建）自定义角色名称。长度介于 2 到 128 个字符之间。
+* `organization_visibility` -（必填，变更后重建）自定义角色的组织可见性。有效值：
   - `organizationVisibility.organization`：仅当前组织可见。
   - `organizationVisibility.orgAndSubOrgs`：当前组织及其子组织可见。
   - `organizationVisibility.global`：全局可见。
-* `role_range` -（必填，ForceNew）自定义角色的作用范围。有效值：
+* `role_range` -（必填，变更后重建）自定义角色的作用范围。有效值：
   - `roleRange.allOrganizations`：所有组织。
   - `roleRange.currentOrganization`：当前组织。
-* `privileges` -（必填，ForceNew）分配给该自定义角色的权限列表。至少需要指定一个权限，每个权限以字符串形式表示。
-* `description` -（可选，ForceNew）自定义角色的描述信息。
+* `privileges` -（必填，变更后重建）分配给该自定义角色的权限列表。至少需要指定一个权限，每个权限以字符串形式表示。
+* `description` -（可选，变更后重建）自定义角色的描述信息。
 
--> **注意：** 由于不支持更新操作，所有参数实际上都是 ForceNew。修改任何参数都会强制重新创建资源。
+-> **注意：** 由于不支持更新操作，所有参数实际上都是 变更后重建。修改任何参数都会强制重新创建资源。
 
 ## 属性说明
 

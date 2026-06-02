@@ -34,8 +34,8 @@ resource "alibabacloudstack_cr_ee_namespace" "my-namespace" {
 
 支持以下参数：
 
-* `instance_id` - (必填，ForceNew) 容器镜像企业版实例的 ID。更改此参数将强制创建新资源。
-* `name` - (必填，ForceNew) 容器镜像企业版命名空间的名称。它可以包含 2 到 30 个字符。更改此参数将强制创建新资源。
+* `instance_id` - (必填，变更后重建) 容器镜像企业版实例的 ID。更改此参数将强制创建新资源。
+* `name` - (必填，变更后重建) 容器镜像企业版命名空间的名称。它可以包含 2 到 30 个字符。更改此参数将强制创建新资源。
 * `auto_create` - (必填) 布尔值，当设置为 true 时，在推送新镜像时会自动创建仓库。如果设置为 false，则在推送前需要创建仓库以存储镜像。
 * `default_visibility` - (必填) 命名空间内存储库的默认可见性设置。有效值为 `PUBLIC` 或 `PRIVATE`。
 

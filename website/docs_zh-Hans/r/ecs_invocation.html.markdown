@@ -123,9 +123,9 @@ resource "alibabacloudstack_ecs_invocation" "default" {
 ## 参数说明
 以下参数支持配置：
 
-* `command_id` - (必需, ForceNew) 命令 ID。你可以通过调用 [DescribeCommands](~~ 64843 ~~) 查询所有可用的命令 ID。
+* `command_id` - (必需, 变更后重建) 命令 ID。你可以通过调用 [DescribeCommands](~~ 64843 ~~) 查询所有可用的命令 ID。
 
-* `repeat_mode` - (可选, ForceNew) 设置命令的执行方式，取值范围：
+* `repeat_mode` - (可选, 变更后重建) 设置命令的执行方式，取值范围：
 
 * `Once`: 立即执行一次命令。
 * `Period`: 定期执行命令。当该参数值为 Period 时，必须同时指定 Timed = true 和 frequency 参数。
@@ -139,7 +139,7 @@ EveryReboot: 每次实例启动时都自动执行。
 
 当此参数值为 Period、NextRebootOnly 或 EveryReboot 时，可以调用 [StopInvocation](~~ 64838 ~~) 来停止待执行或周期性执行的任务。
 当此参数值为 Period 或 EveryReboot 时，可以调用 [DescribeInvocationResults](~~ 64845 ~~) 并设置 IncludeHistory = true 来查看历史执行记录。
-username - (可选, ForceNew) 在 ECS 实例中运行命令的用户名：
+username - (可选, 变更后重建) 在 ECS 实例中运行命令的用户名：
 
 Linux 实例默认由 root 用户执行。
 Windows 实例默认由 System 用户执行。

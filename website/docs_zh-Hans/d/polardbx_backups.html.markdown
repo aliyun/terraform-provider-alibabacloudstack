@@ -59,7 +59,7 @@ data "alibabacloudstack_polardbx_backups" "default" {
 
 支持以下参数：
   * `ids` - (可选) - 备份ID列表。
-  * `db_instance_id` - (必填, ForceNew) - 要查询备份的PolarDBX集群的ID。
+  * `db_instance_id` - (必填, 变更后重建) - 要查询备份的PolarDBX集群的ID。
   * `end_time` - (可选) - 此备份的结束时间（UTC时间）。
   * `start_time` - (可选) - 备份开始时间（UTC时间）。
 

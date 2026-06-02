@@ -30,8 +30,8 @@ output "datahub_topics" {
 
 以下参数支持配置：
 
-* `project_name` - (必选, ForceNew) DataHub项目的名称。
-* `name_regex` - (可选, ForceNew) 用于按主题名称过滤的正则表达式字符串。
+* `project_name` - (必选, 变更后重建) DataHub项目的名称。
+* `name_regex` - (可选, 变更后重建) 用于按主题名称过滤的正则表达式字符串。
 * `names` - (可选, Computed) 用于过滤结果的主题名称列表。
 
 ## 属性参考

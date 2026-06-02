@@ -72,12 +72,12 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_source" "example
 以下参数被支持:
 
 * `group_ip_address` - (必填) 组播IP地址。
-* `transit_router_multicast_domain_id` - (必填, ForceNew) 转发路由器组播域ID。修改此参数会强制重新创建资源。
-* `resource_type` - (必填, ForceNew) 资源类型。取值范围：`VPC`、`Connect`。修改此参数会强制重新创建资源。
-* `vswitch_id` - (可选, ForceNew, Computed) 交换机ID。当 `resource_type` 为 `VPC` 时必填。修改此参数会强制重新创建资源。此属性由 API 返回，无法手动设置。
-* `network_interface_id` - (可选, ForceNew) 弹性网卡 ENI ID。当 `resource_type` 为 `VPC` 时必填。修改此参数会强制重新创建资源。
-* `connect_peer_id` - (可选, ForceNew) Connect Peer ID。当 `resource_type` 为 `Connect` 时必填。修改此参数会强制重新创建资源。
-* `connect_attachment_id` - (可选, ForceNew, Computed) Connect Attachment ID。当 `resource_type` 为 `Connect` 时必填。修改此参数会强制重新创建资源。此属性由 API 返回，无法手动设置。
+* `transit_router_multicast_domain_id` - (必填, 变更后重建) 转发路由器组播域ID。修改此参数会强制重新创建资源。
+* `resource_type` - (必填, 变更后重建) 资源类型。取值范围：`VPC`、`Connect`。修改此参数会强制重新创建资源。
+* `vswitch_id` - (可选, 变更后重建, Computed) 交换机ID。当 `resource_type` 为 `VPC` 时必填。修改此参数会强制重新创建资源。此属性由 API 返回，无法手动设置。
+* `network_interface_id` - (可选, 变更后重建) 弹性网卡 ENI ID。当 `resource_type` 为 `VPC` 时必填。修改此参数会强制重新创建资源。
+* `connect_peer_id` - (可选, 变更后重建) Connect Peer ID。当 `resource_type` 为 `Connect` 时必填。修改此参数会强制重新创建资源。
+* `connect_attachment_id` - (可选, 变更后重建, Computed) Connect Attachment ID。当 `resource_type` 为 `Connect` 时必填。修改此参数会强制重新创建资源。此属性由 API 返回，无法手动设置。
 
 ## 属性参考
 

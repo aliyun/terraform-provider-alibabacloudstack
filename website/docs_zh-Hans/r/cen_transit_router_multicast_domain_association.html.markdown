@@ -75,8 +75,8 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_association" "de
 ## Argument Reference
 
 支持以下参数：
-  * `transit_router_attachment_id` - (必选, ForceNew) - 网络实例ID。
-  * `transit_router_multicast_domain_id` - (必选, ForceNew) - 路由器组播域ID。
+  * `transit_router_attachment_id` - (必选, 变更后重建) - 网络实例ID。
+  * `transit_router_multicast_domain_id` - (必选, 变更后重建) - 路由器组播域ID。
   * `vswitch_id` - (必选) - 交换机ID。
 
 ## Attributes Reference

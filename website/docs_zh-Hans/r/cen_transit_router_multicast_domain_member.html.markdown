@@ -71,13 +71,13 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "example
 
 以下参数被支持:
 
-* `group_ip_address` - (必填, ForceNew) 组播IP地址。取值范围：224.0.0.1~239.255.255.254。224.0.0.0～224.0.0.127 为系统保留地址，不支持作为组播组 IP 地址。
-* `transit_router_multicast_domain_id` - (必填, ForceNew) 组播成员所属的组播域ID。
-* `resource_type` - (必填, ForceNew) 资源类型。取值范围：`VPC`、`Connect`。
-* `vswitch_id` - (可选, ForceNew, Computed) 交换机ID。当 `resource_type` 为 `VPC` 时必填。
-* `network_interface_id` - (可选, ForceNew) 弹性网卡 ENI ID。当 `resource_type` 为 `VPC` 时必填。
-* `connect_peer_id` - (可选, ForceNew) Connect Peer ID。当 `resource_type` 为 `Connect` 时必填。
-* `connect_attachment_id` - (可选, ForceNew, Computed) Connect Attachment ID。当 `resource_type` 为 `Connect` 时必填。
+* `group_ip_address` - (必填, 变更后重建) 组播IP地址。取值范围：224.0.0.1~239.255.255.254。224.0.0.0～224.0.0.127 为系统保留地址，不支持作为组播组 IP 地址。
+* `transit_router_multicast_domain_id` - (必填, 变更后重建) 组播成员所属的组播域ID。
+* `resource_type` - (必填, 变更后重建) 资源类型。取值范围：`VPC`、`Connect`。
+* `vswitch_id` - (可选, 变更后重建, Computed) 交换机ID。当 `resource_type` 为 `VPC` 时必填。
+* `network_interface_id` - (可选, 变更后重建) 弹性网卡 ENI ID。当 `resource_type` 为 `VPC` 时必填。
+* `connect_peer_id` - (可选, 变更后重建) Connect Peer ID。当 `resource_type` 为 `Connect` 时必填。
+* `connect_attachment_id` - (可选, 变更后重建, Computed) Connect Attachment ID。当 `resource_type` 为 `Connect` 时必填。
 
 ## 属性参考
 

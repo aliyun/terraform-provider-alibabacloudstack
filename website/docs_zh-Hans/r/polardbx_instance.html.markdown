@@ -54,28 +54,28 @@ resource "alibabacloudstack_polardbx_instance" "default" {
 
 ### 必填参数
 
-* `storage` - (必填，ForceNew) PolarDB-X 实例的存储容量，单位为 GB。
+* `storage` - (必填，变更后重建) PolarDB-X 实例的存储容量，单位为 GB。
 * `cn_node_class` - (必填) 计算节点（CN）的规格。示例值：`polarx.x4.medium.2e`、`polarx.x4.large.2e`、`polarx.x8.large.2e`、`polarx.x4.xlarge.2e`、`polarx.x8.xlarge.2e`、`polarx.x4.2xlarge.2e`、`polarx.x8.2xlarge.2e`、`polarx.x4.4xlarge.2e`、`polarx.x8.4xlarge.2e`。
 * `cn_node_count` - (必填) 计算节点（CN）的数量。
 * `dn_node_class` - (必填) 数据节点（DN）的规格。示例值：`mysql.n4.medium.25`、`mysql.n4.large.25`、`mysql.n4.xlarge.25`、`mysql.n4.2xlarge.25`、`mysql.x4.medium.25`。
 * `dn_node_count` - (必填) 数据节点（DN）的数量。
-* `vswitch_id` - (必填，ForceNew) 交换机 ID。
+* `vswitch_id` - (必填，变更后重建) 交换机 ID。
 
 ### 选填参数
 
 * `cpu_type` - (选填) PolarDB-X 实例的 CPU 架构类型。
 * `description` - (选填) PolarDB-X 实例的描述信息。
-* `engine_version` - (选填，ForceNew) PolarDB-X 实例的引擎版本。取值：`5.7`、`8.0`。
+* `engine_version` - (选填，变更后重建) PolarDB-X 实例的引擎版本。取值：`5.7`、`8.0`。
 * `gms_node_class` - (选填) GMS（全局元数据服务）节点的规格。
 * `polardbx_instance_id` - (选填) PolarDB-X 实例 ID。
-* `primary_zone` - (选填，ForceNew) 主可用区。
-* `resource_type` - (选填，ForceNew) 资源类型。目前仅支持 PolarDB-X 2.0 实例。
-* `secondary_zone` - (选填，ForceNew) 次可用区。
-* `tertiary_zone` - (选填，ForceNew) 第三可用区。
-* `topology_type` - (选填，ForceNew) 实例的拓扑类型。取值：`1azone`（单可用区）、`3azones`（三可用区）。默认值：`1azone`。
+* `primary_zone` - (选填，变更后重建) 主可用区。
+* `resource_type` - (选填，变更后重建) 资源类型。目前仅支持 PolarDB-X 2.0 实例。
+* `secondary_zone` - (选填，变更后重建) 次可用区。
+* `tertiary_zone` - (选填，变更后重建) 第三可用区。
+* `topology_type` - (选填，变更后重建) 实例的拓扑类型。取值：`1azone`（单可用区）、`3azones`（三可用区）。默认值：`1azone`。
 * `enable_tde` - (选填) 是否启用 TDE（透明数据加密）。取值：`true`、`false`。默认值：`false`。启用后无法禁用。
 * `enable_ssl` - (选填) 是否启用 SSL 加密。取值：`true`、`false`。默认值：`false`。
-* `zone_id` - (选填，ForceNew) 实例所属的可用区 ID。
+* `zone_id` - (选填，变更后重建) 实例所属的可用区 ID。
 * `compute_parameters` - (选填) 实例的计算资源配置。这是一个键值对集合。
     * `name` - (必填) 计算参数的名称。
     * `value` - (必填) 计算参数的值。

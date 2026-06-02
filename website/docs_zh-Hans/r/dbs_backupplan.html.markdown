@@ -61,7 +61,7 @@ resource "alibabacloudstack_dbs_backup_plan" "default" {
   * `Kvstore`: 键值存储。
   * `Other`: 其他类型。
 * `from_app` - (Optional) - 表示请求的来源。默认值为 `OpenApi`。通常无需手动设置。
-* `backup_plan_id` - (ForceNew, Computed) - 备份计划的唯一标识符。此 ID 在创建时自动生成，之后无法修改。
+* `backup_plan_id` - (变更后重建, Computed) - 备份计划的唯一标识符。此 ID 在创建时自动生成，之后无法修改。
 
 ## 属性说明
 
