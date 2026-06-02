@@ -1,3 +1,32 @@
+# 3.18.29
+
+## 新增
+
+1. 日志服务集群的查询能力（`alibabacloudstack_log_clusters`）
+2. BMCP 裸机密钥对的查询能力新增 BMCP 前缀别名（`alibabacloudstack_bmcp_keypairs`）
+3. BMCP 裸机安全组的查询能力新增 BMCP 前缀别名（`alibabacloudstack_bmcp_security_groups`）
+4. BMCP 裸机安全组规则的查询能力新增 BMCP 前缀别名（`alibabacloudstack_bmcp_security_group_rules`）
+
+## 修复
+
+1. 修复 `alibabacloudstack_mongodb_instance` 资源创建和读取的缺陷
+2. 修复 Client `ConnectTimeout` 连接超时配置错误
+
+## 变更
+
+1. `ecs_dedicated_host_cluster` 数据源重命名为 `ecs_dedicated_host_clusters`
+2. `alibabacloudstack_ack_cluster` 增强节点池相关字段处理能力，支持无默认节点池场景
+3. `alibabacloudstack_cs_kubernetes_node_pool` 修复节点更新逻辑
+4. 日志服务资源全量增强：`alibabacloudstack_log_project`、`alibabacloudstack_log_store`、`alibabacloudstack_log_store_index`、`alibabacloudstack_log_alert`、`alibabacloudstack_log_machine_group`、`alibabacloudstack_logtail_attachment`、`alibabacloudstack_logtail_config`
+5. Provider 废弃参数描述更新：`sls_openapi_endpoint`、`asapi_endpoint`、`sls_endpoint`
+6. 清理 `alibabacloudstack_datahub_*`、`alibabacloudstack_db_*`、`alibabacloudstack_dms_enterprise_*`、`alibabacloudstack_dns_*`、`alibabacloudstack_drds_*`、`alibabacloudstack_dts_*`、`alibabacloudstack_ecs_*` 等废弃别名资源
+
+## 下线
+
+1. 下线 ASCM 访问密钥资源的编排能力（`alibabacloudstack_ascm_access_key`）
+
+---
+
 # 3.18.28
 
 ## 修复

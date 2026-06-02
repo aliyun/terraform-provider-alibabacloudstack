@@ -1,3 +1,32 @@
+# 3.18.29
+
+## Added
+
+1. Query capability for Log Service clusters (`alibabacloudstack_log_clusters`)
+2. Added BMCP prefix alias for bare metal key pair query capability (`alibabacloudstack_bmcp_keypairs`)
+3. Added BMCP prefix alias for bare metal security group query capability (`alibabacloudstack_bmcp_security_groups`)
+4. Added BMCP prefix alias for bare metal security group rule query capability (`alibabacloudstack_bmcp_security_group_rules`)
+
+## Fixed
+
+1. Fixed issues with `alibabacloudstack_mongodb_instance` resource creation and reading
+2. Fixed Client `ConnectTimeout` connection timeout configuration error
+
+## Changes
+
+1. Data source `ecs_dedicated_host_cluster` renamed to `ecs_dedicated_host_clusters`
+2. `alibabacloudstack_ack_cluster` enhanced node pool related fields, supports cluster creation without default node pool
+3. `alibabacloudstack_cs_kubernetes_node_pool` fixed node update logic
+4. Comprehensive Log Service resource enhancements: `alibabacloudstack_log_project`, `alibabacloudstack_log_store`, `alibabacloudstack_log_store_index`, `alibabacloudstack_log_alert`, `alibabacloudstack_log_machine_group`, `alibabacloudstack_logtail_attachment`, `alibabacloudstack_logtail_config`
+5. Provider deprecated parameter descriptions updated: `sls_openapi_endpoint`, `asapi_endpoint`, `sls_endpoint`
+6. Cleaned up deprecated alias resources: `alibabacloudstack_datahub_*`, `alibabacloudstack_db_*`, `alibabacloudstack_dms_enterprise_*`, `alibabacloudstack_dns_*`, `alibabacloudstack_drds_*`, `alibabacloudstack_dts_*`, `alibabacloudstack_ecs_*`
+
+## Removals
+
+1. Removed ASCM Access Key orchestration capability (`alibabacloudstack_ascm_access_key`)
+
+---
+
 # 3.18.28
 
 ## Fixed
