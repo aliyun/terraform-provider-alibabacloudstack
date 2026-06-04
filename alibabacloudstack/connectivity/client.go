@@ -954,7 +954,11 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 }
 
 func buildClientToken(popcode, version, action string) string {
-	token := strings.TrimSpace(fmt.Sprintf("TF_%s_%s_%s_%s", popcode, version, action, uuid.Must(uuid.NewV7()).String()))
+	token := strings.TrimSpace(fmt.Sprintf("TF_%s_%s_%s_%s", uuid.Must(uuid.NewV7()).String(), action, popcode, version))
+	// 限制 token 长度不超过 64 个字符
+	if len(token) > 64 {
+		token = token[:64]
+	}
 	return token
 }
 
@@ -1198,9 +1202,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		// remove in 3.21.0
 		request.QueryParams["AccountInfo"] = client.GetAccountInfo()
 	}
-
 	request.QueryParams["ClientToken"] = buildClientToken(request.Product, request.Version, request.ApiName)
-
 	if strings.HasPrefix(domain, "internal.asapi.") || strings.HasPrefix(domain, "public.asapi.") {
 		// asapi compatibility logic
 		// # asapi When using common SDK, pathpattern cannot be concatenated, otherwise an error will be reported
