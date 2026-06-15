@@ -11,7 +11,7 @@ description: |-
 Provides a resource to create an oss bucket and set its attribution.
 
 -> **NOTE:** The bucket namespace is shared by all users of the OSS system. Please set bucket name as unique as possible.
--> **Note:** Using OSS resources requires organizational RAM role permissions
+-> **Note:** Creating an OSS bucket requires organization administrator permissions, default resource set permissions under the current first-level organization, and permissions for the ascm.UpdateInstanceBelong API.
 
 ## Example Usage
 
