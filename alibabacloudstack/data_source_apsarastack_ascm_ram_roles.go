@@ -167,6 +167,7 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 	var s []map[string]interface{}
 	ascmservice := AscmService{client}
 	for _, rg := range data {
+		roleid := fmt.Sprintf("%s:%d", rg.RoleName, rg.ID)
 		if r != nil && !r.MatchString(rg.RoleName) {
 			continue
 		}
@@ -174,7 +175,7 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 			continue
 		}
 		if len(idsMap) > 0 {
-			if _, ok := idsMap[fmt.Sprint(rg.ID)]; !ok {
+			if _, ok := idsMap[roleid]; !ok {
 				continue
 			}
 		}
@@ -182,7 +183,6 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 			continue
 		}
 		log.Printf("[DEBUG] alibabacloudstack_ascm_ram_role ------------------------------------------ role.assume_role_policy_document: %s", rg.AssumeRolePolicyDocument)
-		roleid := fmt.Sprintf("%s:%d", rg.RoleName, rg.ID)
 		mapping := map[string]interface{}{
 			"id":                          roleid,
 			"name":                        rg.RoleName,

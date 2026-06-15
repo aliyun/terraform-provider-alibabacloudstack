@@ -130,7 +130,6 @@ func (s *AscmService) DescribeAscmRamRoleForRoleid(id string) (role *AscmRoleDat
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetRole", "")
 	request.QueryParams["roleId"] = did[1]
 	response := AscmGetRoleResponse{}
-	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {

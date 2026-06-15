@@ -14,19 +14,19 @@ func TestAccAlibabacloudStackAscmRamRolesDataSource(t *testing.T) {
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "testtf",
+			"name_regex": "${alibabacloudstack_ascm_ram_role.default.role_name}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "fake-nonexistent-role",
+			"name_regex": "${alibabacloudstack_ascm_ram_role.default.role_name}-fake",
 		}),
 	}
 
 	idConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"id": "${alibabacloudstack_ascm_ram_role.default.id}",
+			"id": "${alibabacloudstack_ascm_ram_role.default.role_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"id": "-1",
+			"id": "${alibabacloudstack_ascm_ram_role.default.role_id}1",
 		}),
 	}
 	idsConf := dataSourceTestAccConfig{
@@ -34,7 +34,7 @@ func TestAccAlibabacloudStackAscmRamRolesDataSource(t *testing.T) {
 			"ids": []string{"${alibabacloudstack_ascm_ram_role.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"fake-id-12345"},
+			"ids": []string{"${alibabacloudstack_ascm_ram_role.default.id}-fake"},
 		}),
 	}
 
@@ -44,8 +44,8 @@ func TestAccAlibabacloudStackAscmRamRolesDataSource(t *testing.T) {
 			"name_regex": "${alibabacloudstack_ascm_ram_role.default.role_name}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":        []string{"fake-id-12345"},
-			"name_regex": "another-fake-role",
+			"ids":        []string{"${alibabacloudstack_ascm_ram_role.default.id}-fake"},
+			"name_regex": "${alibabacloudstack_ascm_ram_role.default.role_name}-fake",
 		}),
 	}
 
