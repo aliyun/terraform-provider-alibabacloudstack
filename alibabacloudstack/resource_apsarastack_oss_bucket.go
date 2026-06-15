@@ -243,6 +243,16 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 		return nil
 	})
 	if err != nil {
+		// ReBindResourceGroup failed after retries. The bucket has already been created.
+		// To avoid resource leakage, delete the created bucket before returning the error.
+		log.Printf("[WARN] ReBindResourceGroup failed for bucket %s, cleaning up created bucket to avoid resource leakage", bucketName)
+		if deleteErr := ossService.DeleteBucket(ossCluster, bucketName); deleteErr != nil {
+			return errmsgs.WrapError(fmt.Errorf("failed to move resource group and cleanup bucket: %v; cleanup error: %v", err, deleteErr))
+		}
+		if waitErr := ossService.WaitForOssBucket(ossCluster, bucketName, Deleted, DefaultTimeoutMedium); waitErr != nil {
+			return errmsgs.WrapError(fmt.Errorf("failed to move resource group and cleanup bucket: %v; wait for deletion error: %v", err, waitErr))
+		}
+		log.Printf("[INFO] Successfully cleaned up bucket %s after ReBindResourceGroup failure", bucketName)
 		return errmsgs.WrapError(err)
 	}
 	tags := d.Get("tags").(map[string]interface{})
