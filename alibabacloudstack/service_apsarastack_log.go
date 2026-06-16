@@ -99,6 +99,10 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 		if errcode, ok := response["errorCode"]; ok && errcode.(string) == "ProjectNotExist" {
 			return logProject, errmsgs.GetNotFoundErrorFromString("LogProject not found")
 		}
+		// Also treat SCMG invocation failure as not found (project does not exist on SLS endpoint)
+		if strings.Contains(err.Error(), "invoke SCMG failed") {
+			return logProject, errmsgs.GetNotFoundErrorFromString("LogProject not found")
+		}
 		return logProject, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetProject", errmsgs.AlibabacloudStackSdkGoERROR, err)
 	} else {
 		// Parse response from DoTeaRequest
