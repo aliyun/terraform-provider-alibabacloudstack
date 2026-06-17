@@ -1,72 +1,72 @@
 ---
 name: apsarastack-terraform-code-generation
 description: |
-  为阿里云专有云（ApsaraStack）基础设施生成经过验证的 Terraform HCL 代码。
-  使用 Terraform MCP 作为唯一文档来源。
-  强制执行强制性的弃用检查、数据源解析（禁止硬编码 ID）以及专有云特定配置（popgw_domain、protocol）。
-  涵盖 VPC、ECS、RDS、OSS、SLB 以及所有 alibabacloudstack_* 资源，支持自动模式匹配。
-  触发词："write terraform for alibabacloudstack"、"生成专有云 Terraform"、"专有云 HCL"、"用 Terraform 部署阿里云专有云"、"alibabacloudstack provider"、"apsarastack terraform"、"飞天企业版 terraform"。
+  Generate validated Terraform HCL code for Alibaba Cloud ApsaraStack infrastructure.
+  Uses Terraform MCP as the sole documentation source.
+  Enforces mandatory deprecation checks, data source resolution (no hardcoded IDs), and ApsaraStack-specific configuration (popgw_domain, protocol).
+  Covers VPC, ECS, RDS, OSS, SLB, and all alibabacloudstack_* resources with automatic pattern matching.
+  Trigger phrases: "write terraform for alibabacloudstack", "generate ApsaraStack Terraform", "ApsaraStack HCL", "deploy Alibaba Cloud ApsaraStack with Terraform", "alibabacloudstack provider", "apsarastack terraform", "ApsaraStack Enterprise Edition terraform".
 ---
 
-# 阿里云专有云 Terraform 代码生成
+# Alibaba Cloud ApsaraStack Terraform Code Generation
 
-将自然语言描述的阿里云专有云基础设施需求转化为针对当前 `aliyun/alibabacloudstack` Provider 的已验证 Terraform 代码。资源知识在生成时从 Provider 自身的文档中获取。
+Transforms natural language descriptions of Alibaba Cloud ApsaraStack infrastructure requirements into validated Terraform code for the current `aliyun/alibabacloudstack` Provider. Resource knowledge is fetched from the Provider's own documentation at generation time.
 
-## 硬性规则（严禁违反）
+## Hard Rules (Strictly Enforced)
 
-### 1. 凭证安全——永不泄露，永不需要
+### 1. Credential Security — Never Leak, Never Request
 
-在任何地方（HCL、注释、环境变量声明、Shell 输出、日志）都**绝不**读取、打印、询问或写入 AK/SK 值。alibabacloudstack Provider 需要在 provider 块中显式配置凭证或通过环境变量（`ALIBABACLOUDSTACK_ACCESS_KEY`、`ALIBABACLOUDSTACK_SECRET_KEY`）提供。所有凭证都由 Provider 自身读取，本 Skill 绝不接触。
+Nowhere (HCL, comments, environment variable declarations, Shell output, logs) should you **ever** read, print, ask for, or write AK/SK values. The alibabacloudstack Provider requires credentials to be explicitly configured in the provider block or provided via environment variables (`ALIBABACLOUDSTACK_ACCESS_KEY`, `ALIBABACLOUDSTACK_SECRET_KEY`). All credentials are read by the Provider itself; this Skill never touches them.
 
-### 2. Terraform 执行限制
+### 2. Terraform Execution Restrictions
 
-本 Skill **主要生成 Terraform HCL 代码**，但在文件生成完成后，可以执行 `terraform validate` 或 `tofu validate` 进行语法验证和修复（步骤 7）。
+This Skill **primarily generates Terraform HCL code**, but after file generation, can execute `terraform validate` or `tofu validate` for syntax validation and fixes (Step 7).
 
-本 Skill **绝不**执行以下 Terraform 命令：
-- `terraform init`（初始化）
-- `terraform plan`（计划）
-- `terraform apply`（应用）
-- 其他会修改基础设施或需要网络连接的命令
+This Skill **never** executes the following Terraform commands:
+- `terraform init` (initialization)
+- `terraform plan` (planning)
+- `terraform apply` (application)
+- Other commands that modify infrastructure or require network connections
 
-本 Skill 的范围包括：
-- 生成有效的 Terraform HCL 代码
-- 创建项目结构和文件
-- 提供文档和使用说明
-- 执行 `terraform validate` 或 `tofu validate` 进行本地语法验证（步骤 7）
+This Skill's scope includes:
+- Generating valid Terraform HCL code
+- Creating project structure and files
+- Providing documentation and usage instructions
+- Executing `terraform validate` or `tofu validate` for local syntax validation (Step 7)
 
-### 4. 专有云特定配置
+### 4. ApsaraStack-Specific Configuration
 
-**注意：本 Skill 不生成 Provider 配置或相关变量。**
+**Note: This Skill does not generate Provider configuration or related variables.**
 
-与公有云 Provider 相比，alibabacloudstack Provider 需要额外的配置（例如 `popgw_domain`、`protocol`、`insecure`），但这些由用户在自己的 provider 块中管理。
+Compared to the public cloud Provider, the alibabacloudstack Provider requires additional configuration (e.g., `popgw_domain`, `protocol`, `insecure`), but these are managed by users in their own provider blocks.
 
-本 Skill 专注于生成资源定义和数据源。
+This Skill focuses on generating resource definitions and data sources.
 
-## 环境要求（软性建议）
+## Environment Requirements (Soft Recommendations)
 
-- **Terraform ≥ 0.13**（Provider 要求）。
-- **网络连接**是必需的——步骤 4.1 使用 Terraform MCP 获取 Provider 文档。
-- **Go 1.13+**（如果需要从源码构建 Provider，很少需要）。
+- **Terraform ≥ 0.13** (Provider requirement).
+- **Network connection** is required — Step 4.1 uses Terraform MCP to fetch Provider documentation.
+- **Go 1.13+** (if building Provider from source, rarely needed).
 
-## 前置准备：安装 Terraform MCP Server
+## Prerequisites: Installing Terraform MCP Server
 
-在使用本 Skill 之前，必须确保 Terraform MCP Server 已正确安装和配置。MCP Server 是本 Skill 获取 Provider 文档的主要来源。
+Before using this Skill, you must ensure the Terraform MCP Server is correctly installed and configured. The MCP Server is the primary source for this Skill to fetch Provider documentation.
 
-### 安装步骤
+### Installation Steps
 
-**方法 1：通过 npm 安装（推荐）**
+**Method 1: Install via npm (Recommended)**
 
 ```bash
 npm install -g @modelcontextprotocol/server-terraform
 ```
 
-**方法 2：通过 pip 安装**
+**Method 2: Install via pip**
 
 ```bash
 pip install mcp-server-terraform
 ```
 
-**方法 3：从源码构建**
+**Method 3: Build from source**
 
 ```bash
 git clone https://github.com/modelcontextprotocol/servers.git
@@ -75,9 +75,9 @@ npm install
 npm run build
 ```
 
-### 配置 MCP Server
+### Configure MCP Server
 
-在 Aone Copilot 的 MCP 配置文件中添加 Terraform Server：
+Add the Terraform Server to Aone Copilot's MCP configuration file:
 
 ```json
 {
@@ -90,7 +90,7 @@ npm run build
 }
 ```
 
-或者如果使用 pip 安装的版本：
+Or if using the pip-installed version:
 
 ```json
 {
@@ -103,192 +103,192 @@ npm run build
 }
 ```
 
-### 验证安装
+### Verify Installation
 
-重启 Aone Copilot 后，验证 MCP Server 是否正常工作：
+After restarting Aone Copilot, verify the MCP Server is working correctly:
 
-1. 在对话中尝试调用 Terraform MCP 工具
-2. 如果成功返回 Provider 信息，说明安装成功
-3. 如果失败，检查：
-   - MCP Server 是否正确安装在 PATH 中
-   - Aone Copilot 的 MCP 配置是否正确
-   - 网络连接是否正常
+1. Try calling Terraform MCP tools in the conversation
+2. If Provider information is returned successfully, installation is successful
+3. If failed, check:
+   - Whether MCP Server is correctly installed in PATH
+   - Whether Aone Copilot's MCP configuration is correct
+   - Whether network connection is normal
 
-**注意**：MCP Server 是本 Skill 获取 Provider 文档的唯一来源，确保文档的准确性和时效性。如果 MCP Server 无法使用，任务将停止并需要人工介入处理。
+**Note**: The MCP Server is the only source for this Skill to fetch Provider documentation, ensuring accuracy and timeliness. If the MCP Server is unavailable, the task will stop and require human intervention.
 
-## 工作流程
+## Workflow
 
-### 步骤 1. 解析需求
+### Step 1. Parse Requirements
 
-提取：
+Extract:
 
-- `region`——默认值 `cn-hangzhou-env01-d01`（专有云区域格式）。
-- `resources[]`——`{ alibabacloudstack_type, quantity, attributes }`。
-- 非功能性需求：多可用区、加密、备份、高可用、IOPS。
+- `region` — default `cn-hangzhou-env01-d01` (ApsaraStack region format).
+- `resources[]` — `{ alibabacloudstack_type, quantity, attributes }`.
+- Non-functional requirements: multi-AZ, encryption, backup, high availability, IOPS.
 
-如果存在歧义（例如"设置数据库"），**最多**提出一个澄清问题。
+If ambiguity exists (e.g., "set up database"), ask **at most** one clarifying question.
 
-### 步骤 2. 确定目标目录
+### Step 2. Determine Target Directory
 
-从用户请求中提取 `<target-dir>`（明确的路径如 `myshop-infra/`，或未指定时使用当前工作目录）。所有后续的 `fmt` / `init` / `validate` 命令都在此目录中运行。
+Extract `<target-dir>` from user request (explicit path like `myshop-infra/`, or current working directory if unspecified). All subsequent `fmt` / `init` / `validate` commands run in this directory.
 
-在编写任何 `.tf` 文件之前，**必须**创建目录：
+Before writing any `.tf` files, **must** create directory:
 
 ```bash
 mkdir -p <target-dir>
 ```
 
-所有文件写入的路径必须以 `<target-dir>/` 为前缀——绝不要直接写入当前工作目录，也不要写入通用的 `outputs/` 父目录。生成完成后，验证结构：
+All file write paths must be prefixed with `<target-dir>/` — never write directly to current working directory or generic `outputs/` parent directory. After generation, verify structure:
 
 ```bash
 ls -R <target-dir>
 ```
 
-### 步骤 3. 绘制架构草图
+### Step 3. Draw Architecture Sketch
 
-在编写任何 HCL 之前，绘制依赖关系表——每个资源一行：
+Before writing any HCL, draw a dependency table — one row per resource:
 
 | resource | depends on | AZ / placement |
 | --- | --- | --- |
 
-- 扩展 `resources[]`，添加隐含的基础设施（VPC → VSwitch → SecurityGroup → 工作负载）；用户解析时经常会跳过这些。
-- 扩展后的列表是步骤 4 门禁的输入。
+- Extend `resources[]`, adding implicit infrastructure (VPC → VSwitch → SecurityGroup → workloads); users often skip these when parsing.
+- The extended list is input for Step 4 gating.
 
-### 步骤 4. HCL 前置门禁（强制）
+### Step 4. HCL Pre-flight Gating (Mandatory)
 
-对于步骤 3 中的每个不同的 `alibabacloudstack_*` 类型（资源**和**数据源），执行以下步骤。每种类型的调用是独立的——**跨类型并行执行**。
+For each distinct `alibabacloudstack_*` type (resources **and** data sources) in Step 3, execute the following steps. Calls per type are independent — **execute in parallel across types**.
 
-#### 4.1 通过 Terraform MCP 获取 Provider 文档（唯一方式）
+#### 4.1 Fetch Provider Documentation via Terraform MCP (Sole Source)
 
-**步骤 4.1：使用 Terraform MCP**
+**Step 4.1: Use Terraform MCP**
 
-使用 Terraform MCP 工具获取 Provider 文档：
+Use Terraform MCP tools to fetch Provider documentation:
 
-1. 调用 `terraform::tool::search_providers`，参数：
+1. Call `terraform::tool::search_providers` with parameters:
    - `provider_name`: `alibabacloudstack`
    - `provider_namespace`: `aliyun`
-   - `service_slug`: 资源名称（例如 `vpc`、`vswitch`）
-   - `provider_document_type`: `resources`（数据源则为 `data-sources`）
+   - `service_slug`: resource name (e.g., `vpc`, `vswitch`)
+   - `provider_document_type`: `resources` (`data-sources` for data sources)
 
-2. 从结果中识别匹配的资源并获取其 `providerDocID`。
+2. Identify matching resource from results and obtain its `providerDocID`.
 
-3. 使用 `provider_doc_id` 调用 `terraform::tool::get_provider_details` 获取完整文档。
+3. Call `terraform::tool::get_provider_details` with `provider_doc_id` to fetch complete documentation.
 
-**成功标准**：如果 MCP 返回包含必需/可选参数和示例用法的有效文档，**直接进入步骤 4.3（复述）**。
+**Success criteria**: If MCP returns valid documentation with required/optional parameters and example usage, **proceed directly to Step 4.3 (Recitation)**.
 
-**失败处理**：如果 Terraform MCP 工具失败或返回无用的内容，**立即停止任务并请求人工处理**。
+**Failure handling**: If Terraform MCP tool fails or returns useless content, **immediately stop task and request human intervention**.
 
-停止时应向用户报告：
-- 哪个资源的文档获取失败
-- MCP 返回的错误信息或空结果
-- 建议用户检查：
-  - Terraform MCP Server 是否正确安装和运行
-  - 网络连接是否正常
-  - 资源名称是否正确
+When stopping, report to user:
+- Which resource's documentation fetch failed
+- Error message or empty result returned by MCP
+- Advise user to check:
+  - Whether Terraform MCP Server is correctly installed and running
+  - Whether network connection is normal
+  - Whether resource name is correct
 
-**注意**：本 Skill **不再提供本地文档回退方案**。MCP Server 是获取 Provider 文档的唯一来源，确保文档的准确性和时效性。
+**Note**: This Skill **no longer provides local documentation fallback**. MCP Server is the sole source for fetching Provider documentation, ensuring accuracy and timeliness.
 
-#### 4.2 模式查找（条件性）
+#### 4.2 Pattern Lookup (Conditional)
 
-如果用户需求匹配 `references/resource-patterns-apsarastack.md` 中列出的产品特定惯用法（例如 RDS 跨可用区高可用、OSS 生命周期），读取相关部分。
+If user requirements match product-specific idioms listed in `references/resource-patterns-apsarastack.md` (e.g., RDS cross-AZ HA, OSS lifecycle), read relevant sections.
 
-当找到匹配的模式部分时，该部分"必需属性"表中列出的**所有属性都必须出现在生成的 HCL 中**。
+When a matching pattern section is found, **all attributes listed in that section's "Required Attributes" table must appear in the generated HCL**.
 
 ```bash
 grep -in "<keyword>" references/resource-patterns-apsarastack.md
 ```
 
-#### 4.3 复述（阅读证明）
+#### 4.3 Recitation (Reading Proof)
 
-在编写任何 HCL 之前，发出并验证完整的每资源简报：
+Before writing any HCL, issue and verify a complete per-resource briefing:
 
-- **必需**参数（来自 MCP 文档的逐字列表）
-- **2–5 个关键可选**参数（与用户需求相关）
-- 来自文档"示例用法"的最小 HCL 片段
+- **Required** parameters (verbatim list from MCP documentation)
+- **2-5 key optional** parameters (relevant to user requirements)
+- Minimal HCL snippet from documentation's "Example Usage"
 
-如果缺少必需或可选参数，返回步骤 4.1。跳过或使用部分复述是严重失败。
+If required or optional parameters are missing, return to Step 4.1. Skipping or using partial recitation is a critical failure.
 
-### 步骤 5. 生成
+### Step 5. Generation
 
-#### 5.1 根据复述编写 HCL，而非凭记忆
+#### 5.1 Write HCL from Recitation, Not Memory
 
-**仅**使用步骤 4.3 中建立的参数。如果需要未在复述简报中的参数，通过更深入的读取重新获取步骤 4.2；不要猜测。
+**Only** use parameters established in Step 4.3. If parameters not in the recitation briefing are needed, re-fetch Step 4.2 through deeper reading; do not guess.
 
-在编写字段之前，在 `references/deprecated-fields-apsarastack.md` 中查找资源：
+Before writing fields, look up the resource in `references/deprecated-fields-apsarastack.md`:
 
 ```bash
 grep '`alibabacloudstack_<resource>`' references/deprecated-fields-apsarastack.md
 ```
 
-如果用户需求涉及具有特定使用模式的产品，还需查阅 `references/resource-patterns-apsarastack.md`。
+If user requirements involve products with specific usage patterns, also consult `references/resource-patterns-apsarastack.md`.
 
-#### 5.2 数据源强制（强制——禁止硬编码 ID）
+#### 5.2 Data Source Mandate (Mandatory — No Hardcoded IDs)
 
-通过 `data` 块解析，绝不使用字面量：
+Resolve via `data` blocks, never use literals:
 
 - `zone_id` → `data "alibabacloudstack_zones"`。
-- `image_id` → `data "alibabacloudstack_images"`（通过 `name_regex`、`owners = "system"`、`most_recent = true` 过滤）。
+- `image_id` → `data "alibabacloudstack_images"` (filter via `name_regex`, `owners = "system"`, `most_recent = true`).
 - `instance_type` → `data "alibabacloudstack_instance_types"`。
 
-**数据源 `ids` 参数防空字符串**：
+**Data Source `ids` Parameter — Prevent Empty Strings:**
 
-当 data source 使用 `ids` 参数按 ID 列表查询时，**严禁传入空字符串**。如果变量可能为空，必须使用 `coalesce()` 兜底：
+When a data source uses the `ids` parameter to query by ID list, **passing empty strings is strictly prohibited**. If a variable may be empty, must use `coalesce()` as fallback:
 
 ```hcl
-# ❌ 错误：var.vpc_id 可能为空字符串，导致 ids = [""]
+# ❌ Wrong: var.vpc_id may be empty string, resulting in ids = [""]
 data "alibabacloudstack_vpc_vpcs" "existing" {
   ids = [var.vpc_id]
 }
 
-# ✅ 正确：使用 coalesce 兜底，空值时传入一个不存在的 ID
+# ✅ Correct: Use coalesce fallback, pass a non-existent ID when empty
 data "alibabacloudstack_vpc_vpcs" "existing" {
   ids = [coalesce(var.vpc_id, "vpc-nonexistent-placeholder")]
 }
 ```
 
-这样当变量为空时，data source 返回空列表（`vpcs` 长度为 0），不会报错。
+This way, when the variable is empty, the data source returns an empty list (`vpcs` length is 0), without error.
 
-**条件创建漂移问题（重要）**：
+**Conditional Creation Drift Issue (Important):**
 
-当实现"先查询再创建"逻辑时，**严禁使用 data source 查询结果来控制 `count`**。因为：
-- 第一次 apply：data source 查不到 → 创建资源
-- 第二次 apply：data source 查到了 → `count` 变为 0 → **删除资源**
+When implementing "query-then-create" logic, **using data source query results to control `count` is strictly prohibited**. Because:
+- First apply: data source finds nothing → create resource
+- Second apply: data source finds it → `count` becomes 0 → **delete resource**
 
-**正确做法**：用变量是否为空来控制创建逻辑，data source 仅用于获取已存在资源的属性：
+**Correct approach**: Use whether variable is empty to control creation logic; data source is only for fetching attributes of existing resources:
 
 ```hcl
-# ❌ 错误：用 data source 结果控制 count，会导致第二次 apply 删除资源
+# ❌ Wrong: Using data source results to control count will cause resource deletion on second apply
 locals {
   vpc_exists = length(data.alibabacloudstack_vpc_vpcs.existing.vpcs) > 0
 }
 resource "alibabacloudstack_vpc_vpc" "new" {
-  count = local.vpc_exists ? 0 : 1  # 第二次 apply 会变成 0，删除资源！
+  count = local.vpc_exists ? 0 : 1  # Second apply will become 0, deleting resource!
 }
 
-# ✅ 正确：用变量是否为空控制 count，data source 仅用于获取属性
+# ✅ Correct: Use variable emptiness to control count; data source only for fetching attributes
 locals {
   vpc_exists = var.vpc_id != ""
   vpc_id     = local.vpc_exists ? var.vpc_id : alibabacloudstack_vpc_vpc.new[0].id
 }
 resource "alibabacloudstack_vpc_vpc" "new" {
-  count = local.vpc_exists ? 0 : 1  # 只要 var.vpc_id 不变，count 就不会变
+  count = local.vpc_exists ? 0 : 1  # As long as var.vpc_id does not change, count will not change
 }
 ```
 
-**关键原则**：`count` 的条件必须基于**用户输入的变量**，而非**数据源查询结果**。
+**Key principle**: The condition for `count` must be based on **user-input variables**, not **data source query results**.
 
-#### 5.3 Provider 块（内容契约）
+#### 5.3 Provider Block (Content Contract)
 
-**重要：本 Skill 不生成 `provider "alibabacloudstack" {}` 块。** 
-Provider 配置是用户的责任，应单独管理。
+**Important: This Skill does not generate `provider "alibabacloudstack" {}` blocks.** 
+Provider configuration is the user's responsibility and should be managed separately.
 
-本 Skill 仅生成 `terraform { required_providers {} }` 块来声明 Provider 要求。
+This Skill only generates `terraform { required_providers {} }` blocks to declare Provider requirements.
 
-### 文件组织（强制）
+### File Organization (Mandatory)
 
-生成的代码**必须**组织为恰好四个文件：
+Generated code **must** be organized into exactly four files:
 
-1. **`version.tf`**——Terraform 和 Provider 版本约束
+1. **`version.tf`** — Terraform and Provider version constraints
    
    ```hcl
    terraform {
@@ -302,65 +302,65 @@ Provider 配置是用户的责任，应单独管理。
    }
    ```
 
-2. **`variables.tf`**——资源配置的变量声明
+2. **`variables.tf`** — Variable declarations for resource configuration
    
-   - 仅包含资源所需的变量（不包含 Provider 凭证）
-   - 在适当的地方使用合理的默认值
-   - 使用 `sensitive = true` 标记敏感变量
+   - Contains only variables needed for resources (no Provider credentials)
+   - Use sensible defaults where appropriate
+   - Mark sensitive variables with `sensitive = true`
 
-3. **`main.tf`**——主逻辑，包括：
+3. **`main.tf`** — Main logic, including:
    
-   - 数据源（可用区、镜像、实例类型等）
-   - 资源定义（VPC、ECS、RDS 等）
-   - 所有基础设施组件
+   - Data sources (zones, images, instance types, etc.)
+   - Resource definitions (VPC, ECS, RDS, etc.)
+   - All infrastructure components
 
-4. **`outputs.tf`**——输出定义
+4. **`outputs.tf`** — Output definitions
    
-   - 导出重要的资源 ID、IP、名称等
-   - 为每个输出包含描述性说明
+   - Export important resource IDs, IPs, names, etc.
+   - Include descriptive descriptions for each output
 
-### 版本约束规则
+### Version Constraint Rules
 
-- Provider 版本约束：**必须使用 `< 3.19.0`** 作为专有云兼容性的默认上限。
-- **不要**生成任何包含凭证、popgw_domain、protocol 或其他配置的 `provider "alibabacloudstack" {}` 块。
-- 用户必须在自己的 `.tf` 文件中自行配置 provider 块。
+- Provider version constraint: **must use `< 3.19.0`** as the default upper bound for ApsaraStack compatibility.
+- **Do not** generate any `provider "alibabacloudstack" {}` blocks containing credentials, popgw_domain, protocol, or other configuration.
+- Users must configure provider blocks themselves in their own `.tf` files.
 
-**生成后验证**：
+**Post-generation validation**:
 
 ```bash
-# 验证所有四个必需文件都存在
+# Verify all four required files exist
 for file in version.tf variables.tf main.tf outputs.tf; do
   test -f <target-dir>/$file && echo "OK: $file exists" || echo "MISSING: $file"
 done
 
-# 验证 required_providers 包含 aliyun/alibabacloudstack 且具有正确的版本约束
+# Verify required_providers contains aliyun/alibabacloudstack with correct version constraint
 grep -Rq 'alibabacloudstack.*source.*=.*"aliyun/alibabacloudstack"' \
   <target-dir>/version.tf && echo OK_SOURCE || echo BAD_SOURCE
 
 grep -Rq 'version.*=.*"< 3.19.0"' <target-dir>/version.tf \
   && echo OK_VERSION_CONSTRAINT || echo BAD_VERSION_CONSTRAINT
 
-# 确保本 Skill 没有生成任何 provider 块
+# Ensure this Skill did not generate any provider blocks
 ! grep -Rq 'provider "alibabacloudstack"' <target-dir>/*.tf \
   && echo OK_NO_PROVIDER_BLOCK || echo UNEXPECTED_PROVIDER_BLOCK
 ```
 
-所有检查必须通过。
+All checks must pass.
 
-#### 5.4 样式基线
+#### 5.4 Style Baseline
 
-- 2 空格缩进；块内 `=` 对齐；snake_case 语义化资源标签。
-- 每个支持标签的资源都应携带非空的 `tags` 块。
+- 2-space indentation; `=` aligned within blocks; snake_case for semantic resource labels.
+- Every resource that supports tags should carry a non-empty `tags` block.
 
-#### 5.5 弃用字段审计——静态 grep 检查（强制）
+#### 5.5 Deprecated Field Audit — Static grep Check (Mandatory)
 
-在需要 `terraform` 之前运行——这是对刚编写的 HCL 的纯 grep 检查。对于本次生成中的每个资源，对照 `references/deprecated-fields-apsarastack.md` grep 项目并处理每种行类型：
+Run before requiring `terraform` — this is a pure grep check on the just-written HCL. For each resource in this generation, grep items against `references/deprecated-fields-apsarastack.md` and handle each line type:
 
-- **rename** 行 → 用新字段名替换旧字段名。
-- **split / soft-split** 行 → **不要**在父资源上写入内联字段；仅在需要时声明替换的子资源。
-- **deprecated-no-replacement** 行 → 停止使用该字段，无替代品。
+- **rename** lines → replace old field name with new field name.
+- **split / soft-split** lines → **do not** write inline fields on parent resource; only declare replacement sub-resources when needed.
+- **deprecated-no-replacement** lines → stop using the field, no replacement.
 
-**审计后验证（bash grep——必须全部返回 OK）**：
+**Post-audit validation (bash grep — must all return OK)**:
 
 ```bash
 grep '| `alibabacloudstack_' references/deprecated-fields-apsarastack.md | while IFS='|' read _ resource field kind _; do
@@ -383,144 +383,144 @@ grep '| `alibabacloudstack_' references/deprecated-fields-apsarastack.md | while
 done
 ```
 
-**硬性门禁：必须在步骤 6 之前通过**——如果出现任何 `DEPRECATED:` 行，修复 HCL 并重新运行直到所有行返回 `OK:`。
+**Hard gating: must pass before Step 6** — if any `DEPRECATED:` lines appear, fix HCL and re-run until all lines return `OK:`.
 
-### 步骤 6. 覆盖率检查 + 总结
+### Step 6. Coverage Check + Summary
 
-**强制——无论生成结果如何都运行。**
+**Mandatory — run regardless of generation results.**
 
-**覆盖率检查。** 枚举生成的 HCL 中的资源块并与步骤 3 的草图比较。如果缺少任何草图行，返回步骤 5 并添加。
+**Coverage check.** Enumerate resource blocks in generated HCL and compare with Step 3 sketch. If any sketch lines are missing, return to Step 5 and add them.
 
-**总结模板**——以用户的语言打印：
+**Summary template** — print in user's language:
 
 ```
-已写入文件：
+Files written:
 <path/to/file1>
 <path/to/file2>
 ...
 
-验证：待执行（进入步骤 7）
+Validation: pending (proceed to Step 7)
 
-弃用路由：<如果重新路由：`<original_name>` → `<new_name>`；否则：无>
+Deprecation routing: <if rerouted: `<original_name>` → `<new_name>`; otherwise: none>
 
-<可选：架构说明、设计决策、部署提示>
+<optional: architecture notes, design decisions, deployment tips>
 ```
 
-### 步骤 7. Terraform/OpenTofu 验证与修复（条件性执行）
+### Step 7. Terraform/OpenTofu Validation and Fixes (Conditional Execution)
 
-**触发条件**：在文件生成完成后，检查用户本地是否安装了 `terraform` 或 `tofu`（OpenTofu）。
+**Trigger condition**: After file generation, check whether user has `terraform` or `tofu` (OpenTofu) installed locally.
 
-**检测工具可用性**：
+**Detect tool availability**:
 
 ```bash
-# 检测 terraform
+# Detect terraform
 which terraform 2>/dev/null || command -v terraform 2>/dev/null
 
-# 检测 tofu (OpenTofu)
+# Detect tofu (OpenTofu)
 which tofu 2>/dev/null || command -v tofu 2>/dev/null
 ```
 
-**执行逻辑**：
+**Execution logic**:
 
-1. **如果检测到 `terraform`**：
-   - 在 `<target-dir>` 中执行 `terraform init`
-   - 如果 `init` 成功，继续执行 `terraform validate`
-     - 如果验证通过，记录成功状态
-     - 如果验证失败，分析错误信息并自动修复 HCL 代码，然后重新验证（最多重试 3 次）
-   - 如果 `init` 失败，输出提示信息并跳过验证步骤
+1. **If `terraform` is detected**:
+   - Execute `terraform init` in `<target-dir>`
+   - If `init` succeeds, continue with `terraform validate`
+     - If validation passes, record success status
+     - If validation fails, analyze error messages and automatically fix HCL code, then re-validate (retry up to 3 times)
+   - If `init` fails, output prompt message and skip validation step
 
-2. **如果检测到 `tofu`（但未检测到 `terraform`）**：
-   - 在 `<target-dir>` 中执行 `tofu init`
-   - 如果 `init` 成功，继续执行 `tofu validate`
-     - 如果验证通过，记录成功状态
-     - 如果验证失败，分析错误信息并自动修复 HCL 代码，然后重新验证（最多重试 3 次）
-   - 如果 `init` 失败，输出提示信息并跳过验证步骤
+2. **If `tofu` is detected (but `terraform` is not detected)**:
+   - Execute `tofu init` in `<target-dir>`
+   - If `init` succeeds, continue with `tofu validate`
+     - If validation passes, record success status
+     - If validation fails, analyze error messages and automatically fix HCL code, then re-validate (retry up to 3 times)
+   - If `init` fails, output prompt message and skip validation step
 
-3. **如果两者都未检测到**：
-   - 跳过验证步骤
-   - 在总结中注明"验证：已跳过（未检测到 terraform 或 tofu）"
-   - 提醒用户手动安装 Terraform 或 OpenTofu 以进行本地验证
+3. **If neither is detected**:
+   - Skip validation step
+   - Note in summary "Validation: skipped (terraform or tofu not detected)"
+   - Remind user to manually install Terraform or OpenTofu for local validation
 
-**验证执行示例**：
+**Validation execution example**:
 
 ```bash
 cd <target-dir>
 
-# 使用 terraform 验证
+# Validate using terraform
 if command -v terraform &>/dev/null; then
-  echo "检测到 Terraform，执行初始化..."
+  echo "Terraform detected, executing initialization..."
   terraform init
   
   if [ $? -eq 0 ]; then
-    echo "初始化成功，执行验证..."
+    echo "Initialization successful, executing validation..."
     terraform validate
     
     if [ $? -ne 0 ]; then
-      echo "验证失败，分析错误并修复..."
-      # 根据错误信息修复 HCL 文件
-      # 重新验证（最多 3 次）
+      echo "Validation failed, analyzing errors and fixing..."
+      # Fix HCL files based on error messages
+      # Re-validate (up to 3 times)
     fi
   else
-    echo "初始化失败，跳过验证步骤"
-    echo "提示：请检查网络连接、Provider 配置或手动执行 'terraform init'"
+    echo "Initialization failed, skipping validation step"
+    echo "Tip: Please check network connection, Provider configuration, or manually execute 'terraform init'"
   fi
   
-# 或使用 tofu 验证
+# Or validate using tofu
 elif command -v tofu &>/dev/null; then
-  echo "检测到 OpenTofu，执行初始化..."
+  echo "OpenTofu detected, executing initialization..."
   tofu init
   
   if [ $? -eq 0 ]; then
-    echo "初始化成功，执行验证..."
+    echo "Initialization successful, executing validation..."
     tofu validate
     
     if [ $? -ne 0 ]; then
-      echo "验证失败，分析错误并修复..."
-      # 根据错误信息修复 HCL 文件
-      # 重新验证（最多 3 次）
+      echo "Validation failed, analyzing errors and fixing..."
+      # Fix HCL files based on error messages
+      # Re-validate (up to 3 times)
     fi
   else
-    echo "初始化失败，跳过验证步骤"
-    echo "提示：请检查网络连接、Provider 配置或手动执行 'tofu init'"
+    echo "Initialization failed, skipping validation step"
+    echo "Tip: Please check network connection, Provider configuration, or manually execute 'tofu init'"
   fi
   
 else
-  echo "未检测到 Terraform 或 OpenTofu，跳过验证"
+  echo "Terraform or OpenTofu not detected, skipping validation"
 fi
 ```
 
-**常见错误及修复策略**：
+**Common errors and fix strategies**:
 
-- **语法错误**（括号不匹配、缺少逗号等）→ 修正 HCL 语法
-- **未定义的变量** → 检查 `variables.tf` 中是否声明
-- **未定义的资源引用** → 检查资源名称是否正确
-- **类型不匹配** → 修正变量类型或添加类型转换
-- **Provider 配置缺失** → 提醒用户自行配置 provider 块（本 Skill 不生成）
-- **init 失败** → 可能原因：网络问题、Provider 版本不存在、专有云环境配置问题；建议用户手动执行 init 并查看详细错误
+- **Syntax errors** (mismatched brackets, missing commas, etc.) → Fix HCL syntax
+- **Undefined variables** → Check if declared in `variables.tf`
+- **Undefined resource references** → Check if resource names are correct
+- **Type mismatches** → Fix variable types or add type conversions
+- **Missing Provider configuration** → Remind user to configure provider block themselves (this Skill does not generate)
+- **init failure** → Possible causes: network issues, Provider version does not exist, ApsaraStack environment configuration issues; advise user to manually execute init and check detailed errors
 
-**验证后更新总结**：
+**Update summary after validation**:
 
-在步骤 6 的总结模板中更新验证状态：
+Update validation status in Step 6 summary template:
 
 ```
-验证：<成功/失败/已跳过>
-- 工具：<terraform/tofu/无>
-- 初始化：<成功/失败/跳过>
-- 结果：<验证通过/验证失败，已修复 X 处错误/无法自动修复/init 失败跳过>
-- 错误详情：<如有错误，列出关键错误信息>
+Validation: <success/failure/skipped>
+- Tool: <terraform/tofu/none>
+- Initialization: <success/failure/skipped>
+- Result: <validation passed/validation failed, X errors fixed/unable to auto-fix/init failed skipped>
+- Error details: <if errors, list key error messages>
 ```
 
-**注意**：
-- 本步骤会执行 `terraform init` 或 `tofu init` 来初始化 Provider 插件，但不会执行 `plan`、`apply` 等会修改基础设施的命令
-- 如果 `init` 失败（通常由于网络问题或 Provider 配置问题），将跳过验证步骤并向用户报告
-- 如果验证失败且无法自动修复，向用户报告具体错误并建议手动修复
-- 最多重试 3 次验证-修复循环，超过后停止并报告剩余错误
+**Note**:
+- This step will execute `terraform init` or `tofu init` to initialize Provider plugins, but will not execute `plan`, `apply`, or other commands that modify infrastructure
+- If `init` fails (usually due to network issues or Provider configuration issues), will skip validation step and report to user
+- If validation fails and cannot be automatically fixed, report specific errors to user and suggest manual fixes
+- Retry validation-fix cycle up to 3 times, stop after and report remaining errors
 
-## 参考资料
+## References
 
-| 来源 | 何时读取 |
+| Source | When to read |
 | --- | --- |
-| Terraform MCP（`terraform::tool::search_providers`、`terraform::tool::get_provider_details`） | 步骤 4.1——每个资源的权威必需/可选参数（唯一来源） |
-| `references/deprecated-fields-apsarastack.md`（本地） | 步骤 5.1——已知的字段级重命名 |
-| `references/resource-patterns-apsarastack.md`（本地） | 步骤 5.1——产品特定惯用法 |
-| `references/auth-and-network-apsarastack.md`（本地） | 用户参考凭证配置 |
+| Terraform MCP (`terraform::tool::search_providers`, `terraform::tool::get_provider_details`) | Step 4.1 — authoritative required/optional parameters for each resource (sole source) |
+| `references/deprecated-fields-apsarastack.md` (local) | Step 5.1 — known field-level renames |
+| `references/resource-patterns-apsarastack.md` (local) | Step 5.1 — product-specific idioms |
+| `references/auth-and-network-apsarastack.md` (local) | User reference for credential configuration |
