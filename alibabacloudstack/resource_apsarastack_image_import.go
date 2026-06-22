@@ -45,7 +45,20 @@ func resourceAlibabacloudStackImageImport() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Default:      "Ubuntu",
-				ValidateFunc: validation.StringInSlice([]string{"CentOS", "Ubuntu", "SUSE", "OpenSUSE", "Debian", "CoreOS", "Windows Server 2003", "Windows Server 2008", "Windows Server 2012", "Windows 7", "Customized Linux", "Others Linux"}, false),
+				ValidateFunc: validation.StringInSlice([]string{
+					// Red Hat family
+					"CentOS", "RedHat", "Fedora", "Fedora CoreOS", "Anolis", "CentOS Stream", "AlmaLinux", "Rocky Linux",
+					// Debian family
+					"Ubuntu", "Debian",
+					// SUSE family
+					"SUSE", "OpenSUSE",
+					// Other Linux
+					"Aliyun", "Kylin", "UOS", "CoreOS", "Customized Linux", "Others Linux",
+					// Windows
+					"Windows Server 2003", "Windows Server 2008", "Windows Server 2012", "Windows Server 2016", "Windows Server 2019", "Windows Server 2022", "Windows 7",
+					// BSD
+					"FreeBSD",
+				}, false),
 			},
 			"os_type": {
 				Type:         schema.TypeString,
