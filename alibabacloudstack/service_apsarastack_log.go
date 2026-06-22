@@ -96,11 +96,14 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 		}
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &logProject)
 	} else if err != nil {
-		if errcode, ok := response["errorCode"]; ok && errcode.(string) == "ProjectNotExist" {
+		if errcode, ok := response["errorCode"]; ok && (errcode.(string) == "ProjectNotExist" || errcode.(string) == "BadRequest") {
 			return logProject, errmsgs.GetNotFoundErrorFromString("LogProject not found")
 		}
 		// Also treat SCMG invocation failure as not found (project does not exist on SLS endpoint)
 		if strings.Contains(err.Error(), "invoke SCMG failed") {
+			return logProject, errmsgs.GetNotFoundErrorFromString("LogProject not found")
+		}
+		if strings.Contains(err.Error(), "BadRequest") {
 			return logProject, errmsgs.GetNotFoundErrorFromString("LogProject not found")
 		}
 		return logProject, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetProject", errmsgs.AlibabacloudStackSdkGoERROR, err)
