@@ -147,6 +147,28 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 		return err
 	}
 	d.SetId(fmt.Sprintf("%s%s%s", d.Get("project").(string), COLON_SEPARATED, d.Get("name").(string)))
+
+	// Wait for shards to be ready after creation to avoid ID-refresh race condition.
+	// CreateLogStoreV2 returns before shards are fully distributed, causing Read()
+	// to see 1 initial shard instead of the expected shard_count.
+	expectedShardCount := d.Get("shard_count").(int)
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		stored, readErr := slsClient.GetLogStore(d.Get("project").(string), d.Get("name").(string))
+		if readErr != nil {
+			if errmsgs.IsExpectedErrors(readErr, "InternalServerError", errmsgs.LogClientTimeout) {
+				return resource.RetryableError(readErr)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(readErr, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_log_store", "GetLogStore", errmsgs.AlibabacloudStackLogGoSdkERROR, ""))
+		}
+		if stored.ShardCount < expectedShardCount {
+			return resource.RetryableError(fmt.Errorf("logstore shard count not ready: expected %d, got %d", expectedShardCount, stored.ShardCount))
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
