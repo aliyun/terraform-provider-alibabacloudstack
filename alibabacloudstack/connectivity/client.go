@@ -955,7 +955,7 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 
 func buildClientToken(popcode, version, action string) string {
 	token := strings.TrimSpace(fmt.Sprintf("TF_%s_%s_%s_%s", uuid.Must(uuid.NewV7()).String(), action, popcode, version))
-	// 限制 token 长度不超过 64 个字符
+	// Limit token length to 64 characters max
 	if len(token) > 64 {
 		token = token[:64]
 	}

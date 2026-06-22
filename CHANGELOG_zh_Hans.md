@@ -1,3 +1,18 @@
+# 3.18.30
+
+## 修复
+
+1. 修复 `alibabacloudstack_log_store` 创建后分片未就绪导致状态刷新异常的缺陷
+2. 修复 `alibabacloudstack_oss_bucket` 在 `ReBindResourceGroup` 失败时的资源泄漏问题
+3. 修复 `alibabacloudstack_log_project` 对额外错误码（BadRequest、SCMG 调用失败）的处理逻辑
+
+## 变更
+
+1. `alibabacloudstack_ascm_ram_roles` 数据源 ID 匹配逻辑修正为 `RoleName:ID` 格式
+2. 内部 Token 生成逻辑优化，限制 ClientToken 长度不超过 64 字符
+
+---
+
 # 3.18.29
 
 ## 新增

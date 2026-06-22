@@ -1,3 +1,18 @@
+# 3.18.30
+
+## Fixed
+
+1. Fixed `alibabacloudstack_log_store` state refresh failure due to shards not ready after creation
+2. Fixed resource leakage issue in `alibabacloudstack_oss_bucket` when `ReBindResourceGroup` fails
+3. Fixed `alibabacloudstack_log_project` error handling logic for additional error codes (BadRequest, SCMG invocation failure)
+
+## Changes
+
+1. `alibabacloudstack_ascm_ram_roles` data source ID matching logic corrected to `RoleName:ID` format
+2. Internal token generation logic optimized, ClientToken length limited to 64 characters max
+
+---
+
 # 3.18.29
 
 ## Added
