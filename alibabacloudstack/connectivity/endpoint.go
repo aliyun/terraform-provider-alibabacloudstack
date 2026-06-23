@@ -307,8 +307,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"ram.{{.domain}}",
 	},
 	CMSCode: PopEndpoint{
-		"metrics.open.{{.domain}}",
-		"metrics.open.{{.region}}.{{.domain}}",
+		"metrics-vpc.open.{{.domain}}",
+		"metrics-vpc.open.{{.region}}.{{.domain}}",
 	},
 	HitsdbCode: PopEndpoint{
 		"hitsdb.{{.domain}}",
