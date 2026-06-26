@@ -1,3 +1,15 @@
+# 3.16.26
+
+## Added
+
+1. `alibabacloudstack_image_import` `os_arch` parameter supports additional OS types: `RedHat`, `Fedora`, `Fedora CoreOS`, `Anolis`, `CentOS Stream`, `AlmaLinux`, `Rocky Linux`, `Debian`, `Aliyun`, `Kylin`, `UOS`, `Windows Server 2016`, `Windows Server 2019`, `Windows Server 2022`, `FreeBSD`
+
+## Fixes
+
+1. Fixed CMS service endpoint from `metrics.open` to `metrics-vpc.open` for VPC internal access
+
+---
+
 # 3.16.25
 
 ## New

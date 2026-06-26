@@ -1,3 +1,15 @@
+# 3.16.26
+
+## 新增
+
+1. `alibabacloudstack_image_import` 的 `os_arch` 参数支持更多操作系统类型，新增 `RedHat`、`Fedora`、`Fedora CoreOS`、`Anolis`、`CentOS Stream`、`AlmaLinux`、`Rocky Linux`、`Debian`、`Aliyun`、`Kylin`、`UOS`、`Windows Server 2016`、`Windows Server 2019`、`Windows Server 2022`、`FreeBSD`
+
+## 修复
+
+1. 修复 CMS 服务 endpoint 从 `metrics.open` 更新为 `metrics-vpc.open`
+
+---
+
 # 3.16.25
 
 ## 新增
