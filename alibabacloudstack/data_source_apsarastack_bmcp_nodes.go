@@ -78,6 +78,14 @@ func dataSourceAlibabacloudStackBmcpNodes() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"instance_alias": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"instance_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"sn": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -241,6 +249,8 @@ func bmcpNodesAttributes(d *schema.ResourceData, items []interface{}) error {
 		nodeName := formatAnyToString(itemMap["HostName"])
 		clusterId := formatAnyToString(itemMap["ClusterId"])
 		clusterName := formatAnyToString(itemMap["ClusterName"])
+		instanceAlias := formatAnyToString(itemMap["InstanceAlias"])
+		instanceName := formatAnyToString(itemMap["InstanceName"])
 		sn := formatAnyToString(itemMap["SN"])
 		vpcIp := formatAnyToString(itemMap["IP"])
 		status := formatAnyToString(itemMap["Status"])
@@ -266,6 +276,8 @@ func bmcpNodesAttributes(d *schema.ResourceData, items []interface{}) error {
 			"node_name":         nodeName,
 			"cluster_id":        clusterId,
 			"cluster_name":      clusterName,
+			"instance_alias":    instanceAlias,
+			"instance_name":     instanceName,
 			"sn":                sn,
 			"vpc_ip":            vpcIp,
 			"status":            status,
