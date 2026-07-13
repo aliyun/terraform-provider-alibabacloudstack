@@ -222,6 +222,18 @@ grep '`alibabacloudstack_<resource>`' references/deprecated-fields-apsarastack.m
 
 If user requirements involve products with specific usage patterns, also consult `references/resource-patterns-apsarastack.md`.
 
+#### 5.1.1 Common Parameter Filter (ApsaraStack Context)
+
+ApsaraStack resources share several context parameters (e.g., `region_id`, `resource_group_id`, `organization_id`, `department`). **Do not generate these parameters unless they are explicitly listed in the resource schema returned by Terraform MCP.**
+
+Rules:
+
+- If `region_id`, `resource_group_id`, `organization_id`, `department`, or similar account/organization-level fields do **not** appear in the resource's required or optional schema, omit them from the generated `main.tf` and `variables.tf`.
+- Do not infer these fields from the provider block or from other resources. Each resource only declares parameters that belong to its own schema.
+- When such a field is required by the schema, generate it as a variable reference (e.g., `var.region_id`) and declare it in `variables.tf`; do not hardcode values.
+
+This prevents generated HCL from containing unsupported or ignored arguments that trigger `terraform validate` errors.
+
 #### 5.2 Data Source Mandate (Mandatory — No Hardcoded IDs)
 
 Resolve via `data` blocks, never use literals:
