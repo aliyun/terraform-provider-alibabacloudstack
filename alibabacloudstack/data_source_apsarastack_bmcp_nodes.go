@@ -258,7 +258,7 @@ func bmcpNodesAttributes(d *schema.ResourceData, items []interface{}) error {
 		machineTypeName := machineType
 		cpuArch := formatAnyToString(itemMap["CPUArch"])
 		gpuModel := formatAnyToString(itemMap["Gpu"])
-		regionId := formatAnyToString(itemMap["RegionId"])
+		regionId := formatAnyToString(itemMap["Region"])
 		createTime := formatAnyToString(itemMap["CreateTime"])
 
 		var cpuNumber, memory, disk int
