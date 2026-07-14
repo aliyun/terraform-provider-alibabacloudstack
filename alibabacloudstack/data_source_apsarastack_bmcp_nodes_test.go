@@ -101,6 +101,8 @@ func TestUatAlibabacloudStackBmcpNodesDataSource_basic(t *testing.T) {
 			"nodes.0.gpu_model":         CHECKSET,
 			"nodes.0.region_id":         CHECKSET,
 			"nodes.0.create_time":       CHECKSET,
+			"nodes.0.instance_alias":    CHECKSET,
+			"nodes.0.instance_name":     CHECKSET,
 		}
 	}
 
