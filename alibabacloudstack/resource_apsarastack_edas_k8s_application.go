@@ -309,6 +309,10 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"use_cr_ee": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"update_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -692,18 +696,14 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	request.QueryParams["RegionId"] = client.RegionId
 	request.QueryParams["PackageType"] = packageType
 	request.QueryParams["ClusterId"] = d.Get("cluster_id").(string)
+	if use_cr_ee := d.Get("use_cr_ee"); use_cr_ee.(bool) {
+		request.QueryParams["crInstanceId"] = "cri-private"
+	}
 	if strings.ToLower(packageType) == "image" {
 		if v, ok := d.GetOk("image_url"); !ok {
 			return errmsgs.WrapError(errmsgs.Error("image_url is needed for creating image k8s application"))
 		} else {
 			request.QueryParams["ImageUrl"] = v.(string)
-			if strings.HasPrefix(v.(string), "cr-ee.registry") {
-				if crid, ok := d.GetOk("cr_ee_repo_id"); ok && crid.(string) != "" {
-					request.QueryParams["crInstanceId"] = crid.(string)
-				} else {
-					return errmsgs.WrapError(errmsgs.Error("`cr_ee_repo_id` is needed for the image repo is enterprise-edition"))
-				}
-			}
 		}
 	} else {
 		if v, ok := d.GetOk("package_url"); !ok {
@@ -864,8 +864,18 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	if fmt.Sprint(response["Code"]) != "200" {
 		return errmsgs.WrapError(fmt.Errorf("Create k8s application failed for %s", response["Message"].(string)))
 	}
-	appId := response["ApplicationInfo"].(map[string]interface{})["AppId"].(string)
-	changeOrderId := response["ApplicationInfo"].(map[string]interface{})["ChangeOrderId"].(string)
+	applicationInfo, ok := response["ApplicationInfo"].(map[string]interface{})
+	if !ok {
+		return errmsgs.WrapError(fmt.Errorf("Create k8s application failed: ApplicationInfo is missing in response"))
+	}
+	appId, ok := applicationInfo["AppId"].(string)
+	if !ok || appId == "" {
+		return errmsgs.WrapError(fmt.Errorf("Create k8s application failed: AppId is missing or empty in response"))
+	}
+	changeOrderId := ""
+	if v, ok := applicationInfo["ChangeOrderId"].(string); ok {
+		changeOrderId = v
+	}
 	d.SetId(appId)
 
 	if len(changeOrderId) > 0 {
@@ -1475,14 +1485,57 @@ func resourceAlibabacloudStackEdasK8sApplicationDelete(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
 
+	if d.Id() == "" {
+		return nil
+	}
+
 	// request := edas.CreateDeleteK8sApplicationRequest()
 	request := client.NewCommonRequest("DELETE", "Edas", "2017-08-01", "DeleteK8sApplication", "/pop/v5/k8s/acs/k8s_apps")
 	request.QueryParams["RegionId"] = client.RegionId
 	request.QueryParams["AppId"] = d.Id()
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	wait := incrementalWait(1*time.Second, 2*time.Second)
+	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			errmsg := ""
+			if bresponse != nil {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
+			return resource.NonRetryableError(err)
+		}
+		response := make(map[string]interface{})
+		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if fmt.Sprint(response["Code"]) != "200" {
+			message := ""
+			if v, ok := response["Message"].(string); ok {
+				message = v
+			}
+			if strings.Contains(strings.ToLower(message), "appid is invalid") {
+				return nil
+			}
+			return resource.NonRetryableError(errmsgs.Error("Delete k8s application failed for " + message))
+		}
+		changeOrderId := ""
+		if v, ok := response["ChangeOrderId"].(string); ok {
+			changeOrderId = v
+		}
+		if changeOrderId != "" {
+			stateConf := BuildStateConf([]string{"0", "1"}, []string{"3"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"2", "6", "10"}))
+			if _, err := stateConf.WaitForState(); err != nil {
+				return nil
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		errmsg := ""
 		if bresponse != nil {
@@ -1850,7 +1903,7 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 
 	// node_affinity_require
 
-	if len(affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms) > 0 {
+	if affinity.NodeAffinity != nil && len(affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms) > 0 {
 		for _, node_affinity_require := range affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range node_affinity_require.MatchExpressions {
@@ -1868,7 +1921,7 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 
 	// node_affinity_preferred
 
-	if len(affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
+	if affinity.NodeAffinity != nil && len(affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
 		for _, node_affinity_preferred := range affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range node_affinity_preferred.Preference.MatchExpressions {
@@ -1886,7 +1939,7 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 	}
 
 	// pod_affinity_require
-	if len(affinity.PodAffinity.RequiredDuringSchedulingIgnoredDuringExecution) > 0 {
+	if affinity.PodAffinity != nil && len(affinity.PodAffinity.RequiredDuringSchedulingIgnoredDuringExecution) > 0 {
 		for _, pod_affinity_require := range affinity.PodAffinity.RequiredDuringSchedulingIgnoredDuringExecution {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range pod_affinity_require.LabelSelector.MatchExpressions {
@@ -1905,7 +1958,7 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 	}
 
 	// pod_affinity_preferred
-	if len(affinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
+	if affinity.PodAffinity != nil && len(affinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
 		for _, pod_affinity_preferred := range affinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range pod_affinity_preferred.PodAffinityTerm.LabelSelector.MatchExpressions {
@@ -1925,7 +1978,7 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 	}
 
 	// pod_ant_affinity_require
-	if len(affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution) > 0 {
+	if affinity.PodAntiAffinity != nil && len(affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution) > 0 {
 		for _, pod_ant_affinity_require := range affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range pod_ant_affinity_require.LabelSelector.MatchExpressions {
@@ -1944,7 +1997,7 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 	}
 
 	// pod_ant_affinity_preferred
-	if len(affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
+	if affinity.PodAntiAffinity != nil && len(affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
 		for _, pod_ant_affinity_preferred := range affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range pod_ant_affinity_preferred.PodAffinityTerm.LabelSelector.MatchExpressions {

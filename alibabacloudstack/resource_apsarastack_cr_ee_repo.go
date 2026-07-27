@@ -137,8 +137,8 @@ func resourceAlibabacloudStackCrEeRepoUpdate(d *schema.ResourceData, meta interf
 		update = true
 	}
 
-	if update{
-		repoId := d.Get("repo_type").(string)
+	if update {
+		repoId := d.Get("repo_id").(string)
 		if repoId == "" {
 			response, err := crService.DescribeCrEeRepo(d.Id())
 			if err != nil {
