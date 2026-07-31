@@ -25,7 +25,7 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   cluster_id              = var.cluster_id
   replicas                = 2
 
-  // set 'image_url' and 'repo_id' when package_type is 'image'
+  // set 'image_url' and 'cr_ee_repo_id' when package_type is 'image'
   image_url = "registry-vpc.cn-beijing.aliyuncs.com/edas-demo-image/consumer:1.0"
 
   // set 'package_url','package_version' and 'jdk' when package_type is not 'image'
@@ -56,232 +56,214 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   mount_descs           = var.mount_descs
   local_volume          = var.local_volume
   namespace             = "default"
-  logical_region_id     = cn-beijing
+  logical_region_id     = "cn-beijing"
 }
 ```
 
 ### Affinity Usage
-```
+```terraform
 resource "alibabacloudstack_edas_k8s_application" "default" {
-  // package type is Image / FatJar / War
   package_type            = "FatJar"
-  application_name        = "terraform-test-fatjar2"
+  application_name        = "terraform-test-fatjar"
   application_description = "This is description of description"
   cluster_id              = "xxxxxxxxxxxxxxxxxxx"
-  replicas                = 1
+  replicas                = 2
 
   package_url     = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
   package_version = "2025-07-09 10:00:18"
   jdk             = "Open JDK 8"
 
-  command               = "/bin/sh"
-  command_args          = ["-c", "sleep 1001", ]
-  pre_stop              = "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
-  post_start            = "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
-  namespace             = "default"
+  command      = "/bin/sh"
+  command_args = ["-c", "sleep 1001"]
+  pre_stop     = "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
+  post_start   = "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
+  namespace    = "default"
+
+  // Tolerate the disk-pressure taint on nodes.
   custom_tolerations {
-    key    = "test"
-    value = "test"
-    operator = "Equal"
+    key      = "node.kubernetes.io/disk-pressure"
+    operator = "Exists"
     effect   = "NoSchedule"
   }
+
+  // Required node affinity: exclude control-plane nodes and schedule on workers.
   custom_node_affinity_require {
     match_expressions {
-      key    = "test"
-      values = ["aaaaa", "bbbb"]
-      operator = "In"
+      key      = "node-role.kubernetes.io/control-plane"
+      operator = "DoesNotExist"
     }
   }
+
+  // Preferred node affinity: prefer Linux nodes.
   custom_node_affinity_preferred {
     weight = 100
     match_expressions {
-      key    = "test"
-      values = ["aaaaa", "bbbb"]
+      key      = "kubernetes.io/os"
+      values   = ["linux"]
       operator = "In"
     }
   }
-  custom_pod_affinity_require {
-    k8s_namespace = ["default"]
-    topology_key = "test"
-    match_expressions {
-      key    = "test"
-      values = ["aaaaa", "bbbb"]
-      operator = "In"
-    }
-    match_expressions {
-      key    = "test1"
-      values = ["aaaaa2", "bbbb2"]
-      operator = "In"
-    }
-  }
+
+  // Preferred pod affinity: prefer nodes that already run EDAS app pods.
   custom_pod_affinity_preferred {
-    weight = 1
+    weight        = 1
     k8s_namespace = ["default"]
-    topology_key = "test2"
+    topology_key  = "kubernetes.io/hostname"
     match_expressions {
-      key    = "test1"
-      values = ["aaaaa1", "bbbb1"]
+      key      = "edas.component"
+      values   = ["app"]
       operator = "In"
     }
     match_expressions {
-      key    = "test2"
-      values = ["aaaaa2", "bbbb2"]
-      operator = "NotIn"
-    }
-  }
-  custom_pod_ant_affinity_require {
-    k8s_namespace = ["default"]
-    topology_key = "test3"
-    match_expressions {
-      key    = "test3"
-      values = ["aaaaa3", "bbbb3"]
+      key      = "edas.controlplane"
+      values   = ["edas-oam"]
       operator = "In"
     }
-    match_expressions {
-      key    = "test4"
-      values = ["aaaaa4", "bbbb4"]
-      operator = "NotIn"
-    }
   }
+
+  // Preferred pod anti-affinity: spread pods away from other instances of the same app.
   custom_pod_ant_affinity_preferred {
-    weight = 1
+    weight        = 1
     k8s_namespace = ["default"]
-    topology_key = "test5"
+    topology_key  = "kubernetes.io/hostname"
     match_expressions {
-      key    = "test5"
-      values = ["aaaaa5", "bbbb5"]
+      key      = "edas.component"
+      values   = ["app"]
       operator = "In"
+    }
+    match_expressions {
+      key      = "edas.oam.acname"
+      values   = ["${var.name}"]
+      operator = "NotIn"
     }
   }
 }
-
 ```
 
 ## Argument Reference
 
 The following arguments are supported:
 
-* `application_name` - (Required, ForceNew) The name of the application you want to create. Must start with character,supports numbers, letters and dashes (-), supports up to 36 characters
+* `application_name` - (Required) The name of the application you want to create. Must start with a character, supports numbers, letters and dashes (-), supports up to 36 characters.
 * `cluster_id` - (Required, ForceNew) The ID of the alibabacloudstack container service kubernetes cluster that you want to import to. You can call the ListCluster operation to query.
-* `package_type` - (Required, ForceNew) Application package type. Optional parameter values include: FatJar, WAR and Image.
-* `replicas` - (Optional) Number of application instances.
-* `image_url` - (Optional) Mirror address. When the package_type is set to 'Image', this parameter item is required.
-* `application_description` - (Optional) The description of the application
-* `package_url` - (Optional) The url of the package to deploy.Applications deployed through FatJar or WAR packages need to configure it.
-* `package_version` - (Optional) The version number of the deployment package. WAR and FatJar types are required. Please customize its meaning.
-* `jdk` - (Optional, ForceNew) The JDK version that the deployed package depends on. The optional parameter values are Open JDK 7 and Open JDK 8. Image does not support this parameter.
-* `web_container` - (Optional, ForceNew) The Tomcat version that the deployment package depends on. Applicable to Spring Cloud and Dubbo applications deployed through WAR packages. Image does not support this parameter.
+* `package_type` - (Optional, ForceNew) Application package type. Valid values: `FatJar`, `War` and `Image`. Default to `Image`.
+* `replicas` - (Optional) Number of application instances. Default to 1.
+* `image_url` - (Optional) Mirror address. When the `package_type` is set to `Image`, this parameter is required. This attribute is also computed and will be read back from the API.
+* `application_description` - (Optional) The description of the application.
+* `application_descriotion` - (Optional, Deprecated) Deprecated typo of `application_description`. Please use `application_description` instead.
+* `package_url` - (Optional) The url of the package to deploy. Applications deployed through FatJar or WAR packages need to configure it. This attribute is also computed.
+* `package_version` - (Optional) The version number of the deployment package. WAR and FatJar types are required. Please customize its meaning. This attribute is also computed.
+* `jdk` - (Optional) The JDK version that the deployed package depends on. The optional parameter values are `Open JDK 7` and `Open JDK 8`. Image does not support this parameter.
+* `web_container` - (Optional) The Tomcat version that the deployment package depends on. Applicable to Spring Cloud and Dubbo applications deployed through WAR packages. Image does not support this parameter.
 * `edas_container_version` - (Optional) EDAS-Container version that the deployed package depends on. Image does not support this parameter.
+* `cr_ee_repo_id` - (Optional) Repository ID for the Enterprise Edition Container Registry.
+* `cr_instance_id` - (Optional) The ID of the Enterprise Edition Container Registry instance. Required when using the Enterprise Edition Container Registry.
 
-* `internet_target_port` - (Optional, ForceNew) The public SLB back-end port, is also the service port of the application, ranging from 1 to 65535.("Deprecated, please use the relevant properties of internet_service_port_infos.")
-* `internet_slb_port` - (Optional, ForceNew) The public network SLB front-end port, range 1~65535.("Deprecated, please use the relevant properties of internet_service_port_infos.")
-* `internet_slb_protocol` - (Optional, ForceNew) The public network SLB protocol supports TCP, HTTP and HTTPS protocols.("Deprecated, please use the relevant properties of internet_service_port_infos.")
-* `internet_slb_id` - (Optional, ForceNew) Public network SLB ID. If not configured, EDAS will automatically purchase a new SLB for the user.
+* `internet_target_port` - (Optional, Deprecated) The public SLB back-end port, also the service port of the application, ranging from 1 to 65535. Deprecated, please use the relevant properties of `internet_service_port_infos`.
+* `internet_slb_port` - (Optional, Deprecated) The public network SLB front-end port, range 1~65535. Deprecated, please use the relevant properties of `internet_service_port_infos`.
+* `internet_slb_protocol` - (Optional, Deprecated) The public network SLB protocol supports TCP, HTTP and HTTPS protocols. Deprecated, please use the relevant properties of `internet_service_port_infos`.
+* `internet_slb_id` - (Optional) Public network SLB ID. If not configured, EDAS will automatically purchase a new SLB for the user. This attribute is also computed.
+* `internet_external_traffic_policy` - (Optional) The internet SLB external traffic policy of the service. Valid values: `Local`, `Cluster`. Default to `Local`.
+* `internet_scheduler` - (Optional) The internet SLB scheduler of the service. Valid values: `rr`, `wrr`. Default to `rr`.
+* `internet_service_port_infos` - (Optional) Internet service port configuration. This attribute is also computed. Conflicts with `internet_target_port`, `internet_slb_port` and `internet_slb_protocol`.
+  * `port` - (Required) The front-end port of the internet SLB.
+  * `protocol` - (Required) The protocol of the internet SLB. Valid values: `TCP`, `HTTP`, `HTTPS`.
+  * `target_port` - (Required) The back-end (target) port of the internet SLB.
 
-* `intranet_target_port` - (Optional, ForceNew) The private SLB back-end port, is also the service port of the application, ranging from 1 to 65535.("Deprecated, please use the relevant properties of intranet_service_port_infos.")
-* `intranet_slb_port` - (Optional, ForceNew) The private network SLB front-end port, range 1~65535. ("Deprecated, please use the relevant properties of intranet_service_port_infos.")
-* `intranet_slb_protocol` - (Optional, ForceNew) The private network SLB protocol supports TCP, HTTP and HTTPS protocols. ("Deprecated, please use the relevant properties of intranet_service_port_infos.")
-* `intranet_slb_id` - (Optional, ForceNew) private network SLB ID. If not configured, EDAS will automatically purchase a new SLB for the user.
+* `intranet_target_port` - (Optional, Deprecated) The private SLB back-end port, ranging from 1 to 65535. Deprecated, please use the relevant properties of `intranet_service_port_infos`.
+* `intranet_slb_port` - (Optional, Deprecated) The private network SLB front-end port, range 1~65535. Deprecated, please use the relevant properties of `intranet_service_port_infos`.
+* `intranet_slb_protocol` - (Optional, Deprecated) The private network SLB protocol supports TCP, HTTP and HTTPS protocols. Deprecated, please use the relevant properties of `intranet_service_port_infos`.
+* `intranet_slb_id` - (Optional) Private network SLB ID. If not configured, EDAS will automatically purchase a new SLB for the user. This attribute is also computed.
+* `intranet_external_traffic_policy` - (Optional) The intranet SLB external traffic policy of the service. Valid values: `Local`, `Cluster`. Default to `Local`.
+* `intranet_scheduler` - (Optional) The intranet SLB scheduler of the service. Valid values: `rr`, `wrr`. Default to `rr`.
+* `intranet_service_port_infos` - (Optional) Intranet service port configuration. This attribute is also computed. Conflicts with `intranet_target_port`, `intranet_slb_port` and `intranet_slb_protocol`.
+  * `port` - (Required) The front-end port of the intranet SLB.
+  * `protocol` - (Required) The protocol of the intranet SLB. Valid values: `TCP`, `HTTP`, `HTTPS`.
+  * `target_port` - (Required) The back-end (target) port of the intranet SLB.
 
-* `limit_mem` - (Optional) The memory limit of the application instance during application operation, unit: M.
-* `requests_mem` - (Optional) When the application is created, the memory limit of the application instance, unit: M. When set to 0, it means unlimited. 
-* `requests_m_cpu` - (Optional) When the application is created, the CPU quota of the application instance, unit: number of millcores, similar to request_cpu
-* `limit_m_cpu` - (Optional)  The CPU quota of the application instance during application operation. Unit: Number of millcores, set to 0 means unlimited, similar to request_cpu.
+* `limit_mem` - (Optional) The memory limit of the application instance during application operation, unit: M. This attribute is also computed.
+* `requests_mem` - (Optional) When the application is created, the memory limit of the application instance, unit: M. When set to 0, it means unlimited. This attribute is also computed.
+* `requests_m_cpu` - (Optional) When the application is created, the CPU quota of the application instance, unit: number of milli-cores, similar to request_cpu. This attribute is also computed.
+* `limit_m_cpu` - (Optional) The CPU quota of the application instance during application operation. Unit: Number of milli-cores, set to 0 means unlimited, similar to request_cpu. This attribute is also computed.
 * `command` - (Optional) The set command, if set, will replace the startup command in the mirror when the mirror is started.
-* `command_args` - (Optional) Used in combination with the command, the parameter of the command is a JsonArray string in the format: `[{"argument":"-c"},{"argument":"test"}]`. Among them, -c and test are two parameters that need to be set. 
-* `envs` - (Optional, ForceNew)  Deployment environment variables, the format must conform to the JSON object array, such as: `{"name":"x","value":"y"},{"name":"x2","value":"y2"}`, If you want to cancel the configuration, you need to set an empty JSON array "" to indicate no configuration.
-* `pre_stop` - (Optional) Execute script before stopping
-* `post_start` - (Optional) Execute script after startup
-* `liveness` - (Optional) Container survival status monitoring, format such as: `{"failureThreshold": 3,"initialDelaySeconds": 5,"successThreshold": 1,"timeoutSeconds": 1,"tcpSocket":{"host":"", "port":8080} }`.
-* `readiness` - (Optional) Container service status check. If the check fails, the traffic passing through K8s Service will not be transferred to the container. The format is: `{"failureThreshold": 3,"initialDelaySeconds": 5,"successThreshold": 1,"timeoutSeconds": 1, "httpGet": {"path": "/consumer","port": 8080,"scheme": "HTTP","httpHeaders": [{"name": "test","value": "testvalue"} ]}}`.
+* `command_args` - (Optional) Used in combination with the command, the parameter of the command is a list of strings, such as: `["-c", "sleep 1001"]`.
+* `envs` - (Optional) Deployment environment variables, a map of key-value pairs, such as: `{x = "y", x2 = "y2"}`. If you want to cancel the configuration, set an empty map.
+* `pre_stop` - (Optional) Execute script before stopping. This attribute is also computed.
+* `post_start` - (Optional) Execute script after startup.
+* `liveness` - (Optional) Container liveness probe, format such as: `{"failureThreshold": 3,"initialDelaySeconds": 5,"successThreshold": 1,"timeoutSeconds": 1,"tcpSocket":{"host":"", "port":8080} }`.
+* `readiness` - (Optional) Container readiness check. If the check fails, the traffic passing through K8s Service will not be transferred to the container. The format is: `{"failureThreshold": 3,"initialDelaySeconds": 5,"successThreshold": 1,"timeoutSeconds": 1, "httpGet": {"path": "/consumer","port": 8080,"scheme": "HTTP","httpHeaders": [{"name": "test","value": "testvalue"} ]}}`.
 * `nas_id` - (Optional) The ID of the mounted NAS must be in the same region as the cluster. It must have an available mount point creation quota, or its mount point must be on a switch in the VPC. If it is not filled in and the mountDescs field exists, a NAS will be automatically purchased and mounted on the switch in the VPC by default.
-* `mount_descs` - (Optional, ForceNew) Mount configuration description, as a serialized JSON. For example: `[{"nasPath": "/k8s","mountPath": "/mnt"},{"nasPath": "/files","mountPath": "/app/files"}]`. Among them, nasPath refers to the file storage path; mountPath refers to the path mounted in the container.
-* `namespace` - (Optional) The namespace of the K8s cluster, it will determine which K8s namespace your application is deployed in. The default is 'default'.
+* `mount_descs` - (Optional) Mount configuration description, as a serialized JSON. For example: `[{"nasPath": "/k8s","mountPath": "/mnt"},{"nasPath": "/files","mountPath": "/app/files"}]`. Among them, nasPath refers to the file storage path; mountPath refers to the path mounted in the container. This attribute is also computed.
+* `namespace` - (Optional) The namespace of the K8s cluster, it will determine which K8s namespace your application is deployed in. The default is 'default'. This attribute is also computed.
 * `logical_region_id` - (Optional) The ID corresponding to the EDAS namespace, the non-default namespace must be filled in.
 * `config_mount_descs` - (Optional) Configuring K8s ConfigMap and Secret Mounts, supporting the mounting of ConfigMaps and Secrets to specified container directories. The configuration parameters for ConfigMountDescs are as follows:
   * `name` - (Required) The name of the ConfigMap or Secret.
-  * `type` - (Required) The configuration type, supporting ConfigMap and Secret types.
+  * `type` - (Required) The configuration type. Valid values: `ConfigMap`, `Secret`.
   * `mount_path` - (Required) The mount path, an absolute path in the container that starts with a forward slash (/).
 * `pvc_mount_descs` - (Optional) Configure K8s PVC (PersistentVolumeClaim) mounting, supporting the mounting of K8s PVC volumes to specified container directories. The configuration parameters for PvcMountDescs are described as follows:
   * `pvc_name` - (Required) The name of the PVC volume. The PVC volume must already exist and be in the Bound state.
   * `mount_paths` - (Required) A list of mount directories, supporting the configuration of multiple mount directories. Each mount directory supports two configuration parameters:
     * `mount_path` - (Required) The mount path, an absolute path in the container that starts with a forward slash (/).
-    * `read_only` - (Required) The mount mode, true for read-only, false for read-write, defaulting to false.
+    * `read_only` - (Optional) The mount mode, true for read-only, false for read-write, defaulting to false.
 * `local_volume` - (Optional) Configuration for mounting host files to container directories.
   * `node_path` - (Required) The path on the host machine.
   * `mount_path` - (Required) The path within the container.
-  * `type` - (Optional) The type of mount.
-* `update_type` - (Optional)  Deployment type. You can set this parameter when using batch deployment or grayscale deployment. Optional Values: `BatchUpdate` and `GrayBatchUpdate`.
-* `update_batch` - (Optional)  Number of deployment batches.When using batch deployment, you need to set the batch number of deployments.
-* `update_release_type` - (Optional)  Release type of batch deployment. Optional Values: `auto` and `manual`.
-* `update_batch_wait_time` - (Optional)  Automatic release time for batch deployment. When the update_release_type is set to `auto`, You need to set an automatic release time.
-* `update_gray` - (Optional)  Number of batches for grayscale deployment.
-* `cr_ee_repo_id` - (Optional) Repository ID for the Enterprise Edition Container Registry.
-* `host_aliases` - (Optional) haostAliases configuration.
+  * `type` - (Required) The type of mount.
+* `update_type` - (Optional) Deployment type. You can set this parameter when using batch deployment or grayscale deployment. Valid values: `BatchUpdate` and `GrayBatchUpdate`.
+* `update_batch` - (Optional) Number of deployment batches. When using batch deployment, you need to set the batch number of deployments.
+* `update_release_type` - (Optional) Release type of batch deployment. Valid values: `auto` and `manual`.
+* `update_batch_wait_time` - (Optional) Automatic release time for batch deployment. When the `update_release_type` is set to `auto`, you need to set an automatic release time.
+* `update_gray` - (Optional) Number of batches for grayscale deployment.
+* `host_aliases` - (Optional) HostAliases configuration. This attribute is also computed.
   * `ip` - (Optional) The ip of hostAliases.
   * `hostnames` - (Optional) A list of hostnames.
-* `intranet_service_port_infos` - (Optional) Intranet service port configuration.
-  * `port` - (Optional) The port of intranet service port.
-  * `protocol` - (Optional) The protocol of intranet service port.
-  * `target_port` - (Optional) The target port of intranet service port.
-* `intranet_external_traffic_policy` - (Optional) The intranet Slb external traffic policy of the service.
-* `intranet_scheduler` - (Optional) The intranet Slb scheduler of the service.
-* `internet_service_port_infos` - (Optional) Internet service port configuration.
-  * `port` - (Optional) The port of internet service port.
-  * `protocol` - (Optional) The protocol of Internet service port.
-  * `target_port` - (Optional) The target port of Internet service port.
-* `internet_external_traffic_policy` - (Optional) The internet Slb external traffic policy of the service.
-* `internet_scheduler` - (Optional) The internet Slb scheduler of the service.
 * `custom_tolerations` - (Optional) Taint tolerations.
-  * `key` - (Optional) The key of the node tag.
-  * `operator` - (Optional) The operator of the node tag. Valid values: `Exists` and `Equal`.
-  * `value` - (Optional) The value of the node tag.
-  * `effect` - (Optional) The effect of the node tag. Valid values: `NoExecute`, `NoSchedule` and `PreferNoSchedule`.
-  * `toleration_seconds` - (Optional) The toleration seconds.
-* `custom_node_affinity_require` - (Optional) Required Node Affinity.
-  * `match_expressions` - (Optional) The match expressions of the node affinity.
-    * `key` - (Optional) The key of the node label.
-    * `operator` - (Optional) The operator of the node label. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, `Lt`.
-    * `values` - (Optional) The values of the node label.
-* `custom_node_affinity_preference` - (Optional) Preferred Node Affinity.
-  * `weight` - (Optional) The weight of the node affinity. Valid values: `1` to `100`.
-  * `match_expressions` - (Optional) The match expressions of the node affinity.
-    * `key` - (Optional) The key of the node tag.
-    * `operator` - (Optional) The operator of the node tag. Values: `In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, `Lt`.
-    * `values` - (Optional) The values of the node tag.
-* `custom_pod_affinity_require` - (Optional) Required Pod Affinity.
-  * `k8s_namespace` - (Optional) The namespace of the K8s cluster namespace.
-  * `topology_key` - (Optional) The topology key of the pod.
+  * `key` - (Required) The key of the node taint.
+  * `operator` - (Required) The operator. Valid values: `Equal` and `Exists`.
+  * `value` - (Optional) The value of the node taint. Required when `operator` is `Equal`. This attribute is also computed.
+  * `effect` - (Required) The effect. Valid values: `NoSchedule`, `NoExecute` and `PreferNoSchedule`.
+  * `toleration_seconds` - (Optional) The toleration seconds. This attribute is also computed.
+* `custom_node_affinity_require` - (Optional) Required (hard) node affinity.
+  * `match_expressions` - (Required) The match expressions of the node affinity.
+    * `key` - (Required) The key of the node label.
+    * `operator` - (Required) The operator. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, `Lt`.
+    * `values` - (Optional) The values of the node label. This attribute is also computed.
+* `custom_node_affinity_preferred` - (Optional) Preferred (soft) node affinity.
+  * `weight` - (Optional) The weight of the node affinity. Valid values: `1` to `100`. Default to 1.
+  * `match_expressions` - (Required) The match expressions of the node affinity.
+    * `key` - (Required) The key of the node label.
+    * `operator` - (Required) The operator. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, `Lt`.
+    * `values` - (Optional) The values of the node label. This attribute is also computed.
+* `custom_pod_affinity_require` - (Optional) Required (hard) pod affinity.
+  * `k8s_namespace` - (Optional) The namespaces of the K8s cluster.
+  * `topology_key` - (Required) The topology key of the pod.
   * `match_expressions` - (Optional) The match expressions of the pod affinity.
-    * `key` - (Optional) The key of the pod tag.
-    * `operator` - (Optional) The operator of the pod tag. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
-    * `values` - (Optional) The values of the pod tag.
-* `custom_pod_affinity_preferred` - (Optional) The custom pod affinity preferred.
-  * `weight` - (Optional) The weight of the pod affinity. Valid values: `1` to `100`.
-  * `k8s_namespace` - (Optional) The namespace of the K8s cluster namespace.
-  * `topology_key` - (Optional) The topology key of the pod.
+    * `key` - (Required) The key of the pod label.
+    * `operator` - (Required) The operator. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (Optional) The values of the pod label. This attribute is also computed.
+* `custom_pod_affinity_preferred` - (Optional) Preferred (soft) pod affinity.
+  * `weight` - (Optional) The weight of the pod affinity. Valid values: `1` to `100`. Default to 1.
+  * `k8s_namespace` - (Optional) The namespaces of the K8s cluster.
+  * `topology_key` - (Required) The topology key of the pod.
   * `match_expressions` - (Optional) The match expressions of the pod affinity.
-    * `key` - (Optional) The key of the pod tag.
-    * `operator` - (Optional) The operator of the pod tag. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
-    * `values` - (Optional) The values of the pod tag.
-* `custom_pod_ant_affinity_require` - (Optional) Required Pod ant Affinity.
-  * `k8s_namespace` - (Optional) The namespace of the K8s cluster namespace.
-  * `topology_key` - (Optional) The topology key of the pod.
-  * `match_expressions` - (Optional) The match expressions of the pod ant affinity.
-    * `key` - (Optional) The key of the pod tag.
-    * `operator` - (Optional) The operator of the pod tag. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
-    * `values` - (Optional) The values of the pod tag.
-* `custom_pod_ant_affinity_preferred` - (Optional) The custom pod ant affinity preferred.
-  * `weight` - (Optional) The weight of the pod ant affinity. Valid values: `1` to `100`.
-  * `k8s_namespace` - (Optional) The namespace of the K8s cluster namespace.
-  * `topology_key` - (Optional) The topology key of the pod.
-  * `match_expressions` - (Optional) The match expressions of the pod ant affinity.
-    * `key` - (Optional) The key of the pod tag.
-    * `operator` - (Optional) The operator of the pod tag. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
-    * `values` - (Optional) The values of the pod tag.
-
-
-
+    * `key` - (Required) The key of the pod label.
+    * `operator` - (Required) The operator. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (Optional) The values of the pod label. This attribute is also computed.
+* `custom_pod_ant_affinity_require` - (Optional) Required (hard) pod anti-affinity.
+  * `k8s_namespace` - (Optional) The namespaces of the K8s cluster.
+  * `topology_key` - (Required) The topology key of the pod.
+  * `match_expressions` - (Optional) The match expressions of the pod anti-affinity.
+    * `key` - (Required) The key of the pod label.
+    * `operator` - (Required) The operator. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (Optional) The values of the pod label. This attribute is also computed.
+* `custom_pod_ant_affinity_preferred` - (Optional) Preferred (soft) pod anti-affinity.
+  * `weight` - (Optional) The weight of the pod anti-affinity. Valid values: `1` to `100`. Default to 1.
+  * `k8s_namespace` - (Optional) The namespaces of the K8s cluster.
+  * `topology_key` - (Required) The topology key of the pod.
+  * `match_expressions` - (Optional) The match expressions of the pod anti-affinity.
+    * `key` - (Required) The key of the pod label.
+    * `operator` - (Required) The operator. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (Optional) The values of the pod label. This attribute is also computed.
 ## Attributes Reference
 
 The following attributes are exported:
