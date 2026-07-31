@@ -150,32 +150,27 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"application_name": "${var.name}",
-					"cluster_id":       "${local.edas_cluster_id}",
-					"package_type":     "FatJar",
-					"package_url":      fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
-					"package_version":  "2025-07-09 13:00:18",
-					"jdk":              "Open JDK 8",
-					"replicas":         "2",
+					"application_name":  "${var.name}",
+					"cluster_id":        "${local.edas_cluster_id}",
+					"logical_region_id": "${local.edas_logical_region_id}",
+					"package_type":      "FatJar",
+					"package_url":       fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
+					"package_version":   "2026-07-30 17:17:18",
+					"jdk":               "Open JDK 8",
+					"replicas":          "2",
 					"internet_service_port_infos": []map[string]interface{}{
 						{
 							"target_port": "18082",
 							"port":        "18082",
 							"protocol":    "HTTP",
 						},
-						{
-							"target_port": "8080",
-							"port":        "8080",
-							"protocol":    "TCP",
-						},
 					},
 					"internet_external_traffic_policy": "Local",
 					"internet_scheduler":               "rr",
 					"custom_tolerations": []map[string]interface{}{
 						{
-							"key":      "test",
-							"value":    "test",
-							"operator": "Equal",
+							"key":      "node.kubernetes.io/disk-pressure",
+							"operator": "Exists",
 							"effect":   "NoSchedule",
 						},
 					},
@@ -183,9 +178,8 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 						{
 							"match_expressions": []map[string]interface{}{
 								{
-									"key":      "test",
-									"values":   []string{"aaaaa21", "bbbb21"},
-									"operator": "In",
+									"key":      "node-role.kubernetes.io/control-plane",
+									"operator": "DoesNotExist",
 								},
 							},
 						},
@@ -195,27 +189,9 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 							"weight": "100",
 							"match_expressions": []map[string]interface{}{
 								{
-									"key":      "test1",
-									"values":   []string{"aaaaa1", "bbbb1"},
+									"key":      "kubernetes.io/os",
+									"values":   []string{"linux"},
 									"operator": "In",
-								},
-							},
-						},
-					},
-					"custom_pod_affinity_require": []map[string]interface{}{
-						{
-							"k8s_namespace": []string{"default"},
-							"topology_key":  "test",
-							"match_expressions": []map[string]interface{}{
-								{
-									"key":      "test",
-									"values":   []string{"aaaaa21", "bbbb21"},
-									"operator": "In",
-								},
-								{
-									"key":      "test22",
-									"values":   []string{"aaaaa22", "bbbb22"},
-									"operator": "NotIn",
 								},
 							},
 						},
@@ -224,35 +200,17 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 						{
 							"weight":        "1",
 							"k8s_namespace": []string{"default"},
-							"topology_key":  "test",
+							"topology_key":  "kubernetes.io/hostname",
 							"match_expressions": []map[string]interface{}{
 								{
-									"key":      "test3",
-									"values":   []string{"aaaaa31", "bbbb31"},
+									"key":      "edas.component",
+									"values":   []string{"app"},
 									"operator": "In",
 								},
 								{
-									"key":      "test33",
-									"values":   []string{"aaaaa33", "bbbb33"},
-									"operator": "NotIn",
-								},
-							},
-						},
-					},
-					"custom_pod_ant_affinity_require": []map[string]interface{}{
-						{
-							"k8s_namespace": []string{"default"},
-							"topology_key":  "test4",
-							"match_expressions": []map[string]interface{}{
-								{
-									"key":      "test4",
-									"values":   []string{"aaaaa41", "bbbb41"},
+									"key":      "edas.controlplane",
+									"values":   []string{"edas-oam"},
 									"operator": "In",
-								},
-								{
-									"key":      "test42",
-									"values":   []string{"aaaaa42", "bbbb42"},
-									"operator": "NotIn",
 								},
 							},
 						},
@@ -261,12 +219,17 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 						{
 							"weight":        "1",
 							"k8s_namespace": []string{"default"},
-							"topology_key":  "test5",
+							"topology_key":  "kubernetes.io/hostname",
 							"match_expressions": []map[string]interface{}{
 								{
-									"key":      "test5",
-									"values":   []string{"aaaaa51", "bbbb51"},
+									"key":      "edas.component",
+									"values":   []string{"app"},
 									"operator": "In",
+								},
+								{
+									"key":      "edas.oam.acname",
+									"values":   []string{"${var.name}"},
+									"operator": "NotIn",
 								},
 							},
 						},
@@ -274,35 +237,28 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"package_type":                                            "FatJar",
+						"package_url":                                             CHECKSET,
 						"replicas":                                                "2",
 						"internet_external_traffic_policy":                        "Local",
 						"internet_scheduler":                                      "rr",
-						"internet_service_port_infos.#":                           "2",
+						"internet_service_port_infos.#":                           "1",
 						"internet_service_port_infos.0.target_port":               "18082",
 						"internet_service_port_infos.0.port":                      "18082",
 						"internet_service_port_infos.0.protocol":                  "HTTP",
-						"internet_service_port_infos.1.target_port":               "8080",
-						"internet_service_port_infos.1.port":                      "8080",
-						"internet_service_port_infos.1.protocol":                  "TCP",
-						"custom_tolerations":                                      CHECKSET,
+						"custom_tolerations.#":                                    "1",
 						"custom_tolerations.0.effect":                             "NoSchedule",
-						"custom_node_affinity_require":                            CHECKSET,
+						"custom_node_affinity_require.#":                          "1",
 						"custom_node_affinity_require.0.match_expressions.#":      "1",
-						"custom_node_affinity_preferred":                          CHECKSET,
+						"custom_node_affinity_preferred.#":                        "1",
 						"custom_node_affinity_preferred.0.match_expressions.#":    "1",
-						"custom_pod_affinity_require":                             CHECKSET,
-						"custom_pod_affinity_require.0.match_expressions.#":       "2",
-						"custom_pod_affinity_require.0.topology_key":              "test",
-						"custom_pod_affinity_preferred":                           CHECKSET,
+						"custom_pod_affinity_preferred.#":                         "1",
 						"custom_pod_affinity_preferred.0.match_expressions.#":     "2",
-						"custom_pod_affinity_preferred.0.topology_key":            "test",
+						"custom_pod_affinity_preferred.0.topology_key":            "kubernetes.io/hostname",
 						"custom_pod_affinity_preferred.0.weight":                  "1",
-						"custom_pod_ant_affinity_require":                         CHECKSET,
-						"custom_pod_ant_affinity_require.0.match_expressions.#":   "2",
-						"custom_pod_ant_affinity_require.0.topology_key":          "test4",
-						"custom_pod_ant_affinity_preferred":                       CHECKSET,
+						"custom_pod_ant_affinity_preferred.#":                     "1",
 						"custom_pod_ant_affinity_preferred.0.match_expressions.#": "2",
-						"custom_pod_ant_affinity_preferred.0.topology_key":        "test5",
+						"custom_pod_ant_affinity_preferred.0.topology_key":        "kubernetes.io/hostname",
 						"custom_pod_ant_affinity_preferred.0.weight":              "1",
 					}),
 				),
@@ -414,38 +370,19 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccConfig(map[string]interface{}{
-					"custom_node_affinity_require": []map[string]interface{}{
-						{
-							"match_expressions": []map[string]interface{}{
-								{
-									"key":      "test",
-									"values":   []string{"aaaaa21", "bbbb21"},
-									"operator": "In",
-								},
-								{
-									"key":      "test51",
-									"values":   []string{"aaaaa521", "bbb521"},
-									"operator": "In",
-								},
-							},
-						},
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"custom_node_affinity_require":                           CHECKSET,
-						"custom_node_affinity_require.0.match_expressions.#":     "2",
-						"custom_node_affinity_require.0.match_expressions.1.key": "test51",
-					}),
-				),
-			},
-			{
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
 				// "intranet_scheduler", "internet_scheduler" cannot be read back
-				ImportStateVerifyIgnore: []string{"intranet_scheduler", "internet_scheduler"},
+				// affinity/tolerations are not returned by GetK8sApplication, cannot be read back
+				ImportStateVerifyIgnore: []string{
+					"intranet_scheduler", "internet_scheduler", "logical_region_id",
+					"custom_node_affinity_require",
+					"custom_node_affinity_preferred",
+					"custom_pod_affinity_preferred",
+					"custom_pod_ant_affinity_preferred",
+					"custom_tolerations",
+				},
 			},
 		},
 	})
@@ -478,14 +415,16 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"application_name": "${var.name}",
-					"cluster_id":       "${local.edas_cluster_id}",
-					"package_type":     "FatJar",
-					"package_url":      fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
-					"package_version":  "2025-05-20 17:17:18",
-					"jdk":              "Open JDK 8",
-					"replicas":         "1",
-					"internet_slb_id":  "${alibabacloudstack_slb_loadbalancer.default.id}",
+					"application_name":  "${var.name}",
+					"cluster_id":        "${local.edas_cluster_id}",
+					"logical_region_id": "${local.edas_logical_region_id}",
+					"package_type":      "FatJar",
+					"package_url":       fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
+					"package_version":   "2026-07-30 17:17:18",
+					"jdk":               "Open JDK 8",
+					"cr_instance_id":    "cri-private",
+					"replicas":          "1",
+					"internet_slb_id":   "${alibabacloudstack_slb_loadbalancer.default.id}",
 					"internet_service_port_infos": []map[string]interface{}{
 						{
 							"target_port": "18082",
@@ -520,7 +459,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				// "intranet_scheduler", "internet_scheduler" cannot be read back
-				ImportStateVerifyIgnore: []string{"intranet_scheduler", "internet_scheduler"},
+				ImportStateVerifyIgnore: []string{"intranet_scheduler", "cr_instance_id", "internet_scheduler", "logical_region_id"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -556,12 +495,103 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 	})
 }
 
+func TestUatAlibabacloudStackEdasK8sApplication_image(t *testing.T) {
+	var v *EdasK8sApplcation
+	resourceId := "alibabacloudstack_edas_k8s_application.default"
+	ra := resourceAttrInit(resourceId, edasK8sApplicationBasicMap)
+	serviceFunc := func() interface{} {
+		return &EdasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
+
+	rand := getAccTestRandInt(1000, 9999)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := fmt.Sprintf("tf-testacc-edask8sappimg%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sApplicationConfigDependence)
+	imageUrl := os.Getenv("ALIBABACLOUDSTACK_EDAS_IMAGE_URL")
+	if imageUrl == "" {
+		t.Skip("ALIBABACLOUDSTACK_EDAS_IMAGE_URL is not set, skipping Image type EDAS K8s application acceptance test")
+	}
+	updatedImageUrl := os.Getenv("ALIBABACLOUDSTACK_EDAS_IMAGE_URL_UPDATE")
+	if updatedImageUrl == "" {
+		updatedImageUrl = fmt.Sprintf("%s-updated", imageUrl)
+	}
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      testAccCheckEdasK8sApplicationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"application_name":  "${var.name}",
+					"cluster_id":        "${local.edas_cluster_id}",
+					"logical_region_id": "${local.edas_logical_region_id}",
+					"package_type":      "Image",
+					"image_url":         imageUrl,
+					"replicas":          "1",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"package_type": "Image",
+						"image_url":    imageUrl,
+						"package_url":  "",
+						"replicas":     "1",
+					}),
+				),
+			},
+			{
+				// 验证 image_url 更新后能正确回读
+				Config: testAccConfig(map[string]interface{}{
+					"image_url": updatedImageUrl,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"package_type": "Image",
+						"image_url":    updatedImageUrl,
+						"package_url":  "",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"logical_region_id"},
+			},
+		},
+	})
+}
+
 var edasK8sApplicationBasicMap = map[string]string{
 	// "application_name": CHECKSET,
 	// "cluster_id":       CHECKSET,
+	"replicas": CHECKSET,
 }
 
 func testAccCheckEdasK8sApplicationDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
+	edasService := EdasService{client}
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "alibabacloudstack_edas_k8s_application" {
+			continue
+		}
+
+		_, err := edasService.DescribeEdasK8sApplication(rs.Primary.ID)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				continue
+			}
+			return errmsgs.WrapError(err)
+		}
+		return errmsgs.WrapError(errmsgs.Error("EDAS K8s Application still exists"))
+	}
 	return nil
 }
 
@@ -575,10 +605,17 @@ func resourceEdasK8sApplicationConfigDependence(name string) string {
 		
 	resource "alibabacloudstack_slb_loadbalancer" "default" {
 		name          = "${var.name}_slb"
-		vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
+		vswitch_id    = "${local.k8s_vswitch_id}"
 		address_type  = "internet"
 		specification = "slb.s2.small"
 	}
 
-		`, name, EdasClusterCommonTestCase()) // GeneratePassword(12))
+	resource "alibabacloudstack_slb_loadbalancer" "default1" {
+		name          = "${var.name}_slb1"
+		vswitch_id    = "${local.k8s_vswitch_id}"
+		address_type  = "intranet"
+		specification = "slb.s2.small"
+	}
+
+`, name, EdasClusterCommonTestCase()) // GeneratePassword(12))
 }

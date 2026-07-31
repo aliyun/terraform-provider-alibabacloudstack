@@ -10,7 +10,6 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -1266,14 +1265,9 @@ const VpcCommonTestCase = `
 resource "alibabacloudstack_vpc_vpc" "default" {
   vpc_name = "${var.name}_vpc"
   cidr_block = "172.16.0.0/16"
-  tags = {
-    common_test = "terraform"
-	filter = var.name
-  }
   lifecycle {
       ignore_changes = [
 		secondary_cidr_blocks,
-        tags
       ]
   }
 }
@@ -1431,6 +1425,7 @@ resource "alibabacloudstack_cs_kubernetes" "default" {
 	worker_disk_size			= "40"
 	master_disk_size			= "40"
 	slb_internet_enabled		= "true"
+	new_nat_gateway				= "false"
 	security_group_id			= alibabacloudstack_ecs_securitygroup.default.id
 	runtime	 {
 		name	= "containerd"
@@ -1446,72 +1441,32 @@ locals {
 `, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1), DataAlibabacloudstackInstanceTypes)
 }
 
-func checkOrImportEdasK8sInstance(k8sId string) error {
-	rawClient, err := sharedClientForRegion("")
-	if err != nil {
-		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
-	}
-	client := rawClient.(*connectivity.AlibabacloudStackClient)
-	edasService := EdasService{client}
-	{
-		request := edas.CreateListClusterRequest()
-		client.InitRoaRequest(*request.RoaRequest)
-		request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-
-		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-			return edasClient.ListCluster(request)
-		})
-
-		response, ok := raw.(*edas.ListClusterResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_clusters", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-
-		if response.Code != 200 {
-			return errmsgs.WrapError(errmsgs.Error(response.Message))
-		}
-
-		for _, cluster := range response.ClusterList.Cluster {
-			if k8sId == cluster.ClusterId {
-				return nil
-			}
-		}
-	}
-	retry := 5
-	for {
-		if _, err := importK8sCluster(client, k8sId, ""); err == nil {
-			return nil
-		} else {
-			if retry < 0 {
-				return err
-			}
-			retry -= 1
-		}
-	}
-}
-
 func EdasClusterCommonTestCase() string {
-	k8sId := os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID")
-	if k8sId != "" {
-		checkOrImportEdasK8sInstance(k8sId)
-	}
 	return AckK8sCommonTestCase() + `
 	
 data "alibabacloudstack_edas_k8s_clusters" "default" {
 	cs_cluster_id = local.k8s_cluster_id
 }
 
+locals {
+	// 仅当集群尚未导入 EDAS 时才创建导入资源：
+	// create_count 只反映 ACK 集群是否预先存在，与是否已导入 EDAS 无关。
+	// 若已存在 EDAS 集群时仍创建该资源，ImportK8sCluster 会接管已有集群，
+	// 测试销毁阶段会误删原有 EDAS 集群。
+	edas_create_count = length(data.alibabacloudstack_edas_k8s_clusters.default.ids) > 0 ? 0 : 1
+}
+
 resource "alibabacloudstack_edas_k8s_cluster" "default" {
-	count			= local.create_count
+	count			= local.edas_create_count
 	cs_cluster_id	= local.k8s_cluster_id
 }
 
 locals {
-	edas_cluster_id = local.create_count == 0 ? data.alibabacloudstack_edas_k8s_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
+	edas_cluster_id = local.edas_create_count == 0 ? data.alibabacloudstack_edas_k8s_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
+	// 已导入的集群可能归属于非默认逻辑 namespace（如 cn-xxx:autoK8sNs），
+	// EDAS 应用等资源必须携带该 LogicalRegionId 才能找到集群；
+	// 新导入的集群在默认 namespace 下，传空即可。
+	edas_logical_region_id = local.edas_create_count == 0 ? data.alibabacloudstack_edas_k8s_clusters.default.clusters.0.logical_region_id : ""
 }
 `
 }

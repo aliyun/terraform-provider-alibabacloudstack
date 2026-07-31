@@ -12,6 +12,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -309,8 +310,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"use_cr_ee": {
-				Type:     schema.TypeBool,
+			"cr_instance_id": {
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"update_type": {
@@ -696,8 +697,8 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	request.QueryParams["RegionId"] = client.RegionId
 	request.QueryParams["PackageType"] = packageType
 	request.QueryParams["ClusterId"] = d.Get("cluster_id").(string)
-	if use_cr_ee := d.Get("use_cr_ee"); use_cr_ee.(bool) {
-		request.QueryParams["crInstanceId"] = "cri-private"
+	if v, ok := d.GetOk("cr_instance_id"); ok && v.(string) != "" {
+		request.QueryParams["crInstanceId"] = v.(string)
 	}
 	if strings.ToLower(packageType) == "image" {
 		if v, ok := d.GetOk("image_url"); !ok {
@@ -850,19 +851,35 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 		}
 		request.QueryParams["CustomAffinity"] = string(data)
 	}
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug("InsertK8sApplication", bresponse, request, request.QueryParams)
-	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
+	// 对 InsertK8sApplication 调用增加有限重试，仅对 ServiceUnavailable / Throttling 等可重试错误重试
+	wait := incrementalWait(2*time.Second, 4*time.Second)
 	var response map[string]interface{}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	if fmt.Sprint(response["Code"]) != "200" {
-		return errmsgs.WrapError(fmt.Errorf("Create k8s application failed for %s", response["Message"].(string)))
+	err := resource.Retry(30*time.Second, func() *resource.RetryError {
+		bresponse, retryErr := client.ProcessCommonRequest(request)
+		addDebug("InsertK8sApplication", bresponse, request, request.QueryParams)
+		if retryErr != nil {
+			if errmsgs.NeedRetry(retryErr) || errmsgs.IsExpectedErrors(retryErr, errmsgs.ServiceUnavailable, errmsgs.Throttling, errmsgs.ThrottlingUser) {
+				wait()
+				return resource.RetryableError(retryErr)
+			}
+			errmsg := ""
+			if bresponse != nil {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(retryErr, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		}
+		response = make(map[string]interface{})
+		retryErr = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if retryErr != nil {
+			return resource.NonRetryableError(retryErr)
+		}
+		if fmt.Sprint(response["Code"]) != "200" {
+			return resource.NonRetryableError(errmsgs.WrapError(fmt.Errorf("Create k8s application failed for %v", response["Message"])))
+		}
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 	applicationInfo, ok := response["ApplicationInfo"].(map[string]interface{})
 	if !ok {
@@ -919,22 +936,40 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 		if err := json.Unmarshal([]byte(response.Conf.Tolerations), &tolerations); err != nil {
 			return errmsgs.WrapError(err)
 		}
-		for _, data := range tolerations {
+		allowedTolerationKeys := map[string]bool{"key": true, "operator": true, "value": true, "effect": true, "toleration_seconds": true}
+		for i, data := range tolerations {
 			custom_toleration := data.(map[string]interface{})
 			if v, ok := custom_toleration["tolerationSeconds"]; ok {
 				custom_toleration["toleration_seconds"] = v
 			}
-			delete(custom_toleration, "tolerationSeconds")
+			clean := map[string]interface{}{}
+			for k, v := range custom_toleration {
+				if allowedTolerationKeys[k] {
+					clean[k] = v
+				}
+			}
+			tolerations[i] = clean
 		}
 		d.Set("custom_tolerations", tolerations)
 	}
 	d.Set("application_name", response.App.ApplicationName)
 	d.Set("cluster_id", response.App.ClusterId)
 	d.Set("replicas", response.App.Instances)
+	packageType := strings.ToLower(response.App.ApplicationType)
 	d.Set("package_type", response.App.ApplicationType)
-	if d.Get("package_type").(string) == "docker" {
-		d.Set("image_url", response.ImageInfo.ImageUrl)
+
+	allDeploy := response.DeployGroups.DeployGroup
+
+	// Image / Docker 类型：回写 image_url，不维护 package_url
+	if packageType == "image" || packageType == "docker" {
+		imageUrl := response.ImageInfo.ImageUrl
+		if imageUrl == "" && len(allDeploy) > 0 {
+			// 兼容 ImageInfo 为空但 PackageUrl 存了镜像地址的情况
+			imageUrl = allDeploy[0].PackageUrl
+		}
+		d.Set("image_url", imageUrl)
 	}
+
 	envs := make(map[string]string)
 	for _, e := range response.App.EnvList.Env {
 		envs[e.Name] = e.Value
@@ -947,16 +982,19 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	d.Set("limit_mem", response.App.LimitMem)
 	d.Set("requests_mem", response.App.RequestMem)
 
-	allDeploy := response.DeployGroups.DeployGroup
 	for _, v := range allDeploy {
 		if len(v.PackageVersion) > 0 {
 			d.Set("package_version", v.PackageVersion)
 
 		}
-		if v.PackageUrl != "" {
-			d.Set("package_url", v.PackageUrl)
-		} else if v.PackagePublicUrl != "" {
-			d.Set("package_url", v.PackagePublicUrl)
+
+		// 仅 FatJar / War 类型维护 package_url
+		if packageType != "image" && packageType != "docker" {
+			if v.PackageUrl != "" {
+				d.Set("package_url", v.PackageUrl)
+			} else if v.PackagePublicUrl != "" {
+				d.Set("package_url", v.PackagePublicUrl)
+			}
 		}
 
 		for _, c := range v.Components.ComponentsItem {
@@ -1229,10 +1267,7 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 	request.QueryParams["RegionId"] = client.RegionId
 	request.QueryParams["AppId"] = d.Id()
 
-	packageType, err := edasService.QueryK8sAppPackageType(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
+	packageType := d.Get("package_type").(string)
 	if strings.ToLower(packageType) == "image" {
 		if d.HasChange("image_url") {
 			partialKeys = append(partialKeys, "image_url")
@@ -1449,22 +1484,38 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 				request.QueryParams["UpdateStrategy"] = fmt.Sprintf("{\"type\":\"%s\",\"batchUpdate\":{\"batch\":%d,\"releaseType\":\"%s\"}%s}", update_type, update_batch, update_release_type, gray_update_strategy)
 			}
 		}
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-
-		if err != nil {
-			errmsg := ""
-			if bresponse != nil {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		// 对 DeployK8sApplication 调用增加有限重试，仅对 ServiceUnavailable / Throttling 等可重试错误重试
+		deployWait := incrementalWait(2*time.Second, 4*time.Second)
+		var changeOrderId string
+		err = resource.Retry(30*time.Second, func() *resource.RetryError {
+			bresponse, retryErr := client.ProcessCommonRequest(request)
+			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+			if retryErr != nil {
+				if errmsgs.NeedRetry(retryErr) || errmsgs.IsExpectedErrors(retryErr, errmsgs.ServiceUnavailable, errmsgs.Throttling, errmsgs.ThrottlingUser) {
+					deployWait()
+					return resource.RetryableError(retryErr)
+				}
+				errmsg := ""
+				if bresponse != nil {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(retryErr, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-
-		response := make(map[string]interface{})
-		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		changeOrderId := response["ChangeOrderId"].(string)
-		if fmt.Sprint(response["Code"]) != "200" {
-			return errmsgs.WrapError(errmsgs.Error("deploy k8s application failed for " + response["Message"].(string)))
+			response := make(map[string]interface{})
+			retryErr = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+			if retryErr != nil {
+				return resource.NonRetryableError(retryErr)
+			}
+			if fmt.Sprint(response["Code"]) != "200" {
+				return resource.NonRetryableError(errmsgs.WrapError(errmsgs.Error("deploy k8s application failed for " + fmt.Sprint(response["Message"]))))
+			}
+			if v, ok := response["ChangeOrderId"].(string); ok {
+				changeOrderId = v
+			}
+			return nil
+		})
+		if err != nil {
+			return err
 		}
 
 		if changeOrderId != "" {
@@ -1500,7 +1551,7 @@ func resourceAlibabacloudStackEdasK8sApplicationDelete(d *schema.ResourceData, m
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser) {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -1537,25 +1588,7 @@ func resourceAlibabacloudStackEdasK8sApplicationDelete(d *schema.ResourceData, m
 		return nil
 	})
 	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-
 		return err
-	}
-	response := make(map[string]interface{})
-	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	if fmt.Sprint(response["Code"]) != "200" {
-		return errmsgs.Error("Delete k8s application failed for " + response["Message"].(string))
-	}
-	changeOrderId := response["ChangeOrderId"].(string)
-	if changeOrderId != "" {
-		stateConf := BuildStateConf([]string{"0", "1"}, []string{"3"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"2", "6", "10"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return nil
-		}
 	}
 	return nil
 }
@@ -1902,8 +1935,8 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 	custom_pod_ant_affinity_preferred := make([]map[string]interface{}, 0)
 
 	// node_affinity_require
-
-	if affinity.NodeAffinity != nil && len(affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms) > 0 {
+	// RequiredDuringSchedulingIgnoredDuringExecution is a *struct pointer, nil check is required to avoid panic on dereference
+	if affinity.NodeAffinity != nil && affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution != nil {
 		for _, node_affinity_require := range affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range node_affinity_require.MatchExpressions {
@@ -1920,8 +1953,8 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 	}
 
 	// node_affinity_preferred
-
-	if affinity.NodeAffinity != nil && len(affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
+	// PreferredDuringSchedulingIgnoredDuringExecution is a []struct, ranging over a nil slice is safe
+	if affinity.NodeAffinity != nil {
 		for _, node_affinity_preferred := range affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range node_affinity_preferred.Preference.MatchExpressions {
@@ -1939,7 +1972,7 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 	}
 
 	// pod_affinity_require
-	if affinity.PodAffinity != nil && len(affinity.PodAffinity.RequiredDuringSchedulingIgnoredDuringExecution) > 0 {
+	if affinity.PodAffinity != nil {
 		for _, pod_affinity_require := range affinity.PodAffinity.RequiredDuringSchedulingIgnoredDuringExecution {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range pod_affinity_require.LabelSelector.MatchExpressions {
@@ -1951,14 +1984,14 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 			}
 			custom_pod_affinity_require = append(custom_pod_affinity_require, map[string]interface{}{
 				"match_expressions": match_expressions,
-				"k8s_namespaces":    pod_affinity_require.Namespaces,
+				"k8s_namespace":     pod_affinity_require.Namespaces,
 				"topology_key":      pod_affinity_require.TopologyKey,
 			})
 		}
 	}
 
 	// pod_affinity_preferred
-	if affinity.PodAffinity != nil && len(affinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
+	if affinity.PodAffinity != nil {
 		for _, pod_affinity_preferred := range affinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range pod_affinity_preferred.PodAffinityTerm.LabelSelector.MatchExpressions {
@@ -1970,7 +2003,7 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 			}
 			custom_pod_affinity_preferred = append(custom_pod_affinity_preferred, map[string]interface{}{
 				"match_expressions": match_expressions,
-				"k8s_namespaces":    pod_affinity_preferred.PodAffinityTerm.Namespaces,
+				"k8s_namespace":     pod_affinity_preferred.PodAffinityTerm.Namespaces,
 				"topology_key":      pod_affinity_preferred.PodAffinityTerm.TopologyKey,
 				"weight":            pod_affinity_preferred.Weight,
 			})
@@ -1978,7 +2011,7 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 	}
 
 	// pod_ant_affinity_require
-	if affinity.PodAntiAffinity != nil && len(affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution) > 0 {
+	if affinity.PodAntiAffinity != nil {
 		for _, pod_ant_affinity_require := range affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range pod_ant_affinity_require.LabelSelector.MatchExpressions {
@@ -1990,14 +2023,14 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 			}
 			custom_pod_ant_affinity_require = append(custom_pod_ant_affinity_require, map[string]interface{}{
 				"match_expressions": match_expressions,
-				"k8s_namespaces":    pod_ant_affinity_require.Namespaces,
+				"k8s_namespace":     pod_ant_affinity_require.Namespaces,
 				"topology_key":      pod_ant_affinity_require.TopologyKey,
 			})
 		}
 	}
 
 	// pod_ant_affinity_preferred
-	if affinity.PodAntiAffinity != nil && len(affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
+	if affinity.PodAntiAffinity != nil {
 		for _, pod_ant_affinity_preferred := range affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
 			match_expressions := make([]map[string]interface{}, 0)
 			for _, match_expression := range pod_ant_affinity_preferred.PodAffinityTerm.LabelSelector.MatchExpressions {
@@ -2009,7 +2042,7 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 			}
 			custom_pod_ant_affinity_preferred = append(custom_pod_ant_affinity_preferred, map[string]interface{}{
 				"match_expressions": match_expressions,
-				"k8s_namespaces":    pod_ant_affinity_preferred.PodAffinityTerm.Namespaces,
+				"k8s_namespace":     pod_ant_affinity_preferred.PodAffinityTerm.Namespaces,
 				"topology_key":      pod_ant_affinity_preferred.PodAffinityTerm.TopologyKey,
 				"weight":            pod_ant_affinity_preferred.Weight,
 			})

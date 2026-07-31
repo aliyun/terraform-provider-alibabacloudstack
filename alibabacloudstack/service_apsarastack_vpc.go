@@ -1722,7 +1722,7 @@ func (s *VpcService) SetResourceTags(d *schema.ResourceData, resourceType string
 			for i, key := range removedTagKeys {
 				request[fmt.Sprintf("TagKey.%d", i+1)] = key
 			}
-			_, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, nil, request)
+			_, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, request, nil)
 			if err != nil {
 				return err
 			}
@@ -1741,7 +1741,7 @@ func (s *VpcService) SetResourceTags(d *schema.ResourceData, resourceType string
 				count++
 			}
 
-			_, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, nil, request)
+			_, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, request, nil)
 			if err != nil {
 				return err
 			}
@@ -1763,7 +1763,7 @@ func (s *VpcService) ListTagResources(id string, resourceType string) (object in
 	var response map[string]interface{}
 
 	for {
-		response, err = s.client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
+		response, err = s.client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request, nil)
 		addDebug("ListTagResources", response, request)
 		if err != nil {
 			return nil, err
@@ -2279,4 +2279,3 @@ func (s *VpcService) UnassociateHaVip(id, instance_type, instance_id string) err
 	}
 	return nil
 }
-

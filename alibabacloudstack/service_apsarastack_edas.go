@@ -939,7 +939,19 @@ func (e *EdasService) DescribeEdasK8sApplication(appId string) (*EdasK8sApplcati
 	response := EdasGetK8sApplcationResponse{}
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 
+	// 先解析原始结构，识别 601 / "does not exist or is deleted"
+	raw := make(map[string]interface{})
+	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &raw)
+	if code, ok := raw["Code"]; ok {
+		if fmt.Sprint(code) == "601" || strings.Contains(fmt.Sprint(raw["Message"]), "does not exist or is deleted") {
+			return nil, errmsgs.GetNotFoundErrorFromString("Edas K8s application not found")
+		}
+	}
+
 	v = response.Applcation
+	if v.App.AppId == "" {
+		return nil, errmsgs.GetNotFoundErrorFromString("Edas K8s application not found")
+	}
 
 	return &v, nil
 }
