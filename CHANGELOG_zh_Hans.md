@@ -1,3 +1,24 @@
+# 3.18.31
+
+## 新增
+
+1. `alibabacloudstack_edas_k8s_application` 支持 `cr_instance_id` 字段，镜像部署时支持指定容器镜像服务企业版实例
+2. BMCP 裸机节点查询能力新增 `instance_alias` 和 `instance_name` 返回字段（`alibabacloudstack_bmcp_nodes`）
+3. `alibabacloudstack_image_import` 的 `platform` 字段支持更多操作系统类型（RedHat、Fedora、Anolis、AlmaLinux、Rocky Linux、Kylin、UOS、FreeBSD、Windows Server 2016/2019/2022 等）
+
+## 修复
+
+1. 修复 `alibabacloudstack_edas_k8s_application` 未按 `package_type` 正确回写 `image_url` / `package_url` 的缺陷
+2. 修复 `alibabacloudstack_edas_k8s_application` 创建、部署、删除时遇到限流错误直接失败的问题，增加自动重试
+3. 修复 `alibabacloudstack_edas_k8s_application` 删除时应用不存在或已删除导致报错的问题，现可幂等完成
+4. 修复 `alibabacloudstack_cr_ee_repo` 更新时误读 `repo_type` 导致更新失败的缺陷
+5. 修复 `alibabacloudstack_bmcp_nodes` 数据源 `region_id` 无法正确获取的缺陷
+6. 修复 VPC 资源标签操作（绑定/解绑/查询标签）请求参数传递错误导致操作失败的缺陷
+7. 修复 CMS 服务端点模板配置错误
+8. 移除硬编码的 OSS 服务端点模板，改为按实际环境动态解析
+
+---
+
 # 3.18.30
 
 ## 修复

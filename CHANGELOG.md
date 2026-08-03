@@ -1,3 +1,24 @@
+# 3.18.31
+
+## Added
+
+1. `alibabacloudstack_edas_k8s_application` supports the `cr_instance_id` field to specify a Container Registry Enterprise Edition instance for image deployments
+2. Added `instance_alias` and `instance_name` output fields to the BMCP bare metal nodes query capability (`alibabacloudstack_bmcp_nodes`)
+3. The `platform` field of `alibabacloudstack_image_import` supports more operating system types (RedHat, Fedora, Anolis, AlmaLinux, Rocky Linux, Kylin, UOS, FreeBSD, Windows Server 2016/2019/2022, etc.)
+
+## Fixed
+
+1. Fixed `alibabacloudstack_edas_k8s_application` not correctly setting `image_url` / `package_url` based on `package_type`
+2. Fixed `alibabacloudstack_edas_k8s_application` create, deploy and delete operations failing on throttling errors; automatic retry added
+3. Fixed `alibabacloudstack_edas_k8s_application` deletion failing when the application does not exist or is already deleted; deletion is now idempotent
+4. Fixed `alibabacloudstack_cr_ee_repo` update failing due to mistakenly reading `repo_type` instead of `repo_id`
+5. Fixed `alibabacloudstack_bmcp_nodes` data source not returning `region_id` correctly
+6. Fixed VPC resource tag operations (bind/unbind/list tags) failing due to incorrect request parameter placement
+7. Fixed incorrect CMS service endpoint template configuration
+8. Removed hardcoded OSS service endpoint template; endpoints are now resolved dynamically per environment
+
+---
+
 # 3.18.30
 
 ## Fixed
