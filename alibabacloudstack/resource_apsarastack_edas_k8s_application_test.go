@@ -546,7 +546,7 @@ func TestUatAlibabacloudStackEdasK8sApplication_image(t *testing.T) {
 				),
 			},
 			{
-				// 验证 image_url 更新后能正确回读
+				// Verify that image_url is correctly read back after update
 				Config: testAccConfig(map[string]interface{}{
 					"image_url": updatedImageUrl,
 				}),

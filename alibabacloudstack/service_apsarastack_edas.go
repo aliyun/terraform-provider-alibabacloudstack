@@ -939,7 +939,7 @@ func (e *EdasService) DescribeEdasK8sApplication(appId string) (*EdasK8sApplcati
 	response := EdasGetK8sApplcationResponse{}
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 
-	// 先解析原始结构，识别 601 / "does not exist or is deleted"
+	// Parse the raw structure first and identify 601 / "does not exist or is deleted"
 	raw := make(map[string]interface{})
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &raw)
 	if code, ok := raw["Code"]; ok {

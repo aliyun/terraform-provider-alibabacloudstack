@@ -1449,10 +1449,10 @@ data "alibabacloudstack_edas_k8s_clusters" "default" {
 }
 
 locals {
-	// 仅当集群尚未导入 EDAS 时才创建导入资源：
-	// create_count 只反映 ACK 集群是否预先存在，与是否已导入 EDAS 无关。
-	// 若已存在 EDAS 集群时仍创建该资源，ImportK8sCluster 会接管已有集群，
-	// 测试销毁阶段会误删原有 EDAS 集群。
+	// Only create the import resource when the cluster has not been imported into EDAS yet:
+	// create_count only reflects whether the ACK cluster pre-exists, not whether it has been imported into EDAS.
+	// If this resource is still created when an EDAS cluster already exists, ImportK8sCluster will take over the existing cluster,
+	// and the test destroy phase will mistakenly delete the existing EDAS cluster.
 	edas_create_count = length(data.alibabacloudstack_edas_k8s_clusters.default.ids) > 0 ? 0 : 1
 }
 
@@ -1463,9 +1463,9 @@ resource "alibabacloudstack_edas_k8s_cluster" "default" {
 
 locals {
 	edas_cluster_id = local.edas_create_count == 0 ? data.alibabacloudstack_edas_k8s_clusters.default.ids.0 : alibabacloudstack_edas_k8s_cluster.default.0.id
-	// 已导入的集群可能归属于非默认逻辑 namespace（如 cn-xxx:autoK8sNs），
-	// EDAS 应用等资源必须携带该 LogicalRegionId 才能找到集群；
-	// 新导入的集群在默认 namespace 下，传空即可。
+	// An imported cluster may belong to a non-default logical namespace (e.g. cn-xxx:autoK8sNs).
+	// Resources such as EDAS applications must carry this LogicalRegionId to locate the cluster.
+	// A newly imported cluster is under the default namespace, so an empty value is enough.
 	edas_logical_region_id = local.edas_create_count == 0 ? data.alibabacloudstack_edas_k8s_clusters.default.clusters.0.logical_region_id : ""
 }
 `

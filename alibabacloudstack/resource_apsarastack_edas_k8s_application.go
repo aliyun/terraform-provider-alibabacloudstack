@@ -851,7 +851,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 		}
 		request.QueryParams["CustomAffinity"] = string(data)
 	}
-	// 对 InsertK8sApplication 调用增加有限重试，仅对 ServiceUnavailable / Throttling 等可重试错误重试
+	// Add bounded retries to InsertK8sApplication calls, retrying only on retryable errors such as ServiceUnavailable / Throttling
 	wait := incrementalWait(2*time.Second, 4*time.Second)
 	var response map[string]interface{}
 	err := resource.Retry(30*time.Second, func() *resource.RetryError {
@@ -960,11 +960,11 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 
 	allDeploy := response.DeployGroups.DeployGroup
 
-	// Image / Docker 类型：回写 image_url，不维护 package_url
+	// Image / Docker types: set image_url back; package_url is not maintained
 	if packageType == "image" || packageType == "docker" {
 		imageUrl := response.ImageInfo.ImageUrl
 		if imageUrl == "" && len(allDeploy) > 0 {
-			// 兼容 ImageInfo 为空但 PackageUrl 存了镜像地址的情况
+			// Handle the case where ImageInfo is empty but PackageUrl stores the image address
 			imageUrl = allDeploy[0].PackageUrl
 		}
 		d.Set("image_url", imageUrl)
@@ -988,7 +988,7 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 
 		}
 
-		// 仅 FatJar / War 类型维护 package_url
+		// Only FatJar / War types maintain package_url
 		if packageType != "image" && packageType != "docker" {
 			if v.PackageUrl != "" {
 				d.Set("package_url", v.PackageUrl)
@@ -1484,7 +1484,7 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 				request.QueryParams["UpdateStrategy"] = fmt.Sprintf("{\"type\":\"%s\",\"batchUpdate\":{\"batch\":%d,\"releaseType\":\"%s\"}%s}", update_type, update_batch, update_release_type, gray_update_strategy)
 			}
 		}
-		// 对 DeployK8sApplication 调用增加有限重试，仅对 ServiceUnavailable / Throttling 等可重试错误重试
+		// Add bounded retries to DeployK8sApplication calls, retrying only on retryable errors such as ServiceUnavailable / Throttling
 		deployWait := incrementalWait(2*time.Second, 4*time.Second)
 		var changeOrderId string
 		err = resource.Retry(30*time.Second, func() *resource.RetryError {
