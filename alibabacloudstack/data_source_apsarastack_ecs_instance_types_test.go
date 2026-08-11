@@ -42,6 +42,15 @@ func TestAccAlibabacloudStackInstanceTypesDataSource(t *testing.T) {
 		}),
 	}
 
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${data.alibabacloudstack_instance_types.anyone.instance_types.0.id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"ecs.fake.instance.type"},
+		}),
+	}
+
 	// Test with instance_type_family that doesn't exist
 	familyConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -55,6 +64,7 @@ func TestAccAlibabacloudStackInstanceTypesDataSource(t *testing.T) {
 	var existInstanceTypesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                                 CHECKSET, // Should contain at least one instance type
+			"ids.0":                                 CHECKSET,
 			"instance_types.#":                      CHECKSET, // Should contain at least one instance type
 			"instance_types.0.id":                   CHECKSET,
 			"instance_types.0.family":               CHECKSET,
@@ -75,7 +85,7 @@ func TestAccAlibabacloudStackInstanceTypesDataSource(t *testing.T) {
 		existMapFunc: existInstanceTypesMapFunc,
 		fakeMapFunc:  fakeInstanceTypesMapFunc,
 	}
-	instanceTypesCheckInfo.dataSourceTestCheck(t, 0, cpuConf, MemoryConf, eniConf, familyConf)
+	instanceTypesCheckInfo.dataSourceTestCheck(t, 0, idsConf, cpuConf, MemoryConf, eniConf, familyConf)
 }
 
 func dataSourceInstanceTypesConfigDependence(name string) string {

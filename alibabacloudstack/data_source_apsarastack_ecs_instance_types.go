@@ -80,6 +80,7 @@ func dataSourceAlibabacloudStackInstanceTypes() *schema.Resource {
 			},
 			"ids": {
 				Type:     schema.TypeList,
+				Optional: true,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
@@ -240,12 +241,26 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_instance_types", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
+	idsFilter := make(map[string]struct{})
+	if v, ok := d.GetOk("ids"); ok {
+		for _, id := range v.([]interface{}) {
+			if s := strings.TrimSpace(id.(string)); s != "" {
+				idsFilter[s] = struct{}{}
+			}
+		}
+	}
+
 	if resp != nil {
 		eniAmount := d.Get("eni_amount").(int)
 //		k8sNode := strings.TrimSpace(d.Get("kubernetes_node_role").(string))
 		for _, types := range resp.InstanceTypes.InstanceType {
 			if _, ok := mapInstanceTypes[types.InstanceTypeId]; !ok {
 				continue
+			}
+			if len(idsFilter) > 0 {
+				if _, ok := idsFilter[types.InstanceTypeId]; !ok {
+					continue
+				}
 			}
 			var ct string
 			for _, cpu_type_string := range []string{"hg", "kp", "ft"} {
