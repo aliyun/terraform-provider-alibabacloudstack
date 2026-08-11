@@ -65,6 +65,31 @@ func TestAccAlibabacloudStackInstanceTypesDataSource_empty(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackInstanceTypesDataSource_ids(t *testing.T) {
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckAlibabacloudStackInstanceTypesDataSourceIds,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_instance_types.ids"),
+					resource.TestCheckResourceAttr("data.alibabacloudstack_instance_types.ids", "instance_types.#", "1"),
+					resource.TestCheckResourceAttr("data.alibabacloudstack_instance_types.ids", "ids.#", "1"),
+					resource.TestCheckResourceAttrPair(
+						"data.alibabacloudstack_instance_types.ids", "instance_types.0.id",
+						"data.alibabacloudstack_instance_types.c4g8", "instance_types.0.id"),
+					resource.TestCheckResourceAttrPair(
+						"data.alibabacloudstack_instance_types.ids", "ids.0",
+						"data.alibabacloudstack_instance_types.c4g8", "instance_types.0.id"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccAlibabacloudStackInstanceTypesDataSource_k8sSpec(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -142,6 +167,17 @@ const testAccCheckAlibabacloudStackInstanceTypesDataSourceBasicConfig = `
 data "alibabacloudstack_instance_types" "c4g8" {
 	cpu_core_count = 4
 	memory_size = 8
+}
+`
+
+const testAccCheckAlibabacloudStackInstanceTypesDataSourceIds = `
+data "alibabacloudstack_instance_types" "c4g8" {
+	cpu_core_count = 4
+	memory_size = 8
+}
+
+data "alibabacloudstack_instance_types" "ids" {
+	ids = [data.alibabacloudstack_instance_types.c4g8.instance_types.0.id]
 }
 `
 
