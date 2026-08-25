@@ -128,9 +128,9 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"worker_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.worker.storage_set_id}",
 					"worker_storage_set_partition_number": "3",
 					"worker_data_disks": map[string]string{
-						"size":"40",
-						"encrypted": "true",
-						"category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
+						"size":       "40",
+						"encrypted":  "true",
+						"category":   "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 						"kms_key_id": "${alibabacloudstack_kms_key.default.id}",
 					},
 					"tags": map[string]string{
@@ -141,7 +141,8 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": name,
+						"name":           name,
+						"master_nodes.#": "3",
 						// "tags.%":            "3",
 						// "tags.Created":      "TF",
 						// "tags.For":          "acceptance test",
