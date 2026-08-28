@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Lindorm"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_lindorm_lts_instance"

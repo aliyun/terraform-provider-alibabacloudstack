@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_account_database_binding"

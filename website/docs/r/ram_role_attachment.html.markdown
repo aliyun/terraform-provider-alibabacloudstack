@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Apsara Stack Cloud Management"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ram_role_attachment"

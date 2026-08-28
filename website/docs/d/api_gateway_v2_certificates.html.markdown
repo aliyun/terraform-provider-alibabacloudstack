@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_api_gateway_v2_certificates"

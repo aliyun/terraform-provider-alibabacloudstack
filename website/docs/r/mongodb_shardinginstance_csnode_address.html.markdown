@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "ApsaraDB for MongoDB" 
 layout: "alibabacloudstack" 
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_shardinginstance_csnode_address" 

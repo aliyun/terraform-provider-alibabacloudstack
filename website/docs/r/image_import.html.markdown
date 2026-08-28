@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_image_import"

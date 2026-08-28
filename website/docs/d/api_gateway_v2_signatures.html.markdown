@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "API Gateway"
 page_title: "AlibabacloudStack: alibabacloudstack_api_gateway_v2_signatures"
 description: |-

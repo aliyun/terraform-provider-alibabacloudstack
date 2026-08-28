@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Enterprise Distributed Application Service (EDAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_edas_application_scale"

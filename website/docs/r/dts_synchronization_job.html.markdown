@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Data Transmission Service (DTS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dts_synchronization_job"

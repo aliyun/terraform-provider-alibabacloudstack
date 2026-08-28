@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Cross-Cloud DNS Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_universal_dns_records"

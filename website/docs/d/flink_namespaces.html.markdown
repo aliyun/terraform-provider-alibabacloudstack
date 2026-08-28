@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Realtime Compute for Apache Flink"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_flink_namespaces"

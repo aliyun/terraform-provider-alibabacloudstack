@@ -1,4 +1,4 @@
-﻿---
+---
 layout: "alicloud-doc"
 page_title: "Resource: alibabacloudstack_bcmp_security_group"
 subcategory: "Bare Metal Computing Platform (BMCP)"

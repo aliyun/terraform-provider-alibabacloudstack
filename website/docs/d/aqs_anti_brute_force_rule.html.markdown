@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Server Guard"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_aqs_anti_brute_force_rule"

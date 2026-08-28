@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Container Service for Kubernetes"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cs_kubernetes_node_pool"

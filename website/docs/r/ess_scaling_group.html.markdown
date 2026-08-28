@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Auto Scaling"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_scaling_group"

@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "QuickBI"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_quick_bi_user"

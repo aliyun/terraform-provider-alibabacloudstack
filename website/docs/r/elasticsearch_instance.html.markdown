@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Elasticsearch (Earlier Version)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_elasticsearch_instance"

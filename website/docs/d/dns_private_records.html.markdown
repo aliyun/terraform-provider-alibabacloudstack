@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Alibaba Cloud DNS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_dns_private_records"

@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Elastic Block Storage"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ebs_diskreplicapair"

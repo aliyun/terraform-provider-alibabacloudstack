@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_store_index"

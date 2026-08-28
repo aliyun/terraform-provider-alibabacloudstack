@@ -1,4 +1,4 @@
-﻿---
+---
 subcategory: "Bastion Host"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bastionhost_instance"
