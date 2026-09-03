@@ -36,6 +36,69 @@ var (
 	KubernetesClusterNodeCIDRMasksByDefault = 24
 )
 
+// csKubernetesAddonsDiffSuppressFunc suppresses diff for addons when only the order changes or config is empty
+func csKubernetesAddonsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	oldAddons, newAddons := d.GetChange("addons")
+	oldList, oldOk := oldAddons.([]interface{})
+	newList, newOk := newAddons.([]interface{})
+
+	if !oldOk || !newOk {
+		return false
+	}
+
+	oldMap := make(map[string]string)
+	for _, item := range oldList {
+		if addon, ok := item.(map[string]interface{}); ok {
+			name, nameOk := addon["name"].(string)
+			config, configOk := addon["config"].(string)
+			if nameOk && name != "" {
+				if !configOk {
+					config = ""
+				}
+				oldMap[name] = config
+			}
+		}
+	}
+
+	newMap := make(map[string]string)
+	for _, item := range newList {
+		if addon, ok := item.(map[string]interface{}); ok {
+			name, nameOk := addon["name"].(string)
+			config, configOk := addon["config"].(string)
+			if nameOk && name != "" {
+				if !configOk {
+					config = ""
+				}
+				newMap[name] = config
+			}
+		}
+	}
+
+	for name, newConfig := range newMap {
+		if name == "" {
+			continue
+		}
+		oldConfig, exists := oldMap[name]
+		if !exists {
+			return false
+		}
+		if oldConfig != newConfig {
+			return false
+		}
+	}
+
+	for name := range oldMap {
+		if name == "" {
+			continue
+		}
+		if _, exists := newMap[name]; !exists {
+			return false
+		}
+	}
+
+	return true
+}
+
 func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
@@ -224,7 +287,7 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ConflictsWith:    []string{"password", "kms_encrypted_password"},
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
 			},
 			"kms_encrypted_password": {
 				Type:          schema.TypeString,
@@ -256,11 +319,14 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Default:  PortRange,
 			},
 			"image_id": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				DiffSuppressFunc: imageIdSuppressFunc,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
-			// 			"install_cloud_monitor": {
+			"image_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "AliyunLinux3",
+			}, // 			"install_cloud_monitor": {
 			// 				Type:             schema.TypeBool,
 			// 				Optional:         true,
 			// 				Default:          true,
@@ -288,37 +354,37 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			},
 			// cpu policy options of kubelet
 			"cpu_policy": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "none",
-				ValidateFunc: validation.StringInSlice([]string{"none", "static"}, false),
-			},
-			"proxy_mode": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "none",
+				ValidateFunc:     validation.StringInSlice([]string{"none", "static"}, false),
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
+			}, "proxy_mode": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"iptables", "ipvs"}, false),
 			},
 			"addons": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MinItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:     schema.TypeString,
-							Default:  "flannel",
-							Optional: true,
-						},
-						"config": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						//"disabled": {
-						//	Type:     schema.TypeBool,
-						//	Optional: true,
-						//	Default:  false,
-						//},
+				Type:             schema.TypeList,
+				Optional:         true,
+				MinItems:         1,
+				DiffSuppressFunc: csKubernetesAddonsDiffSuppressFunc,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"name": {
+						Type:     schema.TypeString,
+						Default:  "flannel",
+						Optional: true,
 					},
+					"config": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					//"disabled": {
+					//	Type:     schema.TypeBool,
+					//	Optional: true,
+					//	Default:  false,
+					//},
+				},
 				},
 			},
 			"slb_internet_enabled": {
@@ -491,16 +557,18 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Required: true,
 			},
 			"worker_instance_types": {
-				Type:          schema.TypeList,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"instances"},
-				Optional:      true,
+				Type:             schema.TypeList,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				ConflictsWith:    []string{"instances"},
+				Optional:         true,
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
 			},
 			"worker_vswitch_ids": {
-				Type:          schema.TypeList,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"instances"},
-				Optional:      true,
+				Type:             schema.TypeList,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				ConflictsWith:    []string{"instances"},
+				Optional:         true,
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
 			},
 			"instances": {
 				Type:          schema.TypeSet,
@@ -589,8 +657,9 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			// 				//Removed:          "Field 'log_config' has been removed from provider version 1.75.0. New field 'addons' replaces it.",
 			// 			},
 			"user_data": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: numOfNodesZeroSuppressFunc,
 			},
 			// 			"node_name_mode": {
 			// 				Type:         schema.TypeString,
@@ -685,6 +754,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"master_system_disk_performance_level": d.Get("master_system_disk_performance_level").(string),
 		"worker_system_disk_performance_level": d.Get("worker_system_disk_performance_level").(string),
 		"image_id":                             d.Get("image_id").(string),
+		"image_type":                           d.Get("image_type").(string),
 	}
 
 	pod := 0
@@ -819,19 +889,28 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
-	d.Partial(true)
 	invoker := NewInvoker()
 
-	var nodepoolid string
 	if d.IsNewResource() {
-		var err error
-		nodepoolid, err = getDefaultNodePoolId(csService, d.Id())
-		if err != nil {
-			return err
-		}
-	} else {
-		nodepoolid = d.Get("nodepool_id").(string)
+		return nil
 	}
+	noUpdatesAllowedCheck(d, []string{
+		"name", "master_disk_size", "master_disk_category", "delete_protection",
+		"worker_disk_size", "worker_disk_category", "worker_data_disks",
+		"pod_vswitch_ids", "pod_cidr", "service_cidr", "node_cidr_mask",
+		"new_nat_gateway", "enable_ssh", "node_port_range", "image_id",
+		"version", "cluster_type", "os_type", "platform", "cpu_policy",
+		"proxy_mode", "addons", "slb_internet_enabled", "master_instance_types",
+		"master_vswitch_ids", "worker_instance_types", "worker_vswitch_ids",
+		"instances", "format_disk", "keep_instance_name", "master_count",
+		"timeout_mins", "nodes", "user_data", "cloud_monitor_flags", "runtime",
+		"is_enterprise_security_group", "security_group_id",
+		"master_system_disk_performance_level", "worker_system_disk_performance_level",
+		"master_storage_set_id", "master_storage_set_partition_number",
+		"worker_storage_set_id", "worker_storage_set_partition_number",
+	})
+	nodepoolid := d.Get("nodepool_id").(string)
+
 	if d.HasChange("num_of_nodes") && !d.IsNewResource() {
 		password := d.Get("password").(string)
 		if password == "" {
@@ -856,7 +935,6 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 		}
 
 		if newValue < oldValue {
-			//return errmsgs.WrapErrorf(fmt.Errorf("num_of_nodes can not be less than before"), "scaleOutFailed %d:%d", newValue, oldValue)
 			object, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
 			if err != nil {
 				if errmsgs.NotFoundError(err) {
@@ -890,16 +968,53 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, nodepoolid, "DeleteKubernetesClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
 			}
 			if resp.IsSuccess() == false {
-				//return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
 				return err
 			}
 			stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(nodepoolid, d.Id(), []string{"deleting", "failed"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
+			if newValue == 0 {
+				stateConf := BuildStateConf([]string{"initial", "removing"}, []string{"active", "running"}, d.Timeout(schema.TimeoutUpdate), 15*time.Second, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"failed"}))
+				stateConf.NotFoundChecks = 1000
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
+				req := client.NewCommonRequest("DELETE", "CS", "2015-12-15", "DeleteClusterNodepool", fmt.Sprintf("/clusters/%s/nodepools/%s", d.Id(), nodepoolid))
+				req.QueryParams["ClusterId"] = d.Id()
+				req.QueryParams["NodepoolId"] = nodepoolid
+				req.QueryParams["force"] = "true"
+				req.QueryParams["Force"] = "true"
+				body := map[string]interface{}{
+					"force": true,
+					"Force": true,
+				}
+				jsonData, err := json.Marshal(body)
+				if err != nil {
+					return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+				}
+				req.SetContentType("application/json")
+				req.SetContent(jsonData)
+
+				response, err := client.ProcessCommonRequest(req)
+				if err != nil {
+					if response == nil {
+						return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+					}
+					errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, nodepoolid, "DeleteClusterNodePool", errmsg)
+				}
+				stateConf = BuildStateConf([]string{"deleting", "active"}, []string{}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(nodepoolid, d.Id(), []string{"failed"}))
+				if _, err = stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, nodepoolid)
+				}
+			}
 		}
 
 		if newValue > oldValue {
+			if oldValue == 0 {
+				return errmsgs.WrapErrorf(fmt.Errorf("num_of_nodes can not be greater than before"), "scaleOutFailed %d:%d", newValue, oldValue)
+			}
 			request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ScaleClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s", d.Id(), nodepoolid))
 			body := fmt.Sprintf("{\"%s\":%d}",
 				"count", int64(newValue)-int64(oldValue),
@@ -908,33 +1023,23 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			request.QueryParams["ClusterId"] = d.Id()
 			request.SetContent([]byte(body))
 			request.Headers["x-acs-content-type"] = "application/json"
-			//var err error
 			var resp *responses.CommonResponse
 			if err := invoker.Run(func() error {
 				var err error
 				resp, err = client.ProcessCommonRequest(request)
 				return err
 			}); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", resp)
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ScaleClusterNodePool", resp)
 			}
-
-			if debugOn() {
-				resizeRequestMap := make(map[string]interface{})
-				resizeRequestMap["ClusterId"] = d.Id()
-				resizeRequestMap["Args"] = request.GetQueryParams()
-				addDebug("ScaleClusterNodePool", resp, resizeRequestMap)
-			}
+			addDebug("ScaleClusterNodePool", resp, request, request.QueryParams)
 
 			stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(nodepoolid, d.Id(), []string{"deleting", "failed"}))
 
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
-			//d.SetPartial("num_of_nodes")
 		}
 	}
-
-	d.Partial(false)
 	return nil
 }
 
@@ -954,51 +1059,166 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	d.Set("nodepool_id", nodepoolid)
-	clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	d.Set("name", object.Name)
-	// node_count, err := csService.GetCsK8sNodesCount(d.Id())
-	// if err != nil {
-	// 	return errmsgs.WrapError(err)
-	// }
-	nodepool, err := csService.DescribeCsKubernetesNodePool(nodepoolid, d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	d.Set("num_of_nodes", nodepool.Status.HealthyNodes)
-	//d.Set("id", object.ClusterId)
-	//d.Set("state", object.State)
-	d.Set("vpc_id", object.VpcId)
-	//d.Set("resource_group_id", object.ResourceGroupId)
-	d.Set("pod_cidr", object.ContainerCIDR)
-	d.Set("version", object.CurrentVersion)
-	d.Set("delete_protection", object.DeletionProtection)
-	d.Set("version", object.InitVersion)
-	var smaster, sworker []map[string]interface{}
-	//var MasterNodes, WorkerNodes map[string]interface{}
-	for _, k := range clusternode.Nodes {
-		if k.InstanceRole == "Master" {
-			MasterNodes := map[string]interface{}{
-				"id":         k.InstanceID,
-				"name":       k.InstanceName,
-				"private_ip": fmt.Sprintf("%s", k.IPAddress),
-			}
-			smaster = append(smaster, MasterNodes)
-		} else {
-			WorkerNodes := map[string]interface{}{
-				"id":         k.InstanceID,
-				"name":       k.InstanceName,
-				"private_ip": fmt.Sprintf("%s", k.IPAddress),
-			}
-			sworker = append(sworker, WorkerNodes)
+	if nodepoolid != "" {
+		stateConf := BuildStateConf([]string{"scaling", "deleting"}, []string{"active", ""}, d.Timeout(schema.TimeoutUpdate), 20*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(nodepoolid, d.Id(), []string{"failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
+	time.Sleep(10 * time.Second)
+	d.Set("nodepool_id", nodepoolid)
+	d.Set("name", object.Name)
+	d.Set("vpc_id", object.VpcId)
+	d.Set("pod_cidr", object.ContainerCIDR)
+	d.Set("version", object.InitVersion)
+	if object.CurrentVersion != "" {
+		d.Set("version", object.CurrentVersion)
+	}
+	d.Set("cluster_type", string(object.ClusterType))
+	d.Set("security_group_id", object.SecurityGroupId)
+	d.Set("delete_protection", object.DeletionProtection)
 
+	var nodepool *NodePoolAlone
+	if nodepoolid != "" {
+		nodepool, err = csService.DescribeCsKubernetesNodePool(nodepoolid, d.Id())
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				d.Set("num_of_nodes", 0)
+			} else {
+				return errmsgs.WrapError(err)
+			}
+		}
+	}
+	if nodepool != nil {
+		d.Set("num_of_nodes", nodepool.Status.TotalNodes)
+
+		if nodepool.ScalingGroup.InstanceTypes != nil {
+			d.Set("worker_instance_types", nodepool.ScalingGroup.InstanceTypes)
+		}
+		if nodepool.ScalingGroup.VswitchIds != nil {
+			d.Set("worker_vswitch_ids", nodepool.ScalingGroup.VswitchIds)
+		}
+		if nodepool.ScalingGroup.SystemDiskCategory != "" {
+			d.Set("worker_disk_category", nodepool.ScalingGroup.SystemDiskCategory)
+		}
+		if nodepool.ScalingGroup.SystemDiskSize > 0 {
+			d.Set("worker_disk_size", nodepool.ScalingGroup.SystemDiskSize)
+		}
+		if nodepool.ScalingGroup.KeyPair != "" {
+			d.Set("key_name", nodepool.ScalingGroup.KeyPair)
+		}
+		if nodepool.ScalingGroup.ImageID != "" {
+			d.Set("image_id", nodepool.ScalingGroup.ImageID)
+		}
+		if nodepool.ScalingGroup.Platform != "" {
+			d.Set("platform", nodepool.ScalingGroup.Platform)
+		}
+		if nodepool.ScalingGroup.SystemDiskEncrypted {
+			d.Set("worker_disk_encrypted", nodepool.ScalingGroup.SystemDiskEncrypted)
+		}
+		if nodepool.ScalingGroup.SystemDiskEncryptAlgorithm != "" {
+			d.Set("worker_disk_encrypt_algorithm", nodepool.ScalingGroup.SystemDiskEncryptAlgorithm)
+		}
+		if nodepool.ScalingGroup.SystemDiskKMSKeyID != "" {
+			d.Set("worker_disk_kms_key_id", nodepool.ScalingGroup.SystemDiskKMSKeyID)
+		}
+		if nodepool.ScalingGroup.RAMRoleName != "" {
+			d.Set("worker_ram_role_name", nodepool.ScalingGroup.RAMRoleName)
+		}
+		if nodepool.ScalingGroup.SystemDiskPerformanceLevel != "" {
+			d.Set("worker_system_disk_performance_level", nodepool.ScalingGroup.SystemDiskPerformanceLevel)
+		}
+
+		if len(nodepool.ScalingGroup.DataDisks) > 0 {
+			workerDataDisks := make([]map[string]interface{}, 0)
+			for _, disk := range nodepool.ScalingGroup.DataDisks {
+				diskMap := make(map[string]interface{})
+				if disk.Size > 0 {
+					diskMap["size"] = disk.Size
+				}
+				if disk.Category != "" {
+					diskMap["category"] = disk.Category
+				}
+				if disk.Encrypted != "" {
+					diskMap["encrypted"] = disk.Encrypted == "true"
+				}
+				if disk.KMSKeyId != "" {
+					diskMap["kms_key_id"] = disk.KMSKeyId
+				}
+				if disk.AutoSnapshotPolicyId != "" {
+					diskMap["auto_snapshot_policy_id"] = disk.AutoSnapshotPolicyId
+				}
+				if disk.PerformanceLevel != "" {
+					diskMap["performance_level"] = disk.PerformanceLevel
+				}
+				workerDataDisks = append(workerDataDisks, diskMap)
+			}
+			if len(workerDataDisks) > 0 {
+				d.Set("worker_data_disks", workerDataDisks)
+			}
+		}
+
+		if nodepool.KubernetesConfig.CPUPolicy != "" {
+			d.Set("cpu_policy", nodepool.KubernetesConfig.CPUPolicy)
+		}
+		d.Set("cloud_monitor_flags", nodepool.KubernetesConfig.CmsEnabled)
+		if nodepool.KubernetesConfig.UserData != "" {
+			d.Set("user_data", nodepool.KubernetesConfig.UserData)
+		}
+		runtimeName := nodepool.KubernetesConfig.Runtime
+		runtimeVersion := nodepool.KubernetesConfig.RuntimeVersion
+		if runtimeName != "" || runtimeVersion != "" {
+			runtime := []map[string]interface{}{
+				{
+					"name":    runtimeName,
+					"version": runtimeVersion,
+				},
+			}
+			d.Set("runtime", runtime)
+		}
+		sworker := make([]map[string]interface{}, 0)
+		clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
+		if err != nil && !errmsgs.NotFoundError(err) {
+			return errmsgs.WrapError(err)
+		}
+		if clusternode != nil && len(clusternode.Nodes) > 0 {
+			for _, k := range clusternode.Nodes {
+				if k.InstanceRole == "Worker" && k.InstanceStatus == "Running" {
+					WorkerNodes := map[string]interface{}{
+						"id":         k.InstanceID,
+						"name":       k.InstanceName,
+						"private_ip": fmt.Sprintf("%s", k.IPAddress),
+					}
+					sworker = append(sworker, WorkerNodes)
+				}
+			}
+			d.Set("worker_nodes", sworker)
+		}
+	} else {
+		d.Set("num_of_nodes", 0)
+	}
+	smaster := make([]map[string]interface{}, 0)
+	master_instance_types := make([]string, 0)
+	masternodes, err := csService.DescribeClusterMasterNodes(d.Id())
+	if err != nil && !errmsgs.NotFoundError(err) {
+		return errmsgs.WrapError(err)
+	}
+	for _, k := range masternodes {
+		MasterNodes := map[string]interface{}{
+			"id":         k.InstanceID,
+			"name":       k.InstanceName,
+			"private_ip": fmt.Sprintf("%s", k.IPAddress),
+		}
+		smaster = append(smaster, MasterNodes)
+		master_instance_types = append(master_instance_types, k.InstanceType)
+	}
+	if len(masternodes) > 0 {
+		d.Set("image_id", masternodes[0].ImageID)
+	}
 	d.Set("master_nodes", smaster)
-	d.Set("worker_nodes", sworker)
+	d.Set("master_instance_types", master_instance_types)
+	d.Set("master_count", len(smaster))
+
 	if err := d.Set("tags", flattenTagsConfig(object.Tags)); err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -1033,7 +1253,7 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteCluster", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	stateConf := BuildStateConf([]string{"running", "deleting", "initial"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Minute, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"delete_failed"}))
+	stateConf := BuildStateConf([]string{"running", "deleting", "initial"}, []string{""}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"delete_failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -1049,16 +1269,16 @@ func getDefaultNodePoolId(csService CsService, clusterId string) (string, error)
 		}
 
 		for _, k := range nodepool.Nodepools {
-			//Considering multiple nodepools
 			if k.NodepoolInfo.IsDefault {
 				nodepoolid = k.NodepoolInfo.NodepoolID
 			}
 		}
 		if nodepoolid == "" {
-			if len(nodepool.Nodepools) == 1 && nodepool.Nodepools[0].NodepoolInfo.Name == "default-nodepool" {
-				nodepoolid = nodepool.Nodepools[0].NodepoolInfo.NodepoolID
-			} else {
-				return resource.RetryableError(errmsgs.WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools))
+			for _, npinfo := range nodepool.Nodepools {
+				if npinfo.NodepoolInfo.Name == "default-nodepool" {
+					nodepoolid = npinfo.NodepoolInfo.NodepoolID
+					break
+				}
 			}
 		}
 		return nil

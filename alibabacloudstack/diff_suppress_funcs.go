@@ -410,3 +410,10 @@ func rdsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	}
 	return true
 }
+
+func numOfNodesZeroSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	if v, ok := d.GetOk("num_of_nodes"); ok && v.(int) == 0 {
+		return true
+	}
+	return old == new
+}

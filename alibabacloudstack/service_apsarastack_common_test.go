@@ -745,22 +745,22 @@ data "alibabacloudstack_instance_types" "all" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 }
 
-data "alibabacloudstack_instance_types" "any_n4" {
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  instance_type_family = "ecs.n4"
-  sorted_by            = "Memory"
-}
+// data "alibabacloudstack_instance_types" "any_n4" {
+//   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+//   instance_type_family = "ecs.n4"
+//   sorted_by            = "Memory"
+// }
 
 data "alibabacloudstack_instance_types" "default" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   cpu_core_count       = 1
   memory_size          = 1
-  instance_type_family = "ecs.n4"
+  // instance_type_family = "ecs.n4"
   sorted_by            = "Memory"
 }
 
 locals {
-	default_instance_type_id = try(element(sort(length(data.alibabacloudstack_instance_types.default.instance_types) > 0 ? data.alibabacloudstack_instance_types.default.ids : data.alibabacloudstack_instance_types.any_n4.ids), 0), sort(data.alibabacloudstack_instance_types.all.ids)[0])
+	default_instance_type_id = try(element(sort(length(data.alibabacloudstack_instance_types.default.instance_types) > 0 ? data.alibabacloudstack_instance_types.default.ids : []), 0), sort(data.alibabacloudstack_instance_types.all.ids)[0])
 }
 `
 
