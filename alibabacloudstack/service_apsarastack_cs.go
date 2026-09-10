@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -81,60 +82,72 @@ func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *KubernetesC
 
 func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail, err error) {
 	cluster := &KubernetesClusterDetail{}
-	cluster.ClusterId = ""
 
-	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
-	request.QueryParams["SignatureVersion"] = "1.0"
-	request.QueryParams["ProductName"] = "CS"
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		cluster.ClusterId = ""
 
-	clusterdetails, err := s.client.ProcessCommonRequest(request)
-	addDebug("DescribeClustersV1", clusterdetails, request, request.QueryParams)
+		request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
+		request.QueryParams["SignatureVersion"] = "1.0"
+		request.QueryParams["ProductName"] = "CS"
+
+		clusterdetails, err := s.client.ProcessCommonRequest(request)
+		addDebug("DescribeClustersV1", clusterdetails, request, request.QueryParams)
+		if err != nil {
+			if clusterdetails == nil {
+				return resource.NonRetryableError(errmsgs.ResourceNotFoundError("CsKubernetes", id))
+			}
+			if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
+				return resource.NonRetryableError(errmsgs.ResourceNotFoundError("CsKubernetes", id))
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
+			if strings.Contains(strings.ToLower(errmsg), "not found") || strings.Contains(strings.ToLower(errmsg), "notfound") {
+				return resource.NonRetryableError(errmsgs.ResourceNotFoundError("CsKubernetes", id))
+			}
+			// 网络或临时错误，允许重试
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		}
+
+		if debugOn() {
+			requestMap := make(map[string]interface{})
+			requestMap["ClusterId"] = id
+			addDebug("DescribeKubernetesCluster", clusterdetails, request, requestMap)
+		}
+		Cdetails := ClustersV1{}
+		_ = json.Unmarshal(clusterdetails.GetHttpContentBytes(), &Cdetails)
+
+		cluster = &KubernetesClusterDetail{}
+		for _, k := range Cdetails.Clusters {
+			if k.ClusterID == id {
+				cluster.Tags = k.Tags
+				cluster.Name = k.Name
+				cluster.State = k.State
+				cluster.ClusterId = k.ClusterID
+				cluster.ClusterType = KubernetesClusterType(k.ClusterType)
+				cluster.VpcId = k.VpcID
+				cluster.ResourceGroupId = k.ResourceGroupID
+				cluster.ContainerCIDR = k.SubnetCidr
+				cluster.CurrentVersion = k.CurrentVersion
+				cluster.DeletionProtection = k.DeletionProtection
+				cluster.RegionId = k.RegionID
+				cluster.Size = int64(k.Size)
+				cluster.IngressLoadbalancerId = k.ExternalLoadbalancerID
+				cluster.InitVersion = k.InitVersion
+				cluster.NetworkMode = k.NetworkMode
+				cluster.PrivateZone = k.PrivateZone
+				cluster.Profile = k.Profile
+				cluster.VSwitchIds = k.VswitchID
+				break
+			}
+		}
+		if cluster.ClusterId != id {
+			// API 可能延迟，返回空数组，进行有限重试
+			return resource.RetryableError(errmsgs.Error("DescribeClustersV1 returned empty clusters, retrying..."))
+		}
+
+		return nil
+	})
 	if err != nil {
-		if clusterdetails == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
-			return cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
-		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-
-	}
-
-	if debugOn() {
-		requestMap := make(map[string]interface{})
-		requestMap["ClusterId"] = id
-		addDebug("DescribeKubernetesCluster", clusterdetails, request, requestMap)
-	}
-	Cdetails := ClustersV1{}
-	_ = json.Unmarshal(clusterdetails.GetHttpContentBytes(), &Cdetails)
-
-	cluster = &KubernetesClusterDetail{}
-	for _, k := range Cdetails.Clusters {
-		if k.ClusterID == id {
-			cluster.Tags = k.Tags
-			cluster.Name = k.Name
-			cluster.State = k.State
-			cluster.ClusterId = k.ClusterID
-			cluster.ClusterType = KubernetesClusterType(k.ClusterType)
-			cluster.VpcId = k.VpcID
-			cluster.ResourceGroupId = k.ResourceGroupID
-			cluster.ContainerCIDR = k.SubnetCidr
-			cluster.CurrentVersion = k.CurrentVersion
-			cluster.DeletionProtection = k.DeletionProtection
-			cluster.RegionId = k.RegionID
-			cluster.Size = int64(k.Size)
-			cluster.IngressLoadbalancerId = k.ExternalLoadbalancerID
-			cluster.InitVersion = k.InitVersion
-			cluster.NetworkMode = k.NetworkMode
-			cluster.PrivateZone = k.PrivateZone
-			cluster.Profile = k.Profile
-			cluster.VSwitchIds = k.VswitchID
-			break
-		}
-	}
-	if cluster.ClusterId != id {
-		return cluster, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("CsKubernetes", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+		return nil, errmsgs.GetNotFoundErrorFromString(err.Error())
 	}
 
 	return cluster, nil

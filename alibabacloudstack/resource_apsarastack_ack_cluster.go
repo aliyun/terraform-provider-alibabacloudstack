@@ -10,6 +10,7 @@ import (
 
 	//	"github.com/aliyun/alibaba-cloud-sdk-go/services/cs"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -321,6 +322,7 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			"image_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"image_type": {
 				Type:     schema.TypeString,
@@ -1253,8 +1255,19 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteCluster", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
+	// 如果资源已经不存在，直接返回成功，避免 WaitForState 因 NotFound 重试 21 次
+	_, describeErr := csService.DescribeCsKubernetes(d.Id())
+	if describeErr != nil {
+		if errmsgs.NotFoundError(describeErr) {
+			return nil
+		}
+	}
+
 	stateConf := BuildStateConf([]string{"running", "deleting", "initial"}, []string{""}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"delete_failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
+		if strings.Contains(err.Error(), "couldn't find resource") {
+			return nil
+		}
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return nil

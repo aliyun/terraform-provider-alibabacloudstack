@@ -75,12 +75,12 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"master_count":         "3",
 					"master_disk_category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					// "image_id":                     "${data.alibabacloudstack_images.aliyunlinux3.images.0.id}",
-					"master_disk_size":             "40",
+					"master_disk_size":             "120",
 					"master_instance_types":        []string{"${local.ack_instance_type_id}", "${local.ack_instance_type_id}", "${local.ack_instance_type_id}"},
 					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
-					"num_of_nodes":                 "1",
+					"num_of_nodes":                 "3",
 					"worker_disk_category":         "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
-					"worker_disk_size":             "40",
+					"worker_disk_size":             "120",
 					"worker_instance_types":        []string{"${local.ack_worker_instance_type_id}"},
 					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"enable_ssh":                   "${var.enable_ssh}",
@@ -98,10 +98,8 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					// "worker_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.worker.storage_set_id}",
 					// "worker_storage_set_partition_number": "3",
 					"worker_data_disks": []map[string]string{{
-						"size":       "40",
-						"encrypted":  "true",
-						"category":   "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
-						"kms_key_id": "${alibabacloudstack_kms_key.default.id}",
+						"size":     "120",
+						"category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					}},
 					// "tags": map[string]string{
 					// 	"Created": "TF",
@@ -120,7 +118,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 						"worker_instance_types.#":      "1",
 						"worker_vswitch_ids.#":         "1",
 						"worker_disk_category":         CHECKSET,
-						"worker_disk_size":             "40",
+						"worker_disk_size":             "120",
 						"cpu_policy":                   "none",
 						"runtime.#":                    "1",
 						"runtime.0.name":               "containerd",
@@ -130,13 +128,13 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 						"node_cidr_mask":               "26",
 						"worker_data_disks.#":          "1",
 						"os_type":                      "linux",
-						"platform":                     "AliyunLinux",
+						"platform":                     "AliyunLinux3",
 						"timeout_mins":                 "60",
 						"master_count":                 "3",
-						"master_disk_size":             "40",
+						"master_disk_size":             "120",
 						"master_instance_types.#":      "3",
 						"master_vswitch_ids.#":         "3",
-						"num_of_nodes":                 "1",
+						"num_of_nodes":                 "3",
 						"is_enterprise_security_group": "true",
 						"new_nat_gateway":              "false",
 						"slb_internet_enabled":         "false",
@@ -154,6 +152,8 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"master_storage_set_id", "master_storage_set_partition_number", "master_vswitch_ids",
 					"new_nat_gateway", "slb_internet_enabled", "timeout_mins", "worker_storage_set_id",
 					"worker_storage_set_partition_number",
+					"enable_ssh", "master_disk_category", "master_disk_size", "node_cidr_mask",
+					"node_port_range", "proxy_mode", "service_cidr",
 				},
 			},
 			{
@@ -388,12 +388,6 @@ variable "service_cidr" {
   default     = "172.25.0.0/16"
 }
 
-resource "alibabacloudstack_kms_key" "default" {
-	description = "${var.name}"
-	protection_level = "SOFTWARE"
-	pending_window_in_days = "7"
-}
-
 data "alibabacloudstack_instance_types" "ack" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   cpu_core_count    = 4
@@ -409,10 +403,8 @@ data "alibabacloudstack_images" "aliyunlinux3" {
 
 locals {
     disk_category = data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0
-    disk_encrypted = contains(["cloud_pperf", "cloud_sperf"], local.disk_category) ? true : false
-	disk_kmskey = local.disk_encrypted ? alibabacloudstack_kms_key.default.id : ""
 	ack_instance_type_id = "ecs.g7x-se-x25-c1m4.xlarge"
-	ack_worker_instance_type_id = "ecs.s6-k-c1m3.large"
+	ack_worker_instance_type_id = "ecs.s6-k-c1m6.xlarge"
 }
 
 `, name, SecurityGroupCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, RandomPasswordTestCase(12))
