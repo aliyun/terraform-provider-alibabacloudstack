@@ -324,19 +324,35 @@ func csForceUpdateSuppressFunc(k, old, new string, d *schema.ResourceData) bool 
 	// if this is a new resource, allow the diff
 	// args with this suppress func will always suppress the diff, unless user specified force_update
 	log.Printf("key %s, old %s, new %s, isnew %v, id %s", k, old, new, d.IsNewResource(), d.Id())
-	return !(d.Id() == "") && !d.Get("force_update").(bool)
+	forceUpdate, ok := d.Get("force_update").(bool)
+	if !ok {
+		forceUpdate = false
+	}
+	return !(d.Id() == "") && !forceUpdate
 }
 func workerDataDiskSizeSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	_, ok := d.GetOk("worker_data_disk_category")
-	return !ok || !(d.Id() == "") && !d.Get("force_update").(bool)
+	forceUpdate, ok2 := d.Get("force_update").(bool)
+	if !ok2 {
+		forceUpdate = false
+	}
+	return !ok || !(d.Id() == "") && !forceUpdate
 }
 
 func csKubernetesMasterPostPaidDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("master_instance_charge_type").(string) == "PostPaid" || !(d.Id() == "") && !d.Get("force_update").(bool)
+	forceUpdate, ok := d.Get("force_update").(bool)
+	if !ok {
+		forceUpdate = false
+	}
+	return d.Get("master_instance_charge_type").(string) == "PostPaid" || !(d.Id() == "") && !forceUpdate
 }
 
 func csKubernetesWorkerPostPaidDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("worker_instance_charge_type").(string) == "PostPaid" || !(d.Id() == "") && !d.Get("force_update").(bool)
+	forceUpdate, ok := d.Get("force_update").(bool)
+	if !ok {
+		forceUpdate = false
+	}
+	return d.Get("worker_instance_charge_type").(string) == "PostPaid" || !(d.Id() == "") && !forceUpdate
 }
 
 func imageIdSuppressFunc(k, old, new string, d *schema.ResourceData) bool {

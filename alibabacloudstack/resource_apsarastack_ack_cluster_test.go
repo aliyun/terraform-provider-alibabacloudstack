@@ -78,7 +78,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"master_disk_size":             "120",
 					"master_instance_types":        []string{"${local.ack_instance_type_id}", "${local.ack_instance_type_id}", "${local.ack_instance_type_id}"},
 					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
-					"num_of_nodes":                 "3",
+					"num_of_nodes":                 "1",
 					"worker_disk_category":         "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"worker_disk_size":             "120",
 					"worker_instance_types":        []string{"${local.ack_worker_instance_type_id}"},
@@ -134,7 +134,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 						"master_disk_size":             "120",
 						"master_instance_types.#":      "3",
 						"master_vswitch_ids.#":         "3",
-						"num_of_nodes":                 "3",
+						"num_of_nodes":                 "1",
 						"is_enterprise_security_group": "true",
 						"new_nat_gateway":              "false",
 						"slb_internet_enabled":         "false",
@@ -401,10 +401,22 @@ data "alibabacloudstack_images" "aliyunlinux3" {
   owners      = "system"
 }
 
+data "alibabacloudstack_instance_types" "ack_master" {
+  availability_zone    = data.alibabacloudstack_zones.default.zones[0].id
+  kubernetes_node_role = "Master"
+  sorted_by            = "Memory"
+}
+
+data "alibabacloudstack_instance_types" "ack_worker" {
+  availability_zone    = data.alibabacloudstack_zones.default.zones[0].id
+  kubernetes_node_role = "Worker"
+  sorted_by            = "Memory"
+}
+
 locals {
     disk_category = data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0
-	ack_instance_type_id = "ecs.g7x-se-x25-c1m4.xlarge"
-	ack_worker_instance_type_id = "ecs.s6-k-c1m6.xlarge"
+    ack_instance_type_id        = try(data.alibabacloudstack_instance_types.ack_master.instance_types[0].id, "ecs.g7x-se-x25-c1m4.xlarge")
+    ack_worker_instance_type_id = try(data.alibabacloudstack_instance_types.ack_worker.instance_types[0].id, "ecs.s6-k-c1m6.xlarge")
 }
 
 `, name, SecurityGroupCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, RandomPasswordTestCase(12))
