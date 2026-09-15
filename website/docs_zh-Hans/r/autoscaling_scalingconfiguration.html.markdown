@@ -142,6 +142,10 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 
 * `system_disk_auto_snapshot_policy_id` - (可选) 系统盘的自动快照策略ID。
 
+* `system_disk_name` - (可选) 系统盘名称。必须是2~128个字符，并且不能以 `http://` 或 `https://` 开头。
+
+* `system_disk_description` - (可选) 系统盘描述。必须是2~256个字符，并且不能以 `http://` 或 `https://` 开头。
+
 * `is_outdated` - (可选) 是否使用过时的实例类型。默认值为 `false`。
 
 * `user_data` - (可选) 自定义数据用于ECS实例。它必须经过Base64编码，原始数据不得超过16KB。

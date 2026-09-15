@@ -53,6 +53,8 @@ The following attributes are exported in addition to the arguments listed above:
   * `internet_max_bandwidth_out` - The Internet outbound bandwidth value in Mbps for the ECS instance.
   * `system_disk_category` - The category of the system disk used in the scaling configuration.
   * `system_disk_size` - The size of the system disk in GB.
+  * `system_disk_name` - The name of the system disk.
+  * `system_disk_description` - The description of the system disk.
   * `data_disks` - A list of data disks configured in the scaling configuration. Each data disk has the following attributes:
     * `size` - The size of the data disk in GB.
     * `category` - The category of the data disk.

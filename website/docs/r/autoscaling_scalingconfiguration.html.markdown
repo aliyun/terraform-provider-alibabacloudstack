@@ -141,7 +141,11 @@ The following arguments are supported:
 * `substitute` - (Optional) The scaling configuration that will automatically become active and replace the current configuration when `active` is set to `false`. This parameter is invalid when `active` is `true`.
   
 * `system_disk_auto_snapshot_policy_id` - (Optional) The ID of the auto snapshot policy for the system disk.
-  
+
+* `system_disk_name` - (Optional) The name of the system disk. Must be 2~128 characters long and cannot start with `http://` or `https://`.
+
+* `system_disk_description` - (Optional) The description of the system disk. Must be 2~256 characters long and cannot start with `http://` or `https://`.
+
 * `is_outdated` - (Optional) Whether to use outdated instance types. Default is `false`.
   
 * `user_data` - (Optional) Custom data for the ECS instance. It must be Base64-encoded, and the raw data must not exceed 16KB.

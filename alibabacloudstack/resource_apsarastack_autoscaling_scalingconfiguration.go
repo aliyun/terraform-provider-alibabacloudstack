@@ -156,6 +156,14 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"system_disk_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"system_disk_description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"is_outdated": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -396,6 +404,12 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("system_disk_auto_snapshot_policy_id") {
 		request.SystemDiskAutoSnapshotPolicyId = d.Get("system_disk_auto_snapshot_policy_id").(string)
 	}
+	if d.HasChange("system_disk_name") {
+		request.SystemDiskDiskName = d.Get("system_disk_name").(string)
+	}
+	if d.HasChange("system_disk_description") {
+		request.SystemDiskDescription = d.Get("system_disk_description").(string)
+	}
 	if d.HasChange("tags") {
 		if v, ok := d.GetOk("tags"); ok {
 			tags := "{"
@@ -551,6 +565,8 @@ func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData
 	d.Set("system_disk_category", object.SystemDiskCategory)
 	d.Set("system_disk_size", object.SystemDiskSize)
 	d.Set("system_disk_auto_snapshot_policy_id", object.SystemDiskAutoSnapshotPolicyId)
+	d.Set("system_disk_name", object.SystemDiskName)
+	d.Set("system_disk_description", object.SystemDiskDescription)
 	d.Set("data_disk", essService.flattenDataDiskMappings(object.DataDisks.DataDisk))
 	connectivity.SetResourceData(d, object.RamRoleName, "role_name", "ram_role_name")
 	connectivity.SetResourceData(d, object.KeyPairName, "key_name", "key_pair_name")
@@ -732,6 +748,12 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 	}
 	if v := d.Get("system_disk_auto_snapshot_policy_id").(string); v != "" {
 		request.SystemDiskAutoSnapshotPolicyId = v
+	}
+	if v := d.Get("system_disk_name").(string); v != "" {
+		request.SystemDiskDiskName = v
+	}
+	if v := d.Get("system_disk_description").(string); v != "" {
+		request.SystemDiskDescription = v
 	}
 	if v := d.Get("system_disk_size").(int); v != 0 {
 		request.SystemDiskSize = requests.NewInteger(v)

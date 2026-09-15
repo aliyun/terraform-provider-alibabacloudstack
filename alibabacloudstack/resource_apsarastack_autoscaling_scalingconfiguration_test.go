@@ -102,6 +102,18 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"system_disk_name":        "${var.name}",
+					"system_disk_description": "test sys disk description",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"system_disk_name":        name,
+						"system_disk_description": "test sys disk description",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"data_disk": []map[string]string{{
 						"size":                 "20",
 						"category":             "cloud_ssd",
@@ -169,7 +181,7 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 
 func TestAccAlibabacloudStackEssScalingConfigurationMulti(t *testing.T) {
 	rand := getAccTestRandInt(1000, 999999)
-	var v ess.ScalingConfiguration
+	var v ess.ScalingConfigurationInDescribeScalingConfigurations
 	resourceId := "alibabacloudstack_ess_scaling_configuration.default.0"
 	basicMap := map[string]string{
 		"scaling_group_id":     CHECKSET,
@@ -198,13 +210,15 @@ func TestAccAlibabacloudStackEssScalingConfigurationMulti(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"count":              "1",
-					"scaling_group_id":   "${alibabacloudstack_ess_scaling_group.default.id}",
-					"image_id":           "${data.alibabacloudstack_images.default.images.0.id}",
-					"instance_type":      "ecs.n4.large",
-					"security_group_ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
-					"deployment_set_id":  "${alibabacloudstack_ecs_deployment_set.default.id}",
-					"force_delete":       "true",
+					"count":                   "1",
+					"scaling_group_id":        "${alibabacloudstack_ess_scaling_group.default.id}",
+					"image_id":                "${data.alibabacloudstack_images.default.images.0.id}",
+					"instance_type":           "ecs.n4.large",
+					"security_group_ids":      []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
+					"deployment_set_id":       "${alibabacloudstack_ecs_deployment_set.default.id}",
+					"force_delete":            "true",
+					"system_disk_name":        "multi-test-sys-disk",
+					"system_disk_description": "multi test sys disk description",
 					"data_disk": []map[string]string{{
 						"size":                 "20",
 						"category":             "cloud_ssd",
