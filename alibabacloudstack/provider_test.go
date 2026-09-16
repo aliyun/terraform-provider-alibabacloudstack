@@ -36,11 +36,60 @@ import (
 var testAccProviders map[string]*schema.Provider
 var testAccExternalProviders map[string]resource.ExternalProvider
 var testAccProvider, testYundunProvider *schema.Provider
+var testAccOrgProviders map[string]*schema.Provider
+var testAccOrgProvider *schema.Provider
 var defaultRegionToTest = os.Getenv("ALIBABACLOUDSTACK_REGION")
+
+// resolveTestCredentials returns AK/SK based on priority:
+// TEST_USER > TEST_ORG > ALIBABACLOUDSTACK_ACCESS_KEY/SECRET_KEY
+// If forceOrg is true, skip TEST_USER level.
+// TODO: After 3.20, ACC tests will no longer support reading ALIBABACLOUDSTACK_ACCESS_KEY and ALIBABACLOUDSTACK_SECRET_KEY as fallback.
+func resolveTestCredentials(forceOrg bool) (string, string) {
+	if !forceOrg {
+		if ak := os.Getenv("ALIBABACLOUDSTACK_TEST_USER_AK"); ak != "" {
+			if sk := os.Getenv("ALIBABACLOUDSTACK_TEST_USER_SK"); sk != "" {
+				return ak, sk
+			}
+		}
+	}
+	if ak := os.Getenv("ALIBABACLOUDSTACK_TEST_ORG_AK"); ak != "" {
+		if sk := os.Getenv("ALIBABACLOUDSTACK_TEST_ORG_SK"); sk != "" {
+			return ak, sk
+		}
+	}
+	// TODO: After 3.20, remove fallback to ALIBABACLOUDSTACK_ACCESS_KEY/SECRET_KEY.
+	return os.Getenv("ALIBABACLOUDSTACK_ACCESS_KEY"), os.Getenv("ALIBABACLOUDSTACK_SECRET_KEY")
+}
+
+// createTestProviderWithCredentials creates a provider with the given AK/SK override.
+func createTestProviderWithCredentials(ak, sk string) *schema.Provider {
+	p := Provider()
+	if ak != "" {
+		p.Schema["access_key"].Default = ak
+	}
+	if sk != "" {
+		p.Schema["secret_key"].Default = sk
+	}
+	return p
+}
+
+// getTestAccOrgProviders returns providers using ORG credentials,
+// creating them lazily on first call.
+func getTestAccOrgProviders() map[string]*schema.Provider {
+	if testAccOrgProviders == nil {
+		ak, sk := resolveTestCredentials(true)
+		testAccOrgProvider = createTestProviderWithCredentials(ak, sk)
+		testAccOrgProviders = map[string]*schema.Provider{
+			"alibabacloudstack": testAccOrgProvider,
+		}
+	}
+	return testAccOrgProviders
+}
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-	testAccProvider = Provider()
+	ak, sk := resolveTestCredentials(false)
+	testAccProvider = createTestProviderWithCredentials(ak, sk)
 	testAccProviders = map[string]*schema.Provider{
 		"alibabacloudstack": testAccProvider,
 	}
@@ -84,11 +133,14 @@ func testYunDunProviders() map[string]*schema.Provider {
 }
 
 func testAccPreCheck(t *testing.T) {
-	if v := os.Getenv("ALIBABACLOUDSTACK_ACCESS_KEY"); v == "" {
-		t.Fatal("ALIBABACLOUDSTACK_ACCESS_KEY must be set for acceptance tests")
+	ak, sk := resolveTestCredentials(false)
+	if ak == "" {
+		// TODO: After 3.20, only check TEST_USER and TEST_ORG credentials.
+		t.Fatal("One of ALIBABACLOUDSTACK_TEST_USER_AK, ALIBABACLOUDSTACK_TEST_ORG_AK, or ALIBABACLOUDSTACK_ACCESS_KEY must be set for acceptance tests")
 	}
-	if v := os.Getenv("ALIBABACLOUDSTACK_SECRET_KEY"); v == "" {
-		t.Fatal("ALIBABACLOUDSTACK_SECRET_KEY must be set for acceptance tests")
+	if sk == "" {
+		// TODO: After 3.20, only check TEST_USER and TEST_ORG credentials.
+		t.Fatal("One of ALIBABACLOUDSTACK_TEST_USER_SK, ALIBABACLOUDSTACK_TEST_ORG_SK, or ALIBABACLOUDSTACK_SECRET_KEY must be set for acceptance tests")
 	}
 	if v := os.Getenv("ALIBABACLOUDSTACK_REGION"); v == "" {
 		t.Fatal("ALIBABACLOUDSTACK_REGION must be set for acceptance tests")
@@ -109,6 +161,28 @@ func testAccPreCheck(t *testing.T) {
 	//	t.Fatal("ALIBABACLOUDSTACK_RESOURCE_GROUP_SET must be set for acceptance tests")
 	//}
 
+}
+
+// testAccPreCheckOrg validates credentials forcing ORG level (skipping TEST_USER).
+func testAccPreCheckOrg(t *testing.T) {
+	ak, sk := resolveTestCredentials(true)
+	if ak == "" {
+		// TODO: After 3.20, only check TEST_ORG credentials.
+		t.Fatal("One of ALIBABACLOUDSTACK_TEST_ORG_AK or ALIBABACLOUDSTACK_ACCESS_KEY must be set")
+	}
+	if sk == "" {
+		// TODO: After 3.20, only check TEST_ORG credentials.
+		t.Fatal("One of ALIBABACLOUDSTACK_TEST_ORG_SK or ALIBABACLOUDSTACK_SECRET_KEY must be set")
+	}
+	if v := os.Getenv("ALIBABACLOUDSTACK_REGION"); v == "" {
+		t.Fatal("ALIBABACLOUDSTACK_REGION must be set for acceptance tests")
+	}
+	if v := os.Getenv("ALIBABACLOUDSTACK_INSECURE"); v == "" {
+		t.Fatal("ALIBABACLOUDSTACK_INSECURE must be set for acceptance tests")
+	}
+	if v := os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"); v == "" {
+		t.Fatal("ALIBABACLOUDSTACK_POPGW_DOMAIN must be set for acceptance tests")
+	}
 }
 
 func testAccPreCheckOssEndpointList(t *testing.T) {

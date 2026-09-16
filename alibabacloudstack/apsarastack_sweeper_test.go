@@ -16,14 +16,24 @@ func TestMain(m *testing.M) {
 
 // functions for a given region
 func sharedClientForRegion(region string) (interface{}, error) {
-	var accessKey, secretKey, proxy, domain, popgwDomain, rgsName, rgid, dept, protocol string
+	return sharedClientForRegionWithCredentials(region, false)
+}
+
+// sharedClientForRegionOrg creates a client using ORG credentials (skipping TEST_USER).
+func sharedClientForRegionOrg(region string) (interface{}, error) {
+	return sharedClientForRegionWithCredentials(region, true)
+}
+
+func sharedClientForRegionWithCredentials(region string, forceOrg bool) (interface{}, error) {
+	var proxy, domain, popgwDomain, rgsName, rgid, dept, protocol string
 	var insecure, is_center_region bool
-	if accessKey = os.Getenv("ALIBABACLOUDSTACK_ACCESS_KEY"); accessKey == "" {
-		return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_ACCESS_KEY")
+	accessKey, secretKey := resolveTestCredentials(forceOrg)
+	if accessKey == "" {
+		return nil, fmt.Errorf("no valid access key found")
 	}
 
-	if secretKey = os.Getenv("ALIBABACLOUDSTACK_SECRET_KEY"); secretKey == "" {
-		return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_SECRET_KEY")
+	if secretKey == "" {
+		return nil, fmt.Errorf("no valid secret key found")
 	}
 	insecure, _ = strconv.ParseBool(os.Getenv("ALIBABACLOUDSTACK_INSECURE"))
 	if popgwDomain = os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"); popgwDomain == "" {
