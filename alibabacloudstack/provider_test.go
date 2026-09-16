@@ -73,25 +73,20 @@ func createTestProviderWithCredentials(ak, sk string) *schema.Provider {
 	return p
 }
 
-// getTestAccOrgProviders returns providers using ORG credentials,
-// creating them lazily on first call.
-func getTestAccOrgProviders() map[string]*schema.Provider {
-	if testAccOrgProviders == nil {
-		ak, sk := resolveTestCredentials(true)
-		testAccOrgProvider = createTestProviderWithCredentials(ak, sk)
-		testAccOrgProviders = map[string]*schema.Provider{
-			"alibabacloudstack": testAccOrgProvider,
-		}
-	}
-	return testAccOrgProviders
-}
-
 func init() {
 	rand.Seed(time.Now().UnixNano())
 	ak, sk := resolveTestCredentials(false)
 	testAccProvider = createTestProviderWithCredentials(ak, sk)
 	testAccProviders = map[string]*schema.Provider{
 		"alibabacloudstack": testAccProvider,
+	}
+	// ORG provider is created only when TEST_ORG_AK/SK are both set; otherwise it stays nil
+	// and ORG-level tests are skipped in testAccPreCheckOrg (no ACCESS_KEY fallback after 3.20).
+	if orgAK, orgSK := os.Getenv("ALIBABACLOUDSTACK_TEST_ORG_AK"), os.Getenv("ALIBABACLOUDSTACK_TEST_ORG_SK"); orgAK != "" && orgSK != "" {
+		testAccOrgProvider = createTestProviderWithCredentials(orgAK, orgSK)
+		testAccOrgProviders = map[string]*schema.Provider{
+			"alibabacloudstack": testAccOrgProvider,
+		}
 	}
 	testAccExternalProviders = map[string]resource.ExternalProvider{
 		"random": {
@@ -167,11 +162,11 @@ func testAccPreCheck(t *testing.T) {
 func testAccPreCheckOrg(t *testing.T) {
 	ak, sk := resolveTestCredentials(true)
 	if ak == "" {
-		// TODO: After 3.20, only check TEST_ORG credentials.
+		// TODO: After 3.20, remove the ACCESS_KEY/SECRET_KEY fallback; only check TEST_ORG credentials.
 		t.Fatal("One of ALIBABACLOUDSTACK_TEST_ORG_AK or ALIBABACLOUDSTACK_ACCESS_KEY must be set")
 	}
 	if sk == "" {
-		// TODO: After 3.20, only check TEST_ORG credentials.
+		// TODO: After 3.20, remove the ACCESS_KEY/SECRET_KEY fallback; only check TEST_ORG credentials.
 		t.Fatal("One of ALIBABACLOUDSTACK_TEST_ORG_SK or ALIBABACLOUDSTACK_SECRET_KEY must be set")
 	}
 	if v := os.Getenv("ALIBABACLOUDSTACK_REGION"); v == "" {
