@@ -79,6 +79,10 @@ func TestAccAlibabacloudStackNasFileSystem_DataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existFileSystemMapCheck,
 		fakeMapFunc:  fakeFileSystemMapCheck,
+		PreCheck: func() {
+			testAccPreCheck(t, resourceId)
+			testAccPreCheckApiAvailable(t, "GET", "NAS", "2017-06-26", "DescribeZones", "")
+		},
 	}
 
 	fileSystemCheckInfo.dataSourceTestCheck(t, rand, storageTypeConf, protocolTypeConf,
