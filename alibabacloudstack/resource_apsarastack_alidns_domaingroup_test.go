@@ -85,8 +85,6 @@ func testSweepDnsGroup(region string) error {
 }
 
 func TestAccAlibabacloudStackDnsGroup_basic(t *testing.T) {
-	testAccPreCheck(t)
-	testAccPreCheckApiAvailable(t, "POST", "GenesisDns", "2018-07-20", "AddDomainGroup", "")
 	resourceId := "alibabacloudstack_dns_group.default"
 	var v alidns.DomainGroup
 	serviceFunc := func() interface{} {
@@ -103,6 +101,7 @@ func TestAccAlibabacloudStackDnsGroup_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckApiAvailable(t, "POST", "GenesisDns", "2018-07-20", "AddDomainGroup", "")
 		},
 
 		// module name
