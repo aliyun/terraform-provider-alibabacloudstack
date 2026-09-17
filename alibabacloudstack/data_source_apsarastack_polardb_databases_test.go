@@ -87,5 +87,5 @@ resource "alibabacloudstack_polardb_database" "default" {
 	data_base_name        = var.name
 	character_set_name = "utf8"
 }
-`, name, PolarDBCommonTestCase("MySQL",false))
+`, name, PolarDBCommonTestCase("MySQL", false))
 }

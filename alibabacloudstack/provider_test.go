@@ -328,7 +328,15 @@ func testAccPreCheckApiAvailable(t *testing.T, method, popcode, version, name, p
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	// Probe the target API to check if it exists
+	// Step 1: Check if the product is deployed using GetProductEndpoint
+	// Only skip if we get a clear "not deployed" response; empty/ambiguous results proceed to Step 2
+	productDeployed, err := checkProductDeployed(client, popcode)
+	if err == nil && !productDeployed {
+		t.Skipf("Skipping test: product %s is not deployed in the environment", popcode)
+	}
+	// If check failed or returned ambiguous result, proceed to Step 2
+
+	// Step 2: Probe the target API to check if it exists
 	_, err = client.DoTeaRequest(method, popcode, version, name, pattern, nil, nil, nil)
 	if err != nil {
 		if isApiNotFoundError(err) {
@@ -337,6 +345,49 @@ func testAccPreCheckApiAvailable(t *testing.T, method, popcode, version, name, p
 		// For other errors (auth, network, etc.), the API might still exist;
 		// let the actual test handle those errors.
 	}
+}
+
+// checkProductDeployed checks if a product is deployed using GetProductEndpoint API.
+// Returns (true, nil) if clearly deployed, (false, nil) if clearly not deployed,
+// (false, err) if the check itself failed (ambiguous result, caller should proceed to Step 2).
+func checkProductDeployed(client *connectivity.AlibabacloudStackClient, popcode string) (bool, error) {
+	// Call ApiDevelop_2025-06-20_GetProductEndpoint (ROA style POST API)
+	resp, err := client.DoTeaRequest("POST", "ApiDevelop", "2025-06-20", "GetProductEndpoint",
+		"/apidevelop/openapi/getProductEndpoint",
+		nil, nil,
+		map[string]interface{}{
+			"apiProduct": popcode,
+			"platform":   "ASCM",
+			"Date":       time.Now().Format("2006-01-02"),
+		})
+	if err != nil {
+		// API call failed (network, auth, etc.) - ambiguous, proceed to Step 2
+		return false, err
+	}
+	// API call succeeded, check if data array is empty
+	if isProductEndpointEmpty(resp) {
+		// Empty data means product is not deployed
+		return false, nil
+	}
+	return true, nil
+}
+
+// isProductEndpointEmpty checks if the GetProductEndpoint response data array is empty.
+// Response format: {"success": true, "data": [{"popEndpoint": "...", "region": "..."}]}
+// Empty data array means product is not deployed.
+func isProductEndpointEmpty(resp map[string]interface{}) bool {
+	if resp == nil {
+		return true
+	}
+	data, ok := resp["data"]
+	if !ok {
+		return true
+	}
+	// data should be an array
+	if arr, ok := data.([]interface{}); ok {
+		return len(arr) == 0
+	}
+	return true
 }
 
 // isApiNotFoundError checks whether the error indicates the API does not exist in the environment.
