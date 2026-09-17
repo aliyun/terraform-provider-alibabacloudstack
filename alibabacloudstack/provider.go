@@ -219,7 +219,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_KMS_ENDPOINT", nil),
 				Description: descriptions["kms_endpoint"],
-				Deprecated:  "Use schema endpoints replace kms_endpoint. remove in 3.20.0",
+				Deprecated:  "Use schema endpoints replace kms_endpoint. remove in 3.21.0",
 			},
 			"asapi_endpoint": {
 				Type:        schema.TypeString,
@@ -233,7 +233,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SLS_ENDPOINT", nil),
 				Description: descriptions["sls_endpoint"],
-				Deprecated:  "Use schema endpoints replace sls_endpoint. remove in 3.20.0",
+				Deprecated:  "Use schema endpoints replace sls_endpoint. remove in 3.21.0",
 			},
 			"max_retry_timeout": {
 				Type:        schema.TypeInt,

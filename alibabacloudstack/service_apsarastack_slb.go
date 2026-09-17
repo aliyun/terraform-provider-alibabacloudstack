@@ -195,33 +195,6 @@ func (s *SlbService) DescribeSlbMasterSlaveServerGroup(id string) (*slb.Describe
 	return bresponse, err
 }
 
-func (s *SlbService) DescribeSlbBackendServer(id string) (*slb.DescribeLoadBalancerAttributeResponse, error) {
-	response := &slb.DescribeLoadBalancerAttributeResponse{}
-	request := slb.CreateDescribeLoadBalancerAttributeRequest()
-	s.client.InitRpcRequest(*request.RpcRequest)
-	request.LoadBalancerId = id
-	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-		return slbClient.DescribeLoadBalancerAttribute(request)
-	})
-	bresponse, ok := raw.(*slb.DescribeLoadBalancerAttributeResponse)
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, "InvalidLoadBalancerId.NotFound") {
-			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbBackendServers", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		} else {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_backend_server", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		return response, err
-	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	if bresponse.LoadBalancerId == "" {
-		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbBackendServers", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-	}
-	return bresponse, err
-}
 
 func (s *SlbService) DescribeSlbListener(id string) (listener map[string]interface{}, err error) {
 	parts, err := ParseSlbListenerId(id)
@@ -436,30 +409,6 @@ func (s *SlbService) WaitForSlbMasterSlaveServerGroup(id string, status Status, 
 	return nil
 }
 
-func (s *SlbService) WaitSlbAttribute(id string, instanceSet *schema.Set, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-
-RETRY:
-	object, err := s.DescribeSlb(id)
-	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			return nil
-		}
-		return errmsgs.WrapError(err)
-	}
-	if time.Now().After(deadline) {
-		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, Null, id, errmsgs.ProviderERROR)
-	}
-	servers := object.BackendServers.BackendServer
-	if len(servers) > 0 {
-		for _, s := range servers {
-			if instanceSet.Contains(s.ServerId) {
-				goto RETRY
-			}
-		}
-	}
-	return nil
-}
 
 func (s *SlbService) slbRemoveAccessControlListEntryPerTime(list []interface{}, id string) error {
 	request := slb.CreateRemoveAccessControlListEntryRequest()

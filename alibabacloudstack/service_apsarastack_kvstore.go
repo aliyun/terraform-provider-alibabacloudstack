@@ -25,9 +25,6 @@ type KvstoreService struct {
 
 var KVstoreInstanceStatusCatcher = Catcher{"OperationDenied.KVstoreInstanceStatus", 60, 5}
 
-func (s *KvstoreService) DoR_KvstoreDescribeinstanceattributeRequest(id string) (*r_kvstore.DBInstanceAttribute, error) {
-	return s.DescribeKVstoreInstance(id)
-}
 func (s *KvstoreService) DescribeKVstoreInstance(id string) (*r_kvstore.DBInstanceAttribute, error) {
 	instance := &r_kvstore.DBInstanceAttribute{}
 	request := r_kvstore.CreateDescribeInstanceAttributeRequest()
@@ -121,22 +118,6 @@ func (s *KvstoreService) RdsKvstoreInstanceStateRefreshFunc(id string, failState
 	}
 }
 
-func (s *KvstoreService) WaitForKVstoreInstanceVpcAuthMode(id string, status string, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeKVstoreInstance(id)
-		if err != nil && !errmsgs.NotFoundError(err) {
-			return err
-		}
-		if object.VpcAuthMode == string(status) {
-			break
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.VpcAuthMode, status, errmsgs.ProviderERROR)
-		}
-	}
-	return nil
-}
 
 func (s *KvstoreService) DescribeParameters(id string) (*r_kvstore.DescribeParametersResponse, error) {
 	response := &r_kvstore.DescribeParametersResponse{}
@@ -461,25 +442,6 @@ func (s *KvstoreService) DescribeKvstoreConnection(id string) (object r_kvstore.
 	return object, errmsgs.GetNotFoundErrorFromString("KvstoreConnection Not Found")
 }
 
-func (s *KvstoreService) InstanceSslStateRefreshFunc(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, failStates []string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DescribeInstanceSSL(d.Id())
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		for _, failState := range failStates {
-			if object["SSLEnabled"].(string) == failState {
-				return object, object["SSLEnabled"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["SSLEnabled"].(string)))
-			}
-		}
-		return object, object["SSLEnabled"].(string), nil
-	}
-}
 
 func (s *KvstoreService) DescribeInstanceSSL(id string) (map[string]interface{}, error) {
 	request := s.client.NewCommonRequest("POST", "R-kvstore", "2015-01-01", "DescribeInstanceSSL", "")
@@ -500,25 +462,6 @@ func (s *KvstoreService) DescribeInstanceSSL(id string) (map[string]interface{},
 
 // DescribeInstanceTDEStatus
 
-func (s *KvstoreService) InstanceTDEStateRefreshFunc(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, failStates []string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DescribeInstanceTDEStatus(d.Id())
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		for _, failState := range failStates {
-			if object["TDEStatus"].(string) == failState {
-				return object, object["TDEStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["TDEStatus"].(string)))
-			}
-		}
-		return object, object["TDEStatus"].(string), nil
-	}
-}
 
 func (s *KvstoreService) DescribeInstanceTDEStatus(id string) (map[string]interface{}, error) {
 	request := s.client.NewCommonRequest("POST", "R-kvstore", "2015-01-01", "DescribeInstanceTDEStatus", "")

@@ -74,10 +74,10 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 
 	// If new API fails, fallback to old API
 	if err != nil && errmsgs.IsExpectedErrors(err, "InvalidVersion") {
-		// TODO: Remove old API logic in version 3.20.0
+		// TODO: Remove old API logic in version 3.21.0
 		log.Printf("[WARN] SLS 2019-10-23 GetProject failed: %v, fallback to 2020-03-31 API", err)
 
-		// Attempt 2: Old API (2020-03-31) - will be removed in 3.20.0
+		// Attempt 2: Old API (2020-03-31) - will be removed in 3.21.0
 		request := s.client.NewCommonRequest("POST", "SLS", "2020-03-31", "GetProject", "")
 		request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 		request.QueryParams["ProjectName"] = id
@@ -178,27 +178,6 @@ func (s *LogService) GetSlsDataClient(projectName string) (slsClient sls.ClientI
 	return slsClient, nil
 }
 
-func (s *LogService) WaitForLogProject(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeLogProject(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.ProjectName == id && status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ProjectName, id, errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *LogService) DescribeLogStore(id string) (*sls.LogStore, error) {
 	store := &sls.LogStore{}
@@ -242,32 +221,6 @@ func (s *LogService) DescribeLogStore(id string) (*sls.LogStore, error) {
 	return store, nil
 }
 
-func (s *LogService) WaitForLogStore(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	parts, err := ParseResourceId(id, 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	name := parts[1]
-	for {
-		object, err := s.DescribeLogStore(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.Name == name && status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Name, name, errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *LogService) DescribeLogStoreIndex(id string) (*sls.Index, error) {
 	index := &sls.Index{}
@@ -597,42 +550,6 @@ func (s *LogService) WaitForLogstoreAlert(id string, status Status, timeout int)
 	}
 }
 
-func (s *LogService) CreateLogDashboard(project, name string) error {
-	dashboard := sls.Dashboard{
-		DashboardName: name,
-		ChartList:     []sls.Chart{},
-	}
-
-	slsClient, err := s.GetSlsDataClient(project)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-
-	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		err := slsClient.CreateDashboard(project, dashboard)
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, "InternalServerError", errmsgs.LogClientTimeout) {
-				return resource.RetryableError(err)
-			}
-			if err.(*sls.Error).Message == "specified dashboard already exists" {
-				return nil
-			}
-			return resource.NonRetryableError(err)
-		}
-		if debugOn() {
-			addDebug("CreateLogDashboard", dashboard, map[string]string{
-				"project":        project,
-				"dashboard_name": name,
-			})
-		}
-
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
 func CreateDashboard(project, name string, client sls.ClientInterface) error {
 	dashboard := sls.Dashboard{
@@ -720,31 +637,4 @@ func (s *LogService) DescribeLogDashboard(id string) (*sls.Dashboard, error) {
 		return dashboard, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("LogstoreDashboard", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	return dashboard, nil
-}
-
-func (s *LogService) WaitForLogDashboard(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	parts, err := ParseResourceId(id, 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	name := parts[1]
-	for {
-		object, err := s.DescribeLogDashboard(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.DashboardName == name && status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.DashboardName, name, errmsgs.ProviderERROR)
-		}
-	}
 }

@@ -540,28 +540,6 @@ func (s *RdsService) RevokeAccountPrivilege(id, dbName string) error {
 	return nil
 }
 
-func (s *RdsService) ReleaseDBPublicConnection(instanceId, connection string) error {
-	request := rds.CreateReleaseInstancePublicConnectionRequest()
-	s.client.InitRpcRequest(*request.RpcRequest)
-	request.DBInstanceId = instanceId
-	request.CurrentConnectionString = connection
-
-	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
-		return rdsClient.ReleaseInstancePublicConnection(request)
-	})
-	response, ok := raw.(*rds.ReleaseInstancePublicConnectionResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-
-	return nil
-}
 
 func (s *RdsService) ModifyDBBackupPolicy(d *schema.ResourceData, updateForData, updateForLog bool) error {
 	enableBackupLog := "1"
@@ -832,30 +810,6 @@ func (s *RdsService) DescribeDBInstanceSSL(id string) (*rds.DescribeDBInstanceSS
 	return response, nil
 }
 
-func (s *RdsService) DescribeRdsTDEInfo(id string) (*rds.DescribeDBInstanceTDEResponse, error) {
-	response := &rds.DescribeDBInstanceTDEResponse{}
-	request := rds.CreateDescribeDBInstanceTDERequest()
-	s.client.InitRpcRequest(*request.RpcRequest)
-	request.DBInstanceId = id
-	statErr := s.WaitForDBInstance(id, Running, DefaultLongTimeout)
-	if statErr != nil {
-		return response, errmsgs.WrapError(statErr)
-	}
-	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
-		return rdsClient.DescribeDBInstanceTDE(request)
-	})
-	response, ok := raw.(*rds.DescribeDBInstanceTDEResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-
-	return response, nil
-}
 
 func (s *RdsService) ModifySecurityGroupConfiguration(id string, groupid string) error {
 	request := rds.CreateModifySecurityGroupConfigurationRequest()
@@ -1039,27 +993,6 @@ func (s *RdsService) RdsDBInstanceStateRefreshFunc(id string, failStates []strin
 	}
 }
 
-func (s *RdsService) RdsTaskStateRefreshFunc(id string, taskAction string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DescribeTasks(id)
-		if err != nil {
-
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		for _, t := range object.Items.TaskProgressInfo {
-			if t.TaskAction == taskAction {
-				return object, t.Status, nil
-			}
-		}
-
-		return object, "Pending", nil
-	}
-}
 
 // WaitForDBParameter waits for instance parameter to given value.
 // Status of DB instance is Running after ModifyParameters API was
@@ -1275,35 +1208,8 @@ func (s *RdsService) WaitForDBDatabase(id string, status Status, timeout int) er
 }
 
 // turn period to TimeType
-func (s *RdsService) TransformPeriod2Time(period int, chargeType string) (ut int, tt TimeType) {
-	if chargeType == string(Postpaid) {
-		return 1, Day
-	}
-
-	if period >= 1 && period <= 9 {
-		return period, Month
-	}
-
-	if period == 12 {
-		return 1, Year
-	}
-
-	if period == 24 {
-		return 2, Year
-	}
-	return 0, Day
-
-}
 
 // turn TimeType to Period
-func (s *RdsService) TransformTime2Period(ut int, tt TimeType) (period int) {
-	if tt == Year {
-		return 12 * ut
-	}
-
-	return ut
-
-}
 
 func (s *RdsService) flattenDBSecurityIPs(list []rds.DBInstanceIPArray) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0, len(list))
@@ -1462,15 +1368,6 @@ func (s *RdsService) tagsToString(tags []Tag) string {
 	return string(v)
 }
 
-func (s *RdsService) FormatUtcTime(kvstoretime string) (string, error) {
-	t, err := time.Parse("2006-01-02T15:04:05Z", kvstoretime)
-	if err != nil {
-		return "", fmt.Errorf("parse kvstore time failed: %w", err)
-	}
-	outputLayout := "2006-01-02T15:04Z"
-	format_time := t.Format(outputLayout)
-	return format_time, nil
-}
 
 func (s *RdsService) DoDescribebackupsRequest(id string) (*RdsDescribebackupsResponse, error) {
 	// api: rds - 2014-08-15 - DescribeBackups

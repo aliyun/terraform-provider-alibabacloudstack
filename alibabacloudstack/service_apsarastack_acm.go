@@ -8,7 +8,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type AcmService struct {
@@ -85,60 +84,4 @@ type AcmDescribeconfigurationsResponse struct {
 	TotalCount int    `json:"TotalCount"`
 	PageSize   int    `json:"PageSize"`
 	PageNumber int    `json:"PageNumber"`
-}
-
-func (s *AcmService) DoAcmDescribeconfigurationsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*AcmDescribeconfigurationsResponse, error) {
-	// api: acm - 2020-02-06 - DescribeConfigurations
-	request := s.client.NewCommonRequest("GET", "acm", "2020-02-06", "DescribeConfigurations", "")
-	AcmDescribeconfigurationsResponseObj := &AcmDescribeconfigurationsResponse{}
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeConfigurations", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &AcmDescribeconfigurationsResponseObj)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeConfigurations", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return AcmDescribeconfigurationsResponseObj, nil
-}
-
-func (s *AcmService) DoAcmDescribeBetaConfigurationRequest(id string) (*AcmDescribeconfigurationResponse, error) {
-	// api: acm - 2020-02-06 - DescribeBetaConfiguration
-	request := s.client.NewCommonRequest("GET", "acm", "2020-02-06", "DescribeBetaConfiguration", "/diamond-ops/pop/configuration/beta")
-	AcmDescribeconfigurationResponseObj := &AcmDescribeconfigurationResponse{}
-
-	params := strings.Split(id, ":")
-
-	request.QueryParams["DataId"] = params[0]
-
-	request.QueryParams["Group"] = params[1]
-
-	request.QueryParams["NamespaceId"] = params[2]
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBetaConfiguration", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &AcmDescribeconfigurationResponseObj)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBetaConfiguration", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return AcmDescribeconfigurationResponseObj, nil
 }

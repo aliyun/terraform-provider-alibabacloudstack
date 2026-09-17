@@ -43,28 +43,6 @@ func (s *DataworksService) DescribeDataWorksFolder(id string) (object map[string
 	return object, nil
 }
 
-func (s *DataworksService) GetFolder(id string) (object map[string]interface{}, err error) {
-	var response map[string]interface{}
-	parts, err := ParseResourceId(id, 2)
-	if err != nil {
-		err = errmsgs.WrapError(err)
-		return
-	}
-	request := map[string]interface{}{
-		"FolderId":  parts[0],
-		"ProjectId": parts[1],
-	}
-	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetFolder", "", nil, nil, request)
-	if err != nil {
-		return object, err
-	}
-	v, err := jsonpath.Get("$.Data", response)
-	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Data", response)
-	}
-	object = v.(map[string]interface{})
-	return object, nil
-}
 
 func (s *DataworksService) DescribeDataWorksConnection(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}

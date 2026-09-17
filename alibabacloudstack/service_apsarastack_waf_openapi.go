@@ -41,29 +41,6 @@ func (s *WafOpenapiService) convertLogHeadersToString(v []interface{}) (string, 
 	return string(maps), nil
 }
 
-func (s *WafOpenapiService) DescribeWafDomain(id string) (object map[string]interface{}, err error) {
-	var response map[string]interface{}
-	client := s.client
-	action := "DescribeDomain"
-	parts, err := ParseResourceId(id, 2)
-	if err != nil {
-		err = errmsgs.WrapError(err)
-		return
-	}
-	request := map[string]interface{}{
-		"RegionId":   s.client.RegionId,
-		"Domain":     parts[1],
-		"InstanceId": parts[0],
-	}
-	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, nil, request)
-	addDebug(action, response, request)
-	v, err := jsonpath.Get("$.Domain", response)
-	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Domain", response)
-	}
-	object = v.(map[string]interface{})
-	return object, nil
-}
 
 func (s *WafOpenapiService) DescribeWafInstance(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
@@ -98,43 +75,6 @@ func (s *WafOpenapiService) DescribeWafInstance(id string) (object map[string]in
 	return object, nil
 }
 
-func (s *WafOpenapiService) DescribeWafCertificate(id string) (object map[string]interface{}, err error) {
-	var response map[string]interface{}
-	client := s.client
-	action := "DescribeCertificates"
-	parts, err := ParseResourceId(id, 3)
-	if err != nil {
-		err = errmsgs.WrapError(err)
-		return
-	}
-	request := map[string]interface{}{
-		"Domain":     parts[1],
-		"InstanceId": parts[0],
-	}
-	idExist := false
-	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, nil, request)
-	addDebug(action, response, request)
-	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	v, err := jsonpath.Get("$.Certificates", response)
-	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Certificates", response)
-	}
-	if len(v.([]interface{})) < 1 {
-		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("WAF", id)), errmsgs.NotFoundWithResponse, response)
-	}
-	for _, v := range v.([]interface{}) {
-		if fmt.Sprint(v.(map[string]interface{})["CertificateId"]) == parts[2] {
-			idExist = true
-			return v.(map[string]interface{}), nil
-		}
-	}
-	if !idExist {
-		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("WAF", id)), errmsgs.NotFoundWithResponse, response)
-	}
-	return object, nil
-}
 
 func (s *WafOpenapiService) DescribeProtectionModuleStatus(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
@@ -163,56 +103,6 @@ func (s *WafOpenapiService) DescribeProtectionModuleStatus(id string) (object ma
 	return object, nil
 }
 
-func (s *WafOpenapiService) DescribeWafProtectionModule(id string) (object map[string]interface{}, err error) {
-	var response map[string]interface{}
-	client := s.client
-	action := "DescribeProtectionModuleMode"
-	parts, err := ParseResourceId(id, 3)
-	if err != nil {
-		err = errmsgs.WrapError(err)
-		return
-	}
-	request := map[string]interface{}{
-		"DefenseType": parts[2],
-		"Domain":      parts[1],
-		"InstanceId":  parts[0],
-	}
-	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, nil, request)
-	addDebug(action, response, request)
-	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	v, err := jsonpath.Get("$", response)
-	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)
-	}
-	object = v.(map[string]interface{})
-	return object, nil
-}
-
-func (s *WafOpenapiService) DescribeWafv3Instance(id string) (object map[string]interface{}, err error) {
-	client := s.client
-	request := map[string]interface{}{
-		"RegionId": s.client.RegionId,
-	}
-
-	var response map[string]interface{}
-	action := "DescribeInstance"
-	response, err = client.DoTeaRequest("POST", "waf-openapi", "2021-10-01", action, "", nil, nil, request)
-	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	v, err := jsonpath.Get("$", response)
-	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)
-	}
-
-	if _, ok := v.(map[string]interface{})["InstanceId"]; !ok {
-		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Wafv3Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-	}
-
-	return v.(map[string]interface{}), nil
-}
 
 func (s *WafOpenapiService) Wafv3InstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {

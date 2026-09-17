@@ -64,138 +64,6 @@ func (s *RamService) ParseRolePolicyDocument(policyDocument string) (RolePolicy,
 	return policy, nil
 }
 
-func (s *RamService) ParsePolicyDocument(policyDocument string) (statement []map[string]interface{}, version string, err error) {
-	policy := Policy{}
-	err = json.Unmarshal([]byte(policyDocument), &policy)
-	if err != nil {
-		err = errmsgs.WrapError(err)
-		return
-	}
-
-	version = policy.Version
-	statement = make([]map[string]interface{}, 0, len(policy.Statement))
-	for _, v := range policy.Statement {
-		item := make(map[string]interface{})
-
-		item["effect"] = v.Effect
-		if val, ok := v.Action.([]interface{}); ok {
-			item["action"] = val
-		} else {
-			item["action"] = []interface{}{v.Action}
-		}
-
-		if val, ok := v.Resource.([]interface{}); ok {
-			item["resource"] = val
-		} else {
-			item["resource"] = []interface{}{v.Resource}
-		}
-		statement = append(statement, item)
-	}
-	return
-}
-
-func (s *RamService) AssembleRolePolicyDocument(ramUser, service []interface{}, version string) (string, error) {
-	services := expandStringList(service)
-	users := expandStringList(ramUser)
-
-	statement := RolePolicyStatement{
-		Effect: Allow,
-		Action: "sts:AssumeRole",
-		Principal: Principal{
-			RAM:     users,
-			Service: services,
-		},
-	}
-
-	policy := RolePolicy{
-		Version:   version,
-		Statement: []RolePolicyStatement{statement},
-	}
-
-	data, err := json.Marshal(policy)
-	if err != nil {
-		return "", errmsgs.WrapError(err)
-	}
-	return string(data), nil
-}
-
-func (s *RamService) AssemblePolicyDocument(document []interface{}, version string) (string, error) {
-	var statements []PolicyStatement
-
-	for _, v := range document {
-		doc := v.(map[string]interface{})
-
-		actions := expandStringList(doc["action"].([]interface{}))
-		resources := expandStringList(doc["resource"].([]interface{}))
-
-		statement := PolicyStatement{
-			Effect:   Effect(doc["effect"].(string)),
-			Action:   actions,
-			Resource: resources,
-		}
-		statements = append(statements, statement)
-	}
-
-	policy := Policy{
-		Version:   version,
-		Statement: statements,
-	}
-
-	data, err := json.Marshal(policy)
-	if err != nil {
-		return "", errmsgs.WrapError(err)
-	}
-	return string(data), nil
-}
-
-func (s *RamService) JudgeRolePolicyPrincipal(roleName string) error {
-	request := ram.CreateGetRoleRequest()
-	s.client.InitRpcRequest(*request.RpcRequest)
-	request.RoleName = roleName
-	raw, err := s.client.WithRamClient(func(ramClient *ram.Client) (interface{}, error) {
-		return ramClient.GetRole(request)
-	})
-	resp, ok := raw.(*ram.GetRoleResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(resp.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, roleName, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	policy, err := s.ParseRolePolicyDocument(resp.Role.AssumeRolePolicyDocument)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	for _, v := range policy.Statement {
-		for _, val := range v.Principal.Service {
-			if strings.Trim(val, " ") == "ecs.aliyuncs.com" {
-				return nil
-			}
-		}
-	}
-	return errmsgs.WrapError(fmt.Errorf("Role policy services must contains 'ecs.aliyuncs.com', Now is \n%v.", resp.Role.AssumeRolePolicyDocument))
-}
-
-func (s *RamService) GetIntersection(dataMap []map[string]interface{}, allDataMap map[string]interface{}) (allData []interface{}) {
-	for _, v := range dataMap {
-		if len(v) > 0 {
-			for key := range allDataMap {
-				if _, ok := v[key]; !ok {
-					allDataMap[key] = nil
-				}
-			}
-		}
-	}
-
-	for _, v := range allDataMap {
-		if v != nil {
-			allData = append(allData, v)
-		}
-	}
-	return
-}
 
 func (s *RamService) DescribeRamUser(id string) (*ram.User, error) {
 	user := &ram.User{}
@@ -255,27 +123,6 @@ func (s *RamService) DescribeRamUser(id string) (*ram.User, error) {
 	return &response.User, nil
 }
 
-func (s *RamService) WaitForRamUser(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeRamUser(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			}
-			return errmsgs.WrapError(err)
-		}
-		if object.UserId == id {
-			break
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultTimeoutMsg, id, GetFunc(1), errmsgs.ProviderERROR)
-		}
-	}
-	return nil
-}
 
 func (s *RamService) DescribeRamGroupMembership(id string) (*ram.ListUsersForGroupResponse, error) {
 	response := &ram.ListUsersForGroupResponse{}
@@ -304,27 +151,6 @@ func (s *RamService) DescribeRamGroupMembership(id string) (*ram.ListUsersForGro
 	return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
-func (s *RamService) WaitForRamGroupMembership(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeRamGroupMembership(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, strconv.Itoa(len(object.Users.User)), status, errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *RamService) DescribeRamLoginProfile(id string) (*ram.GetLoginProfileResponse, error) {
 	response := &ram.GetLoginProfileResponse{}
@@ -351,27 +177,6 @@ func (s *RamService) DescribeRamLoginProfile(id string) (*ram.GetLoginProfileRes
 	return response, nil
 }
 
-func (s *RamService) WaitForRamLoginProfile(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeRamLoginProfile(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.LoginProfile.UserName == id {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.LoginProfile.UserName, id, errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *RamService) DescribeRamGroupPolicyAttachment(id string) (*ram.Policy, error) {
 	response := &ram.Policy{}
@@ -407,31 +212,6 @@ func (s *RamService) DescribeRamGroupPolicyAttachment(id string) (*ram.Policy, e
 	return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
-func (s *RamService) WaitForRamGroupPolicyAttachment(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	parts, err := ParseResourceId(id, 4)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	for {
-		object, err := s.DescribeRamGroupPolicyAttachment(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.PolicyName, parts[1], errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *RamService) DescribeRamAccountAlias(id string) (*ram.GetAccountAliasResponse, error) {
 	response := &ram.GetAccountAliasResponse{}
@@ -486,27 +266,6 @@ func (s *RamService) DescribeRamAccessKey(id, userName string) (*ram.AccessKey, 
 	return key, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RamAccessKey", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 }
 
-func (s *RamService) WaitForRamAccessKey(id, useName string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeRamAccessKey(id, useName)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if string(status) == object.Status {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Status, status, errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *RamService) DescribeRamPolicy(id string) (*ram.GetPolicyResponse, error) {
 	response := &ram.GetPolicyResponse{}
@@ -534,28 +293,6 @@ func (s *RamService) DescribeRamPolicy(id string) (*ram.GetPolicyResponse, error
 	return response, nil
 }
 
-func (s *RamService) WaitForRamPolicy(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeRamPolicy(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.Policy.PolicyName == id {
-			return nil
-		}
-
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Policy.PolicyName, id, errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *RamService) DescribeRamRoleAttachment(id string) (*ecs.DescribeInstanceRamRoleResponse, error) {
 	response := &ecs.DescribeInstanceRamRoleResponse{}
@@ -656,27 +393,6 @@ func (s *RamService) DescribeRamRole(id string) (*ram.GetRoleResponse, error) {
 	return response, nil
 }
 
-func (s *RamService) WaitForRamRole(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeRamRole(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.Role.RoleName == id && status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Role.RoleName, id, errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *RamService) DescribeRamUserPolicyAttachment(id string) (*ram.Policy, error) {
 	response := &ram.Policy{}
@@ -714,31 +430,6 @@ func (s *RamService) DescribeRamUserPolicyAttachment(id string) (*ram.Policy, er
 	return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
-func (s *RamService) WaitForRamUserPolicyAttachment(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	parts, err := ParseResourceId(id, 4)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	for {
-		object, err := s.DescribeRamUserPolicyAttachment(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.PolicyName, parts[1], errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *RamService) DescribeRamRolePolicyAttachment(id string) (*ram.Policy, error) {
 	response := &ram.Policy{}
@@ -775,31 +466,6 @@ func (s *RamService) DescribeRamRolePolicyAttachment(id string) (*ram.Policy, er
 	return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
-func (s *RamService) WaitForRamRolePolicyAttachment(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	parts, err := ParseResourceId(id, 4)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	for {
-		object, err := s.DescribeRamRolePolicyAttachment(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.PolicyName, parts[1], errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *RamService) DescribeRamGroup(id string) (*ram.GetGroupResponse, error) {
 	response := &ram.GetGroupResponse{}
@@ -826,48 +492,5 @@ func (s *RamService) DescribeRamGroup(id string) (*ram.GetGroupResponse, error) 
 	if response.Group.GroupName != id {
 		return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	return response, nil
-}
-
-func (s *RamService) WaitForRamGroup(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeRamGroup(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.Group.GroupName == id && status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Group.GroupName, id, errmsgs.ProviderERROR)
-		}
-	}
-}
-
-func (s *RamService) DescribeRamAccountPasswordPolicy(id string) (*ram.GetPasswordPolicyResponse, error) {
-	response := &ram.GetPasswordPolicyResponse{}
-	request := ram.CreateGetPasswordPolicyRequest()
-	s.client.InitRpcRequest(*request.RpcRequest)
-	raw, err := s.client.WithRamClient(func(ramClient *ram.Client) (interface{}, error) {
-		return ramClient.GetPasswordPolicy(request)
-	})
-	response, ok := raw.(*ram.GetPasswordPolicyResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	
-
 	return response, nil
 }

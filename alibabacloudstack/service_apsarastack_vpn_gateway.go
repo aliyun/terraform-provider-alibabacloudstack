@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"strconv"
 	"time"
 
 	"strings"
@@ -13,16 +12,12 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type VpnGatewayService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
-func (s *VpnGatewayService) DoVpcDescribevpngatewayRequest(id string) (v vpc.DescribeVpnGatewayResponse, err error) {
-	return s.DescribeVpnGateway(id)
-}
 func (s *VpnGatewayService) DescribeVpnGateway(id string) (v vpc.DescribeVpnGatewayResponse, err error) {
 	request := vpc.CreateDescribeVpnGatewayRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
@@ -257,52 +252,6 @@ func (s *VpnGatewayService) WaitForVpnCustomerGateway(id string, status Status, 
 		}
 		if time.Now().After(deadline) {
 			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, Null, string(status), errmsgs.ProviderERROR)
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
-	}
-}
-
-func (s *VpnGatewayService) WaitForSslVpnServer(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeSslVpnServer(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.SslVpnServerId == id && status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, Null, string(status), errmsgs.ProviderERROR)
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
-	}
-}
-
-func (s *VpnGatewayService) WaitForSslVpnClientCert(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeSslVpnClientCert(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.Status == string(status) {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Status, string(status), errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
@@ -561,43 +510,6 @@ type VpcDescribevpnsslserverlogsResponse struct {
 	PageSize    int    `json:"PageSize"`
 }
 
-func (s *VpnGatewayService) DoVpcDescribevpnsslserverlogsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*VpcDescribevpnsslserverlogsResponse, error) {
-	// api: Vpc - 2016-04-28 - DescribeVpnSslServerLogs
-	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeVpnSslServerLogs", "")
-	VpcDescribevpnsslserverlogsResponseObj := &VpcDescribevpnsslserverlogsResponse{}
-
-	// Call request_params_handler
-
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	} else {
-		return nil, fmt.Errorf("RegionId is required")
-	}
-
-	if v, ok := d.GetOk("ssl_vpn_server_id"); ok {
-		request.QueryParams["VpnSslServerId"] = v.(string)
-	} else {
-		return nil, fmt.Errorf("SslVpnServerId is required")
-	}
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeVpnSslServerLogs", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribevpnsslserverlogsResponseObj)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeVpnSslServerLogs", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return VpcDescribevpnsslserverlogsResponseObj, nil
-}
-
 type VpcDescribesslvpnclientcertResponse struct {
 	RequestId          string `json:"RequestId"`
 	RegionId           string `json:"RegionId"`
@@ -657,47 +569,4 @@ type VpcDescribesslvpnclientcertsResponse struct {
 	TotalCount int    `json:"TotalCount"`
 	PageNumber int    `json:"PageNumber"`
 	PageSize   int    `json:"PageSize"`
-}
-
-func (s *VpnGatewayService) DoVpcDescribesslvpnclientcertsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*VpcDescribesslvpnclientcertsResponse, error) {
-	// api: Vpc - 2016-04-28 - DescribeSslVpnClientCerts
-	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeSslVpnClientCerts", "")
-	VpcDescribesslvpnclientcertsResponseObj := &VpcDescribesslvpnclientcertsResponse{}
-
-	// Call request_params_handler
-
-	if v, ok := d.GetOk("page_number"); ok {
-		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("page_size"); ok {
-		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	} else {
-		return nil, fmt.Errorf("RegionId is required")
-	}
-
-	if v, ok := d.GetOk("ssl_vpn_client_cert_id"); ok {
-		request.QueryParams["SslVpnClientCertId"] = v.(string)
-	}
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeSslVpnClientCerts", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribesslvpnclientcertsResponseObj)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeSslVpnClientCerts", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return VpcDescribesslvpnclientcertsResponseObj, nil
 }

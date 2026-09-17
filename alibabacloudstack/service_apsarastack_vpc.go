@@ -27,17 +27,11 @@ type VpcService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
-func (s *VpcService) DoVpcDescribeforwardtableentriesRequest(id string) (entry vpc.ForwardTableEntry, err error) {
-	return s.DescribeForwardEntry(id)
-}
 
 func (s *VpcService) DoVpcDescribesnattableentriesRequest(id string) (snat vpc.SnatTableEntry, err error) {
 	return s.DescribeSnatEntry(id)
 }
 
-func (s *VpcService) DoVpcDescribeeipaddressesRequest(id string) (eip vpc.EipAddress, err error) {
-	return s.DescribeEip(id)
-}
 
 func (s *VpcService) DescribeEip(id string) (eip vpc.EipAddress, err error) {
 	request := vpc.CreateDescribeEipAddressesRequest()
@@ -416,9 +410,6 @@ func (s *VpcService) DescribeRouteEntry(id string) (*vpc.RouteEntry, error) {
 	return v, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RouteEntry", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
-func (s *VpcService) DoVpcDescriberouterinterfaceattributeRequest(id, regionId string) (ri vpc.RouterInterfaceType, err error) {
-	return s.DescribeRouterInterface(id, regionId)
-}
 func (s *VpcService) DescribeRouterInterface(id, regionId string) (ri vpc.RouterInterfaceType, err error) {
 	request := vpc.CreateDescribeRouterInterfacesRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
@@ -516,39 +507,6 @@ func (s *VpcService) DescribeCenInstanceGrant(id string) (rule vpc.CbnGrantRule,
 	return
 }
 
-func (s *VpcService) WaitForCenInstanceGrant(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	parts, err := ParseResourceId(id, 3)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	instanceId := parts[1]
-	ownerId := parts[2]
-	for {
-		object, err := s.DescribeCenInstanceGrant(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.CenInstanceId == instanceId && fmt.Sprint(object.CenOwnerId) == ownerId && status != Deleted {
-			break
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.CenInstanceId, instanceId, errmsgs.ProviderERROR)
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
-	}
-	return nil
-}
-
-func (s *VpcService) DoVpcDescribecommonbandwidthpackagesRequest(id string) (v vpc.CommonBandwidthPackage, err error) {
-	return s.DescribeCommonBandwidthPackage(id)
-}
 
 func (s *VpcService) DescribeCommonBandwidthPackage(id string) (v vpc.CommonBandwidthPackage, err error) {
 	request := vpc.CreateDescribeCommonBandwidthPackagesRequest()
@@ -1046,9 +1004,6 @@ func (s *VpcService) WaitForRouteTableAttachment(id string, status Status, timeo
 	}
 }
 
-func (s *VpcService) DoVpcDescribenetworkaclattributesRequest(id string) (object map[string]interface{}, err error) {
-	return s.DescribeNetworkAcl(id)
-}
 func (s *VpcService) DescribeNetworkAcl(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := map[string]interface{}{
@@ -2073,32 +2028,6 @@ type VpcDescribebandwidthpackagemonitordataResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
-func (s *NatgatewayService) DoVpcDescribebandwidthpackagemonitordataRequest(id string) (*VpcDescribebandwidthpackagemonitordataResponse, error) {
-	// api: Vpc - 2016-04-28 - DescribeBandwidthPackageMonitorData
-	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBandwidthPackageMonitorData", "")
-	VpcDescribebandwidthpackagemonitordataResponseObj := &VpcDescribebandwidthpackagemonitordataResponse{}
-
-	//call request_params_handler
-
-	request.QueryParams["BandwidthPackageId"] = id
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBandwidthPackageMonitorData", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribebandwidthpackagemonitordataResponseObj)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBandwidthPackageMonitorData", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return VpcDescribebandwidthpackagemonitordataResponseObj, nil
-}
 
 type VpcDescribebandwidthpackagesResponse struct {
 	BandwidthPackages struct {

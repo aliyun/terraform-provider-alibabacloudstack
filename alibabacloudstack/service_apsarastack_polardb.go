@@ -28,28 +28,6 @@ type PolardbCheckaccountnameavailableResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
-func (s *PolardbService) DoPolardbCheckaccountnameavailableRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbCheckaccountnameavailableResponse, error) {
-	// api: polardb - 2024-01-30 - CheckAccountNameAvailable
-	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "CheckAccountNameAvailable", "")
-	PolardbCheckaccountnameavailableResponse := &PolardbCheckaccountnameavailableResponse{}
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "CheckAccountNameAvailable", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbCheckaccountnameavailableResponse)
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "CheckAccountNameAvailable", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return PolardbCheckaccountnameavailableResponse, nil
-}
 
 type PolardbDescribeaccountsResponse struct {
 	Accounts struct {
@@ -115,58 +93,6 @@ func (s *PolardbService) DescribeDBAccount(id string) (*PolardbDescribeaccountsR
 	return PolardbDescribeaccountsResponse, nil
 }
 
-func (s *PolardbService) DoPolardbDescribeaccountsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbDescribeaccountsResponse, error) {
-	// api: polardb - 2024-01-30 - DescribeAccounts
-	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeAccounts", "")
-	PolardbDescribeaccountsResponse := &PolardbDescribeaccountsResponse{}
-
-	// Call request_params_handler
-
-	// Regular parameter filling
-	if v, ok := d.GetOk("account_name"); ok && v != "" {
-		// Call requestin_handler
-		request.QueryParams["AccountName"] = v.(string)
-	}
-
-	// Regular parameter filling
-	if v, ok := d.GetOk("data_base_instance_id"); ok && v != "" {
-		// Call requestin_handler
-		request.QueryParams["DBInstanceId"] = v.(string)
-	} else {
-		return nil, fmt.Errorf("DataBaseInstanceId is required")
-	}
-
-	// Regular parameter filling
-	if v, ok := d.GetOk("page_number"); ok {
-		// Call requestin_handler
-		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
-	}
-
-	// Regular parameter filling
-	if v, ok := d.GetOk("page_size"); ok {
-		// Call requestin_handler
-		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
-	}
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeAccounts", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbDescribeaccountsResponse)
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if len(PolardbDescribeaccountsResponse.Accounts.DBInstanceAccount) < 1 {
-		return PolardbDescribeaccountsResponse, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("accounts", "")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-	}
-	return PolardbDescribeaccountsResponse, nil
-}
 
 type PolardbDescribedatabasesResponse struct {
 	Databases struct {
@@ -211,65 +137,6 @@ func (s *PolardbService) DescribeDBDatabase(id string) (*PolardbDescribedatabase
 		if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, "InvalidDBName.NotFound") {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDatabases", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbDescribedatabasesResponse)
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDatabases", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if len(PolardbDescribedatabasesResponse.Databases.Database) < 1 {
-		return PolardbDescribedatabasesResponse, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Databases", "")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-	}
-
-	return PolardbDescribedatabasesResponse, nil
-}
-func (s *PolardbService) DoPolardbDescribedatabasesRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbDescribedatabasesResponse, error) {
-	// api: polardb - 2024-01-30 - DescribeDatabases
-	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDatabases", "")
-	PolardbDescribedatabasesResponse := &PolardbDescribedatabasesResponse{}
-
-	// Call request_params_handler
-
-	// Regular parameter filling
-	if v, ok := d.GetOk("data_base_instance_id"); ok && v != "" {
-		// Call requestin_handler
-		request.QueryParams["DBInstanceId"] = v.(string)
-	} else {
-		return nil, fmt.Errorf("DataBaseInstanceId is required")
-	}
-
-	// Regular parameter filling
-	if v, ok := d.GetOk("data_base_name"); ok && v != "" {
-		// Call requestin_handler
-		request.QueryParams["DBName"] = v.(string)
-	}
-
-	// Regular parameter filling
-	if v, ok := d.GetOk("page_number"); ok {
-		// Call requestin_handler
-		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
-	}
-
-	// Regular parameter filling
-	if v, ok := d.GetOk("page_size"); ok {
-		// Call requestin_handler
-		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
-	}
-
-	// Regular parameter filling
-	if v, ok := d.GetOk("status"); ok && v != "" {
-		// Call requestin_handler
-		request.QueryParams["DBStatus"] = v.(string)
-	}
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
@@ -745,28 +612,6 @@ func (s *PolardbService) DoPolardbDescribedbinstanceiparraylistRequest(d *schema
 }
 
 // not finish
-func (s *PolardbService) WaitForPolardbConnection(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		parts, err := ParseResourceId(d.Id(), 2)
-		object, err := s.DoPolardbDescribedbinstancenetinfoRequest(parts[0])
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object != nil && object.DBInstanceNetInfos.DBInstanceNetInfo[0].ConnectionString != "" {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, d.Id(), GetFunc(1), timeout, object.DBInstanceNetInfos.DBInstanceNetInfo[0].ConnectionString, d.Id(), errmsgs.ProviderERROR)
-		}
-	}
-}
 func (s *PolardbService) WaitForDBInstance(id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
@@ -1096,25 +941,6 @@ func (s *PolardbService) DescribeDBInstanceTDE(id string) (map[string]interface{
 	return result, nil
 }
 
-func (s *PolardbService) PolardbDBInstanceSslStateRefreshFunc(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, failStates []string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DescribeDBInstanceSSL(d.Id())
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		for _, failState := range failStates {
-			if object["SSLEnabled"].(string) == failState {
-				return object, object["SSLEnabled"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["SSLEnabled"].(string)))
-			}
-		}
-		return object, object["SSLEnabled"].(string), nil
-	}
-}
 
 func (s *PolardbService) DescribeDBInstanceSSL(id string) (map[string]interface{}, error) {
 	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceSSL", "")
@@ -1485,25 +1311,6 @@ func (s *PolardbService) DoPolardbDescribebackupsRequest(id string) (*Polardbbac
 	return nil, errmsgs.Error(errmsgs.NotFoundWithResponse, id)
 }
 
-func (s *PolardbService) PolardbDescribebackupsStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DoPolardbDescribebackupsRequest(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		for _, failState := range failStates {
-			if object.BackupStatus == failState {
-				return object, object.BackupStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.BackupStatus))
-			}
-		}
-		return object, object.BackupStatus, nil
-	}
-}
 
 func (s *PolardbService) SetInstanceTags(d *schema.ResourceData) error {
 	if d.HasChange("tags") {
@@ -2182,38 +1989,6 @@ func (s *PolardbService) PolardbClusterAccountStateRefreshFunc(id string, failSt
 	}
 }
 
-func (s *PolardbService) CreatePolardbClusterAccount(clusterId, accountName, accountPassword string) (err error) {
-
-	reqQuery := map[string]interface{}{
-		"DBClusterId":     clusterId,
-		"AccountName":     accountName,
-		"AccountType":     "Normal",
-		"AccountPassword": accountPassword,
-	}
-	_, err = s.client.DoTeaRequest("POST", "polardb", "2017-08-01", "CreateAccount", "", nil, reqQuery, nil)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *PolardbService) DeletePolardClusterAccount(clusterId, accountName string) (err error) {
-
-	reqQuery := map[string]interface{}{
-		"AccountName": accountName,
-		"DBClusterId": clusterId,
-	}
-
-	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
-		_, err := s.client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteAccount", "", nil, reqQuery, nil)
-		if err != nil {
-			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, accountName, "DeleteAccount", errmsgs.AlibabacloudStackSdkGoERROR, "")
-			return resource.RetryableError(err)
-		}
-		return nil
-	})
-	return nil
-}
 
 func (s *PolardbService) DescribePolardbClusterDatabase(id string) (map[string]interface{}, error) {
 	parts := strings.SplitN(id, ":", 2)

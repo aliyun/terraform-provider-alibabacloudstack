@@ -289,28 +289,6 @@ type PolardbxDescribedbinstancesResponse struct {
 	TotalNumber int    `json:"TotalNumber"`
 }
 
-func (s *PolardbXService) DoPolardbxDescribedbinstancesRequest() (*PolardbxDescribedbinstancesResponse, error) {
-	// api: polardbx - 2020-02-02 - DescribeDBInstances
-	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstances", "")
-	PolardbxDescribedbinstancesResponseObj := &PolardbxDescribedbinstancesResponse{}
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDBInstances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbxDescribedbinstancesResponseObj)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDBInstances", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return PolardbxDescribedbinstancesResponseObj, nil
-}
 
 func (s *PolardbXService) DoPolardbxDescribeDBInstanceSSLRequest(id string) (bool, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstances
@@ -621,33 +599,6 @@ func (s *PolardbXService) DescribePolardbXAccountDBPrivilege(id string) ([]map[s
 	return db_privileges, nil
 }
 
-func (s *PolardbXService) AccountPrivilegeHaschange(account *PolardbxAccount, db_name string, privilege string) (string, string, bool) {
-	if account.DBName == "" {
-		return db_name, privilege, true
-	} else {
-		old_db_names := strings.Split(account.DBName, ",")
-		old_privileges := strings.Split(account.AccountPrivilege, ",")
-		new_db_names := make([]string, 0)
-		new_privileges := make([]string, 0)
-		for index, name := range old_db_names {
-			if name == db_name {
-				if privilege == "none" {
-					continue
-				}
-				new_privileges = append(new_privileges, privilege)
-			} else {
-				new_privileges = append(new_privileges, old_privileges[index])
-			}
-			new_db_names = append(new_db_names, name)
-		}
-		new_db_name := strings.Join(new_db_names, ",")
-		new_privilege := strings.Join(new_privileges, ",")
-		if new_db_name == account.DBName && new_privilege == account.AccountPrivilege {
-			return new_db_name, new_privilege, false
-		}
-		return new_db_name, new_privilege, true
-	}
-}
 
 func (s *PolardbXService) PolardbxAccountDatabaseBinding(id string, privileges []interface{}) error {
 	var instanceId, accountName string
@@ -694,32 +645,6 @@ type DescribeSecurityIpsResponse struct {
 	} `xml:"Data" json:"Data"`
 }
 
-func (s *PolardbXService) DoPolardbxDescribeSecurityIpsRequest(id string) (*[]PolardbxSecurityIpGroupItems, error) {
-	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeAccountList", "")
-	DescribeSecurityIpsResponseObj := &DescribeSecurityIpsResponse{}
-
-	// Call request_params_handler
-
-	request.QueryParams["DBInstanceName"] = id
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeAccountList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DescribeSecurityIpsResponseObj)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeAccountList", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return &DescribeSecurityIpsResponseObj.Data.GroupItems, nil
-}
 
 func (s *PolardbXService) ModifySecurityIps(instance_id string, old, new []interface{}) error {
 	old_securitygroup := make(map[string]interface{})

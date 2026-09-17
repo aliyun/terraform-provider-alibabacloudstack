@@ -417,9 +417,6 @@ func (s *EssService) WaitForEssScheduledTask(id string, status Status, timeout i
 	}
 }
 
-func (srv *EssService) DoEssDescribescalinggroupsRequest(id string, instanceIds []string) (instances []ess.ScalingInstance, err error) {
-	return srv.DescribeEssAttachment(id, instanceIds)
-}
 
 func (srv *EssService) DescribeEssAttachment(id string, instanceIds []string) (instances []ess.ScalingInstance, err error) {
 	request := ess.CreateDescribeScalingInstancesRequest()

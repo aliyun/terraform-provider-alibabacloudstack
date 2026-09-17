@@ -43,7 +43,7 @@ var defaultRegionToTest = os.Getenv("ALIBABACLOUDSTACK_REGION")
 // resolveTestCredentials returns AK/SK based on priority:
 // TEST_USER > TEST_ORG > ALIBABACLOUDSTACK_ACCESS_KEY/SECRET_KEY
 // If forceOrg is true, skip TEST_USER level.
-// TODO: After 3.20, ACC tests will no longer support reading ALIBABACLOUDSTACK_ACCESS_KEY and ALIBABACLOUDSTACK_SECRET_KEY as fallback.
+// TODO: After 3.21.0, ACC tests will no longer support reading ALIBABACLOUDSTACK_ACCESS_KEY and ALIBABACLOUDSTACK_SECRET_KEY as fallback.
 func resolveTestCredentials(forceOrg bool) (string, string) {
 	if !forceOrg {
 		if ak := os.Getenv("ALIBABACLOUDSTACK_TEST_USER_AK"); ak != "" {
@@ -57,7 +57,7 @@ func resolveTestCredentials(forceOrg bool) (string, string) {
 			return ak, sk
 		}
 	}
-	// TODO: After 3.20, remove fallback to ALIBABACLOUDSTACK_ACCESS_KEY/SECRET_KEY.
+	// TODO: After 3.21.0, remove fallback to ALIBABACLOUDSTACK_ACCESS_KEY/SECRET_KEY.
 	return os.Getenv("ALIBABACLOUDSTACK_ACCESS_KEY"), os.Getenv("ALIBABACLOUDSTACK_SECRET_KEY")
 }
 
@@ -81,7 +81,7 @@ func init() {
 		"alibabacloudstack": testAccProvider,
 	}
 	// ORG provider is created only when TEST_ORG_AK/SK are both set; otherwise it stays nil
-	// and ORG-level tests are skipped in testAccPreCheckOrg (no ACCESS_KEY fallback after 3.20).
+	// and ORG-level tests are skipped in testAccPreCheckOrg (no ACCESS_KEY fallback after 3.21.0).
 	if orgAK, orgSK := os.Getenv("ALIBABACLOUDSTACK_TEST_ORG_AK"), os.Getenv("ALIBABACLOUDSTACK_TEST_ORG_SK"); orgAK != "" && orgSK != "" {
 		testAccOrgProvider = createTestProviderWithCredentials(orgAK, orgSK)
 		testAccOrgProviders = map[string]*schema.Provider{
@@ -130,11 +130,11 @@ func testYunDunProviders() map[string]*schema.Provider {
 func testAccPreCheck(t *testing.T) {
 	ak, sk := resolveTestCredentials(false)
 	if ak == "" {
-		// TODO: After 3.20, only check TEST_USER and TEST_ORG credentials.
+		// TODO: After 3.21.0, only check TEST_USER and TEST_ORG credentials.
 		t.Fatal("One of ALIBABACLOUDSTACK_TEST_USER_AK, ALIBABACLOUDSTACK_TEST_ORG_AK, or ALIBABACLOUDSTACK_ACCESS_KEY must be set for acceptance tests")
 	}
 	if sk == "" {
-		// TODO: After 3.20, only check TEST_USER and TEST_ORG credentials.
+		// TODO: After 3.21.0, only check TEST_USER and TEST_ORG credentials.
 		t.Fatal("One of ALIBABACLOUDSTACK_TEST_USER_SK, ALIBABACLOUDSTACK_TEST_ORG_SK, or ALIBABACLOUDSTACK_SECRET_KEY must be set for acceptance tests")
 	}
 	if v := os.Getenv("ALIBABACLOUDSTACK_REGION"); v == "" {
@@ -162,11 +162,11 @@ func testAccPreCheck(t *testing.T) {
 func testAccPreCheckOrg(t *testing.T) {
 	ak, sk := resolveTestCredentials(true)
 	if ak == "" {
-		// TODO: After 3.20, remove the ACCESS_KEY/SECRET_KEY fallback; only check TEST_ORG credentials.
+		// TODO: After 3.21.0, remove the ACCESS_KEY/SECRET_KEY fallback; only check TEST_ORG credentials.
 		t.Fatal("One of ALIBABACLOUDSTACK_TEST_ORG_AK or ALIBABACLOUDSTACK_ACCESS_KEY must be set")
 	}
 	if sk == "" {
-		// TODO: After 3.20, remove the ACCESS_KEY/SECRET_KEY fallback; only check TEST_ORG credentials.
+		// TODO: After 3.21.0, remove the ACCESS_KEY/SECRET_KEY fallback; only check TEST_ORG credentials.
 		t.Fatal("One of ALIBABACLOUDSTACK_TEST_ORG_SK or ALIBABACLOUDSTACK_SECRET_KEY must be set")
 	}
 	if v := os.Getenv("ALIBABACLOUDSTACK_REGION"); v == "" {

@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
@@ -63,37 +62,6 @@ func (s *DrdsService) DrdsInstanceStateRefreshFunc(id string, failStates []strin
 
 		return object, object.Data.Status, nil
 	}
-}
-
-func (s *DrdsService) WaitDrdsInstanceConfigEffect(id string, item map[string]string, timeout time.Duration) error {
-	deadline := time.Now().Add(timeout)
-	for {
-		effected := false
-		object, err := s.DescribeDrdsInstance(id)
-
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			return errmsgs.WrapError(err)
-		}
-
-		if value, ok := item["description"]; ok {
-			if object.Data.Description == value {
-				effected = true
-			}
-		}
-
-		if effected {
-			break
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Data, item, errmsgs.ProviderERROR)
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
-	}
-
-	return nil
 }
 
 type DrdsDescribedrdsdbResponse struct {
@@ -230,42 +198,6 @@ type DrdsDescribedrdsdbipwhitelistResponse struct {
 	Success   bool   `json:"Success"`
 }
 
-func (s *DrdsService) DoDrdsDescribedrdsdbipwhitelistRequest(id string) (*DrdsDescribedrdsdbipwhitelistResponse, error) {
-	var instanceId, databaseName string
-	if parts, err := ParseResourceId(id, 2); err != nil {
-		return nil, err
-	} else {
-		instanceId = parts[0]
-		databaseName = parts[1]
-	}
-	// api: Drds - 2019-01-23 - DescribeDrdsDBIpWhiteList
-	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeDrdsDBIpWhiteList", "")
-	DrdsDescribedrdsdbipwhitelistResponse := &DrdsDescribedrdsdbipwhitelistResponse{}
-
-	// Call request_params_handler
-
-	request.QueryParams["DbName"] = databaseName
-
-	request.QueryParams["DrdsInstanceId"] = instanceId
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDrdsDBIpWhiteList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsDescribedrdsdbipwhitelistResponse)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDrdsDBIpWhiteList", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return DrdsDescribedrdsdbipwhitelistResponse, nil
-}
-
 type DrdsDescribedrdsdbsResponse struct {
 	Data struct {
 		Db []struct {
@@ -284,40 +216,17 @@ type DrdsDescribedrdsdbsResponse struct {
 	Total      int    `json:"Total"`
 }
 
-func (s *DrdsService) DoDrdsDescribedrdsdbsRequest(id string) (*DrdsDescribedrdsdbsResponse, error) {
-	// api: Drds - 2019-01-23 - DescribeDrdsDBs
-	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeDrdsDBs", "")
-	DrdsDescribedrdsdbsResponse := &DrdsDescribedrdsdbsResponse{}
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDrdsDBs", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsDescribedrdsdbsResponse)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDrdsDBs", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return DrdsDescribedrdsdbsResponse, nil
-}
-
 type DrdsDescribeinstanceAccount struct {
 	DbPrivileges struct {
-					DbPrivilege []struct {
-						DbName    string `json:"DbName"`
-						Privilege string `json:"Privilege"`
-					} `json:"DbPrivilege"`
-				} `json:"DbPrivileges"`
-				AccountName string `json:"AccountName"`
-				Host        string `json:"Host"`
-				AccountType int    `json:"AccountType"`
-				Description string `json:"Description"`
+		DbPrivilege []struct {
+			DbName    string `json:"DbName"`
+			Privilege string `json:"Privilege"`
+		} `json:"DbPrivilege"`
+	} `json:"DbPrivileges"`
+	AccountName string `json:"AccountName"`
+	Host        string `json:"Host"`
+	AccountType int    `json:"AccountType"`
+	Description string `json:"Description"`
 }
 
 type DrdsDescribeinstanceaccountsResponse struct {
@@ -357,7 +266,7 @@ func (s *DrdsService) DescribeDrdsAccount(id string) (*DrdsDescribeinstanceAccou
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeInstanceAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	for _, account := range drdsDescribeinstanceaccountsResponse.InstanceAccounts.InstanceAccount{
+	for _, account := range drdsDescribeinstanceaccountsResponse.InstanceAccounts.InstanceAccount {
 		if account.AccountName == drdsAccountName {
 			return &account, nil
 		}
@@ -438,22 +347,22 @@ func (s *DrdsService) PrivateRdsStateRefreshFunc(id string, failStates []string)
 	}
 }
 
-func (s *DrdsService) DescribeInstanceSpecification(id string)(map[string]interface{},error){
+func (s *DrdsService) DescribeInstanceSpecification(id string) (map[string]interface{}, error) {
 	reqQuery := map[string]interface{}{
-			"status":       "Available",
-			"resourceType": "DRDS",
-			"spec": id,
-		}
-		reqHeader := map[string]string{
-			"x-acs-territory": "US",
-			"x-acs-lang":      "EN",
-		}
-		response, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", reqHeader, reqQuery, nil)
-		if err != nil {
-			return nil, err
-		}
-		if len(response["data"].([]interface{})) == 0 {
-			return nil, errmsgs.GetNotFoundErrorFromString("Can not find drds specificaiont " + id)
-		}
-		return response["data"].([]interface{})[0].(map[string]interface{}), nil
+		"status":       "Available",
+		"resourceType": "DRDS",
+		"spec":         id,
+	}
+	reqHeader := map[string]string{
+		"x-acs-territory": "US",
+		"x-acs-lang":      "EN",
+	}
+	response, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", reqHeader, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(response["data"].([]interface{})) == 0 {
+		return nil, errmsgs.GetNotFoundErrorFromString("Can not find drds specificaiont " + id)
+	}
+	return response["data"].([]interface{})[0].(map[string]interface{}), nil
 }

@@ -144,50 +144,6 @@ func (s *OtsService) convertPrimaryKeyType(t tablestore.PrimaryKeyType) PrimaryK
 	return typeString
 }
 
-func (s *OtsService) ListOtsInstance(pageSize int, pageNum int) ([]string, error) {
-	req := ots.CreateListInstanceRequest()
-	s.client.InitRpcRequest(*req.RpcRequest)
-	req.Method = "GET"
-	req.PageSize = requests.NewInteger(pageSize)
-	req.PageNum = requests.NewInteger(pageNum)
-	req.Domain = s.client.Domain
-
-	var allInstanceNames []string
-
-	for {
-		raw, err := s.client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
-			return otsClient.ListInstance(req)
-		})
-		response, ok := raw.(*ots.ListInstanceResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
-			return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alicloud_ots_instances", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(req.GetActionName(), raw, req.RpcRequest, req)
-
-		if response == nil || len(response.InstanceInfos.InstanceInfo) < 1 {
-			break
-		}
-
-		for _, instance := range response.InstanceInfos.InstanceInfo {
-			allInstanceNames = append(allInstanceNames, instance.InstanceName)
-		}
-
-		if len(response.InstanceInfos.InstanceInfo) < PageSizeLarge {
-			break
-		}
-
-		if page, err := getNextpageNumber(req.PageNum); err != nil {
-			return nil, errmsgs.WrapError(err)
-		} else {
-			req.PageNum = page
-		}
-	}
-	return allInstanceNames, nil
-}
 
 func (s *OtsService) DescribeOtsInstanceAttachment(id string) (inst ots.VpcInfo, err error) {
 	request := ots.CreateListVpcInfoByInstanceRequest()

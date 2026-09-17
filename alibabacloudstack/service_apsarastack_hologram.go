@@ -99,25 +99,6 @@ func (s *HologramService) DescribeHologramInstanceBackup(id string) (map[string]
 	}
 }
 
-func (s *HologramService) HologramInstanceBackupStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DescribeHologramInstanceBackup(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		for _, failState := range failStates {
-			if object["Status"] == failState {
-				return object, object["Status"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["Status"]))
-			}
-		}
-		return object, object["Status"].(string), nil
-	}
-}
 
 func (s *HologramService) DescribeHologramInstanceBackupPolicy(id string) (map[string]interface{}, error) {
 	request := map[string]interface{}{

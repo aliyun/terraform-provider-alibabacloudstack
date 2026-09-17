@@ -219,14 +219,6 @@ func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type
 	return disks, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, response.RequestId)
 }
 
-func (s *EcsService) ResourceAvailable(zone ecs.Zone, resourceType ResourceType) error {
-	for _, res := range zone.AvailableResourceCreation.ResourceTypes {
-		if res == string(resourceType) {
-			return nil
-		}
-	}
-	return errmsgs.WrapError(errmsgs.Error("%s is not available in %s zone of %s region", resourceType, zone.ZoneId, s.client.Region))
-}
 
 func (s *EcsService) DiskAvailable(zone ecs.Zone, diskCategory DiskCategory) error {
 	for _, disk := range zone.AvailableDiskCategories.DiskCategories {
@@ -283,9 +275,6 @@ func (s *EcsService) LeaveSecurityGroups(instanceId string, securityGroupIds []s
 	return nil
 }
 
-func (s *EcsService) DoEcsDescribesecuritygroupattributeRequest(id string) (group ecs.DescribeSecurityGroupAttributeResponse, err error) {
-	return s.DescribeSecurityGroup(id)
-}
 func (s *EcsService) DescribeSecurityGroup(id string) (group ecs.DescribeSecurityGroupAttributeResponse, err error) {
 	request := ecs.CreateDescribeSecurityGroupAttributeRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
@@ -444,36 +433,6 @@ func (s *EcsService) DescribeAvailableResources(d *schema.ResourceData, meta int
 	return
 }
 
-func (s *EcsService) InstanceTypeValidation(targetType, zoneId string, validZones []ecs.AvailableZone) error {
-	mapInstanceTypeToZones := make(map[string]string)
-	var expectedInstanceTypes []string
-	for _, zone := range validZones {
-		if zoneId != "" && zoneId != zone.ZoneId {
-			continue
-		}
-		for _, r := range zone.AvailableResources.AvailableResource {
-			if r.Type == string(InstanceTypeResource) {
-				for _, t := range r.SupportedResources.SupportedResource {
-					if t.Status == string(SoldOut) {
-						continue
-					}
-					if targetType == t.Value {
-						return nil
-					}
-
-					if _, ok := mapInstanceTypeToZones[t.Value]; !ok {
-						expectedInstanceTypes = append(expectedInstanceTypes, t.Value)
-						mapInstanceTypeToZones[t.Value] = t.Value
-					}
-				}
-			}
-		}
-	}
-	if zoneId != "" {
-		return errmsgs.WrapError(errmsgs.Error("The instance type %s is solded out or is not supported in the zone %s. Expected instance types: %s", targetType, zoneId, strings.Join(expectedInstanceTypes, ", ")))
-	}
-	return errmsgs.WrapError(errmsgs.Error("The instance type %s is solded out or is not supported in the region %s. Expected instance types: %s", targetType, s.client.RegionId, strings.Join(expectedInstanceTypes, ", ")))
-}
 
 func (s *EcsService) DescribeInstanceIdsWithKeyPair(id string) (instanceIds []string, instances []ecs.Instance, err error) {
 	request := ecs.CreateDescribeInstancesRequest()
@@ -565,9 +524,6 @@ func (s *EcsService) DescribeKeyPairAttachment(id string) (keyPair ecs.KeyPair, 
 	return keyPair, nil
 }
 
-func (s *EcsService) DoEcsDescribedisksRequest(id string) (disk ecs.Disk, err error) {
-	return s.DescribeDisk(id)
-}
 func (s *EcsService) DescribeDisk(id string) (disk ecs.Disk, err error) {
 	request := ecs.CreateDescribeDisksRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
@@ -1236,21 +1192,6 @@ func (s *EcsService) WaitForPrivateIpsListChanged(eniId string, ipList []string)
 	}
 }
 
-func (s *EcsService) WaitForModifySecurityGroupPolicy(id, target string, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	for {
-		object, err := s.DescribeSecurityGroup(id)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		if object.InnerAccessPolicy == target {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.InnerAccessPolicy, target, errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *EcsService) AttachKeyPair(keyName string, instanceIds []interface{}) (err error) {
 	request := ecs.CreateAttachKeyPairRequest()
@@ -1656,29 +1597,6 @@ func (s *EcsService) DescribeImageShareByImageId(id string) (imageShare *ecs.Des
 	return resp, nil
 }
 
-func (s *EcsService) WaitForAutoProvisioningGroup(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-
-	for {
-		object, err := s.DescribeAutoProvisioningGroup(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		if object.Status == string(status) {
-			return nil
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Status, string(status), errmsgs.ProviderERROR)
-		}
-	}
-}
 
 func (s *EcsService) DescribeAutoProvisioningGroup(id string) (group ecs.AutoProvisioningGroup, err error) {
 	request := ecs.CreateDescribeAutoProvisioningGroupsRequest()
@@ -1863,9 +1781,6 @@ func (s *EcsService) EcsDedicatedHostStateRefreshFunc(id string, failStates []st
 	}
 }
 
-func (s *EcsService) DoEcsDescribestoragesetdetailsRequest(id string) (result *datahub_patch.EcsDescribeEcsEbsStorageSetsResult, err error) {
-	return s.DescribeEcsEbsStorageSet(id)
-}
 func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub_patch.EcsDescribeEcsEbsStorageSetsResult, err error) {
 
 	resp := &datahub_patch.EcsDescribeEcsEbsStorageSetsResult{}
@@ -2019,9 +1934,6 @@ func (s *EcsService) CreateActivation(instanceCount int, department int, timeToL
 	return activationId, ActivationCode, nil
 }
 
-func (s *EcsService) DoEcsDescribedeploymentsetsRequest(id string) (object map[string]interface{}, err error) {
-	return s.DescribeEcsDeploymentSet(id)
-}
 func (s *EcsService) DescribeEcsDeploymentSet(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := map[string]interface{}{
@@ -2330,47 +2242,4 @@ type EcsDescribeinvocationsResponse struct {
 	RequestId  string `json:"RequestId"`
 	PageNumber int    `json:"PageNumber"`
 	TotalCount int    `json:"TotalCount"`
-}
-
-func (s *EcsService) DoEcsDescribeinvocationsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*EcsDescribeinvocationsResponse, error) {
-	// api: Ecs - 2014-05-26 - DescribeInvocations
-	request := s.client.NewCommonRequest("POST", "Ecs", "2014-05-26", "DescribeInvocations", "")
-	EcsDescribeinvocationsResponseObj := &EcsDescribeinvocationsResponse{}
-
-	// Call request request_params_handler
-
-	if v, ok := d.GetOk("command_id"); ok {
-		request.QueryParams["CommandId"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("invocation_id"); ok {
-		request.QueryParams["InvokeId"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	} else {
-		return nil, fmt.Errorf("RegionId is required")
-	}
-
-	if v, ok := d.GetOk("timed"); ok {
-		request.QueryParams["Timed"] = strconv.FormatBool(v.(bool))
-	}
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeInvocations", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &EcsDescribeinvocationsResponseObj)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeInvocations", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return EcsDescribeinvocationsResponseObj, nil
 }

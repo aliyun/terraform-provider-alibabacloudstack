@@ -82,49 +82,6 @@ func (s *ElasticsearchService) ElasticsearchStateRefreshFunc(id string, failStat
 	}
 }
 
-func (s *ElasticsearchService) ElasticsearchRetryFunc(wait func(), errorCodeList []string, do func(*elasticsearch.Client) (interface{}, error)) (interface{}, error) {
-	var raw interface{}
-	var err error
-
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		raw, err = s.client.WithElasticsearchClient(do)
-
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, errorCodeList ...) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-
-		return nil
-	})
-
-	return raw, errmsgs.WrapError(err)
-}
-
-func (s *ElasticsearchService) TriggerNetwork(d *schema.ResourceData, content map[string]interface{}, meta interface{}) error {
-	var response map[string]interface{}
-	request := make(map[string]interface{})
-
-	request["product"] = "elasticsearch"
-	response, err := s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "TriggerNetwork", "", nil, nil, request)
-	addDebug("TriggerNetwork", response, content)
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, "RepetitionOperationError") {
-			return nil
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "TriggerNetwork", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, s.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
-	stateConf.PollInterval = 10 * time.Second
-
-	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
-	return nil
-}
 
 func (s *ElasticsearchService) ModifyWhiteIps(d *schema.ResourceData, content map[string]interface{}, meta interface{}) error {
 	var response map[string]interface{}
@@ -220,13 +177,6 @@ func (s *ElasticsearchService) diffElasticsearchTags(oldTags, newTags map[string
 	return
 }
 
-func (s *ElasticsearchService) getActionType(actionType bool) string {
-	if actionType == true {
-		return string(OPEN)
-	} else {
-		return string(CLOSE)
-	}
-}
 
 func updateDescription(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)

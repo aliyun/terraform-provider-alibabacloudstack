@@ -10,9 +10,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -157,32 +155,6 @@ func (e *EdasService) GetDeployGroup(appId, groupId string) (groupInfo *edas.Dep
 	return groupInfo, nil
 }
 
-func (e *EdasService) GetDeployGroupByAppId(appId string) (groupInfo []edas.DeployGroup, err error) {
-	request := edas.CreateListDeployGroupRequest()
-	e.client.InitRoaRequest(*request.RoaRequest)
-	request.AppId = appId
-
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.ListDeployGroup(request)
-	})
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	rsp, ok := raw.(*edas.ListDeployGroupResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(rsp.BaseResponse)
-		}
-		return groupInfo, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, appId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	if rsp.Code != 200 {
-		return groupInfo, errmsgs.Error("get deploy group failed for " + rsp.Message)
-	}
-	return rsp.DeployGroupList.DeployGroup, nil
-}
-
 func (e *EdasService) EdasChangeOrderStatusRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		object, err := e.GetChangeOrderStatus(id)
@@ -226,38 +198,6 @@ func (e *EdasService) SyncResource(resourceType string) error {
 
 	if rsp.Code != 200 || !rsp.Success {
 		return errmsgs.WrapError(errmsgs.Error("sync resource failed for " + rsp.Message))
-	}
-
-	return nil
-}
-
-func (e *EdasService) CheckEcsStatus(instanceIds string, count int) error {
-	request := ecs.CreateDescribeInstancesRequest()
-	e.client.InitRpcRequest(*request.RpcRequest)
-	request.Status = "Running"
-	request.PageSize = requests.NewInteger(100)
-	request.InstanceIds = instanceIds
-
-	raw, err := e.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.DescribeInstances(request)
-	})
-
-	rsp, ok := raw.(*ecs.DescribeInstancesResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(rsp.BaseResponse)
-		}
-		if errmsgs.IsExpectedErrors(err, "OperationDenied.InvalidDBClusterIdNotFound", "OperationDenied.InvalidDBClusterNameNotFound") {
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceIds, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-
-	if len(rsp.Instances.Instance) != count {
-		return errmsgs.WrapErrorf(errmsgs.Error("not enough instances"), errmsgs.DefaultErrorMsg, instanceIds, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	return nil
@@ -840,14 +780,6 @@ func (e *EdasService) GetK8sEnvs(envs map[string]interface{}) (string, error) {
 		return "", errmsgs.WrapError(err)
 	}
 	return string(b), nil
-}
-
-func (e *EdasService) QueryK8sAppPackageType(appId string) (string, error) {
-	v, err := e.DescribeEdasK8sApplication(appId)
-	if err != nil {
-		return "", err
-	}
-	return v.App.ApplicationType, nil
 }
 
 type K8sServicePorts struct {

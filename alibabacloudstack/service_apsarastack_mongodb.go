@@ -124,19 +124,6 @@ func (s *MongoDBService) MongoDbInstanceNodeAddressStateRefreshFunc(nodeid, netT
 	}
 }
 
-func (s *MongoDBService) WaitMongodbDBInstanceEncryptionKeyState(id string) bool {
-	retryInterval := 10 * time.Second
-	maxRetries := 20
-	for i := 0; i < maxRetries; i++ {
-		object, _ := s.DescribeDBInstanceEncryptionKey(id)
-		if object["EncryptionKeyStatus"].(string) == "Enabled" {
-			return true
-		}
-		i++
-		time.Sleep(retryInterval)
-	}
-	return false
-}
 
 func (s *MongoDBService) DescribeMongoDBSecurityIps(instanceId string) (ips []string, err error) {
 	request := dds.CreateDescribeSecurityIpsRequest()
@@ -975,34 +962,6 @@ type DdsDescribeDBInstancesResponse struct {
 	}
 }
 
-func (s *MongoDBService) DoDdsDescribeshardingnetworkaddressRequest(id string) (*DdsDescribeshardingnetworkaddressResponse, error) {
-	// api: Dds - 2015-12-01 - DescribeShardingNetworkAddress
-	request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeShardingNetworkAddress", "")
-	DdsDescribeshardingnetworkaddressResponseObj := &DdsDescribeshardingnetworkaddressResponse{}
-
-	// Call request_params_handler
-	parts := strings.Split(id, COLON_SEPARATED)
-	db_instance_id := parts[0]
-	request.QueryParams["DBInstanceId"] = db_instance_id
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("DescribeShardingNetworkAddress", bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeShardingNetworkAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsDescribeshardingnetworkaddressResponseObj)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeShardingNetworkAddress", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return DdsDescribeshardingnetworkaddressResponseObj, nil
-}
 
 func (s *MongoDBService) ModifyAuditLogFilter(d *schema.ResourceData) error {
 	stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, s.MongoDbInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))

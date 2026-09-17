@@ -41,25 +41,6 @@ func (s *RosService) DescribeRosChangeSet(id string) (object map[string]interfac
 	return object, nil
 }
 
-func (s *RosService) RosChangeSetStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DescribeRosChangeSet(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		for _, failState := range failStates {
-			if object["Status"].(string) == failState {
-				return object, object["Status"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["Status"].(string)))
-			}
-		}
-		return object, object["Status"].(string), nil
-	}
-}
 
 func (s *RosService) DescribeRosStack(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
@@ -218,25 +199,6 @@ func (s *RosService) DescribeRosStackGroup(id string) (object map[string]interfa
 	return object, nil
 }
 
-func (s *RosService) RosStackGroupStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DescribeRosStackGroup(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		for _, failState := range failStates {
-			if object["Status"].(string) == failState {
-				return object, object["Status"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["Status"].(string)))
-			}
-		}
-		return object, object["Status"].(string), nil
-	}
-}
 
 func (s *RosService) DescribeRosTemplate(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}

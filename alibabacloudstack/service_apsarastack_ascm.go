@@ -188,37 +188,6 @@ func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleData, err er
 	return nil, errmsgs.GetNotFoundErrorFromString("role " + did[0] + " not found")
 }
 
-func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, err error) {
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoles", "/ascm/auth/role/listRAMServiceRoles")
-	request.QueryParams["id"] = id
-	var resp = &RamRole{}
-	bresponse, err := s.client.ProcessCommonRequest(request)
-
-	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		} else {
-			return nil, err
-		}
-		if errmsgs.IsExpectedErrors(err, "ErrorRamServiceRoleNotFound") {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMServiceRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug("ListRAMServiceRoles", bresponse, request, request.QueryParams)
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
-	if err != nil {
-		return resp, errmsgs.WrapError(err)
-	}
-
-	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, errmsgs.WrapError(err)
-	}
-
-	return resp, nil
-}
 
 type AscmResourceGroupUser struct {
 	CurrentPage     int    `json:"currentPage"`
@@ -363,41 +332,6 @@ func (s *AscmService) DescribeAscmResourceGroupUserAttachment(rgId string) (*Lis
 	return &response, nil
 }
 
-func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *ListResourceGroup, err error) {
-	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "/ascm/auth/resource_group/list_resource_group")
-	if id == "" {
-		request.QueryParams["pageSize"] = "1000"
-	} else {
-		request.QueryParams["resourceGroupName"] = did[0]
-	}
-	var resp = &ListResourceGroup{}
-	bresponse, err := s.client.ProcessCommonRequest(request)
-
-	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		} else {
-			return nil, err
-		}
-		if errmsgs.IsExpectedErrors(err, "ErrorResourceGroupNotFound") {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "ListResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug("ListResourceGroup", bresponse, request, request.QueryParams)
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
-	if err != nil {
-		return resp, errmsgs.WrapError(err)
-	}
-
-	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, errmsgs.WrapError(err)
-	}
-	return resp, nil
-}
 
 func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*MembersInsideResourceSet, error) {
 
@@ -706,37 +640,6 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 	return &resp.Data, nil
 }
 
-func (s *AscmService) DescribeAscmRamPolicyForRoleId(id string) (response *RamPolicies, err error) {
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetRole", "")
-	request.QueryParams["roleId"] = id
-	var resp = &RamPolicies{}
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("ListRamPolicies", bresponse, request, request.QueryParams)
-
-	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		} else {
-			return nil, err
-		}
-		if errmsgs.IsExpectedErrors(err, "ErrorRamPolicyNotFound") {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRamPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
-	if err != nil {
-		return resp, errmsgs.WrapError(err)
-	}
-
-	if resp.Code == "200" {
-		return resp, errmsgs.WrapError(err)
-	}
-
-	return resp, nil
-}
 
 func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
