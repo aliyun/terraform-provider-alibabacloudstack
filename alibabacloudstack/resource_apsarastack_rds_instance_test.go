@@ -156,7 +156,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBInstanceConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name
@@ -321,7 +321,7 @@ func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBInstanceMysqlAZConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckWithMultiAZ(t)
 		},
 

@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackCspprivateHsmInstance_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCspprivateHsmInstanceDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreYunCheck(t)
 		},
 		IDRefreshName: resourceId,
@@ -137,7 +137,7 @@ func TestAccAlibabacloudStackCspprivateHsmInstance_IsAppointDevice(t *testing.T)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCspprivateHsmInstanceIsAppointDeviceDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreYunCheck(t)
 		},
 		IDRefreshName: resourceId,

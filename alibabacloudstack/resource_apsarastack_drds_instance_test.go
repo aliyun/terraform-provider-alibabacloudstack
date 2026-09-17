@@ -117,7 +117,7 @@ func TestAccAlibabacloudStackDrdsInstance_Vpc(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 
 		},
 		// module name
@@ -188,7 +188,7 @@ func TestAccAlibabacloudStackDrdsInstance_Classic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 
 		},
 		// module name

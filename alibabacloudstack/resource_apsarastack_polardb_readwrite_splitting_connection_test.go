@@ -32,7 +32,7 @@ func TestAccAlibabacloudStackPolarDBReadWriteSplittingConnection_update(t *testi
 	testAccConfig := resourceTestAccConfigFunc(resourceId, prefix, resourcePolarDBReadWriteSplittingConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

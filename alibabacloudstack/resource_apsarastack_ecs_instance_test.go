@@ -269,7 +269,7 @@ func TestAccAlibabacloudStackInstance_Vpc(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -442,7 +442,7 @@ func TestAccAlibabacloudStackInstance_DataDisks(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -521,7 +521,7 @@ func TestAccAlibabacloudStackInstance_TypeUpdate(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: rac.checkResourceDestroy(),
@@ -573,7 +573,7 @@ func TestAccAlibabacloudStackInstance_Multi(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -630,7 +630,7 @@ func TestAccAlibabacloudStackInstance_ImageUpdateTags(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

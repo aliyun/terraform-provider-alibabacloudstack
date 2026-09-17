@@ -8,12 +8,13 @@ import (
 
 func TestAccAlibabacloudStackVpnGatewaysDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
+	resourceId := "data.alibabacloudstack_vpn_gateways.default"
 	var vpnGatewaysCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_vpn_gateways.default",
+		resourceId:   resourceId,
 		existMapFunc: existVpnGatewaysMapFunc,
 		fakeMapFunc:  fakeVpnGatewaysMapFunc,
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 	}
 	idsConf := dataSourceTestAccConfig{

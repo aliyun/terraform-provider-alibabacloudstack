@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackHologramInstance_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName:     resourceId,
@@ -92,7 +92,7 @@ func TestAccAlibabacloudStackHologramInstance_readOnly(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName:     resourceId,

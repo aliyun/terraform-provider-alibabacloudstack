@@ -67,7 +67,7 @@ func TestAccAlibabacloudStackOssClustersDataSource(t *testing.T) {
 		existMapFunc: existOssClustersMapFunc,
 		fakeMapFunc:  fakeOssClustersMapFunc,
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckOssEndpointList(t)
 		},
 	}

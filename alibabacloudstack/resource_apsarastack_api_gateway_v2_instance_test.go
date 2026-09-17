@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
@@ -94,7 +94,7 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_k8s(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
@@ -162,7 +162,7 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_custom(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
@@ -218,7 +218,7 @@ func TestAccAlibabacloudStackAPIGatewayV2Instance_HIGRESS(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,

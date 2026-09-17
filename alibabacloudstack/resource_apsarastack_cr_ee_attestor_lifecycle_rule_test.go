@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackCrEEArtifactLifecycleRule_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEEArtifactLifecycleRuleDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -95,7 +95,7 @@ func TestAccAlibabacloudStackCrEEArtifactLifecycleRule_Repo(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEEArtifactLifecycleRuleDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

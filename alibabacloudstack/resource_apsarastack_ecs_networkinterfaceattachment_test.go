@@ -32,7 +32,7 @@ func TestAccAlibabacloudStackNetworkInterfaceAttachmentBasic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccEcsNetworkInterfaceAttachmentdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName: resourceId,

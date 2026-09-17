@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackApiGatewayV2Signature_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -100,7 +100,7 @@ func TestAccAlibabacloudStackApiGatewayV2SourceSignature_cascade(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,

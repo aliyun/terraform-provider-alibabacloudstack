@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackAscm_RamRoleBasic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testascmramroleconfigbasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

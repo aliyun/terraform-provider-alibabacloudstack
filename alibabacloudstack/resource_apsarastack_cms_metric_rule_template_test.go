@@ -118,7 +118,7 @@ func TestAccAlibabacloudStackCmsMetricRuleTemplate_basic0(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, alibabacloudstackCloudMonitorServiceMetricRuleTemplateBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 
 		},
 		IDRefreshName: resourceId,

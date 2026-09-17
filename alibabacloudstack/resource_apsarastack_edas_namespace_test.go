@@ -111,7 +111,7 @@ func TestAccAlibabacloudStackEDASNamespace_basic0(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackEDASNamespaceBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

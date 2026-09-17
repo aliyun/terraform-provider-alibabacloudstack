@@ -38,7 +38,7 @@ func TestAccAlibabacloudStackDrdsReadonlyInstance_Vpc(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 
 		},
 		// module name
@@ -109,7 +109,7 @@ func TestAccAlibabacloudStackDrdsReadonlyInstance_Classic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 
 		},
 		// module name

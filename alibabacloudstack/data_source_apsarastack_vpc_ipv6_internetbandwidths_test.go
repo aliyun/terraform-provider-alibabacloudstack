@@ -89,7 +89,7 @@ func TestAccAlibabacloudStackVPCIpv6InternetBandwidthsDataSource(t *testing.T) {
 		existMapFunc: existVpcIpv6InternetBandwidthMapFunc,
 		fakeMapFunc:  fakeVpcIpv6InternetBandwidthMapFunc,
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 	}
 

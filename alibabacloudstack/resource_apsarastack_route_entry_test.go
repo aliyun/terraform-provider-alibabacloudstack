@@ -28,7 +28,7 @@ func TestAccAlibabacloudstackRouteEntryInstance(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName: resourceId,
@@ -67,7 +67,7 @@ func TestAccAlibabacloudstackRouteEntryInterface(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName: resourceId,
@@ -101,7 +101,7 @@ func TestAccAlibabacloudstackRouteEntryNatGateway(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName: resourceId,
@@ -135,7 +135,7 @@ func TestAccAlibabacloudstackRouteEntryMulti(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName: resourceId,

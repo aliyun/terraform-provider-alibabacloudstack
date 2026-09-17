@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackPrometheusV2NotifyGroup_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -112,7 +112,7 @@ func TestAccAlibabacloudStackPrometheusV2NotifyGroup_DINGDING(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -173,7 +173,7 @@ func TestAccAlibabacloudStackPrometheusV2NotifyGroup_Contacts(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,

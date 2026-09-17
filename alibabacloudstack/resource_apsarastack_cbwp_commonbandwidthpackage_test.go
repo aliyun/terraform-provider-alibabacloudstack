@@ -127,7 +127,7 @@ func TestAccAlibabacloudStackCommonBandwidthPackage_PayByTraffic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCommonBandwidthPackageBasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -204,7 +204,7 @@ func TestAccAlibabacloudStackCommonBandwidthPackage_PayByBandwidth(t *testing.T)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCommonBandwidthPackageBasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckWithAccountSiteType(t, DomesticSite)
 		},
 		// module name

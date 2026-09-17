@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackVPCIpv6InternetBandwidth_basic0(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackVPCIpv6InternetBandwidthBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

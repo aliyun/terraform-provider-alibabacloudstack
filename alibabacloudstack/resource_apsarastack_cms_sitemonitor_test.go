@@ -26,8 +26,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceSitemonitor0(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCloudmonitorserviceSitemonitorBasicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckApiAvailable(t, "POST", "Cms", "2019-01-01", "DescribeSiteMonitorList", "")
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

@@ -90,8 +90,7 @@ func TestAccAlibabacloudStackKmsSecret_Basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckApiAvailable(t, "POST", "Kms", "2016-01-20", "Decrypt", "")
+			testAccPreCheck(t, resourceId)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -220,8 +219,7 @@ func TestAccAlibabacloudStackKmsSecret_WithKey(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckApiAvailable(t, "POST", "Kms", "2016-01-20", "Decrypt", "")
+			testAccPreCheck(t, resourceId)
 		},
 		// module name
 		IDRefreshName: resourceId,

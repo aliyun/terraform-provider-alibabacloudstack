@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackBmsKeypair_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, BmsKeypairDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -67,7 +67,7 @@ func TestAccAlibabacloudStackBmsKeypair_PublicKey(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, BmsKeypairDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

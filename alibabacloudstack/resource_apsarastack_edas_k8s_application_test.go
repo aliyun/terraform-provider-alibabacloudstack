@@ -140,7 +140,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName:     resourceId,
@@ -405,7 +405,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName:     resourceId,
@@ -519,7 +519,7 @@ func TestUatAlibabacloudStackEdasK8sApplication_image(t *testing.T) {
 	}
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName:     resourceId,

@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackSlbListener0(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -361,7 +361,7 @@ func TestAccAlibabacloudStackSlbListener1(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -420,7 +420,7 @@ func TestAccAlibabacloudStackSlbListener2(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -474,7 +474,7 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -575,7 +575,7 @@ func TestAccAlibabacloudStackSlbListener4(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -647,7 +647,7 @@ func TestAccAlibabacloudStackSlbListener5(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -742,7 +742,7 @@ func TestAccAlibabacloudStackSlbListener6(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -799,7 +799,7 @@ func TestAccAlibabacloudStackSlbListener7(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

@@ -7,9 +7,10 @@ import (
 )
 
 func TestAccAlibabacloudStackHsmVendorsDataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_hsm_vendors.default"
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers: testYunDunProviders(),
 		Steps: []resource.TestStep{
@@ -17,13 +18,13 @@ func TestAccAlibabacloudStackHsmVendorsDataSource(t *testing.T) {
 				Config: testAccCheckAlibabacloudStackHsmVendorsDataSource,
 				Check: resource.ComposeTestCheckFunc(
 
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_hsm_vendors.default"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hsm_vendors.default", "vendors.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hsm_vendors.default", "vendors.0.code"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hsm_vendors.default", "vendors.0.name"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hsm_vendors.default", "vendors.0.products.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hsm_vendors.default", "vendors.0.products.0.code"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hsm_vendors.default", "vendors.0.products.0.name"),
+					testAccCheckAlibabacloudStackDataSourceID(resourceId),
+					resource.TestCheckResourceAttrSet(resourceId, "vendors.#"),
+					resource.TestCheckResourceAttrSet(resourceId, "vendors.0.code"),
+					resource.TestCheckResourceAttrSet(resourceId, "vendors.0.name"),
+					resource.TestCheckResourceAttrSet(resourceId, "vendors.0.products.#"),
+					resource.TestCheckResourceAttrSet(resourceId, "vendors.0.products.0.code"),
+					resource.TestCheckResourceAttrSet(resourceId, "vendors.0.products.0.name"),
 				),
 			},
 		},

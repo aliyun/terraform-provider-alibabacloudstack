@@ -10,9 +10,10 @@ import (
 func TestAccAlibabacloudStackCSKubernetesClustersKubeConfigDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacckubernetesconfig-%d", rand)
+	resourceId := "data.alibabacloudstack_cs_kubernetes_clusters_kubeconfig.k8s_clusters_kubeconfig"
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -20,7 +21,7 @@ func TestAccAlibabacloudStackCSKubernetesClustersKubeConfigDataSource(t *testing
 			{
 				Config: testdataSourceCSKubernetesClustersKubeconfig(name),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_cs_kubernetes_clusters_kubeconfig.k8s_clusters_kubeconfig", "kubeconfig"),
+					resource.TestCheckResourceAttrSet(resourceId, "kubeconfig"),
 				),
 			},
 		},

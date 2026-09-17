@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName:     resourceId,
@@ -166,7 +166,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationScalingRule_triggerNew(t *testing
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName:     resourceId,

@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackAqsWebLock_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		CheckDestroy: nil,
 		Providers:    testYunDunProviders(),
@@ -149,7 +149,7 @@ func TestAccAlibabacloudStackAqsWebLock_blacklist(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		CheckDestroy: nil,
 		Providers:    testYunDunProviders(),

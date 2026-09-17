@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackCspprivateHsmGroup_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCspprivateHsmGroupDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreYunCheck(t)
 		},
 		IDRefreshName:     resourceId,

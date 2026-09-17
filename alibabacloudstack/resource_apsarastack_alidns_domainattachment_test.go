@@ -29,8 +29,7 @@ func TestAccAlibabacloudStackDnsDomainAttachment_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckApiAvailable(t, "POST", "Alidns", "2015-01-09", "DescribeInstanceDomains", "")
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

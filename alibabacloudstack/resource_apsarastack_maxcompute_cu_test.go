@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackMaxcomputeCu_basic0(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceMaxcomputeCuDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			// Currently does not support creating projects with sub-accounts
 		},
 		IDRefreshName: resourceId,

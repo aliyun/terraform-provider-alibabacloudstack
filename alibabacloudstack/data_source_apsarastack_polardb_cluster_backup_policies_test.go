@@ -8,24 +8,25 @@ import (
 )
 
 func TestAccAlibabacloudStackPolardbClusterBackupPoliciesDataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_polardb_cluster_backup_policies.policy"
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testAcc%v", rand)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: datasourcePolardbClusterBackupPoliciesDataSourceDependence(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_polardb_cluster_backup_policies.policy"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "db_cluster_id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "data_level1_backup_time"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "data_level1_backup_retention_period"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "data_level2_backup_retention_period"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "backup_retention_policy_on_cluster_deletion"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardb_cluster_backup_policies.policy", "log_backup_retention_period"),
+					testAccCheckAlibabacloudStackDataSourceID(resourceId),
+					resource.TestCheckResourceAttrSet(resourceId, "db_cluster_id"),
+					resource.TestCheckResourceAttrSet(resourceId, "data_level1_backup_time"),
+					resource.TestCheckResourceAttrSet(resourceId, "data_level1_backup_retention_period"),
+					resource.TestCheckResourceAttrSet(resourceId, "data_level2_backup_retention_period"),
+					resource.TestCheckResourceAttrSet(resourceId, "backup_retention_policy_on_cluster_deletion"),
+					resource.TestCheckResourceAttrSet(resourceId, "log_backup_retention_period"),
 				),
 			},
 		},

@@ -7,9 +7,10 @@ import (
 )
 
 func TestAccAlibabacloudStackHologramClustersDataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_hologram_clusters.default"
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -17,12 +18,12 @@ func TestAccAlibabacloudStackHologramClustersDataSource(t *testing.T) {
 				Config: testAccCheckAlibabacloudStackHologramClustersDataSource,
 				Check: resource.ComposeTestCheckFunc(
 
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_hologram_clusters.default"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hologram_clusters.default", "clusters.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hologram_clusters.default", "clusters.0.type"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hologram_clusters.default", "clusters.0.id"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hologram_clusters.default", "clusters.0.cpu"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hologram_clusters.default", "clusters.0.cluster"),
+					testAccCheckAlibabacloudStackDataSourceID(resourceId),
+					resource.TestCheckResourceAttrSet(resourceId, "clusters.#"),
+					resource.TestCheckResourceAttrSet(resourceId, "clusters.0.type"),
+					resource.TestCheckResourceAttrSet(resourceId, "clusters.0.id"),
+					resource.TestCheckResourceAttrSet(resourceId, "clusters.0.cpu"),
+					resource.TestCheckResourceAttrSet(resourceId, "clusters.0.cluster"),
 				),
 			},
 		},

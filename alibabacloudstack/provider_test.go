@@ -127,7 +127,21 @@ func testYunDunProviders() map[string]*schema.Provider {
 	}
 }
 
-func testAccPreCheck(t *testing.T) {
+// extractResourceTypeName extracts the resource/data source type name from a resourceId.
+// e.g. "data.alibabacloudstack_api_gateway_service.current" -> "alibabacloudstack_api_gateway_service"
+// e.g. "alibabacloudstack_arms_dispatch_rule.default" -> "alibabacloudstack_arms_dispatch_rule"
+func extractResourceTypeName(resourceId string) string {
+	parts := strings.Split(resourceId, ".")
+	if len(parts) < 2 {
+		return ""
+	}
+	if parts[0] == "data" {
+		return parts[1]
+	}
+	return parts[0]
+}
+
+func testAccPreCheck(t *testing.T, resourceId string) {
 	ak, sk := resolveTestCredentials(false)
 	if ak == "" {
 		// TODO: After 3.21.0, only check TEST_USER and TEST_ORG credentials.
@@ -156,6 +170,22 @@ func testAccPreCheck(t *testing.T) {
 	//	t.Fatal("ALIBABACLOUDSTACK_RESOURCE_GROUP_SET must be set for acceptance tests")
 	//}
 
+	// Skip deprecated or unregistered resources/data sources
+	resourceName := extractResourceTypeName(resourceId)
+	if resourceName != "" {
+		if r, ok := testAccProvider.ResourcesMap[resourceName]; ok && r != nil && r.DeprecationMessage != "" {
+			t.Skipf("Skipping test: resource %s is deprecated: %s", resourceName, r.DeprecationMessage)
+		}
+		if d, ok := testAccProvider.DataSourcesMap[resourceName]; ok && d != nil && d.DeprecationMessage != "" {
+			t.Skipf("Skipping test: data source %s is deprecated: %s", resourceName, d.DeprecationMessage)
+		}
+		// Skip if the resource/data source is not registered in the provider at all
+		if _, inResources := testAccProvider.ResourcesMap[resourceName]; !inResources {
+			if _, inDataSources := testAccProvider.DataSourcesMap[resourceName]; !inDataSources {
+				t.Skipf("Skipping test: %s is not registered in the provider", resourceName)
+			}
+		}
+	}
 }
 
 // testAccPreCheckOrg validates credentials forcing ORG level (skipping TEST_USER).
@@ -407,7 +437,7 @@ func testAccPreCheckWithEnvVariable(t *testing.T, envVariableName string) {
 }
 
 func testAccPreCheckWithCrEe(t *testing.T) {
-	testAccPreCheck(t)
+	testAccPreCheck(t, "")
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {

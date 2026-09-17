@@ -33,7 +33,7 @@ func TestAccAlibabacloudStackDBAccountPrivilege_mysql(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name
@@ -153,7 +153,7 @@ func resourceDBAccountPrivilegeConfigDependenceForMySql(name string) string {
 //
 //	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
-//			testAccPreCheck(t)
+//			testAccPreCheck(t, resourceId)
 //		},
 //
 //		// module name

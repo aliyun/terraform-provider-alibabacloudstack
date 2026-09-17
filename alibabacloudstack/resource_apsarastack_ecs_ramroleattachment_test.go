@@ -29,7 +29,7 @@ func TestAccAlibabacloudStackRamRoleAttachment_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccEcsRamRoleAttachmentdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackApfsFileSystem_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApfsFileSystemDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: rac.checkResourceDestroy(),

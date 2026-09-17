@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackImageSharePermission(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageSharePermissionConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			//testAccPreCheckWithMultipleAccount(t)
 		},
 		IDRefreshName: resourceId,

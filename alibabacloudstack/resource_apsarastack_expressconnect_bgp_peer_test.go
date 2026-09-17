@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackExpressconnectBgpPeer_basic0(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackExpressconnectBgpPeerDependence0(rand))
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckWithEnvVariable(t, "ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID")
 		},
 		IDRefreshName: resourceId,

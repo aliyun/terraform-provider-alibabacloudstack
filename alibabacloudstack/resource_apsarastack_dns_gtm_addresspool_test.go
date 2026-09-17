@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackDnsGtmAddressPool_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -120,7 +120,7 @@ func TestAccAlibabacloudStackDnsGtmAddressPool_ipv6(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,

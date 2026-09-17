@@ -128,7 +128,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccEssScheduleConfig)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

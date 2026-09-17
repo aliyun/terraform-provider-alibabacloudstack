@@ -24,8 +24,7 @@ func TestAccAlicloudQuickBIWorkspace_basic0(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlicloudQuickBIWorkspaceBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckApiAvailable(t, "POST", "quickbi-public", "2022-03-01", "QueryWorkspaceUserList", "")
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

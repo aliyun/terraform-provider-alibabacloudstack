@@ -22,7 +22,7 @@ func TestAccAlibabacloudStackNasLifecyclePolicy_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackNasLifecyclePolicyDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckOss(t)
 		},
 		IDRefreshName: resourceId,

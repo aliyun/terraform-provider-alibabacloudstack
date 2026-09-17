@@ -56,13 +56,13 @@ func TestAccAlibabacloudstackCmsAlarmContactGroupGroups_basic(t *testing.T) {
 		}
 	}
 
+	resourceId := "data.alibabacloudstack_cms_alarm_contact_groups.default"
 	var cmsAlarmContactGroupsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_cms_alarm_contact_groups.default",
+		resourceId:   resourceId,
 		existMapFunc: existCmsAlarmContactGroupsMapFunc,
 		fakeMapFunc:  fakeCmsAlarmContactGroupsMapFunc,
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckApiAvailable(t, "POST", "Cms", "2019-01-01", "DescribeContactGroupList", "")
+			testAccPreCheck(t, resourceId)
 		},
 	}
 

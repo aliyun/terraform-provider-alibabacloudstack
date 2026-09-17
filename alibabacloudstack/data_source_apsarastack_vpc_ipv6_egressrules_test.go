@@ -113,7 +113,7 @@ func TestAccAlibabacloudStackVPCIpv6EgressRulesDataSource(t *testing.T) {
 		existMapFunc: existVpcIpv6EgressRuleMapFunc,
 		fakeMapFunc:  fakeVpcIpv6EgressRuleMapFunc,
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 	}
 

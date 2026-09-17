@@ -61,7 +61,7 @@ EOF`, os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"))
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

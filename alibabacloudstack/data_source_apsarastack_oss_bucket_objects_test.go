@@ -76,7 +76,7 @@ func TestAccAlibabacloudStackOssBucketObjectsDataSource_basic(t *testing.T) {
 		existMapFunc: existOssBucketObjectsMapFunc,
 		fakeMapFunc:  fakeOssBucketObjectsMapFunc,
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckOss(t)
 		},
 	}
@@ -161,7 +161,7 @@ func TestAccAlibabacloudStackOssBucketObjectsDataSource_versioning(t *testing.T)
 		existMapFunc: existOssBucketObjectsMapFunc,
 		fakeMapFunc:  fakeOssBucketObjectsMapFunc,
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckOss(t)
 		},
 	}

@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackPolardbProxy_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbProxyConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name
@@ -115,7 +115,7 @@ func TestAccAlibabacloudStackPolardbProxy_ReadWriteSpliting(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbProxyReadWriteSplitingDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

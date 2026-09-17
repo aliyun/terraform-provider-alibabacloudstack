@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccAlibabacloudStackDiskAttachment_basic(t *testing.T) {
+	resourceId := "alibabacloudstack_ecs_diskattachment.default"
 	var i ecs.Instance
 	var v ecs.Disk
 	var attachment ecs.Disk
@@ -28,11 +29,11 @@ func TestAccAlibabacloudStackDiskAttachment_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name
-		IDRefreshName: "alibabacloudstack_ecs_diskattachment.default",
+		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckDiskAttachmentDestroy,
 		Steps: []resource.TestStep{
@@ -69,6 +70,7 @@ func TestAccAlibabacloudStackDiskAttachment_basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackDiskAttachment_multi(t *testing.T) {
+	resourceId := "alibabacloudstack_ecs_diskattachment.default.1"
 	var i ecs.Instance
 	var v ecs.Disk
 	var attachment ecs.Disk
@@ -83,11 +85,11 @@ func TestAccAlibabacloudStackDiskAttachment_multi(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name
-		IDRefreshName: "alibabacloudstack_ecs_diskattachment.default.1",
+		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckDiskAttachmentDestroy,
 		Steps: []resource.TestStep{

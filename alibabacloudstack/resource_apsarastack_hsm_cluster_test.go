@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackHsmCluster_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, buildHsmClusterDependencies)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreYunCheck(t)
 		},
 		IDRefreshName:     resourceId,

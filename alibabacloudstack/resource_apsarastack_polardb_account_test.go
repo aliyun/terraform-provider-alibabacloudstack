@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackPolardbAccount_Update(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbAccountConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

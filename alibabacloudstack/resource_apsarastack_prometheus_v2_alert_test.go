@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackPrometheusV2Alert_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcekPrometheusV2AlertDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: rac.checkResourceDestroy(),

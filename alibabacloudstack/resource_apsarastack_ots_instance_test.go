@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackOtsInstance_clusterName(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -82,7 +82,7 @@ func TestAccAlibabacloudStackOtsInstance_clusterType(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

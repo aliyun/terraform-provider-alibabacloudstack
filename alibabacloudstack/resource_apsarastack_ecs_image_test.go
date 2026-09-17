@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackEcsImageBasic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageBasicConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -122,7 +122,7 @@ func TestAccAlibabacloudStackEcsImageSnapshot(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageSnapshotConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -216,7 +216,7 @@ func TestAccAlibabacloudStackEcsImageDeviceMap(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageSnapshotConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

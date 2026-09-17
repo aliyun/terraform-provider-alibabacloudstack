@@ -7,9 +7,10 @@ import (
 )
 
 func TestAccAlibabacloudStackInstancesDataSourceBasic(t *testing.T) {
+	resourceId := "data.alibabacloudstack_instances.default"
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -17,9 +18,9 @@ func TestAccAlibabacloudStackInstancesDataSourceBasic(t *testing.T) {
 				Config: testAccCheckAlibabacloudStackInstancesDataSource,
 				Check: resource.ComposeTestCheckFunc(
 
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_instances.default"),
-					resource.TestCheckResourceAttr("data.alibabacloudstack_instances.default", "instances.#", "1"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_instances.default", "ids.#"),
+					testAccCheckAlibabacloudStackDataSourceID(resourceId),
+					resource.TestCheckResourceAttr(resourceId, "instances.#", "1"),
+					resource.TestCheckResourceAttrSet(resourceId, "ids.#"),
 				),
 			},
 		},

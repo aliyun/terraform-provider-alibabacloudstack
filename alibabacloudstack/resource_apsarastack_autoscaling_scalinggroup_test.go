@@ -125,7 +125,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name
@@ -256,7 +256,7 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name
@@ -337,7 +337,7 @@ func TestAccAlibabacloudStackEssScalingGroup_rds(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

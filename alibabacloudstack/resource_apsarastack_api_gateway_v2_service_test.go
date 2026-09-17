@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackApiGatewayV2Service_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
@@ -145,7 +145,7 @@ func TestUatAlibabacloudStackApiGatewayV2Service_HSF(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccApigwV2ServicePreCheck(t)
 		},
 		IDRefreshName:     resourceId,
@@ -216,7 +216,7 @@ func TestAccAlibabacloudStackApiGatewayV2Service_AIGwService(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,

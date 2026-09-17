@@ -64,7 +64,7 @@ func TestAccAlibabacloudStackOssBucketsDataSource(t *testing.T) {
 		existMapFunc: existOssBucketsMapFunc,
 		fakeMapFunc:  fakeOssBucketsMapFunc,
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckOss(t)
 		},
 	}

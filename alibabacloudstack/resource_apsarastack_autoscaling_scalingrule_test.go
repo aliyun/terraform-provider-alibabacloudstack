@@ -32,7 +32,7 @@ func TestAccAlibabacloudStackEssScalingRule_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

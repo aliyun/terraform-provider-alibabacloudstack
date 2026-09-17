@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName:     resourceId,
@@ -119,7 +119,7 @@ func TestAccAlibabacloudStackEdasK8sSerice_NodePort(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName:     resourceId,

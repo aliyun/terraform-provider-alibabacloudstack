@@ -8,8 +8,9 @@ import (
 
 func TestAccAlibabacloudStackAqsOssScanconfigsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_aqs_oss_scanconfigs.default"
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_aqs_oss_scanconfigs.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"ids.#":                    "1",
@@ -28,7 +29,7 @@ func TestAccAlibabacloudStackAqsOssScanconfigsDataSource(t *testing.T) {
 		},
 		Providers: testYunDunProviders(),
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckOss(t)
 		},
 	}

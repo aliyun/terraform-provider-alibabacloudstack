@@ -139,7 +139,7 @@ func TestAccAlicloudExpressConnectVirtualBorderRoutersDataSource(t *testing.T) {
 		existMapFunc: existExpressConnectVirtualBorderRoutersMapFunc,
 		fakeMapFunc:  fakeExpressConnectVirtualBorderRoutersMapFunc,
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckPhysicalConnection(t)
 		},
 	}

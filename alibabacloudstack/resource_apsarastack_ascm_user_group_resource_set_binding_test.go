@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding_Basic(t *testing.T)
 	after7day := time.Now().UTC().AddDate(0, 0, 7).Format("2006-01-02T15:04:05Z")
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name
@@ -92,7 +92,7 @@ func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding_LengthByDays(t *tes
 	// after7day := time.Now().UTC().AddDate(0, 0, 7).Format("2006-01-02T15:04:05Z")
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackCloudfirewallControlpolicy0(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreYunCheck(t)
 		},
 		IDRefreshName: resourceId,
@@ -177,7 +177,7 @@ func TestAccAlibabacloudStackCloudfirewallControlpolicy1(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreYunCheck(t)
 		},
 		IDRefreshName: resourceId,

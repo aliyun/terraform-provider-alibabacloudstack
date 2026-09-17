@@ -32,7 +32,7 @@ func TestAccAlibabacloudStackPrometheusV2Instance_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePrometheusV2InstanceDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: nil,

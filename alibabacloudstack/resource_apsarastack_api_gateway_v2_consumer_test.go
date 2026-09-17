@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackApiGatewayV2Consumer_Apikey(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -91,7 +91,7 @@ func TestAccAlibabacloudStackApiGatewayV2Consumer_Basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -162,7 +162,7 @@ func TestAccAlibabacloudStackApiGatewayV2Consumer_Jwt(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -246,7 +246,7 @@ func TestAccAlibabacloudStackApiGatewayV2Consumer_Oauth2(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -367,7 +367,7 @@ func TestAccAlibabacloudStackApiGatewayV2Consumer_Appgw(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -442,7 +442,7 @@ func TestAccAlibabacloudStackApiGatewayV2Consumer_Csb(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
@@ -512,7 +512,7 @@ func TestAccAlibabacloudStackApiGatewayV2Consumer_SourceConsumer(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,

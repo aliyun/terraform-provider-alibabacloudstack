@@ -23,7 +23,7 @@ func TestAccalibabacloudstackdEssAttachment(t *testing.T) {
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

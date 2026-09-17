@@ -37,7 +37,7 @@ func TestAccAlibabacloudStackImageCopyBasic(t *testing.T) {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName:     resourceId,
 		ProviderFactories: providerFactories,
@@ -123,7 +123,7 @@ func TestAccApsaraStackImageCopyEncrypted(t *testing.T) {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName:     resourceId,
 		ProviderFactories: providerFactories,

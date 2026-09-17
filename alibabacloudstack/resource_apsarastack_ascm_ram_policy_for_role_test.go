@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackAscm_RamPolicyForRoleBasic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccAscm_RamPolicyForRole_resource)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName: resourceId,

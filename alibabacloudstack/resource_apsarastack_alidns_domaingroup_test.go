@@ -100,8 +100,7 @@ func TestAccAlibabacloudStackDnsGroup_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckApiAvailable(t, "POST", "GenesisDns", "2018-07-20", "AddDomainGroup", "")
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name

@@ -89,7 +89,7 @@ func TestAccAlibabacloudStackApiGatewayV2Route_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApiGatewayV2RouteDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -218,7 +218,7 @@ func TestAccAlibabacloudStackApiGatewayV2Route_Cascade(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApiGatewayV2SourceRouteDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

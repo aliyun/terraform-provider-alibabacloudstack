@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
@@ -148,7 +148,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_AutoScaling(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,

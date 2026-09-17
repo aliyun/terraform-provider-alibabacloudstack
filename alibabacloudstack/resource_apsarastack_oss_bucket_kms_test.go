@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackOssBucketKms_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckOss(t)
 			testAccPreCheckKmsServer(t)
 		},

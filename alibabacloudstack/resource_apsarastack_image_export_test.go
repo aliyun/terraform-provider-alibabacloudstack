@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackImageExport(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageExportBasicConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckOss(t)
 		},
 		IDRefreshName: resourceId,

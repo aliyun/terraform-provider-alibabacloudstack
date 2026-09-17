@@ -29,7 +29,7 @@ func TestAccAlibabacloudStackPolardbxReadWriteSplittingConfig_basic0(t *testing.
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		// module name
 		IDRefreshName: resourceId,

@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackEdasApplicationPackageAttachment_basic(t *testing.T
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasAPAttachmentDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 
 		},
 

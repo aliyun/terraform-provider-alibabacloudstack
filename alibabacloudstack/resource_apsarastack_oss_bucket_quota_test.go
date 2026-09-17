@@ -17,7 +17,7 @@ func TestAccAlibabacloudStackOssBucketQuota_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckOss(t)
 		},
 		IDRefreshName: resourceId,

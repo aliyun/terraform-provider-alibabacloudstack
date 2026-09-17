@@ -7,9 +7,10 @@ import (
 )
 
 func TestAccAlibabacloudStackHsmsDataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_hsms.default"
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 		Providers: testYunDunProviders(),
 		Steps: []resource.TestStep{
@@ -17,9 +18,9 @@ func TestAccAlibabacloudStackHsmsDataSource(t *testing.T) {
 				Config: testAccCheckAlibabacloudStackHsmsDataSource,
 				Check: resource.ComposeTestCheckFunc(
 
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_hsms.default"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hsms.default", "hsms.#"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_hsms.default", "hsms.0.id"),
+					testAccCheckAlibabacloudStackDataSourceID(resourceId),
+					resource.TestCheckResourceAttrSet(resourceId, "hsms.#"),
+					resource.TestCheckResourceAttrSet(resourceId, "hsms.0.id"),
 				),
 			},
 		},

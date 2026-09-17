@@ -561,7 +561,7 @@ func (dsa *dataSourceAttr) dataSourceTestCheck(t *testing.T, rand int, configs .
 		preCheck = dsa.PreCheck
 	} else {
 		preCheck = func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, dsa.resourceId)
 		}
 	}
 

@@ -153,7 +153,7 @@ func TestAccAlibabacloudStackEip_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccCheckEipConfigBasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckWithAccountSiteType(t, DomesticSite)
 		},
 

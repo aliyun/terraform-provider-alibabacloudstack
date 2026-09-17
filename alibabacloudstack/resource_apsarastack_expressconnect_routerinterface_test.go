@@ -169,7 +169,7 @@ func TestAccAlibabacloudStackRouterInterface_vrouter(t *testing.T) {
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		// module name
@@ -274,7 +274,7 @@ func TestAccAlibabacloudStackRouterInterface_vbr(t *testing.T) {
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckPhysicalConnection(t)
 		},
 

@@ -108,7 +108,7 @@ func TestAccAlibabacloudStackBastionhostInstance_basic_A(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBastionhostInstanceDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreYunCheck(t)
 		},
 		IDRefreshName: resourceId,
@@ -367,7 +367,7 @@ func TestAccAlibabacloudStackBastionhostInstance_basic_S(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBastionhostInstanceDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreYunCheck(t)
 		},
 		IDRefreshName: resourceId,

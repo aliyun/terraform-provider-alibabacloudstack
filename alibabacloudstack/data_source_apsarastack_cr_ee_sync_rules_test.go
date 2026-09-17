@@ -130,7 +130,7 @@ func TestAccAlibabacloudStackCrEeSyncRulesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeCrEeSyncRulesMapFunc,
 	}
 	preCheck := func() {
-		testAccPreCheck(t)
+		testAccPreCheck(t, resourceId)
 		getCrEeSyncRuleTestEnv(t)
 	}
 	crEESyncRulesCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, namespaceConf,

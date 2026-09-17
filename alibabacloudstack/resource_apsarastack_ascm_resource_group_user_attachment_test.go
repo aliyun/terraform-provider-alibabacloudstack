@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackAscmResourceGroupUserAttachmentBasic(t *testing.T) 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccAscmResourceGroupUserAttachmentResource)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName: resourceId,

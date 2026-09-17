@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackCSBProject_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackCSBProjectBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheck(t, resourceId)
 			testAccPreCheckWithEnvVariable(t, "ALIBABACLOUDSTACK_TEST_EXISTED_CSB_ID")
 		},
 		IDRefreshName: resourceId,

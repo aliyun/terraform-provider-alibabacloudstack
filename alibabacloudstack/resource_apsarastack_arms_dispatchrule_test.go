@@ -123,8 +123,7 @@ func TestAccAlibabacloudStackArmsDispatchRule_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ArmsDispatchRuleBasicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckApiAvailable(t, "POST", "ARMS", "2019-08-08", "DescribeDispatchRule", "")
+			testAccPreCheck(t, resourceId)
 		},
 
 		IDRefreshName: resourceId,
