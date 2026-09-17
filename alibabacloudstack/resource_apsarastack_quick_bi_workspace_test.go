@@ -2,10 +2,12 @@ package alibabacloudstack
 
 import (
 	"fmt"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlicloudQuickBIWorkspace_basic0(t *testing.T) {
@@ -22,8 +24,8 @@ func TestAccAlicloudQuickBIWorkspace_basic0(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlicloudQuickBIWorkspaceBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithAPIIsNotSupport(t)
 			testAccPreCheck(t)
+			testAccPreCheckApiAvailable(t, "POST", "quickbi-public", "2022-03-01", "QueryWorkspaceUserList", "")
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,

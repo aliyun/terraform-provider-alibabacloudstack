@@ -60,8 +60,9 @@ func TestAccAlibabacloudstackCmsAlarmContacts_basic(t *testing.T) {
 		resourceId:   "data.alibabacloudstack_cms_alarm_contacts.default",
 		existMapFunc: existcmsAlarmContactsMapFunc,
 		fakeMapFunc:  fakecmsAlarmContactsMapFunc,
-		PreCheck: func(){
-			testAccPreCheckWithAPIIsNotSupport(t)
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckApiAvailable(t, "POST", "Cms", "2019-01-01", "DescribeContactList", "")
 		},
 	}
 

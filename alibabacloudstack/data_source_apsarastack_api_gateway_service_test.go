@@ -36,8 +36,9 @@ func TestAccAlibabacloudStackApiGatewayServiceDataSource(t *testing.T) {
 		resourceId:   resourceId,
 		existMapFunc: existApiGatewayServiceMapFunc,
 		fakeMapFunc:  fakeApiGatewayServiceMapFunc,
-		PreCheck: func(){
-			testAccPreCheckWithAPIIsNotSupport(t)
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckApiAvailable(t, "POST", "CloudAPI", "2016-07-14", "OpenApiGatewayService", "")
 		},
 	}
 	apiGatewayServiceCheckInfo.dataSourceTestCheck(t, rand, enableOnConf)

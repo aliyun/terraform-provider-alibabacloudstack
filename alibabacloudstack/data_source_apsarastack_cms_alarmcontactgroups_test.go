@@ -7,7 +7,6 @@ import (
 )
 
 func TestAccAlibabacloudstackCmsAlarmContactGroupGroups_basic(t *testing.T) {
-	testAccPreCheckWithAPIIsNotSupport(t)
 	rand := getAccTestRandInt(10000, 20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackCmsAlarmContactGroupsDataSourceConfig(rand, map[string]string{
@@ -61,8 +60,9 @@ func TestAccAlibabacloudstackCmsAlarmContactGroupGroups_basic(t *testing.T) {
 		resourceId:   "data.alibabacloudstack_cms_alarm_contact_groups.default",
 		existMapFunc: existCmsAlarmContactGroupsMapFunc,
 		fakeMapFunc:  fakeCmsAlarmContactGroupsMapFunc,
-		PreCheck: func(){
-			testAccPreCheckWithAPIIsNotSupport(t)
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckApiAvailable(t, "POST", "Cms", "2019-01-01", "DescribeContactGroupList", "")
 		},
 	}
 

@@ -66,7 +66,8 @@ func testSweepKmsSecret(region string) error {
 }
 
 func TestAccAlibabacloudStackKmsSecret_Basic(t *testing.T) {
-	testAccPreCheckWithAPIIsNotSupport(t)
+	testAccPreCheck(t)
+	testAccPreCheckApiAvailable(t, "POST", "Kms", "2016-01-20", "Decrypt", "")
 	var v kms.DescribeSecretResponse
 
 	resourceId := "alibabacloudstack_kms_secret.default"
@@ -197,7 +198,8 @@ func TestAccAlibabacloudStackKmsSecret_Basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackKmsSecret_WithKey(t *testing.T) {
-	testAccPreCheckWithAPIIsNotSupport(t)
+	testAccPreCheck(t)
+	testAccPreCheckApiAvailable(t, "POST", "Kms", "2016-01-20", "Decrypt", "")
 	var v kms.DescribeSecretResponse
 
 	resourceId := "alibabacloudstack_kms_secret.default"

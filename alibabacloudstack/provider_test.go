@@ -281,9 +281,60 @@ func testAccCheckAlibabacloudStackDataSourceID(n string) resource.TestCheckFunc 
 		return nil
 	}
 }
-func testAccPreCheckWithAPIIsNotSupport(t *testing.T) {
-	t.Skipf("Skipping because of api is not support, the feature is not output to alibabacloudstack")
-	t.Skipped()
+
+// testAccPreCheckApiAvailable checks whether a given API is available in the current environment
+// by directly probing the target API. If the API returns a "not found" error, the test is skipped.
+// Parameters:
+//   - method: the HTTP method (e.g. "POST", "GET")
+//   - popcode: the product code (e.g. "Vpc", "Ecs")
+//   - version: the API version (e.g. "2016-04-28")
+//   - name: the API action name (e.g. "DescribeVpcs")
+//   - pattern: the ROA path pattern, empty for RPC-style APIs
+func testAccPreCheckApiAvailable(t *testing.T, method, popcode, version, name, pattern string) {
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	rawClient, err := sharedClientForRegion(region)
+	if err != nil {
+		t.Skipf("Skipping test: failed to initialize client: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+
+	// Probe the target API to check if it exists
+	_, err = client.DoTeaRequest(method, popcode, version, name, pattern, nil, nil, nil)
+	if err != nil {
+		if isApiNotFoundError(err) {
+			t.Skipf("Skipping test: API %s_%s_%s is not available in the environment: %s", popcode, version, name, err)
+		}
+		// For other errors (auth, network, etc.), the API might still exist;
+		// let the actual test handle those errors.
+	}
+}
+
+// isApiNotFoundError checks whether the error indicates the API does not exist in the environment.
+func isApiNotFoundError(err error) bool {
+	if err == nil {
+		return false
+	}
+	// Check known error codes that indicate API is not registered
+	if errmsgs.IsExpectedErrors(err, "InvalidAction.NotFound", "NotSupportApi", "UnsupportedApi", "InvalidApi") {
+		return true
+	}
+	// Check error message for common "API not found" patterns
+	errMsg := err.Error()
+	notFoundPatterns := []string{
+		"not found",
+		"not support",
+		"unsupported api",
+		"api not exist",
+		"action not found",
+		"invalid action",
+	}
+	errMsgLower := strings.ToLower(errMsg)
+	for _, pattern := range notFoundPatterns {
+		if strings.Contains(errMsgLower, pattern) {
+			return true
+		}
+	}
+	return false
 }
 
 func testAccPreCheckWithTime2(t *testing.T, days []int) {

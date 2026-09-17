@@ -11,7 +11,8 @@ import (
 )
 
 func TestAccAlibabacloudStackDnsDomainAttachment_basic(t *testing.T) {
-	testAccPreCheckWithAPIIsNotSupport(t)
+	testAccPreCheck(t)
+	testAccPreCheckApiAvailable(t, "POST", "Alidns", "2015-01-09", "DescribeInstanceDomains", "")
 	var v alidns.DescribeInstanceDomainsResponse
 
 	resourceId := "alibabacloudstack_dns_domain_attachment.default"

@@ -124,7 +124,7 @@ func TestAccAlibabacloudStackArmsDispatchRule_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithAPIIsNotSupport(t)
+			testAccPreCheckApiAvailable(t, "POST", "ARMS", "2019-08-08", "DescribeDispatchRule", "")
 		},
 
 		IDRefreshName: resourceId,
@@ -182,9 +182,9 @@ func TestAccAlibabacloudStackArmsDispatchRule_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
