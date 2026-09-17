@@ -44,7 +44,7 @@ func TestAccAlibabacloudStackWafInstancesDataSource(t *testing.T) {
 	}
 
 	var wafInstancesRecordsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_waf_instances.default",
+		resourceId:   resourceId,
 		existMapFunc: existDnsRecordsMapFunc,
 		fakeMapFunc:  fakeDnsRecordsMapFunc,
 	}

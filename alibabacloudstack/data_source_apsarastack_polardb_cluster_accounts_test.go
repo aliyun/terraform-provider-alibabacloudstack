@@ -7,7 +7,7 @@ import (
 
 func TestAccAlibabacloudStackPolardbClusterAccountsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
-	resourceId := "data.alibabacloudstack_polardb_cluster_accounts.default"
+	resourceId := AlibabacloudstackPolardbClusterAccountsDataCheckInfo.resourceId
 	name := fmt.Sprintf("tfaccount%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, datasourcePolardbClusterAccountsConfigDependence)
 

@@ -76,7 +76,7 @@ func TestAccAlibabacloudStackNasFileSystem_DataSource(t *testing.T) {
 	}
 
 	var fileSystemCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_nas_file_systems.default",
+		resourceId:   resourceId,
 		existMapFunc: existFileSystemMapCheck,
 		fakeMapFunc:  fakeFileSystemMapCheck,
 	}

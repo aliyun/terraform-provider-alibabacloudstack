@@ -7,7 +7,7 @@ import (
 
 func TestAccAlibabacloudStackNasLifecyclePolicies_DataSource(t *testing.T) {
 	rand := getAccTestRandInt(100000, 999999)
-	resourceId := "data.alibabacloudstack_nas_lifecycle_policies.default"
+	resourceId := LifecyclePoliciesCheckInfo.resourceId
 	name := fmt.Sprintf("tf-testacc-nas-liecycle-datasource%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, testAccAlibabacloudStackNasLifecyclePoliciesDataSourceConfig)
 

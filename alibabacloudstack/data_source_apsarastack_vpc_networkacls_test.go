@@ -78,7 +78,7 @@ func TestAccAlibabacloudStackVpcNetworkAclsDataSource(t *testing.T) {
 		}
 	}
 	var alibabacloudstackNetworkAclsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_network_acls.default",
+		resourceId:   resourceId,
 		existMapFunc: existAlibabacloudStackNetworkAclsDataSourceNameMapFunc,
 		fakeMapFunc:  fakeAlibabacloudStackNetworkAclsDataSourceNameMapFunc,
 	}
