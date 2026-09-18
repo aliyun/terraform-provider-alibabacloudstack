@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 
@@ -203,12 +204,12 @@ func dataSourceAlibabacloudStackPolardbClusterInstanceTypesRead(d *schema.Resour
 		if _, exists := existedId[id]; exists {
 			continue
 		}
-		cpu := data["cpu"].(string)
+		cpu := fmt.Sprintf("%v", data["cpu"])
 		cpu_count, err := strconv.Atoi(cpu)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, "error data is :%#v", data)
 		}
-		memory := data["memory"].(string)
+		memory := fmt.Sprintf("%v", data["memory"])
 		memory_size, err := strconv.Atoi(memory)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, "error data is :%#v", data)

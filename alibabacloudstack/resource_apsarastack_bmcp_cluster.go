@@ -15,13 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackBmcpCluster() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackBmcpClusterCreate,
-		Read:   resourceAlibabacloudStackBmcpClusterRead,
-		Delete: resourceAlibabacloudStackBmcpClusterDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"cluster_name": {
 				Type:     schema.TypeString,
@@ -160,6 +154,11 @@ func resourceAlibabacloudStackBmcpCluster() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackBmcpClusterCreate,
+		resourceAlibabacloudStackBmcpClusterRead,
+		nil,
+		resourceAlibabacloudStackBmcpClusterDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackBmcpClusterCreate(d *schema.ResourceData, meta interface{}) error {
@@ -255,7 +254,7 @@ func resourceAlibabacloudStackBmcpClusterCreate(d *schema.ResourceData, meta int
 		return fmt.Errorf("error waiting for BMCP cluster (%s) to become active: %s", clusterIdStr, err)
 	}
 
-	return resourceAlibabacloudStackBmcpClusterRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackBmcpClusterRead(d *schema.ResourceData, meta interface{}) error {

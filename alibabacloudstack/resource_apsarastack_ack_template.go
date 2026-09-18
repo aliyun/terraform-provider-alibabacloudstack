@@ -67,14 +67,11 @@ func resourceAlibabacloudStackAckTemplate() *schema.Resource {
 				Computed: true,
 			},
 		},
-		Create: resourceAlibabacloudStackAckTemplateCreate,
-		Read:   resourceAlibabacloudStackAckTemplateRead,
-		Update: resourceAlibabacloudStackAckTemplateUpdate,
-		Delete: resourceAlibabacloudStackAckTemplateDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAckTemplateCreate,
+		resourceAlibabacloudStackAckTemplateRead,
+		resourceAlibabacloudStackAckTemplateUpdate,
+		resourceAlibabacloudStackAckTemplateDelete)
 	return resource
 }
 
@@ -105,7 +102,7 @@ func resourceAlibabacloudStackAckTemplateCreate(d *schema.ResourceData, meta int
 	d.SetId(templateId)
 
 	// No status check is required according to the documentation, so we directly set the final ID
-	return resourceAlibabacloudStackAckTemplateRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAckTemplateRead(d *schema.ResourceData, meta interface{}) error {
@@ -181,7 +178,7 @@ func resourceAlibabacloudStackAckTemplateUpdate(d *schema.ResourceData, meta int
 		}
 	}
 
-	return resourceAlibabacloudStackAckTemplateRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAckTemplateDelete(d *schema.ResourceData, meta interface{}) error {

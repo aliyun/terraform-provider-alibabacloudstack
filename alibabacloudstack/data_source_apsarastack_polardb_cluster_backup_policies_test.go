@@ -3,40 +3,53 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackPolardbClusterBackupPoliciesDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_polardb_cluster_backup_policies.policy"
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testAcc%v", rand)
-	ResourceTest(t, resource.TestCase{
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourcePolardbClusterBackupPoliciesConfigDependence)
+
+	// Basic configuration - create a PolarDB cluster and query its backup policies
+	basicConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"db_cluster_id": "${alibabacloudstack_polardb_cluster_instance.default.id}",
+		}),
+	}
+
+	var existPolardbBackupPoliciesMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"db_cluster_id":                               CHECKSET,
+			"data_level1_backup_time":                     CHECKSET,
+			"data_level1_backup_retention_period":         CHECKSET,
+			"data_level2_backup_retention_period":         CHECKSET,
+			"backup_retention_policy_on_cluster_deletion": CHECKSET,
+			"log_backup_retention_period":                 CHECKSET,
+		}
+	}
+
+	var fakePolardbBackupPoliciesMapFunc = func(rand int) map[string]string {
+		return map[string]string{}
+	}
+
+	var polardbBackupPoliciesCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existPolardbBackupPoliciesMapFunc,
+		fakeMapFunc:  fakePolardbBackupPoliciesMapFunc,
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
+			testAccPreCheckApiAvailable(t, "GET", "polardb", "2017-08-01", "DescribeBackupPolicy", "")
 		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: datasourcePolardbClusterBackupPoliciesDataSourceDependence(name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID(resourceId),
-					resource.TestCheckResourceAttrSet(resourceId, "db_cluster_id"),
-					resource.TestCheckResourceAttrSet(resourceId, "data_level1_backup_time"),
-					resource.TestCheckResourceAttrSet(resourceId, "data_level1_backup_retention_period"),
-					resource.TestCheckResourceAttrSet(resourceId, "data_level2_backup_retention_period"),
-					resource.TestCheckResourceAttrSet(resourceId, "backup_retention_policy_on_cluster_deletion"),
-					resource.TestCheckResourceAttrSet(resourceId, "log_backup_retention_period"),
-				),
-			},
-		},
-	})
+	}
+	polardbBackupPoliciesCheckInfo.dataSourceTestCheck(t, 0, basicConf)
 }
 
-func datasourcePolardbClusterBackupPoliciesDataSourceDependence(name string) string {
+func dataSourcePolardbClusterBackupPoliciesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "%v"
+  default = "%s"
 }
 
 variable "db_type" {
@@ -58,7 +71,7 @@ data "alibabacloudstack_polardb_cluster_instance_types" "default" {
 }
 
 resource "alibabacloudstack_polardb_cluster_instance" "default" {
-	db_cluster_description 	=  "${var.name}"
+	db_cluster_description 	=  "%s"
 	zone_id 				= "${data.alibabacloudstack_zones.default.zones.0.id}"
 	db_type 				= "${var.db_type}"
 	db_version 				= "${var.db_version}"
@@ -68,10 +81,5 @@ resource "alibabacloudstack_polardb_cluster_instance" "default" {
 	sub_category 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.sub_category}"
 	storage_type 			= "ESSDPL1"
 }
-
-data "alibabacloudstack_polardb_cluster_backup_policies" "policy" {
-	db_cluster_id = "${alibabacloudstack_polardb_cluster_instance.default.id}"
-}
-
- `, name, VSwitchCommonTestCase)
+`, name, VSwitchCommonTestCase, name)
 }

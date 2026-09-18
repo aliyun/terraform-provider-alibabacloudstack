@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudstackWafInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudstackWafInstanceCreate,
-		Read:   resourceAlibabacloudstackWafInstanceRead,
-		Update: resourceAlibabacloudstackWafInstanceUpdate,
-		Delete: resourceAlibabacloudstackWafInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -122,6 +115,11 @@ func resourceAlibabacloudstackWafInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudstackWafInstanceCreate,
+		resourceAlibabacloudstackWafInstanceRead,
+		resourceAlibabacloudstackWafInstanceUpdate,
+		resourceAlibabacloudstackWafInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudstackWafInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -296,7 +294,7 @@ func resourceAlibabacloudstackWafInstanceCreate(d *schema.ResourceData, meta int
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprint(response["instance_id"]))
 	}
 
-	return resourceAlibabacloudstackWafInstanceUpdate(d, meta)
+	return nil
 }
 func resourceAlibabacloudstackWafInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
@@ -404,7 +402,7 @@ func resourceAlibabacloudstackWafInstanceUpdate(d *schema.ResourceData, meta int
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprint(d.Id()))
 		}
 	}
-	return resourceAlibabacloudstackWafInstanceRead(d, meta)
+	return nil
 }
 func resourceAlibabacloudstackWafInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
