@@ -2,29 +2,32 @@ package alibabacloudstack
 
 import (
 	"fmt"
-
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackSlbDomainExtensionsDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_slb_domain_extensions.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccCheckAlibabacloudStackSlbDataSourceBasic-%d", rand),
+		dataSourceSlbDomainExtensionsConfigDependence)
+
 	basicConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackDomainExtensionDataSourceConfig(rand, map[string]string{
-			"load_balancer_id": `"${alibabacloudstack_slb_domain_extension.default.load_balancer_id}"`,
-			"frontend_port":    `"${alibabacloudstack_slb_domain_extension.default.frontend_port}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"load_balancer_id": "${alibabacloudstack_slb_domain_extension.default.load_balancer_id}",
+			"frontend_port":    "${alibabacloudstack_slb_domain_extension.default.frontend_port}",
 		}),
 	}
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackDomainExtensionDataSourceConfig(rand, map[string]string{
-			"load_balancer_id": `"${alibabacloudstack_slb_domain_extension.default.load_balancer_id}"`,
-			"frontend_port":    `"${alibabacloudstack_slb_domain_extension.default.listener_port}"`,
-			"ids":              `["${alibabacloudstack_slb_domain_extension.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"load_balancer_id": "${alibabacloudstack_slb_domain_extension.default.load_balancer_id}",
+			"frontend_port":    "${alibabacloudstack_slb_domain_extension.default.listener_port}",
+			"ids":              []string{"${alibabacloudstack_slb_domain_extension.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackDomainExtensionDataSourceConfig(rand, map[string]string{
-			"load_balancer_id": `"${alibabacloudstack_slb_domain_extension.default.load_balancer_id}"`,
-			"frontend_port":    `"${alibabacloudstack_slb_domain_extension.default.listener_port}"`,
-			"ids":              `["${alibabacloudstack_slb_domain_extension.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"load_balancer_id": "${alibabacloudstack_slb_domain_extension.default.load_balancer_id}",
+			"frontend_port":    "${alibabacloudstack_slb_domain_extension.default.listener_port}",
+			"ids":              []string{"${alibabacloudstack_slb_domain_extension.default.id}_fake"},
 		}),
 	}
 
@@ -55,15 +58,11 @@ func TestAccAlibabacloudStackSlbDomainExtensionsDataSource_basic(t *testing.T) {
 	slbDomainExtensionsCheckInfo.dataSourceTestCheck(t, rand, basicConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackDomainExtensionDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceSlbDomainExtensionsConfigDependence(name string) string {
 	return fmt.Sprintf(`
-	variable "name" {
-		default = "tf-testAccCheckAlibabacloudStackSlbDataSourceBasic-%d"
-	}
+variable "name" {
+	default = "%s"
+}
 resource "alibabacloudstack_slb_server_certificate" "default" {
 	name = "${var.name}"
 	server_certificate = %s
@@ -72,12 +71,10 @@ resource "alibabacloudstack_slb_server_certificate" "default" {
 
 resource "alibabacloudstack_slb_loadbalancer" "default" {
 	name = "${var.name}"
-	//address_type       = "internet"
-  	specification        = "slb.s2.small"
+	specification        = "slb.s2.small"
 }
 
 %s
-
 
 resource "alibabacloudstack_slb_server_group" "default" {
   vserver_group_name = "${var.name}"
@@ -99,13 +96,12 @@ resource "alibabacloudstack_slb_listener" "new" {
   protocol                = "https"
   server_certificate_id   = "${alibabacloudstack_slb_server_certificate.default.id}"
 }
-	resource "alibabacloudstack_slb_domain_extension" "default" {
+
+resource "alibabacloudstack_slb_domain_extension" "default" {
   		load_balancer_id      = "${alibabacloudstack_slb_listener.new.load_balancer_id}"
   		frontend_port         = "${alibabacloudstack_slb_listener.new.frontend_port}"
   		domain                = "www.test.com"
   		server_certificate_id = "${alibabacloudstack_slb_listener.new.server_certificate_id}"
- 	}
- 	data "alibabacloudstack_slb_domain_extensions" "default" {
-		%s
- 	}`, rand, ServerCertificateTestCase(), RsaPrivateKeyTestCase(), ECSInstanceCommonTestCase, strings.Join(pairs, "\n "))
+}
+`, name, ServerCertificateTestCase(), RsaPrivateKeyTestCase(), ECSInstanceCommonTestCase)
 }

@@ -2,37 +2,53 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackCenTransitRouterConnectAttachmentsDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 2000)
+	resourceId := "data.alibabacloudstack_cen_transit_router_connect_attachments.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testacc_router_connect_attachment%d", rand),
+		dataSourceCenTransitRouterConnectAttachmentsConfigDependence)
+
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStacRouterConnectAttachmentsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"cen_id":            "${alibabacloudstack_cen_transit_router_connect_attachment.default.cen_id}",
+			"transit_router_id": "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_id}",
+			"name_regex":        "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStacRouterConnectAttachmentsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"cen_id":            "${alibabacloudstack_cen_transit_router_connect_attachment.default.cen_id}",
+			"transit_router_id": "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_id}",
+			"name_regex":        "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}_fake",
 		}),
 	}
 	IdsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStacRouterConnectAttachmentsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cen_transit_router_connect_attachment.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"cen_id":            "${alibabacloudstack_cen_transit_router_connect_attachment.default.cen_id}",
+			"transit_router_id": "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_id}",
+			"ids":               []string{"${alibabacloudstack_cen_transit_router_connect_attachment.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStacRouterConnectAttachmentsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cen_transit_router_connect_attachment.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"cen_id":            "${alibabacloudstack_cen_transit_router_connect_attachment.default.cen_id}",
+			"transit_router_id": "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_id}",
+			"ids":               []string{"${alibabacloudstack_cen_transit_router_connect_attachment.default.id}_fake"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStacRouterConnectAttachmentsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}"`,
-			"ids":        `["${alibabacloudstack_cen_transit_router_connect_attachment.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"cen_id":            "${alibabacloudstack_cen_transit_router_connect_attachment.default.cen_id}",
+			"transit_router_id": "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_id}",
+			"name_regex":        "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}",
+			"ids":               []string{"${alibabacloudstack_cen_transit_router_connect_attachment.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStacRouterConnectAttachmentsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}_fake"`,
-			"ids":        `["${alibabacloudstack_cen_transit_router_connect_attachment.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"cen_id":            "${alibabacloudstack_cen_transit_router_connect_attachment.default.cen_id}",
+			"transit_router_id": "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_id}",
+			"name_regex":        "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_name}_fake",
+			"ids":               []string{"${alibabacloudstack_cen_transit_router_connect_attachment.default.id}_fake"},
 		}),
 	}
 
@@ -68,14 +84,10 @@ var RouterConnectAttachmentsCheckInfo = dataSourceAttr{
 	fakeMapFunc:  fakeRouterConnectAttachmentsMapFunc,
 }
 
-func testAccCheckAlibabacloudStacRouterConnectAttachmentsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceCenTransitRouterConnectAttachmentsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testacc_router_connect_attachment%v"
+  default = "%s"
 }
 
 resource "alibabacloudstack_cen_instance" "default" {
@@ -85,7 +97,7 @@ resource "alibabacloudstack_cen_instance" "default" {
 
 resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
 	physical_connection_id = "%s"
-	vlan_id =                   %d
+	vlan_id =                   100
 	local_gateway_ip =           "10.0.0.1"
 	peer_gateway_ip =            "10.0.0.2"
 	peering_subnet_mask =        "255.255.255.252"
@@ -104,11 +116,5 @@ resource "alibabacloudstack_cen_transit_router_connect_attachment" "default" {
 	transit_router_attachment_name = "${var.name}"
 	depends_on = ["alibabacloudstack_cen_transit_router_vbr_attachment.default"]
 }
-
-data "alibabacloudstack_cen_transit_router_connect_attachments" "default" {
-	cen_id = "${alibabacloudstack_cen_transit_router_connect_attachment.default.cen_id}"
-	transit_router_id = "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_id}"
-	%s
-}`, rand, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"), rand, strings.Join(pairs, "\n  "))
-	return config
+`, name, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"))
 }

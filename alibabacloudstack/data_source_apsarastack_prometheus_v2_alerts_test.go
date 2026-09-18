@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackPrometheusV2AlertsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_prometheus_v2_alerts.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tfacc%d", rand),
+		dataSourcePrometheusV2AlertsConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_prometheus_v2_alerts.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"alerts.#":                      "1",
@@ -35,83 +39,73 @@ func TestAccAlibabacloudStackPrometheusV2AlertsDataSource(t *testing.T) {
 		},
 	}
 
-	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccPrometheusV2AlertsConfigDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_prometheus_v2_alert.default.name}"`,
-		}),
-		fakeConfig: testAccPrometheusV2AlertsConfigDependenceNew(rand, map[string]string{
-			"name_regex": `"^fake-name$"`,
-		}),
-	}
-
-	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccPrometheusV2AlertsConfigDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_prometheus_v2_alert.default.id}"]`,
-		}),
-		fakeConfig: testAccPrometheusV2AlertsConfigDependenceNew(rand, map[string]string{
-			"ids": `["fake-id"]`,
-		}),
-	}
-
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccPrometheusV2AlertsConfigDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_prometheus_v2_alert.default.name}"`,
-			"ids":        `["${alibabacloudstack_prometheus_v2_alert.default.id}"]`,
-		}),
-		fakeConfig: testAccPrometheusV2AlertsConfigDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_prometheus_v2_alert.default.name}"`,
-			"ids":        `["fake-id"]`,
-		}),
-	}
-
-	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
+	testAcc.dataSourceTestCheck(t, rand,
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_prometheus_v2_alert.default.name}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "^fake-name$",
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_prometheus_v2_alert.default.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"fake-id"},
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_prometheus_v2_alert.default.name}",
+				"ids":        []string{"${alibabacloudstack_prometheus_v2_alert.default.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_prometheus_v2_alert.default.name}",
+				"ids":        []string{"fake-id"},
+			}),
+		},
+	)
 }
 
-func testAccPrometheusV2AlertsConfigDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourcePrometheusV2AlertsConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tfacc%d"
+	default = "%s"
 }
 
 resource "alibabacloudstack_prometheus_v2_instance" "default" {
-  cluster_name = "${var.name}"
-  tags         = ["test1", "test2"]
+	cluster_name = "${var.name}"
+	tags         = ["test1", "test2"]
 }
 
 resource "alibabacloudstack_prometheus_v2_notify_group" "default" {
-  name        = "${var.name}_notify_group"
-  type        = "WEBHOOK"
-  description = "${var.name}_notify_group_description"
-  webhook_url = "https://test.com"
-  webhook_header_params {
-    key   = "Content-Type"
-    value = "application/json"
-  }
+	name        = "${var.name}_notify_group"
+	type        = "WEBHOOK"
+	description = "${var.name}_notify_group_description"
+	webhook_url = "https://test.com"
+	webhook_header_params {
+		key   = "Content-Type"
+		value = "application/json"
+	}
 }
 
 resource "alibabacloudstack_prometheus_v2_alert" "default" {
-  name                 = "${var.name}"
-  notify_recovered 	   = true
-  is_check_all 		   = false
-  tag_set 			   = ["aaa", "ccc"]
-  trigger_clusters     = ["${alibabacloudstack_prometheus_v2_instance.default.id}"]
-  trigger_promql 	   = "select testfield from testtable where testfield >= 0"
-  trigger_severity     = "warning"
-  trigger_cron 		   = "0 /5 * * * ?"
-  trigger_period       = "5m"
-  recover_notification = "Trigger condition\\\\$${alert_source} \\\\Hit record\\\\$${alert_time}"
-  notification         = "Trigger condition: {condition}\nHit record :{alert_result}"
-  notify_group_ids     = ["${alibabacloudstack_prometheus_v2_notify_group.default.id}"]
-  notify_types         = ["EMAIL", "SMS"]
-  notify_interval      = "10m"
+	name                 = "${var.name}"
+	notify_recovered     = true
+	is_check_all         = false
+	tag_set              = ["aaa", "ccc"]
+	trigger_clusters     = ["${alibabacloudstack_prometheus_v2_instance.default.id}"]
+	trigger_promql       = "select testfield from testtable where testfield >= 0"
+	trigger_severity     = "warning"
+	trigger_cron         = "0 /5 * * * ?"
+	trigger_period       = "5m"
+	recover_notification = "Trigger condition\\\\$${alert_source} \\\\Hit record\\\\$${alert_time}"
+	notification         = "Trigger condition: {condition}\nHit record :{alert_result}"
+	notify_group_ids     = ["${alibabacloudstack_prometheus_v2_notify_group.default.id}"]
+	notify_types         = ["EMAIL", "SMS"]
+	notify_interval      = "10m"
 }
-
-data "alibabacloudstack_prometheus_v2_alerts" "default" {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
+`, name)
 }

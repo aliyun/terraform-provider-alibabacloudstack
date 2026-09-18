@@ -2,22 +2,17 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEhpcJobTemplatesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
-	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEhpcJobTemplatesDataSourceName(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ehpc_job_template.default.id}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudStackEhpcJobTemplatesDataSourceName(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ehpc_job_template.default.id}_fake"]`,
-		}),
-	}
+	resourceId := "data.alibabacloudstack_ehpc_job_templates.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccTemplates-%d", rand),
+		dataSourceEhpcJobTemplatesConfigDependence)
 
-	var existAlibabacloudStackEhpcJobTemplatesDataSourceNameMapFunc = func(rand int) map[string]string {
+	existMapFunc := func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                         "1",
 			"templates.#":                   "1",
@@ -25,38 +20,38 @@ func TestAccAlibabacloudStackEhpcJobTemplatesDataSource(t *testing.T) {
 			"templates.0.job_template_name": fmt.Sprintf("tf-testAccTemplates-%d", rand),
 		}
 	}
-	var fakeAlibabacloudStackEhpcJobTemplatesDataSourceNameMapFunc = func(rand int) map[string]string {
+	fakeMapFunc := func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#": "0",
 		}
 	}
-	var alibabacloudstackEhpcJobTemplatesCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_ehpc_job_templates.default",
-		existMapFunc: existAlibabacloudStackEhpcJobTemplatesDataSourceNameMapFunc,
-		fakeMapFunc:  fakeAlibabacloudStackEhpcJobTemplatesDataSourceNameMapFunc,
-	}
-	alibabacloudstackEhpcJobTemplatesCheckInfo.dataSourceTestCheck(t, rand, idsConf)
-}
-func testAccCheckAlibabacloudStackEhpcJobTemplatesDataSourceName(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
+	checkInfo := dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existMapFunc,
+		fakeMapFunc:  fakeMapFunc,
 	}
 
-	config := fmt.Sprintf(`
-
-variable "name" {	
-	default = "tf-testAccTemplates-%d"
+	checkInfo.dataSourceTestCheck(t, rand,
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_ehpc_job_template.default.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_ehpc_job_template.default.id}_fake"},
+			}),
+		},
+	)
 }
 
-resource "alibabacloudstack_ehpc_job_template" "default"{
-  job_template_name =  var.name
-  command_line=       "./LammpsTest/lammps.pbs"
+func dataSourceEhpcJobTemplatesConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+	default = "%s"
 }
 
-data "alibabacloudstack_ehpc_job_templates" "default" {	
-	%s
+resource "alibabacloudstack_ehpc_job_template" "default" {
+	job_template_name = var.name
+	command_line      = "./LammpsTest/lammps.pbs"
 }
-`, rand, strings.Join(pairs, " \n "))
-	return config
+`, name)
 }

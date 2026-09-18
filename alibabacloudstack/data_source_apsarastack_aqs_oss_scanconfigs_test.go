@@ -2,13 +2,16 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackAqsOssScanconfigsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_aqs_oss_scanconfigs.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("testacc-agsoss-%d", rand),
+		dataSourceAqsOssScanconfigsConfigDependence)
+
 	testAcc := dataSourceAttr{
 		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
@@ -35,46 +38,41 @@ func TestAccAlibabacloudStackAqsOssScanconfigsDataSource(t *testing.T) {
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: resourceAqsOssScanconfigDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_aqs_oss_scanconfig.default.bucket_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_aqs_oss_scanconfig.default.bucket_name}",
 		}),
-		fakeConfig: resourceAqsOssScanconfigDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_aqs_oss_scanconfig.default.bucket_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_aqs_oss_scanconfig.default.bucket_name}_fake",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: resourceAqsOssScanconfigDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_aqs_oss_scanconfig.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_aqs_oss_scanconfig.default.id}"},
 		}),
-		fakeConfig: resourceAqsOssScanconfigDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_aqs_oss_scanconfig.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_aqs_oss_scanconfig.default.id}_fake"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: resourceAqsOssScanconfigDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_aqs_oss_scanconfig.default.bucket_name}"`,
-			"ids":        `["${alibabacloudstack_aqs_oss_scanconfig.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_aqs_oss_scanconfig.default.bucket_name}",
+			"ids":        []string{"${alibabacloudstack_aqs_oss_scanconfig.default.id}"},
 		}),
-		fakeConfig: resourceAqsOssScanconfigDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_aqs_oss_scanconfig.default.bucket_name}_fake"`,
-			"ids":        `["${alibabacloudstack_aqs_oss_scanconfig.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_aqs_oss_scanconfig.default.bucket_name}_fake",
+			"ids":        []string{"${alibabacloudstack_aqs_oss_scanconfig.default.id}_fake"},
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-// Dependence template generation method
-func resourceAqsOssScanconfigDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceAqsOssScanconfigsConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-	default = "testacc-agsoss-%d"
+	default = "%s"
 }
 
 data "alibabacloudstack_oss_clusters" "default" {
@@ -97,10 +95,5 @@ resource "alibabacloudstack_aqs_oss_scanconfig" "default" {
   decryption                 = "OSS"
   last_modified_start_time   = "2025-12-21 00:00:00"
 }
-
-data "alibabacloudstack_aqs_oss_scanconfigs" "default" {
-  %s
-}
-
-`, rand, strings.Join(pairs, "\n  "))
+`, name)
 }

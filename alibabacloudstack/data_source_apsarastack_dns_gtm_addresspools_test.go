@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackDnsGtmAddressPoolsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_dns_gtm_addresspools.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tfacc%d", rand),
+		dataSourceDnsGtmAddressPoolsConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_dns_gtm_addresspools.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"ids.#":                        "1",
@@ -29,58 +33,54 @@ func TestAccAlibabacloudStackDnsGtmAddressPoolsDataSource(t *testing.T) {
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
-			"name_regex": `"${alibabacloudstack_dns_gtm_addresspool.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_dns_gtm_addresspool.default.id}"},
+			"name_regex": "${alibabacloudstack_dns_gtm_addresspool.default.name}",
 		}),
-		fakeConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
-			"name_regex": `"^fake.*"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_dns_gtm_addresspool.default.id}"},
+			"name_regex": "^fake.*",
 		}),
 	}
 
 	typeConf := dataSourceTestAccConfig{
-		existConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
-			"type": `"A"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":  []string{"${alibabacloudstack_dns_gtm_addresspool.default.id}"},
+			"type": "A",
 		}),
-		fakeConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
-			"type": `"AAAA"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":  []string{"${alibabacloudstack_dns_gtm_addresspool.default.id}"},
+			"type": "AAAA",
 		}),
 	}
 
 	lbaStrategyConf := dataSourceTestAccConfig{
-		existConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
-			"lba_strategy": `"RATIO"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_dns_gtm_addresspool.default.id}"},
+			"lba_strategy": "RATIO",
 		}),
-		fakeConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
-			"lba_strategy": `"ALL_RR"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_dns_gtm_addresspool.default.id}"},
+			"lba_strategy": "ALL_RR",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_dns_gtm_addresspool.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_dns_gtm_addresspool.default.id}"},
 		}),
-		fakeConfig: testAccDnsGtmAddressPoolsDependenceNew(rand, map[string]string{
-			"ids": `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake-id"},
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, typeConf, lbaStrategyConf)
 }
 
-func testAccDnsGtmAddressPoolsDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceDnsGtmAddressPoolsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tfacc%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_dns_gtm_addresspool" "default" {
@@ -100,11 +100,5 @@ resource "alibabacloudstack_dns_gtm_addresspool" "default" {
     lba_weight = 80
   }
 }
-
-data "alibabacloudstack_dns_gtm_addresspools" "default" {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
-
-	return config
+`, name)
 }

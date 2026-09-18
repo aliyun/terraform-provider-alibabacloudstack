@@ -2,63 +2,70 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackCenTransitRouterEntriesDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_cen_transit_router_route_entries.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccRouterEntriesDatasource%d", rand),
+		dataSourceCenTransitRouterRouteEntriesConfigDependence)
+
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStacRouterEntriesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"transit_router_route_table_id": "${alibabacloudstack_cen_transit_router_route_table.default.transit_router_route_table_id}",
+			"name_regex":                    "${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStacRouterEntriesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"transit_router_route_table_id": "${alibabacloudstack_cen_transit_router_route_table.default.transit_router_route_table_id}",
+			"name_regex":                    "${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_name}_fake",
 		}),
 	}
 	IdsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStacRouterEntriesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cen_transit_router_route_entry.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"transit_router_route_table_id": "${alibabacloudstack_cen_transit_router_route_table.default.transit_router_route_table_id}",
+			"ids":                           []string{"${alibabacloudstack_cen_transit_router_route_entry.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStacRouterEntriesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cen_transit_router_route_entry.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"transit_router_route_table_id": "${alibabacloudstack_cen_transit_router_route_table.default.transit_router_route_table_id}",
+			"ids":                           []string{"${alibabacloudstack_cen_transit_router_route_entry.default.id}_fake"},
 		}),
 	}
 
 	descriptionConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStacRouterEntriesDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_description}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"transit_router_route_table_id": "${alibabacloudstack_cen_transit_router_route_table.default.transit_router_route_table_id}",
+			"description_regex":             "${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_description}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStacRouterEntriesDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_description}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"transit_router_route_table_id": "${alibabacloudstack_cen_transit_router_route_table.default.transit_router_route_table_id}",
+			"description_regex":             "${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_description}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStacRouterEntriesDataSourceConfig(rand, map[string]string{
-			"name_regex":        `"${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_name}"`,
-			"description_regex": `"${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_description}"`,
-			"ids":               `["${alibabacloudstack_cen_transit_router_route_entry.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"transit_router_route_table_id": "${alibabacloudstack_cen_transit_router_route_table.default.transit_router_route_table_id}",
+			"name_regex":                    "${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_name}",
+			"description_regex":             "${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_description}",
+			"ids":                           []string{"${alibabacloudstack_cen_transit_router_route_entry.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStacRouterEntriesDataSourceConfig(rand, map[string]string{
-			"name_regex":        `"${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_name}"`,
-			"ids":               `["${alibabacloudstack_cen_transit_router_route_entry.default.id}"]`,
-			"description_regex": `"${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_description}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"transit_router_route_table_id": "${alibabacloudstack_cen_transit_router_route_table.default.transit_router_route_table_id}",
+			"name_regex":                    "${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_name}",
+			"ids":                           []string{"${alibabacloudstack_cen_transit_router_route_entry.default.id}"},
+			"description_regex":             "${alibabacloudstack_cen_transit_router_route_entry.default.transit_router_route_entry_description}_fake",
 		}),
 	}
 
 	RouterEntriesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, IdsConf, descriptionConf, allConf)
 }
 
-func testAccCheckAlibabacloudStacRouterEntriesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func dataSourceCenTransitRouterRouteEntriesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccRouterEntriesDatasource%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_cen_instance" "default" {
@@ -83,12 +90,7 @@ resource "alibabacloudstack_cen_transit_router_route_entry" "default" {
 	transit_router_route_entry_next_hop_type = "BlackHole"
 	transit_router_route_table_id = "${alibabacloudstack_cen_transit_router_route_table.default.transit_router_route_table_id}"
 }
-
-data "alibabacloudstack_cen_transit_router_route_entries" "default" {
-	transit_router_route_table_id="${alibabacloudstack_cen_transit_router_route_table.default.transit_router_route_table_id}"
-	%s
-}`, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name)
 }
 
 var existRouterEntriesMapFunc = func(rand int) map[string]string {

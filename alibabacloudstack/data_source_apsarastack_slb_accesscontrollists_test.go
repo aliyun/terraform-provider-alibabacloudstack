@@ -2,39 +2,42 @@ package alibabacloudstack
 
 import (
 	"fmt"
-
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackSlbAclsDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_slb_acls.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccSlbAclDataSourceBisic-%d", rand),
+		dataSourceSlbAclsConfigDependence)
+
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_slb_acl.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_slb_acl.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_slb_acl.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_slb_acl.default.name}_fake",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_slb_acl.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_slb_acl.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_slb_acl.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_slb_acl.default.id}_fake"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_slb_acl.default.id}"]`,
-			"name_regex": `"${alibabacloudstack_slb_acl.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_slb_acl.default.id}"},
+			"name_regex": "${alibabacloudstack_slb_acl.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_slb_acl.default.id}_fake"]`,
-			"name_regex": `"${alibabacloudstack_slb_acl.default.name}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_slb_acl.default.id}_fake"},
+			"name_regex": "${alibabacloudstack_slb_acl.default.name}",
 		}),
 	}
 
@@ -48,9 +51,6 @@ func TestAccAlibabacloudStackSlbAclsDataSource_basic(t *testing.T) {
 			"acls.0.ip_version":          "ipv4",
 			"acls.0.entry_list.#":        "2",
 			"acls.0.related_listeners.#": "0",
-			// "acls.0.tags.%":              "2",
-			// "acls.0.tags.Created":        "TF",
-			// "acls.0.tags.For":            "acceptance test",
 		}
 	}
 
@@ -63,7 +63,7 @@ func TestAccAlibabacloudStackSlbAclsDataSource_basic(t *testing.T) {
 	}
 
 	var slbaclsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_slb_acls.default",
+		resourceId:   resourceId,
 		existMapFunc: existDnsRecordsMapFunc,
 		fakeMapFunc:  fakeDnsRecordsMapFunc,
 	}
@@ -71,15 +71,10 @@ func TestAccAlibabacloudStackSlbAclsDataSource_basic(t *testing.T) {
 	slbaclsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func dataSourceSlbAclsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccSlbAclDataSourceBisic-%d"
+	default = "%s"
 }
 variable "ip_version" {
 	default = "ipv4"
@@ -97,10 +92,5 @@ resource "alibabacloudstack_slb_acl" "default" {
       comment = "second"
   }
 }
-
-data "alibabacloudstack_slb_acls" "default" {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name)
 }

@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -11,9 +10,11 @@ import (
 func TestAccAlibabacloudStackUniversalDnsDomainsDataSource(t *testing.T) {
 	rand := acctest.RandInt()
 	resourceId := "data.alibabacloudstack_universal_dns_domains.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testacc%d", rand),
+		dataSourceUniversalDnsDomainsConfigDependence)
 
-	// Define the dataSourceAttr with exist and fake check functions
-	dsa := dataSourceAttr{
+	checkInfo := dataSourceAttr{
 		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
@@ -37,56 +38,45 @@ func TestAccAlibabacloudStackUniversalDnsDomainsDataSource(t *testing.T) {
 		},
 	}
 
-	// Run tests using customized test method
-	dsa.dataSourceTestCheck(t, rand,
+	checkInfo.dataSourceTestCheck(t, rand,
 		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccUniversalDnsDomainsConfigDependence(rand, map[string]string{
-				"name_regex": `alibabacloudstack_universal_dns_domain.default.name`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_universal_dns_domain.default.name}",
 			}),
-			fakeConfig: AlibabacloudTestAccUniversalDnsDomainsConfigDependence(rand, map[string]string{
-				"name_regex": `"^fake-name$"`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "^fake-name$",
 			}),
 		},
 		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccUniversalDnsDomainsConfigDependence(rand, map[string]string{
-				"ids": `[alibabacloudstack_universal_dns_domain.default.id]`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_universal_dns_domain.default.id}"},
 			}),
-			fakeConfig: AlibabacloudTestAccUniversalDnsDomainsConfigDependence(rand, map[string]string{
-				"ids": `["nonexistent-id"]`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"nonexistent-id"},
 			}),
 		},
 		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccUniversalDnsDomainsConfigDependence(rand, map[string]string{
-				"ids":        `[alibabacloudstack_universal_dns_domain.default.id]`,
-				"name_regex": `alibabacloudstack_universal_dns_domain.default.name`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"${alibabacloudstack_universal_dns_domain.default.id}"},
+				"name_regex": "${alibabacloudstack_universal_dns_domain.default.name}",
 			}),
-			fakeConfig: AlibabacloudTestAccUniversalDnsDomainsConfigDependence(rand, map[string]string{
-				"ids":        `["nonexistent-id"]`,
-				"name_regex": `"^fake-name$"`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"nonexistent-id"},
+				"name_regex": "^fake-name$",
 			}),
 		},
 	)
 }
 
-// Dependence template generation function
-func AlibabacloudTestAccUniversalDnsDomainsConfigDependence(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceUniversalDnsDomainsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testacc%d"
+	default = "%s"
 }
 
 resource "alibabacloudstack_universal_dns_domain" "default" {
 	name   = "${var.name}.example."
 	remark = "Created by Terraform"
 }
-
-data "alibabacloudstack_universal_dns_domains" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n	"))
-	return config
+`, name)
 }

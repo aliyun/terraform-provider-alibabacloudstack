@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -11,6 +10,9 @@ import (
 func TestAccAlibabacloudStackDnsForwardDomainsDataSource(t *testing.T) {
 	rand := acctest.RandInt()
 	resourceId := "data.alibabacloudstack_dns_forward_domains.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tfacc%d.test.", rand),
+		dataSourceDnsForwardDomainsConfigDependence)
 
 	dsa := dataSourceAttr{
 		resourceId: resourceId,
@@ -34,43 +36,38 @@ func TestAccAlibabacloudStackDnsForwardDomainsDataSource(t *testing.T) {
 	// Run tests using customized test method
 	dsa.dataSourceTestCheck(t, rand,
 		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccDnsForwardDomainsConfigDependence(rand, map[string]string{
-				"name_regex": `alibabacloudstack_dns_forward_domain.default.name`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_dns_forward_domain.default.name}",
 			}),
-			fakeConfig: AlibabacloudTestAccDnsForwardDomainsConfigDependence(rand, map[string]string{
-				"name_regex": `"^fake-name$"`,
-			}),
-		},
-		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccDnsForwardDomainsConfigDependence(rand, map[string]string{
-				"ids": `[alibabacloudstack_dns_forward_domain.default.id]`,
-			}),
-			fakeConfig: AlibabacloudTestAccDnsForwardDomainsConfigDependence(rand, map[string]string{
-				"ids": `["nonexistent-id"]`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "^fake-name$",
 			}),
 		},
 		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccDnsForwardDomainsConfigDependence(rand, map[string]string{
-				"ids":        `[alibabacloudstack_dns_forward_domain.default.id]`,
-				"name_regex": `alibabacloudstack_dns_forward_domain.default.name`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_dns_forward_domain.default.id}"},
 			}),
-			fakeConfig: AlibabacloudTestAccDnsForwardDomainsConfigDependence(rand, map[string]string{
-				"ids":        `["nonexistent-id"]`,
-				"name_regex": `"^fake-name$"`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"nonexistent-id"},
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"${alibabacloudstack_dns_forward_domain.default.id}"},
+				"name_regex": "${alibabacloudstack_dns_forward_domain.default.name}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"nonexistent-id"},
+				"name_regex": "^fake-name$",
 			}),
 		},
 	)
 }
 
-// Dependence template generation function
-func AlibabacloudTestAccDnsForwardDomainsConfigDependence(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceDnsForwardDomainsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tfacc%d.test."
+	default = "%s"
 }
 
 resource "alibabacloudstack_dns_forward_domain" "default" {
@@ -79,10 +76,5 @@ resource "alibabacloudstack_dns_forward_domain" "default" {
 	forward_mode = "FORWARD_FIRST"
 	forwarders = ["192.168.101.1"]
 }
-
-data "alibabacloudstack_dns_forward_domains" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n	"))
-	return config
+`, name)
 }

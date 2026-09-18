@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackApiGatewayV2CascadeInstancesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
+	resourceId := "data.alibabacloudstack_api_gateway_v2_cascade_instances.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccApiGwV2%d", rand),
+		dataSourceApiGatewayV2CascadeInstancesConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_api_gateway_v2_cascade_instances.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"ids.#":                           "1",
@@ -31,46 +35,41 @@ func TestAccAlibabacloudStackApiGatewayV2CascadeInstancesDataSource(t *testing.T
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: APIGatewayV2CascadeInstancesDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_api_gateway_v2_cascade_instance.default.instance_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_api_gateway_v2_cascade_instance.default.instance_name}",
 		}),
-		fakeConfig: APIGatewayV2CascadeInstancesDependenceNew(rand, map[string]string{
-			"name_regex": `"^fake-name.*"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^fake-name.*",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: APIGatewayV2CascadeInstancesDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_api_gateway_v2_cascade_instance.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_api_gateway_v2_cascade_instance.default.id}"},
 		}),
-		fakeConfig: APIGatewayV2CascadeInstancesDependenceNew(rand, map[string]string{
-			"ids": `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake-id"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: APIGatewayV2CascadeInstancesDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_api_gateway_v2_cascade_instance.default.instance_name}"`,
-			"ids":        `["${alibabacloudstack_api_gateway_v2_cascade_instance.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_api_gateway_v2_cascade_instance.default.instance_name}",
+			"ids":        []string{"${alibabacloudstack_api_gateway_v2_cascade_instance.default.id}"},
 		}),
-		fakeConfig: APIGatewayV2CascadeInstancesDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_api_gateway_v2_cascade_instance.default.instance_name}"`,
-			"ids":        `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_api_gateway_v2_cascade_instance.default.instance_name}",
+			"ids":        []string{"fake-id"},
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-// Dependence template generation method
-func APIGatewayV2CascadeInstancesDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceApiGatewayV2CascadeInstancesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccApiGwV2%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_api_gateway_v2_instance" "default" {
@@ -85,9 +84,5 @@ resource "alibabacloudstack_api_gateway_v2_cascade_instance" "default" {
   instance_name       = "${var.name}"
   cascade_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
 }
-
-data "alibabacloudstack_api_gateway_v2_cascade_instances" "default" {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
+`, name)
 }

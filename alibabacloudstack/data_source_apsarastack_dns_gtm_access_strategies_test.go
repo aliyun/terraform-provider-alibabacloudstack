@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackDnsGtmAccessStrategiesDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
+	resourceId := "data.alibabacloudstack_dns_gtm_access_strategies.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tfacc%d", rand),
+		dataSourceDnsGtmAccessStrategiesConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_dns_gtm_access_strategies.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"ids.#":             "1",
@@ -29,45 +33,47 @@ func TestAccAlibabacloudStackDnsGtmAccessStrategiesDataSource_basic(t *testing.T
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: buildDnsGtmAccessStrategiesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_dns_gtm_access_strategy.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"gtm_instance_id": "${alibabacloudstack_dns_gtm_instance.default.id}",
+			"name_regex":      "${alibabacloudstack_dns_gtm_access_strategy.default.name}",
 		}),
-		fakeConfig: buildDnsGtmAccessStrategiesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"^fake.*"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gtm_instance_id": "${alibabacloudstack_dns_gtm_instance.default.id}",
+			"name_regex":      "^fake.*",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: buildDnsGtmAccessStrategiesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_dns_gtm_access_strategy.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"gtm_instance_id": "${alibabacloudstack_dns_gtm_instance.default.id}",
+			"ids":             []string{"${alibabacloudstack_dns_gtm_access_strategy.default.id}"},
 		}),
-		fakeConfig: buildDnsGtmAccessStrategiesDataSourceConfig(rand, map[string]string{
-			"ids": `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gtm_instance_id": "${alibabacloudstack_dns_gtm_instance.default.id}",
+			"ids":             []string{"fake-id"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: buildDnsGtmAccessStrategiesDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_dns_gtm_access_strategy.default.id}"]`,
-			"name_regex": `"${alibabacloudstack_dns_gtm_access_strategy.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"gtm_instance_id": "${alibabacloudstack_dns_gtm_instance.default.id}",
+			"ids":             []string{"${alibabacloudstack_dns_gtm_access_strategy.default.id}"},
+			"name_regex":      "${alibabacloudstack_dns_gtm_access_strategy.default.name}",
 		}),
-		fakeConfig: buildDnsGtmAccessStrategiesDataSourceConfig(rand, map[string]string{
-			"ids":        `["fake-id"]`,
-			"name_regex": `"^fake.*"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gtm_instance_id": "${alibabacloudstack_dns_gtm_instance.default.id}",
+			"ids":             []string{"fake-id"},
+			"name_regex":      "^fake.*",
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func buildDnsGtmAccessStrategiesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceDnsGtmAccessStrategiesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tfacc%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_dns_private_domain" "default" {
@@ -119,10 +125,5 @@ resource "alibabacloudstack_dns_gtm_access_strategy" "default" {
   failover_gtm_address_pool_id   = alibabacloudstack_dns_gtm_addresspool.failover.id
   failover_gtm_address_pool_type = "IPV4"
 }
-
-data "alibabacloudstack_dns_gtm_access_strategies" "default" {
-	gtm_instance_id = alibabacloudstack_dns_gtm_instance.default.id
-%s
-}
-`, rand, strings.Join(pairs, "\n"))
+`, name)
 }

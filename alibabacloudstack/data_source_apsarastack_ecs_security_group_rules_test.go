@@ -2,59 +2,61 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackSecurityGroupRulesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf_acc_sg_rule_%d", rand)
+	resourceId := "data.alibabacloudstack_security_group_rules.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceSecurityGroupRulesConfigDependence)
+
 	GroupIdConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"group_id": `"${alibabacloudstack_security_group_rule.default.security_group_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"group_id": "${alibabacloudstack_security_group_rule.default.security_group_id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"group_id": `"${alibabacloudstack_security_group_rule.default.security_group_id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"group_id": "${alibabacloudstack_security_group_rule.default.security_group_id}_fake",
 		}),
 	}
 	DirectionConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"direction": `"ingress"`,
-			"group_id":  `"${alibabacloudstack_security_group_rule.default.security_group_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"direction": "ingress",
+			"group_id":  "${alibabacloudstack_security_group_rule.default.security_group_id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"direction": `"egress"`,
-			"group_id":  `"${alibabacloudstack_security_group_rule.default.security_group_id}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"direction": "egress",
+			"group_id":  "${alibabacloudstack_security_group_rule.default.security_group_id}",
 		}),
 	}
 	NicTypeConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"nic_type": `"intranet"`,
-			"group_id": `"${alibabacloudstack_security_group_rule.default.security_group_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"nic_type": "intranet",
+			"group_id": "${alibabacloudstack_security_group_rule.default.security_group_id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"nic_type": `"internet"`,
-			"group_id": `"${alibabacloudstack_security_group_rule.default.security_group_id}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"nic_type": "internet",
+			"group_id": "${alibabacloudstack_security_group_rule.default.security_group_id}",
 		}),
 	}
 	IpProtocolConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"ip_protocol": `"tcp"`,
-			"group_id":    `"${alibabacloudstack_security_group_rule.default.security_group_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ip_protocol": "tcp",
+			"group_id":    "${alibabacloudstack_security_group_rule.default.security_group_id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"ip_protocol": `"udp"`,
-			"group_id":    `"${alibabacloudstack_security_group_rule.default.security_group_id}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ip_protocol": "udp",
+			"group_id":    "${alibabacloudstack_security_group_rule.default.security_group_id}",
 		}),
 	}
 	PolicyConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"policy":   `"accept"`,
-			"group_id": `"${alibabacloudstack_security_group_rule.default.security_group_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"policy":   "accept",
+			"group_id": "${alibabacloudstack_security_group_rule.default.security_group_id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"policy":   `"drop"`,
-			"group_id": `"${alibabacloudstack_security_group_rule.default.security_group_id}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"policy":   "drop",
+			"group_id": "${alibabacloudstack_security_group_rule.default.security_group_id}",
 		}),
 	}
 
@@ -76,28 +78,19 @@ func TestAccAlibabacloudStackSecurityGroupRulesDataSource(t *testing.T) {
 	}
 
 	var CheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_security_group_rules.default",
+		resourceId:   resourceId,
 		existMapFunc: exisMapFunc,
 		fakeMapFunc:  fakeMapFunc,
 	}
 	CheckInfo.dataSourceTestCheck(t, rand, GroupIdConf, DirectionConf, NicTypeConf, IpProtocolConf, PolicyConf)
 }
 
-func testAccAlibabacloudStackSecurityGroupRulesDataSourceConfig(name string, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceSecurityGroupRulesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
 }
 
 %s
-
-data "alibabacloudstack_security_group_rules" "default" {
-  %s
-}
-`, name, SecurityGroupCommonTestCase, strings.Join(pairs, "\n  "))
-	return config
+`, name, SecurityGroupCommonTestCase)
 }

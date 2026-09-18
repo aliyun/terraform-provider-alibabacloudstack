@@ -2,19 +2,74 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
-// Generate dependency resources template for alibabacloudstack_aqs_web_locks
-func resourceAqsWebLocksDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
+func TestAccAlibabacloudStackAqsWebLocksDataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_aqs_web_locks.default"
+	rand := getAccTestRandInt(10000, 20000)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testacc%d", rand),
+		dataSourceAqsWebLocksConfigDependence)
+
+	testCheck := dataSourceAttr{
+		resourceId: resourceId,
+		existMapFunc: func(rand int) map[string]string {
+			return map[string]string{
+				"weblocks.#":                                    "1",
+				"weblocks.0.uuid":                               CHECKSET,
+				"weblocks.0.lock_configs.#":                     "1",
+				"weblocks.0.lock_configs.0.dir":                 "/test/tf/",
+				"weblocks.0.lock_configs.0.inclusive_file_type": "php;jsp;asp;aspx;js;cgi;html;htm;xml;shtml;shtm;jpg;gif;png;jspx",
+				"weblocks.0.lock_configs.0.defence_mode":        "block",
+				"weblocks.0.lock_configs.0.mode":                "whitelist",
+			}
+		},
+		fakeMapFunc: func(rand int) map[string]string {
+			return map[string]string{
+				"weblocks.#": "0",
+			}
+		},
+		Providers: testYunDunProviders(),
 	}
+
+	testCheck.dataSourceTestCheck(t, rand,
+
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_aqs_web_lock.default.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_aqs_web_lock.default.id}_fake"},
+			}),
+		},
+		// Test with instanceid filter
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"instanceid": "${alibabacloudstack_aqs_web_lock.default.instanceid}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"instanceid": "${alibabacloudstack_aqs_web_lock.default.instanceid}_fake",
+			}),
+		},
+
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"${alibabacloudstack_aqs_web_lock.default.id}"},
+				"instanceid": "${alibabacloudstack_aqs_web_lock.default.instanceid}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"${alibabacloudstack_aqs_web_lock.default.id}_fake"},
+				"instanceid": "${alibabacloudstack_aqs_web_lock.default.instanceid}_fake",
+			}),
+		},
+	)
+}
+
+func dataSourceAqsWebLocksConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testacc%d"
+	default = "%s"
 }
 
 data "alibabacloudstack_zones" "default" {
@@ -79,66 +134,5 @@ resource "alibabacloudstack_aqs_web_lock" "default" {
 	mode = "whitelist"
   }
 }
-
-data "alibabacloudstack_aqs_web_locks" "default" {
-    %s
-}
-`, rand, strings.Join(pairs, "\n   "))
-}
-
-func TestAccAlibabacloudStackAqsWebLocksDataSource(t *testing.T) {
-	resourceId := "data.alibabacloudstack_aqs_web_locks.default"
-	rand := getAccTestRandInt(10000, 20000)
-	testCheck := dataSourceAttr{
-		resourceId: resourceId,
-		existMapFunc: func(rand int) map[string]string {
-			return map[string]string{
-				"weblocks.#":                                    "1",
-				"weblocks.0.uuid":                               CHECKSET,
-				"weblocks.0.lock_configs.#":                     "1",
-				"weblocks.0.lock_configs.0.dir":                 "/test/tf/",
-				"weblocks.0.lock_configs.0.inclusive_file_type": "php;jsp;asp;aspx;js;cgi;html;htm;xml;shtml;shtm;jpg;gif;png;jspx",
-				"weblocks.0.lock_configs.0.defence_mode":        "block",
-				"weblocks.0.lock_configs.0.mode":                "whitelist",
-			}
-		},
-		fakeMapFunc: func(rand int) map[string]string {
-			return map[string]string{
-				"weblocks.#": "0",
-			}
-		},
-		Providers: testYunDunProviders(),
-	}
-
-	testCheck.dataSourceTestCheck(t, rand,
-
-		dataSourceTestAccConfig{
-			existConfig: resourceAqsWebLocksDependenceNew(rand, map[string]string{
-				"ids": `["${alibabacloudstack_aqs_web_lock.default.id}"]`,
-			}),
-			fakeConfig: resourceAqsWebLocksDependenceNew(rand, map[string]string{
-				"ids": `["${alibabacloudstack_aqs_web_lock.default.id}_fake"]`,
-			}),
-		},
-		// Test with instanceid filter
-		dataSourceTestAccConfig{
-			existConfig: resourceAqsWebLocksDependenceNew(rand, map[string]string{
-				"instanceid": `"${alibabacloudstack_aqs_web_lock.default.instanceid}"`,
-			}),
-			fakeConfig: resourceAqsWebLocksDependenceNew(rand, map[string]string{
-				"instanceid": `"${alibabacloudstack_aqs_web_lock.default.instanceid}_fake"`,
-			}),
-		},
-
-		dataSourceTestAccConfig{
-			existConfig: resourceAqsWebLocksDependenceNew(rand, map[string]string{
-				"ids":        `["${alibabacloudstack_aqs_web_lock.default.id}"]`,
-				"instanceid": `"${alibabacloudstack_aqs_web_lock.default.instanceid}"`,
-			}),
-			fakeConfig: resourceAqsWebLocksDependenceNew(rand, map[string]string{
-				"ids":        `["${alibabacloudstack_aqs_web_lock.default.id}_fake"]`,
-				"instanceid": `"${alibabacloudstack_aqs_web_lock.default.instanceid}_fake"`,
-			}),
-		},
-	)
+`, name)
 }

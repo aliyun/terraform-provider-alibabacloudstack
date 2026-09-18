@@ -2,63 +2,62 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackNatGatewaysBandwidthPackagesDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_natgateway_bandwidth_packages.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccNatGatewaysBandwidthPackagesDatasource%d", rand),
+		dataSourceNatgatewayBandwidthPackagesConfigDependence)
+
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackNatGatewaysBandwidthPackagesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_natgateway_bandwidth_package.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_natgateway_bandwidth_package.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackNatGatewaysBandwidthPackagesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_natgateway_bandwidth_package.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_natgateway_bandwidth_package.default.name}_fake",
 		}),
 	}
 	IdsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackNatGatewaysBandwidthPackagesDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_natgateway_bandwidth_package.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_natgateway_bandwidth_package.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackNatGatewaysBandwidthPackagesDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_natgateway_bandwidth_package.default.id}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_natgateway_bandwidth_package.default.id}_fake"},
 		}),
 	}
 
 	descriptionConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackNatGatewaysBandwidthPackagesDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_natgateway_bandwidth_package.default.description}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "${alibabacloudstack_natgateway_bandwidth_package.default.description}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackNatGatewaysBandwidthPackagesDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_natgateway_bandwidth_package.default.description}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "${alibabacloudstack_natgateway_bandwidth_package.default.description}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackNatGatewaysBandwidthPackagesDataSourceConfig(rand, map[string]string{
-			"name_regex":        `"${alibabacloudstack_natgateway_bandwidth_package.default.name}"`,
-			"description_regex": `"${alibabacloudstack_natgateway_bandwidth_package.default.description}"`,
-			"ids":               `[ "${alibabacloudstack_natgateway_bandwidth_package.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex":        "${alibabacloudstack_natgateway_bandwidth_package.default.name}",
+			"description_regex": "${alibabacloudstack_natgateway_bandwidth_package.default.description}",
+			"ids":               []string{"${alibabacloudstack_natgateway_bandwidth_package.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackNatGatewaysBandwidthPackagesDataSourceConfig(rand, map[string]string{
-			"name_regex":        `"${alibabacloudstack_natgateway_bandwidth_package.default.name}"`,
-			"ids":               `[ "${alibabacloudstack_natgateway_bandwidth_package.default.id}" ]`,
-			"description_regex": `"${alibabacloudstack_natgateway_bandwidth_package.default.description}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex":        "${alibabacloudstack_natgateway_bandwidth_package.default.name}",
+			"ids":               []string{"${alibabacloudstack_natgateway_bandwidth_package.default.id}"},
+			"description_regex": "${alibabacloudstack_natgateway_bandwidth_package.default.description}_fake",
 		}),
 	}
 
 	NatGatewaysBandwidthPackagesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, IdsConf, descriptionConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackNatGatewaysBandwidthPackagesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func dataSourceNatgatewayBandwidthPackagesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccNatGatewaysBandwidthPackagesDatasource%d"
+  default = "%s"
 }
 
 data "alibabacloudstack_zones" "default" {
@@ -89,11 +88,7 @@ resource "alibabacloudstack_natgateway_bandwidth_package" "default" {
 	description = "${var.name}"
 	ip_count = "2"
 }
-
-data "alibabacloudstack_natgateway_bandwidth_packages" "default" {
-	%s
-}`, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name)
 }
 
 var existNatGatewaysBandwidthPackagesMapFunc = func(rand int) map[string]string {

@@ -2,19 +2,74 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
-// Generate dependency resources template for alibabacloudstack_aqs_anti_brute_force_rules
-func resourceAqsAntiBruteForceRulesDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
+func TestAccAlibabacloudStackAqsAntiBruteForceRulesDataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_aqs_anti_brute_force_rules.default"
+	rand := getAccTestRandInt(10000, 20000)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testacc%d", rand),
+		dataSourceAqsAntiBruteForceRulesConfigDependence)
+
+	testCheck := dataSourceAttr{
+		resourceId: resourceId,
+		existMapFunc: func(rand int) map[string]string {
+			return map[string]string{
+				"rules.#":                "1",
+				"rules.0.name":           fmt.Sprintf("tf-testacc%d_rule", rand),
+				"rules.0.span":           "10",
+				"rules.0.fail_count":     "80",
+				"rules.0.forbidden_time": "360",
+				"rules.0.default_rule":   "true",
+				"rules.0.instance_ids.#": "1",
+			}
+		},
+		fakeMapFunc: func(rand int) map[string]string {
+			return map[string]string{
+				"rules.#": "0",
+			}
+		},
+		Providers: testYunDunProviders(),
 	}
+
+	testCheck.dataSourceTestCheck(t, rand,
+
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_aqs_anti_brute_force_rule.default.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_aqs_anti_brute_force_rule.default.id}_fake"},
+			}),
+		},
+		// Test with name_regex filter
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_aqs_anti_brute_force_rule.default.name}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_aqs_anti_brute_force_rule.default.name}_fake",
+			}),
+		},
+
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"${alibabacloudstack_aqs_anti_brute_force_rule.default.id}"},
+				"name_regex": "${alibabacloudstack_aqs_anti_brute_force_rule.default.name}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_aqs_anti_brute_force_rule.default.name}_fake",
+				"ids":        []string{"${alibabacloudstack_aqs_anti_brute_force_rule.default.id}_fake"},
+			}),
+		},
+	)
+}
+
+func dataSourceAqsAntiBruteForceRulesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testacc%d"
+	default = "%s"
 }
 
 data "alibabacloudstack_zones" "default" {
@@ -80,66 +135,5 @@ resource "alibabacloudstack_aqs_anti_brute_force_rule" "default" {
     alibabacloudstack_ecs_instance.default.id,
   ]
 }
-
-data "alibabacloudstack_aqs_anti_brute_force_rules" "default" {
-    %s
-}
-`, rand, strings.Join(pairs, "\n   "))
-}
-
-func TestAccAlibabacloudStackAqsAntiBruteForceRulesDataSource(t *testing.T) {
-	resourceId := "data.alibabacloudstack_aqs_anti_brute_force_rules.default"
-	rand := getAccTestRandInt(10000, 20000)
-	testCheck := dataSourceAttr{
-		resourceId: resourceId,
-		existMapFunc: func(rand int) map[string]string {
-			return map[string]string{
-				"rules.#":                "1",
-				"rules.0.name":           fmt.Sprintf("tf-testacc%d_rule", rand),
-				"rules.0.span":           "10",
-				"rules.0.fail_count":     "80",
-				"rules.0.forbidden_time": "360",
-				"rules.0.default_rule":   "true",
-				"rules.0.instance_ids.#": "1",
-			}
-		},
-		fakeMapFunc: func(rand int) map[string]string {
-			return map[string]string{
-				"rules.#": "0",
-			}
-		},
-		Providers: testYunDunProviders(),
-	}
-
-	testCheck.dataSourceTestCheck(t, rand,
-
-		dataSourceTestAccConfig{
-			existConfig: resourceAqsAntiBruteForceRulesDependenceNew(rand, map[string]string{
-				"ids": `["${alibabacloudstack_aqs_anti_brute_force_rule.default.id}"]`,
-			}),
-			fakeConfig: resourceAqsAntiBruteForceRulesDependenceNew(rand, map[string]string{
-				"ids": `["${alibabacloudstack_aqs_anti_brute_force_rule.default.id}_fake"]`,
-			}),
-		},
-		// Test with name_regex filter
-		dataSourceTestAccConfig{
-			existConfig: resourceAqsAntiBruteForceRulesDependenceNew(rand, map[string]string{
-				"name_regex": `"${alibabacloudstack_aqs_anti_brute_force_rule.default.name}"`,
-			}),
-			fakeConfig: resourceAqsAntiBruteForceRulesDependenceNew(rand, map[string]string{
-				"name_regex": `"${alibabacloudstack_aqs_anti_brute_force_rule.default.name}_fake"`,
-			}),
-		},
-
-		dataSourceTestAccConfig{
-			existConfig: resourceAqsAntiBruteForceRulesDependenceNew(rand, map[string]string{
-				"ids":        `["${alibabacloudstack_aqs_anti_brute_force_rule.default.id}"]`,
-				"name_regex": `"${alibabacloudstack_aqs_anti_brute_force_rule.default.name}"`,
-			}),
-			fakeConfig: resourceAqsAntiBruteForceRulesDependenceNew(rand, map[string]string{
-				"name_regex": `"${alibabacloudstack_aqs_anti_brute_force_rule.default.name}_fake"`,
-				"ids":        `["${alibabacloudstack_aqs_anti_brute_force_rule.default.id}_fake"]`,
-			}),
-		},
-	)
+`, name)
 }

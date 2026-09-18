@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -11,6 +10,9 @@ import (
 func TestAccAlibabacloudStackApiGatewayV2CascadeLinksDataSource(t *testing.T) {
 	rand := acctest.RandInt()
 	resourceId := "data.alibabacloudstack_api_gateway_v2_cascade_links.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccApiGwV2%d", rand),
+		dataSourceApiGatewayV2CascadeLinksConfigDependence)
 
 	// Define the dataSourceAttr with existMapFunc and fakeMapFunc
 	dsa := dataSourceAttr{
@@ -37,52 +39,47 @@ func TestAccAlibabacloudStackApiGatewayV2CascadeLinksDataSource(t *testing.T) {
 	dsa.dataSourceTestCheck(t, rand,
 		// Test by name_regex
 		dataSourceTestAccConfig{
-			existConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"name_regex": `"${alibabacloudstack_api_gateway_v2_cascade_link.default.link_name}"`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_api_gateway_v2_cascade_link.default.link_name}",
 			}),
-			fakeConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"name_regex": "\"fake-name-regex\"",
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "fake-name-regex",
 			}),
 		},
 		// Test by ids
 		dataSourceTestAccConfig{
-			existConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"ids": "[\"${alibabacloudstack_api_gateway_v2_cascade_link.default.id}\"]",
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_api_gateway_v2_cascade_link.default.id}"},
 			}),
-			fakeConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"ids": "[\"fake-id\"]",
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"fake-id"},
 			}),
 		},
 		// Test by source_instance_name
 		dataSourceTestAccConfig{
-			existConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"source_instance_name": "\"${alibabacloudstack_api_gateway_v2_cascade_link.default.source_instance_name}\"",
+			existConfig: testAccConfig(map[string]interface{}{
+				"source_instance_name": "${alibabacloudstack_api_gateway_v2_cascade_link.default.source_instance_name}",
 			}),
-			fakeConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"source_instance_name": "\"fake-source-instance-name\"",
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"source_instance_name": "fake-source-instance-name",
 			}),
 		},
 		// Test by cascade_instance_name
 		dataSourceTestAccConfig{
-			existConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"cascade_instance_name": "\"${alibabacloudstack_api_gateway_v2_cascade_link.default.cascade_instance_name}\"",
+			existConfig: testAccConfig(map[string]interface{}{
+				"cascade_instance_name": "${alibabacloudstack_api_gateway_v2_cascade_link.default.cascade_instance_name}",
 			}),
-			fakeConfig: APIGatewayV2CascadeLinksConfigDependence(rand, map[string]string{
-				"cascade_instance_name": "\"fake-cascade-instance-name\"",
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"cascade_instance_name": "fake-cascade-instance-name",
 			}),
 		},
 	)
 }
 
-// Dependence template generation function
-func APIGatewayV2CascadeLinksConfigDependence(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceApiGatewayV2CascadeLinksConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccApiGwV2%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_api_gateway_v2_instance" "source" {
@@ -112,9 +109,5 @@ resource "alibabacloudstack_api_gateway_v2_cascade_link" "default" {
   cascade_instance_id     = "${alibabacloudstack_api_gateway_v2_cascade_instance.default.id}"
   link_name               = "${var.name}"
 }
-
-data "alibabacloudstack_api_gateway_v2_cascade_links" "default" {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
+`, name)
 }

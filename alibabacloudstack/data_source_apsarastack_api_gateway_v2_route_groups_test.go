@@ -2,40 +2,48 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackApiGatewayV2RouteGroupsDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_api_gateway_v2_route_groups.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testacc-routegroup%d", rand),
+		dataSourceApiGatewayV2RouteGroupsConfigDependence)
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: ApiGatewayV2RouteGroupsDataSourceCommonTestCaseNew(rand, map[string]string{
-			"name_regex": `"tf-testacc-routegroup.*"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id": "${alibabacloudstack_api_gateway_v2_route_group.default.instance_id}",
+			"name_regex":  "tf-testacc-routegroup.*",
 		}),
-		fakeConfig: ApiGatewayV2RouteGroupsDataSourceCommonTestCaseNew(rand, map[string]string{
-			"name_regex": `"tf-testacc-fakeroutegroup.*"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id": "${alibabacloudstack_api_gateway_v2_route_group.default.instance_id}",
+			"name_regex":  "tf-testacc-fakeroutegroup.*",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: ApiGatewayV2RouteGroupsDataSourceCommonTestCaseNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_api_gateway_v2_route_group.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id": "${alibabacloudstack_api_gateway_v2_route_group.default.instance_id}",
+			"ids":         []string{"${alibabacloudstack_api_gateway_v2_route_group.default.id}"},
 		}),
-		fakeConfig: ApiGatewayV2RouteGroupsDataSourceCommonTestCaseNew(rand, map[string]string{
-			"ids": `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id": "${alibabacloudstack_api_gateway_v2_route_group.default.instance_id}",
+			"ids":         []string{"fake-id"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: ApiGatewayV2RouteGroupsDataSourceCommonTestCaseNew(rand, map[string]string{
-			"name_regex": `"tf-testacc-routegroup.*"`,
-			"ids":        `["${alibabacloudstack_api_gateway_v2_route_group.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id": "${alibabacloudstack_api_gateway_v2_route_group.default.instance_id}",
+			"name_regex":  "tf-testacc-routegroup.*",
+			"ids":         []string{"${alibabacloudstack_api_gateway_v2_route_group.default.id}"},
 		}),
-		fakeConfig: ApiGatewayV2RouteGroupsDataSourceCommonTestCaseNew(rand, map[string]string{
-			"name_regex": `"tf-testacc-routegroup.*"`,
-			"ids":        `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id": "${alibabacloudstack_api_gateway_v2_route_group.default.instance_id}",
+			"name_regex":  "tf-testacc-routegroup.*",
+			"ids":         []string{"fake-id"},
 		}),
 	}
 
@@ -73,18 +81,10 @@ func TestAccAlibabacloudStackApiGatewayV2RouteGroupsDataSource_basic(t *testing.
 	dsa.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func ApiGatewayV2RouteGroupsDataSourceCommonTestCaseNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		if k == "ids" {
-			pairs = append(pairs, fmt.Sprintf(`%s = %s`, k, v))
-		} else {
-			pairs = append(pairs, fmt.Sprintf(`%s = %s`, k, v))
-		}
-	}
-	config := fmt.Sprintf(`
+func dataSourceApiGatewayV2RouteGroupsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testacc-routegroup%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_api_gateway_v2_instance" "default" {
@@ -109,13 +109,5 @@ resource "alibabacloudstack_api_gateway_v2_route_group" "default" {
   instance_id    = alibabacloudstack_api_gateway_v2_instance.default.id
   domain_ids     = [alibabacloudstack_api_gateway_v2_domain.domain0.domain_id]
 }
-
-data "alibabacloudstack_api_gateway_v2_route_groups" "default" {
-  instance_id = alibabacloudstack_api_gateway_v2_route_group.default.instance_id
-  
-%s
-}
-`, rand, strings.Join(pairs, "\n"))
-
-	return config
+`, name)
 }

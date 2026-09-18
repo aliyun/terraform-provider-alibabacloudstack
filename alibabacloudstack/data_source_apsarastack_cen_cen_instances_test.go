@@ -2,87 +2,86 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackCenInstancesDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_cen_instances.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccCenInstancesDatasource%d", rand),
+		dataSourceCenInstancesConfigDependence)
+
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cen_instance.default.cen_instance_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_cen_instance.default.cen_instance_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_cen_instance.default.cen_instance_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_cen_instance.default.cen_instance_name}_fake",
 		}),
 	}
 	transit_router_nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"transit_router_name_regex": `"${alibabacloudstack_cen_instance.default.transit_router_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"transit_router_name_regex": "${alibabacloudstack_cen_instance.default.transit_router_name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"transit_router_name_regex": `"${alibabacloudstack_cen_instance.default.transit_router_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"transit_router_name_regex": "${alibabacloudstack_cen_instance.default.transit_router_name}_fake",
 		}),
 	}
 	transit_router_descriptionRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"transit_router_description_regex": `"${alibabacloudstack_cen_instance.default.transit_router_description}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"transit_router_description_regex": "${alibabacloudstack_cen_instance.default.transit_router_description}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"transit_router_description_regex": `"${alibabacloudstack_cen_instance.default.transit_router_description}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"transit_router_description_regex": "${alibabacloudstack_cen_instance.default.transit_router_description}_fake",
 		}),
 	}
 	cirConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"cidr": `"10.10.10.2/24"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"cidr": "10.10.10.2/24",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"cidr": `"10.10.10.2/24_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"cidr": "10.10.10.2/24_fake",
 		}),
 	}
 	IdsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_cen_instance.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_cen_instance.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_cen_instance.default.id}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_cen_instance.default.id}_fake"},
 		}),
 	}
 
 	descriptionConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_cen_instance.default.description}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "${alibabacloudstack_cen_instance.default.description}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_cen_instance.default.description}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "${alibabacloudstack_cen_instance.default.description}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"name_regex":        `"${alibabacloudstack_cen_instance.default.cen_instance_name}"`,
-			"description_regex": `"${alibabacloudstack_cen_instance.default.description}"`,
-			"ids":               `[ "${alibabacloudstack_cen_instance.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex":        "${alibabacloudstack_cen_instance.default.cen_instance_name}",
+			"description_regex": "${alibabacloudstack_cen_instance.default.description}",
+			"ids":               []string{"${alibabacloudstack_cen_instance.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
-			"name_regex":        `"${alibabacloudstack_cen_instance.default.cen_instance_name}"`,
-			"ids":               `[ "${alibabacloudstack_cen_instance.default.id}" ]`,
-			"description_regex": `"${alibabacloudstack_cen_instance.default.description}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex":        "${alibabacloudstack_cen_instance.default.cen_instance_name}",
+			"ids":               []string{"${alibabacloudstack_cen_instance.default.id}"},
+			"description_regex": "${alibabacloudstack_cen_instance.default.description}_fake",
 		}),
 	}
 
 	CenInstancesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, IdsConf, descriptionConf, transit_router_nameRegexConf, transit_router_descriptionRegexConf, cirConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func dataSourceCenInstancesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccCenInstancesDatasource%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_cen_instance" "default" {
@@ -97,11 +96,7 @@ resource "alibabacloudstack_cen_instance" "default" {
 		cidr="10.10.11.2/24"
 	}
 }
-
-data "alibabacloudstack_cen_instances" "default" {
-	%s
-}`, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name)
 }
 
 var existCenInstancesMapFunc = func(rand int) map[string]string {

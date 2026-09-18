@@ -2,13 +2,15 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackDnsPrivateLinesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_dns_private_lines.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tfacc%d", rand),
+		dataSourceDnsPrivateLinesConfigDependence)
 
 	// Define the dataSourceAttr with exist and fake check functions
 	dsa := dataSourceAttr{
@@ -37,43 +39,38 @@ func TestAccAlibabacloudStackDnsPrivateLinesDataSource(t *testing.T) {
 	// Run tests using customized test method
 	dsa.dataSourceTestCheck(t, rand,
 		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccDnsPrivateLinesConfigDependence(rand, map[string]string{
-				"name_regex": `alibabacloudstack_dns_private_line.default.name`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_dns_private_line.default.name}",
 			}),
-			fakeConfig: AlibabacloudTestAccDnsPrivateLinesConfigDependence(rand, map[string]string{
-				"name_regex": `"^fake-name$"`,
-			}),
-		},
-		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccDnsPrivateLinesConfigDependence(rand, map[string]string{
-				"ids": `[alibabacloudstack_dns_private_line.default.id]`,
-			}),
-			fakeConfig: AlibabacloudTestAccDnsPrivateLinesConfigDependence(rand, map[string]string{
-				"ids": `["nonexistent-id"]`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "^fake-name$",
 			}),
 		},
 		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccDnsPrivateLinesConfigDependence(rand, map[string]string{
-				"ids":        `[alibabacloudstack_dns_private_line.default.id]`,
-				"name_regex": `alibabacloudstack_dns_private_line.default.name`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_dns_private_line.default.id}"},
 			}),
-			fakeConfig: AlibabacloudTestAccDnsPrivateLinesConfigDependence(rand, map[string]string{
-				"ids":        `["nonexistent-id"]`,
-				"name_regex": `"^fake-name$"`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"nonexistent-id"},
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"${alibabacloudstack_dns_private_line.default.id}"},
+				"name_regex": "${alibabacloudstack_dns_private_line.default.name}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"nonexistent-id"},
+				"name_regex": "^fake-name$",
 			}),
 		},
 	)
 }
 
-// Dependence template generation function
-func AlibabacloudTestAccDnsPrivateLinesConfigDependence(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceDnsPrivateLinesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tfacc%d"
+	default = "%s"
 }
 
 resource "alibabacloudstack_dns_private_line" "default" {
@@ -81,10 +78,5 @@ resource "alibabacloudstack_dns_private_line" "default" {
 	v4_addresses = ["192.168.0.1"]
 	v6_addresses = ["2020:148:2:28::", "2020:148:3:28::"]
 }
-
-data "alibabacloudstack_dns_private_lines" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n	"))
-	return config
+`, name)
 }

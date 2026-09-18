@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackBmcpImagesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_bmcp_images.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccBmcpImages%d", rand),
+		dataSourceBmcpImagesConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_bmcp_images.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"images.#":        CHECKSET,
@@ -27,47 +31,43 @@ func TestAccAlibabacloudStackBmcpImagesDataSource(t *testing.T) {
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: BmcpImagesDependenceNew(rand, map[string]string{
-			"name_regex": `"ubuntu"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"type":       "public",
+			"name_regex": "ubuntu",
 		}),
-		fakeConfig: BmcpImagesDependenceNew(rand, map[string]string{
-			"name_regex": `"fake-name"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"type":       "public",
+			"name_regex": "fake-name",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: BmcpImagesDependenceNew(rand, map[string]string{
-			"ids": `["i-d"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"type": "public",
+			"ids":  []string{"i-d"},
 		}),
-		fakeConfig: BmcpImagesDependenceNew(rand, map[string]string{
-			"ids": `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"type": "public",
+			"ids":  []string{"fake-id"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: BmcpImagesDependenceNew(rand, map[string]string{
-			"name_regex": `"ubuntu"`,
-			"ids":        `["i-d"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"type":       "public",
+			"name_regex": "ubuntu",
+			"ids":        []string{"i-d"},
 		}),
-		fakeConfig: BmcpImagesDependenceNew(rand, map[string]string{
-			"name_regex": `"fake-name"`,
-			"ids":        `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"type":       "public",
+			"name_regex": "fake-name",
+			"ids":        []string{"fake-id"},
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-// Dependence template generation method
-func BmcpImagesDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	return fmt.Sprintf(`
-data "alibabacloudstack_bmcp_images" "default" {
-  type = "public"
-  %s
-}
-`, strings.Join(pairs, "\n  "))
+func dataSourceBmcpImagesConfigDependence(name string) string {
+	return fmt.Sprintf(``)
 }

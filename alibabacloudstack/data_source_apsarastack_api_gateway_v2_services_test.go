@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackApiGatewayV2ServicesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_api_gateway_v2_services.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("testtf-apigw-%d", rand),
+		dataSourceApiGatewayV2ServicesConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_api_gateway_v2_services.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"ids.#":                    "1",
@@ -31,42 +35,47 @@ func TestAccAlibabacloudStackApiGatewayV2ServicesDataSource(t *testing.T) {
 		ExternalProviders: testAccExternalProviders,
 	}
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: ApiGatewayV2ServicesDataSourceNew(rand, map[string]string{
-			"name_regex": `"testtf-apigw-*"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_service.default.gw_instance_id}",
+			"name_regex":     "testtf-apigw-*",
 		}),
-		fakeConfig: ApiGatewayV2ServicesDataSourceNew(rand, map[string]string{
-			"name_regex": `"tf-apigw-fakeservice*"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_service.default.gw_instance_id}",
+			"name_regex":     "tf-apigw-fakeservice*",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: ApiGatewayV2ServicesDataSourceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_api_gateway_v2_service.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_service.default.gw_instance_id}",
+			"ids":            []string{"${alibabacloudstack_api_gateway_v2_service.default.id}"},
 		}),
-		fakeConfig: ApiGatewayV2ServicesDataSourceNew(rand, map[string]string{
-			"ids": `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_service.default.gw_instance_id}",
+			"ids":            []string{"fake-id"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: ApiGatewayV2ServicesDataSourceNew(rand, map[string]string{
-			"name_regex": `"testtf-apigw-*"`,
-			"ids":        `["${alibabacloudstack_api_gateway_v2_service.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_service.default.gw_instance_id}",
+			"name_regex":     "testtf-apigw-*",
+			"ids":            []string{"${alibabacloudstack_api_gateway_v2_service.default.id}"},
 		}),
-		fakeConfig: ApiGatewayV2ServicesDataSourceNew(rand, map[string]string{
-			"name_regex": `"tf-apigw-fakeservice*"`,
-			"ids":        `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_service.default.gw_instance_id}",
+			"name_regex":     "tf-apigw-fakeservice*",
+			"ids":            []string{"fake-id"},
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func ApiGatewayV2ServiceCommonTestCaseNew(rand int) string {
+func dataSourceApiGatewayV2ServicesConfigDependence(name string) string {
 	return fmt.Sprintf(`
-
 variable "name" {
-  default = "testtf-apigw-%d"
+  default = "%s"
 }
 
 %s
@@ -95,21 +104,5 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
 	http_failures = "0"
   }
 }
- `, rand, ApiGatwayV2K8sInstanceTestCase("SCG", "apig_k8s"))
-}
-func ApiGatewayV2ServicesDataSourceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, "  "+k+" = "+v)
-	}
-	config := fmt.Sprintf(`
-%s
-
-data "alibabacloudstack_api_gateway_v2_services" "default" {
-	gw_instance_id = alibabacloudstack_api_gateway_v2_service.default.gw_instance_id
-%s
-}
-`, ApiGatewayV2ServiceCommonTestCaseNew(rand), strings.Join(pairs, "\n"))
-
-	return config
+`, name, ApiGatwayV2K8sInstanceTestCase("SCG", "apig_k8s"))
 }

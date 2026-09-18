@@ -2,62 +2,56 @@ package alibabacloudstack
 
 import (
 	"fmt"
-
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEipsDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
+	resourceId := "data.alibabacloudstack_eips.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccCheckAlibabacloudstackEipsDataSourceConfig%d", rand),
+		dataSourceEipAddressesConfigDependence)
+
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEipsDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_eip.default.0.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_eip.default.0.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEipsDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_eip.default.0.id}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_eip.default.0.id}_fake"},
 		}),
 	}
 
 	ipsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEipsDataSourceConfig(rand, map[string]string{
-			"ip_addresses": `[ "${alibabacloudstack_eip.default.0.ip_address}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ip_addresses": []string{"${alibabacloudstack_eip.default.0.ip_address}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEipsDataSourceConfig(rand, map[string]string{
-			"ip_addresses": `[ "${alibabacloudstack_eip.default.0.ip_address}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ip_addresses": []string{"${alibabacloudstack_eip.default.0.ip_address}_fake"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackEipsDataSourceConfig(rand, map[string]string{
-			"ids":          `[ "${alibabacloudstack_eip.default.0.id}" ]`,
-			"ip_addresses": `[ "${alibabacloudstack_eip.default.0.ip_address}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":          []string{"${alibabacloudstack_eip.default.0.id}"},
+			"ip_addresses": []string{"${alibabacloudstack_eip.default.0.ip_address}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackEipsDataSourceConfig(rand, map[string]string{
-			"ids":          `[ "${alibabacloudstack_eip.default.0.id}" ]`,
-			"ip_addresses": `[ "${alibabacloudstack_eip.default.0.ip_address}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":          []string{"${alibabacloudstack_eip.default.0.id}"},
+			"ip_addresses": []string{"${alibabacloudstack_eip.default.0.ip_address}_fake"},
 		}),
 	}
 
-	dnsEipsCheckInfo.dataSourceTestCheck(t, rand, idsConf, ipsConf, allConf) //tagsConf, allConf)
-
+	dnsEipsCheckInfo.dataSourceTestCheck(t, rand, idsConf, ipsConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackEipsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
+func dataSourceEipAddressesConfigDependence(name string) string {
 	return fmt.Sprintf(`
-
 resource "alibabacloudstack_eip" "default" {
-  name = "tf-testAccCheckAlibabacloudstackEipsDataSourceConfig%d"
+  name = "%s"
   count = 2
   bandwidth = 5
 }
-data "alibabacloudstack_eips" "default" {
-  %s
-}`, rand, strings.Join(pairs, "\n  "))
+`, name)
 }
 
 var existEipsMapFunc = func(rand int) map[string]string {
@@ -71,8 +65,6 @@ var existEipsMapFunc = func(rand int) map[string]string {
 		"eips.0.bandwidth":     "5",
 		"eips.0.instance_id":   "",
 		"eips.0.instance_type": "",
-		//"eips.0.internet_charge_type": string(PayByTraffic),
-		//"eips.0.creation_time":        CHECKSET,
 	}
 }
 

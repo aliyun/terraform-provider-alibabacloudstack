@@ -1,79 +1,67 @@
 package alibabacloudstack
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackExpressconnectPhysicalconnectionsDataSource(t *testing.T) {
+	resourceId := "data.alibabacloudstack_expressconnect_physical_connections.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		"expressconnect-pc",
+		dataSourceExpressconnectPhysicalConnectionsConfigDependence)
 
-	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
-			"ids": `["${data.alibabacloudstack_expressconnect_physical_connections.anyone.ids.0}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
-			"ids": `["${data.alibabacloudstack_expressconnect_physical_connections.anyone.ids.0}_fake"]`,
-		}),
+	existMapFunc := func(rand int) map[string]string {
+		return map[string]string{
+			"connections.#":    "1",
+			"connections.0.id": CHECKSET,
+		}
+	}
+	fakeMapFunc := func(rand int) map[string]string {
+		return map[string]string{
+			"connections.#": "0",
+		}
+	}
+	checkInfo := dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existMapFunc,
+		fakeMapFunc:  fakeMapFunc,
 	}
 
-	nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
-			"name_regex": `"^${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}$"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
-			"name_regex": `"^tf_fake_fake$"`,
-		}),
-	}
-
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
-			"name_regex": `"^${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}$"`,
-			"ids": `["${data.alibabacloudstack_expressconnect_physical_connections.anyone.ids.0}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(map[string]string{
-			"name_regex": `"^${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}_fake$"`,
-			"ids": `["${data.alibabacloudstack_expressconnect_physical_connections.anyone.ids.0}_fake"]`,
-		}),
-	}
-	AlibabacloudstackExpressconnectPhysicalConnectionsCheckInfo.dataSourceTestCheck(t, 0, nameConf)
-	AlibabacloudstackExpressconnectPhysicalConnectionsCheckInfo.dataSourceTestCheck(t, 0, idsConf, nameConf, allConf)
+	checkInfo.dataSourceTestCheck(t, 0,
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${data.alibabacloudstack_expressconnect_physical_connections.anyone.ids.0}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${data.alibabacloudstack_expressconnect_physical_connections.anyone.ids.0}_fake"},
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "^${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}$",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "^tf_fake_fake$",
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "^${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}$",
+				"ids":        []string{"${data.alibabacloudstack_expressconnect_physical_connections.anyone.ids.0}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "^${data.alibabacloudstack_expressconnect_physical_connections.anyone.connections.0.physical_connection_name}_fake$",
+				"ids":        []string{"${data.alibabacloudstack_expressconnect_physical_connections.anyone.ids.0}_fake"},
+			}),
+		},
+	)
 }
 
-var existAlibabacloudstackExpressconnectPhysicalConnectionsMapFunc = func(rand int) map[string]string {
-	return map[string]string{
-		"connections.#":    "1",
-		"connections.0.id": CHECKSET,
-	}
-}
-
-var fakeAlibabacloudstackExpressconnectPhysicalConnectionsMapFunc = func(rand int) map[string]string {
-	return map[string]string{
-		"connections.#": "0",
-	}
-}
-
-var AlibabacloudstackExpressconnectPhysicalConnectionsCheckInfo = dataSourceAttr{
-	resourceId:   "data.alibabacloudstack_expressconnect_physical_connections.default",
-	existMapFunc: existAlibabacloudstackExpressconnectPhysicalConnectionsMapFunc,
-	fakeMapFunc:  fakeAlibabacloudstackExpressconnectPhysicalConnectionsMapFunc,
-}
-
-func testAccCheckAlibabacloudstackExpressconnectPhysicalConnectionsSourceConfig(attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
-
+func dataSourceExpressconnectPhysicalConnectionsConfigDependence(name string) string {
+	return `
 data "alibabacloudstack_expressconnect_physical_connections" "anyone" {
-	name_regex = ".+"
+	name_regex               = ".+"
 	include_reservation_data = false
 }
-
-data "alibabacloudstack_expressconnect_physical_connections" "default" {
-%s
-}
-`, strings.Join(pairs, "\n   "))
-	return config
+`
 }

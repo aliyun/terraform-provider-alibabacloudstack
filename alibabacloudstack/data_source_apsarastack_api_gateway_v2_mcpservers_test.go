@@ -2,13 +2,15 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackApiGatewayV2McpserversDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	resourceId := "data.alibabacloudstack_api_gateway_v2_mcpservers.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tfaccmcp%d", rand),
+		dataSourceApiGatewayV2McpserversConfigDependence)
 
 	// Define the basic test attributes
 	testAcc := &dataSourceAttr{
@@ -34,65 +36,60 @@ func TestAccAlibabacloudStackApiGatewayV2McpserversDataSource_basic(t *testing.T
 	// Run tests using customized test method
 	testAcc.dataSourceTestCheck(t, rand,
 		dataSourceTestAccConfig{
-			existConfig: testAccConfigNew(rand, map[string]string{
-				"name_regex": `"${alibabacloudstack_api_gateway_v2_mcpserver.default.name}"`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"gw_instance_id": "${alibabacloudstack_api_gateway_v2_mcpserver.default.gw_instance_id}",
+				"name_regex":     "${alibabacloudstack_api_gateway_v2_mcpserver.default.name}",
 			}),
-			fakeConfig: testAccConfigNew(rand, map[string]string{
-				"name_regex": `"^fake-name.*$"`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"gw_instance_id": "${alibabacloudstack_api_gateway_v2_mcpserver.default.gw_instance_id}",
+				"name_regex":     "^fake-name.*$",
 			}),
 		},
 		dataSourceTestAccConfig{
-			existConfig: testAccConfigNew(rand, map[string]string{
-				"ids": `["${alibabacloudstack_api_gateway_v2_mcpserver.default.id}"]`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"gw_instance_id": "${alibabacloudstack_api_gateway_v2_mcpserver.default.gw_instance_id}",
+				"ids":            []string{"${alibabacloudstack_api_gateway_v2_mcpserver.default.id}"},
 			}),
-			fakeConfig: testAccConfigNew(rand, map[string]string{
-				"ids": `["fake-id"]`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"gw_instance_id": "${alibabacloudstack_api_gateway_v2_mcpserver.default.gw_instance_id}",
+				"ids":            []string{"fake-id"},
 			}),
 		},
 	)
 }
 
-// Helper function to generate test configurations dynamically based on input attributes
-func testAccConfigNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceApiGatewayV2McpserversConfigDependence(name string) string {
 	return fmt.Sprintf(`
-	variable "name" {
-	  default = "tfaccmcp%d"
-	}
-
-	%s
-
-	resource "alibabacloudstack_api_gateway_v2_domain" "default" {
-	  	domain = "${var.name}.com"
-		instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
-		protocol = "HTTP"
-	}
-
-	resource "alibabacloudstack_api_gateway_v2_service" "default" {
-		name = "${var.name}"
-		service_source_type = "ip"
-		protocol = "HTTP"
-		service_nodes {
-			ip = "192.168.1.1"
-			port = 80
-		}
-		gw_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
-	}
-	resource "alibabacloudstack_api_gateway_v2_mcpserver" "default" {
-	  name             = "${var.name}"
-	  description      = "${var.name}"
-	  type             = "OPEN_API"
-	  service          = "${alibabacloudstack_api_gateway_v2_service.default.service_id}"
-	  domains          = ["${alibabacloudstack_api_gateway_v2_domain.default.domain_id}"]
-	  consumer_auth    = true
-	  gw_instance_id   = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
-	}
-data "alibabacloudstack_api_gateway_v2_mcpservers" "default" {
-  gw_instance_id = "${alibabacloudstack_api_gateway_v2_mcpserver.default.gw_instance_id}"
-  %s
+variable "name" {
+  default = "%s"
 }
-`, rand, ApiGatwayV2K8sInstanceTestCase("HIGRESS", "k8s"), strings.Join(pairs, "\n  "))
+
+%s
+
+resource "alibabacloudstack_api_gateway_v2_domain" "default" {
+  	domain = "${var.name}.com"
+	instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
+	protocol = "HTTP"
+}
+
+resource "alibabacloudstack_api_gateway_v2_service" "default" {
+	name = "${var.name}"
+	service_source_type = "ip"
+	protocol = "HTTP"
+	service_nodes {
+		ip = "192.168.1.1"
+		port = 80
+	}
+	gw_instance_id = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
+}
+resource "alibabacloudstack_api_gateway_v2_mcpserver" "default" {
+  name             = "${var.name}"
+  description      = "${var.name}"
+  type             = "OPEN_API"
+  service          = "${alibabacloudstack_api_gateway_v2_service.default.service_id}"
+  domains          = ["${alibabacloudstack_api_gateway_v2_domain.default.domain_id}"]
+  consumer_auth    = true
+  gw_instance_id   = "${alibabacloudstack_api_gateway_v2_instance.default.id}"
+}
+`, name, ApiGatwayV2K8sInstanceTestCase("HIGRESS", "k8s"))
 }

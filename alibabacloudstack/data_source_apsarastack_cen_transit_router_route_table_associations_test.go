@@ -2,33 +2,34 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackCenTransitRouterTableAssociationsDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_cen_transit_router_route_table_associations.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccRouterTableAssociationsDatasource%d", rand),
+		dataSourceCenTransitRouterRouteTableAssociationsConfigDependence)
+
 	IdsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStacRouterTableAssociationsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cen_transit_router_route_table_association.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"transit_router_route_table_id": "${alibabacloudstack_cen_transit_router_route_table_association.default.transit_router_route_table_id}",
+			"ids":                           []string{"${alibabacloudstack_cen_transit_router_route_table_association.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStacRouterTableAssociationsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cen_transit_router_route_table_association.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"transit_router_route_table_id": "${alibabacloudstack_cen_transit_router_route_table_association.default.transit_router_route_table_id}",
+			"ids":                           []string{"${alibabacloudstack_cen_transit_router_route_table_association.default.id}_fake"},
 		}),
 	}
 
 	RouterTableAssociationsCheckInfo.dataSourceTestCheck(t, rand, IdsConf)
 }
 
-func testAccCheckAlibabacloudStacRouterTableAssociationsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func dataSourceCenTransitRouterRouteTableAssociationsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccRouterTableAssociationsDatasource%d"
+  default = "%s"
 }
 
 %s
@@ -60,13 +61,7 @@ resource "alibabacloudstack_cen_transit_router_route_table_association" "default
 	transit_router_route_table_id = "${data.alibabacloudstack_cen_transit_router_route_tables.default.transit_router_route_tables.0.id}"
 	transit_router_attachment_id = "${alibabacloudstack_cen_transit_router_vpc_attachment.default.transit_router_attachment_id}"
 }
-
-
-data "alibabacloudstack_cen_transit_router_route_table_associations" "default" {
-	transit_router_route_table_id = "${alibabacloudstack_cen_transit_router_route_table_association.default.transit_router_route_table_id}"
-	%s
-}`, rand, VSwitchCommonTestCase, strings.Join(pairs, "\n  "))
-	return config
+`, name, VSwitchCommonTestCase)
 }
 
 var existRouterTableAssociationsMapFunc = func(rand int) map[string]string {

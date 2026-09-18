@@ -2,39 +2,48 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackBmcpSecurityGroupRulesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf_acc_bmcp_sg_rule_%d", rand)
+	resourceId := "data.alibabacloudstack_bcmp_security_group_rules.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf_acc_bmcp_sg_rule_%d", rand),
+		dataSourceBmcpSecurityGroupRulesConfigDependence)
+
 	SecurityGroupIdConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"security_group_id": `"${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"type":            "ingress",
+			"security_group_id": "${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"security_group_id": `"${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"type":            "ingress",
+			"security_group_id": "${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}_fake",
 		}),
 	}
 	IpProtocolConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"ip_protocol":       `"tcp"`,
-			"security_group_id": `"${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"type":            "ingress",
+			"ip_protocol":     "tcp",
+			"security_group_id": "${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"ip_protocol":       `"udp"`,
-			"security_group_id": `"${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"type":            "ingress",
+			"ip_protocol":     "udp",
+			"security_group_id": "${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}",
 		}),
 	}
 	PolicyConf := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"policy":            `"accept"`,
-			"security_group_id": `"${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"type":            "ingress",
+			"policy":          "accept",
+			"security_group_id": "${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name, map[string]string{
-			"policy":            `"drop"`,
-			"security_group_id": `"${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"type":            "ingress",
+			"policy":          "drop",
+			"security_group_id": "${alibabacloudstack_bcmp_security_group_rule.default.security_group_id}",
 		}),
 	}
 
@@ -54,32 +63,21 @@ func TestAccAlibabacloudStackBmcpSecurityGroupRulesDataSource(t *testing.T) {
 	}
 
 	var CheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_bcmp_security_group_rules.default",
+		resourceId:   resourceId,
 		existMapFunc: exisMapFunc,
 		fakeMapFunc:  fakeMapFunc,
 	}
 	CheckInfo.dataSourceTestCheck(t, rand, SecurityGroupIdConf, IpProtocolConf, PolicyConf)
 }
 
-func testAccAlibabacloudStackBmcpSecurityGroupRulesDataSourceConfig(name string, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceBmcpSecurityGroupRulesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
 }
 
 %s
-
-data "alibabacloudstack_bcmp_security_group_rules" "default" {
-  type = "ingress"
-  %s
-
-}
-`, name, BmcpSecurityGroupCommonTestCase, strings.Join(pairs, "\n  "))
-	return config
+`, name, BmcpSecurityGroupCommonTestCase)
 }
 
 var BmcpSecurityGroupCommonTestCase = `

@@ -2,62 +2,56 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackVpngatewayCustomergatewaiesDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_vpn_customer_gateways.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccVpnCgwNameDataResource%d", rand),
+		dataSourceVpnCustomerGatewaysConfigDependence)
+
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVpnCustomerGatewaysConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_vpn_customer_gateway.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_vpn_customer_gateway.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVpnCustomerGatewaysConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_vpn_customer_gateway.default.id}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_vpn_customer_gateway.default.id}_fake"},
 		}),
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVpnCustomerGatewaysConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vpn_customer_gateway.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vpn_customer_gateway.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVpnCustomerGatewaysConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vpn_customer_gateway.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vpn_customer_gateway.default.name}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVpnCustomerGatewaysConfig(rand, map[string]string{
-			"ids":        `[ "${alibabacloudstack_vpn_customer_gateway.default.id}" ]`,
-			"name_regex": `"${alibabacloudstack_vpn_customer_gateway.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_vpn_customer_gateway.default.id}"},
+			"name_regex": "${alibabacloudstack_vpn_customer_gateway.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVpnCustomerGatewaysConfig(rand, map[string]string{
-			"ids":        `[ "${alibabacloudstack_vpn_customer_gateway.default.id}" ]`,
-			"name_regex": `"${alibabacloudstack_vpn_customer_gateway.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":        []string{"${alibabacloudstack_vpn_customer_gateway.default.id}"},
+			"name_regex": "${alibabacloudstack_vpn_customer_gateway.default.name}_fake",
 		}),
 	}
 
 	vpnCustomerGatewaysCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackVpnCustomerGatewaysConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func dataSourceVpnCustomerGatewaysConfigDependence(name string) string {
+	return fmt.Sprintf(`
 resource "alibabacloudstack_vpn_customer_gateway" "default" {
-	name = "tf-testAccVpnCgwNameDataResource%d"
+	name = "%s"
 	ip_address = "40.104.22.228"
-	description = "tf-testAccVpnCgwNameDataResource%d"
+	description = "%s"
 }
-
-data "alibabacloudstack_vpn_customer_gateways" "default" {
-	%s
-}
-`, rand, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name, name)
 }
 
 var existVpnCustomerGatewaysMapFunc = func(rand int) map[string]string {

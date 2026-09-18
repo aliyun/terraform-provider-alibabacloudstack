@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackBmsKeypairsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_bms_keypairs.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-bms-keypair%d", rand),
+		dataSourceBmsKeypairsConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_bms_keypairs.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"keypairs.#":                      CHECKSET,
@@ -29,54 +33,45 @@ func TestAccAlibabacloudStackBmsKeypairsDataSource(t *testing.T) {
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: BmsKeypairDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_bms_keypair.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_bms_keypair.default.name}",
 		}),
-		fakeConfig: BmsKeypairDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_bms_keypair.default.name}fake-name"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_bms_keypair.default.name}fake-name",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: BmsKeypairDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_bms_keypair.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_bms_keypair.default.id}"},
 		}),
-		fakeConfig: BmsKeypairDependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_bms_keypair.default.id}fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_bms_keypair.default.id}fake-id"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: BmsKeypairDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_bms_keypair.default.name}"`,
-			"ids":        `["${alibabacloudstack_bms_keypair.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_bms_keypair.default.name}",
+			"ids":        []string{"${alibabacloudstack_bms_keypair.default.id}"},
 		}),
-		fakeConfig: BmsKeypairDependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_bms_keypair.default.name}fake-name"`,
-			"ids":        `["${alibabacloudstack_bms_keypair.default.id}fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_bms_keypair.default.name}fake-name",
+			"ids":        []string{"${alibabacloudstack_bms_keypair.default.id}fake-id"},
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-// Dependence template generation method
-func BmsKeypairDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceBmsKeypairsConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-bms-keypair%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_bms_keypair" "default" {
   name = "${var.name}"
 }
-
-data "alibabacloudstack_bms_keypairs" "default" {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
+`, name)
 }

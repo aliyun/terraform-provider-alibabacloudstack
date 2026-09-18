@@ -2,13 +2,15 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackDnsRecursorAclsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_dns_recursor_acls.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tfacc%d", rand),
+		dataSourceDnsRecursorAclsConfigDependence)
 
 	testAcc := dataSourceAttr{
 		resourceId: resourceId,
@@ -31,45 +33,41 @@ func TestAccAlibabacloudStackDnsRecursorAclsDataSource(t *testing.T) {
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: AlibabacloudTestAccDnsRecursorAcldependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_dns_recursor_acl.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_dns_recursor_acl.default.name}",
 		}),
-		fakeConfig: AlibabacloudTestAccDnsRecursorAcldependenceNew(rand, map[string]string{
-			"name_regex": `"^fake-name.*"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^fake-name.*",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: AlibabacloudTestAccDnsRecursorAcldependenceNew(rand, map[string]string{
-			"ids": `["${alibabacloudstack_dns_recursor_acl.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_dns_recursor_acl.default.id}"},
 		}),
-		fakeConfig: AlibabacloudTestAccDnsRecursorAcldependenceNew(rand, map[string]string{
-			"ids": `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake-id"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: AlibabacloudTestAccDnsRecursorAcldependenceNew(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_dns_recursor_acl.default.name}"`,
-			"ids":        `["${alibabacloudstack_dns_recursor_acl.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_dns_recursor_acl.default.name}",
+			"ids":        []string{"${alibabacloudstack_dns_recursor_acl.default.id}"},
 		}),
-		fakeConfig: AlibabacloudTestAccDnsRecursorAcldependenceNew(rand, map[string]string{
-			"name_regex": `"^fake-name.*"`,
-			"ids":        `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^fake-name.*",
+			"ids":        []string{"fake-id"},
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func AlibabacloudTestAccDnsRecursorAcldependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceDnsRecursorAclsConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-    default = "tfacc%d"
+    default = "%s"
 }
 
 resource "alibabacloudstack_dns_line" "ipv4" {
@@ -83,9 +81,5 @@ resource "alibabacloudstack_dns_recursor_acl" "default" {
     policy   = "ALLOW"
     line_ids = ["${alibabacloudstack_dns_line.ipv4.id}"]
 }
-
-data "alibabacloudstack_dns_recursor_acls" "default" {
-    %s
-}
-`, rand, strings.Join(pairs, "\n    "))
+`, name)
 }

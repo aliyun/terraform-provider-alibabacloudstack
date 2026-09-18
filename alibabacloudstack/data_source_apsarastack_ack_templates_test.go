@@ -3,63 +3,62 @@ package alibabacloudstack
 import (
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackAckTemplatesDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_ack_templates.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccAckTemplatesDatasource%d", rand),
+		dataSourceAckTemplatesConfigDependence)
+
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackAckTemplatesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_ack_template.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_ack_template.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAckTemplatesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_ack_template.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_ack_template.default.name}_fake",
 		}),
 	}
 	IdsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackAckTemplatesDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_ack_template.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ack_template.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAckTemplatesDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_ack_template.default.id}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_ack_template.default.id}_fake"},
 		}),
 	}
 
 	descriptionConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackAckTemplatesDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_ack_template.default.description}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "${alibabacloudstack_ack_template.default.description}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAckTemplatesDataSourceConfig(rand, map[string]string{
-			"description_regex": `"${alibabacloudstack_ack_template.default.description}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"description_regex": "${alibabacloudstack_ack_template.default.description}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackAckTemplatesDataSourceConfig(rand, map[string]string{
-			"name_regex":        `"${alibabacloudstack_ack_template.default.name}"`,
-			"description_regex": `"${alibabacloudstack_ack_template.default.description}"`,
-			"ids":               `[ "${alibabacloudstack_ack_template.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex":        "${alibabacloudstack_ack_template.default.name}",
+			"description_regex": "${alibabacloudstack_ack_template.default.description}",
+			"ids":               []string{"${alibabacloudstack_ack_template.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackAckTemplatesDataSourceConfig(rand, map[string]string{
-			"name_regex":        `"${alibabacloudstack_ack_template.default.name}"`,
-			"ids":               `[ "${alibabacloudstack_ack_template.default.id}" ]`,
-			"description_regex": `"${alibabacloudstack_ack_template.default.description}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex":        "${alibabacloudstack_ack_template.default.name}",
+			"ids":               []string{"${alibabacloudstack_ack_template.default.id}"},
+			"description_regex": "${alibabacloudstack_ack_template.default.description}_fake",
 		}),
 	}
 
 	AckTemplatesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, IdsConf, descriptionConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackAckTemplatesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func dataSourceAckTemplatesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccAckTemplatesDatasource%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_ack_template" "default" {
@@ -94,11 +93,7 @@ resource "alibabacloudstack_ack_template" "default" {
 	description="${var.name}"
 	template_type="kubernetes"
 }
-
-data "alibabacloudstack_ack_templates" "default" {
-	%s
-}`, rand, os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"), strings.Join(pairs, "\n  "))
-	return config
+`, name, os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"))
 }
 
 var existAckTemplatesMapFunc = func(rand int) map[string]string {

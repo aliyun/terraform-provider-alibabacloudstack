@@ -2,20 +2,23 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackDatahubProjectsDataSource(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_datahub_projects.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf_testdatahubrojects%d", rand),
+		dataSourceDatahubProjectsConfigDependence)
 
 	nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackDatahubProjectsSourceConfig(rand, map[string]string{
-			"name_regex":`"^${alibabacloudstack_datahub_project.default.name}$"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^${alibabacloudstack_datahub_project.default.name}$",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackDatahubProjectsSourceConfig(rand, map[string]string{
-			"name_regex": `"^${alibabacloudstack_datahub_project.default.name}_fake$"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^${alibabacloudstack_datahub_project.default.name}_fake$",
 		}),
 	}
 
@@ -24,7 +27,7 @@ func TestAccAlibabacloudStackDatahubProjectsDataSource(t *testing.T) {
 
 var existAlibabacloudstackDatahubProjectsMapFunc = func(rand int) map[string]string {
 	return map[string]string{
-		"projects.#":    "1",
+		"projects.#":      "1",
 		"projects.0.name": CHECKSET,
 	}
 }
@@ -41,24 +44,15 @@ var AlibabacloudstackDatahubProjectsCheckInfo = dataSourceAttr{
 	fakeMapFunc:  fakeAlibabacloudstackDatahubProjectsMapFunc,
 }
 
-func testAccCheckAlibabacloudstackDatahubProjectsSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceDatahubProjectsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf_testdatahubrojects%d"
+	default = "%s"
 }
 
 resource "alibabacloudstack_datahub_project" "default" {
     comment = "test"
     name = var.name
 }
-
-data "alibabacloudstack_datahub_projects" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n   "))
-	return config
+`, name)
 }

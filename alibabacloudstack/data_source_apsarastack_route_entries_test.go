@@ -2,89 +2,84 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudstackRouteEntriesDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
+	resourceId := "data.alibabacloudstack_route_entries.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccRouteEntryConfigNameDatasource%d", rand),
+		dataSourceRouteEntriesConfigDependence)
 
 	instanceIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand, map[string]string{
-			"instance_id":    `"${alibabacloudstack_route_entry.default.nexthop_id}"`,
-			"route_table_id": `"${alibabacloudstack_route_entry.default.route_table_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id":    "${alibabacloudstack_route_entry.default.nexthop_id}",
+			"route_table_id": "${alibabacloudstack_route_entry.default.route_table_id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand, map[string]string{
-			"instance_id":    `"${alibabacloudstack_route_entry.default.nexthop_id}"`,
-			"route_table_id": `"${alibabacloudstack_route_entry.default.route_table_id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id":    "${alibabacloudstack_route_entry.default.nexthop_id}",
+			"route_table_id": "${alibabacloudstack_route_entry.default.route_table_id}_fake",
 		}),
 	}
 
 	typeConfig := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand, map[string]string{
-			"instance_id":    `"${alibabacloudstack_route_entry.default.nexthop_id}"`,
-			"route_table_id": `"${alibabacloudstack_route_entry.default.route_table_id}"`,
-			"type":           `"Custom"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id":    "${alibabacloudstack_route_entry.default.nexthop_id}",
+			"route_table_id": "${alibabacloudstack_route_entry.default.route_table_id}",
+			"type":           "Custom",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand, map[string]string{
-			"instance_id":    `"${alibabacloudstack_route_entry.default.nexthop_id}"`,
-			"route_table_id": `"${alibabacloudstack_route_entry.default.route_table_id}"`,
-			"type":           `"System"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id":    "${alibabacloudstack_route_entry.default.nexthop_id}",
+			"route_table_id": "${alibabacloudstack_route_entry.default.route_table_id}",
+			"type":           "System",
 		}),
 	}
 
 	cidrBlockConfig := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand, map[string]string{
-			"route_table_id": `"${alibabacloudstack_route_entry.default.route_table_id}"`,
-			"cidr_block":     `"${alibabacloudstack_route_entry.default.destination_cidrblock}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"route_table_id": "${alibabacloudstack_route_entry.default.route_table_id}",
+			"cidr_block":     "${alibabacloudstack_route_entry.default.destination_cidrblock}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand, map[string]string{
-			"route_table_id": `"${alibabacloudstack_route_entry.default.route_table_id}"`,
-			"cidr_block":     `"${alibabacloudstack_route_entry.default.destination_cidrblock}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"route_table_id": "${alibabacloudstack_route_entry.default.route_table_id}",
+			"cidr_block":     "${alibabacloudstack_route_entry.default.destination_cidrblock}_fake",
 		}),
 	}
 
 	allConfig := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand, map[string]string{
-			"instance_id":    `"${alibabacloudstack_ecs_instance.default.id}"`,
-			"route_table_id": `"${alibabacloudstack_route_entry.default.route_table_id}"`,
-			"type":           `"Custom"`,
-			"cidr_block":     `"${alibabacloudstack_route_entry.default.destination_cidrblock}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id":    "${alibabacloudstack_ecs_instance.default.id}",
+			"route_table_id": "${alibabacloudstack_route_entry.default.route_table_id}",
+			"type":           "Custom",
+			"cidr_block":     "${alibabacloudstack_route_entry.default.destination_cidrblock}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand, map[string]string{
-			"instance_id":    `"${alibabacloudstack_ecs_instance.default.id}"`,
-			"route_table_id": `"${alibabacloudstack_route_entry.default.route_table_id}"`,
-			"type":           `"Custom"`,
-			"cidr_block":     `"${alibabacloudstack_route_entry.default.destination_cidrblock}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id":    "${alibabacloudstack_ecs_instance.default.id}",
+			"route_table_id": "${alibabacloudstack_route_entry.default.route_table_id}",
+			"type":           "Custom",
+			"cidr_block":     "${alibabacloudstack_route_entry.default.destination_cidrblock}_fake",
 		}),
 	}
 
 	routeEntriesCheckInfo.dataSourceTestCheck(t, rand, instanceIdConf, typeConfig, cidrBlockConfig, allConfig)
 }
 
-func testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
-
+func dataSourceRouteEntriesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccRouteEntryConfigNameDatasource%d"
-	}
+	default = "%s"
+}
 
 %s
+
 resource "alibabacloudstack_route_entry" "default" {
    route_table_id = "${alibabacloudstack_vpc_vpc.default.route_table_id}"
    destination_cidrblock = "172.11.1.1/32"
    nexthop_type = "Instance"
    nexthop_id = "${alibabacloudstack_ecs_instance.default.id}"
 }
-data "alibabacloudstack_route_entries" "default" {
-  %s
-}`, rand, ECSInstanceCommonTestCase, strings.Join(pairs, "\n  "))
-	return config
+`, name, ECSInstanceCommonTestCase)
 }
 
 var existRouteEntriesMapFunc = func(rand int) map[string]string {

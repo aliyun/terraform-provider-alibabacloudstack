@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackbmsMachineTypesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_bms_machinetypes.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccBmsMachineTypes%d", rand),
+		dataSourceBmsMachineTypesConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_bms_machinetypes.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"machinetypes.#":             CHECKSET,
@@ -27,46 +31,37 @@ func TestAccAlibabacloudStackbmsMachineTypesDataSource(t *testing.T) {
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: bmsMachineTypesDependenceNew(rand, map[string]string{
-			"name_regex": `"PG"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "PG",
 		}),
-		fakeConfig: bmsMachineTypesDependenceNew(rand, map[string]string{
-			"name_regex": `"fake-name"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "fake-name",
 		}),
 	}
 
 	archRegexConf := dataSourceTestAccConfig{
-		existConfig: bmsMachineTypesDependenceNew(rand, map[string]string{
-			"arch_regex": `"x86"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"arch_regex": "x86",
 		}),
-		fakeConfig: bmsMachineTypesDependenceNew(rand, map[string]string{
-			"arch_regex": `"fake-arch"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"arch_regex": "fake-arch",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: bmsMachineTypesDependenceNew(rand, map[string]string{
-			"name_regex": `"PG"`,
-			"arch_regex": `"x86"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "PG",
+			"arch_regex": "x86",
 		}),
-		fakeConfig: bmsMachineTypesDependenceNew(rand, map[string]string{
-			"name_regex": `"fake-name"`,
-			"arch_regex": `"fake-arch"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "fake-name",
+			"arch_regex": "fake-arch",
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, archRegexConf, allConf)
 }
 
-// Dependence template generation method
-func bmsMachineTypesDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	return fmt.Sprintf(`
-data "alibabacloudstack_bms_machinetypes" "default" {
-  %s
-}
-`, strings.Join(pairs, "\n  "))
+func dataSourceBmsMachineTypesConfigDependence(name string) string {
+	return fmt.Sprintf(``)
 }

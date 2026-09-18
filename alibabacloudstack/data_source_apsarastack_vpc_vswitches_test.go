@@ -2,105 +2,103 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackVpcVswitchesDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_vswitches.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccVSwitchDatasource%d", rand),
+		dataSourceVpcVswitchesConfigDependence)
+
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}_fake",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_vswitch.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_vswitch.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_vswitch.default.id}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_vswitch.default.id}_fake"},
 		}),
 	}
 
 	cidrBlockConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
-			"cidr_block": `"172.16.0.0/24"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
+			"cidr_block": "172.16.0.0/24",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
-			"cidr_block": `"172.16.0.0/23"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
+			"cidr_block": "172.16.0.0/23",
 		}),
 	}
 	idDefaultConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
-			"is_default": `"false"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
+			"is_default": "false",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
-			"is_default": `"true"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
+			"is_default": "true",
 		}),
 	}
 
 	vpcIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
-			"vpc_id":     `"${alibabacloudstack_vpc.default.id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
+			"vpc_id":     "${alibabacloudstack_vpc.default.id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
-			"vpc_id":     `"${alibabacloudstack_vpc.default.id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
+			"vpc_id":     "${alibabacloudstack_vpc.default.id}_fake",
 		}),
 	}
 
 	zoneIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
-			"zone_id":    `"${data.alibabacloudstack_zones.default.zones.0.id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
+			"zone_id":    "${data.alibabacloudstack_zones.default.zones.0.id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
-			"zone_id":    `"${data.alibabacloudstack_zones.default.zones.0.id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
+			"zone_id":    "${data.alibabacloudstack_zones.default.zones.0.id}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
-			"ids":        `[ "${alibabacloudstack_vswitch.default.id}" ]`,
-			"cidr_block": `"172.16.0.0/24"`,
-			"is_default": `"false"`,
-			"vpc_id":     `"${alibabacloudstack_vpc.default.id}"`,
-			"zone_id":    `"${data.alibabacloudstack_zones.default.zones.0.id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
+			"ids":        []string{"${alibabacloudstack_vswitch.default.id}"},
+			"cidr_block": "172.16.0.0/24",
+			"is_default": "false",
+			"vpc_id":     "${alibabacloudstack_vpc.default.id}",
+			"zone_id":    "${data.alibabacloudstack_zones.default.zones.0.id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,
-			"ids":        `[ "${alibabacloudstack_vswitch.default.id}" ]`,
-			"cidr_block": `"172.16.0.0/24"`,
-			"is_default": `"false"`,
-			"vpc_id":     `"${alibabacloudstack_vpc.default.id}"`,
-			"zone_id":    `"${data.alibabacloudstack_zones.default.zones.0.id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vswitch.default.name}",
+			"ids":        []string{"${alibabacloudstack_vswitch.default.id}"},
+			"cidr_block": "172.16.0.0/24",
+			"is_default": "false",
+			"vpc_id":     "${alibabacloudstack_vpc.default.id}",
+			"zone_id":    "${data.alibabacloudstack_zones.default.zones.0.id}_fake",
 		}),
 	}
 
 	vswitchesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, cidrBlockConf, idDefaultConf, vpcIdConf, zoneIdConf, allConf)
-
 }
 
-func testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func dataSourceVpcVswitchesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccVSwitchDatasource%d"
+  default = "%s"
 }
 data "alibabacloudstack_zones" "default" {}
 
@@ -114,13 +112,8 @@ resource "alibabacloudstack_vswitch" "default" {
   cidr_block = "172.16.0.0/24"
   vpc_id = "${alibabacloudstack_vpc.default.id}"
   availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  
 }
-
-data "alibabacloudstack_vswitches" "default" {
-	%s
-}`, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name)
 }
 
 var existVSwitchesMapFunc = func(rand int) map[string]string {

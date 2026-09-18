@@ -2,134 +2,136 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackNatgatewayForwardEntriesDataSource(t *testing.T) {
-
 	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_natgateway_forward_entries.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAlibabacloudstackNatgatewayForwardEntries%d", rand),
+		dataSourceNatgatewayForwardEntriesConfigDependence)
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_natgateway_forward_entries.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_natgateway_forward_entries.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_natgateway_forward_entries.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_natgateway_forward_entries.default.id}_fake"},
 		}),
 	}
 
 	external_ipConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_natgateway_forward_entries.default.id}"]`,
-			"external_ip": `"${alibabacloudstack_natgateway_forward_entries.default.ExternalIp}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":         []string{"${alibabacloudstack_natgateway_forward_entries.default.id}"},
+			"external_ip": "${alibabacloudstack_natgateway_forward_entries.default.ExternalIp}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_natgateway_forward_entries.default.id}_fake"]`,
-			"external_ip": `"${alibabacloudstack_natgateway_forward_entries.default.ExternalIp}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":         []string{"${alibabacloudstack_natgateway_forward_entries.default.id}_fake"},
+			"external_ip": "${alibabacloudstack_natgateway_forward_entries.default.ExternalIp}_fake",
 		}),
 	}
 
 	external_portConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":           `["${alibabacloudstack_natgateway_forward_entries.default.id}"]`,
-			"external_port": `"${alibabacloudstack_natgateway_forward_entries.default.ExternalPort}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":           []string{"${alibabacloudstack_natgateway_forward_entries.default.id}"},
+			"external_port": "${alibabacloudstack_natgateway_forward_entries.default.ExternalPort}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":           `["${alibabacloudstack_natgateway_forward_entries.default.id}_fake"]`,
-			"external_port": `"${alibabacloudstack_natgateway_forward_entries.default.ExternalPort}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":           []string{"${alibabacloudstack_natgateway_forward_entries.default.id}_fake"},
+			"external_port": "${alibabacloudstack_natgateway_forward_entries.default.ExternalPort}_fake",
 		}),
 	}
 
 	forward_entry_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":              `["${alibabacloudstack_natgateway_forward_entries.default.id}"]`,
-			"forward_entry_id": `"${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryId}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_natgateway_forward_entries.default.id}"},
+			"forward_entry_id": "${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryId}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":              `["${alibabacloudstack_natgateway_forward_entries.default.id}_fake"]`,
-			"forward_entry_id": `"${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryId}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_natgateway_forward_entries.default.id}_fake"},
+			"forward_entry_id": "${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryId}_fake",
 		}),
 	}
 
 	forward_entry_nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":                `["${alibabacloudstack_natgateway_forward_entries.default.id}"]`,
-			"forward_entry_name": `"${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryName}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":                []string{"${alibabacloudstack_natgateway_forward_entries.default.id}"},
+			"forward_entry_name": "${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryName}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":                `["${alibabacloudstack_natgateway_forward_entries.default.id}_fake"]`,
-			"forward_entry_name": `"${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryName}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":                []string{"${alibabacloudstack_natgateway_forward_entries.default.id}_fake"},
+			"forward_entry_name": "${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryName}_fake",
 		}),
 	}
 
 	forward_table_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":              `["${alibabacloudstack_natgateway_forward_entries.default.id}"]`,
-			"forward_table_id": `"${alibabacloudstack_natgateway_forward_entries.default.ForwardTableId}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_natgateway_forward_entries.default.id}"},
+			"forward_table_id": "${alibabacloudstack_natgateway_forward_entries.default.ForwardTableId}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":              `["${alibabacloudstack_natgateway_forward_entries.default.id}_fake"]`,
-			"forward_table_id": `"${alibabacloudstack_natgateway_forward_entries.default.ForwardTableId}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_natgateway_forward_entries.default.id}_fake"},
+			"forward_table_id": "${alibabacloudstack_natgateway_forward_entries.default.ForwardTableId}_fake",
 		}),
 	}
 
 	internal_ipConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_natgateway_forward_entries.default.id}"]`,
-			"internal_ip": `"${alibabacloudstack_natgateway_forward_entries.default.InternalIp}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":         []string{"${alibabacloudstack_natgateway_forward_entries.default.id}"},
+			"internal_ip": "${alibabacloudstack_natgateway_forward_entries.default.InternalIp}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_natgateway_forward_entries.default.id}_fake"]`,
-			"internal_ip": `"${alibabacloudstack_natgateway_forward_entries.default.InternalIp}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":         []string{"${alibabacloudstack_natgateway_forward_entries.default.id}_fake"},
+			"internal_ip": "${alibabacloudstack_natgateway_forward_entries.default.InternalIp}_fake",
 		}),
 	}
 
 	internal_portConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":           `["${alibabacloudstack_natgateway_forward_entries.default.id}"]`,
-			"internal_port": `"${alibabacloudstack_natgateway_forward_entries.default.InternalPort}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":           []string{"${alibabacloudstack_natgateway_forward_entries.default.id}"},
+			"internal_port": "${alibabacloudstack_natgateway_forward_entries.default.InternalPort}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":           `["${alibabacloudstack_natgateway_forward_entries.default.id}_fake"]`,
-			"internal_port": `"${alibabacloudstack_natgateway_forward_entries.default.InternalPort}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":           []string{"${alibabacloudstack_natgateway_forward_entries.default.id}_fake"},
+			"internal_port": "${alibabacloudstack_natgateway_forward_entries.default.InternalPort}_fake",
 		}),
 	}
 
 	ip_protocolConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_natgateway_forward_entries.default.id}"]`,
-			"ip_protocol": `"${alibabacloudstack_natgateway_forward_entries.default.IpProtocol}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":         []string{"${alibabacloudstack_natgateway_forward_entries.default.id}"},
+			"ip_protocol": "${alibabacloudstack_natgateway_forward_entries.default.IpProtocol}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_natgateway_forward_entries.default.id}_fake"]`,
-			"ip_protocol": `"${alibabacloudstack_natgateway_forward_entries.default.IpProtocol}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":         []string{"${alibabacloudstack_natgateway_forward_entries.default.id}_fake"},
+			"ip_protocol": "${alibabacloudstack_natgateway_forward_entries.default.IpProtocol}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_natgateway_forward_entries.default.id}"]`,
-
-			"external_ip":        `"${alibabacloudstack_natgateway_forward_entries.default.ExternalIp}"`,
-			"external_port":      `"${alibabacloudstack_natgateway_forward_entries.default.ExternalPort}"`,
-			"forward_entry_id":   `"${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryId}"`,
-			"forward_entry_name": `"${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryName}"`,
-			"forward_table_id":   `"${alibabacloudstack_natgateway_forward_entries.default.ForwardTableId}"`,
-			"internal_ip":        `"${alibabacloudstack_natgateway_forward_entries.default.InternalIp}"`,
-			"internal_port":      `"${alibabacloudstack_natgateway_forward_entries.default.InternalPort}"`,
-			"ip_protocol":        `"${alibabacloudstack_natgateway_forward_entries.default.IpProtocol}"`}),
-		fakeConfig: testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_natgateway_forward_entries.default.id}_fake"]`,
-
-			"external_ip":        `"${alibabacloudstack_natgateway_forward_entries.default.ExternalIp}_fake"`,
-			"external_port":      `"${alibabacloudstack_natgateway_forward_entries.default.ExternalPort}_fake"`,
-			"forward_entry_id":   `"${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryId}_fake"`,
-			"forward_entry_name": `"${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryName}_fake"`,
-			"forward_table_id":   `"${alibabacloudstack_natgateway_forward_entries.default.ForwardTableId}_fake"`,
-			"internal_ip":        `"${alibabacloudstack_natgateway_forward_entries.default.InternalIp}_fake"`,
-			"internal_port":      `"${alibabacloudstack_natgateway_forward_entries.default.InternalPort}_fake"`,
-			"ip_protocol":        `"${alibabacloudstack_natgateway_forward_entries.default.IpProtocol}_fake"`}),
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":                []string{"${alibabacloudstack_natgateway_forward_entries.default.id}"},
+			"external_ip":        "${alibabacloudstack_natgateway_forward_entries.default.ExternalIp}",
+			"external_port":      "${alibabacloudstack_natgateway_forward_entries.default.ExternalPort}",
+			"forward_entry_id":   "${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryId}",
+			"forward_entry_name": "${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryName}",
+			"forward_table_id":   "${alibabacloudstack_natgateway_forward_entries.default.ForwardTableId}",
+			"internal_ip":        "${alibabacloudstack_natgateway_forward_entries.default.InternalIp}",
+			"internal_port":      "${alibabacloudstack_natgateway_forward_entries.default.InternalPort}",
+			"ip_protocol":        "${alibabacloudstack_natgateway_forward_entries.default.IpProtocol}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":                []string{"${alibabacloudstack_natgateway_forward_entries.default.id}_fake"},
+			"external_ip":        "${alibabacloudstack_natgateway_forward_entries.default.ExternalIp}_fake",
+			"external_port":      "${alibabacloudstack_natgateway_forward_entries.default.ExternalPort}_fake",
+			"forward_entry_id":   "${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryId}_fake",
+			"forward_entry_name": "${alibabacloudstack_natgateway_forward_entries.default.ForwardEntryName}_fake",
+			"forward_table_id":   "${alibabacloudstack_natgateway_forward_entries.default.ForwardTableId}_fake",
+			"internal_ip":        "${alibabacloudstack_natgateway_forward_entries.default.InternalIp}_fake",
+			"internal_port":      "${alibabacloudstack_natgateway_forward_entries.default.InternalPort}_fake",
+			"ip_protocol":        "${alibabacloudstack_natgateway_forward_entries.default.IpProtocol}_fake",
+		}),
 	}
 
 	AlibabacloudstackNatgatewayForwardEntriesCheckInfo.dataSourceTestCheck(t, rand, idsConf, external_ipConf, external_portConf, forward_entry_idConf, forward_entry_nameConf, forward_table_idConf, internal_ipConf, internal_portConf, ip_protocolConf, allConf)
@@ -154,24 +156,10 @@ var AlibabacloudstackNatgatewayForwardEntriesCheckInfo = dataSourceAttr{
 	fakeMapFunc:  fakeAlibabacloudstackNatgatewayForwardEntriesMapFunc,
 }
 
-func testAccCheckAlibabacloudstackNatgatewayForwardEntriesSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceNatgatewayForwardEntriesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackNatgatewayForwardEntries%d"
+	default = "%s"
 }
-
-
-
-
-
-
-data "alibabacloudstack_natgateway_forward_entries" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n   "))
-	return config
+`, name)
 }

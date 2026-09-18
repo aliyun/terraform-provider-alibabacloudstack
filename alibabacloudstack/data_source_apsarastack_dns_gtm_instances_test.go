@@ -2,13 +2,15 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackDnsGtmInstancesDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_dns_gtm_instances.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tfacc%d", rand),
+		dataSourceDnsGtmInstancesConfigDependence)
 
 	testAcc := dataSourceAttr{
 		resourceId: resourceId,
@@ -31,45 +33,41 @@ func TestAccAlibabacloudStackDnsGtmInstancesDataSource_basic(t *testing.T) {
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccDnsGtmInstancesConfigDependence(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_dns_gtm_instance.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_dns_gtm_instance.default.name}",
 		}),
-		fakeConfig: testAccDnsGtmInstancesConfigDependence(rand, map[string]string{
-			"name_regex": `"^fake-name$"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "^fake-name$",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccDnsGtmInstancesConfigDependence(rand, map[string]string{
-			"ids": `["${alibabacloudstack_dns_gtm_instance.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_dns_gtm_instance.default.id}"},
 		}),
-		fakeConfig: testAccDnsGtmInstancesConfigDependence(rand, map[string]string{
-			"ids": `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"fake-id"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccDnsGtmInstancesConfigDependence(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_dns_gtm_instance.default.name}"`,
-			"ids":        `["${alibabacloudstack_dns_gtm_instance.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_dns_gtm_instance.default.name}",
+			"ids":        []string{"${alibabacloudstack_dns_gtm_instance.default.id}"},
 		}),
-		fakeConfig: testAccDnsGtmInstancesConfigDependence(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_dns_gtm_instance.default.name}"`,
-			"ids":        `["fake-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_dns_gtm_instance.default.name}",
+			"ids":        []string{"fake-id"},
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
-func testAccDnsGtmInstancesConfigDependence(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceDnsGtmInstancesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-	default = "tfacc%d"
+	default = "%s"
 }
 
 resource "alibabacloudstack_vpc_vpc" "default" {
@@ -91,9 +89,5 @@ resource "alibabacloudstack_dns_gtm_instance" "default" {
 	zone_id = "${alibabacloudstack_dns_private_domain.default.id}"
 	ttl     = 300
 }
-
-data "alibabacloudstack_dns_gtm_instances" "default" {
-	%s
-}
-`, rand, strings.Join(pairs, "\n   "))
+`, name)
 }

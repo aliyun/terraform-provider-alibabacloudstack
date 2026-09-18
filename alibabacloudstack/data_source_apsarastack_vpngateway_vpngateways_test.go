@@ -2,13 +2,16 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackVpnGatewaysDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	resourceId := "data.alibabacloudstack_vpn_gateways.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccVpcGatewayConfig%d", rand),
+		dataSourceVpnGatewaysConfigDependence)
+
 	var vpnGatewaysCheckInfo = dataSourceAttr{
 		resourceId:   resourceId,
 		existMapFunc: existVpnGatewaysMapFunc,
@@ -18,84 +21,79 @@ func TestAccAlibabacloudStackVpnGatewaysDataSourceBasic(t *testing.T) {
 		},
 	}
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_vpn_gateway.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_vpn_gateway.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"ids": `[ "${alibabacloudstack_vpn_gateway.default.id}_fake" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_vpn_gateway.default.id}_fake"},
 		}),
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vpn_gateway.default.name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vpn_gateway.default.name}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vpn_gateway.default.name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vpn_gateway.default.name}_fake",
 		}),
 	}
 
 	vpcIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"vpc_id": `"${alibabacloudstack_vpn_gateway.default.vpc_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"vpc_id": "${alibabacloudstack_vpn_gateway.default.vpc_id}",
 		}),
 
-		fakeConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"vpc_id": `"${alibabacloudstack_vpn_gateway.default.vpc_id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"vpc_id": "${alibabacloudstack_vpn_gateway.default.vpc_id}_fake",
 		}),
 	}
 
 	statusConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vpn_gateway.default.name}"`,
-			"status":     `"Active"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vpn_gateway.default.name}",
+			"status":     "Active",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_vpn_gateway.default.name}"`,
-			"status":     `"Init"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_vpn_gateway.default.name}",
+			"status":     "Init",
 		}),
 	}
 
 	businessStatusConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"name_regex":      `"${alibabacloudstack_vpn_gateway.default.name}"`,
-			"business_status": `"Normal"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex":      "${alibabacloudstack_vpn_gateway.default.name}",
+			"business_status": "Normal",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"name_regex":      `"${alibabacloudstack_vpn_gateway.default.name}"`,
-			"business_status": `"FinancialLocked"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex":      "${alibabacloudstack_vpn_gateway.default.name}",
+			"business_status": "FinancialLocked",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"ids":             `[ "${alibabacloudstack_vpn_gateway.default.id}" ]`,
-			"name_regex":      `"${alibabacloudstack_vpn_gateway.default.name}"`,
-			"vpc_id":          `"${alibabacloudstack_vpn_gateway.default.vpc_id}"`,
-			"status":          `"Active"`,
-			"business_status": `"Normal"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":             []string{"${alibabacloudstack_vpn_gateway.default.id}"},
+			"name_regex":      "${alibabacloudstack_vpn_gateway.default.name}",
+			"vpc_id":          "${alibabacloudstack_vpn_gateway.default.vpc_id}",
+			"status":          "Active",
+			"business_status": "Normal",
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand, map[string]string{
-			"ids":             `[ "${alibabacloudstack_vpn_gateway.default.id}" ]`,
-			"name_regex":      `"${alibabacloudstack_vpn_gateway.default.name}"`,
-			"vpc_id":          `"${alibabacloudstack_vpn_gateway.default.vpc_id}"`,
-			"status":          `"Active"`,
-			"business_status": `"FinancialLocked"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":             []string{"${alibabacloudstack_vpn_gateway.default.id}"},
+			"name_regex":      "${alibabacloudstack_vpn_gateway.default.name}",
+			"vpc_id":          "${alibabacloudstack_vpn_gateway.default.vpc_id}",
+			"status":          "Active",
+			"business_status": "FinancialLocked",
 		}),
 	}
 
 	vpnGatewaysCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, vpcIdConf, statusConf, businessStatusConf, allConf)
 }
 
-func testAccCheckAlibabacloudStackVpnGatewaysDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func dataSourceVpnGatewaysConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccVpcGatewayConfig%d"
+	default = "%s"
 }
 
 resource "alibabacloudstack_vpc" "default" {
@@ -124,12 +122,7 @@ resource "alibabacloudstack_vpn_gateway" "default" {
 	description = "${var.name}"
 	vswitch_id = "${alibabacloudstack_vswitch.default.id}"
 }
-
-data "alibabacloudstack_vpn_gateways" "default" {
-	%s
-}
-`, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name)
 }
 
 var existVpnGatewaysMapFunc = func(rand int) map[string]string {

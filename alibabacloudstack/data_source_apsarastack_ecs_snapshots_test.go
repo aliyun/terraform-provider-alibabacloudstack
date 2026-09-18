@@ -2,115 +2,115 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
-
 	"testing"
 )
 
 func TestAccAlibabacloudStackEcsSnapshotsDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testaccSnapshotDataSourceBasic%d", rand)
+	resourceId := "data.alibabacloudstack_snapshots.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceEcsSnapshotsConfigDependence)
 
 	idsConfig := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids": `["${alibabacloudstack_snapshot.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_snapshot.default.id}"},
 		}),
-		fakeConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids": `["${alibabacloudstack_snapshot.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_snapshot.default.id}_fake"},
 		}),
 	}
 
 	instanceIdConfig := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"instance_id": `"${alibabacloudstack_ecs_instance.default.id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id": "${alibabacloudstack_ecs_instance.default.id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"instance_id": `"${alibabacloudstack_ecs_instance.default.id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id": "${alibabacloudstack_ecs_instance.default.id}_fake",
 		}),
 	}
 
 	diskIdConfig := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"disk_id": `"${alibabacloudstack_snapshot.default.disk_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"disk_id": "${alibabacloudstack_snapshot.default.disk_id}",
 		}),
-		fakeConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"disk_id": `"${alibabacloudstack_snapshot.default.disk_id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"disk_id": "${alibabacloudstack_snapshot.default.disk_id}_fake",
 		}),
 	}
 
 	nameRegexConfig := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"name_regex": `"${alibabacloudstack_snapshot.default.snapshot_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_snapshot.default.snapshot_name}",
 		}),
-		fakeConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"name_regex": `"${alibabacloudstack_snapshot.default.snapshot_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_snapshot.default.snapshot_name}_fake",
 		}),
 	}
 
 	statusConfig := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids":    `["${alibabacloudstack_snapshot.default.id}"]`,
-			"status": `"accomplished"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":    []string{"${alibabacloudstack_snapshot.default.id}"},
+			"status": "accomplished",
 		}),
-		fakeConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids":    `["${alibabacloudstack_snapshot.default.id}"]`,
-			"status": `"failed"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":    []string{"${alibabacloudstack_snapshot.default.id}"},
+			"status": "failed",
 		}),
 	}
 
 	typeConfig := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids":  `["${alibabacloudstack_snapshot.default.id}"]`,
-			"type": `"user"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":  []string{"${alibabacloudstack_snapshot.default.id}"},
+			"type": "user",
 		}),
-		fakeConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids":  `["${alibabacloudstack_snapshot.default.id}"]`,
-			"type": `"auto"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":  []string{"${alibabacloudstack_snapshot.default.id}"},
+			"type": "auto",
 		}),
 	}
 
 	sourceDiskTypeConfig := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids":              `["${alibabacloudstack_snapshot.default.id}"]`,
-			"source_disk_type": `"System"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_snapshot.default.id}"},
+			"source_disk_type": "System",
 		}),
-		fakeConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids":              `["${alibabacloudstack_snapshot.default.id}"]`,
-			"source_disk_type": `"Data"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_snapshot.default.id}"},
+			"source_disk_type": "Data",
 		}),
 	}
 
 	usageConfig := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids":   `["${alibabacloudstack_snapshot.default.id}"]`,
-			"usage": `"none"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":   []string{"${alibabacloudstack_snapshot.default.id}"},
+			"usage": "none",
 		}),
-		fakeConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids":   `["${alibabacloudstack_snapshot.default.id}"]`,
-			"usage": `"image"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":   []string{"${alibabacloudstack_snapshot.default.id}"},
+			"usage": "image",
 		}),
 	}
 
 	allConfig := dataSourceTestAccConfig{
-		existConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids":              `["${alibabacloudstack_snapshot.default.id}"]`,
-			"instance_id":      `"${alibabacloudstack_ecs_instance.default.id}"`,
-			"disk_id":          `"${alibabacloudstack_snapshot.default.disk_id}"`,
-			"name_regex":       `"${alibabacloudstack_snapshot.default.snapshot_name}"`,
-			"status":           `"accomplished"`,
-			"type":             `"user"`,
-			"source_disk_type": `"System"`,
-			"usage":            `"none"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_snapshot.default.id}"},
+			"instance_id":      "${alibabacloudstack_ecs_instance.default.id}",
+			"disk_id":          "${alibabacloudstack_snapshot.default.disk_id}",
+			"name_regex":       "${alibabacloudstack_snapshot.default.snapshot_name}",
+			"status":           "accomplished",
+			"type":             "user",
+			"source_disk_type": "System",
+			"usage":            "none",
 		}),
-		fakeConfig: testAccAlibabacloudStackSnapshotsDataSourceConfig(name, map[string]string{
-			"ids":              `["${alibabacloudstack_snapshot.default.id}_fake"]`,
-			"instance_id":      `"${alibabacloudstack_ecs_instance.default.id}_fake"`,
-			"disk_id":          `"${alibabacloudstack_snapshot.default.disk_id}_fake"`,
-			"name_regex":       `"${alibabacloudstack_snapshot.default.snapshot_name}_fake"`,
-			"status":           `"failed"`,
-			"type":             `"auto"`,
-			"source_disk_type": `"Data"`,
-			"usage":            `"image"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_snapshot.default.id}_fake"},
+			"instance_id":      "${alibabacloudstack_ecs_instance.default.id}_fake",
+			"disk_id":          "${alibabacloudstack_snapshot.default.disk_id}_fake",
+			"name_regex":       "${alibabacloudstack_snapshot.default.snapshot_name}_fake",
+			"status":           "failed",
+			"type":             "auto",
+			"source_disk_type": "Data",
+			"usage":            "image",
 		}),
 	}
 
@@ -143,7 +143,7 @@ func TestAccAlibabacloudStackEcsSnapshotsDataSourceBasic(t *testing.T) {
 	}
 
 	var snapshotsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_snapshots.default",
+		resourceId:   resourceId,
 		existMapFunc: existSnapshotsMapFunc,
 		fakeMapFunc:  fakeSnapshotsMapFunc,
 	}
@@ -151,12 +151,8 @@ func TestAccAlibabacloudStackEcsSnapshotsDataSourceBasic(t *testing.T) {
 	snapshotsCheckInfo.dataSourceTestCheck(t, rand, allConfig, sourceDiskTypeConfig, nameRegexConfig, statusConfig, typeConfig, usageConfig, idsConfig, instanceIdConfig, diskIdConfig)
 }
 
-func testAccAlibabacloudStackSnapshotsDataSourceConfig(name string, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceEcsSnapshotsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
 }
@@ -168,9 +164,5 @@ resource "alibabacloudstack_snapshot" "default" {
 	name = "${var.name}"
 	description = "${var.name}"
 }
-data "alibabacloudstack_snapshots" "default" {
-  %s
-}
-`, name, ECSInstanceCommonTestCase, strings.Join(pairs, "\n  "))
-	return config
+`, name, ECSInstanceCommonTestCase)
 }

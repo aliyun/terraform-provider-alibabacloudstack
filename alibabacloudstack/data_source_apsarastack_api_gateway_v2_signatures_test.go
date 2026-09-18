@@ -2,13 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackApiGatewayV2SignaturesDataSource(t *testing.T) {
+	rand := -1
+	resourceId := "data.alibabacloudstack_api_gateway_v2_signatures.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("test-%d", rand),
+		dataSourceApiGatewayV2SignaturesConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_api_gateway_v2_signatures.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"ids.#":                        "1",
@@ -28,21 +33,44 @@ func TestAccAlibabacloudStackApiGatewayV2SignaturesDataSource(t *testing.T) {
 		},
 	}
 
-	testAcc.dataSourceTestCheck(t, -1,
-		testAccCheckAlibabacloudStackAPIGatewayV2SignaturesDataSourceConfigBasic,
-		testAccCheckAlibabacloudStackAPIGatewayV2SignaturesDataSourceConfigByNameRegex,
-		testAccCheckAlibabacloudStackAPIGatewayV2SignaturesDataSourceConfigByIds,
-	)
+	configBasic := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_signature.default.gw_instance_id}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "fake-id",
+		}),
+	}
+
+	configByNameRegex := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_signature.default.gw_instance_id}",
+			"name_regex":     "test-.*",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_signature.default.gw_instance_id}",
+			"name_regex":     "nonexistent-.*",
+		}),
+	}
+
+	configByIds := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_signature.default.gw_instance_id}",
+			"ids":            []string{"${alibabacloudstack_api_gateway_v2_signature.default.id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_signature.default.gw_instance_id}",
+			"ids":            []string{"fake-id"},
+		}),
+	}
+
+	testAcc.dataSourceTestCheck(t, rand, configBasic, configByNameRegex, configByIds)
 }
 
-func resourceApiGatewayV2SignatureDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceApiGatewayV2SignaturesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "signature_name" {
-  default = "test-%d"
+  default = "%s"
 }
 
 variable "signature_algorithm" {
@@ -50,7 +78,7 @@ variable "signature_algorithm" {
 }
 
 resource "alibabacloudstack_api_gateway_v2_instance" "default" {
-  instance_name      = "testtf-apigw-instance-%d"
+  instance_name      = "testtf-apigw-instance-%s"
   node_number        = "1"
   instance_class     = "mini"
   broker_engine_type = "SCG"
@@ -66,40 +94,5 @@ resource "alibabacloudstack_api_gateway_v2_signature" "default" {
   sig_alg         = var.signature_algorithm
   gw_instance_id  = alibabacloudstack_api_gateway_v2_instance.default.id
 }
-
-data "alibabacloudstack_api_gateway_v2_signatures" "default" {
-  %s
-}
-`, rand, rand, strings.Join(pairs, "\n  "))
-}
-
-var testAccCheckAlibabacloudStackAPIGatewayV2SignaturesDataSourceConfigBasic = dataSourceTestAccConfig{
-	existConfig: resourceApiGatewayV2SignatureDependenceNew(-1, map[string]string{
-		"gw_instance_id": "alibabacloudstack_api_gateway_v2_signature.default.gw_instance_id",
-	}),
-	fakeConfig: resourceApiGatewayV2SignatureDependenceNew(-1, map[string]string{
-		"gw_instance_id": "\"fake-id\"",
-	}),
-}
-
-var testAccCheckAlibabacloudStackAPIGatewayV2SignaturesDataSourceConfigByNameRegex = dataSourceTestAccConfig{
-	existConfig: resourceApiGatewayV2SignatureDependenceNew(-1, map[string]string{
-		"gw_instance_id": "alibabacloudstack_api_gateway_v2_signature.default.gw_instance_id",
-		"name_regex":     "\"test-.*\"",
-	}),
-	fakeConfig: resourceApiGatewayV2SignatureDependenceNew(-1, map[string]string{
-		"gw_instance_id": "alibabacloudstack_api_gateway_v2_signature.default.gw_instance_id",
-		"name_regex":     "\"nonexistent-.*\"",
-	}),
-}
-
-var testAccCheckAlibabacloudStackAPIGatewayV2SignaturesDataSourceConfigByIds = dataSourceTestAccConfig{
-	existConfig: resourceApiGatewayV2SignatureDependenceNew(-1, map[string]string{
-		"gw_instance_id": "alibabacloudstack_api_gateway_v2_signature.default.gw_instance_id",
-		"ids":            "[alibabacloudstack_api_gateway_v2_signature.default.id]",
-	}),
-	fakeConfig: resourceApiGatewayV2SignatureDependenceNew(-1, map[string]string{
-		"gw_instance_id": "alibabacloudstack_api_gateway_v2_signature.default.gw_instance_id",
-		"ids":            "[\"fake-id\"]",
-	}),
+`, name, name)
 }

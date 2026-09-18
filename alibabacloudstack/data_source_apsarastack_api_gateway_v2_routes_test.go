@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackApiGatewayV2RoutesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_api_gateway_v2_routes.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testacca-%d", rand),
+		dataSourceApiGatewayV2RoutesConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_api_gateway_v2_routes.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"ids.#":                  "1",
@@ -31,47 +35,47 @@ func TestAccAlibabacloudStackApiGatewayV2RoutesDataSource(t *testing.T) {
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: ApiGatewayV2RoutesDependenceNew(rand, map[string]string{
-
-			`name_regex`: fmt.Sprintf(`"tf-testacca-%d"`, rand),
+		existConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_route.default.gw_instance_id}",
+			"name_regex":     fmt.Sprintf("tf-testacca-%d", rand),
 		}),
-		fakeConfig: ApiGatewayV2RoutesDependenceNew(rand, map[string]string{
-			`name_regex`: `"^fake-name$"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_route.default.gw_instance_id}",
+			"name_regex":     "^fake-name$",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: ApiGatewayV2RoutesDependenceNew(rand, map[string]string{
-			`ids`: `["${alibabacloudstack_api_gateway_v2_route.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_route.default.gw_instance_id}",
+			"ids":            []string{"${alibabacloudstack_api_gateway_v2_route.default.id}"},
 		}),
-		fakeConfig: ApiGatewayV2RoutesDependenceNew(rand, map[string]string{
-			`ids`: `["fake-route-id"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_route.default.gw_instance_id}",
+			"ids":            []string{"fake-route-id"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: ApiGatewayV2RoutesDependenceNew(rand, map[string]string{
-			`ids`:        `["${alibabacloudstack_api_gateway_v2_route.default.id}"]`,
-			`name_regex`: fmt.Sprintf(`"tf-testacca-%d"`, rand),
+		existConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_route.default.gw_instance_id}",
+			"ids":            []string{"${alibabacloudstack_api_gateway_v2_route.default.id}"},
+			"name_regex":     fmt.Sprintf("tf-testacca-%d", rand),
 		}),
-		fakeConfig: ApiGatewayV2RoutesDependenceNew(rand, map[string]string{
-			`ids`:        `["fake-route-id"]`,
-			`name_regex`: `"^fake-name$"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"gw_instance_id": "${alibabacloudstack_api_gateway_v2_route.default.gw_instance_id}",
+			"ids":            []string{"fake-route-id"},
+			"name_regex":     "^fake-name$",
 		}),
 	}
 
 	testAcc.dataSourceTestCheck(t, rand, allConf, nameRegexConf, idsConf)
 }
 
-// Dependence template generation method
-func ApiGatewayV2RoutesDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceApiGatewayV2RoutesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testacca-%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_api_gateway_v2_instance" "default" {
@@ -125,10 +129,5 @@ resource "alibabacloudstack_api_gateway_v2_route" "default" {
 	domain_ids = ["${alibabacloudstack_api_gateway_v2_domain.default.domain_id}"]
 	service_id = "${alibabacloudstack_api_gateway_v2_service.default.service_id}"
 }
-
-data "alibabacloudstack_api_gateway_v2_routes" "default" {
-	gw_instance_id = alibabacloudstack_api_gateway_v2_route.default.gw_instance_id
-	%s
-}
-`, rand, strings.Join(pairs, "\n   "))
+`, name)
 }

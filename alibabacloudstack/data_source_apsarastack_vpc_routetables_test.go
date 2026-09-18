@@ -2,38 +2,36 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackVpcRoutetablesDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_route_tables.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAccRouteTablesDatasource%d", rand),
+		dataSourceVpcRoutetablesConfigDependence)
 
 	allConfig := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackRouteTablesDataSourceConfigBasic(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_route_table.default.name}"`,
-			"vpc_id":     `"${alibabacloudstack_vpc.default.id}"`,
-			"ids":        `[ "${alibabacloudstack_route_table.default.id}" ]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_route_table.default.name}",
+			"vpc_id":     "${alibabacloudstack_vpc.default.id}",
+			"ids":        []string{"${alibabacloudstack_route_table.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudStackRouteTablesDataSourceConfigBasic(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_route_table.default.name}_fake"`,
-			"vpc_id":     `"${alibabacloudstack_vpc.default.id}"`,
-			"ids":        `[ "${alibabacloudstack_route_table.default.id}" ]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex": "${alibabacloudstack_route_table.default.name}_fake",
+			"vpc_id":     "${alibabacloudstack_vpc.default.id}",
+			"ids":        []string{"${alibabacloudstack_route_table.default.id}"},
 		}),
 	}
 
 	routeTablesCheckInfo.dataSourceTestCheck(t, rand, allConfig)
 }
 
-func testAccCheckAlibabacloudStackRouteTablesDataSourceConfigBasic(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
+func dataSourceVpcRoutetablesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAccRouteTablesDatasource%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_vpc" "default" {
@@ -46,12 +44,7 @@ resource "alibabacloudstack_route_table" "default" {
   name = "${var.name}"
   description = "${var.name}_description"
 }
-
-data "alibabacloudstack_route_tables" "default" {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
-	return config
+`, name)
 }
 
 var existRouteTablesMapFunc = func(rand int) map[string]string {

@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -11,6 +10,10 @@ import (
 func TestAccAlibabacloudStackPrometheusV2InstancesDataSource_basic(t *testing.T) {
 	rand := acctest.RandInt()
 	resourceId := "data.alibabacloudstack_prometheus_v2_instances.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tfacc_prometheus%d", rand),
+		dataSourcePrometheusV2InstancesConfigDependence)
+
 	dsa := dataSourceAttr{
 		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
@@ -35,51 +38,43 @@ func TestAccAlibabacloudStackPrometheusV2InstancesDataSource_basic(t *testing.T)
 
 	dsa.dataSourceTestCheck(t, rand,
 		dataSourceTestAccConfig{
-			existConfig: testAccCheckAlibabacloudStackPrometheusV2InstancesDataSourceConfig(rand, map[string]string{
-				"name_regex": `"${alibabacloudstack_prometheus_v2_instance.default.cluster_name}"`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_prometheus_v2_instance.default.cluster_name}",
 			}),
-			fakeConfig: testAccCheckAlibabacloudStackPrometheusV2InstancesDataSourceConfig(rand, map[string]string{
-				"name_regex": fmt.Sprintf(`"nonexistent-%d"`, rand),
-			}),
-		},
-		dataSourceTestAccConfig{
-			existConfig: testAccCheckAlibabacloudStackPrometheusV2InstancesDataSourceConfig(rand, map[string]string{
-				"ids": `["${alibabacloudstack_prometheus_v2_instance.default.id}"]`,
-			}),
-			fakeConfig: testAccCheckAlibabacloudStackPrometheusV2InstancesDataSourceConfig(rand, map[string]string{
-				"ids": `["fake-id"]`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": fmt.Sprintf("nonexistent-%d", rand),
 			}),
 		},
 		dataSourceTestAccConfig{
-			existConfig: testAccCheckAlibabacloudStackPrometheusV2InstancesDataSourceConfig(rand, map[string]string{
-				"name_regex": fmt.Sprintf(`"%s"`, fmt.Sprintf("tfacc_prometheus%d", rand)),
-				"ids":        `["${alibabacloudstack_prometheus_v2_instance.default.id}"]`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_prometheus_v2_instance.default.id}"},
 			}),
-			fakeConfig: testAccCheckAlibabacloudStackPrometheusV2InstancesDataSourceConfig(rand, map[string]string{
-				"name_regex": fmt.Sprintf(`"%s"`, fmt.Sprintf("nonexistent-%d", rand)),
-				"ids":        `["fake-id"]`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"fake-id"},
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": fmt.Sprintf("tfacc_prometheus%d", rand),
+				"ids":        []string{"${alibabacloudstack_prometheus_v2_instance.default.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": fmt.Sprintf("nonexistent-%d", rand),
+				"ids":        []string{"fake-id"},
 			}),
 		},
 	)
 }
 
-func testAccCheckAlibabacloudStackPrometheusV2InstancesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourcePrometheusV2InstancesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tfacc_prometheus%d"
+	default = "%s"
 }
 
 resource "alibabacloudstack_prometheus_v2_instance" "default" {
-  cluster_name = "${var.name}"
-  tags = ["test1", "test2"]
+	cluster_name = "${var.name}"
+	tags         = ["test1", "test2"]
 }
-
-data "alibabacloudstack_prometheus_v2_instances" "default" {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
+`, name)
 }

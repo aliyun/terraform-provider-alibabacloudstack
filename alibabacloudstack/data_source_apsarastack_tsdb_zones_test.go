@@ -1,16 +1,16 @@
 package alibabacloudstack
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackTsdbZonesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
+	resourceId := "data.alibabacloudstack_tsdb_zones.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", dataSourceTsdbZonesConfigDependence)
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackTsdbZonesSourceConfig(rand, map[string]string{}),
+		existConfig: testAccConfig(map[string]interface{}{}),
 	}
 
 	var existTsdbZonesMapFunc = func(rand int) map[string]string {
@@ -18,7 +18,6 @@ func TestAccAlibabacloudStackTsdbZonesDataSource(t *testing.T) {
 			"ids.#":           CHECKSET,
 			"zones.#":         CHECKSET,
 			"zones.0.zone_id": CHECKSET,
-			//"zones.0.local_name": CHECKSET,
 		}
 	}
 
@@ -30,25 +29,15 @@ func TestAccAlibabacloudStackTsdbZonesDataSource(t *testing.T) {
 	}
 
 	var tsdbZonesRecordsCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_tsdb_zones.default",
+		resourceId:   resourceId,
 		existMapFunc: existTsdbZonesMapFunc,
 		fakeMapFunc:  fakeTsdbZonesMapFunc,
 	}
 
 	tsdbZonesRecordsCheckInfo.dataSourceTestCheck(t, rand, allConf)
-
 }
 
-func testAccCheckAlibabacloudStackTsdbZonesSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
-data "alibabacloudstack_tsdb_zones" "default"{
-%s
-}
-
-`, strings.Join(pairs, "\n   "))
-	return config
+func dataSourceTsdbZonesConfigDependence(name string) string {
+	return `
+`
 }

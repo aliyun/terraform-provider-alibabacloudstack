@@ -2,111 +2,93 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackRdsDatabasesDataSource(t *testing.T) {
-
 	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_rds_databases.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAlibabacloudstackRdsDatabases%d", rand),
+		dataSourceRdsDatabasesConfigDependence)
 
-	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_rds_databases.default.id}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_rds_databases.default.id}_fake"]`,
-		}),
+	existMapFunc := func(rand int) map[string]string {
+		return map[string]string{
+			"databases.#":    "1",
+			"databases.0.id": CHECKSET,
+		}
+	}
+	fakeMapFunc := func(rand int) map[string]string {
+		return map[string]string{
+			"databases.#": "0",
+		}
+	}
+	checkInfo := dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existMapFunc,
+		fakeMapFunc:  fakeMapFunc,
 	}
 
-	data_base_instance_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand, map[string]string{
-			"ids":                   `["${alibabacloudstack_rds_databases.default.id}"]`,
-			"data_base_instance_id": `"${alibabacloudstack_rds_databases.default.DataBaseInstanceId}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand, map[string]string{
-			"ids":                   `["${alibabacloudstack_rds_databases.default.id}_fake"]`,
-			"data_base_instance_id": `"${alibabacloudstack_rds_databases.default.DataBaseInstanceId}_fake"`,
-		}),
-	}
-
-	data_base_nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand, map[string]string{
-			"ids":            `["${alibabacloudstack_rds_databases.default.id}"]`,
-			"data_base_name": `"${alibabacloudstack_rds_databases.default.DataBaseName}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand, map[string]string{
-			"ids":            `["${alibabacloudstack_rds_databases.default.id}_fake"]`,
-			"data_base_name": `"${alibabacloudstack_rds_databases.default.DataBaseName}_fake"`,
-		}),
-	}
-
-	statusConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand, map[string]string{
-			"ids":    `["${alibabacloudstack_rds_databases.default.id}"]`,
-			"status": `"${alibabacloudstack_rds_databases.default.Status}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand, map[string]string{
-			"ids":    `["${alibabacloudstack_rds_databases.default.id}_fake"]`,
-			"status": `"${alibabacloudstack_rds_databases.default.Status}_fake"`,
-		}),
-	}
-
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_rds_databases.default.id}"]`,
-
-			"data_base_instance_id": `"${alibabacloudstack_rds_databases.default.DataBaseInstanceId}"`,
-			"data_base_name":        `"${alibabacloudstack_rds_databases.default.DataBaseName}"`,
-			"status":                `"${alibabacloudstack_rds_databases.default.Status}"`}),
-		fakeConfig: testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_rds_databases.default.id}_fake"]`,
-
-			"data_base_instance_id": `"${alibabacloudstack_rds_databases.default.DataBaseInstanceId}_fake"`,
-			"data_base_name":        `"${alibabacloudstack_rds_databases.default.DataBaseName}_fake"`,
-			"status":                `"${alibabacloudstack_rds_databases.default.Status}_fake"`}),
-	}
-
-	AlibabacloudstackRdsDatabasesCheckInfo.dataSourceTestCheck(t, rand, idsConf, data_base_instance_idConf, data_base_nameConf, statusConf, allConf)
+	checkInfo.dataSourceTestCheck(t, rand,
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_rds_databases.default.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_rds_databases.default.id}_fake"},
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids":                   []string{"${alibabacloudstack_rds_databases.default.id}"},
+				"data_base_instance_id": "${alibabacloudstack_rds_databases.default.DataBaseInstanceId}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids":                   []string{"${alibabacloudstack_rds_databases.default.id}_fake"},
+				"data_base_instance_id": "${alibabacloudstack_rds_databases.default.DataBaseInstanceId}_fake",
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids":            []string{"${alibabacloudstack_rds_databases.default.id}"},
+				"data_base_name": "${alibabacloudstack_rds_databases.default.DataBaseName}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids":            []string{"${alibabacloudstack_rds_databases.default.id}_fake"},
+				"data_base_name": "${alibabacloudstack_rds_databases.default.DataBaseName}_fake",
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids":    []string{"${alibabacloudstack_rds_databases.default.id}"},
+				"status": "${alibabacloudstack_rds_databases.default.Status}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids":    []string{"${alibabacloudstack_rds_databases.default.id}_fake"},
+				"status": "${alibabacloudstack_rds_databases.default.Status}_fake",
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids":                   []string{"${alibabacloudstack_rds_databases.default.id}"},
+				"data_base_instance_id": "${alibabacloudstack_rds_databases.default.DataBaseInstanceId}",
+				"data_base_name":        "${alibabacloudstack_rds_databases.default.DataBaseName}",
+				"status":                "${alibabacloudstack_rds_databases.default.Status}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids":                   []string{"${alibabacloudstack_rds_databases.default.id}_fake"},
+				"data_base_instance_id": "${alibabacloudstack_rds_databases.default.DataBaseInstanceId}_fake",
+				"data_base_name":        "${alibabacloudstack_rds_databases.default.DataBaseName}_fake",
+				"status":                "${alibabacloudstack_rds_databases.default.Status}_fake",
+			}),
+		},
+	)
 }
 
-var existAlibabacloudstackRdsDatabasesMapFunc = func(rand int) map[string]string {
-	return map[string]string{
-		"databases.#":    "1",
-		"databases.0.id": CHECKSET,
-	}
-}
-
-var fakeAlibabacloudstackRdsDatabasesMapFunc = func(rand int) map[string]string {
-	return map[string]string{
-		"databases.#": "0",
-	}
-}
-
-var AlibabacloudstackRdsDatabasesCheckInfo = dataSourceAttr{
-	resourceId:   "data.alibabacloudstack_rds_databases.default",
-	existMapFunc: existAlibabacloudstackRdsDatabasesMapFunc,
-	fakeMapFunc:  fakeAlibabacloudstackRdsDatabasesMapFunc,
-}
-
-func testAccCheckAlibabacloudstackRdsDatabasesSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceRdsDatabasesConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackRdsDatabases%d"
+	default = "%s"
 }
-
-
-
-
-
-
-data "alibabacloudstack_rds_databases" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n   "))
-	return config
+`, name)
 }

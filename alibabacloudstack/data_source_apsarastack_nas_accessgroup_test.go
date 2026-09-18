@@ -2,56 +2,58 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackNasAccessGroupsDataSource(t *testing.T) {
-
 	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_nas_access_groups.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAlibabacloudstackNasAccessGroups%d", rand),
+		dataSourceNasAccessGroupsConfigDependence)
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNasAccessGroupsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_nas_access_groups.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_access_groups.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNasAccessGroupsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_nas_access_groups.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_nas_access_groups.default.id}_fake"},
 		}),
 	}
 
 	access_group_nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNasAccessGroupsSourceConfig(rand, map[string]string{
-			"ids":               `["${alibabacloudstack_nas_access_groups.default.id}"]`,
-			"access_group_name": `"${alibabacloudstack_nas_access_groups.default.AccessGroupName}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":               []string{"${alibabacloudstack_nas_access_groups.default.id}"},
+			"access_group_name": "${alibabacloudstack_nas_access_groups.default.AccessGroupName}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNasAccessGroupsSourceConfig(rand, map[string]string{
-			"ids":               `["${alibabacloudstack_nas_access_groups.default.id}_fake"]`,
-			"access_group_name": `"${alibabacloudstack_nas_access_groups.default.AccessGroupName}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":               []string{"${alibabacloudstack_nas_access_groups.default.id}_fake"},
+			"access_group_name": "${alibabacloudstack_nas_access_groups.default.AccessGroupName}_fake",
 		}),
 	}
 
 	file_system_typeConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNasAccessGroupsSourceConfig(rand, map[string]string{
-			"ids":              `["${alibabacloudstack_nas_access_groups.default.id}"]`,
-			"file_system_type": `"${alibabacloudstack_nas_access_groups.default.FileSystemType}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_nas_access_groups.default.id}"},
+			"file_system_type": "${alibabacloudstack_nas_access_groups.default.FileSystemType}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackNasAccessGroupsSourceConfig(rand, map[string]string{
-			"ids":              `["${alibabacloudstack_nas_access_groups.default.id}_fake"]`,
-			"file_system_type": `"${alibabacloudstack_nas_access_groups.default.FileSystemType}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":              []string{"${alibabacloudstack_nas_access_groups.default.id}_fake"},
+			"file_system_type": "${alibabacloudstack_nas_access_groups.default.FileSystemType}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackNasAccessGroupsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_nas_access_groups.default.id}"]`,
-
-			"access_group_name": `"${alibabacloudstack_nas_access_groups.default.AccessGroupName}"`,
-			"file_system_type":  `"${alibabacloudstack_nas_access_groups.default.FileSystemType}"`}),
-		fakeConfig: testAccCheckAlibabacloudstackNasAccessGroupsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_nas_access_groups.default.id}_fake"]`,
-
-			"access_group_name": `"${alibabacloudstack_nas_access_groups.default.AccessGroupName}_fake"`,
-			"file_system_type":  `"${alibabacloudstack_nas_access_groups.default.FileSystemType}_fake"`}),
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":               []string{"${alibabacloudstack_nas_access_groups.default.id}"},
+			"access_group_name": "${alibabacloudstack_nas_access_groups.default.AccessGroupName}",
+			"file_system_type":  "${alibabacloudstack_nas_access_groups.default.FileSystemType}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":               []string{"${alibabacloudstack_nas_access_groups.default.id}_fake"},
+			"access_group_name": "${alibabacloudstack_nas_access_groups.default.AccessGroupName}_fake",
+			"file_system_type":  "${alibabacloudstack_nas_access_groups.default.FileSystemType}_fake",
+		}),
 	}
 
 	AlibabacloudstackNasAccessGroupsCheckInfo.dataSourceTestCheck(t, rand, idsConf, access_group_nameConf, file_system_typeConf, allConf)
@@ -76,24 +78,10 @@ var AlibabacloudstackNasAccessGroupsCheckInfo = dataSourceAttr{
 	fakeMapFunc:  fakeAlibabacloudstackNasAccessGroupsMapFunc,
 }
 
-func testAccCheckAlibabacloudstackNasAccessGroupsSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceNasAccessGroupsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackNasAccessGroups%d"
+	default = "%s"
 }
-
-
-
-
-
-
-data "alibabacloudstack_nas_access_groups" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n   "))
-	return config
+`, name)
 }

@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackDnsPrivateRecordsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_dns_private_records.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testacc%d", rand),
+		dataSourceDnsPrivateRecordsConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_dns_private_records.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"records.#":                "1",
@@ -35,43 +39,44 @@ func TestAccAlibabacloudStackDnsPrivateRecordsDataSource(t *testing.T) {
 
 	testAcc.dataSourceTestCheck(t, rand,
 		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccDnsPrivateRecorddependenceNew(rand, map[string]string{
-				"name_regex": `"tf-testacc[0-9]+"`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"zone_id":    "${alibabacloudstack_dns_private_record.default.zone_id}",
+				"name_regex": "tf-testacc[0-9]+",
 			}),
-			fakeConfig: AlibabacloudTestAccDnsPrivateRecorddependenceNew(rand, map[string]string{
-				"name_regex": `"nonexistent-record"`,
-			}),
-		},
-		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccDnsPrivateRecorddependenceNew(rand, map[string]string{
-				"ids": `["${alibabacloudstack_dns_private_record.default.id}"]`,
-			}),
-			fakeConfig: AlibabacloudTestAccDnsPrivateRecorddependenceNew(rand, map[string]string{
-				"ids": `["nonexistent-id"]`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"zone_id":    "${alibabacloudstack_dns_private_record.default.zone_id}",
+				"name_regex": "nonexistent-record",
 			}),
 		},
 		dataSourceTestAccConfig{
-			existConfig: AlibabacloudTestAccDnsPrivateRecorddependenceNew(rand, map[string]string{
-				"ids":        `["${alibabacloudstack_dns_private_record.default.id}"]`,
-				"name_regex": `"tf-testacc[0-9]+"`,
+			existConfig: testAccConfig(map[string]interface{}{
+				"zone_id": "${alibabacloudstack_dns_private_record.default.zone_id}",
+				"ids":     []string{"${alibabacloudstack_dns_private_record.default.id}"},
 			}),
-			fakeConfig: AlibabacloudTestAccDnsPrivateRecorddependenceNew(rand, map[string]string{
-				"ids":        `["nonexistent-id"]`,
-				"name_regex": `"nonexistent-record"`,
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"zone_id": "${alibabacloudstack_dns_private_record.default.zone_id}",
+				"ids":     []string{"nonexistent-id"},
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"zone_id":    "${alibabacloudstack_dns_private_record.default.zone_id}",
+				"ids":        []string{"${alibabacloudstack_dns_private_record.default.id}"},
+				"name_regex": "tf-testacc[0-9]+",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"zone_id":    "${alibabacloudstack_dns_private_record.default.zone_id}",
+				"ids":        []string{"nonexistent-id"},
+				"name_regex": "nonexistent-record",
 			}),
 		},
 	)
 }
 
-// Dependency template generation method
-func AlibabacloudTestAccDnsPrivateRecorddependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceDnsPrivateRecordsConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-    default = "tf-testacc%d"
+    default = "%s"
 }
 
 resource "alibabacloudstack_dns_private_domain" "default" {
@@ -93,10 +98,5 @@ resource "alibabacloudstack_dns_private_record" "default" {
         value = "127.0.0.1"
     }
 }
-
-data "alibabacloudstack_dns_private_records" "default" {
-	zone_id = "${alibabacloudstack_dns_private_record.default.zone_id}"
-    %s
-}
-`, rand, strings.Join(pairs, "\n    "))
+`, name)
 }

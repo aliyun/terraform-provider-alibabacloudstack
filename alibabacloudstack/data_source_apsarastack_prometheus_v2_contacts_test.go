@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackPrometheusV2ContactsDataSource(t *testing.T) {
-	randInt := getAccTestRandInt(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_prometheus_v2_contacts.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tfacc_prometheus%d", rand),
+		dataSourcePrometheusV2ContactsConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_prometheus_v2_contacts.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"contacts.#":          "1",
@@ -26,56 +30,46 @@ func TestAccAlibabacloudStackPrometheusV2ContactsDataSource(t *testing.T) {
 		},
 	}
 
-	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: resourcePrometheusV2ContactBasicDependenceNew(randInt, map[string]string{
-			"name_regex": `"${alibabacloudstack_prometheus_v2_contact.default.username}"`,
-		}),
-		fakeConfig: resourcePrometheusV2ContactBasicDependenceNew(randInt, map[string]string{
-			"name_regex": `"^fake-name$"`,
-		}),
-	}
-
-	idsConf := dataSourceTestAccConfig{
-		existConfig: resourcePrometheusV2ContactBasicDependenceNew(randInt, map[string]string{
-			"ids": `["${alibabacloudstack_prometheus_v2_contact.default.id}"]`,
-		}),
-		fakeConfig: resourcePrometheusV2ContactBasicDependenceNew(randInt, map[string]string{
-			"ids": `["fake-id"]`,
-		}),
-	}
-
-	allConf := dataSourceTestAccConfig{
-		existConfig: resourcePrometheusV2ContactBasicDependenceNew(randInt, map[string]string{
-			"name_regex": `"${alibabacloudstack_prometheus_v2_contact.default.username}"`,
-			"ids":        `["${alibabacloudstack_prometheus_v2_contact.default.id}"]`,
-		}),
-		fakeConfig: resourcePrometheusV2ContactBasicDependenceNew(randInt, map[string]string{
-			"name_regex": `"${alibabacloudstack_prometheus_v2_contact.default.username}"`,
-			"ids":        `["fake-id"]`,
-		}),
-	}
-
-	testAcc.dataSourceTestCheck(t, randInt, nameRegexConf, idsConf, allConf)
+	testAcc.dataSourceTestCheck(t, rand,
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_prometheus_v2_contact.default.username}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "^fake-name$",
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_prometheus_v2_contact.default.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"fake-id"},
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_prometheus_v2_contact.default.username}",
+				"ids":        []string{"${alibabacloudstack_prometheus_v2_contact.default.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_prometheus_v2_contact.default.username}",
+				"ids":        []string{"fake-id"},
+			}),
+		},
+	)
 }
 
-// resourcePrometheusV2ContactBasicDependenceNew creates a basic dependency template for prometheus v2 contact tests.
-func resourcePrometheusV2ContactBasicDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourcePrometheusV2ContactsConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tfacc_prometheus%d"
-}
-resource "alibabacloudstack_prometheus_v2_contact" "default" {
-  username = "tfacc-${var.name}"
-  mobile   = "13812345678"
-  mail     = "test@example.com"
+	default = "%s"
 }
 
-data "alibabacloudstack_prometheus_v2_contacts" "default" {
-  %s
+resource "alibabacloudstack_prometheus_v2_contact" "default" {
+	username = "tfacc-${var.name}"
+	mobile   = "13812345678"
+	mail     = "test@example.com"
 }
-`, rand, strings.Join(pairs, "\n  "))
+`, name)
 }

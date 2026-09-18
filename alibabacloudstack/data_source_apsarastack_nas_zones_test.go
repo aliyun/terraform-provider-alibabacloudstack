@@ -1,27 +1,28 @@
 package alibabacloudstack
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlicloudNasZonesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(100, 999)
+	resourceId := "data.alibabacloudstack_nas_zones.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", dataSourceNasZonesConfigDependence)
+
 	zoneIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlicloudNasZonesDataSourceName(map[string]string{
-			"zone_id": `"${data.alibabacloudstack_nas_zones.anyone.zones.0.zone_id}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"zone_id": "${data.alibabacloudstack_nas_zones.anyone.zones.0.zone_id}",
 		}),
-		fakeConfig: testAccCheckAlicloudNasZonesDataSourceName(map[string]string{
-			"zone_id": `"fake_zone_id"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"zone_id": "fake_zone_id",
 		}),
 	}
 	protocolConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlicloudNasZonesDataSourceName(map[string]string{
-			"protocol": `"${data.alibabacloudstack_nas_zones.anyone.zones.0.protocols.0}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"protocol": "${data.alibabacloudstack_nas_zones.anyone.zones.0.protocols.0}",
 		}),
-		fakeConfig: testAccCheckAlicloudNasZonesDataSourceName(map[string]string{
-			"protocol": `"fake_protocol"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"protocol": "fake_protocol",
 		}),
 	}
 
@@ -37,7 +38,7 @@ func TestAccAlicloudNasZonesDataSource(t *testing.T) {
 		}
 	}
 	var alicloudNasZonesAccountBusesCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_nas_zones.default",
+		resourceId:   resourceId,
 		existMapFunc: existAlicloudNasZoneDataSourceNameMapFunc,
 		fakeMapFunc:  fakeNasZonesMapFunc,
 	}
@@ -45,19 +46,9 @@ func TestAccAlicloudNasZonesDataSource(t *testing.T) {
 	alicloudNasZonesAccountBusesCheckInfo.dataSourceTestCheck(t, rand, zoneIdConf, protocolConf)
 }
 
-func testAccCheckAlicloudNasZonesDataSourceName(attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
-	config := fmt.Sprintf(`
-%s
+func dataSourceNasZonesConfigDependence(name string) string {
+	return `
 data "alibabacloudstack_nas_zones" "anyone" {  
 }
-data "alibabacloudstack_nas_zones" "default" {  
-   %s
-}
-`, DataZoneCommonTestCase, strings.Join(pairs, " \n "))
-	return config
+`
 }

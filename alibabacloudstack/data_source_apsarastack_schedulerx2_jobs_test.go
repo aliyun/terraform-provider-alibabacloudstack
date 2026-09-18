@@ -2,14 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackSchedulerx2JobsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
-	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_schedulerx2_jobs.default",
+	resourceId := "data.alibabacloudstack_schedulerx2_jobs.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-test%d", rand),
+		dataSourceSchedulerx2JobsConfigDependence)
+
+	checkInfo := dataSourceAttr{
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"jobs.#":                        "1",
@@ -36,55 +40,40 @@ func TestAccAlibabacloudStackSchedulerx2JobsDataSource(t *testing.T) {
 		},
 	}
 
-	schedulerx2JobBasic := buildBasicSchedulerx2JobNew
-
-	// Test case 1: Filter by name_regex
-	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: schedulerx2JobBasic(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_schedulerx2_job.example.name}"`,
-		}),
-		fakeConfig: schedulerx2JobBasic(rand, map[string]string{
-			"name_regex": `"nonexistent-job"`,
-		}),
-	}
-
-	// Test case 2: Filter by ids
-	idConf := dataSourceTestAccConfig{
-		existConfig: schedulerx2JobBasic(rand, map[string]string{
-			"ids": `["${alibabacloudstack_schedulerx2_job.example.id}"]`,
-		}),
-		fakeConfig: schedulerx2JobBasic(rand, map[string]string{
-			"ids": `["nonexistent-id"]`,
-		}),
-	}
-
-	// Test case 3: Filter by group_id
-	groupIdConf := dataSourceTestAccConfig{
-		existConfig: schedulerx2JobBasic(rand, map[string]string{
-			"group_id": `"${alibabacloudstack_schedulerx2_job.example.group_id}"`,
-			"ids":      `["${alibabacloudstack_schedulerx2_job.example.id}"]`,
-		}),
-		fakeConfig: schedulerx2JobBasic(rand, map[string]string{
-			"group_id": `"nonexistent-group-id"`,
-			"ids":      `["nonexistent-id"]`,
-		}),
-	}
-
-	// Run tests
-	testAcc.dataSourceTestCheck(t, rand, nameRegexConf, idConf, groupIdConf)
+	checkInfo.dataSourceTestCheck(t, rand,
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "${alibabacloudstack_schedulerx2_job.example.name}",
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"name_regex": "nonexistent-job",
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"${alibabacloudstack_schedulerx2_job.example.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids": []string{"nonexistent-id"},
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"group_id": "${alibabacloudstack_schedulerx2_job.example.group_id}",
+				"ids":      []string{"${alibabacloudstack_schedulerx2_job.example.id}"},
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"group_id": "nonexistent-group-id",
+				"ids":      []string{"nonexistent-id"},
+			}),
+		},
+	)
 }
 
-// buildBasicSchedulerx2JobNew generates the Terraform configuration for creating a SchedulerX2 job and its dependencies.
-// It uses an app group as dependency which is created using alibabacloudstack_schedulerx2_app_group resource.
-func buildBasicSchedulerx2JobNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-
+func dataSourceSchedulerx2JobsConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-test%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_schedulerx2_app_group" "example" {
@@ -130,9 +119,5 @@ resource "alibabacloudstack_schedulerx2_job" "example" {
   monitor_miss_worker_enable   = true
   monitor_timeout              = 3600
 }
-
-data "alibabacloudstack_schedulerx2_jobs" "default" {
-  %s
-}
-`, rand, strings.Join(pairs, "\n  "))
+`, name)
 }

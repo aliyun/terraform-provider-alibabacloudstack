@@ -2,43 +2,46 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackCloudmonitorserviceSiteMonitorsDataSource(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
+	resourceId := "data.alibabacloudstack_cloudmonitorservice_site_monitors.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAlibabacloudstackCloudmonitorserviceSiteMonitors%d", rand),
+		dataSourceCmsSiteMonitorsConfigDependence)
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackCloudmonitorserviceSiteMonitorsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}"},
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackCloudmonitorserviceSiteMonitorsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}_fake"},
 		}),
 	}
 
 	task_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackCloudmonitorserviceSiteMonitorsSourceConfig(rand, map[string]string{
-			"ids":     `["${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}"]`,
-			"task_id": `"${alibabacloudstack_cloudmonitorservice_site_monitors.default.TaskId}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":     []string{"${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}"},
+			"task_id": "${alibabacloudstack_cloudmonitorservice_site_monitors.default.TaskId}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackCloudmonitorserviceSiteMonitorsSourceConfig(rand, map[string]string{
-			"ids":     `["${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}_fake"]`,
-			"task_id": `"${alibabacloudstack_cloudmonitorservice_site_monitors.default.TaskId}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":     []string{"${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}_fake"},
+			"task_id": "${alibabacloudstack_cloudmonitorservice_site_monitors.default.TaskId}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackCloudmonitorserviceSiteMonitorsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}"]`,
-
-			"task_id": `"${alibabacloudstack_cloudmonitorservice_site_monitors.default.TaskId}"`}),
-		fakeConfig: testAccCheckAlibabacloudstackCloudmonitorserviceSiteMonitorsSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}_fake"]`,
-
-			"task_id": `"${alibabacloudstack_cloudmonitorservice_site_monitors.default.TaskId}_fake"`}),
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":     []string{"${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}"},
+			"task_id": "${alibabacloudstack_cloudmonitorservice_site_monitors.default.TaskId}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":     []string{"${alibabacloudstack_cloudmonitorservice_site_monitors.default.id}_fake"},
+			"task_id": "${alibabacloudstack_cloudmonitorservice_site_monitors.default.TaskId}_fake",
+		}),
 	}
 
 	AlibabacloudstackCloudmonitorserviceSiteMonitorsCheckInfo.dataSourceTestCheck(t, rand, idsConf, task_idConf, allConf)
@@ -63,24 +66,10 @@ var AlibabacloudstackCloudmonitorserviceSiteMonitorsCheckInfo = dataSourceAttr{
 	fakeMapFunc:  fakeAlibabacloudstackCloudmonitorserviceSiteMonitorsMapFunc,
 }
 
-func testAccCheckAlibabacloudstackCloudmonitorserviceSiteMonitorsSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+func dataSourceCmsSiteMonitorsConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackCloudmonitorserviceSiteMonitors%d"
+	default = "%s"
 }
-
-
-
-
-
-
-data "alibabacloudstack_cloudmonitorservice_site_monitors" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n   "))
-	return config
+`, name)
 }

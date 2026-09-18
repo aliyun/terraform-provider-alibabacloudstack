@@ -2,13 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackCenVbrHealthChecksDataSource(t *testing.T) {
+	rand := getAccTestRandInt(1000, 2000)
+	resourceId := "data.alibabacloudstack_cen_vbr_health_checks.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testAcc%d", rand),
+		dataSourceCenVbrHealthChecksConfigDependence)
+
 	testAcc := dataSourceAttr{
-		resourceId: "data.alibabacloudstack_cen_vbr_health_checks.default",
+		resourceId: resourceId,
 		existMapFunc: func(rand int) map[string]string {
 			return map[string]string{
 				"ids.#":                                      "1",
@@ -31,14 +36,37 @@ func TestAccAlibabacloudStackCenVbrHealthChecksDataSource(t *testing.T) {
 		},
 	}
 
-	CenVbrHealthCheckCommonTestCaseNew := func(rand int, attrMap map[string]string) string {
-		var pairs []string
-		for k, v := range attrMap {
-			pairs = append(pairs, k+" = "+v)
-		}
-		return fmt.Sprintf(`
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"cen_id": "${alibabacloudstack_cen_vbr_health_check.default.cen_id}",
+			"ids":    []string{"${alibabacloudstack_cen_vbr_health_check.default.cen_id}:${alibabacloudstack_cen_vbr_health_check.default.vbr_instance_id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"cen_id": "${alibabacloudstack_cen_vbr_health_check.default.cen_id}",
+			"ids":    []string{"cen-fakeid:vbr-fakeid"},
+		}),
+	}
+
+	allConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"cen_id":          "${alibabacloudstack_cen_vbr_health_check.default.cen_id}",
+			"vbr_instance_id": "${alibabacloudstack_cen_vbr_health_check.default.vbr_instance_id}",
+			"ids":             []string{"${alibabacloudstack_cen_vbr_health_check.default.cen_id}:${alibabacloudstack_cen_vbr_health_check.default.vbr_instance_id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"cen_id":          "${alibabacloudstack_cen_vbr_health_check.default.cen_id}",
+			"vbr_instance_id": "${alibabacloudstack_cen_vbr_health_check.default.vbr_instance_id}",
+			"ids":             []string{"cen-fakeid:vbr-fakeid"},
+		}),
+	}
+
+	testAcc.dataSourceTestCheck(t, rand, idsConf, allConf)
+}
+
+func dataSourceCenVbrHealthChecksConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testAcc%d"
+  default = "%s"
 }
 
 resource "alibabacloudstack_cen_instance" "default" {
@@ -74,37 +102,5 @@ resource "alibabacloudstack_cen_vbr_health_check" "default" {
     health_check_only      = true
     depends_on             = [alibabacloudstack_cen_transit_router_vbr_attachment.default]
 }
-
-data "alibabacloudstack_cen_vbr_health_checks" "default" {
-    %s
-}
-`, rand, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"), rand, strings.Join(pairs, "\n   "))
-	}
-
-	rand := getAccTestRandInt(1000, 2000)
-	idsConf := dataSourceTestAccConfig{
-		existConfig: CenVbrHealthCheckCommonTestCaseNew(rand, map[string]string{
-			"cen_id": `"${alibabacloudstack_cen_vbr_health_check.default.cen_id}"`,
-			"ids":    `["${alibabacloudstack_cen_vbr_health_check.default.cen_id}:${alibabacloudstack_cen_vbr_health_check.default.vbr_instance_id}"]`,
-		}),
-		fakeConfig: CenVbrHealthCheckCommonTestCaseNew(rand, map[string]string{
-			"cen_id": `"${alibabacloudstack_cen_vbr_health_check.default.cen_id}"`,
-			"ids":    `["cen-fakeid:vbr-fakeid"]`,
-		}),
-	}
-
-	allConf := dataSourceTestAccConfig{
-		existConfig: CenVbrHealthCheckCommonTestCaseNew(rand, map[string]string{
-			"cen_id":          `"${alibabacloudstack_cen_vbr_health_check.default.cen_id}"`,
-			"vbr_instance_id": `"${alibabacloudstack_cen_vbr_health_check.default.vbr_instance_id}"`,
-			"ids":             `["${alibabacloudstack_cen_vbr_health_check.default.cen_id}:${alibabacloudstack_cen_vbr_health_check.default.vbr_instance_id}"]`,
-		}),
-		fakeConfig: CenVbrHealthCheckCommonTestCaseNew(rand, map[string]string{
-			"cen_id":          `"${alibabacloudstack_cen_vbr_health_check.default.cen_id}"`,
-			"vbr_instance_id": `"${alibabacloudstack_cen_vbr_health_check.default.vbr_instance_id}"`,
-			"ids":             `["cen-fakeid:vbr-fakeid"]`,
-		}),
-	}
-
-	testAcc.dataSourceTestCheck(t, rand, idsConf, allConf)
+`, name, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"), getAccTestRandInt(1000, 2000))
 }

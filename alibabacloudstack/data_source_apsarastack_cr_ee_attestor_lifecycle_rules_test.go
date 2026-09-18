@@ -2,44 +2,48 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackCrEEArtifactLifecycleRulesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
+	resourceId := "data.alibabacloudstack_cr_ee_attestor_lifecycle_rules.default"
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
+		fmt.Sprintf("tf-testacc-cree-rule-%d", rand),
+		dataSourceCrEEAttestorLifecycleRulesConfigDependence)
+
 	idsConf := dataSourceTestAccConfig{
-		existConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
-			"instance_id": `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
-			"ids":         `["${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id": "${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}",
+			"ids":         []string{"${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.id}"},
 		}),
-		fakeConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
-			"instance_id": `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
-			"ids":         `["${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id": "${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}",
+			"ids":         []string{"${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.id}_fake"},
 		}),
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
-			"instance_id":     `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
-			"namespace_regex": `"${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.namespace_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id":     "${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}",
+			"namespace_regex": "${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.namespace_name}",
 		}),
-		fakeConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
-			"instance_id":     `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
-			"namespace_regex": `"${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.namespace_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id":     "${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}",
+			"namespace_regex": "${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.namespace_name}_fake",
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
-		existConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
-			"instance_id":     `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
-			"ids":             `["${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.id}"]`,
-			"namespace_regex": `"${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.namespace_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"instance_id":     "${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}",
+			"ids":             []string{"${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.id}"},
+			"namespace_regex": "${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.namespace_name}",
 		}),
-		fakeConfig: resourceCrEEArtifactLifecycleRuleDependenceNew(rand, map[string]string{
-			"instance_id":     `"${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}"`,
-			"ids":             `["${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.id}_fake"]`,
-			"namespace_regex": `"${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.namespace_name}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"instance_id":     "${data.alibabacloudstack_cr_ee_instances.default.instances.0.id}",
+			"ids":             []string{"${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.id}_fake"},
+			"namespace_regex": "${alibabacloudstack_cr_ee_attestor_lifecycle_rule.default.namespace_name}_fake",
 		}),
 	}
 
@@ -62,7 +66,7 @@ func TestAccAlibabacloudStackCrEEArtifactLifecycleRulesDataSource(t *testing.T) 
 	}
 
 	dataSourceAttr := dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_cr_ee_attestor_lifecycle_rules.default",
+		resourceId:   resourceId,
 		existMapFunc: existMapFunc,
 		fakeMapFunc:  fakeMapFunc,
 	}
@@ -70,15 +74,10 @@ func TestAccAlibabacloudStackCrEEArtifactLifecycleRulesDataSource(t *testing.T) 
 	dataSourceAttr.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
 
-// Generate dependency resource template for CreeAttestorLifecycleRules
-func resourceCrEEArtifactLifecycleRuleDependenceNew(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourceCrEEAttestorLifecycleRulesConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-  default = "tf-testacc-cree-rule-%d"
+  default = "%s"
 }
 
 data "alibabacloudstack_cr_ee_instances" "default" {
@@ -101,9 +100,5 @@ resource "alibabacloudstack_cr_ee_attestor_lifecycle_rule" "default" {
 	recent_pull_keep = 30
 	recent_push_keep = 20
 }
-
-data "alibabacloudstack_cr_ee_attestor_lifecycle_rules" "default" {
-    %s
-}
-`, rand, strings.Join(pairs, "\n   "))
+`, name)
 }
