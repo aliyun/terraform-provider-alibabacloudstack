@@ -120,7 +120,11 @@ func dataSourceAlibabacloudStackUniversalDnsDomainsRead(d *schema.ResourceData, 
 
 			// Apply id filtering
 			if len(idsMap) > 0 {
-				if _, existed := domain["Id"].(string); !existed {
+				id, existed := domain["Id"].(string)
+				if !existed {
+					continue
+				}
+				if _, inMap := idsMap[id]; !inMap {
 					continue
 				}
 			}

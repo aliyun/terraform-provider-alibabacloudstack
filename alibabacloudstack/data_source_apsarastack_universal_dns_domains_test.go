@@ -9,9 +9,11 @@ import (
 
 func TestAccAlibabacloudStackUniversalDnsDomainsDataSource(t *testing.T) {
 	rand := acctest.RandInt()
+	namePrefix := fmt.Sprintf("tf-testacc%d", rand)
+	domainName := namePrefix + ".example."
 	resourceId := "data.alibabacloudstack_universal_dns_domains.default"
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf-testacc%d", rand),
+		namePrefix,
 		dataSourceUniversalDnsDomainsConfigDependence)
 
 	checkInfo := dataSourceAttr{
@@ -21,7 +23,7 @@ func TestAccAlibabacloudStackUniversalDnsDomainsDataSource(t *testing.T) {
 				"ids.#":                      "1",
 				"names.#":                    "1",
 				"domains.#":                  "1",
-				"domains.0.name":             fmt.Sprintf("tf-testacc%d.example.", rand),
+				"domains.0.name":             domainName,
 				"domains.0.remark":           "Created by Terraform",
 				"domains.0.record_count":     CHECKSET,
 				"domains.0.id":               CHECKSET,
@@ -41,14 +43,6 @@ func TestAccAlibabacloudStackUniversalDnsDomainsDataSource(t *testing.T) {
 	checkInfo.dataSourceTestCheck(t, rand,
 		dataSourceTestAccConfig{
 			existConfig: testAccConfig(map[string]interface{}{
-				"name_regex": "${alibabacloudstack_universal_dns_domain.default.name}",
-			}),
-			fakeConfig: testAccConfig(map[string]interface{}{
-				"name_regex": "^fake-name$",
-			}),
-		},
-		dataSourceTestAccConfig{
-			existConfig: testAccConfig(map[string]interface{}{
 				"ids": []string{"${alibabacloudstack_universal_dns_domain.default.id}"},
 			}),
 			fakeConfig: testAccConfig(map[string]interface{}{
@@ -58,7 +52,17 @@ func TestAccAlibabacloudStackUniversalDnsDomainsDataSource(t *testing.T) {
 		dataSourceTestAccConfig{
 			existConfig: testAccConfig(map[string]interface{}{
 				"ids":        []string{"${alibabacloudstack_universal_dns_domain.default.id}"},
-				"name_regex": "${alibabacloudstack_universal_dns_domain.default.name}",
+				"name_regex": namePrefix,
+			}),
+			fakeConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"${alibabacloudstack_universal_dns_domain.default.id}"},
+				"name_regex": "^fake-name$",
+			}),
+		},
+		dataSourceTestAccConfig{
+			existConfig: testAccConfig(map[string]interface{}{
+				"ids":        []string{"${alibabacloudstack_universal_dns_domain.default.id}"},
+				"name_regex": namePrefix,
 			}),
 			fakeConfig: testAccConfig(map[string]interface{}{
 				"ids":        []string{"nonexistent-id"},
