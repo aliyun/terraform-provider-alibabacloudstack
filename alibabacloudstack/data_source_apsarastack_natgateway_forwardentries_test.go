@@ -149,7 +149,7 @@ var fakeForwardEntriesMapFunc = func(rand int) map[string]string {
 }
 
 var forwardEntriesCheckInfo = dataSourceAttr{
-	resourceId:   "data.alibabacloudstack_forward_entries.default",
+	resourceId:   "data.alibabacloudstack_natgateway_forwardentries.default",
 	existMapFunc: existForwardEntriesMapFunc,
 	fakeMapFunc:  fakeForwardEntriesMapFunc,
 }
