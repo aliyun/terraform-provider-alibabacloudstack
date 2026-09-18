@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -16,18 +17,22 @@ func TestAccAlibabacloudStackAscmRamServiceRoleBasic(t *testing.T) {
 	}, "ListRAMServiceRoles")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := "Tf-testAccServiceRamRole"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAscmServiceRamRoleConfigDependence)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
 		},
-
-		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAscmServiceRamRoleDependence,
+				Config: testAccConfig(map[string]interface{}{
+					"organization_id": "${alibabacloudstack_ascm_organization.default.id}",
+					"product_name":    "ECS",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -39,18 +44,20 @@ func TestAccAlibabacloudStackAscmRamServiceRoleBasic(t *testing.T) {
 			},
 		},
 	})
-
 }
 
-const testAccAscmServiceRamRoleDependence = `
+func resourceAscmServiceRamRoleConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+	default = "%s"
+}
+
 resource "alibabacloudstack_ascm_organization" "default" {
-  name = "Tf-testingresource-org2"
-  parent_id = "1"
-} 
- resource "alibabacloudstack_ascm_ram_service_role" "default" {
-  organization_id = "${alibabacloudstack_ascm_organization.default.id}"
-  product_name = "ECS"
-}`
+	name      = "Tf-testingresource-org2"
+	parent_id = "1"
+}
+`, name)
+}
 
 var testAccCheckAscmServiceRamRole = map[string]string{
 	"ram_roles.0.id":                          CHECKSET,

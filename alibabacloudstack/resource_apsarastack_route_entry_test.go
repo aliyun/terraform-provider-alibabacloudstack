@@ -5,13 +5,11 @@ import (
 	"os"
 	"testing"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudstackRouteEntryInstance(t *testing.T) {
@@ -26,21 +24,29 @@ func TestAccAlibabacloudstackRouteEntryInstance(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
+	name := fmt.Sprintf("tf-testAccRouteEntryConfigName%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceRouteEntryInstanceConfigDependence)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
 		},
-
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckRouteEntryDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRouteEntryConfig_instance(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"route_table_id":        "${alibabacloudstack_vpc_vpc.default.route_table_id}",
+					"destination_cidrblock": "172.11.1.1/32",
+					"nexthop_type":          "Instance",
+					"nexthop_id":            "${alibabacloudstack_ecs_instance.default.id}",
+					"name":                  "${var.name}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"nexthop_type": "Instance",
-						"name":         fmt.Sprintf("tf-testAccRouteEntryConfigName%d", rand),
+						"name":         name,
 					}),
 				),
 			},
@@ -65,21 +71,29 @@ func TestAccAlibabacloudstackRouteEntryInterface(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
+	name := fmt.Sprintf("tf-testAccRouteEntryInterfaceConfig%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceRouteEntryInterfaceConfigDependence)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
 		},
-
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckRouteEntryDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRouteEntryConfig_interface(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"route_table_id":        "${alibabacloudstack_vpc_vpc.default.route_table_id}",
+					"destination_cidrblock": "172.11.1.1/32",
+					"nexthop_type":          "RouterInterface",
+					"nexthop_id":            "${alibabacloudstack_router_interface.default.id}",
+					"name":                  "${var.name}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"nexthop_type": "RouterInterface",
-						"name":         fmt.Sprintf("tf-testAccRouteEntryInterfaceConfig%d", rand),
+						"name":         name,
 					}),
 				),
 			},
@@ -99,21 +113,29 @@ func TestAccAlibabacloudstackRouteEntryNatGateway(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
+	name := fmt.Sprintf("tf-testAccRouteEntryNatGatewayConfig%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceRouteEntryNatGatewayConfigDependence)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
 		},
-
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckRouteEntryDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRouteEntryConfig_natGateway(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"route_table_id":        "${alibabacloudstack_vpc.default.route_table_id}",
+					"destination_cidrblock": "172.11.1.1/32",
+					"nexthop_type":          "NatGateway",
+					"nexthop_id":            "${alibabacloudstack_nat_gateway.default.id}",
+					"name":                  "${var.name}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"nexthop_type": "NatGateway",
-						"name":         fmt.Sprintf("tf-testAccRouteEntryNatGatewayConfig%d", rand),
+						"name":         name,
 					}),
 				),
 			},
@@ -133,22 +155,31 @@ func TestAccAlibabacloudstackRouteEntryMulti(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
+	name := fmt.Sprintf("tf-testAccRouteEntryConcurrence%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceRouteEntryMultiConfigDependence)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
 		},
-
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckRouteEntryDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRouteEntryConfigMulti(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"count":                 "3",
+					"route_table_id":        "${alibabacloudstack_vpc.default.route_table_id}",
+					"destination_cidrblock": "172.16.${count.index}.0/24",
+					"nexthop_type":          "NetworkInterface",
+					"nexthop_id":            "${alibabacloudstack_network_interface.default.id}",
+					"name":                  "${var.name}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"nexthop_type":          "NetworkInterface",
 						"destination_cidrblock": "172.16.2.0/24",
-						"name":                  fmt.Sprintf("tf-testAccRouteEntryConcurrence%d", rand),
+						"name":                  name,
 					}),
 				),
 			},
@@ -177,127 +208,102 @@ func testAccCheckRouteEntryDestroy(s *terraform.State) error {
 		}
 	}
 
-	//	testAccCheckRouterInterfaceDestroy(s)
-
 	return nil
 }
 
-func testAccRouteEntryConfig_instance(rand int) string {
+func resourceRouteEntryInstanceConfigDependence(name string) string {
 	return fmt.Sprintf(`
-
 variable "name" {
-   default = "tf-testAccRouteEntryConfigName%d"
+	default = "%s"
 }
-
 
 %s
-
-resource "alibabacloudstack_route_entry" "default" {
-	route_table_id = "${alibabacloudstack_vpc_vpc.default.route_table_id}"
-	destination_cidrblock = "172.11.1.1/32"
-	nexthop_type = "Instance"
-	nexthop_id = "${alibabacloudstack_ecs_instance.default.id}"
-	name = "${var.name}"
- }
-	`, rand, ECSInstanceCommonTestCase)
+`, name, ECSInstanceCommonTestCase)
 }
 
-func testAccRouteEntryConfig_interface(rand int) string {
-	return fmt.Sprintf(
-		`
+func resourceRouteEntryInterfaceConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccRouteEntryInterfaceConfig%d"
-	}
+	default = "%s"
+}
+
 %s
 
 resource "alibabacloudstack_router_interface" "default" {
-  opposite_region = "%s"
-  router_type = "VRouter"
-  router_id = "${alibabacloudstack_vpc_vpc.default.router_id}"
-  role = "InitiatingSide"
-  specification = "Large.2"
-  name = "${var.name}"
-  description = "${var.name}"
+	opposite_region = "%s"
+	router_type     = "VRouter"
+	router_id       = "${alibabacloudstack_vpc_vpc.default.router_id}"
+	role            = "InitiatingSide"
+	specification   = "Large.2"
+	name            = "${var.name}"
+	description     = "${var.name}"
 }
-resource "alibabacloudstack_route_entry" "default" {
-  route_table_id = "${alibabacloudstack_vpc_vpc.default.route_table_id}"
-  destination_cidrblock = "172.11.1.1/32"
-  nexthop_type = "RouterInterface"
-  nexthop_id = "${alibabacloudstack_router_interface.default.id}"
-  name = "${var.name}"
-}
-`, rand, SecurityGroupCommonTestCase, os.Getenv("ALIBABACLOUDSTACK_REGION"),)
+`, name, SecurityGroupCommonTestCase, os.Getenv("ALIBABACLOUDSTACK_REGION"))
 }
 
-func testAccRouteEntryConfig_natGateway(rand int) string {
-	return fmt.Sprintf(
-		`
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation= "VSwitch"
-}
-variable "name" {
-   default = "tf-testAccRouteEntryNatGatewayConfig%d"
-}
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "10.1.0.0/21"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "10.1.1.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name = "${var.name}"
-}
-resource "alibabacloudstack_nat_gateway" "default" {
-   vpc_id = "${alibabacloudstack_vpc.default.id}"
-   specification = "Middle"
-   name = "${var.name}"
-}
-resource "alibabacloudstack_route_entry" "default" {
-  route_table_id = "${alibabacloudstack_vpc.default.route_table_id}"
-  destination_cidrblock = "172.11.1.1/32"
-  nexthop_type = "NatGateway"
-  nexthop_id = "${alibabacloudstack_nat_gateway.default.id}"
-  name = "${var.name}"
-}`, rand)
-}
-
-func testAccRouteEntryConfigMulti(rand int) string {
+func resourceRouteEntryNatGatewayConfigDependence(name string) string {
 	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-   available_resource_creation= "VSwitch"
-}
 variable "name" {
-   default = "tf-testAccRouteEntryConcurrence%d"
+	default = "%s"
 }
+
+data "alibabacloudstack_zones" "default" {
+	available_resource_creation = "VSwitch"
+}
+
 resource "alibabacloudstack_vpc" "default" {
-   name = "${var.name}"
-   cidr_block = "10.1.0.0/21"
+	name       = "${var.name}"
+	cidr_block = "10.1.0.0/21"
 }
+
 resource "alibabacloudstack_vswitch" "default" {
-    name = "${var.name}"
-    cidr_block = "10.1.1.0/24"
-    availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-    vpc_id = "${alibabacloudstack_vpc.default.id}"
+	vpc_id              = "${alibabacloudstack_vpc.default.id}"
+	cidr_block          = "10.1.1.0/24"
+	availability_zone   = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	name                = "${var.name}"
 }
+
+resource "alibabacloudstack_nat_gateway" "default" {
+	vpc_id        = "${alibabacloudstack_vpc.default.id}"
+	specification = "Middle"
+	name          = "${var.name}"
+}
+`, name)
+}
+
+func resourceRouteEntryMultiConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+	default = "%s"
+}
+
+data "alibabacloudstack_zones" "default" {
+	available_resource_creation = "VSwitch"
+}
+
+resource "alibabacloudstack_vpc" "default" {
+	name       = "${var.name}"
+	cidr_block = "10.1.0.0/21"
+}
+
+resource "alibabacloudstack_vswitch" "default" {
+	name              = "${var.name}"
+	cidr_block        = "10.1.1.0/24"
+	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	vpc_id            = "${alibabacloudstack_vpc.default.id}"
+}
+
 resource "alibabacloudstack_security_group" "default" {
-    name = "${var.name}"
-    vpc_id = "${alibabacloudstack_vpc.default.id}"
+	name   = "${var.name}"
+	vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
+
 resource "alibabacloudstack_network_interface" "default" {
-    name = "${var.name}"
-    vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-    security_groups = [ "${alibabacloudstack_security_group.default.id}" ]
+	name            = "${var.name}"
+	vswitch_id      = "${alibabacloudstack_vswitch.default.id}"
+	security_groups = ["${alibabacloudstack_security_group.default.id}"]
 }
-resource "alibabacloudstack_route_entry" "default" {
-   count = 3
-   route_table_id = "${alibabacloudstack_vpc.default.route_table_id}"
-   destination_cidrblock = "172.16.${count.index}.0/24"
-   nexthop_type = "NetworkInterface"
-   nexthop_id = "${alibabacloudstack_network_interface.default.id}"
-   name = "${var.name}"
-}
-`, rand)
+`, name)
 }
 
 var testAccRouteEntryCheckMap = map[string]string{

@@ -2,17 +2,14 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"testing"
-
-	
-
 	"log"
 	"strings"
+	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -136,8 +133,10 @@ func TestAccAlibabacloudStackNatGatewayBasic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := fmt.Sprintf("tf-testAccNatGatewayConfig%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceNatGatewayConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -148,7 +147,10 @@ func TestAccAlibabacloudStackNatGatewayBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckNatGatewayDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNatGatewayConfigBasic(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"vpc_id": "${alibabacloudstack_vswitch.default.vpc_id}",
+					"name":   "${var.name}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name": fmt.Sprintf("tf-testAccNatGatewayConfig%d", rand),
@@ -160,9 +162,10 @@ func TestAccAlibabacloudStackNatGatewayBasic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-
 			{
-				Config: testAccNatGatewayConfig_name(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"name": "${var.name}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name": fmt.Sprintf("tf-testAccNatGatewayConfig%d", rand),
@@ -170,7 +173,9 @@ func TestAccAlibabacloudStackNatGatewayBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNatGatewayConfig_type(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"specification": "Small",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"specification": "Small",
@@ -178,7 +183,9 @@ func TestAccAlibabacloudStackNatGatewayBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNatGatewayConfig_specification(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"specification": "Middle",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"specification": "Middle",
@@ -186,7 +193,14 @@ func TestAccAlibabacloudStackNatGatewayBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNatGatewayConfig_all(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"name":          "${var.name}_all",
+					"specification": "Small",
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "Test",
+					},
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"specification": "Small",
@@ -201,11 +215,10 @@ func TestAccAlibabacloudStackNatGatewayBasic(t *testing.T) {
 	})
 }
 
-func testAccNatGatewayConfigBasic(rand int) string {
-	return fmt.Sprintf(
-		`
+func resourceNatGatewayConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccNatGatewayConfig%d"
+	default = "%s"
 }
 
 data "alibabacloudstack_zones" "default" {
@@ -213,148 +226,17 @@ data "alibabacloudstack_zones" "default" {
 }
 
 resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
+	name       = "${var.name}"
 	cidr_block = "172.16.0.0/12"
 }
 
 resource "alibabacloudstack_vswitch" "default" {
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
-	cidr_block = "172.16.0.0/21"
-	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	name = "${var.name}"
+	vpc_id              = "${alibabacloudstack_vpc.default.id}"
+	cidr_block          = "172.16.0.0/21"
+	availability_zone   = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	name                = "${var.name}"
 }
-
-resource "alibabacloudstack_nat_gateway" "default" {
-	vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
-	name = "${var.name}"
-}
-`, rand)
-}
-
-func testAccNatGatewayConfig_type(rand int) string {
-	return fmt.Sprintf(
-		`
-variable "name" {
-	default = "tf-testAccNatGatewayConfig%d"
-}
-
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation = "VSwitch"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
-	cidr_block = "172.16.0.0/21"
-	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	name = "${var.name}"
-}
-
-resource "alibabacloudstack_nat_gateway" "default" {
-	vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
-	name = "${var.name}"
-}
-`, rand)
-}
-
-func testAccNatGatewayConfig_name(rand int) string {
-	return fmt.Sprintf(
-		`
-variable "name" {
-	default = "tf-testAccNatGatewayConfig%d"
-}
-
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation = "VSwitch"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
-	cidr_block = "172.16.0.0/21"
-	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	name = "${var.name}"
-}
-
-resource "alibabacloudstack_nat_gateway" "default" {
-	vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
-	name = "${var.name}"
-}
-`, rand)
-}
-
-func testAccNatGatewayConfig_specification(rand int) string {
-	return fmt.Sprintf(
-		`
-variable "name" {
-	default = "tf-testAccNatGatewayConfig%d"
-}
-
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation = "VSwitch"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
-	cidr_block = "172.16.0.0/21"
-	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	name = "${var.name}"
-}
-
-resource "alibabacloudstack_nat_gateway" "default" {
-	vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
-	name = "${var.name}"
-	specification = "Middle"
-}
-`, rand)
-}
-
-func testAccNatGatewayConfig_all(rand int) string {
-	return fmt.Sprintf(
-		`
-variable "name" {
-	default = "tf-testAccNatGatewayConfig%d"
-}
-
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation = "VSwitch"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
-	cidr_block = "172.16.0.0/21"
-	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	name = "${var.name}"
-}
-
-resource "alibabacloudstack_nat_gateway" "default" {
-	vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
-	name = "${var.name}_all"
-	specification = "Small"
-	tags = {
-	Created= "TF",
-	For=     "Test",
-	}
-}
-`, rand)
+`, name)
 }
 
 var testAccCheckNatGatewayBasicMap = map[string]string{

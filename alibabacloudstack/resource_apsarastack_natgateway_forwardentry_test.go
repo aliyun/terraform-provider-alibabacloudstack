@@ -25,6 +25,9 @@ func TestAccAlibabacloudStackForwardEntryBasic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
+	name := fmt.Sprintf("tf-testAccForwardEntryConfig%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceForwardEntryConfigDependence)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
@@ -34,7 +37,15 @@ func TestAccAlibabacloudStackForwardEntryBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckForwardEntryDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccForwardEntryConfigBasic(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"name":             "${var.name}",
+					"forward_table_id": "${alibabacloudstack_nat_gateway.default.forward_table_ids}",
+					"external_ip":      "${alibabacloudstack_eip.default.0.ip_address}",
+					"external_port":    "80",
+					"ip_protocol":      "tcp",
+					"internal_ip":      "172.16.0.4",
+					"internal_port":    "8080",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -68,30 +79,10 @@ func testAccCheckForwardEntryDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccForwardEntryConfigBasic(rand int) string {
-	config := fmt.Sprintf(`
-%s
-
-resource "alibabacloudstack_forward_entry" "default"{
-	name = "${var.name}"
-	forward_table_id = "${alibabacloudstack_nat_gateway.default.forward_table_ids}"
-	external_ip = "${alibabacloudstack_eip.default.0.ip_address}"
-	external_port = "80"
-	ip_protocol = "tcp"
-	internal_ip = "172.16.0.4"
-	internal_port = "8080"
-
-
-}
-`, testAccForwardEntryConfigCommon(rand))
-	return config
-}
-
-func testAccForwardEntryConfigCommon(rand int) string {
-	return fmt.Sprintf(
-		`
+func resourceForwardEntryConfigDependence(name string) string {
+	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccForwardEntryConfig%d"
+	default = "%s"
 }
 
 variable "number" {
@@ -99,38 +90,34 @@ variable "number" {
 }
 
 data "alibabacloudstack_zones" "default" {
-	available_resource_creation= "VSwitch"
+	available_resource_creation = "VSwitch"
 }
 
 resource "alibabacloudstack_vpc" "default" {
-	
 	cidr_block = "172.16.0.0/12"
 }
 
 resource "alibabacloudstack_vswitch" "default" {
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
-	cidr_block = "172.16.0.0/21"
-	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	
+	vpc_id              = "${alibabacloudstack_vpc.default.id}"
+	cidr_block          = "172.16.0.0/21"
+	availability_zone   = "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 
 resource "alibabacloudstack_nat_gateway" "default" {
-	vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
+	vpc_id        = "${alibabacloudstack_vswitch.default.vpc_id}"
 	specification = "Small"
-	
 }
 
 resource "alibabacloudstack_eip" "default" {
 	count = "${var.number}"
-	
 }
 
 resource "alibabacloudstack_eip_association" "default" {
-	count = "${var.number}"
-	allocation_id = "${element(alibabacloudstack_eip.default.*.id,count.index)}"
-	instance_id = "${alibabacloudstack_nat_gateway.default.id}"
+	count         = "${var.number}"
+	allocation_id = "${element(alibabacloudstack_eip.default.*.id, count.index)}"
+	instance_id   = "${alibabacloudstack_nat_gateway.default.id}"
 }
-`, rand)
+`, name)
 }
 
 var testAccForwardEntryCheckMap = map[string]string{

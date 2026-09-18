@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -17,17 +18,29 @@ func TestAccAlibabacloudStackAscmPasswordPolicy_baisc(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := "Tf-testAccPasswordPolicy"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAscmPasswordPolicyConfigDependence)
+
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
 		},
-
-		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlibabacloudstackPasswordPolicyMinimumPasswordLength,
+				Config: testAccConfig(map[string]interface{}{
+					"minimum_password_length":      "10",
+					"require_lowercase_characters": true,
+					"require_uppercase_characters": true,
+					"require_numbers":              true,
+					"require_symbols":              true,
+					"hard_expiry":                  true,
+					"max_password_age":             "90",
+					"password_reuse_prevention":    "5",
+					"max_login_attempts":           "5",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -39,22 +52,15 @@ func TestAccAlibabacloudStackAscmPasswordPolicy_baisc(t *testing.T) {
 			},
 		},
 	})
-
 }
 
-const testAccAlibabacloudstackPasswordPolicyMinimumPasswordLength = `
-resource "alibabacloudstack_ascm_password_policy" "default" {
-		minimum_password_length = 10
-	    require_lowercase_characters = true
-	   require_uppercase_characters = true
-       require_numbers = true
-	    require_symbols = true
-	    hard_expiry = true
-	    max_password_age = 90
-	    password_reuse_prevention = 5
-	    max_login_attempts = 5
+func resourceAscmPasswordPolicyConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+	default = "%s"
 }
-`
+`, name)
+}
 
 var ascmPassword = map[string]string{
 	"minimum_password_length":      "10",

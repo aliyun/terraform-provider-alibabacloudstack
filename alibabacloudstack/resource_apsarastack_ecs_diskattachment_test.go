@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -22,23 +21,25 @@ func TestAccAlibabacloudStackDiskAttachment_basic(t *testing.T) {
 	}
 
 	diskRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_disk.default", &v, serverFunc, "DescribeDisk")
-
 	instanceRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_instance.default", &i, serverFunc, "DescribeInstance")
-
 	attachmentRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_diskattachment.default", &attachment, serverFunc, "DescribeDiskAttachment")
+
+	name := "tf-testAccEcsDiskAttachmentConfig"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEcsDiskAttachmentConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
 		},
-
-		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckDiskAttachmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDiskAttachmentConfig(),
+				Config: testAccConfig(map[string]interface{}{
+					"disk_id":     "${alibabacloudstack_ecs_disk.default.id}",
+					"instance_id": "${alibabacloudstack_ecs_instance.default.id}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					diskRc.checkResourceExists(),
 					instanceRc.checkResourceExists(),
@@ -48,7 +49,7 @@ func TestAccAlibabacloudStackDiskAttachment_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDiskAttachmentConfigResize(),
+				Config: resourceEcsDiskAttachmentResizeConfig("tf-testAccEcsDiskAttachmentConfig"),
 				Check: resource.ComposeTestCheckFunc(
 					diskRc.checkResourceExists(),
 					instanceRc.checkResourceExists(),
@@ -66,7 +67,6 @@ func TestAccAlibabacloudStackDiskAttachment_basic(t *testing.T) {
 			},
 		},
 	})
-
 }
 
 func TestAccAlibabacloudStackDiskAttachment_multi(t *testing.T) {
@@ -78,23 +78,26 @@ func TestAccAlibabacloudStackDiskAttachment_multi(t *testing.T) {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	diskRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_disk.default.1", &v, serverFunc, "DescribeDisk")
-
 	instanceRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_instance.default", &i, serverFunc, "DescribeInstance")
-
 	attachmentRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_diskattachment.default.1", &attachment, serverFunc, "DescribeDiskAttachment")
+
+	name := "tf-testAccEcsDiskAttachmentConfig"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEcsDiskAttachmentMultiConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
 		},
-
-		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckDiskAttachmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMultiDiskAttachmentConfig(ECSInstanceCommonTestCase),
+				Config: testAccConfig(map[string]interface{}{
+					"count":       "${var.number}",
+					"disk_id":     "${element(alibabacloudstack_ecs_disk.default.*.id, count.index)}",
+					"instance_id": "${alibabacloudstack_ecs_instance.default.id}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					diskRc.checkResourceExists(),
 					instanceRc.checkResourceExists(),
@@ -105,7 +108,6 @@ func TestAccAlibabacloudStackDiskAttachment_multi(t *testing.T) {
 			},
 		},
 	})
-
 }
 
 func testAccCheckDiskAttachmentDestroy(s *terraform.State) error {
@@ -130,87 +132,73 @@ func testAccCheckDiskAttachmentDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccDiskAttachmentConfig() string {
+func resourceEcsDiskAttachmentConfigDependence(name string) string {
 	return fmt.Sprintf(`
+variable "name" {
+	default = "%s"
+}
 
-	variable "name" {
-		default = "tf-testAccEcsDiskAttachmentConfig"
-	}
-	
 %s
 
-	resource "alibabacloudstack_ecs_disk" "default" {
-	  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-	  size = "20"
-	  name = "${var.name}"
-	  category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-	  delete_auto_snapshot = true
-	  tags = {
-	    Name = "TerraformTest-disk"
-	  }
+resource "alibabacloudstack_ecs_disk" "default" {
+	availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+	size              = "20"
+	name              = "${var.name}"
+	category          = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	delete_auto_snapshot = true
+	tags = {
+		Name = "TerraformTest-disk"
 	}
-
-
-	resource "alibabacloudstack_ecs_diskattachment" "default" {
-	  disk_id = "${alibabacloudstack_ecs_disk.default.id}"
-	  instance_id = "${alibabacloudstack_ecs_instance.default.id}"
-	}
-	`, ECSInstanceCommonTestCase)
 }
-func testAccDiskAttachmentConfigResize() string {
-	return fmt.Sprintf(`
-    
-	variable "name" {
-		default = "tf-testAccEcsDiskAttachmentConfig"
-	}
-	
-	%s
-
-	resource "alibabacloudstack_ecs_disk" "default" {
-	  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-	  size = "30"
-	  name = "${var.name}"
-	  category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-
-	  tags = {
-	    Name = "TerraformTest-disk"
-	  }
-	}
-
-	resource "alibabacloudstack_ecs_diskattachment" "default" {
-	  disk_id = "${alibabacloudstack_ecs_disk.default.id}"
-	  instance_id = "${alibabacloudstack_ecs_instance.default.id}"
-	}
-	`, ECSInstanceCommonTestCase)
+`, name, ECSInstanceCommonTestCase)
 }
-func testAccMultiDiskAttachmentConfig(common string) string {
+
+func resourceEcsDiskAttachmentResizeConfig(name string) string {
 	return fmt.Sprintf(`
-	variable "name" {
-		default = "tf-testAccEcsDiskAttachmentConfig"
-	}
+variable "name" {
+	default = "%s"
+}
 
-	variable "number" {
-		default = "2"
-	}
-	
-	%s
+%s
 
-	resource "alibabacloudstack_ecs_disk" "default" {
-		name = "${var.name}-${count.index}"
-		count = "${var.number}"
-		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-		category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-		size = "20"
-
-		tags = {
-			Name = "TerraformTest-disk-${count.index}"
-		}
+resource "alibabacloudstack_ecs_disk" "default" {
+	availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+	size              = "30"
+	name              = "${var.name}"
+	category          = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	tags = {
+		Name = "TerraformTest-disk"
 	}
+}
 
-	resource "alibabacloudstack_ecs_diskattachment" "default" {
-		count = "${var.number}"
-		disk_id     = "${element(alibabacloudstack_ecs_disk.default.*.id, count.index)}"
-		instance_id = "${alibabacloudstack_ecs_instance.default.id}"
+resource "alibabacloudstack_ecs_diskattachment" "default" {
+	disk_id     = "${alibabacloudstack_ecs_disk.default.id}"
+	instance_id = "${alibabacloudstack_ecs_instance.default.id}"
+}
+`, name, ECSInstanceCommonTestCase)
+}
+
+func resourceEcsDiskAttachmentMultiConfigDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+	default = "%s"
+}
+
+variable "number" {
+	default = "2"
+}
+
+%s
+
+resource "alibabacloudstack_ecs_disk" "default" {
+	name              = "${var.name}-${count.index}"
+	count             = "${var.number}"
+	availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+	category          = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	size              = "20"
+	tags = {
+		Name = "TerraformTest-disk-${count.index}"
 	}
-	`, common)
+}
+`, name, ECSInstanceCommonTestCase)
 }

@@ -51,20 +51,22 @@ func TestAccAlibabacloudStackEipAssociationBasic(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := fmt.Sprintf("tf-testAccEipAssociation%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEipAssociationConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
 		},
-
-		// module name
 		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEIPAssociationDestroy,
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckEIPAssociationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEIPAssociationConfigBaisc(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"allocation_id": "${alibabacloudstack_eip.default.id}",
+					"instance_id":   "${alibabacloudstack_ecs_instance.default.id}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -78,7 +80,6 @@ func TestAccAlibabacloudStackEipAssociationBasic(t *testing.T) {
 	})
 }
 
-
 func TestAccAlibabacloudStackEipAssociationEni(t *testing.T) {
 	var v vpc.EipAddress
 	resourceId := "alibabacloudstack_eip_association.default"
@@ -91,20 +92,23 @@ func TestAccAlibabacloudStackEipAssociationEni(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := fmt.Sprintf("tf-testAccEipAssociation%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEipAssociationEniConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
 		},
-
-		// module name
 		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEIPAssociationDestroy,
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckEIPAssociationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEIPAssociationConfigEni(rand),
+				Config: testAccConfig(map[string]interface{}{
+					"allocation_id": "${alibabacloudstack_eip.default.id}",
+					"instance_id":   "${alibabacloudstack_network_interface.default.id}",
+					"instance_type": "NetworkInterface",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"instance_type": "NetworkInterface",
@@ -115,10 +119,10 @@ func TestAccAlibabacloudStackEipAssociationEni(t *testing.T) {
 	})
 }
 
-func testAccEIPAssociationConfigBaisc(rand int) string {
+func resourceEipAssociationConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAccEipAssociation%d"
+	default = "%s"
 }
 
 %s
@@ -126,57 +130,45 @@ variable "name" {
 resource "alibabacloudstack_eip" "default" {
 	name = "${var.name}"
 }
-
-resource "alibabacloudstack_eip_association" "default" {
-  allocation_id = "${alibabacloudstack_eip.default.id}"
-  instance_id = "${alibabacloudstack_ecs_instance.default.id}"
-}
-`, rand, ECSInstanceCommonTestCase)
+`, name, ECSInstanceCommonTestCase)
 }
 
-
-func testAccEIPAssociationConfigEni(rand int) string {
+func resourceEipAssociationEniConfigDependence(name string) string {
 	return fmt.Sprintf(`
-%s
 variable "name" {
-  default = "tf-testAccEipAssociation%d"
+	default = "%s"
 }
+
+%s
 
 resource "alibabacloudstack_vpc" "default" {
-    name = "${var.name}"
-    cidr_block = "192.168.0.0/24"
+	name         = "${var.name}"
+	cidr_block   = "192.168.0.0/24"
 }
 
-
 resource "alibabacloudstack_vswitch" "default" {
-    name = "${var.name}"
-    cidr_block = "192.168.0.0/24"
-    availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-    vpc_id = "${alibabacloudstack_vpc.default.id}"
+	name              = "${var.name}"
+	cidr_block        = "192.168.0.0/24"
+	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	vpc_id            = "${alibabacloudstack_vpc.default.id}"
 }
 
 resource "alibabacloudstack_security_group" "default" {
-    name = "${var.name}"
-    vpc_id = "${alibabacloudstack_vpc.default.id}"
+	name   = "${var.name}"
+	vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
 
 resource "alibabacloudstack_network_interface" "default" {
-	name = "${var.name}"
-    vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-	security_groups = [ "${alibabacloudstack_security_group.default.id}" ]
-	private_ip = "192.168.0.2"
+	name            = "${var.name}"
+	vswitch_id      = "${alibabacloudstack_vswitch.default.id}"
+	security_groups = ["${alibabacloudstack_security_group.default.id}"]
+	private_ip      = "192.168.0.2"
 }
 
 resource "alibabacloudstack_eip" "default" {
 	name = "${var.name}"
 }
-
-resource "alibabacloudstack_eip_association" "default" {
-  allocation_id = "${alibabacloudstack_eip.default.id}"
-  instance_id = "${alibabacloudstack_network_interface.default.id}"
-  instance_type = "NetworkInterface"
-}
-`, DataAlibabacloudstackVswitchZones, rand)
+`, name, DataAlibabacloudstackVswitchZones)
 }
 
 var testAccCheckEipAssociationBasicMap = map[string]string{
