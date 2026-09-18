@@ -2,43 +2,63 @@ package alibabacloudstack
 
 import (
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackCspprivateHsmsDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_cspprivate_hsms.default"
-	ResourceTest(t, resource.TestCase{
+
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", dataSourceCspprivateHsmsConfigDependence)
+
+	// Basic configuration with required parameters from vendor data source
+	basicConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"vendor_code":  `${data.alibabacloudstack_cspprivate_hsm_vendors.anyone.vendors.0.code}`,
+			"product_code": `${data.alibabacloudstack_cspprivate_hsm_vendors.anyone.vendors.0.products.0.code}`,
+			"zone_id":      `${data.alibabacloudstack_zones.anyone.zones.0.id}`,
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"vendor_code":  `${data.alibabacloudstack_cspprivate_hsm_vendors.anyone.vendors.0.code}`,
+			"product_code": `${data.alibabacloudstack_cspprivate_hsm_vendors.anyone.vendors.0.products.0.code}`,
+			"zone_id":      "fake-zone-id",
+		}),
+	}
+
+	var existCspprivateHsmsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":     CHECKSET,
+			"hsms.#":    CHECKSET,
+			"hsms.0.id": CHECKSET,
+		}
+	}
+
+	var fakeCspprivateHsmsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"ids.#":  "0",
+			"hsms.#": "0",
+		}
+	}
+
+	var cspprivateHsmsCheckInfo = dataSourceAttr{
+		resourceId:   resourceId,
+		existMapFunc: existCspprivateHsmsMapFunc,
+		fakeMapFunc:  fakeCspprivateHsmsMapFunc,
+		Providers:    testYunDunProviders(),
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
+			testAccPreCheckYundunCredentials(t)
+			testAccPreCheckApiAvailable(t, "POST", "Cspprivate", "2022-02-17", "DescribeProxyCryptoService", "")
 		},
-		Providers: testYunDunProviders(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlibabacloudStackCspprivateHsmsDataSource,
-				Check: resource.ComposeTestCheckFunc(
-
-					testAccCheckAlibabacloudStackDataSourceID(resourceId),
-					resource.TestCheckResourceAttrSet(resourceId, "hsms.#"),
-					resource.TestCheckResourceAttrSet(resourceId, "hsms.0.id"),
-				),
-			},
-		},
-	})
+	}
+	cspprivateHsmsCheckInfo.dataSourceTestCheck(t, 0, basicConf)
 }
 
-const testAccCheckAlibabacloudStackCspprivateHsmsDataSource = `
-data "alibabacloudstack_cspprivate_hsm_vendors" "default" {
+func dataSourceCspprivateHsmsConfigDependence(name string) string {
+	return `
+data "alibabacloudstack_cspprivate_hsm_vendors" "anyone" {
 }
 
-data "alibabacloudstack_zones" "default" {
+data "alibabacloudstack_zones" "anyone" {
   enable_details = true
 }
-
-data "alibabacloudstack_cspprivate_hsms" "default" {
-  vendor_code = "${data.alibabacloudstack_cspprivate_hsm_vendors.default.vendors[0].code}"
-  product_code = "${data.alibabacloudstack_cspprivate_hsm_vendors.default.vendors[0].products[0].code}"
-  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
-}
-
 `
+}

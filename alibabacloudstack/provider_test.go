@@ -210,6 +210,16 @@ func testAccPreCheckOrg(t *testing.T) {
 	}
 }
 
+// testAccPreCheckYundunCredentials skips the test if Yundun-specific AK/SK are not configured.
+func testAccPreCheckYundunCredentials(t *testing.T) {
+	if v := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY"); v == "" {
+		t.Skip("Skipping test: ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY is not set")
+	}
+	if v := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY"); v == "" {
+		t.Skip("Skipping test: ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY is not set")
+	}
+}
+
 func testAccPreCheckOssEndpointList(t *testing.T) {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rawClient, err := sharedClientForRegion(region)
