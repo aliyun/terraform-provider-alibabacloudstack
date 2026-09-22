@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -204,15 +203,18 @@ func dataSourceAlibabacloudStackPolardbClusterInstanceTypesRead(d *schema.Resour
 		if _, exists := existedId[id]; exists {
 			continue
 		}
+		if data["cpu"] == nil || data["memory"] == nil {
+			continue
+		}
 		cpu := fmt.Sprintf("%v", data["cpu"])
 		cpu_count, err := strconv.Atoi(cpu)
 		if err != nil {
-			return errmsgs.WrapErrorf(err, "error data is :%#v", data)
+			continue
 		}
 		memory := fmt.Sprintf("%v", data["memory"])
 		memory_size, err := strconv.Atoi(memory)
 		if err != nil {
-			return errmsgs.WrapErrorf(err, "error data is :%#v", data)
+			continue
 		}
 		if v, ok := d.GetOk("cpu"); ok && cpu_count != v.(int) {
 			continue
