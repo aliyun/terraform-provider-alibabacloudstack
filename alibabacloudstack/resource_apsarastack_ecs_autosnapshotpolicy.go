@@ -89,6 +89,22 @@ func resourceAlibabacloudStackSnapshotPolicyCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapError(err)
 	}
 
+	if v, ok := d.GetOk("disk_ids"); ok {
+		diskIds := v.(*schema.Set).List()
+		if len(diskIds) > 0 {
+			request := map[string]interface{}{
+				"DiskIds":              convertListToJsonString(diskIds),
+				"AutoSnapshotPolicyId": d.Id(),
+			}
+			response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", "ApplyAutoSnapshotPolicy", "", nil, request, nil)
+			if err != nil {
+				errmsg := ""
+				errmsg = errmsgs.GetAsapiErrorMessage(response)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_snapshot_policy", "ApplyAutoSnapshotPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+		}
+	}
+
 	return nil
 }
 

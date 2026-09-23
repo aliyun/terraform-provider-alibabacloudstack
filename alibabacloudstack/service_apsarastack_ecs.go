@@ -219,7 +219,6 @@ func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type
 	return disks, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, response.RequestId)
 }
 
-
 func (s *EcsService) DiskAvailable(zone ecs.Zone, diskCategory DiskCategory) error {
 	for _, disk := range zone.AvailableDiskCategories.DiskCategories {
 		if disk == string(diskCategory) {
@@ -432,7 +431,6 @@ func (s *EcsService) DescribeAvailableResources(d *schema.ResourceData, meta int
 
 	return
 }
-
 
 func (s *EcsService) DescribeInstanceIdsWithKeyPair(id string) (instanceIds []string, instances []ecs.Instance, err error) {
 	request := ecs.CreateDescribeInstancesRequest()
@@ -1192,7 +1190,6 @@ func (s *EcsService) WaitForPrivateIpsListChanged(eniId string, ipList []string)
 	}
 }
 
-
 func (s *EcsService) AttachKeyPair(keyName string, instanceIds []interface{}) (err error) {
 	request := ecs.CreateAttachKeyPairRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
@@ -1465,16 +1462,19 @@ func (s *EcsService) WaitForSnapshotPolicy(id string, status Status, timeout int
 				if status == Deleted {
 					return nil
 				}
+			} else {
+				return errmsgs.WrapError(err)
 			}
-			return errmsgs.WrapError(err)
-		}
-
-		if snapshotPolicy.Status == string(status) {
+		} else if snapshotPolicy.Status == string(status) {
 			return nil
 		}
 
 		if time.Now().After(deadLine) {
-			return errmsgs.WrapErrorf(errmsgs.GetTimeErrorFromString("ECS WaitForSnapshotPolicy"), errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, snapshotPolicy.Status, string(status), errmsgs.ProviderERROR)
+			currentStatus := ""
+			if snapshotPolicy != nil {
+				currentStatus = snapshotPolicy.Status
+			}
+			return errmsgs.WrapErrorf(errmsgs.GetTimeErrorFromString("ECS WaitForSnapshotPolicy"), errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, currentStatus, string(status), errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
@@ -1596,7 +1596,6 @@ func (s *EcsService) DescribeImageShareByImageId(id string) (imageShare *ecs.Des
 	}
 	return resp, nil
 }
-
 
 func (s *EcsService) DescribeAutoProvisioningGroup(id string) (group ecs.AutoProvisioningGroup, err error) {
 	request := ecs.CreateDescribeAutoProvisioningGroupsRequest()
