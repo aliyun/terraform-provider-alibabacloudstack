@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackLogAlert_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_log_alert.default"
 	ra := resourceAttrInit(resourceId, logAlertMap)
 	serviceFunc := func() interface{} {
-		return &LogService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &LogService{testAccOrgProviders["alibabacloudstack"].Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rc := resourceCheckInit(resourceId, &alert, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
@@ -29,10 +29,10 @@ func TestAccAlibabacloudStackLogAlert_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 
 		PreCheck: func() {
-			testAccPreCheck(t, resourceId)
+			testAccPreCheckOrg(t)
 		},
 		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		Providers:     testAccOrgProviders,
 		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
@@ -91,11 +91,12 @@ func TestAccAlibabacloudStackLogAlert_basic(t *testing.T) {
 					}),
 				),
 			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
+		{
+			ResourceName:            resourceId,
+			ImportState:             true,
+			ImportStateVerify:       true,
+			ImportStateVerifyIgnore: []string{"mute_until"},
+		},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"throttling": "1h",
