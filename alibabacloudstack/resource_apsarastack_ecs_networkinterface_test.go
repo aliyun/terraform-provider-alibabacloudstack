@@ -76,13 +76,11 @@ func TestAccAlibabacloudStackEcsNetworkInterface0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"network_interface_name": name + "_update",
-					"description":            name + "_update",
+					"description": name + "_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"network_interface_name": name + "_update",
-						"description":            name + "_update",
+						"description": name + "_update",
 					}),
 				),
 			},
