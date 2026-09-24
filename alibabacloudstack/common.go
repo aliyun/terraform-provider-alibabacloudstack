@@ -467,6 +467,12 @@ func toInt(v interface{}) (int, error) {
 			return int(i), nil
 		}
 	}
+	if f, ok := v.(float64); ok {
+		return int(f), nil
+	}
+	if f, ok := v.(float32); ok {
+		return int(f), nil
+	}
 	return 0, fmt.Errorf("value is neither int nor string")
 }
 

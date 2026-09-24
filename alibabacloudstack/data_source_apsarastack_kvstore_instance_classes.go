@@ -49,12 +49,12 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"double", "single", "readone", "readthree", "readfive"}, false),
 			},
-			"cpu": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntInSlice([]int{1, 2, 4, 8, 16, 32, 64, 128, 256}),
-			},
+		"cpu": {
+			Type:         schema.TypeInt,
+			Optional:     true,
+			ForceNew:     true,
+			ValidateFunc: validation.IntInSlice([]int{1, 2, 4, 8, 16, 32, 64, 128, 256}),
+		},
 			"memory": {
 				Type:     schema.TypeFloat,
 				Optional: true,
@@ -201,7 +201,6 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 			memory = v.(float64)
 		}
 		for _, data := range datas {
-			// Convert raw.Memory to float32
 			switch v := data.Memory.(type) {
 			case float64:
 				data.Memory = v
@@ -215,13 +214,22 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 				data.Memory = float64(v)
 			case float32:
 				data.Memory = float64(v)
+			case nil:
+				data.Memory = float64(0)
 			default:
 				return fmt.Errorf("unsupported type for memory: %T (value: %v)", v, v)
 			}
-			if data.Cpu == 0 && data.CpuCore != 0 {
-				data.Cpu = data.CpuCore
+			cpuVal, _ := toInt(data.Cpu)
+			cpuCoreVal, _ := toInt(data.CpuCore)
+			data.Cpu = cpuVal
+			data.CpuCore = cpuCoreVal
+			if cpuVal == 0 && cpuCoreVal != 0 {
+				data.Cpu = cpuCoreVal
 			}
-			if cpu != 0 && data.CpuCore != cpu {
+			if data.Cpu == 0 && data.CpuCore == 0 {
+				continue
+			}
+			if cpu != 0 && data.Cpu != cpu {
 				continue
 			}
 			if memory != 0 && data.Memory != memory {
@@ -246,7 +254,7 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 			"architecture":   t.Architecture,
 			"edition_type":   t.Series,
 			"node_type":      t.NodeType,
-			"cpu":            t.CpuCore,
+			"cpu":            t.Cpu,
 			"memory":         t.Memory,
 			"status":         t.Status,
 		}

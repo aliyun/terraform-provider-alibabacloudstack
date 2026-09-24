@@ -491,12 +491,12 @@ type GetKVInstanceClassResponse struct {
 
 type KVInstanceClass struct {
 	Architecture   string      `json:"architecture"`
-	Cpu            int         `json:"cpu"`
-	CpuCore        int         `json:"cpuCore"`
+	Cpu            interface{} `json:"cpu"`
+	CpuCore        interface{} `json:"cpuCore"`
 	EngineVersion  string      `json:"engineVersion"`
 	InstanceClass  string      `json:"instanceClass"`
-	MaxBandWidth   int         `json:"maxBandWidth"`
-	MaxConnections int         `json:"maxConnections"`
+	MaxBandWidth   interface{} `json:"maxBandWidth"`
+	MaxConnections interface{} `json:"maxConnections"`
 	Memory         interface{} `json:"memory"`
 	NodeType       string      `json:"nodeType"`
 	Product        string      `json:"product"`
