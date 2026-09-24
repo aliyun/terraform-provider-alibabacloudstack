@@ -2,7 +2,9 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -12,6 +14,9 @@ import (
 
 func resourceAlibabacloudStackEdasK8sCluster() *schema.Resource {
 	resource := &schema.Resource{
+		Importer: &schema.ResourceImporter{
+			State: resourceAlibabacloudStackEdasK8sClusterImportState,
+		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
@@ -53,6 +58,31 @@ func resourceAlibabacloudStackEdasK8sCluster() *schema.Resource {
 	return resource
 }
 
+func upgradeEdasK8sClusterId(oldId, regionId string) string {
+	if !strings.Contains(oldId, ":") && regionId != "" {
+		return fmt.Sprintf("%s:%s", regionId, oldId)
+	}
+	return oldId
+}
+
+func resourceAlibabacloudStackEdasK8sClusterImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	id := d.Id()
+	if !strings.Contains(id, ":") {
+		client := meta.(*connectivity.AlibabacloudStackClient)
+		edasService := EdasService{client}
+		object, err := edasService.DescribeEdasK8sCluster(id)
+		if err != nil {
+			return nil, errmsgs.WrapError(err)
+		}
+		newId := upgradeEdasK8sClusterId(id, object.RegionId)
+		d.SetId(newId)
+		if object.RegionId != "" {
+			d.Set("namespace_id", object.RegionId)
+		}
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
 type ImportK8sClusterResponse struct {
 	Message   string `json:"Message" xml:"Message"`
 	Data      string `json:"Data" xml:"Data"`
@@ -64,10 +94,15 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 	retry := 5
 	var id string
 	var err error
+	namespaceId := d.Get("namespace_id").(string)
 	for retry > 0 {
-		id, err = importK8sCluster(client, d.Get("cs_cluster_id").(string), d.Get("namespace_id").(string))
+		id, err = importK8sCluster(client, d.Get("cs_cluster_id").(string), namespaceId)
 		if err == nil {
-			d.SetId(id)
+			if namespaceId != "" {
+				d.SetId(fmt.Sprintf("%s:%s", namespaceId, id))
+			} else {
+				d.SetId(id)
+			}
 			break
 		}
 		retry -= 1
@@ -126,6 +161,13 @@ func resourceAlibabacloudStackEdasK8sClusterRead(d *schema.ResourceData, meta in
 		}
 		return errmsgs.WrapError(err)
 	}
+
+	// 兼容旧格式 id（仅 clusterid），自动升级为新格式（namespaceid:clusterid）
+	newId := upgradeEdasK8sClusterId(d.Id(), object.RegionId)
+	if newId != d.Id() {
+		d.SetId(newId)
+	}
+
 	d.Set("cluster_name", object.ClusterName)
 	d.Set("cluster_type", object.ClusterType)
 	d.Set("network_mode", object.NetworkMode)
@@ -140,8 +182,13 @@ func resourceAlibabacloudStackEdasK8sClusterRead(d *schema.ResourceData, meta in
 func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
+	clusterId := d.Id()
+	if idx := strings.LastIndex(clusterId, ":"); idx != -1 && idx+1 < len(clusterId) {
+		clusterId = clusterId[idx+1:]
+	}
+
 	request := client.NewCommonRequest("DELETE", "Edas", "2017-08-01", "DeleteCluster", "/pop/v5/resource/cluster")
-	request.QueryParams["ClusterId"] = d.Id()
+	request.QueryParams["ClusterId"] = clusterId
 	// request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request)

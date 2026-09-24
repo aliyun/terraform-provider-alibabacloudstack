@@ -163,7 +163,11 @@ func testAccCheckEdasK8sClusterDestroy(s *terraform.State) error {
 		}
 
 		// Try to find the cluster
+		// 兼容新格式 ID（namespaceid:clusterid），按最后分隔符分割提取 clusterId
 		clusterId := rs.Primary.ID
+		if idx := strings.LastIndex(clusterId, ":"); idx != -1 && idx+1 < len(clusterId) {
+			clusterId = clusterId[idx+1:]
+		}
 		regionId := client.RegionId
 
 		request := edas.CreateGetClusterRequest()
@@ -192,6 +196,102 @@ func testAccCheckEdasK8sClusterDestroy(s *terraform.State) error {
 	return nil
 }
 
+func TestUpgradeEdasK8sClusterId(t *testing.T) {
+	tests := []struct {
+		name     string
+		oldId    string
+		regionId string
+		want     string
+	}{
+		{
+			name:     "旧格式ID无region，应升级",
+			oldId:    "cluster-123",
+			regionId: "cn-test",
+			want:     "cn-test:cluster-123",
+		},
+		{
+			name:     "新格式ID保持不变",
+			oldId:    "cn-test:cluster-123",
+			regionId: "cn-test",
+			want:     "cn-test:cluster-123",
+		},
+		{
+			name:     "旧格式ID但region为空，保持原样",
+			oldId:    "cluster-123",
+			regionId: "",
+			want:     "cluster-123",
+		},
+		{
+			name:     "ID含多个冒号按最后分隔符处理，已为新格式保持不变",
+			oldId:    "ns:test:cluster-123",
+			regionId: "cn-test",
+			want:     "ns:test:cluster-123",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := upgradeEdasK8sClusterId(tt.oldId, tt.regionId)
+			if got != tt.want {
+				t.Errorf("upgradeEdasK8sClusterId(%q, %q) = %q, want %q", tt.oldId, tt.regionId, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAccAlibabacloudStackEdasK8sCluster_ImportStateWithOldId(t *testing.T) {
+	var v *EdasK8sCluster
+	resourceId := "alibabacloudstack_edas_k8s_cluster.default"
+	ra := resourceAttrInit(resourceId, edasK8sClusterBasicMap)
+	serviceFunc := func() interface{} {
+		return &EdasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
+	rand := getAccTestRandInt(0, 1000)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := fmt.Sprintf("tftest%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sClusterConfigDependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t, resourceId)
+		},
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      testAccCheckEdasK8sClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"cs_cluster_id": "${local.k8s_cluster_id}",
+					"namespace_id":  "${alibabacloudstack_edas_namespace.default.namespace_logical_id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"cs_cluster_id": CHECKSET,
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// 验证导入后 ID 已升级为新格式（含 namespace 前缀）
+				ImportStateCheck: func(s []*terraform.InstanceState) error {
+					if len(s) != 1 {
+						return fmt.Errorf("expected 1 instance state, got %d", len(s))
+					}
+					id := s[0].ID
+					if !strings.Contains(id, ":") {
+						return fmt.Errorf("imported ID expected to contain ':', got %s", id)
+					}
+					return nil
+				},
+			},
+		},
+	})
+}
+
 func resourceEdasK8sClusterConfigDependence(name string) string {
 	return fmt.Sprintf(`
 		variable "name" {
@@ -216,4 +316,3 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 
 		`, name, AckK8sCommonTestCase())
 }
-

@@ -395,11 +395,24 @@ type EdasGetK8sClusterResponse struct {
 	Code    int  `json:"Code"`
 }
 
-func (e *EdasService) DescribeEdasK8sCluster(clusterId string) (*EdasK8sCluster, error) {
+func (e *EdasService) DescribeEdasK8sCluster(id string) (*EdasK8sCluster, error) {
 	cluster := EdasK8sCluster{}
+
+	var clusterId string
+	var namespaceId string
+	if idx := strings.LastIndex(id, ":"); idx != -1 && idx+1 < len(id) {
+		namespaceId = id[:idx]
+		clusterId = id[idx+1:]
+	} else {
+		clusterId = id
+	}
+
 	request := e.client.NewCommonRequest("POST", "Edas", "2017-08-01", "GetK8sCluster", "/pop/v5/k8s_clusters")
 	request.QueryParams["ResourceGroupId"] = e.client.ResourceGroup
 	request.QueryParams["ClusterId"] = clusterId
+	if namespaceId != "" {
+		request.QueryParams["RegionId"] = namespaceId
+	}
 
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
