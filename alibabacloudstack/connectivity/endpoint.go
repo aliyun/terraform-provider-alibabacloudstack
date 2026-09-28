@@ -90,7 +90,7 @@ const (
 	DTSCode              = ServiceCode("DTS")
 	SLSCode              = ServiceCode("SLS")
 	RosCode              = ServiceCode("ROS")
-	QuickbiCode          = ServiceCode("QUICKBI")
+	QuickbiCode          = ServiceCode("QUICKBI_PUBLIC")
 	DataworksPublicCode  = ServiceCode("DATAWORKS_PUBLIC")
 	DataworksPrivateCode = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
 	OneRouterCode        = ServiceCode("ONEROUTER") // remove in 3.21.0

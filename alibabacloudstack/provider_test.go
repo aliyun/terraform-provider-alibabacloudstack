@@ -418,6 +418,7 @@ func isApiNotFoundError(err error) bool {
 		"api not exist",
 		"action not found",
 		"invalid action",
+		"missing the product",
 	}
 	errMsgLower := strings.ToLower(errMsg)
 	for _, pattern := range notFoundPatterns {

@@ -24,6 +24,7 @@ func TestAccAlicloudQuickBIUser_basic0(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
+			testAccPreCheckApiAvailable(t, "POST", "quickbi-public", "2022-03-01", "AddUser", "")
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
