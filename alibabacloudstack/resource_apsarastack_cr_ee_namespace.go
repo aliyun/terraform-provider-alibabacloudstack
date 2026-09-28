@@ -60,6 +60,10 @@ func resourceAlibabacloudStackCrEeNamespaceCreate(d *schema.ResourceData, meta i
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		if errmsgs.IsExpectedErrors(err, "ascm.manage.EntityAlreadyExisted") {
+			d.SetId(crService.GenResourceId(instanceId, namespace))
+			return nil
+		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
