@@ -129,7 +129,7 @@ func NotFoundError(err error) bool {
 	}
 
 	if e, ok := err.(*tea.SDKError); ok {
-		return *e.StatusCode == 404 || strings.HasSuffix(*e.Code, ".NotFound")
+		return *e.StatusCode == 404 || strings.HasSuffix(*e.Code, ".NotFound") || strings.Contains(strings.ToLower(*e.Message), "doesn't exist") || strings.Contains(strings.ToLower(*e.Message), "does not exist")
 	}
 
 	// Handle OSS SDK OperationError
@@ -140,7 +140,7 @@ func NotFoundError(err error) bool {
 		}
 	}
 
-	return strings.HasSuffix(err.Error(), ".NotFound") || strings.HasPrefix(err.Error(), ResourceNotfound)
+	return strings.HasSuffix(err.Error(), ".NotFound") || strings.HasPrefix(err.Error(), ResourceNotfound) || strings.Contains(strings.ToLower(err.Error()), "doesn't exist") || strings.Contains(strings.ToLower(err.Error()), "does not exist")
 
 }
 
