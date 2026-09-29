@@ -246,6 +246,9 @@ func (s *ApiGateWayV2Service) DescribeRouteGroup(id string) (map[string]interfac
 	// Call the API to get the route group details
 	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetGroup", "/group/getGroup", nil, nil, reqQuery)
 	if err != nil {
+		if strings.Contains(strings.ToLower(err.Error()), "does not exist") {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("route group %s not found", id))
+		}
 		return nil, err
 	}
 
