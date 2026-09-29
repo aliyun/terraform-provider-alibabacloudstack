@@ -67,8 +67,15 @@ func resourceAlibabacloudStackApiGatewayV2CascadeLinkCreate(d *schema.ResourceDa
 		return err
 	}
 
-	linkId, ok := response["data"].(string)
-	if !ok {
+	var linkId string
+	if data, ok := response["data"].(string); ok {
+		linkId = data
+	} else if dataMap, ok := response["data"].(map[string]interface{}); ok {
+		if id, ok := dataMap["linkId"].(string); ok {
+			linkId = id
+		}
+	}
+	if linkId == "" {
 		return fmt.Errorf("failed to get linkId from response")
 	}
 
@@ -147,5 +154,6 @@ func resourceAlibabacloudStackApiGatewayV2CascadeLinkDelete(d *schema.ResourceDa
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteCascadeLink", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
+	d.SetId("")
 	return nil
 }

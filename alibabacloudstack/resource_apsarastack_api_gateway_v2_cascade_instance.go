@@ -68,17 +68,27 @@ func resourceAlibabacloudStackAPIGatewayV2CascadeInstanceCreate(d *schema.Resour
 		return err
 	}
 
-	data, ok := response["data"]
-	if !ok {
-		return fmt.Errorf("failed to get linkId from response")
+	var instance_id string
+	if data, ok := response["data"].(string); ok {
+		instance_id = data
+	} else if dataMap, ok := response["data"].(map[string]interface{}); ok {
+		if id, ok := dataMap["cascadeInstanceId"].(string); ok {
+			instance_id = id
+		} else if id, ok := dataMap["instanceId"].(string); ok {
+			instance_id = id
+		}
 	}
-
-	instance_id, ok := data.(string)
-	if !ok {
-		return fmt.Errorf("invalid type of linkId in response")
+	if instance_id == "" {
+		return fmt.Errorf("failed to get instanceId from response")
 	}
 
 	d.SetId(instance_id)
+
+	service := ApiGateWayV2Service{client}
+	stateConf := BuildStateConf([]string{"0", "1", "2", "3", "4"}, []string{"5"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, service.CascadeInstanceStateRefreshFunc(instance_id, []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, instance_id)
+	}
 
 	return nil
 }

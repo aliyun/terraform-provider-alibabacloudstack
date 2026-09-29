@@ -283,15 +283,22 @@ func (s *ApiGateWayV2Service) DescribeCascadeLink(id string) (map[string]interfa
 
 	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetCascadeLink", "/cascadeLink/getCascadeLink", nil, nil, reqQuery)
 	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "Cascading links do not exist", "Cascading link does not exist", "Cascade link not found") {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("cascade link %s not found", id))
+		}
 		return nil, err
 	}
 
-	if fmt.Sprint(response["code"]) != "200" {
+	if fmt.Sprint(response["code"]) != "200" && fmt.Sprint(response["Code"]) != "200" {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("cascade link %s not found", id))
 	}
 
-	data := response["data"].(map[string]interface{})
-	return data, nil
+	data, ok := response["data"]
+	if !ok || data == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("cascade link %s not found", id))
+	}
+
+	return data.(map[string]interface{}), nil
 }
 
 func (s *ApiGateWayV2Service) DescribeCascadeInstance(id string) (map[string]interface{}, error) {
@@ -307,6 +314,26 @@ func (s *ApiGateWayV2Service) DescribeCascadeInstance(id string) (map[string]int
 
 	return response["data"].(map[string]interface{}), nil
 }
+
+func (s *ApiGateWayV2Service) CascadeInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeCascadeInstance(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if fmt.Sprint(object["status"]) == failState {
+				return object, fmt.Sprint(object["status"]), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(object["status"])))
+			}
+		}
+		return object, fmt.Sprint(object["status"]), nil
+	}
+}
+
 func (s *ApiGateWayV2Service) DescribeApiGatewayV2Service(id string) (map[string]interface{}, error) {
 	parts := strings.SplitN(id, "^", 2)
 	if len(parts) != 2 {
