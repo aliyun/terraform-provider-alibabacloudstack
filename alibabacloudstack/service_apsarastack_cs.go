@@ -820,6 +820,35 @@ type ClusterObject struct {
 	} `json:"node_pools"`
 }
 
+func (c *ClusterObject) UnmarshalJSON(data []byte) error {
+	type Alias ClusterObject
+	aux := &struct {
+		Tags json.RawMessage `json:"tags"`
+		*Alias
+	}{
+		Alias: (*Alias)(c),
+	}
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+	if len(aux.Tags) > 0 {
+		var tags []Tag
+		if err := json.Unmarshal(aux.Tags, &tags); err != nil {
+			var tagMap map[string]string
+			if err2 := json.Unmarshal(aux.Tags, &tagMap); err2 == nil {
+				tags = make([]Tag, 0, len(tagMap))
+				for k, v := range tagMap {
+					tags = append(tags, Tag{Key: k, Value: v})
+				}
+			} else {
+				c.Tags = nil
+			}
+		}
+		c.Tags = tags
+	}
+	return nil
+}
+
 type ClustersV1 struct {
 	Redirect        bool   `json:"redirect"`
 	EagleEyeTraceID string `json:"eagleEyeTraceId"`

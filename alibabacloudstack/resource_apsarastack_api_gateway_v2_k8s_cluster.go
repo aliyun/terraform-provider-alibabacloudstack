@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -96,10 +97,46 @@ func resourceAlibabacloudStackAPIGatewayV2K8sClusterCreate(d *schema.ResourceDat
 		}
 	}
 	reqBody["k8sClusterName"] = d.Get("k8s_cluster_name").(string)
+	clusterName := reqBody["k8sClusterName"].(string)
 
 	// Call ImportCluster API
 	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ImportCluster", "/k8s/importCluster", nil, nil, reqBody)
 	if err != nil {
+		// Handle "cluster name is exist" error by adopting the existing cluster
+		if strings.Contains(err.Error(), "cluster name is exist") {
+			listReqBody := map[string]interface{}{
+				"current": 1,
+				"size":    100,
+			}
+			listResp, listErr := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListClusters", "/k8s/listClusters", nil, nil, listReqBody)
+			if listErr != nil {
+				return fmt.Errorf("cluster name exists but failed to list clusters: %v", listErr)
+			}
+
+			data, ok := listResp["data"].(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("cluster name exists but failed to parse list response")
+			}
+
+			records, ok := data["records"].([]interface{})
+			if !ok {
+				return fmt.Errorf("cluster name exists but no records found in list response")
+			}
+
+			for _, record := range records {
+				item, ok := record.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				if name, _ := item["k8sClusterName"].(string); name == clusterName {
+					if code, _ := item["k8sClusterCode"].(string); code != "" {
+						d.SetId(code)
+						return nil
+					}
+				}
+			}
+			return fmt.Errorf("cluster name exists but could not find matching cluster: %s", clusterName)
+		}
 		return err
 	}
 
@@ -158,6 +195,19 @@ func resourceAlibabacloudStackAPIGatewayV2K8sClusterDelete(d *schema.ResourceDat
 	// Call the CancelImportCluster API
 	_, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "CancelImportCluster", "/k8s/cancelImportCluster", nil, nil, reqBody)
 	if err != nil {
+		// Handle "not found" errors as success (resource already deleted)
+		if errmsgs.NotFoundError(err) {
+			log.Printf("[WARN] Resource alibabacloudstack_api_gateway_v2_k8s_cluster already deleted: %s", d.Id())
+			return nil
+		}
+		// Also check for common "not found" patterns in error message
+		errMsg := strings.ToLower(err.Error())
+		if strings.Contains(errMsg, "not found") || strings.Contains(errMsg, "not exist") ||
+			strings.Contains(errMsg, "does not exist") || strings.Contains(errMsg, "not be found") ||
+			strings.Contains(errMsg, "resource not found") || strings.Contains(errMsg, "cluster not found") {
+			log.Printf("[WARN] Resource alibabacloudstack_api_gateway_v2_k8s_cluster appears to be already deleted: %s", d.Id())
+			return nil
+		}
 		return fmt.Errorf("failed to cancel import cluster: %v", err)
 	}
 

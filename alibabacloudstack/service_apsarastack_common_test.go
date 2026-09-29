@@ -1410,6 +1410,48 @@ locals {
 	create_count = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? 0 : 1
 }
 
+resource "alibabacloudstack_vpc_vpc" "default" {
+	count = local.create_count
+	vpc_name = "${var.name}_vpc"
+	cidr_block = "172.16.0.0/16"
+	lifecycle {
+		ignore_changes = [
+			secondary_cidr_blocks,
+		]
+	}
+}
+
+resource "alibabacloudstack_vpc_vswitch" "default" {
+	count = local.create_count
+	vswitch_name = "${var.name}_vsw"
+	vpc_id = "${alibabacloudstack_vpc_vpc.default.0.id}"
+	cidr_block = "172.16.1.0/24"
+	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	lifecycle {
+		ignore_changes = [
+			tags
+		]
+	}
+}
+
+resource "alibabacloudstack_ecs_securitygroup" "default" {
+	count = local.create_count
+	name   = "${var.name}_sg"
+	vpc_id = "${alibabacloudstack_vpc_vpc.default.0.id}"
+}
+
+resource "alibabacloudstack_security_group_rule" "default" {
+	count = local.create_count
+	type = "ingress"
+	ip_protocol = "tcp"
+	nic_type = "intranet"
+	policy = "accept"
+	port_range = "22/22"
+	priority = 1
+	security_group_id = "${alibabacloudstack_ecs_securitygroup.default.0.id}"
+	cidr_ip = "192.168.0.0/16"
+}
+
 resource "alibabacloudstack_cs_kubernetes" "default" {
 	count						= local.create_count
 	name						= var.name
@@ -1418,12 +1460,12 @@ resource "alibabacloudstack_cs_kubernetes" "default" {
 	platform					= "AliyunLinux"
 	num_of_nodes				= "1"
 	master_count				= "3"
-	master_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+	master_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.0.id}", "${alibabacloudstack_vpc_vswitch.default.0.id}", "${alibabacloudstack_vpc_vswitch.default.0.id}"]
 	master_instance_types		= ["${local.default_instance_type_id}","${local.default_instance_type_id}","${local.default_instance_type_id}"]
 	master_disk_category		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-	vpc_id						= "${alibabacloudstack_vpc_vpc.default.id}"
+	vpc_id						= "${alibabacloudstack_vpc_vpc.default.0.id}"
 	worker_instance_types		= ["${local.default_instance_type_id}"]
-	worker_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.id}"]
+	worker_vswitch_ids			= ["${alibabacloudstack_vpc_vswitch.default.0.id}"]
 	worker_disk_category		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 	password					= random_password.password.0.result
 	pod_cidr					= "172.20.0.0/16"
@@ -1432,7 +1474,7 @@ resource "alibabacloudstack_cs_kubernetes" "default" {
 	master_disk_size			= "40"
 	slb_internet_enabled		= "true"
 	new_nat_gateway				= "false"
-	security_group_id			= alibabacloudstack_ecs_securitygroup.default.id
+	security_group_id			= alibabacloudstack_ecs_securitygroup.default.0.id
 	runtime	 {
 		name	= "containerd"
 		version	= "2.1.5"
@@ -1444,7 +1486,7 @@ locals {
 	k8s_cluster_name = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.names.0 : alibabacloudstack_cs_kubernetes.default.0.name
 	k8s_vswitch_id = length(data.alibabacloudstack_cs_kubernetes_clusters.default.ids) > 0 ? data.alibabacloudstack_cs_kubernetes_clusters.default.clusters.0.vswitch_ids.0 : alibabacloudstack_cs_kubernetes.default.0.master_vswitch_ids.0
 }
-`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SecurityGroupCommonTestCase, RandomPasswordTestCase(12, 1), DataAlibabacloudstackInstanceTypes)
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), DataZoneCommonTestCase, RandomPasswordTestCase(12, 1), DataAlibabacloudstackInstanceTypes)
 }
 
 func EdasClusterCommonTestCase() string {
