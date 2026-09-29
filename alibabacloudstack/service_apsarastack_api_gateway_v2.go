@@ -196,6 +196,12 @@ func (s *ApiGateWayV2Service) DescribeAPIGatewayV2Consumer(id string) (map[strin
 
 	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqQuery)
 	if err != nil {
+		if strings.Contains(err.Error(), "Consumers don't exist") ||
+			strings.Contains(err.Error(), "SourceApplication don't exist") ||
+			strings.Contains(err.Error(), "Application don't exist") ||
+			strings.Contains(err.Error(), "App not found") {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("api gateway v2 consumer %s not found", id))
+		}
 		return nil, err
 	}
 
@@ -203,8 +209,11 @@ func (s *ApiGateWayV2Service) DescribeAPIGatewayV2Consumer(id string) (map[strin
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("api gateway v2 consumer %s not found", id))
 	}
 
-	data := response["data"].(map[string]interface{})
-	return data, nil
+	data, ok := response["data"]
+	if !ok || data == nil {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("api gateway v2 consumer %s not found", id))
+	}
+	return data.(map[string]interface{}), nil
 }
 
 func (s *ApiGateWayV2Service) DescribeApiGatewayV2ServiceSource(id string) (map[string]interface{}, error) {
