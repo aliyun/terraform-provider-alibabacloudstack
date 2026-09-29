@@ -305,6 +305,9 @@ func (s *ApiGateWayV2Service) DescribeCascadeInstance(id string) (map[string]int
 	reqQuery := map[string]interface{}{"instanceId": id}
 	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", "GetCascadeInstance", "/cascadeInstance/getCascadeInstance", nil, nil, reqQuery)
 	if err != nil {
+		if errmsgs.IsExpectedErrors(err, "does not exist") {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("CascadeInstance %s not found", id))
+		}
 		return nil, err
 	}
 
