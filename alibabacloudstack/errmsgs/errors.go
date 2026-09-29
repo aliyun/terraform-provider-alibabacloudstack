@@ -121,11 +121,11 @@ func NotFoundError(err error) bool {
 	}
 
 	if e, ok := err.(*sdkerrors.ServerError); ok {
-		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound")
+		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound") || strings.Contains(strings.ToLower(e.Message()), "doesn't exist") || strings.Contains(strings.ToLower(e.Message()), "does not exist")
 	}
 
 	if e, ok := err.(*ProviderError); ok {
-		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound")
+		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound") || strings.Contains(strings.ToLower(e.Message()), "doesn't exist") || strings.Contains(strings.ToLower(e.Message()), "does not exist")
 	}
 
 	if e, ok := err.(*tea.SDKError); ok {

@@ -190,13 +190,36 @@ func resourceAlibabacloudStackAPIGatewayV2Instance() *schema.Resource {
 func resourceAlibabacloudStackAPIGatewayV2InstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	apigatewayv2Service := ApiGateWayV2Service{client}
+	
+	instanceName := d.Get("instance_name").(string)
 	broker_engine_type := d.Get("broker_engine_type").(string)
 	deployMode := d.Get("deploy_mode").(string)
+	
+	listRequest := map[string]interface{}{
+		"current": 1,
+		"size":    1000,
+	}
+	listResponse, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListInstances", "/gatewayInstance/listInstances", nil, listRequest, listRequest)
+	if err == nil {
+		if records, ok := listResponse["data"].(map[string]interface{})["records"].([]interface{}); ok {
+			for _, record := range records {
+				if item, ok := record.(map[string]interface{}); ok {
+					if name, ok := item["instanceName"].(string); ok && name == instanceName {
+						if gwInstanceId, ok := item["gwInstanceId"].(string); ok {
+							d.SetId(gwInstanceId)
+							return resourceAlibabacloudStackAPIGatewayV2InstanceRead(d, meta)
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	request := map[string]interface{}{
 		"RegionId":         client.RegionId,
 		"Department":       client.Department,
 		"ResourceGroup":    client.ResourceGroup,
-		"gwInstanceName":   d.Get("instance_name"),
+		"gwInstanceName":   instanceName,
 		"instanceNumber":   d.Get("node_number"),
 		"instanceClass":    d.Get("instance_class"),
 		"brokerEngineType": broker_engine_type,
