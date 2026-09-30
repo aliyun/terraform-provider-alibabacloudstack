@@ -389,6 +389,14 @@ func (s *CenService) WaitForCenInstance(instanceId string, status Status, timeou
 			continue
 		}
 
+		if instance == nil {
+			if time.Now().After(deadline) {
+				return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, "", string(status), errmsgs.ProviderERROR)
+			}
+			time.Sleep(DefaultIntervalShort * time.Second)
+			continue
+		}
+
 		if instance.Status == string(status) {
 			return nil
 		}
@@ -413,6 +421,14 @@ func (s *CenService) WaitForTransitRouterInstance(instanceId string, status Stat
 			} else {
 				return errmsgs.WrapError(err)
 			}
+		}
+
+		if instance == nil || len(instance.TransitRouters) == 0 {
+			if time.Now().After(deadline) {
+				return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, "", string(status), errmsgs.ProviderERROR)
+			}
+			time.Sleep(DefaultIntervalShort * time.Second)
+			continue
 		}
 
 		if instance.TransitRouters[0].Status == string(status) {
@@ -440,6 +456,13 @@ func (s *CenService) WaitForTransitRouterMulticastDomain(instanceId string, stat
 			} else {
 				return errmsgs.WrapError(err)
 			}
+		}
+		if instance == nil {
+			if time.Now().After(deadline) {
+				return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+			}
+			time.Sleep(DefaultIntervalShort * time.Second)
+			continue
 		}
 		for _, domain := range instance.TransitRouterMulticastDomains {
 			if domain.TransitRouterMulticastDomainId == domain_id && domain.Status == string(status) {
@@ -705,6 +728,13 @@ func (s *CenService) WaitForTransitRouterMulticastDomainAssociation(id string, s
 				return errmsgs.WrapError(err)
 			}
 		}
+		if domain_associations == nil {
+			if time.Now().After(deadline) {
+				return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+			}
+			time.Sleep(DefaultIntervalShort * time.Second)
+			continue
+		}
 		delete := true
 		for _, domain_association := range domain_associations.TransitRouterMulticastAssociations {
 			if domain_association.TransitRouterAttachmentId == attchment_id && domain_association.VSwitchId == vswithch_id && domain_association.TransitRouterMulticastDomainId == domain_id {
@@ -739,6 +769,13 @@ func (s *CenService) WaitForTransitRouterTable(id string, status Status, timeout
 			} else {
 				return errmsgs.WrapError(err)
 			}
+		}
+		if tables == nil {
+			if time.Now().After(deadline) {
+				return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, table_id, GetFunc(1), timeout, "", string(status), errmsgs.ProviderERROR)
+			}
+			time.Sleep(DefaultIntervalShort * time.Second)
+			continue
 		}
 		table_status := ""
 		for _, table := range tables.TransitRouterRouteTables {
@@ -932,6 +969,13 @@ func (s *CenService) WaitForAttachmentInstance(id string, status Status, timeout
 				return errmsgs.WrapError(err)
 			}
 		}
+		if instance == nil {
+			if time.Now().After(deadline) {
+				return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+			}
+			time.Sleep(DefaultIntervalShort * time.Second)
+			continue
+		}
 		for _, v := range instance.TransitRouterAttachments {
 			if v.TransitRouterAttachmentId == attach_ment_id && v.Status == string(status) {
 				return nil
@@ -959,6 +1003,13 @@ func (s *CenService) WaitForTransitRouterTableAssociation(id string, status Stat
 			} else {
 				return errmsgs.WrapError(err)
 			}
+		}
+		if instance == nil {
+			if time.Now().After(deadline) {
+				return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+			}
+			time.Sleep(DefaultIntervalShort * time.Second)
+			continue
 		}
 		if len(instance.TransitRouterAssociations) == 0 && status == Deleted {
 			return nil
@@ -990,6 +1041,13 @@ func (s *CenService) WaitForTransitRouterTablePropagation(id string, status Stat
 			} else {
 				return errmsgs.WrapError(err)
 			}
+		}
+		if instance == nil {
+			if time.Now().After(deadline) {
+				return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+			}
+			time.Sleep(DefaultIntervalShort * time.Second)
+			continue
 		}
 		if len(instance.TransitRouterPropagations) == 0 && status == Deleted {
 			return nil
