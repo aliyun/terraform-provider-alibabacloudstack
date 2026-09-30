@@ -382,6 +382,11 @@ func (s *CenService) WaitForCenInstance(instanceId string, status Status, timeou
 			} else {
 				return errmsgs.WrapError(err)
 			}
+			if time.Now().After(deadline) {
+				return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, "", string(status), errmsgs.ProviderERROR)
+			}
+			time.Sleep(DefaultIntervalShort * time.Second)
+			continue
 		}
 
 		if instance.Status == string(status) {
