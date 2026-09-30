@@ -151,12 +151,27 @@ func (s *ApiGateWayV2Service) DescribeApiGatewayV2Signature(id string) (map[stri
 
 	response, err := s.client.DoTeaRequest("POST", "csb2", "2023-02-06", action, pattern, nil, nil, reqQuery)
 	if err != nil {
+		if action == "GetSourceSigScheme" {
+			if errmsgs.IsExpectedErrors(err, "源签名方案不存在", "source signature scheme not exist", "Signature scheme does not exist") {
+				return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("signature scheme %s not found", id))
+			}
+		}
 		return nil, err
 	}
 	if action == "GetSourceSigScheme" {
-		if data, ok := response["data"]; ok {
+		if success, ok := response["success"].(bool); ok && !success {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("signature scheme %s not found", id))
+		}
+		if code, ok := response["code"].(string); ok && code != "200" {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("signature scheme %s not found", id))
+		}
+		if Code, ok := response["Code"].(string); ok && Code != "200" {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("signature scheme %s not found", id))
+		}
+		if data, ok := response["data"]; ok && data != nil {
 			return data.(map[string]interface{}), nil
 		}
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("signature scheme %s not found", id))
 	} else {
 		records, err := jsonpath.Get("$.data.records", response)
 		if err != nil {
