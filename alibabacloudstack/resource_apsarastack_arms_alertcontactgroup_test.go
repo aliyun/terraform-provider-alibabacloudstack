@@ -88,7 +88,7 @@ func TestAccAlibabacloudStackArmsAlertContactGroup_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_arms_alert_contact_group.default"
 	ra := resourceAttrInit(resourceId, ArmsAlertContactGroupMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &ArmsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &ArmsService{testAccOrgProviders["alibabacloudstack"].Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeArmsAlertContactGroup")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -97,11 +97,11 @@ func TestAccAlibabacloudStackArmsAlertContactGroup_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ArmsAlertContactGroupBasicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t, resourceId)
+			testAccPreCheckOrg(t)
 		},
 
 		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		Providers:     testAccOrgProviders,
 		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
