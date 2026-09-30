@@ -106,24 +106,60 @@ func testYunDunProviders() map[string]*schema.Provider {
 	testYundunProvider.Schema["access_key"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY", ""),
+		DefaultFunc: testYundunAccessKeyDefaultFunc(),
 		Description: descriptions["access_key"],
 	}
 	testYundunProvider.Schema["secret_key"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY", ""),
+		DefaultFunc: testYundunSecretKeyDefaultFunc(),
 		Description: descriptions["secret_key"],
 	}
 	testYundunProvider.Schema["role_arn"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
 		Description: descriptions["assume_role_role_arn"],
-		DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN", ""),
+		DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN", nil),
 	}
 	return map[string]*schema.Provider{
 		"alibabacloudstack":        testYundunProvider,
 		"alibabacloudstack-common": testAccProvider,
+	}
+}
+
+func testYundunAccessKeyDefaultFunc() schema.SchemaDefaultFunc {
+	return func() (interface{}, error) {
+		if v := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY"); v != "" {
+			return v, nil
+		}
+		if v := os.Getenv("ALIBABACLOUDSTACK_TEST_USER_AK"); v != "" {
+			return v, nil
+		}
+		if v := os.Getenv("ALIBABACLOUDSTACK_TEST_ORG_AK"); v != "" {
+			return v, nil
+		}
+		if v := os.Getenv("ALIBABACLOUDSTACK_ACCESS_KEY"); v != "" {
+			return v, nil
+		}
+		return nil, nil
+	}
+}
+
+func testYundunSecretKeyDefaultFunc() schema.SchemaDefaultFunc {
+	return func() (interface{}, error) {
+		if v := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY"); v != "" {
+			return v, nil
+		}
+		if v := os.Getenv("ALIBABACLOUDSTACK_TEST_USER_SK"); v != "" {
+			return v, nil
+		}
+		if v := os.Getenv("ALIBABACLOUDSTACK_TEST_ORG_SK"); v != "" {
+			return v, nil
+		}
+		if v := os.Getenv("ALIBABACLOUDSTACK_SECRET_KEY"); v != "" {
+			return v, nil
+		}
+		return nil, nil
 	}
 }
 
@@ -210,13 +246,19 @@ func testAccPreCheckOrg(t *testing.T) {
 	}
 }
 
-// testAccPreCheckYundunCredentials skips the test if Yundun-specific AK/SK are not configured.
+// testAccPreCheckYundunCredentials skips the test if no credentials are available for Yundun tests.
+// It checks Yundun-specific credentials first, then falls back to regular credentials.
 func testAccPreCheckYundunCredentials(t *testing.T) {
-	if v := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY"); v == "" {
-		t.Skip("Skipping test: ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY is not set")
+	hasYundunAK := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY") != ""
+	hasYundunSK := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY") != ""
+	
+	if hasYundunAK && hasYundunSK {
+		return
 	}
-	if v := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY"); v == "" {
-		t.Skip("Skipping test: ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY is not set")
+	
+	ak, sk := resolveTestCredentials(false)
+	if ak == "" || sk == "" {
+		t.Skip("Skipping test: no credentials available for Yundun tests (checked ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY/SECRET_KEY and fallback credentials)")
 	}
 }
 

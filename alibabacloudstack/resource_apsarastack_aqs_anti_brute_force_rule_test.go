@@ -13,7 +13,7 @@ func TestAccAlibabacloudStackAqsAntiBruteForceRule_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_aqs_anti_brute_force_rule.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &AqsService{testYundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &AqsService{testAccOrgProviders["alibabacloudstack"].Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeAntiBruteForceRule")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -23,10 +23,10 @@ func TestAccAlibabacloudStackAqsAntiBruteForceRule_basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t, resourceId)
+			testAccPreCheckOrg(t)
 		},
 		CheckDestroy: nil,
-		Providers:    testYunDunProviders(),
+		Providers:    testAccOrgProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -87,19 +87,16 @@ variable "name" {
 }
 
 data "alibabacloudstack_zones" "default" {
-  provider = alibabacloudstack-common
   available_resource_creation = "VSwitch"
   enable_details             = true
 }
 
 resource "alibabacloudstack_vpc_vpc" "default" {
-  provider = alibabacloudstack-common
   vpc_name   = "${var.name}_vpc"
   cidr_block = "172.16.0.0/16"
 }
 
 resource "alibabacloudstack_vpc_vswitch" "default" {
-  provider = alibabacloudstack-common
   name        = "${var.name}_vsw"
   vpc_id      = "${alibabacloudstack_vpc_vpc.default.id}"
   cidr_block  = "172.16.0.0/24"
@@ -107,25 +104,21 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 }
 
 resource "alibabacloudstack_ecs_securitygroup" "default" {
-  provider = alibabacloudstack-common
   name   = "${var.name}_sg"
   vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
 }
 
 data "alibabacloudstack_images" "default" {
-  provider = alibabacloudstack-common
   name_regex  = "^ubuntu_"
   most_recent = true
   owners      = "system"
 }
 
 data "alibabacloudstack_instance_types" "all" {
-  provider = alibabacloudstack-common
   sorted_by        = "Memory"
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 }
 resource "alibabacloudstack_ecs_instance" "default0" {
-  provider = alibabacloudstack-common
   system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
   instance_name        = "${var.name}"
   user_data            = "I_am_user_data"
@@ -138,7 +131,6 @@ resource "alibabacloudstack_ecs_instance" "default0" {
 }
 
 resource "alibabacloudstack_ecs_instance" "default1" {
-  provider = alibabacloudstack-common
   system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
   instance_name        = "${var.name}"
   user_data            = "I_am_user_data"
