@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -13,21 +14,22 @@ func TestAccAlibabacloudStackAqsOssScanconfig_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_aqs_oss_scanconfig.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &AqsService{testYundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &AqsService{testAccOrgProviders["alibabacloudstack"].Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeAqsOssScanConfig")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
-	name := fmt.Sprintf("tf-testacc%d", rand)
+	name := fmt.Sprintf("tf-testacc%d-%d", rand, time.Now().Unix()%100000)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAqsOssScanconfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t, resourceId)
+			testAccPreCheckOrg(t)
 			testAccPreCheckOss(t)
+			testAccPreCheckApiAvailable(t, "POST", "aegis", "2016-11-11", "ListOssScanConfig", "")
 		},
 		CheckDestroy: nil,
-		Providers:    testYunDunProviders(),
+		Providers:    testAccOrgProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
