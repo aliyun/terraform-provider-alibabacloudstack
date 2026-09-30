@@ -1,8 +1,10 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -157,6 +159,9 @@ func dataSourceAlibabacloudStackAPIGatewayV2RoutesRead(d *schema.ResourceData, m
 			}
 		}
 
+		routePath := convertRoutePath(route["routePath"])
+		enableStatus := convertEnableStatus(route["enableStatus"])
+
 		// Add route to filtered list
 		filteredRoutes = append(filteredRoutes, map[string]interface{}{
 			"id":            resourceId,
@@ -165,9 +170,9 @@ func dataSourceAlibabacloudStackAPIGatewayV2RoutesRead(d *schema.ResourceData, m
 			"group_id":      route["groupId"],
 			"group_name":    route["groupName"],
 			"service_name":  route["serviceName"],
-			"route_path":    route["routePath"],
+			"route_path":    routePath,
 			"service_id":    route["serviceId"],
-			"enable_status": route["enableStatus"],
+			"enable_status": enableStatus,
 			"create_time":   route["createTime"],
 		})
 
@@ -185,4 +190,42 @@ func dataSourceAlibabacloudStackAPIGatewayV2RoutesRead(d *schema.ResourceData, m
 	}
 
 	return nil
+}
+
+func convertRoutePath(v interface{}) interface{} {
+	if v == nil {
+		return []interface{}{}
+	}
+	switch val := v.(type) {
+	case []interface{}:
+		return val
+	case string:
+		var result []interface{}
+		if err := json.Unmarshal([]byte(val), &result); err == nil {
+			return result
+		}
+		return []interface{}{val}
+	default:
+		return []interface{}{}
+	}
+}
+
+func convertEnableStatus(v interface{}) bool {
+	if v == nil {
+		return false
+	}
+	switch val := v.(type) {
+	case bool:
+		return val
+	case string:
+		b, err := strconv.ParseBool(val)
+		if err != nil {
+			return false
+		}
+		return b
+	case float64:
+		return val != 0
+	default:
+		return false
+	}
 }
