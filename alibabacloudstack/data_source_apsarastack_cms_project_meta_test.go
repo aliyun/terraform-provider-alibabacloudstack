@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackCmsProjectMetaDataSource(t *testing.T) {
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": ".*ECS.*",
+			"name_regex": ".*VPC.*",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"name_regex": "fake_*",
@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackCmsProjectMetaDataSource(t *testing.T) {
 
 	namespaceConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"namespace": "acs_ecs_dashboard",
+			"namespace": "acs_vpc_vswitch",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"namespace": "fake_namespace",

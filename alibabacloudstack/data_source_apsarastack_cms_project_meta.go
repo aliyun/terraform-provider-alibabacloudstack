@@ -118,17 +118,19 @@ func dataSourceAlibabacloudStackCmsProjectMetaRead(d *schema.ResourceData, meta 
 			"description": rg.Description,
 			"namespace":   rg.Namespace,
 		}
-		if len(rg.Labels) > 0 {
-			labels := make([]map[string]string, 0)
-			for _, label := range rg.Labels {
-				label_map := map[string]string{
-					"name":  label.Name,
-					"value": label.Value,
-				}
-				labels = append(labels, label_map)
+		var labels []map[string]string
+		for _, label := range rg.Labels {
+			label_map := map[string]string{
+				"name":  label.Name,
+				"value": label.Value,
 			}
-			mapping["labels"] = labels
+			labels = append(labels, label_map)
 		}
+		if labels == nil {
+			labels = make([]map[string]string, 0)
+		}
+		mapping["labels"] = labels
+		ids = append(ids, rg.Namespace)
 		s = append(s, mapping)
 	}
 
