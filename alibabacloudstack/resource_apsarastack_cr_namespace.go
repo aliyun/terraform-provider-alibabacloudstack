@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -41,6 +41,8 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	resp := crResponse{}
 	namespaceName := d.Get("name").(string)
+	autoCreate := d.Get("auto_create").(bool)
+	visibility := d.Get("default_visibility").(string)
 	request := client.NewCommonRequest("PUT", "cr", "2016-06-07", "CreateNamespace", "/namespace")
 	request.QueryParams["NamespaceName"] = namespaceName
 	request.QueryParams["Action"] = "CreateNamespace"
@@ -48,10 +50,12 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 		"Action":        "CreateNamespace",
 		"NamespaceName": namespaceName,
 		"namespace": map[string]interface{}{
-			"namespace":     namespaceName,
-			"AscmShareType": "0",
-			"haApsaraStack": "false",
-			"arch":          "x86_64",
+			"namespace":         namespaceName,
+			"AscmShareType":     "0",
+			"haApsaraStack":     "false",
+			"arch":              "x86_64",
+			"AutoCreate":        autoCreate,
+			"DefaultVisibility": visibility,
 		},
 	}
 	jsonData, err := json.Marshal(body)
@@ -87,14 +91,16 @@ func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta int
 	visibility := d.Get("default_visibility").(string)
 	if d.HasChanges("auto_create", "default_visibility") {
 		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateNamespace", fmt.Sprintf("/namespace/%s", d.Id()))
+		request.QueryParams["NamespaceName"] = d.Id()
 		body := map[string]interface{}{
+			"Action":        "UpdateNamespace",
 			"NamespaceName": d.Id(),
 			"namespace": map[string]interface{}{
-				"AutoCreate":        fmt.Sprintf("%t", create),
+				"namespace":         d.Id(),
+				"AutoCreate":        create,
 				"DefaultVisibility": visibility,
 			},
 		}
-		request.QueryParams["Namespace"] = d.Id()
 		jsonData, err := json.Marshal(body)
 		if err != nil {
 			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
