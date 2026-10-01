@@ -90,7 +90,7 @@ func dataSourceAlibabacloudStackCenVbrHealthChecksRead(d *schema.ResourceData, m
 	}
 
 	// Call API
-	resp, err := client.DoTeaRequest("POST", "Cbn", "2017-09-12", "DescribeCenVbrHealthCheck", "", nil, reqQuery, nil)
+	resp, err := client.DoTeaRequest("GET", "Cbn", "2017-09-12", "DescribeCenVbrHealthCheck", "", nil, reqQuery, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_vbr_health_checks", "DescribeCenVbrHealthCheck", errmsgs.AlibabacloudStackSdkGoERROR)
 	}

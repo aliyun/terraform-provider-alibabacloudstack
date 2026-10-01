@@ -34,6 +34,10 @@ func TestAccAlibabacloudStackCenVbrHealthChecksDataSource(t *testing.T) {
 				"vbr_health_checks.#": "0",
 			}
 		},
+		PreCheck: func() {
+			testAccPreCheck(t, resourceId)
+			testAccPreCheckPhysicalConnection(t)
+		},
 	}
 
 	idsConf := dataSourceTestAccConfig{
@@ -69,6 +73,8 @@ variable "name" {
   default = "%s"
 }
 
+%s
+
 resource "alibabacloudstack_cen_instance" "default" {
   cen_instance_name = var.name
   description       = var.name
@@ -78,7 +84,7 @@ resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
   local_gateway_ip           = "10.0.0.1"
   peer_gateway_ip            = "10.0.0.2"
   peering_subnet_mask        = "255.255.255.252"
-  physical_connection_id     = "%s"
+  physical_connection_id     = alibabacloudstack_expressconnect_physicalconnection.default.id
   virtual_border_router_name = var.name
   vlan_id                    = %d
   min_rx_interval            = 1000
@@ -102,5 +108,5 @@ resource "alibabacloudstack_cen_vbr_health_check" "default" {
     health_check_only      = true
     depends_on             = [alibabacloudstack_cen_transit_router_vbr_attachment.default]
 }
-`, name, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"), getAccTestRandInt(1000, 2000))
+`, name, ExpressconnectPhysicalConnectionsCommonTestCase, getAccTestRandInt(1000, 2000)%3000)
 }
