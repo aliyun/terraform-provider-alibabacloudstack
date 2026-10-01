@@ -136,6 +136,7 @@ func TestAccAlibabacloudStackCrEEArtifactLifecycleRule_Repo(t *testing.T) {
 					"enable_delete_tag":   "false",
 					"recent_pull_keep":    "10",
 					"recent_push_keep":    "10",
+					"repo_name":           REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -146,6 +147,7 @@ func TestAccAlibabacloudStackCrEEArtifactLifecycleRule_Repo(t *testing.T) {
 						"enable_delete_tag":   "false",
 						"recent_pull_keep":    "10",
 						"recent_push_keep":    "10",
+						"repo_name":           REMOVEKEY,
 					}),
 				),
 			},

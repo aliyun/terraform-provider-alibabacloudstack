@@ -320,8 +320,8 @@ func (c *CrService) ListCrEeInstances(pageNo int, pageSize int) (map[string]inte
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	repoList := response["Instances"].([]interface{})
-	if len(repoList) == 0 {
+	repoList, ok := response["Instances"].([]interface{})
+	if !ok || len(repoList) == 0 {
 		return nil, errmsgs.WrapError(fmt.Errorf("cr-ee instance not found"))
 	}
 
