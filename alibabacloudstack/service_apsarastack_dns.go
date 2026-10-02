@@ -433,6 +433,9 @@ func (s *DnsService) DescribePrivateZoneRecord(id string) (map[string]interface{
 
 	resp, err := s.client.DoTeaRequest("POST", "CloudDns", "2021-06-24", "DescribePrivateZoneRecords", "", nil, nil, query)
 	if err != nil {
+		if strings.Contains(err.Error(), "ResourceNotFound") || strings.Contains(strings.ToLower(err.Error()), "non-exist") {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("record %s not found", id))
+		}
 		return nil, err
 	}
 
