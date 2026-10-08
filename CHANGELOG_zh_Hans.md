@@ -1,3 +1,28 @@
+# 3.16.27
+
+## 新增
+
+1. `alibabacloudstack_ack_cluster` 支持通过新增 `image_type` 参数指定节点操作系统镜像类型（默认 `AliyunLinux3`）
+2. `alibabacloudstack_autoscaling_scalingconfiguration` 支持配置系统盘名称和描述，新增 `system_disk_name` 和 `system_disk_description` 参数
+3. `alibabacloudstack_autoscaling_scalingconfigurations` 数据源新增 `system_disk_name` 和 `system_disk_description` 属性
+4. `alibabacloudstack_instance_types` 数据源支持通过 `ids` 参数按实例规格 ID 过滤
+
+## 修复
+
+1. 修复 `alibabacloudstack_ack_cluster` 在节点数为 0 时 `key_name`、`cpu_policy`、`worker_instance_types`、`worker_vswitch_ids`、`user_data` 等字段产生非预期 diff 的问题
+2. 修复 `alibabacloudstack_ack_cluster` 的 `addons` 配置因顺序变化或 config 为空产生非预期 diff 的问题
+3. 修复 `alibabacloudstack_ack_cluster` 的 `image_id` 字段未指定时产生非预期 diff 的问题
+4. 修复 `alibabacloudstack_ack_cluster` 删除时未检查资源是否存在导致不必要重试的问题
+5. 修复 `alibabacloudstack_ack_cluster` 状态查询在节点池扩缩容期间读取失败的问题
+6. 修复 diff 抑制函数中 `force_update` 字段类型断言可能导致 panic 的问题
+
+## 变更
+
+1. `alibabacloudstack_ack_cluster` 的 `num_of_nodes` 缩减为 0 时自动删除对应节点池并清理资源；不支持从 0 节点直接扩容（将返回明确错误）
+2. README 新增公告：因阿里云专有云飞天企业版 V3.16.2 已 EOX，本 Provider v3.16xR 分支停止演进，不再提供新功能和**非重大安全补丁**，请及时升级云平台至 V3.18.6
+
+---
+
 # 3.16.26
 
 ## 新增

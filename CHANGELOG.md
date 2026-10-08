@@ -1,3 +1,28 @@
+# 3.16.27
+
+## Added
+
+1. `alibabacloudstack_ack_cluster` supports specifying the node OS image type with the new `image_type` parameter (default `AliyunLinux3`)
+2. `alibabacloudstack_autoscaling_scalingconfiguration` supports configuring the system disk name and description with new `system_disk_name` and `system_disk_description` parameters
+3. `alibabacloudstack_autoscaling_scalingconfigurations` data source exports new `system_disk_name` and `system_disk_description` attributes
+4. `alibabacloudstack_instance_types` data source supports filtering by instance type IDs with the `ids` parameter
+
+## Fixes
+
+1. Fixed `alibabacloudstack_ack_cluster` unexpected diffs on `key_name`, `cpu_policy`, `worker_instance_types`, `worker_vswitch_ids`, and `user_data` fields when the node count is 0
+2. Fixed `alibabacloudstack_ack_cluster` `addons` configuration unexpected diffs caused by order changes or empty config
+3. Fixed `alibabacloudstack_ack_cluster` `image_id` field unexpected diff when not specified
+4. Fixed `alibabacloudstack_ack_cluster` delete operation missing resource existence check causing unnecessary retries
+5. Fixed `alibabacloudstack_ack_cluster` state query failures during node pool scaling (now waits for the node pool state to stabilize before reading)
+6. Fixed potential panic caused by `force_update` field type assertion in diff suppress functions
+
+## Changes
+
+1. `alibabacloudstack_ack_cluster` automatically deletes the corresponding node pool and cleans up resources when `num_of_nodes` is reduced to 0; scaling up from 0 nodes is not supported (returns an explicit error)
+2. README adds a notice: since Alibaba Cloud ApsaraStack V3.16.2 has reached EOX, the v3.16xR branch of this provider stops evolving — no new features or non-critical security patches will be provided; please upgrade the cloud platform to V3.18.6 in a timely manner
+
+---
+
 # 3.16.26
 
 ## Added
