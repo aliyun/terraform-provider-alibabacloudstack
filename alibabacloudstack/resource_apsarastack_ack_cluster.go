@@ -1255,7 +1255,7 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteCluster", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	// 如果资源已经不存在，直接返回成功，避免 WaitForState 因 NotFound 重试 21 次
+	// If the resource no longer exists, return success directly to avoid WaitForState retrying 21 times due to NotFound
 	_, describeErr := csService.DescribeCsKubernetes(d.Id())
 	if describeErr != nil {
 		if errmsgs.NotFoundError(describeErr) {

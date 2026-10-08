@@ -103,7 +103,7 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail
 			if strings.Contains(strings.ToLower(errmsg), "not found") || strings.Contains(strings.ToLower(errmsg), "notfound") {
 				return resource.NonRetryableError(errmsgs.ResourceNotFoundError("CsKubernetes", id))
 			}
-			// 网络或临时错误，允许重试
+			// Network or transient error, allow retry
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 
@@ -140,7 +140,7 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail
 			}
 		}
 		if cluster.ClusterId != id {
-			// API 可能延迟，返回空数组，进行有限重试
+			// The API may lag and return an empty array, perform limited retries
 			return resource.RetryableError(errmsgs.Error("DescribeClustersV1 returned empty clusters, retrying..."))
 		}
 
