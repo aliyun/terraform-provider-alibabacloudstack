@@ -2,6 +2,10 @@
 
 <img src="https://www.datocms-assets.com/2885/1506527326-color.svg" width="400px">
 
+> :warning: **End of Evolution (EOX) Notice**
+>
+> Since Alibaba Cloud ApsaraStack V3.16.2 has reached End of Life (EOX), the current branch of this provider (v3.16xR) has also stopped evolving. No new features or non-critical security patches will be provided for this branch anymore. We strongly recommend that you upgrade your cloud platform to Alibaba Cloud ApsaraStack V3.18.6 in a timely manner and use the corresponding provider version 3.18.x.
+
 ## Document languages
 
 ---
