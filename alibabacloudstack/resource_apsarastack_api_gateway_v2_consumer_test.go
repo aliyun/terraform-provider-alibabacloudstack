@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -507,8 +506,8 @@ func TestAccAlibabacloudStackApiGatewayV2Consumer_SourceConsumer(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(100000, 999999)
-	name := fmt.Sprintf("tf-testacc%d-%d", rand, time.Now().Unix()%100000)
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ApiGatewayV2SourceConsumerDependence)
 
 	ResourceTest(t, resource.TestCase{
