@@ -151,6 +151,7 @@ func resourceAlibabacloudStackPolardbxInstance() *schema.Resource {
 			"zone_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"compute_parameters": {
 				Type: schema.TypeSet,
