@@ -787,7 +787,9 @@ func resourceAlibabacloudStackPolardbxInstanceRead(d *schema.ResourceData, meta 
 
 	d.Set("status", data.Status)
 
-	d.Set("vswitch_id", data.VSwitchId)
+	if data.VSwitchId != "" {
+		d.Set("vswitch_id", data.VSwitchId)
+	}
 
 	d.Set("zone_id", data.ZoneId)
 
