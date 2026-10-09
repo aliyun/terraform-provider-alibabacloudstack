@@ -819,9 +819,15 @@ func resourceAlibabacloudStackPolardbxInstanceRead(d *schema.ResourceData, meta 
 	d.Set("enable_ssl", enable_ssl)
 	enable_tde, err := polardbxService.DoPolardbxDescribeDBInstanceTDERequest(d.Id())
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardbx_instance", errmsgs.AlibabacloudStackSdkGoERROR)
+		// Some engine versions (e.g., 5.7) do not support TDE. In this case, just set enable_tde to false.
+		if errmsgs.IsExpectedErrors(err, "IncorrectEngineVersion") {
+			d.Set("enable_tde", false)
+		} else {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardbx_instance", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+	} else {
+		d.Set("enable_tde", enable_tde)
 	}
-	d.Set("enable_tde", enable_tde)
 	if err = polardbxService.RefreshParameters(d, "storage"); err != nil {
 		return errmsgs.WrapError(err)
 	}
