@@ -289,7 +289,6 @@ type PolardbxDescribedbinstancesResponse struct {
 	TotalNumber int    `json:"TotalNumber"`
 }
 
-
 func (s *PolardbXService) DoPolardbxDescribeDBInstanceSSLRequest(id string) (bool, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstances
 	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstanceSSL", "")
@@ -548,6 +547,15 @@ func (s *PolardbXService) DeletePolardbxAccount(instance_id, account_name string
 	request.QueryParams["DBInstanceName"] = instance_id
 	request.QueryParams["AccountName"] = account_name
 
+	// When rights separation (three-role separation) is enabled, the DeleteAccount
+	// API requires the SecurityAccountName parameter. Query the super account list
+	// to detect if rights separation is active and obtain the security account name.
+	if accounts, accErr := s.DoPolardbxDescribeSuperAccountRequest(instance_id); accErr == nil && len(accounts) > 1 {
+		// len > 1 means security + audit accounts exist (rights separation enabled)
+		// accounts[1] is the security account
+		request.QueryParams["SecurityAccountName"] = accounts[1].AccountName
+	}
+
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if bresponse == nil {
@@ -599,7 +607,6 @@ func (s *PolardbXService) DescribePolardbXAccountDBPrivilege(id string) ([]map[s
 	return db_privileges, nil
 }
 
-
 func (s *PolardbXService) PolardbxAccountDatabaseBinding(id string, privileges []interface{}) error {
 	var instanceId, accountName string
 	if parts, err := ParseResourceId(id, 2); err != nil {
@@ -644,7 +651,6 @@ type DescribeSecurityIpsResponse struct {
 		GroupItems     []PolardbxSecurityIpGroupItems `xml:"GroupItems" json:"GroupItems"`
 	} `xml:"Data" json:"Data"`
 }
-
 
 func (s *PolardbXService) ModifySecurityIps(instance_id string, old, new []interface{}) error {
 	old_securitygroup := make(map[string]interface{})

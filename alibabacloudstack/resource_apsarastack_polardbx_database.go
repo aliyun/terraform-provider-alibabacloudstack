@@ -5,6 +5,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -62,9 +63,24 @@ func resourceAlibabacloudStackPolardbxDatabaseCreate(d *schema.ResourceData, met
 	defer func() {
 		Polardbxservice.DeletePolardbxAccount(d.Get("instance_id").(string), account_name)
 	}()
+	// Wait for instance to be in Running state before creating database,
+	// to avoid DBInstance.NotRunning error when instance is in transient state
+	// (e.g., right after enabling rights separation).
+	instanceId := d.Get("instance_id").(string)
+	stateConf := BuildStateConf(
+		[]string{"Creating", "CONFIG_SWITCHING"},
+		[]string{"Running"},
+		d.Timeout(schema.TimeoutCreate),
+		10*time.Second,
+		Polardbxservice.PolardbxDescribedbinstanceStateRefreshFunc(instanceId, []string{"Failed"}),
+	)
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, "Error waiting for Polardbx instance %s to be Running before CreateDB", instanceId)
+	}
+
 	reqQuery := map[string]interface{}{
 		"DbName":           d.Get("database_name").(string),
-		"DBInstanceName":   d.Get("instance_id").(string),
+		"DBInstanceName":   instanceId,
 		"Charset":          d.Get("encode").(string),
 		"DbDescription":    d.Get("description").(string),
 		"AccountName":      account_name,
@@ -83,9 +99,7 @@ func resourceAlibabacloudStackPolardbxDatabaseCreate(d *schema.ResourceData, met
 
 	drds_database_name := d.Get("database_name").(string)
 
-	instance_id := d.Get("instance_id").(string)
-
-	d.SetId(fmt.Sprintf("%s:%s", instance_id, drds_database_name))
+	d.SetId(fmt.Sprintf("%s:%s", instanceId, drds_database_name))
 	return nil
 
 }

@@ -1,13 +1,61 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
+
+
+// sweepPolardbxAccounts deletes all non-super accounts in the given instance.
+// If rights separation is enabled, it passes the security account name.
+func sweepPolardbxAccounts(client *connectivity.AlibabacloudStackClient, instanceId string) error {
+	request := client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeAccountList", "")
+	request.QueryParams["DBInstanceName"] = instanceId
+	bresponse, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		return fmt.Errorf("DescribeAccountList failed: %s", err)
+	}
+	var resp DoPolardbxDescribeAccountListResponse
+	if err := json.Unmarshal(bresponse.GetHttpContentBytes(), &resp); err != nil {
+		return fmt.Errorf("parse DescribeAccountList response failed: %s", err)
+	}
+
+	// Check if rights separation is enabled (security account exists)
+	var securityAccountName string
+	for _, acc := range resp.Data {
+		if acc.AccountType == "3" {
+			securityAccountName = acc.AccountName
+			break
+		}
+	}
+
+	// Delete non-super accounts (AccountType "1" = super, "2" = super-like; skip them)
+	for _, acc := range resp.Data {
+		if acc.AccountType == "1" || acc.AccountType == "2" {
+			continue // skip super accounts
+		}
+		if acc.AccountType == "3" || acc.AccountType == "4" {
+			continue // skip security and audit accounts
+		}
+		log.Printf("[INFO] Deleting account %s (type=%s) from instance %s", acc.AccountName, acc.AccountType, instanceId)
+		delReq := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteAccount", "")
+		delReq.QueryParams["DBInstanceName"] = instanceId
+		delReq.QueryParams["AccountName"] = acc.AccountName
+		if securityAccountName != "" {
+			delReq.QueryParams["SecurityAccountName"] = securityAccountName
+		}
+		if _, err := client.ProcessCommonRequest(delReq); err != nil {
+			log.Printf("[WARN] Failed to delete account %s: %s", acc.AccountName, err)
+		}
+	}
+	return nil
+}
 
 func TestAccAlibabacloudStackPolardbxAccount_basic0(t *testing.T) {
 	var v *PolardbxAccount

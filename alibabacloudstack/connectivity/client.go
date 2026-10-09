@@ -1043,6 +1043,12 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 			return resource.RetryableError(err), retryTimes
 		}
 
+		// Transient network-level errors (connection refused, reset, etc.)
+		if isTransientNetworkError(err) && retryTimes > 0 {
+			retryTimes--
+			return resource.RetryableError(err), retryTimes
+		}
+
 		// Fallback: non-retryable error
 		errmsg := errmsgs.GetAsapiErrorMessage(response)
 		wrappedErr := errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "Request API", api, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -1052,6 +1058,34 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 	return nil, retryTimes
 }
 
+// isTransientNetworkError checks whether the error is a transient network-level error
+// that may succeed on retry (connection refused, connection reset, i/o timeout, etc.).
+func isTransientNetworkError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	patterns := []string{
+		"connection refused",
+		"connection reset",
+		"connection timed out",
+		"i/o timeout",
+		"broken pipe",
+		"eof",
+	}
+	for _, p := range patterns {
+		if strings.Contains(msg, p) {
+			return true
+		}
+	}
+	// Also check tea.SDKError StatusCode for 5xx server errors
+	if sdkErr, ok := err.(*tea.SDKError); ok {
+		if sdkErr.StatusCode != nil && *sdkErr.StatusCode >= 500 {
+			return true
+		}
+	}
+	return false
+}
 func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, apiname, pathpattern string, headers map[string]string, query, body map[string]interface{}) (_result map[string]interface{}, _err error) {
 	ServiceCodeStr := strings.ReplaceAll(strings.ToUpper(popcode), "-", "_")
 	endpoint := client.Config.Endpoints[ServiceCode(ServiceCodeStr)]

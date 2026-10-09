@@ -2,9 +2,12 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"strings"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -12,6 +15,87 @@ import (
 
 func TestMain(m *testing.M) {
 	resource.TestMain(m)
+}
+
+// sweepFunc is the standard signature for all resource sweepers.
+// Region is obtained from environment variables inside each sweeper via sharedClientForRegion("").
+type sweepFunc func(prefixes []string) error
+
+// broadPrefixes is the common test resource prefix pair used in broad sweep mode.
+var broadPrefixes = []string{"tf-testAcc", "tf_testAcc"}
+
+// sweeperEntry binds a sweeper function with its precise/broad prefixes and error handling policy.
+type sweeperEntry struct {
+	fn      sweepFunc // the sweeper function
+	precise []string  // prefixes for precise mode (default)
+	broad   []string  // prefixes for broad mode (default: nil, only first entry needs this)
+	fatal   bool      // true: return err on failure; false: log warning only (default: false)
+	waitSec int       // seconds to wait after this entry completes; 0 means default 5s
+}
+
+// SweeperFunc composes multiple sweeperEntries into a resource.Sweeper.F function.
+//   - Precise mode (default): all entries run with their precise prefixes.
+//   - Broad mode (ALIBABACLOUDSTACK_TF_SWEEP_BROAD=1): only the first entry runs, with its broad prefixes.
+//   - fatal controls whether failure returns error (true) or logs warning (false).
+//   - waitSec controls seconds to sleep after each entry; 0 means default 5s.
+//
+// Usage:
+//
+//	SweeperFunc(
+//	    sweeperEntry{fn: testSweepCen, precise: []string{"tf-testAccCen"}, broad: broadPrefixes, fatal: true},
+//	    sweeperEntry{fn: testSweepVSwitch, precise: []string{"tf-testAccCen_vsw"}},
+//	    sweeperEntry{fn: testSweepVPC, precise: []string{"tf-testAccCen_vpc"}},
+//	)
+// SweeperFunc composes multiple sweeperEntries into a resource.Sweeper.F function.
+//   - Precise mode (default): all entries run with their precise prefixes.
+//   - Broad mode (ALIBABACLOUDSTACK_TF_SWEEP_BROAD=1): only entries with broad prefixes run, using their broad prefixes.
+//   - Custom prefix mode (ALIBABACLOUDSTACK_TF_SWEEP_PREFIXES=prefix1,prefix2): only works in broad mode, all entries run with the specified custom prefixes instead of broad prefixes.
+//   - fatal controls whether failure returns error (true) or logs warning (false).
+//   - waitSec controls seconds to sleep after each entry; 0 means default 5s.
+//
+// Environment variable: ALIBABACLOUDSTACK_TF_SWEEP_BROAD=1 enables broad mode; ALIBABACLOUDSTACK_TF_SWEEP_PREFIXES overrides broad prefixes (requires BROAD=1).
+func SweeperFunc(entries ...sweeperEntry) error {
+	broad := os.Getenv("ALIBABACLOUDSTACK_TF_SWEEP_BROAD") == "1"
+
+	// Custom prefix mode: only works in broad mode, use user-specified prefixes for all entries
+	var customPrefixes []string
+	if broad {
+		if envPrefixes := os.Getenv("ALIBABACLOUDSTACK_TF_SWEEP_PREFIXES"); envPrefixes != "" {
+			for _, p := range strings.Split(envPrefixes, ",") {
+				p = strings.TrimSpace(p)
+				if p != "" {
+					customPrefixes = append(customPrefixes, p)
+				}
+			}
+		}
+	}
+
+	for _, e := range entries {
+		var prefixes []string
+		if broad {
+			if len(customPrefixes) > 0 {
+				prefixes = customPrefixes
+			} else if len(e.broad) == 0 {
+				continue
+			} else {
+				prefixes = e.broad
+			}
+		} else {
+			prefixes = e.precise
+		}
+		if err := e.fn(prefixes); err != nil {
+			if e.fatal {
+				return err
+			}
+			log.Printf("[WARN] Sweeper %s error: %s", prefixes, err)
+		}
+		wait := e.waitSec
+		if wait == 0 {
+			wait = 5
+		}
+		time.Sleep(time.Duration(wait) * time.Second)
+	}
+	return nil
 }
 
 // functions for a given region

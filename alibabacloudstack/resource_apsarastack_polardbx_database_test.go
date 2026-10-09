@@ -1,13 +1,40 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
+
+
+// sweepPolardbxDatabases deletes all databases in the given instance.
+func sweepPolardbxDatabases(client *connectivity.AlibabacloudStackClient, instanceId string) error {
+	request := client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDbList", "")
+	request.QueryParams["DBInstanceName"] = instanceId
+	bresponse, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		return fmt.Errorf("DescribeDbList failed: %s", err)
+	}
+	var resp PolardbxDescribeDbListResponse
+	if err := json.Unmarshal(bresponse.GetHttpContentBytes(), &resp); err != nil {
+		return fmt.Errorf("parse DescribeDbList response failed: %s", err)
+	}
+	for _, db := range resp.Data {
+		log.Printf("[INFO] Deleting database %s from instance %s", db.DBName, instanceId)
+		delReq := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteDB", "")
+		delReq.QueryParams["DBInstanceName"] = instanceId
+		delReq.QueryParams["DbName"] = db.DBName
+		if _, err := client.ProcessCommonRequest(delReq); err != nil {
+			log.Printf("[WARN] Failed to delete database %s: %s", db.DBName, err)
+		}
+	}
+	return nil
+}
 
 func TestAccAlibabacloudStackPolardbxDatabase_basic0(t *testing.T) {
 	var v *PolardbxDatabase

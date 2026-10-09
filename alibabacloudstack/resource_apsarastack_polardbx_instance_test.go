@@ -1,13 +1,134 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
+
+
+func init() {
+	resource.AddTestSweepers("alibabacloudstack_polardbx_instance", &resource.Sweeper{
+		Name: "alibabacloudstack_polardbx_instance",
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepPolardbxInstances, precise: []string{"tf-testAcc", "tf_testAcc", "tfacc-polardbx"}, broad: broadPrefixes, fatal: true, waitSec: 30},
+		) },
+	})
+}
+
+// testSweepPolardbxInstances cleans up all PolarDB-X instances matching the given prefixes.
+// For each matching instance it:
+//  1. Waits for Running state (best-effort)
+//  2. Deletes all databases
+//  3. Deletes all accounts (handling rights separation if enabled)
+//  4. Deletes the instance itself
+func testSweepPolardbxInstances(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
+	if err != nil {
+		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	polardbxService := PolardbXService{client}
+
+	// List all PolarDB-X instances (paginated)
+	type instanceInfo struct {
+		Id          string
+		Description string
+		Status      string
+	}
+	var instances []instanceInfo
+	page := 1
+	pageSize := 50
+	for {
+		request := client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstances", "")
+		request.QueryParams["PageNumber"] = fmt.Sprint(page)
+		request.QueryParams["PageSize"] = fmt.Sprint(pageSize)
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			return fmt.Errorf("error listing PolarDB-X instances: %s", err)
+		}
+		var resp PolardbxDescribedbinstancesResponse
+		if err := json.Unmarshal(bresponse.GetHttpContentBytes(), &resp); err != nil {
+			return fmt.Errorf("error parsing PolarDB-X instances response: %s", err)
+		}
+		for _, inst := range resp.DBInstances {
+			matched := false
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(inst.Description, prefix) || strings.HasPrefix(inst.Id, prefix) {
+					matched = true
+					break
+				}
+			}
+			if matched {
+				instances = append(instances, instanceInfo{
+					Id:          inst.Id,
+					Description: inst.Description,
+					Status:      inst.Status,
+				})
+			}
+		}
+		if page*pageSize >= resp.TotalNumber {
+			break
+		}
+		page++
+	}
+
+	if len(instances) == 0 {
+		log.Printf("[INFO] No PolarDB-X instances to sweep")
+		return nil
+	}
+	log.Printf("[INFO] Found %d PolarDB-X instances to sweep", len(instances))
+
+	for _, inst := range instances {
+		log.Printf("[INFO] Sweeping PolarDB-X instance %s (%s), status=%s", inst.Id, inst.Description, inst.Status)
+
+		// Step 1: Wait for Running state (best-effort, timeout 5 min)
+		if inst.Status != "Running" {
+			log.Printf("[INFO] Instance %s is %s, waiting for Running...", inst.Id, inst.Status)
+			stateConf := BuildStateConf(
+				[]string{"Creating", "NodeCreating", "NodeDeleting", "ClassChanging", "CONFIG_SWITCHING"},
+				[]string{"Running"},
+				5*time.Minute, 10*time.Second,
+				polardbxService.PolardbxDescribedbinstanceStateRefreshFunc(inst.Id, []string{}),
+			)
+			if _, err := stateConf.WaitForState(); err != nil {
+				log.Printf("[WARN] Instance %s did not reach Running state: %s, attempting delete anyway", inst.Id, err)
+			}
+		}
+
+		// Step 2: Delete all databases
+		if err := sweepPolardbxDatabases(client, inst.Id); err != nil {
+			log.Printf("[WARN] Error sweeping databases for %s: %s", inst.Id, err)
+		}
+
+		// Step 3: Delete all accounts (handles rights separation)
+		if err := sweepPolardbxAccounts(client, inst.Id); err != nil {
+			log.Printf("[WARN] Error sweeping accounts for %s: %s", inst.Id, err)
+		}
+
+		// Step 4: Delete the instance
+		time.Sleep(5 * time.Second)
+		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteDBInstance", "")
+		request.QueryParams["DBInstanceName"] = inst.Id
+		if _, err := client.ProcessCommonRequest(request); err != nil {
+			log.Printf("[WARN] Error deleting PolarDB-X instance %s: %s", inst.Id, err)
+		} else {
+			log.Printf("[INFO] Deleted PolarDB-X instance %s", inst.Id)
+		}
+
+		// Wait for instance to be deleted before moving to next
+		time.Sleep(15 * time.Second)
+	}
+	return nil
+}
+
 
 func TestAccAlibabacloudStackPolardbxInstance_basic0(t *testing.T) {
 	var v *PolardbxDescribedbinstanceattributeResponse

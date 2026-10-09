@@ -1,7 +1,10 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
@@ -9,6 +12,61 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
+func init() {
+	resource.AddTestSweepers("alibabacloudstack_vpc_vswitch", &resource.Sweeper{
+		Name: "alibabacloudstack_vpc_vswitch",
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepVSwitches, precise: []string{"tf-testAccMulticastDomainAssociationsDatasource_vsw"}, broad: broadPrefixes, fatal: true},
+		) },
+	})
+}
+
+func testSweepVSwitches(prefixes []string) error {
+		rawClient, err := sharedClientForRegion("")
+		if err != nil {
+			return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
+		}
+		client := rawClient.(*connectivity.AlibabacloudStackClient)
+
+		request := client.NewCommonRequest("GET", "Vpc", "2016-04-28", "DescribeVSwitches", "")
+		request.QueryParams["RegionId"] = client.RegionId
+		response, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			return fmt.Errorf("error listing VSwitches: %s", err)
+		}
+		var vswsResp struct {
+			VSwitches struct {
+				VSwitch []struct {
+					VSwitchId   string `json:"VSwitchId"`
+					VSwitchName string `json:"VSwitchName"`
+				} `json:"VSwitch"`
+			} `json:"VSwitches"`
+		}
+		if err := json.Unmarshal(response.GetHttpContentBytes(), &vswsResp); err != nil {
+			return fmt.Errorf("error parsing VSwitch list: %s", err)
+		}
+
+		for _, vsw := range vswsResp.VSwitches.VSwitch {
+			matched := false
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(vsw.VSwitchName, prefix) {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				continue
+			}
+			log.Printf("[INFO] Sweeping VSwitch: %s (%s)", vsw.VSwitchName, vsw.VSwitchId)
+			delRequest := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteVSwitch", "")
+			delRequest.QueryParams["VSwitchId"] = vsw.VSwitchId
+			if _, err := client.ProcessCommonRequest(delRequest); err != nil {
+				log.Printf("[WARN] Error deleting VSwitch %s: %s", vsw.VSwitchId, err)
+			}
+		}
+	return nil
+}
 
 func TestAccAlibabacloudStackVpcVswitch_basic(t *testing.T) {
 

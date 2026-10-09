@@ -1,13 +1,74 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
+
+func init() {
+	resource.AddTestSweepers("alibabacloudstack_vpc_vpc", &resource.Sweeper{
+		Name: "alibabacloudstack_vpc_vpc",
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepVSwitches, precise: []string{"tf-testAccMulticastDomainAssociationsDatasource_vsw"}},
+			sweeperEntry{fn: testSweepVPCs, precise: []string{"tf-testAccMulticastDomainAssociationsDatasource_vpc"}, broad: broadPrefixes, fatal: true},
+		) },
+	})
+}
+
+func testSweepVPCs(prefixes []string) error {
+
+
+		rawClient, err := sharedClientForRegion("")
+		if err != nil {
+			return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
+		}
+		client := rawClient.(*connectivity.AlibabacloudStackClient)
+
+		request := client.NewCommonRequest("GET", "Vpc", "2016-04-28", "DescribeVpcs", "")
+		request.QueryParams["RegionId"] = client.RegionId
+		response, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			return fmt.Errorf("error listing VPCs: %s", err)
+		}
+		var vpcsResp struct {
+			Vpcs struct {
+				Vpc []struct {
+					VpcId   string `json:"VpcId"`
+					VpcName string `json:"VpcName"`
+				} `json:"Vpc"`
+			} `json:"Vpcs"`
+		}
+		if err := json.Unmarshal(response.GetHttpContentBytes(), &vpcsResp); err != nil {
+			return fmt.Errorf("error parsing VPC list: %s", err)
+		}
+
+		for _, vpc := range vpcsResp.Vpcs.Vpc {
+			matched := false
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(vpc.VpcName, prefix) {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				continue
+			}
+			log.Printf("[INFO] Sweeping VPC: %s (%s)", vpc.VpcName, vpc.VpcId)
+			delRequest := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteVpc", "")
+			delRequest.QueryParams["VpcId"] = vpc.VpcId
+			if _, err := client.ProcessCommonRequest(delRequest); err != nil {
+				log.Printf("[WARN] Error deleting VPC %s: %s", vpc.VpcId, err)
+			}
+		}
+	return nil
+}
 
 func TestAccAlibabacloudStackVpcVpc_basic(t *testing.T) {
 
