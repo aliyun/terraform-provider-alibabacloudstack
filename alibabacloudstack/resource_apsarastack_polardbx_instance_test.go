@@ -164,7 +164,6 @@ func TestAccAlibabacloudStackPolardbxInstance_basic0(t *testing.T) {
 					"engine_version": "5.7",
 					"storage":        "50",
 					"vswitch_id":     "${alibabacloudstack_vpc_vswitch.default.id}",
-					"gms_node_class": "${data.alibabacloudstack_polardbx_instance_types.dn.instance_types.0.id}",
 					"cn_node_class":  "${data.alibabacloudstack_polardbx_instance_types.cn.instance_types.0.id}",
 					"cn_node_count":  "2",
 					"dn_node_class":  "${data.alibabacloudstack_polardbx_instance_types.dn.instance_types.0.id}",
