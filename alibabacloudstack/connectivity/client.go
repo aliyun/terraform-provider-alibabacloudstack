@@ -871,7 +871,7 @@ func (client *AlibabacloudStackClient) NewBastionhostClient() (*rpc.Client, erro
 }
 
 func (client *AlibabacloudStackClient) defaultHeaders(popcode string) map[string]string {
-	return map[string]string{
+	headers := map[string]string{
 		"RegionId":                client.RegionId, //	ASAPI
 		"x-acs-organizationid":    client.Department,
 		"x-acs-resourcegroupid":   client.ResourceGroup,
@@ -886,15 +886,31 @@ func (client *AlibabacloudStackClient) defaultHeaders(popcode string) map[string
 		"x-acs-caller-sdk-source": "Terraform",
 		//"x-acs-asapi-gateway-version": "3.0"  This specifies to use the ASAPI v3 gateway process, currently maintained is v4, by default it will use v4. Specifying to use v3 is not recommended unless there are compatibility issues that require it.
 	}
+	// The POP gateway reads the STS token from the x-acs-security-token header for ROA-style
+	// requests, so carry it as a standard default header on both the common and tea request paths.
+	if client.Config.SecurityToken != "" {
+		headers["x-acs-security-token"] = client.Config.SecurityToken
+	}
+	return headers
 }
 
 func (client *AlibabacloudStackClient) defaultQueryParams() map[string]string {
-	return map[string]string{
+	queryParams := map[string]string{
 		"RegionId":       client.RegionId,
 		"Department":     client.Department,
 		"OrganizationId": client.Department,
 		"ResourceGroup":  client.ResourceGroup,
 	}
+	// The ASCM backend reads SecurityToken from the query params, but ROA-style signing (PathPattern
+	// set) routes the STS token to the "x-acs-security-token" header only, causing
+	// "ascm.auth.InvalidParameter [empty securityToken]". Carry SecurityToken as a standard default
+	// query param so it reaches the ASCM backend on both the common and tea request paths. For
+	// RPC-style products the RPC signature composer already adds SecurityToken to the query, so this
+	// is redundant but harmless (same value); keeping it here unifies the token handling in one place.
+	if client.Config.SecurityToken != "" {
+		queryParams["SecurityToken"] = client.Config.SecurityToken
+	}
+	return queryParams
 }
 
 func (client *AlibabacloudStackClient) NewCommonRequest(method string, popcode string, version string, apiname string, pathpattern string) *requests.CommonRequest {
