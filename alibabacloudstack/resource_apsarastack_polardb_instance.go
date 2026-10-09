@@ -128,31 +128,31 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				AtLeastOneOf:  []string{"instance_storage"},
 			},
 			"instance_charge_type": {
-				Type:          schema.TypeString,
-				ValidateFunc:  validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
-				Optional:      true,
-				Computed:      true,
-				Deprecated:    "The field `instance_charge_type` has been deprecated and is scheduled for removal in version 3.21.0.",
-				ConflictsWith: []string{"payment_type"},
-				DiffSuppressFunc: DeprecatedDiffSuppressFunc,
+				Type:                  schema.TypeString,
+				ValidateFunc:          validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
+				Optional:              true,
+				Computed:              true,
+				Deprecated:            "The field `instance_charge_type` has been deprecated and is scheduled for removal in version 3.21.0.",
+				ConflictsWith:         []string{"payment_type"},
+				DiffSuppressFunc:      DeprecatedDiffSuppressFunc,
 				DiffSuppressOnRefresh: true,
 			},
 			"payment_type": {
-				Type:          schema.TypeString,
-				ValidateFunc:  validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"instance_charge_type"},
-				Deprecated:    "The field `payment_type` has been deprecated and is scheduled for removal in version 3.21.0.",
-				DiffSuppressFunc: DeprecatedDiffSuppressFunc,
+				Type:                  schema.TypeString,
+				ValidateFunc:          validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
+				Optional:              true,
+				Computed:              true,
+				ConflictsWith:         []string{"instance_charge_type"},
+				Deprecated:            "The field `payment_type` has been deprecated and is scheduled for removal in version 3.21.0.",
+				DiffSuppressFunc:      DeprecatedDiffSuppressFunc,
 				DiffSuppressOnRefresh: true,
 			},
 			"period": {
-				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
-				Optional:         true,
-				Default:          1,
-				DiffSuppressFunc: DeprecatedDiffSuppressFunc,
+				Type:                  schema.TypeInt,
+				ValidateFunc:          validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
+				Optional:              true,
+				Default:               1,
+				DiffSuppressFunc:      DeprecatedDiffSuppressFunc,
 				DiffSuppressOnRefresh: true,
 			},
 			"monitoring_period": {
@@ -162,20 +162,20 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Computed:     true,
 			},
 			"auto_renew": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:          false,
-				DiffSuppressFunc: DeprecatedDiffSuppressFunc,
-				Deprecated:    "The field `auto_renew` has been deprecated and is scheduled for removal in version 3.21.0.",
+				Type:                  schema.TypeBool,
+				Optional:              true,
+				Default:               false,
+				DiffSuppressFunc:      DeprecatedDiffSuppressFunc,
+				Deprecated:            "The field `auto_renew` has been deprecated and is scheduled for removal in version 3.21.0.",
 				DiffSuppressOnRefresh: true,
 			},
 			"auto_renew_period": {
-				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntBetween(1, 12),
-				Optional:         true,
-				Default:          1,
-				DiffSuppressFunc: DeprecatedDiffSuppressFunc,
-				Deprecated:    "The field `auto_renew_period` has been deprecated and is scheduled for removal in version 3.21.0.",
+				Type:                  schema.TypeInt,
+				ValidateFunc:          validation.IntBetween(1, 12),
+				Optional:              true,
+				Default:               1,
+				DiffSuppressFunc:      DeprecatedDiffSuppressFunc,
+				Deprecated:            "The field `auto_renew_period` has been deprecated and is scheduled for removal in version 3.21.0.",
 				DiffSuppressOnRefresh: true,
 			},
 			"zone_id": {
@@ -473,7 +473,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceTDE", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		stateConf := BuildStateConf([]string{"Disabled"}, []string{"Enabled"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, PolardbService.PolardbDBInstanceTdeStateRefreshFunc(d, client, d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{"TDE_MODIFYING", "CONFIG_ENCRYPTING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -512,7 +512,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		// 	target = "on"
 		// 	process = "off"
 		// }
-		stateConf := BuildStateConf([]string{"SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{"SSL_MODIFYING", "CONFIG_ENCRYPTING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -633,7 +633,7 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_dbinstance", ssl_req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		stateConf := BuildStateConf([]string{"SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
+		stateConf := BuildStateConf([]string{"SSL_MODIFYING", "CONFIG_ENCRYPTING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -662,7 +662,7 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 			errmsg := errmsgs.GetBaseResponseErrorMessage(acl_response.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_dbinstance", acl_req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		stateConf := BuildStateConf([]string{"SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 2*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{"SSL_MODIFYING", "CONFIG_ENCRYPTING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 2*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -861,7 +861,7 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackPolardbInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
-	stateConf := BuildStateConf([]string{"SSL_MODIFYING", "TDE_MODIFYING", "DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"SSL_MODIFYING", "TDE_MODIFYING", "CONFIG_ENCRYPTING", "DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

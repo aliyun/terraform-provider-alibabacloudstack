@@ -219,7 +219,7 @@ func (s *PolardbXService) PolardbxDescribedbinstanceStateRefreshFunc(id string, 
 	return func() (interface{}, string, error) {
 		response, err := s.DoPolardbxDescribedbinstanceattributeRequest(id)
 		if err != nil {
-			if errmsgs.NotFoundError(err) {
+			if errmsgs.NotFoundError(err) || errmsgs.NeedRetry(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
@@ -844,7 +844,7 @@ func (s *PolardbXService) DescribePolarDbXBackupStateRefreshFunc(id string, fail
 	return func() (interface{}, string, error) {
 		object, err := s.DescribePolarDbXBackup(id)
 		if err != nil {
-			if errmsgs.NotFoundError(err) {
+			if errmsgs.NotFoundError(err) || errmsgs.NeedRetry(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
