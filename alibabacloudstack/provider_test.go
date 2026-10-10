@@ -251,11 +251,11 @@ func testAccPreCheckOrg(t *testing.T) {
 func testAccPreCheckYundunCredentials(t *testing.T) {
 	hasYundunAK := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY") != ""
 	hasYundunSK := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY") != ""
-	
+
 	if hasYundunAK && hasYundunSK {
 		return
 	}
-	
+
 	ak, sk := resolveTestCredentials(false)
 	if ak == "" || sk == "" {
 		t.Skip("Skipping test: no credentials available for Yundun tests (checked ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY/SECRET_KEY and fallback credentials)")
@@ -461,6 +461,7 @@ func isApiNotFoundError(err error) bool {
 		"action not found",
 		"invalid action",
 		"missing the product",
+		"user.invalid",
 	}
 	errMsgLower := strings.ToLower(errMsg)
 	for _, pattern := range notFoundPatterns {

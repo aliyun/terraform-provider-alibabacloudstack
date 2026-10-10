@@ -2,12 +2,49 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
+func testAccPreCheckEdasNamespace(t *testing.T) {
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	rawClient, err := sharedClientForRegion(region)
+	if err != nil {
+		t.Skipf("Skipping test: failed to initialize client: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+
+	request := map[string]interface{}{
+		"RegionTag":  fmt.Sprintf("%s:test_probe", region),
+		"RegionName": "test_probe",
+	}
+	response, err := client.DoTeaRequest("POST", "Edas", "2017-08-01", "InsertOrUpdateRegion", "/pop/v5/user_region_def", nil, request, nil)
+	if err != nil {
+		errMsg := strings.ToLower(err.Error())
+		if strings.Contains(errMsg, "user.invalid") || strings.Contains(errMsg, "invalidaction.notfound") || strings.Contains(errMsg, "notsupportapi") {
+			t.Skipf("Skipping test: EDAS namespace API is not available in the environment: %s", err)
+		}
+		return
+	}
+	// EDAS POP API returns error in response body, not as Go error
+	if code, ok := response["Code"]; ok {
+		codeStr := fmt.Sprintf("%v", code)
+		if codeStr != "200" {
+			msg := ""
+			if m, ok := response["Message"]; ok {
+				msg = fmt.Sprintf("%v", m)
+			}
+			if strings.Contains(strings.ToLower(msg), "user.invalid") || strings.Contains(strings.ToLower(msg), "invalidaction") {
+				t.Skipf("Skipping test: EDAS namespace API is not available in the environment (Code: %s, Message: %s)", codeStr, msg)
+			}
+		}
+	}
+}
 
 func TestAccAlibabacloudStackEdasCluster_basic(t *testing.T) {
 	var v *edas.Cluster
@@ -23,8 +60,8 @@ func TestAccAlibabacloudStackEdasCluster_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasClusterConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-
 			testAccPreCheck(t, resourceId)
+			testAccPreCheckEdasNamespace(t)
 		},
 
 		IDRefreshName: resourceId,

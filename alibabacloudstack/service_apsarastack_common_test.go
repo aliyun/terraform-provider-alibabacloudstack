@@ -447,10 +447,6 @@ func valueConvert(indentation int, val reflect.Value) string {
 		return listValue(indentation, val)
 	case reflect.Map:
 		return mapValue(indentation, val)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return fmt.Sprintf("%d", val.Int())
-	case reflect.Float32, reflect.Float64:
-		return fmt.Sprintf("%v", val.Float())
 	default:
 		log.Panicf("the map value must be string, bool, int, float, map or slice type! %s", val)
 	}
