@@ -160,7 +160,7 @@ func TestAccAlibabacloudStackPolardbxInstance_basic0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description":    "testtf",
-					"zone_id":        "${data.alibabacloudstack_zones.default.zones.1.id}",
+					"zone_id":        "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"engine_version": "5.7",
 					"storage":        "50",
 					"vswitch_id":     "${alibabacloudstack_vpc_vswitch.default.id}",
