@@ -62,12 +62,12 @@ func TestAccAlibabacloudStackVpcNetworkAclsDataSource(t *testing.T) {
 	}
 	var existAlibabacloudStackNetworkAclsDataSourceNameMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":                        CHECKSET,
-			"names.#":                      CHECKSET,
-			"acls.#":                       CHECKSET,
+			"ids.#":                        "1",
+			"names.#":                      "1",
+			"acls.#":                       "1",
 			"acls.0.description":           fmt.Sprintf("tf-testAccNetworkAcl-%d", rand),
-		"acls.0.egress_acl_entries.#":  "1",
-		"acls.0.ingress_acl_entries.#": "1",
+			"acls.0.egress_acl_entries.#":  "1",
+			"acls.0.ingress_acl_entries.#": "1",
 			"acls.0.network_acl_name":      fmt.Sprintf("tf-testAccNetworkAcl-%d", rand),
 			"acls.0.vpc_id":                CHECKSET,
 			"acls.0.status":                "Available",
