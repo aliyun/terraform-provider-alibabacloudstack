@@ -91,7 +91,7 @@ func testAccCheckAscm_RamPolicyDestroy(s *terraform.State) error {
 
 func testAccAscm_RamPolicy_resource(name string) string {
 	return fmt.Sprintf(`
-variables "name" {
+variable "name" {
 	default = "%s"
 }
 `, name)

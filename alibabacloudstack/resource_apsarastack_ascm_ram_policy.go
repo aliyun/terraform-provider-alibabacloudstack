@@ -136,7 +136,6 @@ func resourceAlibabacloudStackAscmRamPolicyUpdate(d *schema.ResourceData, meta i
 		if d.HasChange("policy_document") {
 			request.QueryParams["newPolicyDocument"] = d.Get("policy_document").(string)
 		}
-
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			if bresponse == nil {
@@ -146,6 +145,17 @@ func resourceAlibabacloudStackAscmRamPolicyUpdate(d *schema.ResourceData, meta i
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
+
+	// Verify policyDocument was actually updated (some backends silently ignore newPolicyDocument)
+	if d.HasChange("policy_document") {
+		verifyResp, verifyErr := ascmService.DescribeAscmRamPolicy(d.Id())
+		if verifyErr == nil && len(verifyResp.Data) > 0 {
+			if strings.TrimSpace(verifyResp.Data[0].PolicyDocument) != strings.TrimSpace(d.Get("policy_document").(string)) {
+				return fmt.Errorf("UpdateRAMPolicy succeeded but policyDocument was not updated on backend (expected %s, got %s). This is a known backend limitation", d.Get("policy_document").(string), verifyResp.Data[0].PolicyDocument)
+			}
+		}
+	}
+
 	d.SetId(d.Get("name").(string) + COLON_SEPARATED + did[1])
 
 	return nil
