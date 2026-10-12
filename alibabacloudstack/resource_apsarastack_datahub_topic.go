@@ -160,6 +160,10 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		if errmsgs.IsExpectedErrors(err, "ascm.manage.EntityAlreadyExisted") {
+			d.SetId(strings.ToLower(fmt.Sprintf("%s:%s", d.Get("project_name"), d.Get("name"))))
+			return nil
+		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_topic", "CreateTopic", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}

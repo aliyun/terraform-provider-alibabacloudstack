@@ -62,6 +62,11 @@ func resourceAlibabacloudStackDatahubKafkaGroupCreate(d *schema.ResourceData, me
 
 	// Call the CreateKafkaGroup API
 	if _, err := client.DoTeaRequest("POST", "datahub", "2019-11-20", "CreateKafkaGroup", "", nil, reqQuery, nil); err != nil {
+		if errmsgs.IsExpectedErrors(err, "ascm.manage.EntityAlreadyExisted") {
+			resourceId := fmt.Sprintf("%s:%s", projectName, groupName)
+			d.SetId(resourceId)
+			return nil
+		}
 		return err
 	}
 

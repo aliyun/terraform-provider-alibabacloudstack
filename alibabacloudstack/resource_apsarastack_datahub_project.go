@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 
@@ -70,6 +71,10 @@ func resourceAlibabacloudStackDatahubProjectCreate(d *schema.ResourceData, meta 
 	if err != nil {
 		if response == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		if errmsgs.IsExpectedErrors(err, "ascm.manage.EntityAlreadyExisted") {
+			d.SetId(strings.ToLower(projectName))
+			return nil
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_project", request.GetActionName(), errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
@@ -163,6 +168,51 @@ func resourceAlibabacloudStackDatahubProjectDelete(d *schema.ResourceData, meta 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	datahubService := DatahubService{client}
 	projectName := d.Id()
+
+	listTopicsReq := client.NewCommonRequest("GET", "datahub", "2019-11-20", "ListTopics", "")
+	listTopicsReq.QueryParams["ProjectName"] = projectName
+	listTopicsReq.QueryParams["PageNumber"] = "1"
+	listTopicsReq.QueryParams["PageSize"] = "1000"
+
+	listTopicsResp, err := client.ProcessCommonRequest(listTopicsReq)
+	if err != nil {
+		if !isDatahubNotExistError(err) {
+			return errmsgs.WrapError(err)
+		}
+	} else {
+		listTopicResult := &ListTopicResult{}
+		if err := json.Unmarshal(listTopicsResp.GetHttpContentBytes(), listTopicResult); err != nil {
+			return errmsgs.WrapError(err)
+		}
+		for _, topic := range listTopicResult.List.Topic {
+			topicName := topic.TopicName
+
+			listSubsReq := client.NewCommonRequest("GET", "datahub", "2019-11-20", "ListSubscriptions", "")
+			listSubsReq.QueryParams["ProjectName"] = projectName
+			listSubsReq.QueryParams["TopicName"] = topicName
+			listSubsReq.QueryParams["PageNumber"] = "1"
+			listSubsReq.QueryParams["PageSize"] = "1000"
+
+			listSubsResp, err := client.ProcessCommonRequest(listSubsReq)
+			if err == nil {
+				listSubsResult := &ListSubscriptionResult{}
+				if err := json.Unmarshal(listSubsResp.GetHttpContentBytes(), listSubsResult); err == nil {
+					for _, sub := range listSubsResult.List.Subscriptions {
+						delSubReq := client.NewCommonRequest("GET", "datahub", "2019-11-20", "DeleteSubscription", "")
+						delSubReq.QueryParams["ProjectName"] = projectName
+						delSubReq.QueryParams["TopicName"] = topicName
+						delSubReq.QueryParams["SubscriptionId"] = sub.SubId
+						_, _ = client.ProcessCommonRequest(delSubReq)
+					}
+				}
+			}
+
+			delTopicReq := client.NewCommonRequest("GET", "datahub", "2019-11-20", "DeleteTopic", "")
+			delTopicReq.QueryParams["ProjectName"] = projectName
+			delTopicReq.QueryParams["TopicName"] = topicName
+			_, _ = client.ProcessCommonRequest(delTopicReq)
+		}
+	}
 
 	request := client.NewCommonRequest("GET", "datahub", "2019-11-20", "DeleteProject", "")
 	request.QueryParams["ProjectName"] = projectName

@@ -7,7 +7,7 @@ import (
 
 func TestAccAlibabacloudStackDatahubSubscriptionsDataSource(t *testing.T) {
 
-	rand := getAccTestRandInt(10000, 99999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_datahub_subscriptions.default"
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		fmt.Sprintf("tf_test_scriptions%d", rand),
@@ -79,8 +79,9 @@ resource "alibabacloudstack_datahub_topic" "default" {
 resource "alibabacloudstack_datahub_subscription" "default" {
   comment          = "terraform subscription datasource test"
   application_name = "tf_acc_test"
-  project_name     = "${alibabacloudstack_datahub_project.default.name}"
-  topic_name       = "${alibabacloudstack_datahub_topic.default.name}"
+  project_name     = alibabacloudstack_datahub_project.default.name
+  topic_name       = alibabacloudstack_datahub_topic.default.name
+  depends_on       = [alibabacloudstack_datahub_topic.default]
 }
 `, name)
 }
