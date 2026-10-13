@@ -329,6 +329,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ack_templates":                                    dataSourceAlibabacloudStackAckTemplates(),
 		"alibabacloudstack_cs_kubernetes_clusters_kubeconfig":                dataSourceAlibabacloudStackCSKubernetesClustersKubeConfig(),
 		"alibabacloudstack_cs_autoscaling_configs":                           dataSourceAlibabacloudStackCSAutoscalingConfigs(),
+		"alibabacloudstack_cs_kubernetes_addon_instance":                     dataSourceAlibabacloudStackCSKubernetesAddonInstance(),
 		"alibabacloudstack_cms_metric_rule_templates":                        dataSourceAlibabacloudStackCmsMetricRuleTemplates(),
 		"alibabacloudstack_cloudmonitorservice_metricruletemplates":          dataSourceAlibabacloudStackCmsMetricRuleTemplates(),
 		"alibabacloudstack_cms_alarm_contacts":                               dataSourceAlibabacloudStackCmsAlarmContacts(),

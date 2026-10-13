@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -74,7 +75,6 @@ func (s *CsService) GetCsK8sNodesCount(id string) (node_count int, err error) {
 	}
 	return node_count, nil
 }
-
 
 func (s *CsService) DescribeCsKubernetes(id string) (*ClusterObject, error) {
 	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
@@ -328,7 +328,6 @@ func (s *CsService) DescribeCsKubernetesNodePool(id string) (*NodePoolAlone, err
 	return node, nil
 }
 
-
 func (s *CsService) DescribeAckTemplate(id string) (map[string]interface{}, error) {
 	reqQuery := map[string]interface{}{
 		// "template_type": "kubernetes",
@@ -394,7 +393,6 @@ func (s *CsService) DescribeAckTemplate(id string) (map[string]interface{}, erro
 
 	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("ack template %s not found", id))
 }
-
 
 type UpgradeClusterArgs struct {
 	Version string `json:"version"`
@@ -978,14 +976,76 @@ type AddonInstance struct {
 }
 
 func (s *CsService) GetAutoscalingConfig(cluster_id string) (map[string]interface{}, error) {
-	pathPattern := fmt.Sprintf("/clusters/%s/autoscale/", cluster_id)
-	request := map[string]interface{}{
-		"ClusterId": cluster_id,
-	}
-	response, err := s.client.DoTeaRequest("GET", "CS", "2015-12-15", "DescribeClusterAutoScale", pathPattern, nil, request, nil)
+	addonInstance, err := s.DescribeClusterAddonInstance(cluster_id, COMPONENT_AUTO_SCALER)
 	if err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	// Parse the config JSON string to extract autoscaling parameters
+	var config map[string]interface{}
+	if addonInstance.Config != "" {
+		if err := json.Unmarshal([]byte(addonInstance.Config), &config); err != nil {
+			return nil, errmsgs.WrapErrorf(err, "Failed to parse addon config JSON for cluster %s", cluster_id)
+		}
+	}
+
+	// Normalize field names: map addon config keys to legacy autoscaling config keys
+	// DescribeClusterAddonInstance returns snake_case keys, while legacy code expects PascalCase
+	fieldMappings := map[string]string{
+		"cool_down_duration":        "ScaleDownUnneededTime",
+		"unneeded_duration":         "ScaleDownDelayAfterAdd",
+		"utilization_threshold":     "ScaleDownUtilizationThreshold",
+		"gpu_utilization_threshold": "ScaleDownGpuUtilizationThreshold",
+	}
+	for srcKey, dstKey := range fieldMappings {
+		if v, ok := config[srcKey]; ok {
+			config[dstKey] = v
+		}
+	}
+
+	return config, nil
+}
+
+// AddonInstanceResponse represents the response of DescribeClusterAddonInstance
+type AddonInstanceResponse struct {
+	Name    string `json:"name"`
+	Config  string `json:"config"`
+	Version string `json:"version"`
+	State   string `json:"state"`
+}
+
+func (s *CsService) DescribeClusterAddonInstance(clusterId, addonName string) (*AddonInstanceResponse, error) {
+	pathPattern := fmt.Sprintf("/clusters/%s/components/%s/instance", clusterId, addonName)
+	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterAddonInstance", pathPattern)
+	request.QueryParams["ClusterId"] = clusterId
+	request.QueryParams["AddonName"] = addonName
+
+	response, err := s.client.ProcessCommonRequest(request)
+	addDebug("DescribeClusterAddonInstance", response, request, request.QueryParams)
+	if err != nil {
+		if response == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		responseBody := string(response.GetHttpContentBytes())
+		if errmsgs.IsExpectedErrors(err, "AddonNotFound") || strings.Contains(responseBody, "AddonNotFound") {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("addon instance %s for cluster %s not found", addonName, clusterId))
+		}
+		if errmsgs.IsExpectedErrors(err, "ErrorClusterNotFound") || strings.Contains(responseBody, "ErrorClusterNotFound") {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("cluster %s not found", clusterId))
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, clusterId, "DescribeClusterAddonInstance", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	if !response.IsSuccess() {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, clusterId, "DescribeClusterAddonInstance", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	var addonInstance AddonInstanceResponse
+	err = json.Unmarshal(response.GetHttpContentBytes(), &addonInstance)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, clusterId, "DescribeClusterAddonInstance", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return &addonInstance, nil
 }

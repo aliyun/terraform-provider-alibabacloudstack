@@ -115,6 +115,7 @@ func resourceAlibabacloudStackCSAutoscalingConfigRead(d *schema.ResourceData, me
 		return errmsgs.WrapError(err)
 	}
 
+	d.Set("cluster_id", d.Id())
 	if v, ok := addonConfigRaw["ScaleDownUnneededTime"]; ok && v != nil {
 		d.Set("cool_down_duration", fmt.Sprint(v))
 	}
@@ -127,6 +128,8 @@ func resourceAlibabacloudStackCSAutoscalingConfigRead(d *schema.ResourceData, me
 	if v, ok := addonConfigRaw["ScaleDownGpuUtilizationThreshold"]; ok && v != nil {
 		d.Set("gpu_utilization_threshold", fmt.Sprint(v))
 	}
+	// ensure_required_role is not returned by the API, use schema default
+	d.Set("ensure_required_role", true)
 	return nil
 }
 
