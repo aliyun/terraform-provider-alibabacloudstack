@@ -85,7 +85,7 @@ func resourceAlibabacloudStackPolardbClusterAccountCreate(d *schema.ResourceData
 	d.SetId(fmt.Sprintf("%s:%s", dbClusterId, accountName))
 
 	// Wait for the account status to become Available
-	stateConf := BuildStateConf([]string{"UnAvailable"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, polardbService.PolardbClusterAccountStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"UnAvailable", "Unavailable"}, []string{"Available", "Unavailable"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, polardbService.PolardbClusterAccountStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -108,12 +108,12 @@ func resourceAlibabacloudStackPolardbClusterAccountRead(d *schema.ResourceData, 
 		return errmsgs.WrapError(err)
 	}
 	parts := strings.SplitN(d.Id(), ":", 2)
-		if len(parts) != 2 {
-			return fmt.Errorf("invalid id format, expected DBClusterId:AccountName")
-		}
-	d.Set("db_cluster_id",  parts[0])
-	d.Set("account_name",  parts[1])
-		
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid id format, expected DBClusterId:AccountName")
+	}
+	d.Set("db_cluster_id", parts[0])
+	d.Set("account_name", parts[1])
+
 	// Set the resource data from the returned object
 	d.Set("account_type", object["AccountType"])
 	d.Set("account_description", object["AccountDescription"])

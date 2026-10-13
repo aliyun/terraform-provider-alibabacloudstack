@@ -114,7 +114,7 @@ func resourceAlibabacloudStackPolardbAccountCreate(d *schema.ResourceData, meta 
 	data_base_instance_id := d.Get("data_base_instance_id").(string)
 
 	d.SetId(fmt.Sprintf("%s:%s", data_base_instance_id, account_name))
-	stateConf := BuildStateConf([]string{"UnAvailable"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, polardbService.PolardbAccountStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"UnAvailable", "Unavailable"}, []string{"Available", "Unavailable"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, polardbService.PolardbAccountStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
