@@ -86,7 +86,7 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 
 	ecsService := EcsService{client}
 
-	stateConf := BuildStateConf([]string{}, []string{string(SnapshotCreatingAccomplished)}, d.Timeout(schema.TimeoutCreate), 3*time.Minute,
+	stateConf := BuildStateConf([]string{}, []string{string(SnapshotCreatingAccomplished)}, d.Timeout(schema.TimeoutCreate), 10*time.Second,
 		ecsService.SnapshotStateRefreshFunc(d.Id(), []string{string(SnapshotCreatingFailed)}))
 
 	if _, err := stateConf.WaitForState(); err != nil {

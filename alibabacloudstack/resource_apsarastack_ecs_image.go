@@ -174,7 +174,7 @@ func resourceAlibabacloudStackImageCreate(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	stateConf := BuildStateConf([]string{"Creating", ""}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 20*time.Minute, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}))
+	stateConf := BuildStateConf([]string{"Creating", ""}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
