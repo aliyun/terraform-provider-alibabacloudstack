@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -34,7 +36,7 @@ func resourceAlibabacloudStackPolardbxBackup() *schema.Resource {
 			},
 
 			"backup_set_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 
@@ -59,6 +61,9 @@ func resourceAlibabacloudStackPolardbxBackup() *schema.Resource {
 				Computed: true,
 			},
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(60 * time.Minute),
+		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackPolardbxBackupCreate,
 		resourceAlibabacloudStackPolardbxBackupRead,
@@ -78,22 +83,45 @@ func resourceAlibabacloudStackPolardbxBackupCreate(d *schema.ResourceData, meta 
 	if task_exists {
 		return errmsgs.WrapError(errmsgs.Error("There are already backup tasks in progress."))
 	}
+	// Bug#87449965: 快照创建前已存在的备份集 id。17E 后端返回 "cb-*" 字符串备份集 id，
+	// 且 CreateBackup 响应可能不携带可用的 BackupSetId；当响应无法解析出 id 时，
+	// 通过创建前后的差集在 DescribeBackupSetList 中定位刚创建的备份集。
+	before_ids := map[string]bool{}
+	if existing, e := polardbx_service.DescribePolarDbXBackups(instance_id); e == nil {
+		for _, b := range existing {
+			if b.BackupSetId != "" {
+				before_ids[b.BackupSetId] = true
+			}
+		}
+	}
 	// api: polardb - 2017-08-01 - CreateBackup
-	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "CreateBackup", "")
 	PolardbXCreatebackupResponseObj := PolardbXCreatebackupResponse{}
 
 	// Call request_params_handler
 
-	request.QueryParams["DBInstanceName"] = instance_id
-	request.QueryParams["BackupType"] = fmt.Sprint(d.Get("backup_type").(int))
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	// 实例创建后约 2.5min 会触发初始自动备份作业，此时手动 CreateBackup 返回 BackupJobExists。
+	// 轮询等待初始备份作业结束后重试，避免与初始自动备份冲突。
+	var bresponse *responses.CommonResponse
+	backup_type := fmt.Sprint(d.Get("backup_type").(int))
+	retry_deadline := time.Now().Add(25 * time.Minute)
+	for {
+		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "CreateBackup", "")
+		request.QueryParams["DBInstanceName"] = instance_id
+		request.QueryParams["BackupType"] = backup_type
+		bresponse, err = client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if (strings.Contains(err.Error(), "BackupJobExists") || strings.Contains(errmsg, "BackupJobExists")) && time.Now().Before(retry_deadline) {
+				time.Sleep(30 * time.Second)
+				continue
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		break
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbXCreatebackupResponseObj)
@@ -102,8 +130,18 @@ func resourceAlibabacloudStackPolardbxBackupCreate(d *schema.ResourceData, meta 
 			"alibabacloudstack_polardbx_backup", "CreateBackup", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	db_instance_id := d.Get("instance_id").(string)
-	backup_set_id := PolardbXCreatebackupResponseObj.Data.BackupSetId
-	buckup_id := fmt.Sprintf("%s:%d", db_instance_id, backup_set_id)
+	backup_set_id := normalizeBackupSetId(PolardbXCreatebackupResponseObj.Data.BackupSetId)
+	if backup_set_id == "" {
+		resolved, rerr := polardbx_service.ResolveNewBackupSetId(instance_id, before_ids)
+		if rerr != nil {
+			return errmsgs.WrapErrorf(rerr, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardbx_backup", "DescribeBackupSetList", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		backup_set_id = resolved
+	}
+	if backup_set_id == "" {
+		return errmsgs.WrapError(errmsgs.Error("Unable to resolve BackupSetId for the newly created PolarDB-X backup."))
+	}
+	buckup_id := fmt.Sprintf("%s:%s", db_instance_id, backup_set_id)
 	d.SetId(buckup_id)
 	stateConf := BuildStateConf([]string{"0"}, []string{"1"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbx_service.DescribePolarDbXBackupStateRefreshFunc(buckup_id, []string{"2"}))
 	if _, err := stateConf.WaitForState(); err != nil {
@@ -127,8 +165,7 @@ func resourceAlibabacloudStackPolardbxBackupRead(d *schema.ResourceData, meta in
 	}
 	d.Set("backup_model", data.BackupModel)
 	d.Set("instance_id", instanceId)
-	backup_set_id, _ := strconv.Atoi(data.BackupSetId)
-	d.Set("backup_set_id", backup_set_id)
+	d.Set("backup_set_id", data.BackupSetId)
 	d.Set("backup_type", data.BackupType)
 	d.Set("backup_set_size", data.BackupSetSize)
 	d.Set("status", data.Status)
@@ -144,8 +181,37 @@ func resourceAlibabacloudStackPolardbxBackupDelete(d *schema.ResourceData, meta 
 type PolardbXCreatebackupResponse struct {
 	RequestId string `json:"RequestId"`
 	Data      struct {
-		BackupSetId int `json:"BackupSetId"`
+		BackupSetId interface{} `json:"BackupSetId"`
 	} `json:"Data"`
+}
+
+// Bug#87449965: BackupSetId 跨环境类型不一致（149E 返回数字，17E 返回 "cb-*" 字符串），
+// 且响应可能不携带该字段。用 interface{} 容错解析；返回 "" 表示需回退到 DescribeBackupSetList 差集定位。
+func normalizeBackupSetId(raw interface{}) string {
+	switch v := raw.(type) {
+	case nil:
+		return ""
+	case string:
+		if v == "" || v == "0" {
+			return ""
+		}
+		return v
+	case float64:
+		if v == 0 {
+			return ""
+		}
+		return strconv.FormatInt(int64(v), 10)
+	case json.Number:
+		if s := v.String(); s != "" && s != "0" {
+			return s
+		}
+		return ""
+	default:
+		if s := fmt.Sprint(v); s != "" && s != "0" && s != "<nil>" {
+			return s
+		}
+		return ""
+	}
 }
 
 func TimeStampFormat(timestamp int) string {

@@ -840,6 +840,33 @@ func (s *PolardbXService) DescribePolarDbXBackup(backup_id string) (*PolarDbXBac
 	return nil, errmsgs.Error(errmsgs.NotFoundMsg, "PolarDbXBackup")
 }
 
+// Bug#87449965: CreateBackup 响应未携带可用 BackupSetId 时（如 17E），轮询 DescribeBackupSetList，
+// 优先返回创建前不存在的新备份集 id（差集），其次返回进行中（Status==0）的备份集 id。
+func (s *PolardbXService) ResolveNewBackupSetId(instance_id string, before_ids map[string]bool) (string, error) {
+	deadline := time.Now().Add(120 * time.Second)
+	for {
+		backup_list, err := s.DescribePolarDbXBackups(instance_id)
+		if err != nil {
+			return "", err
+		}
+		for _, backup := range backup_list {
+			if backup.BackupSetId != "" && !before_ids[backup.BackupSetId] {
+				return backup.BackupSetId, nil
+			}
+		}
+		for _, backup := range backup_list {
+			if backup.BackupSetId != "" && backup.Status == 0 {
+				return backup.BackupSetId, nil
+			}
+		}
+		if time.Now().After(deadline) {
+			break
+		}
+		time.Sleep(10 * time.Second)
+	}
+	return "", nil
+}
+
 func (s *PolardbXService) DescribePolarDbXBackupStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		object, err := s.DescribePolarDbXBackup(id)
