@@ -227,18 +227,16 @@ func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 					"engine_version":           "${local.polardb_instance_type_0.engine_version}",
 					"db_instance_class":        "${local.polardb_instance_type_0.id}",
 					"db_instance_storage":      "${local.polardb_instance_type_0.storage_min}",
-					"encryption":               "true",
 					"encryption_key":           "${local.kms_key}",
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            name,
 					"db_instance_storage_type": "${local.polardb_instance_type_0.storage_type}",
-					"tde_status":               "true",
+					"tde_status":               true,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"engine":         "MySQL",
 						"instance_name":  name,
-						"encryption":     "true",
 						"tde_status":     "true",
 						"encryption_key": CHECKSET,
 					}),
@@ -246,7 +244,7 @@ func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"enable_ssl": "true",
+					"enable_ssl": true,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -256,7 +254,7 @@ func TestAccAlibabacloudStackPolardbInstanceTDESSL(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"enable_ssl": "false",
+					"enable_ssl": false,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -298,14 +296,13 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 					"engine_version":           "${local.polardb_instance_type_0.engine_version}",
 					"db_instance_class":        "${local.polardb_instance_type_0.id}",
 					"db_instance_storage":      "${local.polardb_instance_type_0.storage_min}",
-					"encryption":               "true",
 					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            "${var.name}",
 					"db_instance_storage_type": "${local.polardb_instance_type_0.storage_type}",
-					"enable_ssl":               "true",
+					"enable_ssl":               true,
 					"acl":                      "require",
-					"tde_status":               "true",
+					"tde_status":               true,
 					"parameters": []map[string]interface{}{{
 						"name":  "polar_px_interconnect_transmit_timeout",
 						"value": "4000",
@@ -316,7 +313,6 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 						"engine":        "PolarDB_PG",
 						"instance_name": name,
 						"acl":           "require",
-						"encryption":    "true",
 						"tde_status":    "true",
 						"enable_ssl":    "true",
 					}),
