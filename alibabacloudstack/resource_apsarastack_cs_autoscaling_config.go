@@ -61,9 +61,45 @@ func resourceAlibabacloudStackCSAutoscalingConfig() *schema.Resource {
 }
 
 func resourceAlibabacloudStackCSAutoscalingConfigCreate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
 	clusterId := d.Get("cluster_id").(string)
+
+	reqBody := make(map[string]interface{})
+	if v, ok := d.GetOk("cool_down_duration"); ok {
+		reqBody["cool_down_duration"] = v.(string)
+	}
+	if v, ok := d.GetOk("unneeded_duration"); ok {
+		reqBody["unneeded_duration"] = v.(string)
+	}
+	if v, ok := d.GetOk("utilization_threshold"); ok {
+		reqBody["utilization_threshold"] = v.(string)
+	}
+	if v, ok := d.GetOk("gpu_utilization_threshold"); ok {
+		reqBody["gpu_utilization_threshold"] = v.(string)
+	}
+	if v, ok := d.GetOk("ensure_required_role"); ok {
+		reqBody["ensure_required_role"] = v.(bool)
+	}
+
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+		_, err := client.DoTeaRequest("POST", "CS", "2015-12-15", "CreateAutoscalingConfig", fmt.Sprintf("/cluster/%s/autoscale/config/", clusterId), nil, nil, reqBody)
+		if err != nil {
+			if errmsgs.NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, resourceAlibabacloudStackCSAutoscalingConfigName, "CreateAutoscalingConfig", err)
+	}
+
 	d.SetId(clusterId)
-	return nil
+	return resourceAlibabacloudStackCSAutoscalingConfigRead(d, meta)
 }
 
 func resourceAlibabacloudStackCSAutoscalingConfigRead(d *schema.ResourceData, meta interface{}) error {
@@ -72,20 +108,24 @@ func resourceAlibabacloudStackCSAutoscalingConfigRead(d *schema.ResourceData, me
 
 	addonConfigRaw, err := csService.GetAutoscalingConfig(d.Id())
 	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
 		return errmsgs.WrapError(err)
 	}
 
-	if v, ok := addonConfigRaw["ScaleDownUnneededTime"]; ok {
-		d.Set("cool_down_duration", v.(string))
+	if v, ok := addonConfigRaw["ScaleDownUnneededTime"]; ok && v != nil {
+		d.Set("cool_down_duration", fmt.Sprint(v))
 	}
-	if v, ok := addonConfigRaw["ScaleDownDelayAfterAdd"]; ok {
-		d.Set("unneeded_duration", v.(string))
+	if v, ok := addonConfigRaw["ScaleDownDelayAfterAdd"]; ok && v != nil {
+		d.Set("unneeded_duration", fmt.Sprint(v))
 	}
-	if v, ok := addonConfigRaw["ScaleDownUtilizationThreshold"]; ok {
-		d.Set("utilization_threshold", v.(string))
+	if v, ok := addonConfigRaw["ScaleDownUtilizationThreshold"]; ok && v != nil {
+		d.Set("utilization_threshold", fmt.Sprint(v))
 	}
-	if v, ok := addonConfigRaw["ScaleDownGpuUtilizationThreshold"]; ok {
-		d.Set("gpu_utilization_threshold", v.(string))
+	if v, ok := addonConfigRaw["ScaleDownGpuUtilizationThreshold"]; ok && v != nil {
+		d.Set("gpu_utilization_threshold", fmt.Sprint(v))
 	}
 	return nil
 }
