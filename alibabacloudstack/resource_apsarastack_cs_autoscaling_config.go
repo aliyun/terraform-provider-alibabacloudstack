@@ -56,7 +56,7 @@ func resourceAlibabacloudStackCSAutoscalingConfig() *schema.Resource {
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackCSAutoscalingConfigCreate,
 		resourceAlibabacloudStackCSAutoscalingConfigRead, resourceAlibabacloudStackCSAutoscalingConfigUpdate,
-		resourceAlibabacloudStackCSAutoscalingConfigDelete)
+		nil)
 	return resource
 }
 
@@ -170,10 +170,5 @@ func resourceAlibabacloudStackCSAutoscalingConfigUpdate(d *schema.ResourceData, 
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, resourceAlibabacloudStackCSAutoscalingConfigName, "ModifyClusterAddon", err)
 	}
 
-	return nil
-}
-
-func resourceAlibabacloudStackCSAutoscalingConfigDelete(d *schema.ResourceData, meta interface{}) error {
-	// Autoscaling config cannot be deleted, only disabled
 	return nil
 }

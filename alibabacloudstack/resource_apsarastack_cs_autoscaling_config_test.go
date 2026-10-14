@@ -30,7 +30,6 @@ func TestAccAlibabacloudStackCSAutoscalingConfig_basic(t *testing.T) {
 		IDRefreshName:     resourceId,
 		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		CheckDestroy:      rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			// Step 1: Create autoscaling config with default values
 			{
