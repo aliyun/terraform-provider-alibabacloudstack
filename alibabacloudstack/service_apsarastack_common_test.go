@@ -824,6 +824,7 @@ data "alibabacloudstack_images" "default" {
   name_regex  = "^aliyun_.*"
   most_recent = true
   owners      = "system"
+  architecture = "x86_64"
 }
 
 `

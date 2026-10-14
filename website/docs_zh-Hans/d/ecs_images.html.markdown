@@ -16,9 +16,10 @@ description: |-
 
 ```hcl
 data "alibabacloudstack_ecs_images" "default" {
-  owners     = "system"
-  name_regex = "^centos_6"
-  most_recent = true
+  owners       = "system"
+  name_regex   = "^centos_6"
+  architecture = "x86_64"
+  most_recent  = true
 }
 
 output "first_image_id" {
@@ -37,6 +38,9 @@ output "first_image_id" {
   * `self` - 用户的自定义镜像。
   * `others` - 其他用户的公开镜像。
   * `marketplace` - 镜像市场镜像。
+* `architecture` - (选填, 变更时重建) 镜像的架构类型。有效值为 `x86_64` 和 `arm64`。默认值为 `x86_64`。
+* `shared` - (选填, 变更时重建) 是否查询其他组织共享的镜像。如果设置为 `true`，则返回的结果中会包含共享镜像。
+* `output_file` - (选填, **已弃用**) `output_file` 字段已被弃用，计划在 3.19.0 版本中移除。如需将内容写入文件，请使用 `local_file` provider。
 
 -> **注意:** 至少需要设置 `name_regex`、`most_recent` 和 `owners` 中的一个。
 
@@ -48,7 +52,7 @@ output "first_image_id" {
 * `images` - 镜像列表。每个元素包含以下属性：
   * `id` - 镜像的ID(与 `image_id` 相同)。
   * `image_id` - 镜像的唯一标识符。
-  * `architecture` - 镜像系统的平台类型：`i386` 或 `x86_64`。
+  * `architecture` - 镜像系统的平台类型：`i386`、`x86_64` 或 `arm64`。
   * `creation_time` - 镜像创建的时间，格式为 `YYYY-MM-DDTHH:mm:ssZ`。
   * `description` - 镜像的描述信息。
   * `image_owner_alias` - 镜像所有者的别名。有效值包括：
@@ -82,4 +86,4 @@ output "first_image_id" {
     * `none` - 表示该镜像未被任何资源引用。
   * `is_support_io_optimized` - 镜像是否可以在I/O优化实例上使用。
   * `tags` - 资源的标签。
-  * `name` - 镜像的名称。 
+  * `name` - 镜像的名称。

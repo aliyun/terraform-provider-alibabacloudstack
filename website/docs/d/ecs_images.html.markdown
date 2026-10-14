@@ -15,8 +15,9 @@ This data source provides a list of ECS images in an AlibabacloudStack account a
 
 ```hcl
 data "alibabacloudstack_ecs_images" "images_ds" {
-  owners     = "system"
-  name_regex = "^centos_6"
+  owners       = "system"
+  name_regex   = "^centos_6"
+  architecture = "x86_64"
 }
 
 output "first_image_id" {
@@ -31,6 +32,9 @@ The following arguments are supported:
 * `name_regex` - (Optional, ForceNew) A regex string to filter resulting images by name.
 * `most_recent` - (Optional, ForceNew, type: bool) If more than one result is returned, select the most recent one.
 * `owners` - (Optional, ForceNew) Filter results by a specific image owner. Valid items are `system`, `self`, `others`, `marketplace`.
+* `architecture` - (Optional, ForceNew) The architecture of the image. Valid values are `x86_64` and `arm64`. Default to `x86_64`.
+* `shared` - (Optional, ForceNew) Whether to query resources shared from other organizations. If set to true, shared resources will be included in the results.
+* `output_file` - (Optional, **Deprecated**) The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.
 
 -> **NOTE:** At least one of the `name_regex`, `most_recent`, and `owners` must be set.
 
@@ -42,7 +46,7 @@ The following attributes are exported in addition to the arguments listed above:
 * `images` - A list of images. Each element contains the following attributes:
   * `id` - The ID of the image (same as `image_id`).
   * `image_id` - The unique identifier for the image.
-  * `architecture` - Platform type of the image system: `i386` or `x86_64`.
+  * `architecture` - Platform type of the image system: `i386`, `x86_64` or `arm64`.
   * `creation_time` - The time when the image was created.
   * `description` - The description of the image.
   * `image_owner_alias` - Alias of the image owner.
