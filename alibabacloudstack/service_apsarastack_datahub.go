@@ -7,6 +7,8 @@ import (
 
 	"encoding/json"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
@@ -63,29 +65,16 @@ func (s *DatahubService) DescribeDatahubProject(id string) (*datahub.GetProjectR
 	return resp, nil
 }
 
-func (s *DatahubService) WaitForDatahubProject(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-
-	for {
+func (s *DatahubService) DatahubProjectStateRefreshFunc(id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
 		object, err := s.DescribeDatahubProject(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
+				return struct{}{}, "Deleted", nil
 			}
+			return nil, "", errmsgs.WrapError(err)
 		}
-
-		if time.Now().After(deadline) {
-			objstringfy, err := convertArrayObjectToJsonString(object)
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, objstringfy, id, errmsgs.ProviderERROR)
-		}
-
+		return object, "Deleting", nil
 	}
 }
 
@@ -190,31 +179,16 @@ func (s *DatahubService) DescribeDatahubTopic(id string) (*GetTopicResult, error
 	return topic, nil
 }
 
-func (s *DatahubService) WaitForDatahubTopic(id string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	parts, err := ParseResourceId(id, 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	projectName, topicName := parts[0], parts[1]
-	for {
+func (s *DatahubService) DatahubTopicStateRefreshFunc(id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
 		object, err := s.DescribeDatahubTopic(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
+				return struct{}{}, "Deleted", nil
 			}
+			return nil, "", errmsgs.WrapError(err)
 		}
-		if object.ProjectName == projectName && object.TopicName == topicName && status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ProjectName+":"+object.TopicName, id, errmsgs.ProviderERROR)
-		}
-
+		return object, "Deleting", nil
 	}
 }
 

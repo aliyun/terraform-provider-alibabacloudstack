@@ -2,9 +2,13 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
@@ -169,6 +173,8 @@ func resourceAlibabacloudStackDatahubProjectDelete(d *schema.ResourceData, meta 
 	datahubService := DatahubService{client}
 	projectName := d.Id()
 
+	// Step 1: Check if there are topics still under the project.
+	// Terraform should NOT delete topics it doesn't manage.
 	listTopicsReq := client.NewCommonRequest("GET", "datahub", "2019-11-20", "ListTopics", "")
 	listTopicsReq.QueryParams["ProjectName"] = projectName
 	listTopicsReq.QueryParams["PageNumber"] = "1"
@@ -179,60 +185,72 @@ func resourceAlibabacloudStackDatahubProjectDelete(d *schema.ResourceData, meta 
 		if !isDatahubNotExistError(err) {
 			return errmsgs.WrapError(err)
 		}
-	} else {
-		listTopicResult := &ListTopicResult{}
-		if err := json.Unmarshal(listTopicsResp.GetHttpContentBytes(), listTopicResult); err != nil {
-			return errmsgs.WrapError(err)
+		// Project not found, nothing to delete
+		return nil
+	}
+
+	listTopicResult := &ListTopicResult{}
+	if err := json.Unmarshal(listTopicsResp.GetHttpContentBytes(), listTopicResult); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	if len(listTopicResult.List.Topic) > 0 {
+		topicNames := make([]string, 0, len(listTopicResult.List.Topic))
+		for _, t := range listTopicResult.List.Topic {
+			topicNames = append(topicNames, t.TopicName)
 		}
-		for _, topic := range listTopicResult.List.Topic {
-			topicName := topic.TopicName
+		return fmt.Errorf("cannot delete Datahub project %q: %d topic(s) still bound (%s). "+
+			"Please remove topic resources managed by Terraform first", projectName, len(topicNames), strings.Join(topicNames, ", "))
+	}
 
-			listSubsReq := client.NewCommonRequest("GET", "datahub", "2019-11-20", "ListSubscriptions", "")
-			listSubsReq.QueryParams["ProjectName"] = projectName
-			listSubsReq.QueryParams["TopicName"] = topicName
-			listSubsReq.QueryParams["PageNumber"] = "1"
-			listSubsReq.QueryParams["PageSize"] = "1000"
+	// Step 2: No topics found, proceed to delete the project.
+	// The backend may still have stale project-topic associations that haven't been
+	// cleaned up yet, so DeleteProject can fail with a dependency error even though
+	// ListTopics returned empty. Wait briefly before first attempt.
+	time.Sleep(30 * time.Second)
 
-			listSubsResp, err := client.ProcessCommonRequest(listSubsReq)
-			if err == nil {
-				listSubsResult := &ListSubscriptionResult{}
-				if err := json.Unmarshal(listSubsResp.GetHttpContentBytes(), listSubsResult); err == nil {
-					for _, sub := range listSubsResult.List.Subscriptions {
-						delSubReq := client.NewCommonRequest("GET", "datahub", "2019-11-20", "DeleteSubscription", "")
-						delSubReq.QueryParams["ProjectName"] = projectName
-						delSubReq.QueryParams["TopicName"] = topicName
-						delSubReq.QueryParams["SubscriptionId"] = sub.SubId
-						_, _ = client.ProcessCommonRequest(delSubReq)
-					}
-				}
+	err = resource.Retry(30*time.Minute, func() *resource.RetryError {
+		request := client.NewCommonRequest("GET", "datahub", "2019-11-20", "DeleteProject", "")
+		request.QueryParams["ProjectName"] = projectName
+
+		var requestInfo *datahub.DataHub
+		response, err := client.ProcessCommonRequest(request)
+		if debugOn() {
+			requestMap := make(map[string]string)
+			requestMap["ProjectName"] = projectName
+			addDebug("DeleteProject", response, requestInfo, requestMap)
+		}
+		if err != nil {
+			if isDatahubNotExistError(err) {
+				return nil
 			}
-
-			delTopicReq := client.NewCommonRequest("GET", "datahub", "2019-11-20", "DeleteTopic", "")
-			delTopicReq.QueryParams["ProjectName"] = projectName
-			delTopicReq.QueryParams["TopicName"] = topicName
-			_, _ = client.ProcessCommonRequest(delTopicReq)
+			if response == nil {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
+			}
+			// Only retry when the backend reports topic association not yet cleaned up:
+			// ErrorCode: ApiProxyServiceError, Message: "Can not delete project ... which has: N topics."
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if errmsgs.IsExpectedErrors(err, "ApiProxyServiceError") && regexp.MustCompile(`has: \d+ topics`).MatchString(errmsg) {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_project", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_project", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-	}
+		return nil
+	})
 
-	request := client.NewCommonRequest("GET", "datahub", "2019-11-20", "DeleteProject", "")
-	request.QueryParams["ProjectName"] = projectName
-
-	var requestInfo *datahub.DataHub
-	response, err := client.ProcessCommonRequest(request)
-	if debugOn() {
-		requestMap := make(map[string]string)
-		requestMap["ProjectName"] = projectName
-		addDebug("DeleteProject", response, requestInfo, requestMap)
-	}
 	if err != nil {
-		if isDatahubNotExistError(err) {
-			return nil
-		}
-		if response == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_project", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return err
 	}
-	return errmsgs.WrapError(datahubService.WaitForDatahubProject(d.Id(), Deleted, DefaultTimeout))
+
+	stateConf := BuildStateConf(
+		[]string{"Deleting"},
+		[]string{"Deleted"},
+		d.Timeout(schema.TimeoutDelete),
+		10*time.Second,
+		datahubService.DatahubProjectStateRefreshFunc(d.Id()),
+	)
+	if _, err = stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+	return nil
 }

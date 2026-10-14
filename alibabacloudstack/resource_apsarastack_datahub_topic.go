@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -311,5 +312,15 @@ func resourceAlibabacloudStackDatahubTopicDelete(d *schema.ResourceData, meta in
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_topic", "DeleteTopic", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
-	return errmsgs.WrapError(datahubService.WaitForDatahubTopic(d.Id(), Deleted, DefaultTimeout))
+	stateConf := BuildStateConf(
+		[]string{"Deleting"},
+		[]string{"Deleted"},
+		time.Duration(DefaultTimeout)*time.Second,
+		10*time.Second,
+		datahubService.DatahubTopicStateRefreshFunc(d.Id()),
+	)
+	if _, err = stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+	return nil
 }
