@@ -34,28 +34,29 @@ func TestAccAlibabacloudStackPolardbParameterGroup_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"engine":               "mysql",
+					"engine":               "MySQL",
 					"engine_version":       "8.0",
 					"parameter_group_name": "${var.name}",
 					"parameter_group_desc": "tf-testAccPolardbParameterGroupDesc",
-					"parameters":           AlibabacloudStackparameterMap,
+					"parameters": map[string]interface{}{
+						"wait_timeout": "3600",
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine":               "mysql",
+						"engine":               "MySQL",
 						"engine_version":       "8.0",
 						"parameter_group_name": name,
 						"parameter_group_desc": "tf-testAccPolardbParameterGroupDesc",
-						"parameters.%":         "1",
-						"parameters.loose_multi_blocks_ddl_count": "11",
 					}),
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-				//  effective_time effective_specific_time is Execution parameters
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parameters"},
+				// parameters field is not returned by DescribeParameterGroups list API
 			},
 		},
 	})

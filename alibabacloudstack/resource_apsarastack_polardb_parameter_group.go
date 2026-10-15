@@ -75,8 +75,8 @@ func resourceAlibabacloudStackPolarDBParameterGroupCreate(d *schema.ResourceData
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := map[string]interface{}{
-		"Engine":             d.Get("engine").(string),
-		"EngineVersion":      d.Get("engine_version").(string),
+		"DBType":             d.Get("engine").(string),
+		"DBVersion":          d.Get("engine_version").(string),
 		"ParameterGroupName": d.Get("parameter_group_name").(string),
 	}
 	if v, ok := d.GetOk("parameter_group_desc"); ok {
@@ -87,7 +87,6 @@ func resourceAlibabacloudStackPolarDBParameterGroupCreate(d *schema.ResourceData
 		for key, value := range v.(map[string]interface{}) {
 			paramsMap[key] = value.(string)
 		}
-
 		paramsJSON, err := json.Marshal(paramsMap)
 		if err != nil {
 			return fmt.Errorf("failed to marshal parameters to JSON: %v", err)
@@ -96,39 +95,20 @@ func resourceAlibabacloudStackPolarDBParameterGroupCreate(d *schema.ResourceData
 	}
 
 	// Call the CreateParameterGroup API
-	response, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "CreateParameterGroup", "", nil, request, nil)
+	response, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "CreateParameterGroup", "", nil, request, nil)
 	addDebug("CreateParameterGroup", response, request)
 	if err != nil {
 		return err
 	}
 
-	// Since the create API doesn't return the parameter group ID, we need to retrieve it by querying
-	// Get all parameter groups and find the one that matches our criteria
-	describeReq := map[string]interface{}{}
-	response, err = client.DoTeaRequest("POST", "polardb", "2024-01-30", "DescribeParameterGroups", "", nil, describeReq, nil)
-	if err != nil {
-		return err
-	}
-
-	// Find the parameter group with matching name
+	// The CreateParameterGroup API returns ParameterGroupId directly
 	paramGroupId := ""
-	if parameterGroups, ok := response["ParameterGroups"].(map[string]interface{}); ok {
-		if groups, ok := parameterGroups["ParameterGroup"].([]interface{}); ok {
-			for _, group := range groups {
-				if groupMap, ok := group.(map[string]interface{}); ok {
-					if groupName, ok := groupMap["ParameterGroupName"].(string); ok && groupName == d.Get("parameter_group_name").(string) {
-						if id, ok := groupMap["ParamGroupId"].(string); ok {
-							paramGroupId = id
-							break
-						}
-					}
-				}
-			}
-		}
+	if id, ok := response["ParameterGroupId"].(string); ok && id != "" {
+		paramGroupId = id
 	}
 
 	if paramGroupId == "" {
-		return fmt.Errorf("failed to find ParameterGroupId after creation")
+		return fmt.Errorf("CreateParameterGroup did not return ParameterGroupId, response: %v", response)
 	}
 
 	// Set the temporary ID before any potential status checks
@@ -142,27 +122,48 @@ func resourceAlibabacloudStackPolarDBParameterGroupCreate(d *schema.ResourceData
 
 func resourceAlibabacloudStackPolarDBParameterGroupRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolardbService{client}
 
-	object, err := polardbService.DescribeParameterGroup(d.Id())
+	// DescribeParameterGroup (singular) returns empty data on ApsaraStack,
+	// so we use DescribeParameterGroups (plural) and find by ID.
+	reqQuery := map[string]interface{}{}
+	response, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DescribeParameterGroups", "", nil, reqQuery, nil)
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
-			log.Printf("[DEBUG] Resource alibabacloudstack_polardb_parameter_group polardbService.DescribeParameterGroup Failed!!! %s", err)
+			log.Printf("[DEBUG] Resource alibabacloudstack_polardb_parameter_group DescribeParameterGroups Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
 	}
 
-	// Set computed fields from the response
-	d.Set("parameter_group_id", object["ParamGroupId"])
-	d.Set("engine", object["Engine"])
-	d.Set("engine_version", object["EngineVersion"])
+	// Find the parameter group by ID in the flat list
+	var object map[string]interface{}
+	if groups, ok := response["ParameterGroups"].([]interface{}); ok {
+		for _, group := range groups {
+			if groupMap, ok := group.(map[string]interface{}); ok {
+				if id, ok := groupMap["ParameterGroupId"].(string); ok && id == d.Id() {
+					object = groupMap
+					break
+				}
+			}
+		}
+	}
+
+	if object == nil {
+		log.Printf("[DEBUG] Resource alibabacloudstack_polardb_parameter_group not found in DescribeParameterGroups: %s", d.Id())
+		d.SetId("")
+		return nil
+	}
+
+	// Set computed fields from the response (handle both old and new field names)
+	d.Set("parameter_group_id", firstNonEmpty(object, "ParameterGroupId", "ParamGroupId"))
+	d.Set("engine", firstNonEmpty(object, "DBType", "Engine"))
+	d.Set("engine_version", firstNonEmpty(object, "DBVersion", "EngineVersion"))
 	d.Set("parameter_group_type", object["ParameterGroupType"])
-	d.Set("param_counts", object["ParamCounts"])
+	d.Set("param_counts", firstNonEmpty(object, "ParameterCounts", "ParamCounts"))
 	d.Set("force_restart", object["ForceRestart"])
-	d.Set("created", object["Created"])
-	d.Set("modified", object["Modified"])
+	d.Set("created", firstNonEmpty(object, "CreateTime", "Created"))
+	d.Set("modified", firstNonEmpty(object, "ModifyTime", "Modified"))
 	d.Set("parameter_group_name", object["ParameterGroupName"])
 	d.Set("parameter_group_desc", object["ParameterGroupDesc"])
 
@@ -201,7 +202,7 @@ func resourceAlibabacloudStackPolarDBParameterGroupDelete(d *schema.ResourceData
 	}
 
 	err := resource.Retry(10*time.Second, func() *resource.RetryError {
-		_, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "DeleteParameterGroup", "", nil, reqQuery, nil)
+		_, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DeleteParameterGroup", "", nil, reqQuery, nil)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "ParameterGroup.NotFound", "InvalidParameterGroupId.NotFound") {
 				return resource.NonRetryableError(err)
@@ -213,4 +214,19 @@ func resourceAlibabacloudStackPolarDBParameterGroupDelete(d *schema.ResourceData
 	})
 
 	return errmsgs.WrapError(err)
+}
+
+// firstNonEmpty returns the first non-empty string value from the map for the given keys.
+func firstNonEmpty(m map[string]interface{}, keys ...string) interface{} {
+	for _, k := range keys {
+		if v, ok := m[k]; ok {
+			if s, ok := v.(string); ok && s != "" {
+				return v
+			}
+			if v != nil {
+				return v
+			}
+		}
+	}
+	return nil
 }

@@ -2087,32 +2087,22 @@ func (s *PolardbService) DescribeDBReadWriteSplittingConnection(id string) (map[
 }
 
 func (s *PolardbService) DescribeParameterGroup(id string) (map[string]interface{}, error) {
-	reqQuery := map[string]interface{}{"ParameterGroupId": id}
-
-	response, err := s.client.DoTeaRequest("GET", "polardb", "2024-01-30", "DescribeParameterGroup", "", nil, reqQuery, nil)
+	// DescribeParameterGroup (singular) returns empty data on ApsaraStack,
+	// so we use DescribeParameterGroups (plural) and find by ID.
+	response, err := s.client.DoTeaRequest("POST", "polardb", "2017-08-01", "DescribeParameterGroups", "", nil, map[string]interface{}{}, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if the parameter group exists
-	if paramGroup, ok := response["ParamGroup"]; ok {
-		if paramGroupList, ok := paramGroup.(map[string]interface{})["ParameterGroup"]; ok {
-			if paramGroupArray, ok := paramGroupList.([]interface{}); ok && len(paramGroupArray) > 0 {
-				paramGroupMap := paramGroupArray[0].(map[string]interface{})
+	log.Printf("[DEBUG] DescribeParameterGroups response: %v", response)
 
-				result := make(map[string]interface{})
-				for k, v := range paramGroupMap {
-					result[k] = v
+	// Find the parameter group by ID in the flat list
+	if groups, ok := response["ParameterGroups"].([]interface{}); ok {
+		for _, group := range groups {
+			if groupMap, ok := group.(map[string]interface{}); ok {
+				if gid, ok := groupMap["ParameterGroupId"].(string); ok && gid == id {
+					return groupMap, nil
 				}
-
-				// Handle ParamDetail if it exists
-				if paramDetail, ok := paramGroupMap["ParamDetail"]; ok {
-					if detailMap, ok := paramDetail.(map[string]interface{}); ok {
-						result["ParamDetail"] = detailMap
-					}
-				}
-
-				return result, nil
 			}
 		}
 	}

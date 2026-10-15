@@ -1,10 +1,8 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -123,24 +121,7 @@ func dataSourceAlibabacloudStackPolardbParameterGroups() *schema.Resource {
 func dataSourceAlibabacloudStackPolardbParameterGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	action := "DescribeParameterGroups"
-
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", action, "")
-	var bresponse *responses.CommonResponse
-	var err error
-
-	bresponse, err = client.ProcessCommonRequest(request)
-
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_parameter_groups", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	var response DescribeParameterGroupsResponse
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	response, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DescribeParameterGroups", "", nil, map[string]interface{}{}, nil)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -161,18 +142,37 @@ func dataSourceAlibabacloudStackPolardbParameterGroupsRead(d *schema.ResourceDat
 		nameRegex = regexp.MustCompile(v.(string))
 	}
 
+	// The response is a flat array: response["ParameterGroups"] = []interface{}
+	var rawGroups []interface{}
+	if groups, ok := response["ParameterGroups"].([]interface{}); ok {
+		rawGroups = groups
+	}
+
 	// Filter results
-	var filteredGroups []ParameterGroupItem
-	for _, group := range response.ParameterGroups.ParameterGroup {
+	var filteredGroups []map[string]interface{}
+	for _, g := range rawGroups {
+		group, ok := g.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		// Get ID using firstNonEmptyString for field name compatibility
+		groupId := firstNonEmptyString(group, "ParameterGroupId", "ParamGroupId")
+
+		// Get name
+		groupName := ""
+		if v, ok := group["ParameterGroupName"].(string); ok {
+			groupName = v
+		}
 
 		// Apply name regex filter
-		if nameRegex != nil && !nameRegex.MatchString(group.ParameterGroupName) {
+		if nameRegex != nil && !nameRegex.MatchString(groupName) {
 			continue
 		}
 
 		// Apply ids filter
 		if len(idsMap) > 0 {
-			if _, ok := idsMap[group.ParamGroupId]; !ok {
+			if _, ok := idsMap[groupId]; !ok {
 				continue
 			}
 		}
@@ -186,36 +186,50 @@ func dataSourceAlibabacloudStackPolardbParameterGroupsRead(d *schema.ResourceDat
 	groups := make([]map[string]interface{}, 0)
 
 	for _, group := range filteredGroups {
+		groupId := firstNonEmptyString(group, "ParameterGroupId", "ParamGroupId")
+		engine := firstNonEmptyString(group, "DBType", "Engine")
+		engineVersion := firstNonEmptyString(group, "DBVersion", "EngineVersion")
+		created := firstNonEmptyString(group, "CreateTime", "Created")
+		modified := firstNonEmptyString(group, "ModifyTime", "Modified")
+
 		mapping := map[string]interface{}{
-			"id":                   group.ParamGroupId,
-			"parameter_group_id":   group.ParamGroupId,
-			"parameter_group_name": group.ParameterGroupName,
-			"parameter_group_desc": group.ParameterGroupDesc,
-			"engine":               group.Engine,
-			"engine_version":       group.EngineVersion,
-			"parameter_group_type": group.ParameterGroupType,
-			"force_restart":        group.ForceRestart,
-			"param_counts":         group.ParamCounts,
-			"created":              group.Created,
-			"modified":             group.Modified,
-			"parameters":           []map[string]interface{}{}, // Initialize empty parameters list
+			"id":                   groupId,
+			"parameter_group_id":   groupId,
+			"parameter_group_name": group["ParameterGroupName"],
+			"parameter_group_desc": group["ParameterGroupDesc"],
+			"engine":               engine,
+			"engine_version":       engineVersion,
+			"parameter_group_type": mustToInt(group["ParameterGroupType"]),
+			"force_restart":        mustToInt(group["ForceRestart"]),
+			"param_counts":         mustToInt(group["ParameterCounts"]),
+			"created":              created,
+			"modified":             modified,
+			"parameters":           []map[string]interface{}{},
 		}
 
 		// Add parameters if available in the response
-		if group.ParamDetail != nil {
-			parameters := make([]map[string]interface{}, 0)
-			for _, param := range group.ParamDetail.ParameterDetail {
-				paramMap := map[string]interface{}{
-					"param_name":  param.ParamName,
-					"param_value": param.ParamValue,
+		if paramDetail, ok := group["ParamDetail"]; ok {
+			if detailMap, ok := paramDetail.(map[string]interface{}); ok {
+				if paramDetails, ok := detailMap["ParameterDetail"]; ok {
+					if paramArray, ok := paramDetails.([]interface{}); ok {
+						parameters := make([]map[string]interface{}, 0)
+						for _, paramItem := range paramArray {
+							if paramMap, ok := paramItem.(map[string]interface{}); ok {
+								paramMap2 := map[string]interface{}{
+									"param_name":  paramMap["ParamName"],
+									"param_value": paramMap["ParamValue"],
+								}
+								parameters = append(parameters, paramMap2)
+							}
+						}
+						mapping["parameters"] = parameters
+					}
 				}
-				parameters = append(parameters, paramMap)
 			}
-			mapping["parameters"] = parameters
 		}
 
-		ids = append(ids, group.ParamGroupId)
-		names = append(names, group.ParameterGroupName)
+		ids = append(ids, groupId)
+		names = append(names, group["ParameterGroupName"])
 		groups = append(groups, mapping)
 	}
 
@@ -233,37 +247,20 @@ func dataSourceAlibabacloudStackPolardbParameterGroupsRead(d *schema.ResourceDat
 	return nil
 }
 
-// Response structures for unmarshaling JSON
-type DescribeParameterGroupsResponse struct {
-	ParameterGroups ParameterGroups `json:"ParameterGroups"`
-	RequestId       string          `json:"RequestId"`
-	Success         bool            `json:"success"`
+// firstNonEmptyString returns the first non-empty string value from the map for the given keys.
+func firstNonEmptyString(m map[string]interface{}, keys ...string) string {
+	for _, k := range keys {
+		if v, ok := m[k]; ok {
+			if s, ok := v.(string); ok && s != "" {
+				return s
+			}
+		}
+	}
+	return ""
 }
 
-type ParameterGroups struct {
-	ParameterGroup []ParameterGroupItem `json:"ParameterGroup"`
-}
-
-type ParameterGroupItem struct {
-	ParameterGroupId   int          `json:"ParameterGroupId"`
-	ParamGroupId       string       `json:"ParamGroupId"`
-	ParameterGroupName string       `json:"ParameterGroupName"`
-	ParameterGroupDesc string       `json:"ParameterGroupDesc"`
-	Engine             string       `json:"Engine"`
-	EngineVersion      string       `json:"EngineVersion"`
-	ParameterGroupType int          `json:"ParameterGroupType"`
-	ForceRestart       int          `json:"ForceRestart"`
-	ParamCounts        int          `json:"ParamCounts"`
-	Created            string       `json:"Created"`
-	Modified           string       `json:"Modified"`
-	ParamDetail        *ParamDetail `json:"ParamDetail,omitempty"`
-}
-
-type ParamDetail struct {
-	ParameterDetail []ParameterDetailItem `json:"ParameterDetail"`
-}
-
-type ParameterDetailItem struct {
-	ParamName  string `json:"ParamName"`
-	ParamValue string `json:"ParamValue"`
+// mustToInt converts an interface{} to int, returning 0 on error.
+func mustToInt(v interface{}) int {
+	n, _ := toInt(v)
+	return n
 }

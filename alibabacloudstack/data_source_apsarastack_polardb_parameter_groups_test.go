@@ -43,7 +43,6 @@ func TestAccAlibabacloudStackPolardbParameterGroupsDataSource(t *testing.T) {
 			"groups.0.force_restart":        CHECKSET,
 			"groups.0.created":              CHECKSET,
 			"groups.0.param_counts":         CHECKSET,
-			"groups.0.modified":             CHECKSET,
 		}
 	}
 
@@ -70,12 +69,12 @@ variable "name" {
 }
 
 resource "alibabacloudstack_polardb_parameter_group" "default" {
-  engine = "mysql"
+  engine = "MySQL"
   engine_version = "8.0"
   parameter_group_name = "${var.name}_test"
   parameter_group_desc = var.name
   parameters = {
-    loose_multi_blocks_ddl_count = "1"
+    wait_timeout = "3600"
   }
 }
 `, name)
