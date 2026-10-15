@@ -236,6 +236,16 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	}
 	if v, ok := d.GetOk("cpu_type"); ok {
 		request["CpuType"] = v.(string)
+	} else {
+		instanceClass := d.Get("instance_class").(string)
+		instanceType := d.Get("instance_type").(string)
+		extraQuery := map[string]interface{}{}
+		if v, ok := d.GetOk("engine_version"); ok {
+			extraQuery["engineVersion"] = v.(string)
+		}
+		if cpuType, err := queryCpuTypeBySpec(client, strings.ToUpper(instanceType), instanceClass, extraQuery); err == nil {
+			request["CpuType"] = cpuType
+		}
 	}
 	if v, ok := d.GetOk("node_type"); ok {
 		request["NodeType"] = v.(string)
@@ -388,8 +398,8 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 					errmsg := ""
 					if raw != nil {
 						baseResponse := &responses.BaseResponse{}
-						err = json.Unmarshal([]byte(raw.(*r_kvstore.ModifyInstanceVpcAuthModeResponse).GetHttpContentString()), baseResponse)
-						if err == nil {
+						unmarshalErr := json.Unmarshal([]byte(raw.(*r_kvstore.ModifyInstanceVpcAuthModeResponse).GetHttpContentString()), baseResponse)
+						if unmarshalErr == nil {
 							errmsg = errmsgs.GetBaseResponseErrorMessage(baseResponse)
 						}
 					}
@@ -418,8 +428,8 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 			errmsg := ""
 			if raw != nil {
 				baseResponse := &responses.BaseResponse{}
-				err = json.Unmarshal([]byte(raw.(*r_kvstore.ModifyInstanceMaintainTimeResponse).GetHttpContentString()), baseResponse)
-				if err == nil {
+				unmarshalErr := json.Unmarshal([]byte(raw.(*r_kvstore.ModifyInstanceMaintainTimeResponse).GetHttpContentString()), baseResponse)
+				if unmarshalErr == nil {
 					errmsg = errmsgs.GetBaseResponseErrorMessage(baseResponse)
 				}
 			}
@@ -515,8 +525,8 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 				errmsg := ""
 				if raw != nil {
 					baseResponse := &responses.BaseResponse{}
-					err = json.Unmarshal([]byte(raw.(*r_kvstore.ModifyInstanceSpecResponse).GetHttpContentString()), baseResponse)
-					if err == nil {
+					unmarshalErr := json.Unmarshal([]byte(raw.(*r_kvstore.ModifyInstanceSpecResponse).GetHttpContentString()), baseResponse)
+					if unmarshalErr == nil {
 						errmsg = errmsgs.GetBaseResponseErrorMessage(baseResponse)
 					}
 				}
@@ -586,8 +596,8 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 			errmsg := ""
 			if raw != nil {
 				baseResponse := &responses.BaseResponse{}
-				err = json.Unmarshal([]byte(raw.(*r_kvstore.ModifyInstanceAttributeResponse).GetHttpContentString()), baseResponse)
-				if err == nil {
+				unmarshalErr := json.Unmarshal([]byte(raw.(*r_kvstore.ModifyInstanceAttributeResponse).GetHttpContentString()), baseResponse)
+				if unmarshalErr == nil {
 					errmsg = errmsgs.GetBaseResponseErrorMessage(baseResponse)
 				}
 			}
@@ -697,8 +707,8 @@ func resourceAlibabacloudStackKVStoreInstanceDelete(d *schema.ResourceData, meta
 			errmsg := ""
 			if raw != nil {
 				baseResponse := &responses.BaseResponse{}
-				err = json.Unmarshal([]byte(raw.(*r_kvstore.DeleteInstanceResponse).GetHttpContentString()), baseResponse)
-				if err == nil {
+				unmarshalErr := json.Unmarshal([]byte(raw.(*r_kvstore.DeleteInstanceResponse).GetHttpContentString()), baseResponse)
+				if unmarshalErr == nil {
 					errmsg = errmsgs.GetBaseResponseErrorMessage(baseResponse)
 				}
 			}

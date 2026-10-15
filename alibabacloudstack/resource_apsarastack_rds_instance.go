@@ -355,6 +355,13 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 
 	if v, ok := d.GetOk("cpu_type"); ok && v.(string) != "" {
 		request.QueryParams["CpuType"] = v.(string)
+	} else {
+		if cpuType, err := queryCpuTypeBySpec(client, "rds", DBInstanceClass, map[string]interface{}{
+			"engine":        engine,
+			"engineVersion": enginever,
+		}); err == nil {
+			request.QueryParams["CpuType"] = cpuType
+		}
 	}
 
 	if encryption {
@@ -853,7 +860,7 @@ func resourceAlibabacloudStackDBInstanceDelete(d *schema.ResourceData, meta inte
 		}
 		return errmsgs.WrapError(err)
 	}
-	if v, existed:= instance["PayType"]; existed && PayType(v.(string)) == Prepaid {
+	if v, existed := instance["PayType"]; existed && PayType(v.(string)) == Prepaid {
 		return errmsgs.WrapError(errmsgs.Error("At present, 'Prepaid' instance cannot be deleted and must wait it to be expired and release it automatically."))
 	}
 

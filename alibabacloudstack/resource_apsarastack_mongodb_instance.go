@@ -31,6 +31,11 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				ForceNew: true,
 				Required: true,
 			},
+			"cpu_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"db_instance_class": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -359,6 +364,16 @@ func resourceAlibabacloudStackMongoDBInstanceCreate(d *schema.ResourceData, meta
 	request, err := buildMongoDBCreateRequest(d, meta)
 	if err != nil {
 		return errmsgs.WrapError(err)
+	}
+	if v, ok := d.GetOk("cpu_type"); ok && v.(string) != "" {
+		request.QueryParams["CpuType"] = v.(string)
+	} else {
+		dbInstanceClass := d.Get("db_instance_class").(string)
+		if cpuType, err := queryCpuTypeBySpec(client, "dds", dbInstanceClass, map[string]interface{}{
+			"engine": "MongoDB",
+		}); err == nil {
+			request.QueryParams["CpuType"] = cpuType
+		}
 	}
 
 	raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {

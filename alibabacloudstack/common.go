@@ -1233,3 +1233,66 @@ func getLock(lockname string) *sync.Mutex {
 	}
 	return Locks[lockname]
 }
+
+// queryCpuTypeBySpec queries cpuType from SelectCommonSpec by spec code.
+// resourceType: e.g. "rds", "dds", "REDIS", "MEMCACHE"
+// spec: instance class / dbInstanceClass / spec code
+// extraQuery: additional query parameters like engine, engineVersion, dbInstanceType
+func queryCpuTypeBySpec(client *connectivity.AlibabacloudStackClient, resourceType, spec string, extraQuery map[string]interface{}) (string, error) {
+	reqQuery := map[string]interface{}{
+		"pageStart":    1,
+		"pageSize":     100,
+		"resourceType": resourceType,
+		"status":       "Available",
+	}
+	for k, v := range extraQuery {
+		reqQuery[k] = v
+	}
+
+	reqHeader := map[string]string{
+		"x-acs-territory": "US",
+		"x-acs-lang":      "EN",
+	}
+
+	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", reqHeader, reqQuery, nil)
+	if err != nil {
+		return "", err
+	}
+
+	if dataList, ok := response["data"].([]interface{}); ok {
+		cpuTypes := make(map[string]struct{})
+		for _, item := range dataList {
+			data := item.(map[string]interface{})
+			var dataSpec string
+			switch resourceType {
+			case "rds":
+				if v, ok := data["dbInstanceClass"].(string); ok {
+					dataSpec = v
+				}
+			default:
+				if v, ok := data["spec"].(string); ok {
+					dataSpec = v
+				}
+			}
+			if dataSpec == spec {
+				if cpuType, ok := data["cpuType"].(string); ok && cpuType != "" {
+					cpuTypes[cpuType] = struct{}{}
+				}
+			}
+		}
+		if len(cpuTypes) == 0 {
+			return "", fmt.Errorf("cannot find cpuType for spec %s in resourceType %s", spec, resourceType)
+		}
+		if len(cpuTypes) > 1 {
+			var types []string
+			for t := range cpuTypes {
+				types = append(types, t)
+			}
+			return "", fmt.Errorf("spec %s has multiple cpu_types (%s), please specify cpu_type manually", spec, strings.Join(types, ", "))
+		}
+		for t := range cpuTypes {
+			return t, nil
+		}
+	}
+	return "", fmt.Errorf("cannot find cpuType for spec %s in resourceType %s", spec, resourceType)
+}

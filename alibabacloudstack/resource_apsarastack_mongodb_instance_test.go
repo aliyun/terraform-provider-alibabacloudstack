@@ -260,6 +260,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 					"engine_version":          "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.0.engine_version}",
 					"db_instance_storage":     "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.0.storage_min}",
 					"db_instance_class":       "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.0.id}",
+					"cpu_type":                "intel",
 					"audit_status":            "Enable",
 					"audit_filter": []map[string]interface{}{{
 						"role_type": "db",
@@ -276,6 +277,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 						"replication_factor":      "3",
 						"audit_status":            "Enable",
 						"audit_filter.#":          "1",
+						"cpu_type":                CHECKSET,
 					}),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						resourceId,
@@ -356,9 +358,10 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cpu_type"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -522,7 +525,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ssl_action"},
+				ImportStateVerifyIgnore: []string{"ssl_action", "cpu_type"},
 			},
 			{
 				Config: testMongoDBInstance_multiAZ_name,
