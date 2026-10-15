@@ -87,16 +87,13 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 
 func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	create := d.Get("auto_create").(bool)
-	visibility := d.Get("default_visibility").(string)
 	if d.HasChanges("auto_create", "default_visibility") {
+		create := d.Get("auto_create").(bool)
+		visibility := d.Get("default_visibility").(string)
+
 		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateNamespace", fmt.Sprintf("/namespace/%s", d.Id()))
-		request.QueryParams["NamespaceName"] = d.Id()
 		body := map[string]interface{}{
-			"Action":        "UpdateNamespace",
-			"NamespaceName": d.Id(),
 			"namespace": map[string]interface{}{
-				"namespace":         d.Id(),
 				"AutoCreate":        create,
 				"DefaultVisibility": visibility,
 			},
