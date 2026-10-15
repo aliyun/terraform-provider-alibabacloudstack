@@ -771,7 +771,13 @@ data "alibabacloudstack_zones" "default" {
 
 `
 
-const DataAlibabacloudstackInstanceTypes = `
+var DataAlibabacloudstackInstanceTypes string
+
+func init() {
+	instanceType := os.Getenv("ALIBABACLOUDSTACK_TEST_ECS_INSTANCE_TYPE")
+	imageRegex := os.Getenv("ALIBABACLOUDSTACK_TEST_ECS_IMAGE_REGEX")
+
+	DataAlibabacloudstackInstanceTypes = fmt.Sprintf(`
 data "alibabacloudstack_instance_types" "all" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   sorted_by         = "CPU"
@@ -788,14 +794,35 @@ data "alibabacloudstack_instance_types" "default" {
 locals {
   filtered_default = [for d in data.alibabacloudstack_instance_types.default : d if length(d.ids) > 0]
   fallback_all     = length(data.alibabacloudstack_instance_types.all.ids) > 0 ? data.alibabacloudstack_instance_types.all.ids : []
-  
+
   default_instance_type_id = coalesce(
+    %s,
     try(local.filtered_default[0].ids[0], null),
     try(local.fallback_all[0], null),
     "no-available-instance-type"
   )
 }
-`
+`, func() string {
+		if instanceType != "" {
+			return fmt.Sprintf(`"%s"`, instanceType)
+		}
+		return "try(local.filtered_default[0].ids[0], null)"
+	}())
+
+	DataAlibabacloudstackImages = fmt.Sprintf(`
+data "alibabacloudstack_images" "default" {
+  name_regex  = "%s"
+  most_recent = true
+  owners      = "system"
+}
+
+`, func() string {
+		if imageRegex != "" {
+			return imageRegex
+		}
+		return "^aliyun_.*"
+	}())
+}
 
 const DataAlibabacloudstackInstanceTypes_Eni2 = `
 data "alibabacloudstack_instance_types" "eni2" {
@@ -825,15 +852,7 @@ locals {
 }
 `
 
-const DataAlibabacloudstackImages = `
-data "alibabacloudstack_images" "default" {
-  name_regex  = "^aliyun_.*"
-  most_recent = true
-  owners      = "system"
-  architecture = "x86_64"
-}
-
-`
+var DataAlibabacloudstackImages string
 
 func RdsMysqlCommonTestCase() string {
 	cpuType := os.Getenv("ALIBABACLOUDSTACK_TEST_CPU_TYPE")
@@ -1172,7 +1191,7 @@ resource "alibabacloudstack_ram_role" "default" {
 }
 `
 
-const SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + SecurityGroupCommonTestCase + `
+var SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + SecurityGroupCommonTestCase + `
 resource "alibabacloudstack_instance" "default" {
   image_id = "${data.alibabacloudstack_images.default.images.0.id}"
   instance_type = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
@@ -1360,7 +1379,7 @@ resource "alibabacloudstack_security_group_rule" "default" {
 
 `
 
-const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + DataAlibabacloudstackInstanceTypes + `
+var ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + DataAlibabacloudstackInstanceTypes + `
 resource "alibabacloudstack_ecs_instance" "default" {
   image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
   instance_type        = "${local.default_instance_type_id}"

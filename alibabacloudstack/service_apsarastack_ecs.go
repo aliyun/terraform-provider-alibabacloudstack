@@ -195,7 +195,7 @@ func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		response, _ = raw.(*ecs.DescribeDisksResponse)
 		if len(response.Disks.Disk) < 1 {
-			return resource.RetryableError(err)
+			return resource.RetryableError(fmt.Errorf("disk of instance %s not found yet", id))
 		}
 		return nil
 	})
