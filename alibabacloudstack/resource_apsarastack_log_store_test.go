@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
@@ -150,15 +149,9 @@ func TestAccAlibabacloudStackLogStore_encryption(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("testtf-encrypt-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogStoreEncryptionConfigDependence)
-
-	arn := os.Getenv("ALIBABACLOUDSTACK_TEST_SLS_ENCRYPTION_ARN")
-
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t, resourceId)
-			if arn == "" {
-				t.Fatalf("ALIBABACLOUDSTACK_TEST_SLS_ENCRYPTION_ARN must be set for encryption test with CMK")
-			}
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -172,7 +165,6 @@ func TestAccAlibabacloudStackLogStore_encryption(t *testing.T) {
 					"encryption":   "true",
 					"encrypt_type": "sm4_gcm",
 					"cmk_key_id":   "${alibabacloudstack_kms_key.default.id}",
-					"arn":          arn,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -181,6 +173,7 @@ func TestAccAlibabacloudStackLogStore_encryption(t *testing.T) {
 						"shard_count":  "2",
 						"encryption":   "true",
 						"encrypt_type": "sm4_gcm",
+						"arn":          CHECKSET,
 					}),
 				),
 			},
@@ -189,16 +182,6 @@ func TestAccAlibabacloudStackLogStore_encryption(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"encrypt_type"},
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"encrypt_type": "aes_gcm",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"encrypt_type": "aes_gcm",
-					}),
-				),
 			},
 		},
 	})

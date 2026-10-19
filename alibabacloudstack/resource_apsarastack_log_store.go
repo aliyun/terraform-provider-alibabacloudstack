@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ram"
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -109,6 +110,7 @@ func resourceAlibabacloudStackLogStore() *schema.Resource {
 			"arn": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 		},
@@ -140,14 +142,34 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 			Enable:      v.(bool),
 			EncryptType: d.Get("encrypt_type").(string),
 		}
-		if cmkKeyId, ok := d.GetOk("cmk_key_id"); ok && cmkKeyId.(string) != "" {
+		cmkKeyId, hasCmkKeyId := d.GetOk("cmk_key_id")
+		arn, hasArn := d.GetOk("arn")
+		if hasCmkKeyId && cmkKeyId.(string) != "" {
 			if logstore.EncryptConf.UserCmkInfo == nil {
 				logstore.EncryptConf.UserCmkInfo = &sls.EncryptUserCmkConf{}
 			}
 			logstore.EncryptConf.UserCmkInfo.CmkKeyId = cmkKeyId.(string)
 			logstore.EncryptConf.UserCmkInfo.RegionId = client.RegionId
-		}
-		if arn, ok := d.GetOk("arn"); ok && arn.(string) != "" {
+			if hasArn && arn.(string) != "" {
+				logstore.EncryptConf.UserCmkInfo.Arn = arn.(string)
+			} else {
+				request := ram.CreateGetRoleRequest()
+				client.InitRpcRequest(*request.RpcRequest)
+				request.Scheme = "https"
+				request.RoleName = "AliyunLogAccessingKMSRole"
+				raw, err := client.WithRamClient(func(ramClient *ram.Client) (interface{}, error) {
+					return ramClient.GetRole(request)
+				})
+				if err != nil {
+					if errmsgs.IsExpectedErrors(err, "EntityNotExist.Role") {
+						return errmsgs.WrapErrorf(err, "cmk_key_id is set but arn is not provided, and default RAM role 'AliyunLogAccessingKMSRole' does not exist. Please either set arn explicitly or create the RAM role")
+					}
+					return errmsgs.WrapErrorf(err, "Failed to query RAM role 'AliyunLogAccessingKMSRole'")
+				}
+				response := raw.(*ram.GetRoleResponse)
+				logstore.EncryptConf.UserCmkInfo.Arn = response.Role.Arn
+			}
+		} else if hasArn && arn.(string) != "" {
 			if logstore.EncryptConf.UserCmkInfo == nil {
 				logstore.EncryptConf.UserCmkInfo = &sls.EncryptUserCmkConf{}
 			}
