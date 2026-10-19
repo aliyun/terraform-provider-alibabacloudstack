@@ -89,25 +89,28 @@ func resourceAlibabacloudStackLogStore() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			//			"encryption": {
-			//				Type:     schema.TypeBool,
-			//				Optional: true,
-			//			},
-			//			"cmk_key_id": {
-			//				Type:     schema.TypeString,
-			//				Optional: true,
-			//			},
-			//			"arn": {
-			//				Type:     schema.TypeString,
-			//				Optional: true,
-			//			},
-			//			"encrypt_type": {
-			//				Type:         schema.TypeString,
-			//				Optional:     true,
-			//				ForceNew:     true,
-			//				Default:      "sm4_gcm",
-			//				ValidateFunc: validation.StringInSlice([]string{"sm4_gcm", "aes_gcm"}, false),
-			//			},
+			"encryption": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+			"encrypt_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "sm4_gcm",
+				ValidateFunc: validation.StringInSlice([]string{"sm4_gcm", "aes_gcm"}, false),
+			},
+			"cmk_key_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"arn": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackLogStoreCreate, resourceAlibabacloudStackLogStoreRead, resourceAlibabacloudStackLogStoreUpdate, resourceAlibabacloudStackLogStoreDelete)
@@ -130,6 +133,27 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 		AutoSplit:     d.Get("auto_split").(bool),
 		MaxSplitShard: d.Get("max_split_shard_count").(int),
 		AppendMeta:    d.Get("append_meta").(bool),
+	}
+
+	if v, ok := d.GetOk("encryption"); ok && v.(bool) {
+		logstore.EncryptConf = &sls.EncryptConf{
+			Enable:      v.(bool),
+			EncryptType: d.Get("encrypt_type").(string),
+		}
+		if cmkKeyId, ok := d.GetOk("cmk_key_id"); ok && cmkKeyId.(string) != "" {
+			if logstore.EncryptConf.UserCmkInfo == nil {
+				logstore.EncryptConf.UserCmkInfo = &sls.EncryptUserCmkConf{}
+			}
+			logstore.EncryptConf.UserCmkInfo.CmkKeyId = cmkKeyId.(string)
+			logstore.EncryptConf.UserCmkInfo.RegionId = client.RegionId
+		}
+		if arn, ok := d.GetOk("arn"); ok && arn.(string) != "" {
+			if logstore.EncryptConf.UserCmkInfo == nil {
+				logstore.EncryptConf.UserCmkInfo = &sls.EncryptUserCmkConf{}
+			}
+			logstore.EncryptConf.UserCmkInfo.Arn = arn.(string)
+			logstore.EncryptConf.UserCmkInfo.RegionId = client.RegionId
+		}
 	}
 	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
 		err := slsClient.CreateLogStoreV2(d.Get("project").(string), logstore)
@@ -223,6 +247,15 @@ func resourceAlibabacloudStackLogStoreRead(d *schema.ResourceData, meta interfac
 	d.Set("auto_split", object.AutoSplit)
 	d.Set("enable_web_tracking", object.WebTracking)
 	d.Set("max_split_shard_count", object.MaxSplitShard)
+
+	if object.EncryptConf != nil {
+		d.Set("encryption", object.EncryptConf.Enable)
+		d.Set("encrypt_type", object.EncryptConf.EncryptType)
+		if object.EncryptConf.UserCmkInfo != nil {
+			d.Set("cmk_key_id", object.EncryptConf.UserCmkInfo.CmkKeyId)
+			d.Set("arn", object.EncryptConf.UserCmkInfo.Arn)
+		}
+	}
 
 	return nil
 }

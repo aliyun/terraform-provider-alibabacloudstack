@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
@@ -134,6 +135,91 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccAlibabacloudStackLogStore_encryption(t *testing.T) {
+	var v *sls.LogStore
+	resourceId := "alibabacloudstack_log_store.encrypted"
+	ra := resourceAttrInit(resourceId, logStoreMap)
+	serviceFunc := func() interface{} {
+		return &LogService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("testtf-encrypt-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogStoreEncryptionConfigDependence)
+
+	arn := os.Getenv("ALIBABACLOUDSTACK_TEST_SLS_ENCRYPTION_ARN")
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t, resourceId)
+			if arn == "" {
+				t.Fatalf("ALIBABACLOUDSTACK_TEST_SLS_ENCRYPTION_ARN must be set for encryption test with CMK")
+			}
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name":         name,
+					"project":      "${alibabacloudstack_log_project.foo.name}",
+					"shard_count":  "2",
+					"encryption":   "true",
+					"encrypt_type": "sm4_gcm",
+					"cmk_key_id":   "${alibabacloudstack_kms_key.default.id}",
+					"arn":          arn,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name":         name,
+						"project":      name,
+						"shard_count":  "2",
+						"encryption":   "true",
+						"encrypt_type": "sm4_gcm",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"encrypt_type"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"encrypt_type": "aes_gcm",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"encrypt_type": "aes_gcm",
+					}),
+				),
+			},
+		},
+	})
+}
+
+func resourceLogStoreEncryptionConfigDependence(name string) string {
+	return fmt.Sprintf(`
+
+		variable "name" {
+			default = "%s"
+		}
+		data "alibabacloudstack_account" "current" {}
+		resource "alibabacloudstack_log_project" "foo" {
+			name = "${var.name}"
+			description = "tf unit test"
+		}
+		resource "alibabacloudstack_kms_key" "default" {
+			description = "tf-testacc-logstore-encryption"
+			pending_window_in_days = 7
+		}
+		`, name)
 }
 
 func resourceLogStoreConfigDependence(name string) string {
