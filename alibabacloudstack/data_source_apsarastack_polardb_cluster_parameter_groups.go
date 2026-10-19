@@ -229,25 +229,3 @@ func dataSourceAlibabacloudStackPolardbClusterParameterGroupsRead(d *schema.Reso
 	return nil
 }
 
-// mustToInt converts various numeric types to int.
-func mustToInt(v interface{}) int {
-	if v == nil {
-		return 0
-	}
-	switch val := v.(type) {
-	case int:
-		return val
-	case int64:
-		return int(val)
-	case float64:
-		return int(val)
-	case string:
-		n, err := toInt(val)
-		if err != nil {
-			return 0
-		}
-		return n
-	default:
-		return 0
-	}
-}

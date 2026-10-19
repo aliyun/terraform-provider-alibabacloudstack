@@ -259,8 +259,3 @@ func firstNonEmptyString(m map[string]interface{}, keys ...string) string {
 	return ""
 }
 
-// mustToInt converts an interface{} to int, returning 0 on error.
-func mustToInt(v interface{}) int {
-	n, _ := toInt(v)
-	return n
-}
