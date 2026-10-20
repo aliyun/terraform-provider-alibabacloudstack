@@ -713,7 +713,13 @@ func ParseSlbListenerId(id string) (parts []string, err error) {
 }
 
 func buildClientToken(action string) string {
-	token := strings.TrimSpace(fmt.Sprintf("TF-%s-%d-%s", action, time.Now().Unix(), strings.Trim(uuid.New().String(), "-")))
+	// Truncate long action names: keep first 12 + "***" + last 12 chars
+	// This ensures action <= 27 chars, leaving room for full UUID (32 chars) within 64-char limit
+	if len(action) > 28 {
+		action = action[:12] + "***" + action[len(action)-12:]
+	}
+	
+	token := strings.TrimSpace(fmt.Sprintf("TF-%s-%s", action, strings.Trim(uuid.Must(uuid.NewV7()).String(), "-")))
 	if len(token) > 64 {
 		token = token[0:64]
 	}
