@@ -63,6 +63,21 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 	organizationvisibility := d.Get("organization_visibility").(string)
 	assumeRolePolicyDocument := d.Get("assume_role_policy_document").(string)
 
+	// D2: rawRamRole requires assume_role_policy_document in valid JSON format.
+	// API doc example: {"Version":"1","Statement":[{"Action":"sts:AssumeRole","Effect":"Allow",
+	//   "Principal":{"Service":["dms.aliyuncs.com"],"RAM":["acs:ram::xxx:root"]}}]}
+	if rolerange == "roleRange.rawRamRole" {
+		if assumeRolePolicyDocument == "" {
+			return fmt.Errorf("assume_role_policy_document is required when role_range is roleRange.rawRamRole; " +
+				"expected format: {\"Version\":\"1\",\"Statement\":[{\"Action\":\"sts:AssumeRole\"," +
+				"\"Effect\":\"Allow\",\"Principal\":{\"RAM\":[\"acs:ram::<accountId>:root\"]}}]}")
+		}
+		var js json.RawMessage
+		if err := json.Unmarshal([]byte(assumeRolePolicyDocument), &js); err != nil {
+			return fmt.Errorf("assume_role_policy_document must be valid JSON: %v", err)
+		}
+	}
+
 	_, err := ascmService.DescribeAscmRamRole(name)
 	if err == nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "role alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -70,35 +85,35 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "DescribeAscmRamRole", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateRole", "/ascm/auth/role/createRole")
-
-	// Prepare the base parameters
-	params := map[string]string{
+	// API doc: POST /ascm/auth/role/createRole, all params in Body (not QueryParams)
+	requestBody := map[string]interface{}{
 		"roleName":               name,
 		"description":            description,
 		"roleRange":              rolerange,
 		"organizationVisibility": organizationvisibility,
 	}
-
 	if assumeRolePolicyDocument != "" {
-		params["AssumeRolePolicyDocument"] = assumeRolePolicyDocument
+		requestBody["assumeRolePolicyDocument"] = assumeRolePolicyDocument
 	}
 
-	mergeMaps(request.QueryParams, params)
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug("CreateRole", bresponse, request, request.QueryParams)
+	bresponse, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "CreateRole", "/ascm/auth/role/createRole", nil, nil, requestBody)
+	addDebug("CreateRole", bresponse, requestBody, nil)
 	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", "CreateRole", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	// Parse response to get role ID
+	if data, ok := bresponse["data"].(map[string]interface{}); ok {
+		if id, ok := data["id"].(float64); ok {
+			d.SetId(name + COLON_SEPARATED + fmt.Sprint(int(id)))
+			return nil
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
+	// Fallback: try JSON unmarshal
+	respBytes, _ := json.Marshal(bresponse)
 	resp := CreateAscmRolesResponse{}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	if err := json.Unmarshal(respBytes, &resp); err != nil {
+		return errmsgs.WrapErrorf(err, "failed to parse CreateRole response")
 	}
 	d.SetId(name + COLON_SEPARATED + fmt.Sprint(resp.Data.ID))
 	return nil

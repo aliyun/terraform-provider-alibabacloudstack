@@ -188,7 +188,6 @@ func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleData, err er
 	return nil, errmsgs.GetNotFoundErrorFromString("role " + did[0] + " not found")
 }
 
-
 type AscmResourceGroupUser struct {
 	CurrentPage     int    `json:"currentPage"`
 	PageSize        int    `json:"pageSize"`
@@ -331,7 +330,6 @@ func (s *AscmService) DescribeAscmResourceGroupUserAttachment(rgId string) (*Lis
 	}
 	return &response, nil
 }
-
 
 func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*MembersInsideResourceSet, error) {
 
@@ -640,7 +638,6 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 	return &resp.Data, nil
 }
 
-
 func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRamPolicies", "/ascm/auth/role/listRAMPolicies")
@@ -676,33 +673,48 @@ func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, e
 
 func (s *AscmService) DescribeAscmRamPolicyForRole(id string) (response *RamPolicies, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRamPolicies", "/ascm/auth/role/listRAMPolicies")
-	request.QueryParams["RamPolicyId"] = did[0]
 	var resp = &RamPolicies{}
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("ListRamPolicies", bresponse, request, request.QueryParams)
+
+	// API doc: POST /ascm/auth/role/listRAMPolicies, Body: {"roleId": Integer, ...}
+	roleIdInt, _ := strconv.Atoi(did[1])
+	requestBody := map[string]interface{}{
+		"RamPolicyId": did[0],
+		"roleId":      roleIdInt,
+	}
+	rawResp, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "ListRamPolicies", "/ascm/auth/role/listRAMPolicies", nil, nil, requestBody)
+	addDebug("ListRamPolicies", rawResp, requestBody, nil)
 
 	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		} else {
-			return nil, err
-		}
 		if errmsgs.IsExpectedErrors(err, "ErrorRamPolicyNotFound") {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRamPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRamPolicies", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	addDebug("ListRamPolicies", response, request, request.QueryParams)
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+	// Parse DoTeaRequest response (map[string]interface{}) into RamPolicies struct
+	respBytes, err := json.Marshal(rawResp)
 	if err != nil {
+		return resp, errmsgs.WrapError(err)
+	}
+	if err := json.Unmarshal(respBytes, resp); err != nil {
 		return resp, errmsgs.WrapError(err)
 	}
 
 	if resp.Code == "200" {
 		return resp, errmsgs.WrapError(err)
+	}
+
+	// Verify the policy is actually attached to the specific role (not just existing somewhere).
+	expectedRoleId, _ := strconv.Atoi(did[1])
+	bindingFound := false
+	for _, policy := range resp.Data {
+		if policy.RoleId == expectedRoleId {
+			bindingFound = true
+			break
+		}
+	}
+	if !bindingFound {
+		return resp, errmsgs.WrapErrorf(nil, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	return resp, nil

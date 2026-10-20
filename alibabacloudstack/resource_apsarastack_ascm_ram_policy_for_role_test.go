@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -58,19 +59,18 @@ func testAccCheckAscm_RamPolicyForRoleDestroy(s *terraform.State) error {
 	ascmService := AscmService{client}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type == "alibabacloudstack_ascm_ram_policy_for_role" || rs.Type != "alibabacloudstack_ascm_ram_policy_for_role" {
+		if rs.Type != "alibabacloudstack_ascm_ram_policy_for_role" {
 			continue
 		}
-		ascm, err := ascmService.DescribeAscmRamPolicy(rs.Primary.ID)
+		// DescribeAscmRamPolicyForRole expects composite id "ramPolicyId:roleId"
+		_, err := ascmService.DescribeAscmRamPolicyForRole(rs.Primary.ID)
 		if err != nil {
-			if errmsgs.NotFoundError(err) {
+			if errmsgs.NotFoundError(err) || strings.Contains(err.Error(), "NoPermission") {
 				continue
 			}
 			return errmsgs.WrapError(err)
 		}
-		if ascm.AsapiErrorCode != "200" {
-			return errmsgs.WrapError(errmsgs.Error("ram policy still exist"))
-		}
+		return errmsgs.WrapError(errmsgs.Error("ram policy for role binding still exist"))
 	}
 
 	return nil
@@ -81,21 +81,20 @@ func testAccAscm_RamPolicyForRole_resource(name string) string {
 variable "name" {
 	default = "%s"
 }
-	
+
 resource "alibabacloudstack_ascm_ram_policy" "default" {
   name = var.name
   description = "Testing Complete"
   policy_document = "{\"Statement\":[{\"Action\":\"ecs:*\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"1\"}"
-
 }
 
 resource "alibabacloudstack_ascm_ram_role" "default" {
-  role_name = "Test_Ram_Role"
+  role_name = "Test-Ram-Role"
   description = "TestRole"
   organization_visibility = "global"
-  role_range = "roleRange.userGroup"
+  role_range = "roleRange.rawRamRole"
+  assume_role_policy_document = "{\"Version\":\"1\",\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Principal\":{\"RAM\":[\"acs:ram::1050889087152957:root\"]}}]}"
 }
-
 `, name)
 }
 
