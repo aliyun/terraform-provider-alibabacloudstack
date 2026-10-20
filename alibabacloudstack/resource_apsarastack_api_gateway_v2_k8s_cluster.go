@@ -97,46 +97,10 @@ func resourceAlibabacloudStackAPIGatewayV2K8sClusterCreate(d *schema.ResourceDat
 		}
 	}
 	reqBody["k8sClusterName"] = d.Get("k8s_cluster_name").(string)
-	clusterName := reqBody["k8sClusterName"].(string)
 
 	// Call ImportCluster API
 	resp, err := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ImportCluster", "/k8s/importCluster", nil, nil, reqBody)
 	if err != nil {
-		// Handle "cluster name is exist" error by adopting the existing cluster
-		if strings.Contains(err.Error(), "cluster name is exist") {
-			listReqBody := map[string]interface{}{
-				"current": 1,
-				"size":    100,
-			}
-			listResp, listErr := client.DoTeaRequest("POST", "csb2", "2023-02-06", "ListClusters", "/k8s/listClusters", nil, nil, listReqBody)
-			if listErr != nil {
-				return fmt.Errorf("cluster name exists but failed to list clusters: %v", listErr)
-			}
-
-			data, ok := listResp["data"].(map[string]interface{})
-			if !ok {
-				return fmt.Errorf("cluster name exists but failed to parse list response")
-			}
-
-			records, ok := data["records"].([]interface{})
-			if !ok {
-				return fmt.Errorf("cluster name exists but no records found in list response")
-			}
-
-			for _, record := range records {
-				item, ok := record.(map[string]interface{})
-				if !ok {
-					continue
-				}
-				if name, _ := item["k8sClusterName"].(string); name == clusterName {
-					if code, _ := item["k8sClusterCode"].(string); code != "" {
-						d.SetId(code)
-						return nil
-					}
-				}
-			}
-			return fmt.Errorf("cluster name exists but could not find matching cluster: %s", clusterName)
-		}
 		return err
 	}
 
