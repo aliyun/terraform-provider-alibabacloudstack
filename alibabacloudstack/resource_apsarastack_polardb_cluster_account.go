@@ -85,7 +85,7 @@ func resourceAlibabacloudStackPolardbClusterAccountCreate(d *schema.ResourceData
 	d.SetId(fmt.Sprintf("%s:%s", dbClusterId, accountName))
 
 	// Wait for the account status to become Available
-	stateConf := BuildStateConf([]string{"UnAvailable", "Unavailable"}, []string{"Available", "Unavailable"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, polardbService.PolardbClusterAccountStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"UnAvailable", "Unavailable"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, polardbService.PolardbClusterAccountStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
