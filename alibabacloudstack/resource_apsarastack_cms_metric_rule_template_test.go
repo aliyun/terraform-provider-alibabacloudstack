@@ -21,20 +21,18 @@ func init() {
 		"alibabacloudstack_cms_metric_rule_template",
 		&resource.Sweeper{
 			Name: "alibabacloudstack_cms_metric_rule_template",
-			F:    testSweepCmsMetricRuleTemplate,
+			F: func(region string) error { return SweeperFunc(
+				sweeperEntry{fn: testSweepCmsMetricRuleTemplate, precise: []string{"tf-testAccCmsMetricRuleTemplate"}, broad: broadPrefixes, fatal: true},
+			) },
 		})
 }
 
-func testSweepCmsMetricRuleTemplate(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepCmsMetricRuleTemplate(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting alibabacloudstack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 	action := "DescribeMetricRuleTemplateList"
 	request := map[string]interface{}{}
 	request["PageSize"] = PageSizeLarge
@@ -392,7 +390,7 @@ variable "name" {
 // 		}
 // 	}
 // 	region := os.Getenv("alibabacloudstack_REGION")
-// 	rawClient, err := sharedClientForRegion(region)
+// 	rawClient, err := sharedClientForRegion("")
 // 	if err != nil {
 // 		t.Skipf("Skipping the test case with err: %s", err)
 // 		t.Skipped()

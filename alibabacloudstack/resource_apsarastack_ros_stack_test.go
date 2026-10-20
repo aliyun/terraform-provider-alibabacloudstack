@@ -23,25 +23,23 @@ func init() {
 		"alibabacloudstack_ros_stack",
 		&resource.Sweeper{
 			Name: "alibabacloudstack_ros_stack",
-			F:    testSweepRosStack,
+			F: func(region string) error { return SweeperFunc(
+				sweeperEntry{fn: testSweepRosStack, precise: []string{"tf-testAccRosStack"}, broad: broadPrefixes, fatal: true},
+			) },
 		})
 }
 
-func testSweepRosStack(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepRosStack(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "Error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf-testacc",
-	}
 	request := map[string]interface{}{
 		"PageSize":   PageSizeLarge,
 		"PageNumber": 1,
-		"RegionId":   region,
+		"RegionId":   client.RegionId,
 	}
 	var response map[string]interface{}
 	action := "ListStacks"
@@ -78,7 +76,7 @@ func testSweepRosStack(region string) error {
 			action = "DeleteStack"
 			request := map[string]interface{}{
 				"StackId":  item["StackId"],
-				"RegionId": region,
+				"RegionId": client.RegionId,
 			}
 			_, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 			if err != nil {
@@ -108,7 +106,7 @@ func TestAccAlibabacloudStackRosStack_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testAcc%sAlibabacloudStackRosStack%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testAccRosStack%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackRosStackBasicDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

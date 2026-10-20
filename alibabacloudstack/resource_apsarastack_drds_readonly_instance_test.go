@@ -15,7 +15,9 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_drds_readonly_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_drds_readonly_instance",
-		F:    testSweepDrdsInstances,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepDrdsInstances, precise: []string{"tf-testacc-readonlyinstance-", "tf-testacc-readonly-instance-"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 

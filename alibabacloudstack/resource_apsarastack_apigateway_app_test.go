@@ -19,21 +19,19 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_api_gateway_app", &resource.Sweeper{
 		Name: "alibabacloudstack_api_gateway_app",
-		F:    testSweepApiGatewayApp,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepApiGatewayApp, precise: []string{"tf_testAccApp_"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepApiGatewayApp(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepApiGatewayApp(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testacc",
-		"tf_testacc",
-	}
 
 	req := cloudapi.CreateDescribeAppAttributesRequest()
 	raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {

@@ -18,25 +18,20 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_common_bandwidth_package", &resource.Sweeper{
 		Name: "alibabacloudstack_common_bandwidth_package",
-		F:    testSweepCommonBandwidthPackage,
-		// When implemented, these should be removed firstly
-		Dependencies: []string{
-			"alibabacloudstack_common_bandwidth_package_attachment",
-		},
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepCommonBandwidthPackageAttachment, precise: []string{"tf-testAccCommonBandwidth"}, broad: broadPrefixes},
+			sweeperEntry{fn: testSweepCommonBandwidthPackage, precise: []string{"tf-testAccCommonBandwidthPackage"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepCommonBandwidthPackage(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepCommonBandwidthPackage(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting alibabacloudstack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var commonBandwidthPackages []vpc.CommonBandwidthPackage
 	req := vpc.CreateDescribeCommonBandwidthPackagesRequest()

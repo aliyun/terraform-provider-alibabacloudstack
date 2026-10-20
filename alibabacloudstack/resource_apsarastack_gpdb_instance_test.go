@@ -18,21 +18,19 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_gpdb_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_gpdb_instance",
-		F:    testSweepGpdbInstances,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepGpdbInstances, precise: []string{"tf-testacc-gpdb-"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepGpdbInstances(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepGpdbInstances(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var instances []gpdb.DBInstance
 	request := gpdb.CreateDescribeDBInstancesRequest()

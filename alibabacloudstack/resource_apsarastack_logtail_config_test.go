@@ -17,22 +17,20 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_logtail_config", &resource.Sweeper{
 		Name: "alibabacloudstack_logtail_config",
-		F:    testSweepLogConfigs,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepLogConfigs, precise: []string{"testtf-"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepLogConfigs(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepLogConfigs(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	raw, err := logService.GetSlsDataClient("")
 	if err != nil {

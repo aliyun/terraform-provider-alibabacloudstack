@@ -20,21 +20,19 @@ func init() {
 		"alibabacloudstack_ecs_deployment_set",
 		&resource.Sweeper{
 			Name: "alibabacloudstack_ecs_deployment_set",
-			F:    testSweepEcsDeploymentSet,
+			F: func(region string) error { return SweeperFunc(
+				sweeperEntry{fn: testSweepEcsDeploymentSet, precise: []string{"tf-testAccEcsDeploymentSet"}, broad: broadPrefixes, fatal: true},
+			) },
 		})
 }
 
-func testSweepEcsDeploymentSet(region string) error {
+func testSweepEcsDeploymentSet(prefixes []string) error {
 
-	rawClient, err := sharedClientForRegion(region)
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
-	prefixes := []string{
-		"tf-testacc",
-		"tf_testacc",
-	}
 	action := "DescribeDeploymentSets"
 	request := map[string]interface{}{
 		"PageSize":   PageSizeLarge,

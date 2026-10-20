@@ -13,7 +13,9 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_drds_account", &resource.Sweeper{
 		Name: "alibabacloudstack_drds_account",
-		F:    testSweepDrdsInstances,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepDrdsInstances, precise: []string{"tf_acc_drds_db_"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 

@@ -16,23 +16,21 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_flink_namespace", &resource.Sweeper{
 		Name: "alibabacloudstack_flink_namespace",
-		F:    testSweepFlinkNamespace,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepFlinkNamespace, precise: []string{"tf-testAccFlinkNamespace"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepFlinkNamespace(region string) error {
-	// skip not supported region
+func testSweepFlinkNamespace(prefixes []string) error {
+	// skip not supported client.RegionId
 
-	rawClient, err := sharedClientForRegion(region)
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapError(fmt.Errorf("error getting AlibabacloudStack client: %s", err))
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	response, err := client.DoTeaRequest("GET", "ververica", "2020-05-01", "DescribeNamespaces", "/flink/namespace/list", nil, nil, nil)
 	if err != nil {

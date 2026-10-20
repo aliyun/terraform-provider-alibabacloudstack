@@ -21,21 +21,19 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_ess_scheduled_task", &resource.Sweeper{
 		Name: "alibabacloudstack_ess_scheduled_task",
-		F:    testSweepEssSchedules,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepEssSchedules, precise: []string{"tf-testAccEssSchedule-", "tf-testAccEssScheduleConfig"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepEssSchedules(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepEssSchedules(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var groups []ess.ScheduledTask
 	req := ess.CreateDescribeScheduledTasksRequest()

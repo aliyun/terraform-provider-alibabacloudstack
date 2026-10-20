@@ -21,26 +21,23 @@ func init() {
 		"alibabacloudstack_edas_namespace",
 		&resource.Sweeper{
 			Name: "alibabacloudstack_edas_namespace",
-			F:    testSweepEdasNamespace,
+			F: func(region string) error { return SweeperFunc(
+				sweeperEntry{fn: testSweepEdasNamespace, precise: []string{"tftestacc"}, broad: broadPrefixes, fatal: true},
+			) },
 		})
 }
 
-func testSweepEdasNamespace(region string) error {
-// 	if testSweepPreCheckWithRegions(region, true, connectivity.EdasSupportedRegions) {
-// 		log.Printf("[INFO] Skipping Edas Namespace unsupported region: %s", region)
+func testSweepEdasNamespace(prefixes []string) error {
+// 	if testSweepPreCheckWithRegions(client.RegionId, true, connectivity.EdasSupportedRegions) {
+// 		log.Printf("[INFO] Skipping Edas Namespace unsupported client.RegionId: %s", client.RegionId)
 // 		return nil
 // 	}
 
-	rawClient, err := sharedClientForRegion(region)
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-		"tftestacc",
-	}
 	request := map[string]interface{}{}
 	action:= "ListUserDefineRegion"
 

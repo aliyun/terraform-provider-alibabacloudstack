@@ -20,25 +20,23 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_edas_k8s_cluster", &resource.Sweeper{
 		Name: "alibabacloudstack_edas_k8s_cluster",
-		F:    testSweepEdasK8sCluster,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepEdasK8sCluster, precise: []string{"tftest"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepEdasK8sCluster(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepEdasK8sCluster(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf-testacc",
-	}
 
 	clusterListRq := edas.CreateListClusterRequest()
-	clusterListRq.RegionId = region
+	clusterListRq.RegionId = client.RegionId
 
 	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.ListCluster(clusterListRq)
@@ -70,7 +68,7 @@ func testSweepEdasK8sCluster(region string) error {
 		log.Printf("[INFO] delete edas cluster: %s", name)
 
 		deleteClusterRq := edas.CreateDeleteClusterRequest()
-		deleteClusterRq.RegionId = region
+		deleteClusterRq.RegionId = client.RegionId
 		deleteClusterRq.ClusterId = v.ClusterId
 
 		wait := incrementalWait(1*time.Second, 2*time.Second)

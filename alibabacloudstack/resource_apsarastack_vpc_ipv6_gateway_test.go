@@ -22,21 +22,19 @@ func init() {
 		"alibabacloudstack_vpc_ipv6_gateway",
 		&resource.Sweeper{
 			Name: "alibabacloudstack_vpc_ipv6_gateway",
-			F:    testSweepVpcIpv6Gateway,
+			F: func(region string) error { return SweeperFunc(
+				sweeperEntry{fn: testSweepVpcIpv6Gateway, precise: []string{"tf-testaccvpcipv6gateway"}, broad: broadPrefixes, fatal: true},
+			) },
 		})
 }
 
-func testSweepVpcIpv6Gateway(region string) error {
+func testSweepVpcIpv6Gateway(prefixes []string) error {
 
-	rawClient, err := sharedClientForRegion(region)
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 	action := "DescribeIpv6Gateways"
 	request := map[string]interface{}{}
 
@@ -121,7 +119,7 @@ func TestAccAlibabacloudStackVPCIpv6Gateway_basic0(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%svpcipv6gateway%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testaccvpcipv6gateway%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackVPCIpv6GatewayBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

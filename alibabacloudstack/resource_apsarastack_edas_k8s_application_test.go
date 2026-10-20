@@ -20,25 +20,23 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_edas_k8s_application", &resource.Sweeper{
 		Name: "alibabacloudstack_edas_k8s_application",
-		F:    testSweepEdasK8sApplication,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepEdasK8sApplication, precise: []string{"tf-testacc-edask8sappb", "tf-testacc-edask8sappimg"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepEdasK8sApplication(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepEdasK8sApplication(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf-testacc",
-	}
 
 	applicationListRq := edas.CreateListApplicationRequest()
-	applicationListRq.RegionId = region
+	applicationListRq.RegionId = client.RegionId
 
 	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.ListApplication(applicationListRq)
@@ -70,7 +68,7 @@ func testSweepEdasK8sApplication(region string) error {
 		log.Printf("[INFO] delete edas application: %s", name)
 		// stop it before delete
 		stopAppRequest := edas.CreateStopApplicationRequest()
-		stopAppRequest.RegionId = region
+		stopAppRequest.RegionId = client.RegionId
 		stopAppRequest.AppId = v.AppId
 
 		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
@@ -91,7 +89,7 @@ func testSweepEdasK8sApplication(region string) error {
 		}
 
 		deleteApplicationRequest := edas.CreateDeleteApplicationRequest()
-		deleteApplicationRequest.RegionId = region
+		deleteApplicationRequest.RegionId = client.RegionId
 		deleteApplicationRequest.AppId = v.AppId
 
 		wait := incrementalWait(1*time.Second, 2*time.Second)

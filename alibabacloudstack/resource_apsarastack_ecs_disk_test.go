@@ -17,24 +17,19 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_disk", &resource.Sweeper{
 		Name: "alibabacloudstack_disk",
-		F:    testSweepDisks,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepDisks, precise: []string{"tf-testAccDisk"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepDisks(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepDisks(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-		"tf_test_",
-		"tf-test-",
-		"testAcc",
-	}
 
 	var disks []ecs.Disk
 	req := ecs.CreateDescribeDisksRequest()

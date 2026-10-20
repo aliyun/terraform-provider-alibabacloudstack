@@ -18,21 +18,19 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_drds_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_drds_instance",
-		F:    testSweepDrdsInstances,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepDrdsInstances, precise: []string{"tf-testacc-instance-"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepDrdsInstances(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepDrdsInstances(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	request := drds.CreateDescribeDrdsInstancesRequest()
 	request.Headers["x-ascm-product-name"] = "Drds"

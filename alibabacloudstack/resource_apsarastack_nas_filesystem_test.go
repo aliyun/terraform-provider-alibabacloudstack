@@ -20,21 +20,19 @@ func init() {
 	resource.AddTestSweepers("alibabacloudstack_nas_file_system",
 		&resource.Sweeper{
 			Name: "alibabacloudstack_nas_file_system",
-			F:    testSweepNasFileSystem,
+			F: func(region string) error { return SweeperFunc(
+				sweeperEntry{fn: testSweepNasFileSystem, precise: []string{"tf-testAccNasFileSystem"}, broad: broadPrefixes, fatal: true},
+			) },
 		})
 }
 
-func testSweepNasFileSystem(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepNasFileSystem(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting Alicloud client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 	action := "DescribeFileSystems"
 	request := make(map[string]interface{})
 	request["RegionId"] = client.Region
@@ -123,7 +121,7 @@ func TestAccAlibabacloudStackNasFileSystem_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testAcc%sAlibabacloudStackNasFileSystem%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testAccNasFileSystem%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackNasFileSystemBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -194,7 +192,7 @@ func TestAccAlibabacloudStackNasFileSystemEncrypt(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testAcc%sAlibabacloudStackNasFileSystem%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testAccNasFileSystem%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackNasFileSystemBasicDependence1)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

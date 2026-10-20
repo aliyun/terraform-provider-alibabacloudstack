@@ -16,25 +16,23 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_alikafka_topic", &resource.Sweeper{
 		Name: "alibabacloudstack_alikafka_topic",
-		F:    testSweepAlikafkaTopic,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepAlikafkaTopic, precise: []string{"tf-testacc-alikafkatopicbasic"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepAlikafkaTopic(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepAlikafkaTopic(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "error getting alibabacloudstack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testacc",
-	}
 
 	instanceListReq := alikafka.CreateGetInstanceListRequest()
-	instanceListReq.RegionId = region
+	instanceListReq.RegionId = client.RegionId
 
 	raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 		return alikafkaClient.GetInstanceList(instanceListReq)

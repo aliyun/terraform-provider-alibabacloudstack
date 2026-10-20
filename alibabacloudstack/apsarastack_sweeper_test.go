@@ -33,12 +33,6 @@ type sweeperEntry struct {
 	waitSec int       // seconds to wait after this entry completes; 0 means default 5s
 }
 
-// SweeperFunc composes multiple sweeperEntries into a resource.Sweeper.F function.
-//   - Precise mode (default): all entries run with their precise prefixes.
-//   - Broad mode (ALIBABACLOUDSTACK_TF_SWEEP_BROAD=1): only the first entry runs, with its broad prefixes.
-//   - fatal controls whether failure returns error (true) or logs warning (false).
-//   - waitSec controls seconds to sleep after each entry; 0 means default 5s.
-//
 // Usage:
 //
 //	SweeperFunc(
@@ -48,8 +42,8 @@ type sweeperEntry struct {
 //	)
 // SweeperFunc composes multiple sweeperEntries into a resource.Sweeper.F function.
 //   - Precise mode (default): all entries run with their precise prefixes.
-//   - Broad mode (ALIBABACLOUDSTACK_TF_SWEEP_BROAD=1): only entries with broad prefixes run, using their broad prefixes.
-//   - Custom prefix mode (ALIBABACLOUDSTACK_TF_SWEEP_PREFIXES=prefix1,prefix2): only works in broad mode, all entries run with the specified custom prefixes instead of broad prefixes.
+//   - Broad mode (ALIBABACLOUDSTACK_TF_SWEEP_BROAD=1): all entries run with combined precise + broad prefixes.
+//   - Custom prefix mode (ALIBABACLOUDSTACK_TF_SWEEP_PREFIXES=prefix1,prefix2): only works in broad mode, all entries run with the specified custom prefixes instead of precise+broad.
 //   - fatal controls whether failure returns error (true) or logs warning (false).
 //   - waitSec controls seconds to sleep after each entry; 0 means default 5s.
 //
@@ -75,13 +69,15 @@ func SweeperFunc(entries ...sweeperEntry) error {
 		if broad {
 			if len(customPrefixes) > 0 {
 				prefixes = customPrefixes
-			} else if len(e.broad) == 0 {
-				continue
 			} else {
-				prefixes = e.broad
+				// Broad mode: clean both precise and broad prefixes
+				prefixes = append(e.precise, e.broad...)
 			}
 		} else {
 			prefixes = e.precise
+		}
+		if len(prefixes) == 0 {
+			continue
 		}
 		if err := e.fn(prefixes); err != nil {
 			if e.fatal {

@@ -20,21 +20,19 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_adb_db_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_adb_db_instance",
-		F:    testSweepAdbDbInstances,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepAdbDbInstances, precise: []string{"tf-testacc-adbcluster"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepAdbDbInstances(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepAdbDbInstances(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	action := "DescribeDBClusters"
 	request := make(map[string]interface{})

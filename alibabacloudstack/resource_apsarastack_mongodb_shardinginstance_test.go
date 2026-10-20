@@ -13,26 +13,24 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_mongodb_sharding_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_mongodb_sharding_instance",
-		F:    testSweepMongoDBShardingInstances,
+		F: func(region string) error {
+			return SweeperFunc(
+				sweeperEntry{fn: testSweepMongoDBShardingInstances, precise: []string{"tfaccount"}, broad: broadPrefixes, fatal: true},
+			)
+		},
 	})
 }
-func testSweepMongoDBShardingInstances(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepMongoDBShardingInstances(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
-
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var insts []dds.DBInstance
 	request := dds.CreateDescribeDBInstancesRequest()
@@ -114,26 +112,6 @@ func testSweepMongoDBShardingInstances(region string) error {
 	if sweeped {
 		// Waiting 30 seconds to eusure these DB instances have been deleted.
 		time.Sleep(30 * time.Second)
-	}
-	return nil
-}
-
-func testAccCheckMongoDBShardingInstanceDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
-	ddsService := MongoDBService{client}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "alibabacloudstack_mongodb_sharding_instance" {
-			continue
-		}
-		_, err := ddsService.DescribeMongoDBInstance(rs.Primary.ID)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				continue
-			}
-			return errmsgs.WrapError(err)
-		}
-		return err
 	}
 	return nil
 }

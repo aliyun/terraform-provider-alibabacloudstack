@@ -18,22 +18,20 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_api_gateway_vpc_access", &resource.Sweeper{
 		Name: "alibabacloudstack_api_gateway_vpc_access",
-		F:    testSweepApiGatewayVpcAccess,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepApiGatewayVpcAccess, precise: []string{"tf-testAcc-"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepApiGatewayVpcAccess(region string) error {
+func testSweepApiGatewayVpcAccess(prefixes []string) error {
 
-	rawClient, err := sharedClientForRegion(region)
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	req := cloudapi.CreateDescribeVpcAccessesRequest()
 	raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {

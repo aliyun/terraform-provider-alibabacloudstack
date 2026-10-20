@@ -19,21 +19,19 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_arms_dispatch_rule", &resource.Sweeper{
 		Name: "alibabacloudstack_arms_dispatch_rule",
-		F:    testSweepArmsDispatchRule,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepArmsDispatchRule, precise: []string{"tf-testAccArmsDispatchRule"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepArmsDispatchRule(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepArmsDispatchRule(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testacc",
-	}
 
 	action := "ListDispatchRule"
 	request := make(map[string]interface{})

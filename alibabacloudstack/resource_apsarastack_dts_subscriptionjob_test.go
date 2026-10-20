@@ -22,25 +22,23 @@ func init() {
 		"alibabacloudstack_dts_subscription_job",
 		&resource.Sweeper{
 			Name: "alibabacloudstack_dts_subscription_job",
-			F:    testSweepDtsSubscriptionJob,
+			F: func(region string) error { return SweeperFunc(
+				sweeperEntry{fn: testSweepDtsSubscriptionJob, precise: []string{"tf-testaccdtssubscriptionjob"}, broad: broadPrefixes, fatal: true},
+			) },
 		})
 }
 
-func testSweepDtsSubscriptionJob(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepDtsSubscriptionJob(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "Error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	action := "DescribeDtsJobs"
 	request := make(map[string]interface{})
 	request["JobType"] = "SUBSCRIBE"
-	request["Region"] = region
+	request["Region"] = client.RegionId
 	request["RegionId"] = client.RegionId
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
@@ -122,7 +120,7 @@ func TestAccAlibabacloudStackDTSSubscriptionJob_basic0(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sdtssubscriptionjob%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testaccdtssubscriptionjob%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackDTSSubscriptionJobBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -279,7 +277,7 @@ func TestAccAlibabacloudStackDTSSubscriptionJob_basic1(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sdtssubscriptionjob%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testaccdtssubscriptionjob%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackDTSSubscriptionJobBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -409,7 +407,7 @@ func TestAccAlibabacloudStackDTSSubscriptionJob_basic2(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sdtssubscriptionjob%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testaccdtssubscriptionjob%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackDTSSubscriptionJobBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

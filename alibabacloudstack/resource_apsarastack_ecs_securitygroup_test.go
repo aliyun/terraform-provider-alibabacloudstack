@@ -18,27 +18,20 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_security_group", &resource.Sweeper{
 		Name: "alibabacloudstack_security_group",
-		F:    testSweepSecurityGroups,
-		//When implemented, these should be removed firstly
-		Dependencies: []string{
-			"alibabacloudstack_ecs_instance",
-			"alibabacloudstack_network_interface",
-			"alibabacloudstack_yundun_bastionhost_instance",
-		},
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepInstances, precise: []string{"tf-testAcc"}, broad: broadPrefixes},
+			sweeperEntry{fn: testSweepSecurityGroups, precise: []string{"tf-testacc_sg"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepSecurityGroups(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepSecurityGroups(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var groups []ecs.SecurityGroup
 	req := ecs.CreateDescribeSecurityGroupsRequest()

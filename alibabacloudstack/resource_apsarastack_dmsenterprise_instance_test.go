@@ -20,23 +20,20 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_dms_enterprise_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_dms_enterprise_instance",
-		F:    testSweepDMSEnterpriseInstances,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepDMSEnterpriseInstances, precise: []string{"tf-DmsInstance"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepDMSEnterpriseInstances(region string) error {
+func testSweepDMSEnterpriseInstances(prefixes []string) error {
 
-	rawClient, err := sharedClientForRegion(region)
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "Error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-		"testacc",
-	}
 	request := map[string]interface{}{
 		"InstanceState": "NORMAL",
 		"PageSize":      PageSizeXLarge,

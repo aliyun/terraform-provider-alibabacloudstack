@@ -20,23 +20,21 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_cr_namespace", &resource.Sweeper{
 		Name: "alibabacloudstack_cr_namespace",
-		F:    testSweepCRNamespace,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepCRNamespace, precise: []string{"tf-testAccCRNamespace"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepCRNamespace(region string) error {
-	// skip not supported region
+func testSweepCRNamespace(prefixes []string) error {
+	// skip not supported client.RegionId
 
-	rawClient, err := sharedClientForRegion(region)
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapError(fmt.Errorf("error getting AlibabacloudStack client: %s", err))
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	request := requests.NewCommonRequest()
 	request.Method = "POST"

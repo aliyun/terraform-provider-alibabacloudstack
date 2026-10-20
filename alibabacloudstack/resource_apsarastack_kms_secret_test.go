@@ -17,12 +17,14 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_kms_secret", &resource.Sweeper{
 		Name: "alibabacloudstack_kms_secret",
-		F:    testSweepKmsSecret,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepKmsSecret, precise: []string{"tf_testaccKmsSecret_"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepKmsSecret(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepKmsSecret(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting Alibabacloudstack client: %s", err)
 	}

@@ -15,12 +15,14 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_bastionhost_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_bastionhost_instance",
-		F:    testSweepBastionhostInstances,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepBastionhostInstances, precise: []string{"tf-testAccBastionhost"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepBastionhostInstances(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepBastionhostInstances(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}

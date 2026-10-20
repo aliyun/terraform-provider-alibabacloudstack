@@ -41,22 +41,19 @@ const ClientNodeAmountForUpdate = "3"
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_elasticsearch_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_elasticsearch_instance",
-		F:    testSweepElasticsearch,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepElasticsearch, precise: []string{"tf-testAccES-vpc"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepElasticsearch(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepElasticsearch(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("Error getting AlibabacloudStack client: %s", err)
 	}
 
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
-	prefixes := []string{
-		"",
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var instances []elasticsearch.Instance
 	req := elasticsearch.CreateListInstanceRequest()

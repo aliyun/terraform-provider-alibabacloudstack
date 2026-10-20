@@ -13,22 +13,20 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_api_gateway_v2_k8s_cluster", &resource.Sweeper{
 		Name: "alibabacloudstack_api_gateway_v2_k8s_cluster",
-		F:    testSweepApiGatewayV2K8sCluster,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepApiGatewayV2K8sCluster, precise: []string{"tf_testAccApiGatewayv2cluster_"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepApiGatewayV2K8sCluster(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepApiGatewayV2K8sCluster(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	apigatewayv2Service := ApiGateWayV2Service{client}
 
-	prefixes := []string{
-		"tf_testAccApiGatewayv2cluster",
-		"tf-testacc",
-	}
 
 	reqBody := map[string]interface{}{
 		"current": 1,

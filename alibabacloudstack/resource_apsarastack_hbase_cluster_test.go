@@ -19,21 +19,19 @@ import (
 func init() {
 	resource.AddTestSweepers("aalibabacloudstack_hbase_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_hbase_instance",
-		F:    testSweepHBaseInstances,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepHBaseInstances, precise: []string{"tf-testAccHBase"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepHBaseInstances(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepHBaseInstances(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var insts []hbase.Instance
 	req := hbase.CreateDescribeInstancesRequest()

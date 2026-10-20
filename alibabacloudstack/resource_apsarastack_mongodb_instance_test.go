@@ -19,7 +19,9 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_mongodb_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_mongodb_instance",
-		F:    testSweepMongoDBInstances,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepMongoDBInstances, precise: []string{"tf-accdbinstance", "tf-testAccMongoDBInstance_"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
@@ -43,17 +45,13 @@ func testAccCheckMongoDBInstanceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testSweepMongoDBInstances(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepMongoDBInstances(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var insts []dds.DBInstance
 	request := dds.CreateDescribeDBInstancesRequest()

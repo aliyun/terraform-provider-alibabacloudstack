@@ -18,27 +18,21 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_eip", &resource.Sweeper{
 		Name: "alibabacloudstack_eip",
-		F:    testSweepEips,
-		// When implemented, these should be removed firstly
-		Dependencies: []string{
-			"alibabacloudstack_instance",
-			"alibabacloudstack_slb",
-			"alibabacloudstack_nat_gateway",
-		},
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepInstances, precise: []string{"tf-testAcc"}, broad: broadPrefixes},
+			sweeperEntry{fn: testSweepNatGateways, precise: []string{"tf-testAccNatGatewayConfig"}, broad: broadPrefixes},
+			sweeperEntry{fn: testSweepEips, precise: []string{"tf-testAcceEipName"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepEips(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepEips(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var eips []vpc.EipAddress
 	req := vpc.CreateDescribeEipAddressesRequest()

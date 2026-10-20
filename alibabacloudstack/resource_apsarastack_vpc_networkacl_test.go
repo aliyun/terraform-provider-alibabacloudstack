@@ -20,21 +20,19 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_network_acl", &resource.Sweeper{
 		Name: "alibabacloudstack_network_acl",
-		F:    testSweepNetworkAcl,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepNetworkAcl, precise: []string{"tf-testaccnetworkacl"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepNetworkAcl(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepNetworkAcl(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 	action := "DescribeNetworkAcls"
 	request := map[string]interface{}{
 		"RegionId":   client.RegionId,
@@ -165,7 +163,7 @@ func TestAccAlibabacloudStackVpcNetworkAcl_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%snetworkacl%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testaccnetworkacl%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackNetworkAclBasicDependence0)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

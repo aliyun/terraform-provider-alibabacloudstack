@@ -21,21 +21,19 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_ess_scalinggroup", &resource.Sweeper{
 		Name: "alibabacloudstack_ess_scalinggroup",
-		F:    testSweepEssGroups,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepEssGroups, precise: []string{"tf-testAccEssScalingGroup-"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepEssGroups(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepEssGroups(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting Alibabacloudstack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var groups []ess.ScalingGroup
 	req := ess.CreateDescribeScalingGroupsRequest()

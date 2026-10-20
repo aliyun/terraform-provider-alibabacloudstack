@@ -18,12 +18,14 @@ func init() {
 		"alibabacloudstack_dns_group",
 		&resource.Sweeper{
 			Name: "alibabacloudstack_dns_group",
-			F:    testSweepDnsGroup,
+			F: func(region string) error { return SweeperFunc(
+				sweeperEntry{fn: testSweepDnsGroup, precise: []string{"tf-testaccdns"}, broad: broadPrefixes, fatal: true},
+			) },
 		})
 }
 
-func testSweepDnsGroup(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepDnsGroup(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}

@@ -17,21 +17,19 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_router_interface", &resource.Sweeper{
 		Name: "alibabacloudstack_router_interface",
-		F:    testSweepRouterInterfaces,
+		F: func(region string) error { return SweeperFunc(
+			sweeperEntry{fn: testSweepRouterInterfaces, precise: []string{"tf-testAccRouterInterface"}, broad: broadPrefixes, fatal: true},
+		) },
 	})
 }
 
-func testSweepRouterInterfaces(region string) error {
-	rawClient, err := sharedClientForRegion(region)
+func testSweepRouterInterfaces(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
-	prefixes := []string{
-		"tf-testAcc",
-		"tf_testAcc",
-	}
 
 	var ris []vpc.RouterInterfaceType
 	req := vpc.CreateDescribeRouterInterfacesRequest()
