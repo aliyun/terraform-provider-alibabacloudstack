@@ -43,6 +43,11 @@ func TestAccAlibabacloudStackEcsImageBasic(t *testing.T) {
 						"Created": "TF",
 						"For":     "acceptance test123",
 					},
+					"timeouts": []map[string]interface{}{
+						{
+							"create": "60m",
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -136,6 +141,11 @@ func TestAccAlibabacloudStackEcsImageSnapshot(t *testing.T) {
 					"tags": map[string]string{
 						"Created": "TF",
 						"For":     "acceptance test123",
+					},
+					"timeouts": []map[string]interface{}{
+						{
+							"create": "60m",
+						},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -234,6 +244,11 @@ func TestAccAlibabacloudStackEcsImageDeviceMap(t *testing.T) {
 						{
 							"size":        "20",
 							"snapshot_id": "${alibabacloudstack_ecs_snapshot.default.id}",
+						},
+					},
+					"timeouts": []map[string]interface{}{
+						{
+							"create": "60m",
 						},
 					},
 				}),

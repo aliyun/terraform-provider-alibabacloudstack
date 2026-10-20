@@ -4,12 +4,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackImage() *schema.Resource {
@@ -20,15 +20,15 @@ func resourceAlibabacloudStackImage() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"disk_device_mapping", "snapshot_id"},
 			},
 			"snapshot_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"instance_id", "disk_device_mapping"},
 			},
 			"description": {
@@ -43,10 +43,10 @@ func resourceAlibabacloudStackImage() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(2, 128),
 			},
 			"disk_device_mapping": {
-				Type:         schema.TypeList,
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
 				ConflictsWith: []string{"instance_id", "snapshot_id"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -174,7 +174,7 @@ func resourceAlibabacloudStackImageCreate(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	stateConf := BuildStateConf([]string{"Creating", ""}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}))
+	stateConf := BuildStateConfByTimes([]string{"Creating", ""}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}), 200)
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
