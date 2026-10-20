@@ -723,33 +723,29 @@ func (s *AscmService) DescribeAscmRamPolicyForRole(id string) (response *RamPoli
 func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	var targetType string
-	if did[0] == "RDS" {
+	if did[0] == "rds" {
 		targetType = "MySql"
-	} else if did[0] == "R-KVSTORE" {
+	} else if did[0] == "r-kvstore" {
 		targetType = "redis"
-	} else if did[0] == "DDS" {
+	} else if did[0] == "dds" {
 		targetType = "mongodb"
 	} else {
 		targetType = ""
 	}
 	quotaTypeIdInt, _ := strconv.Atoi(did[2])
-	requestBody := map[string]interface{}{
-		"productName": did[0],
-		"quotaType":   did[1],
-		"quotaTypeId": quotaTypeIdInt,
-		"targetType":  targetType,
-		"regionName":  s.client.RegionId,
-	}
-	bodyJSON, _ := json.Marshal(requestBody)
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetQuota", "/ascm/manage/quota/query")
-	request.Content = bodyJSON
-	request.SetContentType("application/json")
+	request.FormParams["productName"] = did[0]
+	request.FormParams["quotaType"] = did[1]
+	request.FormParams["quotaTypeId"] = strconv.Itoa(quotaTypeIdInt)
+	request.FormParams["targetType"] = targetType
+	request.FormParams["regionName"] = s.client.RegionId
 	var resp = &AscmQuota{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 
 	if err != nil {
 		errmsg := ""
 		if bresponse != nil {
+			log.Printf("[ERROR] GetQuota response body: %s", bresponse.GetHttpContentString())
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		} else {
 			return nil, err

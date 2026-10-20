@@ -105,55 +105,55 @@ func resourceAlibabacloudStackAscmQuota() *schema.Resource {
 
 func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	productName := strings.ToUpper(d.Get("product_name").(string))
+	productName := strings.ToLower(d.Get("product_name").(string))
 	quotaType := d.Get("quota_type").(string)
 	quotaTypeId := d.Get("quota_type_id").(string)
 
 	var quotaBody string
 	var targetType string
 	switch productName {
-	case "ECS":
+	case "ecs":
 		totalCpu := d.Get("total_cpu").(int)
 		totalMem := d.Get("total_mem").(int)
 		totalGpu := d.Get("total_gpu").(int)
 		totalDiskCloudSsd := d.Get("total_disk_cloud_ssd").(int)
 		totalDiskCloudEfficiency := d.Get("total_disk_cloud_efficiency").(int)
 		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalGpu\":%d,\"totalDisk_cloud_ssd\":%d,\"totalDisk_cloud_efficiency\":%d}", totalCpu, totalMem, totalGpu, totalDiskCloudSsd, totalDiskCloudEfficiency)
-	case "OSS":
+	case "oss":
 		totalAmount := d.Get("total_amount").(int)
 		quotaBody = fmt.Sprintf("{\"totalAmount\":%d}", totalAmount)
-	case "EIP":
+	case "eip":
 		totalEIP := d.Get("total_eip").(int)
 		quotaBody = fmt.Sprintf("{\"totalEIP\":%d}", totalEIP)
-	case "SLB":
+	case "slb":
 		totalVipPublic := d.Get("total_vip_public").(int)
 		totalVipInternal := d.Get("total_vip_internal").(int)
 		quotaBody = fmt.Sprintf("{\"totalVipPublic\":%d,\"totalVipInternal\":%d}", totalVipPublic, totalVipInternal)
-	case "ODPS":
+	case "odps":
 		totalCu := d.Get("total_cu").(int)
 		totalDisk := d.Get("total_disk").(int)
 		quotaBody = fmt.Sprintf("{\"totalCu\":%d,\"totalDisk\":%d}", totalCu, totalDisk)
-	case "DDS":
+	case "dds":
 		totalCpu := d.Get("total_cpu").(int)
 		totalMem := d.Get("total_mem").(int)
 		totalDisk := d.Get("total_disk").(int)
 		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCpu, totalMem, totalDisk)
-	case "RDS":
+	case "rds":
 		targetType = d.Get("target_type").(string)
 		totalCpu := d.Get("total_cpu").(int)
 		totalMem := d.Get("total_mem").(int)
 		totalDisk := d.Get("total_disk").(int)
 		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCpu, totalMem, totalDisk)
-	case "GPDB":
+	case "gpdb":
 		totalCpu := d.Get("total_cpu").(int)
 		totalMem := d.Get("total_mem").(int)
 		totalDisk := d.Get("total_disk").(int)
 		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCpu, totalMem, totalDisk)
-	case "R-KVSTORE":
+	case "r-kvstore":
 		targetType = d.Get("target_type").(string)
 		totalMem := d.Get("total_mem").(int)
 		quotaBody = fmt.Sprintf("{\"totalMem\":%d}", totalMem)
-	case "VPC":
+	case "vpc":
 		totalVPC := d.Get("total_vpc").(int)
 		quotaBody = fmt.Sprintf("{\"totalVPC\":%d}", totalVPC)
 	default:
@@ -161,23 +161,15 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 		return nil
 	}
 
-	quotaTypeIdInt, _ := strconv.Atoi(quotaTypeId)
-	var quotaBodyMap interface{}
-	json.Unmarshal([]byte(quotaBody), &quotaBodyMap)
-	requestBody := map[string]interface{}{
-		"productName": productName,
-		"quotaType":   quotaType,
-		"quotaTypeId": quotaTypeIdInt,
-		"regionName":  client.RegionId,
-		"quotaBody":   quotaBodyMap,
-	}
-	if targetType != "" {
-		requestBody["targetType"] = targetType
-	}
-	bodyJSON, _ := json.Marshal(requestBody)
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateQuota", "/ascm/manage/quota/add")
-	request.Content = bodyJSON
-	request.SetContentType("application/json")
+	request.QueryParams["ProductName"] = productName
+	request.QueryParams["QuotaBody"] = quotaBody
+	request.QueryParams["QuotaType"] = quotaType
+	request.QueryParams["QuotaTypeId"] = quotaTypeId
+	request.QueryParams["RegionName"] = client.RegionId
+	if targetType != "" {
+		request.QueryParams["TargetType"] = targetType
+	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -185,6 +177,7 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		log.Printf("[ERROR] CreateQuota response body: %s", bresponse.GetHttpContentString())
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_quota", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
@@ -205,208 +198,214 @@ func resourceAlibabacloudStackAscmQuotaUpdate(d *schema.ResourceData, meta inter
 	}
 
 	var quotaBody string
+	var targetType string
 	switch did[0] {
-	case "VPC":
+	case "vpc":
 		var totalVPC int
 		if d.HasChange("total_vpc") {
 			if v, ok := d.GetOk("total_vpc"); ok {
 				totalVPC = v.(int)
 			}
-			check.Data.TotalVPC = totalVPC
+			check.Data.TotalVPC = float64(totalVPC)
 			attributeUpdate = true
 		} else {
 			if v, ok := d.GetOk("total_vpc"); ok {
 				totalVPC = v.(int)
 			}
-			check.Data.TotalVPC = totalVPC
+			check.Data.TotalVPC = float64(totalVPC)
 		}
 		quotaBody = fmt.Sprintf("{\"totalVPC\":%d}", totalVPC)
-	case "RDS":
+	case "rds":
+		targetType = d.Get("target_type").(string)
 		var totalDISK, totalCPU, totalMEM int
 		if d.HasChange("total_mem") {
 			if v, ok := d.GetOk("total_mem"); ok {
 				totalMEM = v.(int)
 			}
-			check.Data.TotalMem = totalMEM
+			check.Data.TotalMem = float64(totalMEM)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_disk") {
 			if v, ok := d.GetOk("total_disk"); ok {
 				totalDISK = v.(int)
 			}
-			check.Data.TotalDisk = totalDISK
+			check.Data.TotalDisk = float64(totalDISK)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_cpu") {
 			if v, ok := d.GetOk("total_cpu"); ok {
 				totalCPU = v.(int)
 			}
-			check.Data.TotalCPU = totalCPU
+			check.Data.TotalCPU = float64(totalCPU)
 			attributeUpdate = true
 		}
 		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCPU, totalMEM, totalDISK)
-	case "EIP":
+	case "eip":
 		var totalEIP int
 		if d.HasChange("total_eip") {
 			if v, ok := d.GetOk("total_eip"); ok {
 				totalEIP = v.(int)
 			}
-			check.Data.TotalMem = totalEIP
+			check.Data.TotalMem = float64(totalEIP)
 			attributeUpdate = true
 		}
 		quotaBody = fmt.Sprintf("{\"totalEIP\":%d}", totalEIP)
-	case "ECS":
+	case "ecs":
 		var totalGPU, totalCPU, totalMEM, totalDCE, totalDCS int
 		if d.HasChange("total_cpu") {
 			if v, ok := d.GetOk("total_cpu"); ok {
 				totalCPU = v.(int)
 			}
-			check.Data.TotalCPU = totalCPU
+			check.Data.TotalCPU = float64(totalCPU)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_gpu") {
 			if v, ok := d.GetOk("total_gpu"); ok {
 				totalGPU = v.(int)
 			}
-			check.Data.TotalGpu = totalGPU
+			check.Data.TotalGpu = float64(totalGPU)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_mem") {
 			if v, ok := d.GetOk("total_mem"); ok {
 				totalMEM = v.(int)
 			}
-			check.Data.TotalMem = totalMEM
+			check.Data.TotalMem = float64(totalMEM)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_disk_cloud_ssd") {
 			if v, ok := d.GetOk("total_disk_cloud_ssd"); ok {
 				totalDCS = v.(int)
 			}
-			check.Data.TotalDiskCloudSsd = totalDCS
+			check.Data.TotalDiskCloudSsd = float64(totalDCS)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_disk_cloud_efficiency") {
 			if v, ok := d.GetOk("total_disk_cloud_efficiency"); ok {
 				totalDCE = v.(int)
 			}
-			check.Data.TotalDiskCloudEfficiency = totalDCE
+			check.Data.TotalDiskCloudEfficiency = float64(totalDCE)
 			attributeUpdate = true
 		}
 		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalGpu\":%d,\"totalDisk_cloud_ssd\":%d,\"totalDisk_cloud_efficiency\":%d}", totalCPU, totalMEM, totalGPU, totalDCS, totalDCE)
-	case "SLB":
+	case "slb":
 		var totalVP, totalVI int
 		if d.HasChange("total_vip_internal") {
 			if v, ok := d.GetOk("total_vip_internal"); ok {
 				totalVI = v.(int)
 			}
-			check.Data.TotalVipInternal = totalVI
+			check.Data.TotalVipInternal = float64(totalVI)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_vip_public") {
 			if v, ok := d.GetOk("total_vip_public"); ok {
 				totalVP = v.(int)
 			}
-			check.Data.TotalVipPublic = totalVP
+			check.Data.TotalVipPublic = float64(totalVP)
 			attributeUpdate = true
 		}
 		quotaBody = fmt.Sprintf("{\"totalVipPublic\":%d,\"totalVipInternal\":%d}", totalVP, totalVI)
-	case "OSS":
+	case "oss":
 		var totalAmount int
 		if d.HasChange("total_amount") {
 			if v, ok := d.GetOk("total_amount"); ok {
 				totalAmount = v.(int)
 			}
-			check.Data.TotalAmount = totalAmount
+			check.Data.TotalAmount = float64(totalAmount)
 			attributeUpdate = true
 		}
 		quotaBody = fmt.Sprintf("{\"totalAmount\":%d}", totalAmount)
-	case "DDS":
+	case "dds":
 		var totalDISK, totalCPU, totalMEM int
 		if d.HasChange("total_mem") {
 			if v, ok := d.GetOk("total_mem"); ok {
 				totalMEM = v.(int)
 			}
-			check.Data.TotalMem = totalMEM
+			check.Data.TotalMem = float64(totalMEM)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_disk") {
 			if v, ok := d.GetOk("total_disk"); ok {
 				totalDISK = v.(int)
 			}
-			check.Data.TotalDisk = totalDISK
+			check.Data.TotalDisk = float64(totalDISK)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_cpu") {
 			if v, ok := d.GetOk("total_cpu"); ok {
 				totalCPU = v.(int)
 			}
-			check.Data.TotalCPU = totalCPU
+			check.Data.TotalCPU = float64(totalCPU)
 			attributeUpdate = true
 		}
 		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCPU, totalMEM, totalDISK)
-	case "ODPS":
+	case "odps":
 		var totalDISK, totalCU int
 		if d.HasChange("total_disk") {
 			if v, ok := d.GetOk("total_disk"); ok {
 				totalDISK = v.(int)
 			}
-			check.Data.TotalDisk = totalDISK
+			check.Data.TotalDisk = float64(totalDISK)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_cu") {
 			if v, ok := d.GetOk("total_cu"); ok {
 				totalCU = v.(int)
 			}
-			check.Data.TotalCU = totalCU
+			check.Data.TotalCU = float64(totalCU)
 			attributeUpdate = true
 		}
 		quotaBody = fmt.Sprintf("{\"totalCu\":%d,\"totalDisk\":%d}", totalCU, totalDISK)
-	case "GPDB":
+	case "gpdb":
 		var totalDISK, totalCPU, totalMEM int
 		if d.HasChange("total_mem") {
 			if v, ok := d.GetOk("total_mem"); ok {
 				totalMEM = v.(int)
 			}
-			check.Data.TotalMem = totalMEM
+			check.Data.TotalMem = float64(totalMEM)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_disk") {
 			if v, ok := d.GetOk("total_disk"); ok {
 				totalDISK = v.(int)
 			}
-			check.Data.TotalDisk = totalDISK
+			check.Data.TotalDisk = float64(totalDISK)
 			attributeUpdate = true
 		}
 		if d.HasChange("total_cpu") {
 			if v, ok := d.GetOk("total_cpu"); ok {
 				totalCPU = v.(int)
 			}
-			check.Data.TotalCPU = totalCPU
+			check.Data.TotalCPU = float64(totalCPU)
 			attributeUpdate = true
 		}
 		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCPU, totalMEM, totalDISK)
-	case "R-KVSTORE":
+	case "r-kvstore":
+		targetType = d.Get("target_type").(string)
 		var totalMEM int
 		if d.HasChange("total_mem") {
 			if v, ok := d.GetOk("total_mem"); ok {
 				totalMEM = v.(int)
 			}
-			check.Data.TotalMem = totalMEM
+			check.Data.TotalMem = float64(totalMEM)
 			attributeUpdate = true
 		}
 		quotaBody = fmt.Sprintf("{\"totalMem\":%d}", totalMEM)
 	}
 
 	if attributeUpdate {
+		quotaTypeIdInt, _ := strconv.Atoi(did[2])
 		var quotaBodyMap interface{}
 		json.Unmarshal([]byte(quotaBody), &quotaBodyMap)
-		quotaTypeIdInt, _ := strconv.Atoi(did[2])
 		requestBody := map[string]interface{}{
 			"productName": did[0],
 			"quotaType":   did[1],
 			"quotaTypeId": quotaTypeIdInt,
 			"regionName":  client.RegionId,
 			"quotaBody":   quotaBodyMap,
+		}
+		if targetType != "" {
+			requestBody["targetType"] = targetType
 		}
 		bodyJSON, _ := json.Marshal(requestBody)
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateQuota", "/ascm/manage/quota/update")
@@ -418,6 +417,7 @@ func resourceAlibabacloudStackAscmQuotaUpdate(d *schema.ResourceData, meta inter
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			log.Printf("[ERROR] UpdateQuota response body: %s", bresponse.GetHttpContentString())
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_quota", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
@@ -444,10 +444,23 @@ func resourceAlibabacloudStackAscmQuotaRead(d *schema.ResourceData, meta interfa
 		return nil
 	}
 
-	if did[0] == "VPC" || did[0] == "OSS" || did[0] == "ECS" || did[0] == "SLB" || did[0] == "EIP" || did[0] == "RDS" || did[0] == "ODPS" || did[0] == "GPDB" || did[0] == "R-KVSTORE" || did[0] == "DDS" {
+	if did[0] == "vpc" || did[0] == "oss" || did[0] == "ecs" || did[0] == "slb" || did[0] == "eip" || did[0] == "rds" || did[0] == "odps" || did[0] == "gpdb" || did[0] == "r-kvstore" || did[0] == "dds" {
 		d.Set("quota_id", object.Data.ID)
+		d.Set("product_name", strings.ToUpper(did[0]))
 		d.Set("quota_type", did[1])
 		d.Set("quota_type_id", did[2])
+		d.Set("total_cpu", int(object.Data.TotalCPU))
+		d.Set("total_mem", int(object.Data.TotalMem))
+		d.Set("total_gpu", int(object.Data.TotalGpu))
+		d.Set("total_disk_cloud_ssd", int(object.Data.TotalDiskCloudSsd))
+		d.Set("total_disk_cloud_efficiency", int(object.Data.TotalDiskCloudEfficiency))
+		d.Set("total_vpc", int(object.Data.TotalVPC))
+		d.Set("total_eip", int(object.Data.TotalEIP))
+		d.Set("total_amount", int(object.Data.TotalAmount))
+		d.Set("total_disk", int(object.Data.TotalDisk))
+		d.Set("total_cu", int(object.Data.TotalCU))
+		d.Set("total_vip_internal", int(object.Data.TotalVipInternal))
+		d.Set("total_vip_public", int(object.Data.TotalVipPublic))
 		return nil
 	} else {
 		d.Set("region_name", object.Data.RegionName)
@@ -476,20 +489,15 @@ func resourceAlibabacloudStackAscmQuotaDelete(d *schema.ResourceData, meta inter
 
 	addDebug("IsQuotaExist", check, nil, map[string]string{"productName": did[0]})
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		quotaTypeIdInt, _ := strconv.Atoi(did[2])
-		requestBody := map[string]interface{}{
-			"productName": did[0],
-			"quotaType":   did[1],
-			"quotaTypeId": quotaTypeIdInt,
-			"regionName":  client.RegionId,
-		}
-		bodyJSON, _ := json.Marshal(requestBody)
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DeleteQuota", "/ascm/manage/quota/delete")
-		request.Content = bodyJSON
-		request.SetContentType("application/json")
+		request.FormParams["productName"] = did[0]
+		request.FormParams["quotaType"] = did[1]
+		request.FormParams["quotaTypeId"] = did[2]
+		request.FormParams["regionName"] = client.RegionId
 
 		_, err := client.ProcessCommonRequest(request)
 		if err != nil {
+			log.Printf("[ERROR] DeleteQuota response: %v", err)
 			return resource.RetryableError(err)
 		}
 		check, err := ascmService.DescribeAscmQuota(d.Id())
