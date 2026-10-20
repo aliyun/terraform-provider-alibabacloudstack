@@ -3,7 +3,7 @@ subcategory: "Simple Log Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_store"
 description: |-
-  Provides a Alibabacloudstack log store resource.
+  Provides an Alibabacloudstack log store resource.
 ---
 
 # alibabacloudstack_log_store
@@ -51,11 +51,11 @@ resource "alibabacloudstack_log_project" "example" {
 resource "alibabacloudstack_log_store" "example" {
     project                 = alibabacloudstack_log_project.example.name
     name                    = "tf-log-store"
-    retention_period        = "30"
+    retention_period        = 30
     shard_count             = 3
     enable_web_tracking     = false
     auto_split              = true
-    max_split_shard_count   = "64"
+    max_split_shard_count   = 64
     append_meta             = true
     encryption              = true
     encrypt_type            = "aes_gcm"
@@ -69,22 +69,24 @@ resource "alibabacloudstack_log_store" "example" {
 
 The following arguments are supported:
 
-* `project` - (Required, ForceNew) The project name to the log store belongs.
-* `name` - (Required, ForceNew) The log store, which is unique in the same project.
-* `retention_period` - (Optional) The data retention time (in days). Valid values: [1-3650]. Default to `30`. Log store data will be stored permanently when the value is `3650`.
-* `shard_count` - (Required) The number of shards in this log store. 
-* `auto_split` - (Optional) Determines whether to automatically split a shard. Default to `false`.
-* `max_split_shard_count` - (Optional) The maximum number of shards for automatic split, which is in the range of 1 to 64. You must specify this parameter when autoSplit is true.
-* `append_meta` - (Optional) Determines whether to append log meta automatically. The meta includes log receive time and client IP address. Default to `true`.
-* `enable_web_tracking` - (Optional) Determines whether to enable Web Tracking. Default `false`.
-* `encryption` - (Optional) Enable encryption. Default `false`. 
-* `encrypt_type` - (Optional, ForceNew) Supported encryption type, only supports `default(sm4_gcm)`, `aes_gcm`.
+* `name` - (Required, ForceNew) The log store name, which is unique in the same project.
+* `project` - (Required, ForceNew) The project name to which the log store belongs.
+* `shard_count` - (Required) The number of shards in this log store.
+* `arn` - (Optional, ForceNew, Computed) The ARN of the RAM role used for encryption. When `cmk_key_id` is specified but `arn` is not, the provider will attempt to use the default RAM role `AliyunLogAccessingKMSRole`.
+* `cmk_key_id` - (Optional, ForceNew) The user-managed customer master key (CMK) ID used for encryption.
+* `encrypt_type` - (Optional, ForceNew) The encryption type. Valid values: `sm4_gcm`, `aes_gcm`. Defaults to `sm4_gcm`.
+* `encryption` - (Optional, ForceNew) Whether to enable encryption. Defaults to `false`.
+* `append_meta` - (Optional) Whether to append log meta automatically. The meta includes log receive time and client IP address. Defaults to `true`.
+* `auto_split` - (Optional) Whether to automatically split a shard. Defaults to `false`.
+* `enable_web_tracking` - (Optional) Whether to enable Web Tracking. Defaults to `false`.
+* `max_split_shard_count` - (Optional) The maximum number of shards for automatic split, which is in the range of 1 to 64. You must specify this parameter when `auto_split` is `true`. Defaults to `0`.
+* `retention_period` - (Optional) The data retention time (in days). Valid values: [1-3650]. Defaults to `30`. Log store data will be stored permanently when the value is `3650`.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The ID of the log project. It formats of `<project>:<name>`.
+* `id` - The ID of the log store. It formats as `<project>:<name>`.
 * `project` - The project name.
 * `name` - Log store name.
 * `retention_period` - The data retention time.
@@ -104,5 +106,5 @@ The following attributes are exported:
 Log store can be imported using the id, e.g.
 
 ```
-$ terraform import alibabacloudstack_log_store.example tf-log:tf-log-store
+$ terraform import alibabacloudstack_log_store.example <project>:<name>
 ```

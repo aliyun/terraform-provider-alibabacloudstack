@@ -2,14 +2,13 @@
 subcategory: "日志服务 SLS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_log_store"
-sidebar_current: "docs-Alibabacloudstack-resource-log-store"
 description: |-
-  编排日志告警的日志库
+  提供日志服务 SLS 日志库资源。
 ---
 
 # alibabacloudstack_log_store
 
-使用Provider配置的凭证在指定的资源集编排日志告警的日志库。
+使用 Provider 配置的凭证在指定的资源集编排日志服务 SLS 日志库。
 日志库(Log Store)是日志服务中用于收集、存储和查询日志数据的单元。每个日志库属于一个项目，每个项目可以创建多个日志库。[更多详情](https://help.aliyun.com/apsara/enterprise/v_3_16_0_20220117/sls/enterprise-ascm-developer-guide/CreateLogstore.html?spm=a2c4g.14484438.10001.307)
 
 ## 示例用法
@@ -54,11 +53,11 @@ resource "alibabacloudstack_log_project" "example" {
 resource "alibabacloudstack_log_store" "example" {
     project                 = alibabacloudstack_log_project.example.name
     name                    = "tf-log-store"
-    retention_period        = "30"
+    retention_period        = 30
     shard_count             = 3
     enable_web_tracking     = false
     auto_split              = true
-    max_split_shard_count   = "64"
+    max_split_shard_count   = 64
     append_meta             = true
     encryption              = true
     encrypt_type            = "aes_gcm"
@@ -72,24 +71,24 @@ resource "alibabacloudstack_log_store" "example" {
 
 支持以下参数：
 
-* `project` - (必填，变更时重建) 日志库所属的项目名称。
-* `name` - (必填，变更时重建) 日志库名称，在同一项目中必须唯一。
-* `retention_period` - (可选) 数据保留时间(以天为单位)。有效值范围：[1-3650]。默认值为 `30`。当值为 `3650` 时，日志库数据将永久存储。
+* `name` - (必填，变更后重建) 日志库名称，在同一项目中必须唯一。
+* `project` - (必填，变更后重建) 日志库所属的项目名称。
 * `shard_count` - (必填) 该日志库中的分片数量。
-* `auto_split` - (可选) 是否自动拆分分片。默认为 `false`。
-* `max_split_shard_count` - (可选) 自动拆分的最大分片数，范围为 1 到 64。当 `auto_split` 为 true 时必须指定此参数。
-* `append_meta` - (可选) 是否自动附加日志元数据。元数据包括日志接收时间和客户端 IP 地址。默认为 `true`。
-* `enable_web_tracking` - (可选) 是否启用 Web 跟踪功能。默认为 `false`。
-* `encryption` - (可选) 启用加密功能。默认为 `false`。
-* `encrypt_type` - (可选，变更时重建) 支持的加密类型，仅支持 `default(sm4_gcm)` 和 `aes_gcm`。
-* `arn` - (可选) 角色 ARN，用于指定加密时的角色权限。
-* `cmk_key_id` - (可选) 用户主密钥 ID，用于指定加密时使用的密钥。
+* `arn` - (选填，变更后重建) 用于加密的 RAM 角色 ARN。当指定了 `cmk_key_id` 但未指定 `arn` 时，提供程序将尝试使用默认 RAM 角色 `AliyunLogAccessingKMSRole`。
+* `cmk_key_id` - (选填，变更后重建) 用于加密的用户主密钥（CMK）ID。
+* `encrypt_type` - (选填，变更后重建) 加密类型。有效值：`sm4_gcm`、`aes_gcm`。默认值为 `sm4_gcm`。
+* `encryption` - (选填，变更后重建) 是否启用加密功能。默认值为 `false`。
+* `append_meta` - (选填) 是否自动附加日志元数据。元数据包括日志接收时间和客户端 IP 地址。默认值为 `true`。
+* `auto_split` - (选填) 是否自动拆分分片。默认值为 `false`。
+* `enable_web_tracking` - (选填) 是否启用 Web 跟踪功能。默认值为 `false`。
+* `max_split_shard_count` - (选填) 自动拆分的最大分片数，范围为 1 到 64。当 `auto_split` 为 `true` 时必须指定此参数。默认值为 `0`。
+* `retention_period` - (选填) 数据保留时间（以天为单位）。有效值范围：[1-3650]。默认值为 `30`。当值为 `3650` 时，日志库数据将永久存储。
 
 ## 属性说明
 
 导出以下属性：
 
-* `id` - 日志项目的 ID。格式为 `<project>:<name>`。
+* `id` - 日志库的 ID。格式为 `<project>:<name>`。
 * `project` - 项目名称。
 * `name` - 日志库名称。
 * `retention_period` - 数据保留时间（以天为单位）。
@@ -109,5 +108,5 @@ resource "alibabacloudstack_log_store" "example" {
 日志库可以通过 ID 导入，例如：
 
 ```bash
-$ terraform import alibabacloudstack_log_store.example tf-log:tf-log-store
+$ terraform import alibabacloudstack_log_store.example <project>:<name>
 ```
