@@ -732,14 +732,18 @@ func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err err
 	} else {
 		targetType = ""
 	}
-	request := s.client.NewCommonRequest("GET", "ascm", "2019-05-10", "GetQuota", "/ascm/manage/quota/query")
-	mergeMaps(request.QueryParams, map[string]string{
+	quotaTypeIdInt, _ := strconv.Atoi(did[2])
+	requestBody := map[string]interface{}{
 		"productName": did[0],
 		"quotaType":   did[1],
-		"quotaTypeId": did[2],
+		"quotaTypeId": quotaTypeIdInt,
 		"targetType":  targetType,
 		"regionName":  s.client.RegionId,
-	})
+	}
+	bodyJSON, _ := json.Marshal(requestBody)
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetQuota", "/ascm/manage/quota/query")
+	request.Content = bodyJSON
+	request.SetContentType("application/json")
 	var resp = &AscmQuota{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 

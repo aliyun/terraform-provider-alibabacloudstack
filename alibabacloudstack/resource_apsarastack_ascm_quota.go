@@ -1,12 +1,13 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -160,14 +161,23 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 		return nil
 	}
 
+	quotaTypeIdInt, _ := strconv.Atoi(quotaTypeId)
+	var quotaBodyMap interface{}
+	json.Unmarshal([]byte(quotaBody), &quotaBodyMap)
+	requestBody := map[string]interface{}{
+		"productName": productName,
+		"quotaType":   quotaType,
+		"quotaTypeId": quotaTypeIdInt,
+		"regionName":  client.RegionId,
+		"quotaBody":   quotaBodyMap,
+	}
+	if targetType != "" {
+		requestBody["targetType"] = targetType
+	}
+	bodyJSON, _ := json.Marshal(requestBody)
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateQuota", "/ascm/manage/quota/add")
-	request.QueryParams["regionName"] = client.RegionId
-	request.QueryParams["quotaType"] = quotaType
-	request.QueryParams["quotaTypeId"] = quotaTypeId
-	request.QueryParams["productName"] = productName
-	request.QueryParams["targetType"] = ""
-	request.QueryParams["quotaBody"] = quotaBody
-	request.QueryParams["targetType"] = targetType
+	request.Content = bodyJSON
+	request.SetContentType("application/json")
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -388,13 +398,20 @@ func resourceAlibabacloudStackAscmQuotaUpdate(d *schema.ResourceData, meta inter
 	}
 
 	if attributeUpdate {
+		var quotaBodyMap interface{}
+		json.Unmarshal([]byte(quotaBody), &quotaBodyMap)
+		quotaTypeIdInt, _ := strconv.Atoi(did[2])
+		requestBody := map[string]interface{}{
+			"productName": did[0],
+			"quotaType":   did[1],
+			"quotaTypeId": quotaTypeIdInt,
+			"regionName":  client.RegionId,
+			"quotaBody":   quotaBodyMap,
+		}
+		bodyJSON, _ := json.Marshal(requestBody)
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateQuota", "/ascm/manage/quota/update")
-		request.QueryParams["regionName"] = client.RegionId
-		request.QueryParams["quotaType"] = did[1]
-		request.QueryParams["quotaTypeId"] = did[2]
-		request.QueryParams["productName"] = did[0]
-		request.QueryParams["targetType"] = ""
-		request.QueryParams["quotaBody"] = quotaBody
+		request.Content = bodyJSON
+		request.SetContentType("application/json")
 
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
@@ -450,7 +467,6 @@ func resourceAlibabacloudStackAscmQuotaRead(d *schema.ResourceData, meta interfa
 func resourceAlibabacloudStackAscmQuotaDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
-	var requestInfo *ecs.Client
 	check, err := ascmService.DescribeAscmQuota(d.Id())
 	did := strings.Split(d.Id(), COLON_SEPARATED)
 
@@ -458,12 +474,19 @@ func resourceAlibabacloudStackAscmQuotaDelete(d *schema.ResourceData, meta inter
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, did[0], "IsQuotaExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	addDebug("IsQuotaExist", check, requestInfo, map[string]string{"productName": did[0]})
+	addDebug("IsQuotaExist", check, nil, map[string]string{"productName": did[0]})
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		quotaTypeIdInt, _ := strconv.Atoi(did[2])
+		requestBody := map[string]interface{}{
+			"productName": did[0],
+			"quotaType":   did[1],
+			"quotaTypeId": quotaTypeIdInt,
+			"regionName":  client.RegionId,
+		}
+		bodyJSON, _ := json.Marshal(requestBody)
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DeleteQuota", "/ascm/manage/quota/delete")
-		request.QueryParams["productName"] = did[0]
-		request.QueryParams["quotaType"] = did[1]
-		request.QueryParams["quotaTypeId"] = did[2]
+		request.Content = bodyJSON
+		request.SetContentType("application/json")
 
 		_, err := client.ProcessCommonRequest(request)
 		if err != nil {
@@ -472,6 +495,9 @@ func resourceAlibabacloudStackAscmQuotaDelete(d *schema.ResourceData, meta inter
 		check, err := ascmService.DescribeAscmQuota(d.Id())
 
 		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				return nil
+			}
 			return resource.NonRetryableError(err)
 		}
 		if check.Data.QuotaTypeID != 0 {
