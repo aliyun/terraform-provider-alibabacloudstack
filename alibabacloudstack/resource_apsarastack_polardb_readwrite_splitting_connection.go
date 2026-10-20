@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -76,11 +77,14 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionCreate(d *schem
 }
 
 func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionRead(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbServce := PolardbService{client}
-	response, err := polardbServce.DescribeDBReadWriteSplittingConnection(d.Id())
+	polardbService := PolardbService{client}
+	response, err := polardbService.DescribeDBReadWriteSplittingConnection(d.Id())
 	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 
@@ -89,18 +93,35 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionRead(d *schema.
 	d.Set("connection_string", response["DBProxyConnectString"])
 	d.Set("distribution_type", response["ReadOnlyInstanceDistributionType"])
 	{
-		var instances []map[string]interface{}
-		if err := json.Unmarshal([]byte(response["ReadOnlyInstanceWeight"].(string)), &instances); err != nil {
-			panic(err)
+		var instances []interface{}
+		rawWeight := response["ReadOnlyInstanceWeight"]
+		if rawWeight == nil {
+			// ReadWriteSplitting not yet configured; clear state
+			d.SetId("")
+			return nil
+		}
+		switch v := rawWeight.(type) {
+		case string:
+			if v != "" {
+				if err := json.Unmarshal([]byte(v), &instances); err != nil {
+					return fmt.Errorf("failed to parse ReadOnlyInstanceWeight: %w", err)
+				}
+			}
+		case []interface{}:
+			instances = v
+		default:
+			return fmt.Errorf("unsupported ReadOnlyInstanceWeight type: %T", rawWeight)
 		}
 
 		result := make(map[string]int)
-		for _, inst := range instances {
+		for _, item := range instances {
+			inst, ok := item.(map[string]interface{})
+			if !ok {
+				continue
+			}
 			if avail, ok := inst["Availability"].(string); ok && avail == "Available" {
 				if id, ok := inst["DBInstanceId"].(string); ok {
-					if weight, ok := inst["Weight"].(float64); ok {
-						result[id] = int(weight)
-					} else if weight, ok := inst["Weight"].(int); ok {
+					if weight, err := toInt(inst["Weight"]); err == nil {
 						result[id] = weight
 					}
 				}
