@@ -101,6 +101,18 @@ func TestAccAlibabacloudStackEssScalingConfiguration_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"system_disk_name":        "test_disk_name",
+					"system_disk_description": "test_disk_description",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"system_disk_name":        "test_disk_name",
+						"system_disk_description": "test_disk_description",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"data_disk": []map[string]string{{
 						"size":                 "20",
 						"category":             "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",

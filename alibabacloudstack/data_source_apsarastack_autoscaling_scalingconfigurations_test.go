@@ -65,6 +65,8 @@ func TestAccAlibabacloudStackEssScalingConfigurationsDataSource(t *testing.T) {
 			 "configurations.0.creation_time":              CHECKSET,
 			 "configurations.0.system_disk_category":       CHECKSET,
 			 "configurations.0.system_disk_size":           CHECKSET,
+			 "configurations.0.system_disk_name":           "test_disk_name",
+			 "configurations.0.system_disk_description":    "test_disk_description",
 			 "configurations.0.internet_max_bandwidth_in":  CHECKSET,
 			 "configurations.0.internet_max_bandwidth_out": CHECKSET,
 		}
@@ -121,6 +123,8 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 	enable = true
 	deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
 	system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	system_disk_name = "test_disk_name"
+	system_disk_description = "test_disk_description"
 }
 
 `, name, ECSInstanceCommonTestCase)

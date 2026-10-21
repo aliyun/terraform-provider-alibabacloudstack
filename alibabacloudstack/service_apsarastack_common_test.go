@@ -772,6 +772,8 @@ data "alibabacloudstack_zones" "default" {
 `
 
 var DataAlibabacloudstackInstanceTypes string
+var SlbListenerVserverCommonTestCase string
+var ECSInstanceCommonTestCase string
 
 func init() {
 	instanceType := os.Getenv("ALIBABACLOUDSTACK_TEST_ECS_INSTANCE_TYPE")
@@ -822,6 +824,69 @@ data "alibabacloudstack_images" "default" {
 		}
 		return "^aliyun_.*"
 	}())
+
+	SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + SecurityGroupCommonTestCase + `
+resource "alibabacloudstack_instance" "default" {
+  image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+  instance_type = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
+  instance_name = "${var.name}"
+  count = "2"
+  security_groups = "${alibabacloudstack_security_group.default.*.id}"
+  internet_max_bandwidth_out = "10"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  system_disk_category = "cloud_efficiency"
+  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+}
+
+resource "alibabacloudstack_slb" "default" {
+  name = "${var.name}"
+  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+}
+
+resource "alibabacloudstack_slb_server_group" "default" {
+  load_balancer_id = "${alibabacloudstack_slb.default.id}"
+  name = "${var.name}"
+}
+
+resource "alibabacloudstack_slb_master_slave_server_group" "default" {
+  load_balancer_id = "${alibabacloudstack_slb.default.id}"
+  name = "${var.name}"
+  servers {
+      server_id = "${alibabacloudstack_instance.default.0.id}"
+      port = 80
+      weight = 100
+      server_type = "Master"
+  }
+  servers {
+      server_id = "${alibabacloudstack_instance.default.1.id}"
+      port = 80
+      weight = 100
+      server_type = "Slave"
+  }
+}
+`
+
+	ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + DataAlibabacloudstackInstanceTypes + `
+resource "alibabacloudstack_ecs_instance" "default" {
+  image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
+  instance_type        = "${local.default_instance_type_id}"
+  system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+  system_disk_size     = 20
+  system_disk_name     = "test_sys_disk"
+  security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
+  instance_name        = "${var.name}_ecs"
+  vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
+  zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
+  is_outdated          = false
+  lifecycle {
+    ignore_changes = [
+      instance_type,
+	  system_disk_category
+    ]
+  }
+}
+
+`
 }
 
 const DataAlibabacloudstackInstanceTypes_Eni2 = `
@@ -1191,47 +1256,6 @@ resource "alibabacloudstack_ram_role" "default" {
 }
 `
 
-var SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + SecurityGroupCommonTestCase + `
-resource "alibabacloudstack_instance" "default" {
-  image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_type = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
-  instance_name = "${var.name}"
-  count = "2"
-  security_groups = "${alibabacloudstack_security_group.default.*.id}"
-  internet_max_bandwidth_out = "10"
-  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  system_disk_category = "cloud_efficiency"
-  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-}
-
-resource "alibabacloudstack_slb" "default" {
-  name = "${var.name}"
-  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-}
-
-resource "alibabacloudstack_slb_server_group" "default" {
-  load_balancer_id = "${alibabacloudstack_slb.default.id}"
-  name = "${var.name}"
-}
-
-resource "alibabacloudstack_slb_master_slave_server_group" "default" {
-  load_balancer_id = "${alibabacloudstack_slb.default.id}"
-  name = "${var.name}"
-  servers {
-      server_id = "${alibabacloudstack_instance.default.0.id}"
-      port = 80
-      weight = 100
-      server_type = "Master"
-  }
-  servers {
-      server_id = "${alibabacloudstack_instance.default.1.id}"
-      port = 80
-      weight = 100
-      server_type = "Slave"
-  }
-}
-`
-
 const DataZoneCommonTestCase = `
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
@@ -1375,28 +1399,6 @@ resource "alibabacloudstack_security_group_rule" "default" {
   	priority = 1
   	security_group_id = "${alibabacloudstack_ecs_securitygroup.default.id}"
   	cidr_ip = "192.168.0.0/16"
-}
-
-`
-
-var ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + DataAlibabacloudstackInstanceTypes + `
-resource "alibabacloudstack_ecs_instance" "default" {
-  image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_type        = "${local.default_instance_type_id}"
-  system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-  system_disk_size     = 20
-  system_disk_name     = "test_sys_disk"
-  security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
-  instance_name        = "${var.name}_ecs"
-  vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
-  zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
-  is_outdated          = false
-  lifecycle {
-    ignore_changes = [
-      instance_type,
-	  system_disk_category
-    ]
-  }
 }
 
 `
