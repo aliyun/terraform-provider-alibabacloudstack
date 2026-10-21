@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -98,6 +99,14 @@ func resourceAlibabacloudStackAscmQuota() *schema.Resource {
 				Optional: true,
 			},
 		},
+		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+			productName := d.Get("product_name").(string)
+			targetType := d.Get("target_type").(string)
+			if (productName == "RDS" || productName == "R-KVSTORE") && targetType == "" {
+				return fmt.Errorf("target_type is required when product_name is %s", productName)
+			}
+			return nil
+		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackAscmQuotaCreate, resourceAlibabacloudStackAscmQuotaRead, resourceAlibabacloudStackAscmQuotaUpdate, resourceAlibabacloudStackAscmQuotaDelete)
 	return resource
@@ -170,6 +179,7 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 	if targetType != "" {
 		request.QueryParams["TargetType"] = targetType
 	}
+	log.Printf("[DEBUG] CreateQuota request QueryParams: %v", request.QueryParams)
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -188,6 +198,9 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackAscmQuotaUpdate(d *schema.ResourceData, meta interface{}) error {
+	if d.IsNewResource() {
+		return nil
+	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	attributeUpdate := false
@@ -411,6 +424,7 @@ func resourceAlibabacloudStackAscmQuotaUpdate(d *schema.ResourceData, meta inter
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateQuota", "/ascm/manage/quota/update")
 		request.Content = bodyJSON
 		request.SetContentType("application/json")
+		log.Printf("[DEBUG] UpdateQuota request body: %s", string(bodyJSON))
 
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
@@ -484,6 +498,10 @@ func resourceAlibabacloudStackAscmQuotaDelete(d *schema.ResourceData, meta inter
 	did := strings.Split(d.Id(), COLON_SEPARATED)
 
 	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			log.Printf("[WARN] DeleteQuota: quota %s not found, treating as already deleted", d.Id())
+			return nil
+		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, did[0], "IsQuotaExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
@@ -497,6 +515,10 @@ func resourceAlibabacloudStackAscmQuotaDelete(d *schema.ResourceData, meta inter
 
 		_, err := client.ProcessCommonRequest(request)
 		if err != nil {
+			if strings.Contains(err.Error(), "EntityNotExist") || strings.Contains(err.Error(), "quota_not_found") {
+				log.Printf("[WARN] DeleteQuota: quota %s already deleted (%v)", d.Id(), err)
+				return nil
+			}
 			log.Printf("[ERROR] DeleteQuota response: %v", err)
 			return resource.RetryableError(err)
 		}
