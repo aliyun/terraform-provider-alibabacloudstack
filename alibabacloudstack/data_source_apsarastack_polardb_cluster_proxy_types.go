@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -166,18 +167,18 @@ func parseProxyCoreCount(label, proxyClass string) int {
 	}
 
 	// New format: derive from size tier in spec ID
-	// Pattern: polar.maxscale.<gen>.<size>.<suffix>
-	// e.g. polar.maxscale.g2.medium.c -> medium -> 2
+	// Patterns:
+	//   polar.maxscale.g2.medium.c -> generation "g2" at index 2, size "medium" at index 3
+	//   polar.o.maxscale.x2.medium -> generation "x2" at index 3, size "medium" at index 4
+	// Find the generation identifier (g2/g4/g8/x2/etc.) and take the next part as size tier.
 	sizeTier := ""
 	parts := strings.Split(proxyClass, ".")
+	genPattern := regexp.MustCompile(`^[gx]\d+$`)
 	for i, p := range parts {
-		if (p == "g2" || p == "g4" || p == "g8") && i+1 < len(parts) {
+		if genPattern.MatchString(p) && i+1 < len(parts) {
 			sizeTier = parts[i+1]
 			break
 		}
-	}
-	if sizeTier == "" && len(parts) >= 4 {
-		sizeTier = parts[3]
 	}
 
 	sizeToCore := map[string]int{
