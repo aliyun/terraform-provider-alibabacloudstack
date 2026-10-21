@@ -127,7 +127,25 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 		totalGpu := d.Get("total_gpu").(int)
 		totalDiskCloudSsd := d.Get("total_disk_cloud_ssd").(int)
 		totalDiskCloudEfficiency := d.Get("total_disk_cloud_efficiency").(int)
-		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalGpu\":%d,\"totalDisk_cloud_ssd\":%d,\"totalDisk_cloud_efficiency\":%d}", totalCpu, totalMem, totalGpu, totalDiskCloudSsd, totalDiskCloudEfficiency)
+		// Only include non-zero quota items to avoid parent org validation failures
+		quotaBodyMap := make(map[string]int)
+		if totalCpu > 0 {
+			quotaBodyMap["totalCpu"] = totalCpu
+		}
+		if totalMem > 0 {
+			quotaBodyMap["totalMem"] = totalMem
+		}
+		if totalGpu > 0 {
+			quotaBodyMap["totalGpu"] = totalGpu
+		}
+		if totalDiskCloudSsd > 0 {
+			quotaBodyMap["totalDisk_cloud_ssd"] = totalDiskCloudSsd
+		}
+		if totalDiskCloudEfficiency > 0 {
+			quotaBodyMap["totalDisk_cloud_efficiency"] = totalDiskCloudEfficiency
+		}
+		quotaBodyBytes, _ := json.Marshal(quotaBodyMap)
+		quotaBody = string(quotaBodyBytes)
 	case "oss":
 		totalAmount := d.Get("total_amount").(int)
 		quotaBody = fmt.Sprintf("{\"totalAmount\":%d}", totalAmount)
@@ -170,6 +188,11 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 		return nil
 	}
 
+	// Validate that at least one quota item is set
+	if quotaBody == "" || quotaBody == "{}" {
+		return fmt.Errorf("at least one quota item must be set for product %s", productName)
+	}
+
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateQuota", "/ascm/manage/quota/add")
 	request.QueryParams["ProductName"] = productName
 	request.QueryParams["QuotaBody"] = quotaBody
@@ -191,6 +214,7 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_quota", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
+	log.Printf("[DEBUG] CreateQuota response: %s", bresponse.GetHttpContentString())
 
 	d.SetId(productName + COLON_SEPARATED + quotaType + COLON_SEPARATED + quotaTypeId)
 
@@ -463,11 +487,22 @@ func resourceAlibabacloudStackAscmQuotaRead(d *schema.ResourceData, meta interfa
 		d.Set("product_name", strings.ToUpper(did[0]))
 		d.Set("quota_type", did[1])
 		d.Set("quota_type_id", did[2])
-		d.Set("total_cpu", int(object.Data.TotalCPU))
-		d.Set("total_mem", int(object.Data.TotalMem))
-		d.Set("total_gpu", int(object.Data.TotalGpu))
-		d.Set("total_disk_cloud_ssd", int(object.Data.TotalDiskCloudSsd))
-		d.Set("total_disk_cloud_efficiency", int(object.Data.TotalDiskCloudEfficiency))
+		// Only set fields if backend value is not -1 (unset); -1 means the quota item is not configured
+		if object.Data.TotalCPU != -1 {
+			d.Set("total_cpu", int(object.Data.TotalCPU))
+		}
+		if object.Data.TotalMem != -1 {
+			d.Set("total_mem", int(object.Data.TotalMem))
+		}
+		if object.Data.TotalGpu != -1 {
+			d.Set("total_gpu", int(object.Data.TotalGpu))
+		}
+		if object.Data.TotalDiskCloudSsd != -1 {
+			d.Set("total_disk_cloud_ssd", int(object.Data.TotalDiskCloudSsd))
+		}
+		if object.Data.TotalDiskCloudEfficiency != -1 {
+			d.Set("total_disk_cloud_efficiency", int(object.Data.TotalDiskCloudEfficiency))
+		}
 		d.Set("total_vpc", int(object.Data.TotalVPC))
 		d.Set("total_eip", int(object.Data.TotalEIP))
 		d.Set("total_amount", int(object.Data.TotalAmount))
