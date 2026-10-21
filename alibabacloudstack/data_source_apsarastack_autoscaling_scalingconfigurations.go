@@ -88,6 +88,14 @@ func dataSourceAlibabacloudStackEssScalingConfigurations() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"system_disk_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"system_disk_description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"data_disks": {
 							Type: schema.TypeList,
 							Elem: &schema.Resource{
@@ -215,6 +223,8 @@ func scalingConfigurationsDescriptionAttribute(d *schema.ResourceData, scalingCo
 			"internet_max_bandwidth_out": scalingConfiguration.InternetMaxBandwidthOut,
 			"system_disk_category":       scalingConfiguration.SystemDiskCategory,
 			"system_disk_size":           scalingConfiguration.SystemDiskSize,
+			"system_disk_name":           scalingConfiguration.SystemDiskName,
+			"system_disk_description":    scalingConfiguration.SystemDiskDescription,
 			"data_disks":                 essService.flattenDataDiskMappings(scalingConfiguration.DataDisks.DataDisk),
 			"lifecycle_state":            scalingConfiguration.LifecycleState,
 			"creation_time":              scalingConfiguration.CreationTime,

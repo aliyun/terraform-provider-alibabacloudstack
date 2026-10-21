@@ -202,6 +202,7 @@ The following arguments are supported:
 * `keep_instance_name` - (Optional) Add an existing instance to the node pool, whether to keep the original instance name. It is recommended to set to `true`.
 * `format_disk` - (Optional) After selecting this option, if data disks have been attached to the specified ECS instances and the file system of the last data disk is uninitialized, the system automatically formats the last data disk to ext4 and mounts the data disk to `/var/lib/docker` and `/var/lib/kubelet`. The original data on the disk will be cleared. Make sure that you back up data in advance. If no data disk is mounted on the ECS instance, no new data disk will be purchased. Default is `false`.
 * `image_id` - (Optional) Custom Image support. Must be based on CentOS7 or AliyunLinux2.
+* `image_type` - (Optional) The OS image type of the worker nodes. Default is `AliyunLinux3`.
 * `timeout_mins` - (Optional) Backend service time-out time; unit: minute. Default is 60.
 * `delete_protection` - (Optional) Whether the instance should have delete protection.
 * `kms_encryption_context` - (Optional) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating a CS Kubernetes with `kms_encrypted_password`. See [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm). It is valid when `kms_encrypted_password` is set.

@@ -202,6 +202,7 @@ resource "alibabacloudstack_cs_kubernetes" "k8s" {
 * `keep_instance_name` - (选填) 将现有实例添加到节点池时，是否保留原始实例名称。建议设置为 `true`。
 * `format_disk` - (选填) 选择此选项后，如果已将数据盘附加到指定的 ECS 实例并且最后一个数据盘的文件系统未初始化，系统将自动将最后一个数据盘格式化为 ext4 并挂载到 `/var/lib/docker` 和 `/var/lib/kubelet`。磁盘上的原始数据将被清除。请确保提前备份数据。如果没有在 ECS 实例上挂载数据盘，则不会购买新的数据盘。默认为 `false`。
 * `image_id` - (选填) 自定义镜像支持。必须基于 CentOS7 或 AliyunLinux2。
+* `image_type` - (选填) 工作节点操作系统镜像类型。默认为 `AliyunLinux3`。
 * `timeout_mins` - (选填) 后端服务超时时间；单位：分钟。默认为 60。
 * `delete_protection` - (选填) 实例是否应具有删除保护。
 * `kms_encryption_context` - (选填) 用于在创建或更新 CS Kubernetes 前解密 `kms_encrypted_password` 的 KMS 加密上下文。有关更多信息，请参阅 [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm)。当设置了 `kms_encrypted_password` 时有效。
