@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -39,23 +38,24 @@ func TestAccAlibabacloudStackAscmQuota_VPC(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"quota_type":    "organization",
-					"quota_type_id": testAccGetOrgId(),
+					"quota_type_id": TfRawString("data.alibabacloudstack_account.current.organization_id"),
 					"product_name":  "VPC",
 					"total_vpc":     1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"total_vpc": "1",
+					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"quota_type":    "organization",
-					"quota_type_id": testAccGetOrgId(),
-					"product_name":  "VPC",
-					"total_vpc":     2,
+					"total_vpc": 2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"total_vpc": "2",
+					}),
 				),
 			},
 			{
@@ -91,28 +91,15 @@ func testAccCheckAscm_Quota_Destroy(s *terraform.State) error { //destroy functi
 	return nil
 }
 
-// testAccGetOrgId returns the organization ID from environment.
-// Checks ALIBABACLOUDSTACK_DEPARTMENT first (provider's actual env var),
-// then ALIBABACLOUDSTACK_ORGANIZATION_ID for convenience.
-func testAccGetOrgId() string {
-	if v := os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT"); v != "" {
-		return v
-	}
-	if v := os.Getenv("ALIBABACLOUDSTACK_ORGANIZATION_ID"); v != "" {
-		return v
-	}
-	return ""
-}
-
 func testAccCheckAscm_QuotaVPC(name string) string {
 	return `
-# VPC quota set directly on existing org; no child org needed.
+data "alibabacloudstack_account" "current" {}
 `
 }
 
 func testAccCheckAscm_QuotaECS(name string) string {
 	return `
-# ECS quota set directly on existing org; no child org needed.
+data "alibabacloudstack_account" "current" {}
 `
 }
 
@@ -144,25 +131,38 @@ func TestAccAlibabacloudStackAscmQuota_ECS(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"quota_type":    "organization",
-					"quota_type_id": testAccGetOrgId(),
+					"quota_type_id": TfRawString("data.alibabacloudstack_account.current.organization_id"),
 					"product_name":  "ECS",
 					"total_cpu":     200,
 					"total_mem":     400,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"total_cpu": "200",
+						"total_mem": "400",
+					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"quota_type":    "organization",
-					"quota_type_id": testAccGetOrgId(),
-					"product_name":  "ECS",
-					"total_cpu":     300,
-					"total_mem":     600,
+					"total_cpu": 300,
+					"total_mem": 600,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"total_cpu": "300",
+						"total_mem": "600",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"total_cpu": 0, // Delete this quota item
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"total_cpu": REMOVEKEY,
+					}),
 				),
 			},
 			{
@@ -175,15 +175,15 @@ func TestAccAlibabacloudStackAscmQuota_ECS(t *testing.T) {
 }
 
 var testAccCheckQuotaVPC = map[string]string{
-	"product_name":  CHECKSET,
+	"product_name":  "VPC",
 	"quota_type_id": CHECKSET,
-	"quota_type":    CHECKSET,
+	"quota_type":    "organization",
 }
 
 var testAccCheckQuotaECS = map[string]string{
-	"product_name":  CHECKSET,
+	"product_name":  "ECS",
 	"quota_type_id": CHECKSET,
-	"quota_type":    CHECKSET,
+	"quota_type":    "organization",
 	"total_cpu":     CHECKSET,
 	"total_mem":     CHECKSET,
 }

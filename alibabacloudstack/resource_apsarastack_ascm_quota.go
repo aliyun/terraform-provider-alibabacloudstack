@@ -16,6 +16,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+// productFieldMappings defines product-specific mapping from old schema fields to API keys
+var productFieldMappings = map[string]map[string]string{
+	"ecs": {
+		"total_cpu":                   "totalCpu",
+		"total_mem":                   "totalMem",
+		"total_gpu":                   "totalGpu",
+		"total_disk_cloud_ssd":        "totalDisk_cloud_ssd",
+		"total_disk_cloud_efficiency": "totalDisk_cloud_efficiency",
+	},
+	"oss":       {"total_amount": "totalAmount"},
+	"eip":       {"total_eip": "totalEIP"},
+	"slb":       {"total_vip_public": "totalVipPublic", "total_vip_internal": "totalVipInternal"},
+	"odps":      {"total_cu": "totalCu", "total_disk": "totalDisk"},
+	"dds":       {"total_cpu": "totalCpu", "total_mem": "totalMem", "total_disk": "totalDisk"},
+	"rds":       {"total_cpu": "totalCpu", "total_mem": "totalMem", "total_disk": "totalDisk"},
+	"gpdb":      {"total_cpu": "totalCpu", "total_mem": "totalMem", "total_disk": "totalDisk"},
+	"r-kvstore": {"total_mem": "totalMem"},
+	"vpc":       {"total_vpc": "totalVPC"},
+}
+
 func resourceAlibabacloudStackAscmQuota() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -87,8 +107,9 @@ func resourceAlibabacloudStackAscmQuota() *schema.Resource {
 				Required: true,
 			},
 			"region_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This field is deprecated. Only the current region is supported. This field will be removed in version 3.21.0.",
 			},
 			"cluster_name": {
 				Type:     schema.TypeString,
@@ -105,6 +126,26 @@ func resourceAlibabacloudStackAscmQuota() *schema.Resource {
 			if (productName == "RDS" || productName == "R-KVSTORE") && targetType == "" {
 				return fmt.Errorf("target_type is required when product_name is %s", productName)
 			}
+
+			// Get product-specific field mapping
+			fieldMapping, ok := productFieldMappings[strings.ToLower(productName)]
+			if !ok {
+				return fmt.Errorf("unsupported product_name: %s", productName)
+			}
+
+			// Check if at least one old field is defined with value > 0
+			atLeastOneSet := false
+			for oldField := range fieldMapping {
+				if v, ok := d.GetOk(oldField); ok && v.(int) > 0 {
+					atLeastOneSet = true
+					break
+				}
+			}
+
+			if !atLeastOneSet {
+				return fmt.Errorf("at least one quota item must be set for product %s", productName)
+			}
+
 			return nil
 		},
 	}
@@ -120,75 +161,28 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 
 	var quotaBody string
 	var targetType string
-	switch productName {
-	case "ecs":
-		totalCpu := d.Get("total_cpu").(int)
-		totalMem := d.Get("total_mem").(int)
-		totalGpu := d.Get("total_gpu").(int)
-		totalDiskCloudSsd := d.Get("total_disk_cloud_ssd").(int)
-		totalDiskCloudEfficiency := d.Get("total_disk_cloud_efficiency").(int)
-		// Only include non-zero quota items to avoid parent org validation failures
-		quotaBodyMap := make(map[string]int)
-		if totalCpu > 0 {
-			quotaBodyMap["totalCpu"] = totalCpu
-		}
-		if totalMem > 0 {
-			quotaBodyMap["totalMem"] = totalMem
-		}
-		if totalGpu > 0 {
-			quotaBodyMap["totalGpu"] = totalGpu
-		}
-		if totalDiskCloudSsd > 0 {
-			quotaBodyMap["totalDisk_cloud_ssd"] = totalDiskCloudSsd
-		}
-		if totalDiskCloudEfficiency > 0 {
-			quotaBodyMap["totalDisk_cloud_efficiency"] = totalDiskCloudEfficiency
+
+	// Build quotaBody from old fixed fields
+	quotaBodyMap := make(map[string]int)
+	if fieldMapping, ok := productFieldMappings[productName]; ok {
+		for oldField, newKey := range fieldMapping {
+			if v := d.Get(oldField).(int); v > 0 {
+				quotaBodyMap[newKey] = v
+			}
 		}
 		quotaBodyBytes, _ := json.Marshal(quotaBodyMap)
 		quotaBody = string(quotaBodyBytes)
-	case "oss":
-		totalAmount := d.Get("total_amount").(int)
-		quotaBody = fmt.Sprintf("{\"totalAmount\":%d}", totalAmount)
-	case "eip":
-		totalEIP := d.Get("total_eip").(int)
-		quotaBody = fmt.Sprintf("{\"totalEIP\":%d}", totalEIP)
-	case "slb":
-		totalVipPublic := d.Get("total_vip_public").(int)
-		totalVipInternal := d.Get("total_vip_internal").(int)
-		quotaBody = fmt.Sprintf("{\"totalVipPublic\":%d,\"totalVipInternal\":%d}", totalVipPublic, totalVipInternal)
-	case "odps":
-		totalCu := d.Get("total_cu").(int)
-		totalDisk := d.Get("total_disk").(int)
-		quotaBody = fmt.Sprintf("{\"totalCu\":%d,\"totalDisk\":%d}", totalCu, totalDisk)
-	case "dds":
-		totalCpu := d.Get("total_cpu").(int)
-		totalMem := d.Get("total_mem").(int)
-		totalDisk := d.Get("total_disk").(int)
-		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCpu, totalMem, totalDisk)
-	case "rds":
-		targetType = d.Get("target_type").(string)
-		totalCpu := d.Get("total_cpu").(int)
-		totalMem := d.Get("total_mem").(int)
-		totalDisk := d.Get("total_disk").(int)
-		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCpu, totalMem, totalDisk)
-	case "gpdb":
-		totalCpu := d.Get("total_cpu").(int)
-		totalMem := d.Get("total_mem").(int)
-		totalDisk := d.Get("total_disk").(int)
-		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCpu, totalMem, totalDisk)
-	case "r-kvstore":
-		targetType = d.Get("target_type").(string)
-		totalMem := d.Get("total_mem").(int)
-		quotaBody = fmt.Sprintf("{\"totalMem\":%d}", totalMem)
-	case "vpc":
-		totalVPC := d.Get("total_vpc").(int)
-		quotaBody = fmt.Sprintf("{\"totalVPC\":%d}", totalVPC)
-	default:
+	} else {
 		log.Print("Please Enter a valid Product Name.")
 		return nil
 	}
 
-	// Validate that at least one quota item is set
+	// For RDS/R-KVSTORE, need targetType
+	if productName == "rds" || productName == "r-kvstore" {
+		targetType = d.Get("target_type").(string)
+	}
+
+	// Validate that at least one quota item is set (items with value <= 0 don't count)
 	if quotaBody == "" || quotaBody == "{}" {
 		return fmt.Errorf("at least one quota item must be set for product %s", productName)
 	}
@@ -226,239 +220,62 @@ func resourceAlibabacloudStackAscmQuotaUpdate(d *schema.ResourceData, meta inter
 		return nil
 	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	ascmService := AscmService{client}
-	attributeUpdate := false
-	check, err := ascmService.DescribeAscmQuota(d.Id())
 	did := strings.Split(d.Id(), COLON_SEPARATED)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsQuotaExist", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
 
 	var quotaBody string
 	var targetType string
-	switch did[0] {
-	case "vpc":
-		var totalVPC int
-		if d.HasChange("total_vpc") {
-			if v, ok := d.GetOk("total_vpc"); ok {
-				totalVPC = v.(int)
+
+	// Build quotaBody from old fixed fields: send all fields for this product
+	// to prevent API from resetting unchanged fields to -1
+	quotaBodyMap := make(map[string]int)
+	if fieldMapping, ok := productFieldMappings[did[0]]; ok {
+		for oldField, newKey := range fieldMapping {
+			v := d.Get(oldField).(int)
+			if v > 0 {
+				quotaBodyMap[newKey] = v
+			} else {
+				quotaBodyMap[newKey] = -1
 			}
-			check.Data.TotalVPC = float64(totalVPC)
-			attributeUpdate = true
-		} else {
-			if v, ok := d.GetOk("total_vpc"); ok {
-				totalVPC = v.(int)
-			}
-			check.Data.TotalVPC = float64(totalVPC)
 		}
-		quotaBody = fmt.Sprintf("{\"totalVPC\":%d}", totalVPC)
-	case "rds":
+	}
+	if len(quotaBodyMap) == 0 {
+		return nil
+	}
+	quotaBodyBytes, _ := json.Marshal(quotaBodyMap)
+	quotaBody = string(quotaBodyBytes)
+
+	// For RDS/R-KVSTORE, need targetType
+	if did[0] == "rds" || did[0] == "r-kvstore" {
 		targetType = d.Get("target_type").(string)
-		var totalDISK, totalCPU, totalMEM int
-		if d.HasChange("total_mem") {
-			if v, ok := d.GetOk("total_mem"); ok {
-				totalMEM = v.(int)
-			}
-			check.Data.TotalMem = float64(totalMEM)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_disk") {
-			if v, ok := d.GetOk("total_disk"); ok {
-				totalDISK = v.(int)
-			}
-			check.Data.TotalDisk = float64(totalDISK)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_cpu") {
-			if v, ok := d.GetOk("total_cpu"); ok {
-				totalCPU = v.(int)
-			}
-			check.Data.TotalCPU = float64(totalCPU)
-			attributeUpdate = true
-		}
-		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCPU, totalMEM, totalDISK)
-	case "eip":
-		var totalEIP int
-		if d.HasChange("total_eip") {
-			if v, ok := d.GetOk("total_eip"); ok {
-				totalEIP = v.(int)
-			}
-			check.Data.TotalMem = float64(totalEIP)
-			attributeUpdate = true
-		}
-		quotaBody = fmt.Sprintf("{\"totalEIP\":%d}", totalEIP)
-	case "ecs":
-		var totalGPU, totalCPU, totalMEM, totalDCE, totalDCS int
-		if d.HasChange("total_cpu") {
-			if v, ok := d.GetOk("total_cpu"); ok {
-				totalCPU = v.(int)
-			}
-			check.Data.TotalCPU = float64(totalCPU)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_gpu") {
-			if v, ok := d.GetOk("total_gpu"); ok {
-				totalGPU = v.(int)
-			}
-			check.Data.TotalGpu = float64(totalGPU)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_mem") {
-			if v, ok := d.GetOk("total_mem"); ok {
-				totalMEM = v.(int)
-			}
-			check.Data.TotalMem = float64(totalMEM)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_disk_cloud_ssd") {
-			if v, ok := d.GetOk("total_disk_cloud_ssd"); ok {
-				totalDCS = v.(int)
-			}
-			check.Data.TotalDiskCloudSsd = float64(totalDCS)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_disk_cloud_efficiency") {
-			if v, ok := d.GetOk("total_disk_cloud_efficiency"); ok {
-				totalDCE = v.(int)
-			}
-			check.Data.TotalDiskCloudEfficiency = float64(totalDCE)
-			attributeUpdate = true
-		}
-		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalGpu\":%d,\"totalDisk_cloud_ssd\":%d,\"totalDisk_cloud_efficiency\":%d}", totalCPU, totalMEM, totalGPU, totalDCS, totalDCE)
-	case "slb":
-		var totalVP, totalVI int
-		if d.HasChange("total_vip_internal") {
-			if v, ok := d.GetOk("total_vip_internal"); ok {
-				totalVI = v.(int)
-			}
-			check.Data.TotalVipInternal = float64(totalVI)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_vip_public") {
-			if v, ok := d.GetOk("total_vip_public"); ok {
-				totalVP = v.(int)
-			}
-			check.Data.TotalVipPublic = float64(totalVP)
-			attributeUpdate = true
-		}
-		quotaBody = fmt.Sprintf("{\"totalVipPublic\":%d,\"totalVipInternal\":%d}", totalVP, totalVI)
-	case "oss":
-		var totalAmount int
-		if d.HasChange("total_amount") {
-			if v, ok := d.GetOk("total_amount"); ok {
-				totalAmount = v.(int)
-			}
-			check.Data.TotalAmount = float64(totalAmount)
-			attributeUpdate = true
-		}
-		quotaBody = fmt.Sprintf("{\"totalAmount\":%d}", totalAmount)
-	case "dds":
-		var totalDISK, totalCPU, totalMEM int
-		if d.HasChange("total_mem") {
-			if v, ok := d.GetOk("total_mem"); ok {
-				totalMEM = v.(int)
-			}
-			check.Data.TotalMem = float64(totalMEM)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_disk") {
-			if v, ok := d.GetOk("total_disk"); ok {
-				totalDISK = v.(int)
-			}
-			check.Data.TotalDisk = float64(totalDISK)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_cpu") {
-			if v, ok := d.GetOk("total_cpu"); ok {
-				totalCPU = v.(int)
-			}
-			check.Data.TotalCPU = float64(totalCPU)
-			attributeUpdate = true
-		}
-		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCPU, totalMEM, totalDISK)
-	case "odps":
-		var totalDISK, totalCU int
-		if d.HasChange("total_disk") {
-			if v, ok := d.GetOk("total_disk"); ok {
-				totalDISK = v.(int)
-			}
-			check.Data.TotalDisk = float64(totalDISK)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_cu") {
-			if v, ok := d.GetOk("total_cu"); ok {
-				totalCU = v.(int)
-			}
-			check.Data.TotalCU = float64(totalCU)
-			attributeUpdate = true
-		}
-		quotaBody = fmt.Sprintf("{\"totalCu\":%d,\"totalDisk\":%d}", totalCU, totalDISK)
-	case "gpdb":
-		var totalDISK, totalCPU, totalMEM int
-		if d.HasChange("total_mem") {
-			if v, ok := d.GetOk("total_mem"); ok {
-				totalMEM = v.(int)
-			}
-			check.Data.TotalMem = float64(totalMEM)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_disk") {
-			if v, ok := d.GetOk("total_disk"); ok {
-				totalDISK = v.(int)
-			}
-			check.Data.TotalDisk = float64(totalDISK)
-			attributeUpdate = true
-		}
-		if d.HasChange("total_cpu") {
-			if v, ok := d.GetOk("total_cpu"); ok {
-				totalCPU = v.(int)
-			}
-			check.Data.TotalCPU = float64(totalCPU)
-			attributeUpdate = true
-		}
-		quotaBody = fmt.Sprintf("{\"totalCpu\":%d,\"totalMem\":%d,\"totalDisk\":%d}", totalCPU, totalMEM, totalDISK)
-	case "r-kvstore":
-		targetType = d.Get("target_type").(string)
-		var totalMEM int
-		if d.HasChange("total_mem") {
-			if v, ok := d.GetOk("total_mem"); ok {
-				totalMEM = v.(int)
-			}
-			check.Data.TotalMem = float64(totalMEM)
-			attributeUpdate = true
-		}
-		quotaBody = fmt.Sprintf("{\"totalMem\":%d}", totalMEM)
 	}
 
-	if attributeUpdate {
-		quotaTypeIdInt, _ := strconv.Atoi(did[2])
-		var quotaBodyMap interface{}
-		json.Unmarshal([]byte(quotaBody), &quotaBodyMap)
-		requestBody := map[string]interface{}{
-			"productName": did[0],
-			"quotaType":   did[1],
-			"quotaTypeId": quotaTypeIdInt,
-			"regionName":  client.RegionId,
-			"quotaBody":   quotaBodyMap,
-		}
-		if targetType != "" {
-			requestBody["targetType"] = targetType
-		}
-		bodyJSON, _ := json.Marshal(requestBody)
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateQuota", "/ascm/manage/quota/update")
-		request.Content = bodyJSON
-		request.SetContentType("application/json")
-		log.Printf("[DEBUG] UpdateQuota request body: %s", string(bodyJSON))
+	quotaTypeIdInt, _ := strconv.Atoi(did[2])
+	var quotaBodyObj interface{}
+	json.Unmarshal([]byte(quotaBody), &quotaBodyObj)
+	requestBody := map[string]interface{}{
+		"productName": did[0],
+		"quotaType":   did[1],
+		"quotaTypeId": quotaTypeIdInt,
+		"regionName":  client.RegionId,
+		"quotaBody":   quotaBodyObj,
+	}
+	if targetType != "" {
+		requestBody["targetType"] = targetType
+	}
+	bodyJSON, _ := json.Marshal(requestBody)
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateQuota", "/ascm/manage/quota/update")
+	request.Content = bodyJSON
+	request.SetContentType("application/json")
+	log.Printf("[DEBUG] UpdateQuota request body: %s", string(bodyJSON))
 
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			log.Printf("[ERROR] UpdateQuota response body: %s", bresponse.GetHttpContentString())
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_quota", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	bresponse, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		log.Printf("[ERROR] UpdateQuota response body: %s", bresponse.GetHttpContentString())
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_quota", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	return nil
@@ -482,45 +299,73 @@ func resourceAlibabacloudStackAscmQuotaRead(d *schema.ResourceData, meta interfa
 		return nil
 	}
 
-	if did[0] == "vpc" || did[0] == "oss" || did[0] == "ecs" || did[0] == "slb" || did[0] == "eip" || did[0] == "rds" || did[0] == "odps" || did[0] == "gpdb" || did[0] == "r-kvstore" || did[0] == "dds" {
-		d.Set("quota_id", object.Data.ID)
-		d.Set("product_name", strings.ToUpper(did[0]))
-		d.Set("quota_type", did[1])
-		d.Set("quota_type_id", did[2])
-		// Only set fields if backend value is not -1 (unset); -1 means the quota item is not configured
-		if object.Data.TotalCPU != -1 {
-			d.Set("total_cpu", int(object.Data.TotalCPU))
-		}
-		if object.Data.TotalMem != -1 {
-			d.Set("total_mem", int(object.Data.TotalMem))
-		}
-		if object.Data.TotalGpu != -1 {
-			d.Set("total_gpu", int(object.Data.TotalGpu))
-		}
-		if object.Data.TotalDiskCloudSsd != -1 {
-			d.Set("total_disk_cloud_ssd", int(object.Data.TotalDiskCloudSsd))
-		}
-		if object.Data.TotalDiskCloudEfficiency != -1 {
-			d.Set("total_disk_cloud_efficiency", int(object.Data.TotalDiskCloudEfficiency))
-		}
-		d.Set("total_vpc", int(object.Data.TotalVPC))
-		d.Set("total_eip", int(object.Data.TotalEIP))
-		d.Set("total_amount", int(object.Data.TotalAmount))
-		d.Set("total_disk", int(object.Data.TotalDisk))
-		d.Set("total_cu", int(object.Data.TotalCU))
-		d.Set("total_vip_internal", int(object.Data.TotalVipInternal))
-		d.Set("total_vip_public", int(object.Data.TotalVipPublic))
-		return nil
+	// Set common fields for all products
+	d.Set("quota_id", object.Data.ID)
+	d.Set("product_name", strings.ToUpper(did[0]))
+	d.Set("quota_type", did[1])
+	d.Set("quota_type_id", did[2])
+
+	// Set old fixed fields from API response
+	// If API returns -1, set to 0 (delete the quota item)
+	if object.Data.TotalCPU > 0 {
+		d.Set("total_cpu", int(object.Data.TotalCPU))
 	} else {
-		d.Set("region_name", object.Data.RegionName)
-		d.Set("product_name", object.Data.ProductName)
-		d.Set("cluster_name", object.Data.Cluster)
-		d.Set("total_cpu", object.Data.TotalCPU)
-		d.Set("total_mem", object.Data.TotalMem)
-		d.Set("total_gpu", object.Data.TotalGpu)
-		d.Set("total_disk_cloud_ssd", object.Data.TotalDiskCloudSsd)
-		d.Set("total_disk_cloud_efficiency", object.Data.TotalDiskCloudEfficiency)
-		d.Set("total_amount", object.Data.TotalAmount)
+		d.Set("total_cpu", 0)
+	}
+	if object.Data.TotalMem > 0 {
+		d.Set("total_mem", int(object.Data.TotalMem))
+	} else {
+		d.Set("total_mem", 0)
+	}
+	if object.Data.TotalGpu > 0 {
+		d.Set("total_gpu", int(object.Data.TotalGpu))
+	} else {
+		d.Set("total_gpu", 0)
+	}
+	if object.Data.TotalDiskCloudSsd > 0 {
+		d.Set("total_disk_cloud_ssd", int(object.Data.TotalDiskCloudSsd))
+	} else {
+		d.Set("total_disk_cloud_ssd", 0)
+	}
+	if object.Data.TotalDiskCloudEfficiency > 0 {
+		d.Set("total_disk_cloud_efficiency", int(object.Data.TotalDiskCloudEfficiency))
+	} else {
+		d.Set("total_disk_cloud_efficiency", 0)
+	}
+	if object.Data.TotalVPC > 0 {
+		d.Set("total_vpc", int(object.Data.TotalVPC))
+	} else {
+		d.Set("total_vpc", 0)
+	}
+	if object.Data.TotalEIP > 0 {
+		d.Set("total_eip", int(object.Data.TotalEIP))
+	} else {
+		d.Set("total_eip", 0)
+	}
+	if object.Data.TotalAmount > 0 {
+		d.Set("total_amount", int(object.Data.TotalAmount))
+	} else {
+		d.Set("total_amount", 0)
+	}
+	if object.Data.TotalDisk > 0 {
+		d.Set("total_disk", int(object.Data.TotalDisk))
+	} else {
+		d.Set("total_disk", 0)
+	}
+	if object.Data.TotalCU > 0 {
+		d.Set("total_cu", int(object.Data.TotalCU))
+	} else {
+		d.Set("total_cu", 0)
+	}
+	if object.Data.TotalVipInternal > 0 {
+		d.Set("total_vip_internal", int(object.Data.TotalVipInternal))
+	} else {
+		d.Set("total_vip_internal", 0)
+	}
+	if object.Data.TotalVipPublic > 0 {
+		d.Set("total_vip_public", int(object.Data.TotalVipPublic))
+	} else {
+		d.Set("total_vip_public", 0)
 	}
 
 	return nil
