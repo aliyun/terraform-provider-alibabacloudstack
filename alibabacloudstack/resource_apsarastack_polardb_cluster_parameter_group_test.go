@@ -17,7 +17,7 @@ func TestAccAlibabacloudStackPolardbClusterParameterGroup_basic(t *testing.T) {
 	serviceFunc := func() interface{} {
 		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeParameterGroup")
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeClusterParameterGroup")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbClusterParameterGroupConfigDependence)

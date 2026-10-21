@@ -34,7 +34,7 @@ func TestAccAlibabacloudStackPolardbParameterGroup_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"engine":               "MySQL",
+					"engine":               "mysql",
 					"engine_version":       "8.0",
 					"parameter_group_name": "${var.name}",
 					"parameter_group_desc": "tf-testAccPolardbParameterGroupDesc",
@@ -44,7 +44,7 @@ func TestAccAlibabacloudStackPolardbParameterGroup_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine":               "MySQL",
+						"engine":               "mysql",
 						"engine_version":       "8.0",
 						"parameter_group_name": name,
 						"parameter_group_desc": "tf-testAccPolardbParameterGroupDesc",

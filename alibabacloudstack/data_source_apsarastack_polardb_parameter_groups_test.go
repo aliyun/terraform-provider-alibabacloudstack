@@ -69,7 +69,7 @@ variable "name" {
 }
 
 resource "alibabacloudstack_polardb_parameter_group" "default" {
-  engine = "MySQL"
+  engine = "mysql"
   engine_version = "8.0"
   parameter_group_name = "${var.name}_test"
   parameter_group_desc = var.name

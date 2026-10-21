@@ -2089,14 +2089,50 @@ func (s *PolardbService) DescribeDBReadWriteSplittingConnection(id string) (map[
 func (s *PolardbService) DescribeParameterGroup(id string) (map[string]interface{}, error) {
 	// DescribeParameterGroup (singular) returns empty data on ApsaraStack,
 	// so we use DescribeParameterGroups (plural) and find by ID.
+	response, err := s.client.DoTeaRequest("POST", "polardb", "2024-01-30", "DescribeParameterGroups", "", nil, map[string]interface{}{}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the parameter group by ID in the list
+	// Response may be nested (ParameterGroups.ParameterGroup[]) or flat (ParameterGroups[])
+	var groupList []interface{}
+	if pg, ok := response["ParameterGroups"]; ok {
+		if nested, ok := pg.(map[string]interface{}); ok {
+			if arr, ok := nested["ParameterGroup"].([]interface{}); ok {
+				groupList = arr
+			}
+		} else if arr, ok := pg.([]interface{}); ok {
+			groupList = arr
+		}
+	}
+	for _, group := range groupList {
+		if groupMap, ok := group.(map[string]interface{}); ok {
+			gid := ""
+			if v, ok := groupMap["ParamGroupId"].(string); ok && v != "" {
+				gid = v
+			} else if v, ok := groupMap["ParameterGroupId"].(string); ok && v != "" {
+				gid = v
+			}
+			if gid == id {
+				return groupMap, nil
+			}
+		}
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB parameter group %s not found", id))
+}
+
+func (s *PolardbService) DescribeClusterParameterGroup(id string) (map[string]interface{}, error) {
+	// Cluster edition uses polardb/2017-08-01 API.
+	// DescribeParameterGroup (singular) returns empty data on ApsaraStack,
+	// so we use DescribeParameterGroups (plural) and find by ID.
 	response, err := s.client.DoTeaRequest("POST", "polardb", "2017-08-01", "DescribeParameterGroups", "", nil, map[string]interface{}{}, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[DEBUG] DescribeParameterGroups response: %v", response)
-
-	// Find the parameter group by ID in the flat list
+	// 2017-08-01 response is a flat array: ParameterGroups[]
 	if groups, ok := response["ParameterGroups"].([]interface{}); ok {
 		for _, group := range groups {
 			if groupMap, ok := group.(map[string]interface{}); ok {
@@ -2107,7 +2143,7 @@ func (s *PolardbService) DescribeParameterGroup(id string) (map[string]interface
 		}
 	}
 
-	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB parameter group %s not found", id))
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB cluster parameter group %s not found", id))
 }
 
 func (s *PolardbService) PolardbAccountStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {

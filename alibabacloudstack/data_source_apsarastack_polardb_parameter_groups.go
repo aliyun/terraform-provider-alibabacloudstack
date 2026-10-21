@@ -121,7 +121,7 @@ func dataSourceAlibabacloudStackPolardbParameterGroups() *schema.Resource {
 func dataSourceAlibabacloudStackPolardbParameterGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	response, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "DescribeParameterGroups", "", nil, map[string]interface{}{}, nil)
+	response, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "DescribeParameterGroups", "", nil, map[string]interface{}{}, nil)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -142,10 +142,16 @@ func dataSourceAlibabacloudStackPolardbParameterGroupsRead(d *schema.ResourceDat
 		nameRegex = regexp.MustCompile(v.(string))
 	}
 
-	// The response is a flat array: response["ParameterGroups"] = []interface{}
+	// Response may be nested (ParameterGroups.ParameterGroup[]) or flat (ParameterGroups[])
 	var rawGroups []interface{}
-	if groups, ok := response["ParameterGroups"].([]interface{}); ok {
-		rawGroups = groups
+	if pg, ok := response["ParameterGroups"]; ok {
+		if nested, ok := pg.(map[string]interface{}); ok {
+			if arr, ok := nested["ParameterGroup"].([]interface{}); ok {
+				rawGroups = arr
+			}
+		} else if arr, ok := pg.([]interface{}); ok {
+			rawGroups = arr
+		}
 	}
 
 	// Filter results
