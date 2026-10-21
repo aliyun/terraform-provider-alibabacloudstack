@@ -118,6 +118,8 @@ The following arguments are supported:
   
 * `instance_type` - (Required) The specification of the ECS instance.
   
+* `instance_types` - (Optional) A list of instance types. If specified, the scaling group will select one of these instance types to create ECS instances.
+  
 * `security_group_ids` - (Required) A list of security group IDs to which the ECS instance belongs.
   
 * `deployment_set_id` - (Required) The ID of the deployment set to which the ECS instance belongs.
@@ -128,12 +130,16 @@ The following arguments are supported:
   
 * `internet_max_bandwidth_in` - (Optional) The maximum incoming bandwidth from the public network, measured in Mbps (Mega bit per second). The value range is [1, 200]. If not specified, the default value is 200 Mbps.
   
-* `system_disk_category` - (Optional) The category of the system disk. Valid options are `ephemeral_ssd`, `cloud_efficiency`, `cloud_ssd`, `cloud_essd`, and `cloud`. Default is `cloud_efficiency`.
+* `system_disk_category` - (Optional) The category of the system disk. Valid options are `cloud`, `ephemeral_ssd`, `cloud_ssd`, `cloud_efficiency`, `cloud_pperf`, and `cloud_sperf`. Default is `cloud_efficiency`.
   
 * `system_disk_size` - (Optional) The size of the system disk, in GiB. The valid range depends on the disk category:
   * `cloud`: [20, 500]
   * `cloud_efficiency`, `cloud_ssd`, `cloud_essd`: [20, 500]
   * `ephemeral_ssd`: [20, 500]
+  
+* `system_disk_name` - (Optional) The name of the system disk.
+  
+* `system_disk_description` - (Optional) The description of the system disk.
   
 * `data_disk` - (Optional) A list of data disks to attach to the ECS instance. See [Block datadisk](#block-datadisk) below for details.
   

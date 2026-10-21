@@ -42,41 +42,41 @@ func TestAccAlibabacloudStackEssScalingConfigurationsDataSource(t *testing.T) {
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"scaling_group_id": "${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}",
-			"ids": []string{"${alibabacloudstack_ess_scaling_configuration.default.id}"},
-			"name_regex": "${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}",
+			"ids":              []string{"${alibabacloudstack_ess_scaling_configuration.default.id}"},
+			"name_regex":       "${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"scaling_group_id": "${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}_fake",
-			"ids": []string{"${alibabacloudstack_ess_scaling_configuration.default.id}_fake"},
-			"name_regex": "${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}",
+			"ids":              []string{"${alibabacloudstack_ess_scaling_configuration.default.id}_fake"},
+			"name_regex":       "${alibabacloudstack_ess_scaling_configuration.default.scaling_configuration_name}",
 		}),
 	}
 
 	var existEssScalingconfigurationsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			 "ids.#":                                       "1",
-			 "names.#":                                     "1",
-			 "configurations.#":                            "1",
-			 "configurations.0.name":                       name,
-			 "configurations.0.scaling_group_id":           CHECKSET,
-			 "configurations.0.image_id":                   CHECKSET,
-			 "configurations.0.instance_type":              CHECKSET,
-			 "configurations.0.security_group_id":          CHECKSET,
-			 "configurations.0.creation_time":              CHECKSET,
-			 "configurations.0.system_disk_category":       CHECKSET,
-			 "configurations.0.system_disk_size":           CHECKSET,
-			 "configurations.0.system_disk_name":           "test_disk_name",
-			 "configurations.0.system_disk_description":    "test_disk_description",
-			 "configurations.0.internet_max_bandwidth_in":  CHECKSET,
-			 "configurations.0.internet_max_bandwidth_out": CHECKSET,
+			"ids.#":                                       "1",
+			"names.#":                                     "1",
+			"configurations.#":                            "1",
+			"configurations.0.name":                       name,
+			"configurations.0.scaling_group_id":           CHECKSET,
+			"configurations.0.image_id":                   CHECKSET,
+			"configurations.0.instance_type":              CHECKSET,
+			"configurations.0.security_group_id":          CHECKSET,
+			"configurations.0.creation_time":              CHECKSET,
+			"configurations.0.system_disk_category":       CHECKSET,
+			"configurations.0.system_disk_size":           CHECKSET,
+			"configurations.0.system_disk_name":           "test_disk_name",
+			"configurations.0.system_disk_description":    "test_disk_description",
+			"configurations.0.internet_max_bandwidth_in":  CHECKSET,
+			"configurations.0.internet_max_bandwidth_out": CHECKSET,
 		}
 	}
 
 	var fakeEssScalingconfigurationsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			 "configurations.#": "0",
-			 "ids.#":            "0",
-			 "names.#":          "0",
+			"configurations.#": "0",
+			"ids.#":            "0",
+			"names.#":          "0",
 		}
 	}
 

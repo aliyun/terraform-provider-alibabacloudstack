@@ -119,6 +119,8 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 
 * `instance_type` - (必填) ECS实例的规格。
 
+* `instance_types` - (可选) 实例类型列表。如果指定，伸缩组将从中选择一种实例类型来创建ECS实例。
+
 * `security_group_ids` - (必填) ECS实例所属的安全组ID列表。
 
 * `deployment_set_id` - (必填) ECS实例所属的部署集ID。
@@ -129,12 +131,16 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 
 * `internet_max_bandwidth_in` - (可选) 公网入方向的最大带宽，单位为Mbps(兆比特每秒)。取值范围为 [1, 200]。如果未指定，默认值为200 Mbps。
 
-* `system_disk_category` - (可选) 系统盘的类别。有效选项包括 `ephemeral_ssd`、`cloud_efficiency`、`cloud_ssd`、`cloud_essd` 和 `cloud`。默认值为 `cloud_efficiency`。
+* `system_disk_category` - (可选) 系统盘的类别。有效选项包括 `cloud`、`ephemeral_ssd`、`cloud_ssd`、`cloud_efficiency`、`cloud_pperf` 和 `cloud_sperf`。默认值为 `cloud_efficiency`。
 
 * `system_disk_size` - (可选) 系统盘大小，单位为GiB。有效范围取决于磁盘类别：
   * `cloud`: [20, 500]
   * `cloud_efficiency`, `cloud_ssd`, `cloud_essd`: [20, 500]
   * `ephemeral_ssd`: [20, 500]
+
+* `system_disk_name` - (可选) 系统盘名称。
+
+* `system_disk_description` - (可选) 系统盘描述。
 
 * `data_disk` - (可选) 要附加到ECS实例的数据盘列表。详见下方 [Block datadisk](#block-datadisk)。
 

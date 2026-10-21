@@ -162,6 +162,8 @@ output "first_scaling_configuration_id" {
   * `internet_max_bandwidth_out` - ECS实例的互联网出方向带宽值，单位为Mbps。  
   * `system_disk_category` - 伸缩配置中使用的系统盘类别。  
   * `system_disk_size` - 系统盘大小，单位为GB。  
+  * `system_disk_name` - 系统盘名称。  
+  * `system_disk_description` - 系统盘描述。  
   * `data_disks` - 伸缩配置中配置的数据盘列表。每个数据盘具有以下属性：  
     * `size` - 数据盘大小，单位为GB。  
     * `category` - 数据盘类别。  
