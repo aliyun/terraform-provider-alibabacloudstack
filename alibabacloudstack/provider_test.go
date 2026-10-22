@@ -587,6 +587,69 @@ func testAccPreCheckPhysicalConnection(t *testing.T) {
 	}
 }
 
+func testAccPreCheckElasticsearchInstanceExists(t *testing.T) {
+	instanceId := os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_ES_ID")
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	rawClient, err := sharedClientForRegion(region)
+	if err != nil {
+		t.Skipf("Skipping test: failed to initialize client: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	
+	if instanceId == "" {
+		request := map[string]interface{}{
+			"Size": 50,
+			"Page": 1,
+		}
+		response, err := client.DoTeaRequest("GET", "elasticsearch-k8s", "2017-06-13", "ListInstance", "/openapi/instances", nil, request, nil)
+		if err != nil {
+			t.Skipf("Skipping test: failed to list Elasticsearch instances: %s", err)
+		}
+		if fmt.Sprint(response["Success"]) == "false" {
+			t.Skipf("Skipping test: failed to list Elasticsearch instances, response: %v", response)
+		}
+		r, err := jsonpath.Get("$.Result", response)
+		if err != nil {
+			t.Skipf("Skipping test: failed to parse Elasticsearch instances response: %s", err)
+		}
+		results, ok := r.([]interface{})
+		if !ok || len(results) == 0 {
+			t.Skipf("Skipping test: no Elasticsearch instances found in the environment")
+		}
+		
+		for _, result := range results {
+			instance, ok := result.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			status, _ := instance["status"].(string)
+			if status == "active" {
+				if id, ok := instance["instanceId"].(string); ok && id != "" {
+					instanceId = id
+					break
+				}
+			}
+		}
+		
+		if instanceId == "" {
+			t.Skipf("Skipping test: no active Elasticsearch instances found in the environment")
+		}
+		os.Setenv("ALIBABACLOUDSTACK_TEST_EXISTED_ES_ID", instanceId)
+	}
+	
+	elasticsearchService := &ElasticsearchService{client}
+	object, err := elasticsearchService.DescribeElasticsearchInstance(instanceId)
+	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			t.Skipf("Skipping test: Elasticsearch instance %s does not exist: %s", instanceId, err)
+		}
+		t.Skipf("Skipping test: failed to query Elasticsearch instance %s: %s", instanceId, err)
+	}
+	if object == nil || object["instanceId"] == nil || object["instanceId"].(string) == "" {
+		t.Skipf("Skipping test: Elasticsearch instance %s does not exist", instanceId)
+	}
+}
+
 func getAccTestRandInt(min, max int) int {
 	if v := os.Getenv("ALIBABACLOUDSTACK_ACCRANDINT"); v != "" {
 		if i, err := strconv.Atoi(v); err == nil {

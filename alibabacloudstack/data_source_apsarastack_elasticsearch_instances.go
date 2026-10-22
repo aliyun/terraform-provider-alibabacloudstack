@@ -37,11 +37,11 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-// There is an issue with Zone filtering
-// 			"zone_id": {
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 			},
+			// There is an issue with Zone filtering
+			// 			"zone_id": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -138,6 +138,11 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 							Computed: true,
 						},
 
+						"vpc_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
 						"status": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -200,61 +205,70 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 				"version":     object["esVersion"],
 				"description": object["description"],
 			}
-			if object["dataNode"].(bool) {
-				if v, err := object["nodeAmount"].(json.Number).Int64(); err == nil {
-					mapping["data_node_amount"] = int(v)
-				} else {
-					return errmsgs.WrapError(err)
+			if dataNode, ok := object["dataNode"].(bool); ok && dataNode {
+				if nodeAmount, ok := object["nodeAmount"].(json.Number); ok {
+					if v, err := nodeAmount.Int64(); err == nil {
+						mapping["data_node_amount"] = int(v)
+					} else {
+						return errmsgs.WrapError(err)
+					}
 				}
-				nodeSpec := object["nodeSpec"].(map[string]interface{})
-				mapping["data_node_spec"] = nodeSpec["spec"]
-				if v, err := nodeSpec["disk"].(json.Number).Int64(); err == nil {
-					mapping["data_node_disk_size"] = int(v)
-				} else {
-					return errmsgs.WrapError(err)
-				}
-				mapping["data_node_disk_type"] = nodeSpec["storageClassName"]
-			}
-
-			if object["haveKibana"].(bool) {
-				// The ListInstance API may incorrectly omit Kibana data in its response.
-				mapping["kibana_node_spec"] = object["kibanaConfiguration"].(map[string]interface{})["spec"]
-				mapping["kibana_slb_address"] = object["kibanaSlbAddress"]
-				mapping["kibana_domain"] = object["kibanaDomain"]
-				mapping["kibana_protocol"] = object["kibanaProtocol"]
-				if v, err := object["kibanaPort"].(json.Number).Int64(); err == nil {
-					mapping["kibana_port"] = int(v)
-				} else {
-					return errmsgs.WrapError(err)
+				if nodeSpec, ok := object["nodeSpec"].(map[string]interface{}); ok {
+					mapping["data_node_spec"] = nodeSpec["spec"]
+					if diskSize, ok := nodeSpec["disk"].(json.Number); ok {
+						if v, err := diskSize.Int64(); err == nil {
+							mapping["data_node_disk_size"] = int(v)
+						} else {
+							return errmsgs.WrapError(err)
+						}
+					}
+					mapping["data_node_disk_type"] = nodeSpec["storageClassName"]
 				}
 			}
 
-			if object["advancedDedicateMaster"].(bool) {
-				masterConfiguration := object["masterConfiguration"].(map[string]interface{})
-				if v, err := masterConfiguration["amount"].(json.Number).Int64(); err == nil {
-					mapping["master_node_amount"] = int(v)
-				} else {
-					return errmsgs.WrapError(err)
+			if haveKibana, ok := object["haveKibana"].(bool); ok && haveKibana {
+				if kibanaConfig, ok := object["kibanaConfiguration"].(map[string]interface{}); ok {
+					mapping["kibana_node_spec"] = kibanaConfig["spec"]
 				}
-				mapping["master_node_spec"] = masterConfiguration["spec"]
-				if v, err := masterConfiguration["disk"].(json.Number).Int64(); err == nil {
-					mapping["master_node_disk_size"] = int(v)
-				} else {
-					return errmsgs.WrapError(err)
-				}
-				mapping["master_node_disk_type"] = masterConfiguration["storageClassName"]
 			}
 
-			if object["haveClientNode"].(bool) {
-				clientNodeConfiguration := object["clientNodeConfiguration"].(map[string]interface{})
-				if v, err := clientNodeConfiguration["amount"].(json.Number).Int64(); err == nil {
-					mapping["client_node_amount"] = int(v)
-				} else {
-					return errmsgs.WrapError(err)
+			if advancedDedicateMaster, ok := object["advancedDedicateMaster"].(bool); ok && advancedDedicateMaster {
+				if masterConfiguration, ok := object["masterConfiguration"].(map[string]interface{}); ok {
+					if masterAmount, ok := masterConfiguration["amount"].(json.Number); ok {
+						if v, err := masterAmount.Int64(); err == nil {
+							mapping["master_node_amount"] = int(v)
+						} else {
+							return errmsgs.WrapError(err)
+						}
+					}
+					mapping["master_node_spec"] = masterConfiguration["spec"]
+					if masterDisk, ok := masterConfiguration["disk"].(json.Number); ok {
+						if v, err := masterDisk.Int64(); err == nil {
+							mapping["master_node_disk_size"] = int(v)
+						} else {
+							return errmsgs.WrapError(err)
+						}
+					}
+					mapping["master_node_disk_type"] = masterConfiguration["storageClassName"]
 				}
-				mapping["client_node_spec"] = clientNodeConfiguration["spec"]
 			}
-			mapping["vswitch_id"] = object["networkConfig"].(map[string]interface{})["vswitchId"]
+
+			if haveClientNode, ok := object["haveClientNode"].(bool); ok && haveClientNode {
+				if clientNodeConfiguration, ok := object["clientNodeConfiguration"].(map[string]interface{}); ok {
+					if clientAmount, ok := clientNodeConfiguration["amount"].(json.Number); ok {
+						if v, err := clientAmount.Int64(); err == nil {
+							mapping["client_node_amount"] = int(v)
+						} else {
+							return errmsgs.WrapError(err)
+						}
+					}
+					mapping["client_node_spec"] = clientNodeConfiguration["spec"]
+				}
+			}
+			if networkConfig, ok := object["networkConfig"].(map[string]interface{}); ok {
+				mapping["vswitch_id"] = networkConfig["vswitchId"]
+				mapping["vpc_id"] = networkConfig["vpcId"]
+			}
 			mapping["status"] = object["status"]
 
 			instances = append(instances, mapping)

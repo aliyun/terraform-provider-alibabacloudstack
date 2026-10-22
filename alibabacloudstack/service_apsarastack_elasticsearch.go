@@ -39,7 +39,7 @@ var EsClusterConfig = map[string]string{
 func (s *ElasticsearchService) DescribeElasticsearchInstance(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := make(map[string]interface{})
-	response, err = s.client.DoTeaRequest("GET", "elasticsearch-k8s", "2017-06-13", "DescribeInstance", fmt.Sprintf("/openapi/instances/%s", id), nil, nil, request)
+	response, err = s.client.DoTeaRequest("GET", "elasticsearch-k8s", "2017-06-13", "DescribeInstance", fmt.Sprintf("/openapi/instances/%s", id), nil, request, nil)
 	addDebug("DescribeInstance", response, nil)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, "InstanceNotFound") {
