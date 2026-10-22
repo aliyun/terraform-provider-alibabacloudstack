@@ -236,7 +236,7 @@ func dataSourceAlibabacloudStackGpdbInstanceTypesRead(d *schema.ResourceData, me
 						}
 					}
 				} else if memoryStr, ok := memoryData.(string); ok {
-					memory = parseCpuFromSpec(memoryStr)
+					memory = parseMemoryValue(memoryStr)
 				}
 			}
 
@@ -271,7 +271,8 @@ func dataSourceAlibabacloudStackGpdbInstanceTypesRead(d *schema.ResourceData, me
 				"id":                     data["specification"],
 				"cpu":                    cpu,
 				"memory":                 memory,
-				"engine_version":         data["engineVersionLabel"],
+				"engine":                 data["engine"],
+				"engine_version":         data["engineVersion"],
 				"connections":            connections,
 				"storage_min":            data["storageMin"],
 				"storage_max":            data["storageMax"],
