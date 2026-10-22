@@ -31,7 +31,7 @@ func resourceAlibabacloudStackFlinkNamespace() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Intel"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Intel", "AMD", "ARM", "Hygon"}, false),
 			},
 			"owner_uid": {
 				Type:     schema.TypeString,
