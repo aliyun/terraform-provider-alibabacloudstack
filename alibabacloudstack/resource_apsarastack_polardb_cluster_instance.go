@@ -19,6 +19,11 @@ import (
 
 func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(60 * time.Minute),
+			Update: schema.DefaultTimeout(40 * time.Minute),
+			Delete: schema.DefaultTimeout(40 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"tde_enabled": {
 				Type:     schema.TypeBool,
