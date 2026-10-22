@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackPolardbClusterAccount_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_cluster_id":    "${alibabacloudstack_polardb_cluster_instance.instance.id}",
+					"db_cluster_id":    "${local.polardb_cluster_id}",
 					"account_name":     "${var.name}",
 					"account_password": "${random_password.password.0.result}",
 				}),
@@ -78,35 +78,10 @@ func resourcePolardbClusterAccountConfigDependence(name string) string {
 	  default = "%s"
 	}
 
-	variable "db_type" {
-	  default = "PostgreSQL"
-	}
-
-	variable "db_version" {
-	  default = "14"
-	}
+	%s
 
 	%s
 
-	data "alibabacloudstack_polardb_cluster_instance_types" "default" {
-	  db_type = "${var.db_type}"
-	  db_version = "${var.db_version}"
-	  sorted_by = "CPU"
-	  sub_category = "normal_exclusive"
-	}
-
 	%s
-	
-	resource "alibabacloudstack_polardb_cluster_instance" "instance" {
-		db_cluster_description 	= "${var.name}"
-		db_type            		= "${var.db_type}"
-		db_version    			= "${var.db_version}"
-		storage_type			= "ESSDPL1"
-		storage_space 			= 20
-		db_node_class 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}"
-		zone_id					= "${data.alibabacloudstack_zones.default.zones.0.id}"
-		vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"
-		sub_category 			= "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.sub_category}"
-	}
-	`, name, RandomPasswordTestCase(12, 2), VSwitchCommonTestCase)
+	`, name, VSwitchCommonTestCase, PolardbClusterCommonTestCase("PostgreSQL", "14", true), RandomPasswordTestCase(12, 2))
 }

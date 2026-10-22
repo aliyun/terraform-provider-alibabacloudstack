@@ -1054,6 +1054,52 @@ locals {
 `, os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_TYPE"), os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_ID"), engine, cpuType, vswtichId)
 }
 
+func PolardbClusterCommonTestCase(dbType, dbVersion string, enableVpc bool) string {
+	var vswitchId string
+	if enableVpc {
+		vswitchId = `vswitch_id				= "${alibabacloudstack_vpc_vswitch.default.id}"`
+	}
+	cpuType := os.Getenv("ALIBABACLOUDSTACK_TEST_CPU_TYPE")
+	if cpuType != "" {
+		cpuType = fmt.Sprintf(`cpu_type = "%s"`, cpuType)
+	}
+	return fmt.Sprintf(`
+variable "polardb_cluster_id" {
+  type      = string
+  default   = "%s"
+}
+
+data "alibabacloudstack_polardb_cluster_instances" "default" {
+  ids = var.polardb_cluster_id != "" ? [var.polardb_cluster_id] : [" "]
+}
+
+data "alibabacloudstack_polardb_cluster_instance_types" "default" {
+  db_type    = "%s"
+  db_version = "%s"
+  sorted_by  = "CPU"
+  %s
+  sub_category = "normal_exclusive"
+}
+
+resource "alibabacloudstack_polardb_cluster_instance" "default" {
+  count                = length(data.alibabacloudstack_polardb_cluster_instances.default.ids) > 0 ? 0 : 1
+  db_cluster_description = "${var.name}"
+  db_type              = "%s"
+  db_version           = "%s"
+  storage_type         = "ESSDPL1"
+  storage_space        = 20
+  db_node_class        = data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id
+  zone_id              = data.alibabacloudstack_zones.default.zones.0.id
+  %s
+  sub_category         = data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.sub_category
+}
+
+locals {
+  polardb_cluster_id = length(data.alibabacloudstack_polardb_cluster_instances.default.ids) > 0 ? data.alibabacloudstack_polardb_cluster_instances.default.ids.0 : alibabacloudstack_polardb_cluster_instance.default.0.id
+}
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_CLUSTER_ID"), dbType, dbVersion, cpuType, dbType, dbVersion, vswitchId)
+}
+
 const PolardbxCommonTestCase = `
 data "alibabacloudstack_polardbx_instance_types" "cn" {
 	sorted_by = "CPU"
@@ -1318,6 +1364,7 @@ resource "alibabacloudstack_vpc_vpc" "default" {
   lifecycle {
       ignore_changes = [
 		secondary_cidr_blocks,
+		tags,
       ]
   }
 }
