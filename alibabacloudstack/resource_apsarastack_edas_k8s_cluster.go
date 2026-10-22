@@ -162,7 +162,7 @@ func resourceAlibabacloudStackEdasK8sClusterRead(d *schema.ResourceData, meta in
 		return errmsgs.WrapError(err)
 	}
 
-	// 兼容旧格式 id（仅 clusterid），自动升级为新格式（namespaceid:clusterid）
+	// Compatible with the legacy id format (clusterid only); automatically upgrade it to the new format (namespaceid:clusterid)
 	newId := upgradeEdasK8sClusterId(d.Id(), object.RegionId)
 	if newId != d.Id() {
 		d.SetId(newId)

@@ -83,9 +83,9 @@ func resourceAlibabacloudStackPolardbxBackupCreate(d *schema.ResourceData, meta 
 	if task_exists {
 		return errmsgs.WrapError(errmsgs.Error("There are already backup tasks in progress."))
 	}
-	// Bug#87449965: 快照创建前已存在的备份集 id。17E 后端返回 "cb-*" 字符串备份集 id，
-	// 且 CreateBackup 响应可能不携带可用的 BackupSetId；当响应无法解析出 id 时，
-	// 通过创建前后的差集在 DescribeBackupSetList 中定位刚创建的备份集。
+	// Bug#87449965: Backup set ids that already exist before the snapshot is created. The 17E backend returns "cb-*" string backup set ids,
+	// and the CreateBackup response may not carry a usable BackupSetId; when no id can be parsed from the response,
+	// the newly created backup set is located in DescribeBackupSetList via the diff of ids before and after creation.
 	before_ids := map[string]bool{}
 	if existing, e := polardbx_service.DescribePolarDbXBackups(instance_id); e == nil {
 		for _, b := range existing {
@@ -99,8 +99,8 @@ func resourceAlibabacloudStackPolardbxBackupCreate(d *schema.ResourceData, meta 
 
 	// Call request_params_handler
 
-	// 实例创建后约 2.5min 会触发初始自动备份作业，此时手动 CreateBackup 返回 BackupJobExists。
-	// 轮询等待初始备份作业结束后重试，避免与初始自动备份冲突。
+	// An initial automatic backup job is triggered about 2.5 minutes after the instance is created; a manual CreateBackup at that time returns BackupJobExists.
+	// Poll and wait for the initial backup job to finish before retrying, to avoid conflicting with the initial automatic backup.
 	var bresponse *responses.CommonResponse
 	backup_type := fmt.Sprint(d.Get("backup_type").(int))
 	retry_deadline := time.Now().Add(25 * time.Minute)
@@ -185,8 +185,8 @@ type PolardbXCreatebackupResponse struct {
 	} `json:"Data"`
 }
 
-// Bug#87449965: BackupSetId 跨环境类型不一致（149E 返回数字，17E 返回 "cb-*" 字符串），
-// 且响应可能不携带该字段。用 interface{} 容错解析；返回 "" 表示需回退到 DescribeBackupSetList 差集定位。
+// Bug#87449965: The type of BackupSetId is inconsistent across environments (149E returns a number, 17E returns a "cb-*" string),
+// and the response may not carry this field at all. Parse it tolerantly with interface{}; an empty string means the caller must fall back to locating the backup set via the DescribeBackupSetList diff.
 func normalizeBackupSetId(raw interface{}) string {
 	switch v := raw.(type) {
 	case nil:

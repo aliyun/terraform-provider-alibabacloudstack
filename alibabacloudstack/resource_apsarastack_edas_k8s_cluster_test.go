@@ -163,7 +163,7 @@ func testAccCheckEdasK8sClusterDestroy(s *terraform.State) error {
 		}
 
 		// Try to find the cluster
-		// 兼容新格式 ID（namespaceid:clusterid），按最后分隔符分割提取 clusterId
+		// Compatible with the new ID format (namespaceid:clusterid); split on the last separator to extract clusterId
 		clusterId := rs.Primary.ID
 		if idx := strings.LastIndex(clusterId, ":"); idx != -1 && idx+1 < len(clusterId) {
 			clusterId = clusterId[idx+1:]
@@ -276,7 +276,7 @@ func TestAccAlibabacloudStackEdasK8sCluster_ImportStateWithOldId(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// 验证导入后 ID 已升级为新格式（含 namespace 前缀）
+				// Verify that after import the ID has been upgraded to the new format (with the namespace prefix)
 				ImportStateCheck: func(s []*terraform.InstanceState) error {
 					if len(s) != 1 {
 						return fmt.Errorf("expected 1 instance state, got %d", len(s))
