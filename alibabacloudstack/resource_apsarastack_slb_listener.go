@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"context"
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -423,6 +424,12 @@ func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta int
 	if err = slbService.WaitForSlbListener(d.Id(), Running, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
+
+	// Wait for list-query API cache to sync before returning,
+	// otherwise Read may get NotFound due to cache inconsistency.
+	log.Printf("[DEBUG] resourceAlibabacloudStackSlbListenerCreate: sleeping 30s for API cache sync, id=%s", d.Id())
+	time.Sleep(30 * time.Second)
+
 	return nil
 }
 
