@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -15,16 +16,16 @@ func resourceAlibabacloudStackSlbServerCertificate() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'server_certificate_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'server_certificate_name' instead.",
 				ConflictsWith: []string{"server_certificate_name"},
 			},
 			"server_certificate_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 			"server_certificate": {
@@ -83,7 +84,20 @@ func resourceAlibabacloudStackSlbServerCertificateCreate(d *schema.ResourceData,
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ := raw.(*slb.UploadServerCertificateResponse)
+	if response == nil || response.ServerCertificateId == "" {
+		return errmsgs.WrapErrorf(errmsgs.Error("UploadServerCertificate returned empty ServerCertificateId"), errmsgs.DefaultErrorMsg, d.Id(), "UploadServerCertificate", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
 	d.SetId(response.ServerCertificateId)
+
+	slbService := SlbService{client}
+	if err := slbService.WaitForSlbServerCertificate(d.Id(), Available, DefaultTimeout); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UploadServerCertificate", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	// Wait for list-query API cache to sync before returning,
+	// otherwise Read may get NotFound due to cache inconsistency.
+	log.Printf("[DEBUG] resourceAlibabacloudStackSlbServerCertificateCreate: sleeping 30s for API cache sync, id=%s", d.Id())
+	time.Sleep(30 * time.Second)
 
 	return nil
 }

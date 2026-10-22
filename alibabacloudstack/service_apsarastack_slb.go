@@ -195,7 +195,6 @@ func (s *SlbService) DescribeSlbMasterSlaveServerGroup(id string) (*slb.Describe
 	return bresponse, err
 }
 
-
 func (s *SlbService) DescribeSlbListener(id string) (listener map[string]interface{}, err error) {
 	parts, err := ParseSlbListenerId(id)
 	if err != nil {
@@ -214,7 +213,7 @@ func (s *SlbService) DescribeSlbListener(id string) (listener map[string]interfa
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, "The specified resource does not exist") {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR))
-			} else if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy ...) {
+			} else if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy...) {
 				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 			}
 		}
@@ -408,7 +407,6 @@ func (s *SlbService) WaitForSlbMasterSlaveServerGroup(id string, status Status, 
 	}
 	return nil
 }
-
 
 func (s *SlbService) slbRemoveAccessControlListEntryPerTime(list []interface{}, id string) error {
 	request := slb.CreateRemoveAccessControlListEntryRequest()
@@ -627,17 +625,22 @@ func (s *SlbService) WaitForSlbServerCertificate(id string, status Status, timeo
 				if status == Deleted {
 					return nil
 				}
-			} else {
-				return errmsgs.WrapError(err)
+				if time.Now().After(deadline) {
+					return errmsgs.WrapErrorf(errmsgs.Error("WaitForSlbServerCertificate timeout, resource not found"), errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, "", id, errmsgs.ProviderERROR)
+				}
+				time.Sleep(DefaultIntervalShort * time.Second)
+				continue
 			}
+			return errmsgs.WrapError(err)
 		}
 		if object.ServerCertificateId == id {
 			break
 		}
 
 		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ServerCertificateId, id, errmsgs.ProviderERROR)
+			return errmsgs.WrapErrorf(errmsgs.Error("WaitForSlbServerCertificate timeout, ID mismatch"), errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ServerCertificateId, id, errmsgs.ProviderERROR)
 		}
+		time.Sleep(DefaultIntervalShort * time.Second)
 	}
 	return nil
 }
@@ -977,7 +980,7 @@ func (s *SlbService) DescribeAccessLogsDownloadAttributes(id string) (logsattr [
 		return nil, errmsgs.WrapError(err)
 	}
 	logsattr = []Slblogsdownloadattribute{}
-	for _, logattr  :=  range slblogs.LogsDownloadAttributes.LogsDownloadAttribute {
+	for _, logattr := range slblogs.LogsDownloadAttributes.LogsDownloadAttribute {
 		if logattr.LoadBalancerId == id {
 			logsattr = append(logsattr, logattr)
 		}
