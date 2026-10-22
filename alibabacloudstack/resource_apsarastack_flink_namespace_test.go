@@ -2,10 +2,11 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/PaesslerAG/jsonpath"
 	"log"
 	"strings"
 	"testing"
+
+	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -92,14 +93,14 @@ func TestAccAlibabacloudStackFlinkNamespace_Basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":      name,
 					"cu":        "1",
-					"cpu_type":  "Intel",
+					"cpu_type":  "Hygon",
 					"owner_uid": "${alibabacloudstack_ascm_user.default.user_uid}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":     name,
 						"cu":       "1",
-						"cpu_type": "Intel",
+						"cpu_type": "Hygon",
 					}),
 				),
 			},

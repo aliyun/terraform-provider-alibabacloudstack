@@ -104,14 +104,22 @@ func resourceAlibabacloudStackFlinkNamespaceRead(d *schema.ResourceData, meta in
 		return errmsgs.WrapError(err)
 	}
 
-	d.Set("name", object["Name"].(string))
-	cu, err := strconv.Atoi(object["GuaranteeQuota"].(string))
-	if err != nil {
-		return err
+	if v, ok := object["Name"].(string); ok {
+		d.Set("name", v)
 	}
-	d.Set("cu", cu)
-	d.Set("cpu_type", object["CpuBrand"].(string))
-	d.Set("owner_uid", object["Uid"].(string))
+	if v, ok := object["GuaranteeQuota"].(string); ok {
+		cu, err := strconv.Atoi(v)
+		if err != nil {
+			return err
+		}
+		d.Set("cu", cu)
+	}
+	if v, ok := object["CpuBrand"].(string); ok {
+		d.Set("cpu_type", v)
+	}
+	if v, ok := object["Uid"].(string); ok {
+		d.Set("owner_uid", v)
+	}
 
 	return nil
 }
