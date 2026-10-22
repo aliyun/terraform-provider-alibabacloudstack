@@ -38,7 +38,7 @@ The following arguments are supported:
 * `instance_type_family` - (Optional) Filter the results based on their family name. For example: 'ecs.n4'.
 * `eni_amount` - (Optional) Filter the result whose network interface number is no more than `eni_amount`.
 * `kubernetes_node_role` - (Optional) Filter the result which is used to create a kubernetes cluster Optional Values: `Master` and `Worker`.
-* `ids` - (Optional) A list of instance type IDs.
+* `ids` - (Optional, Computed) A list of instance type IDs to filter results. Only instance types whose IDs are in the list are returned.
 
 ## Attributes Reference
 

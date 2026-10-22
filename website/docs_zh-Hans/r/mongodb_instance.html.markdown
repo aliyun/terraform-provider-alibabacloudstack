@@ -47,6 +47,7 @@ resource "alibabacloudstack_mongodb_instance" "example" {
 支持以下参数：
 
 * `engine_version` - (必填，变更时重建) 实例的数据库引擎版本。有效值：`8.0`, `7.0`, `6.0`, `5.0`, `4.4`, `4.2`, `4.0`。注意：3.4 及以下版本已停售。
+* `cpu_type` - (选填，变更时重建) 实例的 CPU 架构类型。未指定时，Provider 会根据 `db_instance_class` 自动查询对应的 CPU 类型。
 * `db_instance_class` - (必填) 实例类型。例如：`dds.mongo.s.small`, `dds.mongo.mid`。
 * `db_instance_storage` - (必填) 实例的存储容量。有效值：10 到 2000。单位：GB。
 * `zone_id` - (选填，变更时重建) 实例所在的可用区 ID。如果不指定，系统将默认选择一个。

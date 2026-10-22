@@ -47,6 +47,7 @@ resource "alibabacloudstack_mongodb_instance" "example" {
 The following arguments are supported:
 
 * `engine_version` - (Required, ForceNew) The database engine version of the instance. Valid values: `8.0`, `7.0`, `6.0`, `5.0`, `4.4`, `4.2`, `4.0`. Note: Versions 3.4 and below are no longer available for purchase.
+* `cpu_type` - (Optional, ForceNew) The CPU architecture type of the instance. If it is not specified, the provider resolves the CPU type from `db_instance_class`.
 * `db_instance_class` - (Required) The instance type. For example: `dds.mongo.s.small`, `dds.mongo.mid`.
 * `db_instance_storage` - (Required) The storage capacity of the instance. Valid values: 10 to 2000. Unit: GB.
 * `zone_id` - (Optional, ForceNew) The zone ID of the instance. If not specified, the system will select one by default.

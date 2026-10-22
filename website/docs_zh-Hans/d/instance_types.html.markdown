@@ -39,7 +39,7 @@ output "instance_types"{
 * `instance_type_family` - (可选) 根据系列名称筛选结果。例如：'ecs.n4'。
 * `eni_amount` - (可选) 筛选网络接口数不超过`eni_amount`的结果。
 * `kubernetes_node_role` - (可选) 筛选用于创建Kubernetes集群的结果。可选值：`Master` 和 `Worker`。
-* `ids` - (可选) 实例类型ID列表。
+* `ids` - (可选, 可回读) 用于过滤结果的实例类型 ID 列表，仅返回 ID 在该列表中的实例类型。
 
 ## 属性说明
 
