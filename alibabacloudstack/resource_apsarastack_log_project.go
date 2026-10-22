@@ -92,6 +92,9 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 		}
 		return resource.RetryableError(errmsgs.Error("Failed to describe log project"))
 	})
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "CreateProject", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
 	d.SetId(name)
 	return nil
 }
