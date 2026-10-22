@@ -94,7 +94,7 @@ func TestAccAlibabacloudStackFlinkNamespace_Basic(t *testing.T) {
 					"name":      name,
 					"cu":        "1",
 					"cpu_type":  "Hygon",
-					"owner_uid": "228094992573280849",
+					"owner_uid": "${alibabacloudstack_ascm_user.default.user_uid}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -127,6 +127,19 @@ func resourceFlinkNamespaceConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable name{
  default = "%s"
+}
+
+resource "alibabacloudstack_ascm_user" "default" {
+  display_name = var.name
+  mobile_nation_code = "86"
+  login_name = var.name
+  login_policy_id = "1"
+  role_ids = [
+               "8",
+               "9"
+             ]
+  cellphone_number = "13612345678"
+  email = "${var.name}@gmail.com"
 }
 `, name)
 }
