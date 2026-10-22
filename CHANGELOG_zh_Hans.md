@@ -1,3 +1,52 @@
+# 3.18.32
+
+## 新增
+
+1. 新增资源 `alibabacloudstack_polardb_cluster_parameter_group`（PolarDB 集群参数模板）及数据源 `alibabacloudstack_polardb_cluster_parameter_groups`
+2. 新增数据源 `alibabacloudstack_cs_autoscaling_configs`（查询 ACK 集群节点自动伸缩配置）和 `alibabacloudstack_cs_kubernetes_addon_instance`（查询 ACK 集群组件实例）
+3. 恢复启用资源 `alibabacloudstack_cs_autoscaling_config`
+4. `alibabacloudstack_autoscaling_scalingconfiguration` 及其数据源 `alibabacloudstack_autoscaling_scalingconfigurations` 支持系统盘名称（`system_disk_name`）与系统盘描述（`system_disk_description`）配置
+5. `alibabacloudstack_mongodb_instance` 新增 `cpu_type` 参数支持芯片架构指定；`alibabacloudstack_rds_instance`、`alibabacloudstack_kvstore_instance`、`alibabacloudstack_mongodb_instance` 创建时未指定 `cpu_type` 将自动探测 CPU 架构
+6. 数据源 `alibabacloudstack_ecs_images` 支持按 CPU 架构（`architecture`）过滤镜像
+7. 数据源 `alibabacloudstack_instance_types` 支持按规格 ID 列表（`ids`）过滤
+8. `alibabacloudstack_log_store` 恢复支持加密参数 `encrypt_type`、`cmk_key_id`、`arn`
+
+## 修复
+
+1. 修复 `alibabacloudstack_ascm_quota` 增删改查失败的问题，配额操作改经统一配额通道执行
+2. 修复 `alibabacloudstack_ascm_custom_role` 权限策略字段格式导致的创建/更新失败
+3. 修复 `alibabacloudstack_ascm_ram_policy_for_role` 权限策略名称不匹配、重复绑定与删除异常等问题
+4. 修复 `alibabacloudstack_polardb_cluster_instance` 创建超时过短（40 分钟）导致的假性失败，创建超时调整为 60 分钟
+5. 修复 `alibabacloudstack_polardb_cluster_account` 创建/删除状态收敛不完整导致的操作提前结束问题，增加 Deleting/Available 状态等待
+6. 修复 `alibabacloudstack_polardb_readwrite_splitting_connection` 读取时 endpoint 类型与描述字段为空导致的类型断言 panic
+7. 修复 `alibabacloudstack_polardb_parameter_group` 及其数据源查询失败：增强 DescribeParameterGroups 响应解析兼容性（兼容嵌套与扁平结构、`ParameterGroupId`/`ParamGroupId` 字段名），创建时优先使用 API 直接返回的参数组 ID
+8. 修复 `alibabacloudstack_polardb_cluster_instance_types` 数据源在 CPU/内存字段为空时的 panic
+9. 修复 `alibabacloudstack_cr_ee_namespace` UpdateNamespace 请求结构转换错误、auto_create 与 visibility 互斥校验缺失及企业版类型断言 panic 等问题
+10. 修复 `alibabacloudstack_polardbx_instance` 可用区、账号、数据库、只读实例等一系列问题
+11. 修复 `alibabacloudstack_api_gateway_v2` 系列 API 管理、插件绑定与网关实例相关缺陷
+12. 修复 `alibabacloudstack_log_store` 加密参数（`encrypt_type`/`cmk_key_id` 等）可用性问题：指定密钥无 ARN 时自动查询 AliyunLogAccessingKMSRole 角色 ARN
+13. 修复 `alibabacloudstack_cen` 系列资源等待函数在状态查询返回空响应时的异常：各 `WaitFor*` 轮询函数增加查询结果 nil 检查与显式超时错误上报；修复数据源 `alibabacloudstack_cen_vbr_health_checks` 因请求方法错误（POST 改为 GET）导致的查询失败
+14. 修复 `alibabacloudstack_ecs_image`、`alibabacloudstack_ecs_snapshot` 状态等待间隔过长（20 分钟/3 分钟）导致的创建阻塞，统一为 10 秒轮询
+15. 修复 `alibabacloudstack_kvstore_instance_classes` 数据源 CPU 字段为空时的类型转换 panic
+16. 修复 CMS 系列资源仅在存在标签时才下发标签数据的问题，改为始终填充标签
+17. 修复 `alibabacloudstack_dns_private_zone` 资源不存在时的读取/删除处理逻辑
+18. 修复 `alibabacloudstack_ecs_auto_snapshot_policy` 指定磁盘列表（`disk_ids`）在创建时不生效的问题
+19. 修复 `alibabacloudstack_edas_namespace` 创建使用错误的 API 路径
+20. 修复 `alibabacloudstack_universal_dns_domains` 数据源 `ids` 过滤未下推到服务端的问题
+21. 修复 `alibabacloudstack_ack_cluster` 集群状态查询逻辑，优化 ACK 集群节点管理
+
+## 变更
+
+1. `alibabacloudstack_polardbx_instance` 的 `zone_id` 调整为 Optional + Computed
+2. `alibabacloudstack_edas_k8s_cluster` ID 格式升级并增强导入兼容性
+3. ACK 集群组件实例查询由 DescribeClusterAutoScale 切换为 DescribeClusterAddonInstance
+
+## 废弃/下线
+
+无
+
+---
+
 # 3.18.31
 
 ## 新增

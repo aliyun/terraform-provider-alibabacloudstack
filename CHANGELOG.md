@@ -1,3 +1,52 @@
+# 3.18.32
+
+## Added
+
+1. New resource `alibabacloudstack_polardb_cluster_parameter_group` (PolarDB cluster parameter template) and data source `alibabacloudstack_polardb_cluster_parameter_groups`
+2. New data sources `alibabacloudstack_cs_autoscaling_configs` (query ACK cluster node autoscaling configurations) and `alibabacloudstack_cs_kubernetes_addon_instance` (query ACK cluster addon instances)
+3. Re-enabled resource `alibabacloudstack_cs_autoscaling_config`
+4. `alibabacloudstack_autoscaling_scalingconfiguration` and its data source `alibabacloudstack_autoscaling_scalingconfigurations` support `system_disk_name` and `system_disk_description`
+5. `alibabacloudstack_mongodb_instance` gains the `cpu_type` parameter for chip architecture selection; when `cpu_type` is unspecified, `alibabacloudstack_rds_instance`, `alibabacloudstack_kvstore_instance` and `alibabacloudstack_mongodb_instance` now auto-detect the CPU architecture on creation
+6. Data source `alibabacloudstack_ecs_images` supports filtering images by CPU architecture (`architecture`)
+7. Data source `alibabacloudstack_instance_types` supports filtering instance types by ID list (`ids`)
+8. `alibabacloudstack_log_store` re-enables the encryption parameters `encrypt_type`, `cmk_key_id` and `arn`
+
+## Fixed
+
+1. Fixed `alibabacloudstack_ascm_quota` CRUD failures; quota operations now go through the unified quota channel
+2. Fixed `alibabacloudstack_ascm_custom_role` create/update failures caused by privilege policy format handling
+3. Fixed `alibabacloudstack_ascm_ram_policy_for_role` policy name mismatch, duplicate attachment and deletion errors
+4. Fixed `alibabacloudstack_polardb_cluster_instance` false failures caused by the 40-minute update timeout; create timeout is now 60 minutes
+5. Fixed `alibabacloudstack_polardb_cluster_account` operations ending before state convergence; Deleting/Available states are now awaited
+6. Fixed `alibabacloudstack_polardb_readwrite_splitting_connection` type-assertion panic when endpoint type or description is nil
+7. Fixed query failures of `alibabacloudstack_polardb_parameter_group` and its data source by improving DescribeParameterGroups response parsing (nested and flat shapes; `ParameterGroupId`/`ParamGroupId` field-name compatibility) and preferring the parameter group ID returned directly by the create API
+8. Fixed `alibabacloudstack_polardb_cluster_instance_types` panic when CPU/memory fields are nil
+9. Fixed `alibabacloudstack_cr_ee_namespace` UpdateNamespace request structure conversion, missing auto_create/visibility mutual-exclusion validation and Enterprise Edition type-assertion panics
+10. Fixed a series of `alibabacloudstack_polardbx_instance` issues covering zone handling, accounts, databases and read-only instances
+11. Fixed `alibabacloudstack_api_gateway_v2` resources: API management, plugin attachment and gateway instance defects
+12. Fixed `alibabacloudstack_log_store` encryption parameter usability: when `cmk_key_id` is given without ARN, the AliyunLogAccessingKMSRole ARN is resolved automatically
+13. Fixed `alibabacloudstack_cen` waiter functions misbehaving when state polling returned an empty response (added nil checks on query results and explicit timeout error reporting in the `WaitFor*` polling functions); fixed the `alibabacloudstack_cen_vbr_health_checks` data source query failure caused by the wrong request method (POST changed to GET)
+14. Fixed `alibabacloudstack_ecs_image` and `alibabacloudstack_ecs_snapshot` creation blocking caused by 20-minute/3-minute state-wait delays; unified to 10-second polling
+15. Fixed `alibabacloudstack_kvstore_instance_classes` float-to-int conversion panic when the CPU field is empty
+16. Fixed CMS resources sending tag data only when tags exist; labels are now always populated
+17. Fixed `alibabacloudstack_dns_private_zone` read/delete handling when the resource does not exist
+18. Fixed `alibabacloudstack_ecs_auto_snapshot_policy` `disk_ids` not taking effect on creation
+19. Fixed `alibabacloudstack_edas_namespace` creation using an incorrect API path
+20. Fixed `alibabacloudstack_universal_dns_domains` data source not pushing the `ids` filter down to the API
+21. Fixed `alibabacloudstack_ack_cluster` cluster state query logic and improved ACK node management
+
+## Changes
+
+1. `zone_id` of `alibabacloudstack_polardbx_instance` is now Optional + Computed
+2. `alibabacloudstack_edas_k8s_cluster` ID format upgraded with improved import compatibility
+3. ACK cluster addon instance query switched from DescribeClusterAutoScale to DescribeClusterAddonInstance
+
+## Deprecated
+
+None
+
+---
+
 # 3.18.31
 
 ## Added
