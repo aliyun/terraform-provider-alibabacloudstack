@@ -119,3 +119,117 @@ resource "alibabacloudstack_cen_transit_router_route_table" "default" {
 }
 `, name)
 }
+
+func TestAccAlibabacloudStackCenTransitRouterEntry1(t *testing.T) {
+	var v *CbnDescribeTransitRouterRouteEntriesResponse
+
+	resourceId := "alibabacloudstack_cen_transit_router_route_entry.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccCenTransitRouterEtryCheckmap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &CenService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DoCbnDescribeTransitRouterRouteEntriesRequest")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%srouter_entry%d", defaultRegionToTest, rand)
+	modify_name := fmt.Sprintf("tf-testacc%srouter_entry_modify%d", defaultRegionToTest, rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCenTransitRouterEtryAttachmentBasicdependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+			testAccPreCheck(t, resourceId)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+
+		Steps: []resource.TestStep{
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"transit_router_route_entry_description": name,
+
+					"transit_router_route_entry_destination_cidr_block": "192.168.100.0/24",
+
+					"transit_router_route_entry_name": "${var.name}",
+
+					"transit_router_route_entry_next_hop_id": "${alibabacloudstack_cen_transit_router_vpc_attachment.default.transit_router_attachment_id}",
+
+					"transit_router_route_entry_next_hop_type": "Attachment",
+
+					"transit_router_route_table_id": "${data.alibabacloudstack_cen_transit_router_route_tables.default.transit_router_route_tables.0.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"transit_router_route_entry_destination_cidr_block": "192.168.100.0/24",
+
+						"transit_router_route_entry_next_hop_type": "Attachment",
+
+						"transit_router_route_entry_next_hop_id": CHECKSET,
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"transit_router_route_entry_description": modify_name,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"transit_router_route_entry_description": modify_name,
+
+						"transit_router_route_entry_next_hop_type": "Attachment",
+
+						"transit_router_route_entry_next_hop_id": CHECKSET,
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"transit_router_route_table_id"},
+			},
+		},
+	})
+}
+
+func AlibabacloudTestAccCenTransitRouterEtryAttachmentBasicdependence(name string) string {
+	return fmt.Sprintf(
+		`
+variable "name" {
+	default = "%s"
+}
+
+%s
+
+resource "alibabacloudstack_cen_instance" "default" {
+	cen_instance_name = "${var.name}"
+	description = "${var.name}"
+	transit_router_name = "${var.name}"
+	transit_router_description = "${var.name}"
+}
+
+resource "alibabacloudstack_cen_transit_router_vpc_attachment" "default" {
+	transit_router_attachment_name = "${var.name}"
+	transit_router_attachment_description = "${var.name}"
+	cen_id = "${alibabacloudstack_cen_instance.default.id}"
+	vpc_id = "${alibabacloudstack_vpc_vswitch.default.vpc_id}"
+	transit_router_id = "${alibabacloudstack_cen_instance.default.transit_router_id}"
+	zone_mappings {
+			vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
+			 zone_id = "${alibabacloudstack_vpc_vswitch.default.zone_id}"
+		}
+}
+
+data "alibabacloudstack_cen_transit_router_route_tables" "default" {
+	transit_router_route_id="${alibabacloudstack_cen_instance.default.transit_router_id}"
+}
+
+`, name, VSwitchCommonTestCase)
+}

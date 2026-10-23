@@ -94,7 +94,7 @@ func resourceAlibabacloudStackCenTransitRouterRouteEntryCreate(d *schema.Resourc
 	request.QueryParams["TransitRouterRouteTableId"] = d.Get("transit_router_route_table_id").(string)
 	if next_hop_type == "Attachment" {
 		if v, ok := d.GetOk("transit_router_route_entry_next_hop_id"); ok {
-			request.QueryParams["Description"] = v.(string)
+			request.QueryParams["TransitRouterRouteEntryNextHopId"] = v.(string)
 		} else {
 			return errmsgs.WrapError(errmsgs.Error("transit_router_route_entry_next_hop_id is required when transit_router_route_entry_next_hop_type is Attachment"))
 		}
