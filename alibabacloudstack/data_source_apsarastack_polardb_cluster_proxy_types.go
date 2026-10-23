@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -128,9 +127,9 @@ func dataSourceAlibabacloudStackPolardbClusterProxyTypesRead(d *schema.ResourceD
 		if !ok {
 			classLabelRaw = fmt.Sprintf("%v", data["proxyClassLabel"])
 		}
-		coreCount := parseProxyCoreCount(classLabelRaw, idRaw)
+		coreCount := parseProxyCoreCount(classLabelRaw)
 		if coreCount == 0 {
-			log.Printf("[WARN] Unable to determine core_count from proxyClassLabel=%q proxyClass=%q, skipping", classLabelRaw, idRaw)
+			log.Printf("[WARN] Unable to determine core_count from proxyClassLabel=%q, skipping", classLabelRaw)
 			continue
 		}
 		if v, ok := d.GetOk("core_count"); ok && coreCount != v.(int) {
@@ -156,47 +155,12 @@ func dataSourceAlibabacloudStackPolardbClusterProxyTypesRead(d *schema.ResourceD
 }
 
 // parseProxyCoreCount extracts the CPU core count from the proxyClassLabel.
-// Old ASCM format: label = "2 C" -> first token is the core count.
-// New ASCM format: label = "polar.maxscale.g2.medium.c" (same as proxyClass) ->
-// derive core count from the size tier in the spec ID.
-func parseProxyCoreCount(label, proxyClass string) int {
-	// Try old format first: "<number> C" or just "<number>"
+// Format: label = "2 C" -> first token is the core count.
+func parseProxyCoreCount(label string) int {
 	firstToken := strings.Split(strings.TrimSpace(label), " ")[0]
 	if n, err := strconv.Atoi(firstToken); err == nil && n > 0 {
 		return n
 	}
-
-	// New format: derive from size tier in spec ID
-	// Patterns:
-	//   polar.maxscale.g2.medium.c -> generation "g2" at index 2, size "medium" at index 3
-	//   polar.o.maxscale.x2.medium -> generation "x2" at index 3, size "medium" at index 4
-	// Find the generation identifier (g2/g4/g8/x2/etc.) and take the next part as size tier.
-	sizeTier := ""
-	parts := strings.Split(proxyClass, ".")
-	genPattern := regexp.MustCompile(`^[gx]\d+$`)
-	for i, p := range parts {
-		if genPattern.MatchString(p) && i+1 < len(parts) {
-			sizeTier = parts[i+1]
-			break
-		}
-	}
-
-	sizeToCore := map[string]int{
-		"small":    1,
-		"medium":   2,
-		"large":    4,
-		"xlarge":   8,
-		"2xlarge":  16,
-		"3xlarge":  24,
-		"4xlarge":  32,
-		"8xlarge":  64,
-		"12xlarge": 96,
-		"16xlarge": 128,
-	}
-	if n, ok := sizeToCore[sizeTier]; ok {
-		return n
-	}
-
 	return 0
 }
 
