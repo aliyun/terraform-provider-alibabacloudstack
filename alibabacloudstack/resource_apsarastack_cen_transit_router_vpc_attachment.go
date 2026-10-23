@@ -145,6 +145,7 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentCreate(d *schema.Reso
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "CreateTransitRouterVpcAttachment", "")
 	CbnCreateTransitRouterVpcAttachmentResponseObj := CbnCreateTransitRouterVpcAttachmentResponse{}
 	request.QueryParams["CenId"] = d.Get("cen_id").(string)
+	request.QueryParams["TransitRouterId"] = d.Get("transit_router_id").(string)
 	request.QueryParams["VpcId"] = d.Get("vpc_id").(string)
 	i := 1
 	for _, v := range d.Get("zone_mappings").(*schema.Set).List() {
