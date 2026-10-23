@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccAlibabacloudStackPolarDBReadWriteSplittingConnection_update(t *testing.T) {
-	var connection map[string]interface {}
+	var connection map[string]interface{}
 
 	resourceId := "alibabacloudstack_polardb_readwrite_splitting_connection.default"
 	ra := resourceAttrInit(resourceId, map[string]string{
@@ -44,7 +44,6 @@ func TestAccAlibabacloudStackPolarDBReadWriteSplittingConnection_update(t *testi
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":       "${alibabacloudstack_polardb_readonly_instance.default.master_db_instance_id}",
-					"connection_id":     "${alibabacloudstack_polardb_proxy.default.db_proxy_endpoint_name}",
 					"distribution_type": "Standard",
 				}),
 				Check: resource.ComposeTestCheckFunc(

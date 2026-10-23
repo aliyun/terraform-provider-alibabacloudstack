@@ -51,7 +51,6 @@ resource "alibabacloudstack_polardb_proxy" "default" {
 
 resource "alibabacloudstack_polardb_readwrite_splitting_connection" "default" {
   instance_id       = alibabacloudstack_polardb_dbinstance.default.id
-  connection_id     = alibabacloudstack_polardb_proxy.default.db_proxy_endpoint_name
   distribution_type = "Standard"
   max_delay_time    = 30
 }
@@ -62,7 +61,7 @@ resource "alibabacloudstack_polardb_readwrite_splitting_connection" "default" {
 The following arguments are supported:
 
 * `instance_id` - (Required, ForceNew) The ID of the PolarDB cluster.
-* `connection_id` - (Required, ForceNew) The ID of the proxy endpoint.
+* `connection_id` - (Optional, Computed, Deprecated) The ID of the proxy endpoint. If set, the value is passed to the API as-is; if omitted, the provider resolves the real endpoint ID from the backend automatically. **Deprecated:** this field will become read-only (Computed) in version 3.21.0.
 * `distribution_type` - (Required) The distribution type of read requests. Valid values: `Standard`, `Custom`.
   - `Standard`: System automatically distributes read requests to read-only nodes based on their weights.
   - `Custom`: You can customize the weight of each read-only node.
@@ -74,6 +73,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The ID of the resource, which is the same as `instance_id`.
+* `connection_id` - The ID of the proxy endpoint, resolved from the backend.
 * `connection_string` - The connection string of the read/write splitting endpoint.
 * `port` - The port number of the read/write splitting endpoint.
 

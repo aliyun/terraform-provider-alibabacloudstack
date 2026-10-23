@@ -52,7 +52,6 @@ resource "alibabacloudstack_polardb_proxy" "default" {
 
 resource "alibabacloudstack_polardb_readwrite_splitting_connection" "default" {
   instance_id       = alibabacloudstack_polardb_dbinstance.default.id
-  connection_id     = alibabacloudstack_polardb_proxy.default.db_proxy_endpoint_name
   distribution_type = "Standard"
   max_delay_time    = 30
 }
@@ -63,7 +62,7 @@ resource "alibabacloudstack_polardb_readwrite_splitting_connection" "default" {
 支持以下参数：
 
 * `instance_id` - (必填, 变更时强制重建) PolarDB集群ID。
-* `connection_id` - (必填, 变更时强制重建) 代理终端ID。
+* `connection_id` - (可选, 由API返回, 已废弃) 代理终端ID。若配置则原样传给后端 API；未配置时 provider 会自动从后端解析真实终端ID。**已废弃**：该字段将在 3.21.0 版本变为只读（纯 Computed）。
 * `distribution_type` - (必填) 读请求分发类型。取值：`Standard`、`Custom`。
   - `Standard`：系统根据只读节点的权重自动分发读请求。
   - `Custom`：您可以自定义每个只读节点的权重。
@@ -75,6 +74,7 @@ resource "alibabacloudstack_polardb_readwrite_splitting_connection" "default" {
 导出以下属性：
 
 * `id` - 资源ID，与 `instance_id` 相同。
+* `connection_id` - 代理终端ID，由后端自动解析。
 * `connection_string` - 读写分离终端的连接地址。
 * `port` - 读写分离终端的端口号。
 

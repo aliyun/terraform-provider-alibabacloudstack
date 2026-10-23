@@ -21,9 +21,10 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnection() *schema.Reso
 				Required: true,
 			},
 			"connection_id": {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Computed:   true,
+				Deprecated: "The field `connection_id` is deprecated and will become read-only (Computed) in version 3.21.0. If set, the value is passed to the API as-is; if unset, the provider resolves the real endpoint ID from the backend automatically.",
 			},
 			"distribution_type": {
 				Type:         schema.TypeString,
@@ -140,17 +141,22 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionRead(d *schema.
 
 func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolardbService{client}
-	endpoint, err := polardbService.DoDescribeDBProxyEndpointRequest(d.Id())
-	if err != nil {
-		return err
+
+	endpointId := d.Get("connection_id").(string)
+	if endpointId == "" {
+		polardbService := PolardbService{client}
+		endpoint, err := polardbService.DoDescribeDBProxyEndpointRequest(d.Id())
+		if err != nil {
+			return err
+		}
+		endpointId = endpoint.DBProxyEndpointId
 	}
 
 	reqQuery := map[string]interface{}{
 		"DBInstanceId":                     d.Id(),
 		"ConfigDBProxyFeatures":            "ReadWriteSpliting:1;",
 		"ReadOnlyInstanceDistributionType": d.Get("distribution_type"),
-		"DBProxyEndpointId":                endpoint.DBProxyEndpointId,
+		"DBProxyEndpointId":                endpointId,
 	}
 	if v, ok := d.GetOk("max_delay_time"); ok && v.(int) != 0 {
 		reqQuery["ReadOnlyInstanceMaxDelayTime"] = v
@@ -177,23 +183,39 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate(d *schem
 
 func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbService := PolardbService{client}
-	endpoint, err := polardbService.DoDescribeDBProxyEndpointRequest(d.Id())
-	if err != nil {
-		return err
+
+	endpointId := d.Get("connection_id").(string)
+	if endpointId == "" {
+		polardbService := PolardbService{client}
+		endpoint, err := polardbService.DoDescribeDBProxyEndpointRequest(d.Id())
+		if err != nil {
+			return err
+		}
+		endpointId = endpoint.DBProxyEndpointId
 	}
 
 	reqQuery := map[string]interface{}{
 		"DBInstanceId":          d.Id(),
 		"ConfigDBProxyFeatures": "ReadWriteSpliting:0;",
-		"DBProxyEndpointId":     endpoint.DBProxyEndpointId,
+		"DBProxyEndpointId":     endpointId,
 	}
 
 	if _, err := client.DoTeaRequest("POST", "polardb", "2024-01-30", "ModifyDBProxyEndpoint", "", nil, reqQuery, nil); err != nil {
 		return err
 	}
 	polardbServce := PolardbService{client}
-	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbServce.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{}, []string{""}, d.Timeout(schema.TimeoutUpdate), 10*time.Second,
+		func() (interface{}, string, error) {
+			object, err := polardbServce.DoPolardbDescribedbproxyRequest(d.Id())
+			if err != nil {
+				if errmsgs.NotFoundError(err) {
+					// The proxy endpoint is gone, which means ReadWriteSpliting has been disabled.
+					return struct{}{}, "", nil
+				}
+				return nil, "", errmsgs.WrapError(err)
+			}
+			return object, object.DBProxyInstanceStatus, nil
+		})
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
