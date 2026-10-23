@@ -413,6 +413,7 @@ func (s *CenService) WaitForTransitRouterInstance(instanceId string, status Stat
 func (s *CenService) WaitForTransitRouterMulticastDomain(instanceId string, status Status, timeout int) error {
 	parts := strings.Split(instanceId, COLON_SEPARATED)
 	domain_id := parts[1]
+	var lastSeen string
 	stateConf := BuildStateConf([]string{}, []string{string(status)}, time.Duration(timeout)*time.Second, DefaultIntervalShort*time.Second, func() (interface{}, string, error) {
 		instance, err := s.DoCbnDescribeTransitRouterMuliticastDomainsRequest(instanceId)
 		if err != nil {
@@ -429,6 +430,7 @@ func (s *CenService) WaitForTransitRouterMulticastDomain(instanceId string, stat
 		}
 		for _, domain := range instance.TransitRouterMulticastDomains {
 			if domain.TransitRouterMulticastDomainId == domain_id {
+				lastSeen = domain.Status
 				return instance, domain.Status, nil
 			}
 		}
@@ -438,7 +440,7 @@ func (s *CenService) WaitForTransitRouterMulticastDomain(instanceId string, stat
 		return instance, "", nil
 	})
 	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, lastSeen, string(status), errmsgs.ProviderERROR)
 	}
 	return nil
 }
@@ -681,6 +683,7 @@ func (s *CenService) WaitForTransitRouterMulticastDomainAssociation(id string, s
 	attchment_id := parts[0]
 	domain_id := parts[1]
 	vswithch_id := parts[2]
+	var lastSeen string
 	stateConf := BuildStateConf([]string{}, []string{string(status)}, time.Duration(timeout)*time.Second, DefaultIntervalShort*time.Second, func() (interface{}, string, error) {
 		domain_associations, err := s.DoCbnDescribeTransitRouterMuliticastDomainAssociationsRequest(":" + domain_id)
 		if err != nil {
@@ -697,6 +700,7 @@ func (s *CenService) WaitForTransitRouterMulticastDomainAssociation(id string, s
 		}
 		for _, domain_association := range domain_associations.TransitRouterMulticastAssociations {
 			if domain_association.TransitRouterAttachmentId == attchment_id && domain_association.VSwitchId == vswithch_id && domain_association.TransitRouterMulticastDomainId == domain_id {
+				lastSeen = domain_association.Status
 				return domain_associations, domain_association.Status, nil
 			}
 		}
@@ -706,7 +710,7 @@ func (s *CenService) WaitForTransitRouterMulticastDomainAssociation(id string, s
 		return domain_associations, "", nil
 	})
 	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, lastSeen, string(status), errmsgs.ProviderERROR)
 	}
 	return nil
 }
@@ -909,6 +913,7 @@ func (s *CenService) WaitForAttachmentInstance(id string, status Status, timeout
 	cen_id := parts[0]
 	transit_router_id := parts[1]
 	attach_ment_id := parts[2]
+	var lastSeen string
 	stateConf := BuildStateConf([]string{}, []string{string(status)}, time.Duration(timeout)*time.Second, DefaultIntervalShort*time.Second, func() (interface{}, string, error) {
 		instance, err := s.DoCbnDescribeTransitRouterAttachmentsRequest(cen_id + ":" + transit_router_id)
 		if err != nil {
@@ -925,6 +930,7 @@ func (s *CenService) WaitForAttachmentInstance(id string, status Status, timeout
 		}
 		for _, v := range instance.TransitRouterAttachments {
 			if v.TransitRouterAttachmentId == attach_ment_id {
+				lastSeen = v.Status
 				return instance, v.Status, nil
 			}
 		}
@@ -934,7 +940,7 @@ func (s *CenService) WaitForAttachmentInstance(id string, status Status, timeout
 		return instance, "", nil
 	})
 	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, lastSeen, string(status), errmsgs.ProviderERROR)
 	}
 	return nil
 }
@@ -943,6 +949,7 @@ func (s *CenService) WaitForTransitRouterTableAssociation(id string, status Stat
 	parts := strings.Split(id, COLON_SEPARATED)
 	transit_router_table_id := parts[0]
 	attach_ment_id := parts[1]
+	var lastSeen string
 	stateConf := BuildStateConf([]string{}, []string{string(status)}, time.Duration(timeout)*time.Second, DefaultIntervalShort*time.Second, func() (interface{}, string, error) {
 		instance, err := s.DoCbnDescribeTransitRouterRouteTableAssociationsRequest(transit_router_table_id + ":" + attach_ment_id)
 		if err != nil {
@@ -965,6 +972,7 @@ func (s *CenService) WaitForTransitRouterTableAssociation(id string, status Stat
 		}
 		for _, v := range instance.TransitRouterAssociations {
 			if v.TransitRouterAttachmentId == attach_ment_id {
+				lastSeen = v.Status
 				return instance, v.Status, nil
 			}
 		}
@@ -974,7 +982,7 @@ func (s *CenService) WaitForTransitRouterTableAssociation(id string, status Stat
 		return instance, "", nil
 	})
 	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, lastSeen, string(status), errmsgs.ProviderERROR)
 	}
 	return nil
 }
@@ -983,6 +991,7 @@ func (s *CenService) WaitForTransitRouterTablePropagation(id string, status Stat
 	parts := strings.Split(id, COLON_SEPARATED)
 	transit_router_table_id := parts[0]
 	attach_ment_id := parts[1]
+	var lastSeen string
 	stateConf := BuildStateConf([]string{}, []string{string(status)}, time.Duration(timeout)*time.Second, DefaultIntervalShort*time.Second, func() (interface{}, string, error) {
 		instance, err := s.DoCbnDescribeTransitRouterRouteTablePropagationsRequest(transit_router_table_id + ":" + attach_ment_id)
 		if err != nil {
@@ -1005,6 +1014,7 @@ func (s *CenService) WaitForTransitRouterTablePropagation(id string, status Stat
 		}
 		for _, v := range instance.TransitRouterPropagations {
 			if v.TransitRouterAttachmentId == attach_ment_id {
+				lastSeen = v.Status
 				return instance, v.Status, nil
 			}
 		}
@@ -1014,7 +1024,7 @@ func (s *CenService) WaitForTransitRouterTablePropagation(id string, status Stat
 		return instance, "", nil
 	})
 	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, lastSeen, string(status), errmsgs.ProviderERROR)
 	}
 	return nil
 }

@@ -11,6 +11,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -107,6 +108,7 @@ func resourceAlibabacloudStackCenTransitRouterVbrAttachmentCreate(d *schema.Reso
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "CreateTransitRouterVbrAttachment", "")
 	CbnCreateTransitRouterVbrAttachmentResponseObj := CbnCreateTransitRouterVbrAttachmentResponse{}
 	request.QueryParams["CenId"] = d.Get("cen_id").(string)
+	request.QueryParams["TransitRouterId"] = d.Get("transit_router_id").(string)
 	request.QueryParams["VbrId"] = d.Get("vbr_id").(string)
 	request.QueryParams["AutoPublishRouteEnabled"] = "true"
 	if v, ok := d.GetOk("route_table_propagation_enabled"); ok {
@@ -115,19 +117,22 @@ func resourceAlibabacloudStackCenTransitRouterVbrAttachmentCreate(d *schema.Reso
 	if v, ok := d.GetOk("route_table_association_enabled"); ok {
 		request.QueryParams["RouteTableAssociationEnabled"] = fmt.Sprintf("%v", v)
 	}
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		for i := 1; i <= 5; i++ {
-			bresponse, err = client.ProcessCommonRequest(request)
-			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-			if err != nil {
-				time.Sleep(3 * time.Second)
-				continue
+	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return resource.RetryableError(err)
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.RetryableError(fmt.Errorf("CreateTransitRouterVbrAttachment Failed!!! %s", errmsg))
 		}
-	}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnCreateTransitRouterVbrAttachmentResponseObj)
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnCreateTransitRouterVbrAttachmentResponseObj)
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_cen_transit_router_vbr_attachment", "CreateTransitRouterVbrAttachment", errmsgs.AlibabacloudStackSdkGoERROR)
