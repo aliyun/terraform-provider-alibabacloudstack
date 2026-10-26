@@ -16,6 +16,11 @@ import (
 
 func resourceAlibabacloudStackPolardbConnection() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -151,7 +156,7 @@ func resourceAlibabacloudStackPolardbConnectionUpdate(d *schema.ResourceData, me
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceConnectionString", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		stateConf := BuildStateConfByTimes([]string{"NET_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbService.PolardbDBInstanceStateRefreshFunc(d, client, parts[0], []string{"Deleting"}), 100)
+		stateConf := BuildStateConfByTimes([]string{"NET_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbDBInstanceStateRefreshFunc(d, client, parts[0], []string{"Deleting"}), 100)
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}

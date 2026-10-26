@@ -21,8 +21,8 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(60 * time.Minute),
-			Update: schema.DefaultTimeout(40 * time.Minute),
-			Delete: schema.DefaultTimeout(40 * time.Minute),
+			Update: schema.DefaultTimeout(45 * time.Minute),
+			Delete: schema.DefaultTimeout(45 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"tde_enabled": {
@@ -698,7 +698,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 			if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+			stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, "Change the Node num: waiting for PolarDB cluster instance %s to be Running failed!", d.Id())
 			}
@@ -716,7 +716,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 			if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+			stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, "Change the Node num: waiting for PolarDB cluster instance %s to be Running failed!", d.Id())
 			}
@@ -815,7 +815,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 				if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
 				}
-				stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+				stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 				if _, err := stateConf.WaitForState(); err != nil {
 					return errmsgs.WrapErrorf(err, "Change the Node num: waiting for PolarDB cluster instance %s to be Running failed!", d.Id())
 				}
@@ -834,7 +834,7 @@ func resourceAlibabacloudStackPolardbClusterInstanceUpdate(d *schema.ResourceDat
 				if _, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", action, "", nil, reqQuery, nil); err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
 				}
-				stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+				stateConf := BuildStateConf([]string{"DBNodeDeleting", "DBNodeCreating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardbService.PolardbClusterInstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 				if _, err := stateConf.WaitForState(); err != nil {
 					return errmsgs.WrapErrorf(err, "Change the Node num: waiting for PolarDB cluster instance %s to be Running failed!", d.Id())
 				}

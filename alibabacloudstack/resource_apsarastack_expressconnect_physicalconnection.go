@@ -14,7 +14,9 @@ import (
 func resourceAlibabacloudStackExpressConnectPhysicalConnection() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(2 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(5 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"access_point_id": {
@@ -202,7 +204,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 				if err != nil {
 					return err
 				}
-				stateConf := BuildStateConf([]string{"Terminating"}, []string{"Terminated"}, d.Timeout(schema.TimeoutCreate), 1*time.Second, vpcService.ExpressConnectPhysicalConnectionStateRefreshFunc(d.Id(), []string{"Allocation Failed"}))
+				stateConf := BuildStateConf([]string{"Terminating"}, []string{"Terminated"}, d.Timeout(schema.TimeoutUpdate), 1*time.Second, vpcService.ExpressConnectPhysicalConnectionStateRefreshFunc(d.Id(), []string{"Allocation Failed"}))
 				if _, err := stateConf.WaitForState(); err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 				}
@@ -294,7 +296,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete(d *schema.R
 		if err != nil {
 			return err
 		}
-		stateConf := BuildStateConf([]string{"Terminating"}, []string{"Terminated"}, d.Timeout(schema.TimeoutCreate), 1*time.Second, vpcService.ExpressConnectPhysicalConnectionStateRefreshFunc(d.Id(), []string{"Allocation Failed"}))
+		stateConf := BuildStateConf([]string{"Terminating"}, []string{"Terminated"}, d.Timeout(schema.TimeoutDelete), 1*time.Second, vpcService.ExpressConnectPhysicalConnectionStateRefreshFunc(d.Id(), []string{"Allocation Failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}

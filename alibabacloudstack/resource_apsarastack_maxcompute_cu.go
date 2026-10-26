@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -15,9 +14,6 @@ import (
 
 func resourceAlibabacloudStackMaxcomputeCu() *schema.Resource {
 	resource := &schema.Resource{
-		Timeouts: &schema.ResourceTimeout{
-			Delete: schema.DefaultTimeout(2 * time.Minute),
-		},
 		Schema: map[string]*schema.Schema{
 			"cu_name": {
 				Type:         schema.TypeString,

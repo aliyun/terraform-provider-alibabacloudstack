@@ -11,6 +11,10 @@ import (
 
 func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:     schema.TypeString,

@@ -15,6 +15,10 @@ import (
 
 func resourceAlibabacloudStackCenTransitMulticastDomainMember() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"group_ip_address": {
 				Type:        schema.TypeString,

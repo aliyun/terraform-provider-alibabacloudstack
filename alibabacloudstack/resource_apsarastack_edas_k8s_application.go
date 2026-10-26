@@ -19,6 +19,7 @@ import (
 func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
+			Update: schema.DefaultTimeout(20 * time.Minute),
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
@@ -1519,7 +1520,7 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		}
 
 		if changeOrderId != "" {
-			stateConf := BuildStateConf([]string{"0", "1", "9"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
+			stateConf := BuildStateConf([]string{"0", "1", "9"}, []string{"2"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
@@ -1580,7 +1581,7 @@ func resourceAlibabacloudStackEdasK8sApplicationDelete(d *schema.ResourceData, m
 			changeOrderId = v
 		}
 		if changeOrderId != "" {
-			stateConf := BuildStateConf([]string{"0", "1"}, []string{"3"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"2", "6", "10"}))
+			stateConf := BuildStateConf([]string{"0", "1"}, []string{"3"}, d.Timeout(schema.TimeoutDelete), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"2", "6", "10"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return nil
 			}
@@ -1666,7 +1667,7 @@ func K8sBindSlb(net_type string, isnew bool, d *schema.ResourceData, meta interf
 			time.Sleep(time.Duration(60) * time.Second)
 			return nil
 		}
-		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(ChangeOrderId, []string{"3", "6", "10"}))
+		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(ChangeOrderId, []string{"3", "6", "10"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", action, errmsgs.AlibabacloudStackSdkGoERROR, "")
 		}
@@ -1736,7 +1737,7 @@ func K8sAppConfiguration(d *schema.ResourceData, meta interface{}) error {
 		coid, _ = response["Data"]
 	}
 	ChangeOrderId = coid.(string)
-	stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(ChangeOrderId, []string{"3", "6", "10"}))
+	stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(ChangeOrderId, []string{"3", "6", "10"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", "K8sAppConfiguration", errmsgs.AlibabacloudStackSdkGoERROR, "")
 	}

@@ -13,6 +13,10 @@ import (
 
 func resourceAlibabacloudStackDBReadWriteSplittingConnection() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -162,7 +166,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionDelete(d *schema.Res
 		return err
 	}
 	rdsService := RdsService{client}
-	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsService.RdsProxyStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutDelete), 10*time.Second, rdsService.RdsProxyStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

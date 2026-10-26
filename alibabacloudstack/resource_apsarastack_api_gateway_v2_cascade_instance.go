@@ -12,6 +12,9 @@ import (
 
 func resourceAlibabacloudStackAPIGatewayV2CascadeInstance() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			// "instance_type": {
 			// 	Type:         schema.TypeString,

@@ -14,6 +14,10 @@ import (
 
 func resourceAlibabacloudStackPolardbReadWriteSplittingConnection() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -204,7 +208,7 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionDelete(d *schem
 		return err
 	}
 	polardbServce := PolardbService{client}
-	stateConf := BuildStateConf([]string{}, []string{""}, d.Timeout(schema.TimeoutUpdate), 10*time.Second,
+	stateConf := BuildStateConf([]string{}, []string{""}, d.Timeout(schema.TimeoutDelete), 10*time.Second,
 		func() (interface{}, string, error) {
 			object, err := polardbServce.DoPolardbDescribedbproxyRequest(d.Id())
 			if err != nil {

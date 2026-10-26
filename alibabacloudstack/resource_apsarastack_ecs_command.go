@@ -17,6 +17,10 @@ import (
 
 func resourceAlibabacloudStackEcsCommand() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"command_content": {
 				Type:     schema.TypeString,

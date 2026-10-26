@@ -13,6 +13,11 @@ import (
 
 func resourceAlibabacloudStackHsmCluster() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"cluster_name": {
 				Type:     schema.TypeString,
@@ -251,7 +256,7 @@ func resourceAlibabacloudStackHsmClusterDelete(d *schema.ResourceData, meta inte
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 				"alibabacloudstack_hsm_cluster", "RemoveHsmFromCluster", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		stateConf := BuildStateConf([]string{"0", "1", "3"}, []string{"2"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second,
+		stateConf := BuildStateConf([]string{"0", "1", "3"}, []string{"2"}, d.Timeout(schema.TimeoutDelete), 20*time.Second,
 			hsmService.HsmClusterStateRefreshFunc(d.Id(), []string{"4", "5"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

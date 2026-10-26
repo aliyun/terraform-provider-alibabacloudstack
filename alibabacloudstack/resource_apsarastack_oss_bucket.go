@@ -21,6 +21,9 @@ import (
 
 func resourceAlibabacloudStackOssBucket() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Update: schema.DefaultTimeout(20 * time.Minute),
+		},
 		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -470,7 +473,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, syncInput.OpName, errmsgs.AlibabacloudStackOssGoSdk)
 		}
-		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, ossService.OssBucketSyncStateRefreshFunc(ossCluster, bucketName, []string{failed}))
+		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutUpdate), 2*time.Minute, ossService.OssBucketSyncStateRefreshFunc(ossCluster, bucketName, []string{failed}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}

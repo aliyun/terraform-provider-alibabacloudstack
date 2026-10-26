@@ -21,6 +21,10 @@ var component_id int
 
 func resourceAlibabacloudStackEdasApplication() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"application_name": {
 				Type:     schema.TypeString,
@@ -352,7 +356,7 @@ func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta
 	changeOrderId := bresponse.ChangeOrderId
 
 	if len(changeOrderId) > 0 {
-		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
+		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutDelete), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -389,7 +393,7 @@ func resourceAlibabacloudStackEdasApplicationDelete(d *schema.ResourceData, meta
 		changeOrderId = bresponse.ChangeOrderId
 		delete(component_ids, req.AppId)
 		if len(changeOrderId) > 0 && changeOrderId != "SUCCESS" {
-			stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
+			stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutDelete), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id()))
 			}

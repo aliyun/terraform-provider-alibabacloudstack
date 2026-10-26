@@ -14,6 +14,10 @@ import (
 
 func resourceAlibabacloudStackNasDirQuota() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"file_system_id": {
 				Type:     schema.TypeString,
@@ -221,7 +225,7 @@ func resourceAlibabacloudStackNasDirQuotaUpdate(d *schema.ResourceData, meta int
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 					"alibabacloudstack_nas_dir_quota", "SetDirQuota", errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			stateConf := BuildStateConf([]string{"Initializing"}, []string{"Normal"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, nasService.NasDirQuotaStateRefreshFunc(d.Id(), []string{}))
+			stateConf := BuildStateConf([]string{"Initializing"}, []string{"Normal"}, d.Timeout(schema.TimeoutUpdate), 3*time.Second, nasService.NasDirQuotaStateRefreshFunc(d.Id(), []string{}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
@@ -249,7 +253,7 @@ func resourceAlibabacloudStackNasDirQuotaUpdate(d *schema.ResourceData, meta int
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 					"alibabacloudstack_nas_dir_quota", "CancelDirQuota", errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			stateConf := BuildStateConf([]string{"Initializing"}, []string{"Normal"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, nasService.NasDirQuotaStateRefreshFunc(d.Id(), []string{}))
+			stateConf := BuildStateConf([]string{"Initializing"}, []string{"Normal"}, d.Timeout(schema.TimeoutUpdate), 3*time.Second, nasService.NasDirQuotaStateRefreshFunc(d.Id(), []string{}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}

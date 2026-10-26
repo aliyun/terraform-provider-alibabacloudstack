@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -15,9 +14,6 @@ import (
 
 func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
 	resource := &schema.Resource{
-		Timeouts: &schema.ResourceTimeout{
-			Delete: schema.DefaultTimeout(2 * time.Minute),
-		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,

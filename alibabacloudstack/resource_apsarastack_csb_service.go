@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html"
 	"log"
-	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -16,9 +15,6 @@ import (
 
 func resourceAlibabacloudStackCsbService() *schema.Resource {
 	resource := &schema.Resource{
-		Timeouts: &schema.ResourceTimeout{
-			Update: schema.DefaultTimeout(5 * time.Minute),
-		},
 		Schema: map[string]*schema.Schema{
 			"csb_id": {
 				Type:        schema.TypeInt,

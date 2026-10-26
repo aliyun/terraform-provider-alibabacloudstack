@@ -27,7 +27,7 @@ func resourceAlibabacloudStackAlikafkaInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(60 * time.Minute),
-			Update: schema.DefaultTimeout(120 * time.Minute),
+			Update: schema.DefaultTimeout(60 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
@@ -322,7 +322,7 @@ func resourceAlibabacloudStackAlikafkaInstanceCreate(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	if err := waitTaskFinished(client, d); err != nil {
+	if err := waitTaskFinished(client, d, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return err
 	}
 
@@ -488,7 +488,7 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 			if _, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", action, "", nil, request, nil); err != nil {
 				return err
 			}
-			if err := waitTaskFinished(client, d); err != nil {
+			if err := waitTaskFinished(client, d, d.Timeout(schema.TimeoutUpdate)); err != nil {
 				return err
 			}
 		}
@@ -507,7 +507,7 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 		if _, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", "ApplyVipInfo", "", nil, requestQuery, nil); err != nil {
 			return err
 		}
-		if err := waitTaskFinished(client, d); err != nil {
+		if err := waitTaskFinished(client, d, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return err
 		}
 
@@ -550,7 +550,7 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 		if _, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", "ApplyVipInfo", "", nil, requestQuery, nil); err != nil {
 			return err
 		}
-		if err := waitTaskFinished(client, d); err != nil {
+		if err := waitTaskFinished(client, d, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return err
 		}
 	}
@@ -597,14 +597,14 @@ func resourceAlibabacloudStackAlikafkaInstanceDelete(d *schema.ResourceData, met
 	return nil
 }
 
-func waitTaskFinished(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) error {
+func waitTaskFinished(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData, timeout time.Duration) error {
 	time.Sleep(30 * time.Second)
 	requestQuery := map[string]interface{}{
 		"InstanceId":  d.Id(),
 		"CurrentPage": 1,
 		"PageSize":    10,
 	}
-	err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+	err := resource.Retry(client.GetRetryTimeout(timeout), func() *resource.RetryError {
 		if response, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", "GetScheduledTaskList", "", nil, requestQuery, nil); err != nil {
 			return resource.NonRetryableError(err)
 		} else {

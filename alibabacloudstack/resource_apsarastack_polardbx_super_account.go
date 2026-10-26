@@ -13,6 +13,9 @@ import (
 
 func resourceAlibabacloudStackPolardbxSuperAccount() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Update: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 
 			"instance_id": {

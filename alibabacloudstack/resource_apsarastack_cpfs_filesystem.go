@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -9,10 +8,6 @@ import (
 
 func resourceAlibabacloudStackCpfsFileSystem() *schema.Resource {
 	resource := &schema.Resource{
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(30 * time.Minute),
-			Delete: schema.DefaultTimeout(45 * time.Minute),
-		},
 		Schema: map[string]*schema.Schema{
 			"storage_type": {
 				Type:     schema.TypeString,

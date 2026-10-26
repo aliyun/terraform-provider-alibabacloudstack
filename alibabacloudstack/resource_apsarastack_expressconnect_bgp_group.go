@@ -202,7 +202,7 @@ func resourceAlibabacloudStackExpressconnectBgpgroupUpdate(d *schema.ResourceDat
 				"alibabacloudstack_express_connect_bgp_group", "ModifyBgpGroupAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		expressconnectservice := ExpressconnectService{client}
-		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectBgpGroupsStateRefreshFunc(d.Id(), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Available"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, expressconnectservice.ExpressconnectBgpGroupsStateRefreshFunc(d.Id(), []string{"Failed"}))
 
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -267,7 +267,7 @@ func resourceAlibabacloudStackExpressconnectBgpgroupDelete(d *schema.ResourceDat
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_express_connect_bgp_group", "DeleteBgpGroup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	expressconnectservice := ExpressconnectService{client}
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutCreate), 2*time.Second, expressconnectservice.ExpressconnectBgpGroupsStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 2*time.Second, expressconnectservice.ExpressconnectBgpGroupsStateRefreshFunc(d.Id(), []string{"Failed"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

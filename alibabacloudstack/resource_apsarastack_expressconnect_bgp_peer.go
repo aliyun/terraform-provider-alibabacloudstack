@@ -16,6 +16,11 @@ import (
 
 func resourceAlibabacloudStackExpressconnectBgppeer() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 
 			"auth_key": {
@@ -220,7 +225,7 @@ func resourceAlibabacloudStackExpressconnectBgppeerUpdate(d *schema.ResourceData
 				"alibabacloudstack_express_connect_bgp_peer", "ModifyBgpPeerAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		expressconnectservice := ExpressconnectService{client}
-		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectBgpPeersStateRefreshFunc(d.Id(), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Available"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, expressconnectservice.ExpressconnectBgpPeersStateRefreshFunc(d.Id(), []string{"Failed"}))
 
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -295,7 +300,7 @@ func resourceAlibabacloudStackExpressconnectBgppeerDelete(d *schema.ResourceData
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_express_connect_bgp_peer", "DeleteBgpPeer", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	expressconnectservice := ExpressconnectService{client}
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectBgpPeersStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, expressconnectservice.ExpressconnectBgpPeersStateRefreshFunc(d.Id(), []string{"Failed"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

@@ -11,6 +11,9 @@ import (
 
 func resourceAlibabacloudStackAPIGatewayV2Instance() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"deploy_cluster_namespace": {
 				Type:     schema.TypeString,
@@ -275,7 +278,7 @@ func resourceAlibabacloudStackAPIGatewayV2InstanceCreate(d *schema.ResourceData,
 	if d.Get("deploy_mode").(string) == "custom" {
 		target = "5"
 	}
-	stateConf := BuildStateConf([]string{"1", "0"}, []string{target}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, apigatewayv2Service.ApiGateWayV2InstanceStateRefreshFunc(id.(string), []string{"3"}))
+	stateConf := BuildStateConf([]string{"1", "0"}, []string{target}, d.Timeout(schema.TimeoutCreate), 10*time.Second, apigatewayv2Service.ApiGateWayV2InstanceStateRefreshFunc(id.(string), []string{"3"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, id)
 	}

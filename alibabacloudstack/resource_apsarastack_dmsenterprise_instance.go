@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -13,9 +12,6 @@ import (
 
 func resourceAlibabacloudStackDmsEnterpriseInstance() *schema.Resource {
 	resource := &schema.Resource{
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(1 * time.Minute),
-		},
 		Schema: map[string]*schema.Schema{
 			"data_link_name": {
 				Type:     schema.TypeString,

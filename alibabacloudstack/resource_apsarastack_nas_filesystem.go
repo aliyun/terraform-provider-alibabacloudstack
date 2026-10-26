@@ -14,6 +14,11 @@ import (
 
 func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"storage_type": {
 				Type:         schema.TypeString,
@@ -140,7 +145,7 @@ func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta i
 		if err != nil {
 			return err
 		}
-		stateConf := BuildStateConf([]string{"Pending", "Extending"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Pending", []string{"Stopped", "Stopping", "Deleting"}))
+		stateConf := BuildStateConf([]string{"Pending", "Extending"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Pending", []string{"Stopped", "Stopping", "Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}

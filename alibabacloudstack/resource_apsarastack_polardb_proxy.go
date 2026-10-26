@@ -18,8 +18,8 @@ import (
 func resourceAlibabacloudStackPolardbproxy() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(40 * time.Minute),
-			Update: schema.DefaultTimeout(40 * time.Minute),
+			Create: schema.DefaultTimeout(45 * time.Minute),
+			Update: schema.DefaultTimeout(45 * time.Minute),
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
@@ -199,7 +199,7 @@ func resourceAlibabacloudStackPolardbproxyCreate(d *schema.ResourceData, meta in
 
 	d.SetId(db_instance_id)
 	polardb_proxyservice := PolardbService{client}
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardb_proxyservice.PolardbProxyStateRefreshFunc(db_instance_id, []string{""}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polardb_proxyservice.PolardbProxyStateRefreshFunc(db_instance_id, []string{""}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -484,7 +484,7 @@ func resourceAlibabacloudStackPolardbproxyDelete(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_proxy", "ModifyDBProxy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	polardb_proxyservice := PolardbService{client}
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{""}, d.Timeout(schema.TimeoutUpdate), 1*time.Second, polardb_proxyservice.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{""}, d.Timeout(schema.TimeoutDelete), 1*time.Second, polardb_proxyservice.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

@@ -15,6 +15,11 @@ import (
 
 func resourceAlibabacloudStackDrdsRdsInstnace() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 
 			"storage_type": {
@@ -164,7 +169,7 @@ func resourceAlibabacloudStackDrdsRdsInstnaceUpdate(d *schema.ResourceData, meta
 		if err != nil {
 			return err
 		}
-		stateConf := BuildStateConf([]string{"Changing Specifications"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, drdsRdsservice.PrivateRdsStateRefreshFunc(d.Id(), []string{"Stopping"}))
+		stateConf := BuildStateConf([]string{"Changing Specifications"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdsRdsservice.PrivateRdsStateRefreshFunc(d.Id(), []string{"Stopping"}))
 
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -227,7 +232,7 @@ func resourceAlibabacloudStackDrdsRdsInstnaceDelete(d *schema.ResourceData, meta
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_database", "RemoveDrdsDb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	stateConf := BuildStateConf([]string{"Running", "Deleting"}, []string{}, d.Timeout(schema.TimeoutCreate), 10*time.Second, drdsRdsservice.PrivateRdsStateRefreshFunc(d.Id(), []string{"Stopping"}))
+	stateConf := BuildStateConf([]string{"Running", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, drdsRdsservice.PrivateRdsStateRefreshFunc(d.Id(), []string{"Stopping"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

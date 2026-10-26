@@ -16,6 +16,7 @@ import (
 func resourceAlibabacloudStackNasMountTarget() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 			Create: schema.DefaultTimeout(5 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{

@@ -17,6 +17,9 @@ import (
 
 func resourceAlibabacloudStackDbsBackupPlan() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+		},
 		DeprecationMessage: "The 'alibabacloudstack_dbs_backup_plan' resource is unsupported on ApsaraStack and will be removed in version 3.21.0.",
 		Schema: map[string]*schema.Schema{
 			"backup_plan_id": {

@@ -13,6 +13,10 @@ import (
 
 func resourceAlibabacloudStackEdasInstanceApplicationScale() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"ecc_info": {
 				Type:     schema.TypeString,
@@ -162,7 +166,7 @@ func resourceAlibabacloudStackEdasInstanceApplicationAttachmentDelete(d *schema.
 	changeOrderId, ok := response["ChangeOrderId"].(string)
 
 	if ok && changeOrderId != "" {
-		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
+		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutDelete), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}

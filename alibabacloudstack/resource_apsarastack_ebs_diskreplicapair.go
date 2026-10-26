@@ -15,6 +15,10 @@ import (
 
 func resourceAlibabacloudStackEbsDiskreplicapair() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 
 			// "bandwidth": {
@@ -441,7 +445,7 @@ func resourceAlibabacloudStackEbsDiskreplicapairDelete(d *schema.ResourceData, m
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ebs_disk_replica_pair", "DeleteDiskReplicaPair", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	ebsdisk_replica_groupservice := EbsService{client}
-	stateConf := BuildStateConf([]string{"deleting"}, []string{}, d.Timeout(schema.TimeoutCreate), 10*time.Second, ebsdisk_replica_groupservice.EbsDiskreplicapairStatusRefreshFunc(d.Id(), []string{"failed"}))
+	stateConf := BuildStateConf([]string{"deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, ebsdisk_replica_groupservice.EbsDiskreplicapairStatusRefreshFunc(d.Id(), []string{"failed"}))
 	
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

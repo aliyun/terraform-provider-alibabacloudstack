@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -14,9 +13,6 @@ import (
 
 func resourceAlibabacloudStackOosExecution() *schema.Resource {
 	resource := &schema.Resource{
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(11 * time.Minute),
-		},
 		Schema: map[string]*schema.Schema{
 			"failed_tasks": {
 				Type:     schema.TypeInt,

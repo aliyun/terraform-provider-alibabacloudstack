@@ -15,6 +15,9 @@ import (
 
 func resourceAlibabacloudStackMongodbShardingInstanceCsNodeAddress() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Update: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"db_instance_id": {
 				Type:     schema.TypeString,

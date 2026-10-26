@@ -17,7 +17,6 @@ func resourceAlibabacloudStackEcsSnapshotgroup() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(DefaultTimeout * time.Second),
 		},
 		Schema: map[string]*schema.Schema{
 

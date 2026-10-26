@@ -16,6 +16,10 @@ import (
 
 func resourceAlibabacloudStackVpcHavip() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 
 			"associated_eip_addresses": {
@@ -308,7 +312,7 @@ func resourceAlibabacloudStackVpcHavipDelete(d *schema.ResourceData, meta interf
 			}
 		}
 	}
-	stateConf := BuildStateConf([]string{"Pending", "InUse"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, vpcservice.VpcHaVipStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"Pending", "InUse"}, []string{"Available"}, d.Timeout(schema.TimeoutDelete), 10*time.Second, vpcservice.VpcHaVipStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

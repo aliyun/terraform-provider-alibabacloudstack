@@ -20,6 +20,10 @@ import (
 
 func resourceAlibabacloudStackDrdsDatabase() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 
 			"instance_id": {
@@ -469,7 +473,7 @@ func resourceAlibabacloudStackDrdsDatabaseDelete(d *schema.ResourceData, meta in
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_database", "RemoveDrdsDb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	stateConf := BuildStateConf([]string{"DELETE", "NORMAL"}, []string{}, d.Timeout(schema.TimeoutCreate), 10*time.Second, drdsService.DbStateRefreshFunc(d.Id(), []string{"Error"}))
+	stateConf := BuildStateConf([]string{"DELETE", "NORMAL"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, drdsService.DbStateRefreshFunc(d.Id(), []string{"Error"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

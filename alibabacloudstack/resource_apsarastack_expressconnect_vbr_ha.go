@@ -10,6 +10,10 @@ import (
 
 func resourceAlibabacloudStackExpressconnectVbrHa() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 
 			"name": {
@@ -111,7 +115,7 @@ func resourceAlibabacloudStackExpressconnectVbrHaDelete(d *schema.ResourceData, 
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_expressconnect_vbr_ha", "DeleteVbrHa", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	expressconnectservice := ExpressconnectService{client}
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectVbrHaStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, expressconnectservice.ExpressconnectVbrHaStateRefreshFunc(d.Id(), []string{"Failed"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

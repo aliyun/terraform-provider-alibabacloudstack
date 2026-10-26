@@ -13,6 +13,10 @@ import (
 
 func resourceAlibabacloudstackWafInstance() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -397,7 +401,7 @@ func resourceAlibabacloudstackWafInstanceUpdate(d *schema.ResourceData, meta int
 			}
 			addDebug(scaleup, response, request)
 		}
-		stateConf := BuildStateConf([]string{}, []string{"success"}, d.Timeout(schema.TimeoutCreate), 20*time.Second, waf_openapiService.Wafv3InstanceStateRefreshFunc(d.Id(), []string{"faild"}))
+		stateConf := BuildStateConf([]string{}, []string{"success"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second, waf_openapiService.Wafv3InstanceStateRefreshFunc(d.Id(), []string{"faild"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprint(d.Id()))
 		}

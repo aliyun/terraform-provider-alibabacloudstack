@@ -15,6 +15,10 @@ import (
 
 func resourceAlibabacloudStackExpressconnectVbrpconnassociation() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"physical_connection_id": {
 				Type:     schema.TypeString,
@@ -269,7 +273,7 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationDelete(d *schema.
 
 	expressconnectservice := ExpressconnectService{client}
 
-	stateConf := BuildStateConf([]string{"UnAssociating"}, []string{}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectVbrPconnAssociationStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"UnAssociating"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, expressconnectservice.ExpressconnectVbrPconnAssociationStateRefreshFunc(d.Id(), []string{"Failed"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

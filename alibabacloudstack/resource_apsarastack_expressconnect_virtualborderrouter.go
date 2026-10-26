@@ -16,7 +16,8 @@ import (
 func resourceAlibabacloudStackExpressConnectVirtualBorderRouter() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
-			Update: schema.DefaultTimeout(2 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(5 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"associated_physical_connections": {
