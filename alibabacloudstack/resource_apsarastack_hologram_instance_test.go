@@ -159,7 +159,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 }
 
 data "alibabacloudstack_hologram_clusters" "default" {
-  zone_id = "cn-wulan-env2g1-amtest2001-a"
+  zone_id = sort(data.alibabacloudstack_zones.default.ids)[0]
 }
 
 `, name)
@@ -184,7 +184,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 }
 
 data "alibabacloudstack_hologram_clusters" "default" {
-  zone_id = "cn-wulan-env2g1-amtest2001-a"
+  zone_id = sort(data.alibabacloudstack_zones.default.ids)[0]
 }
 
 resource "alibabacloudstack_hologram_instance" "standard" {
