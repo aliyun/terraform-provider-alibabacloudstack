@@ -1,12 +1,90 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
+func init() {
+	resource.AddTestSweepers("alibabacloudstack_express_connect_virtual_border_router", &resource.Sweeper{
+		Name: "alibabacloudstack_express_connect_virtual_border_router",
+		F: func(region string) error {
+			return SweeperFunc(
+				sweeperEntry{fn: testSweepVirtualBorderRouters, precise: []string{"tf-testacc-ecvbr"}, broad: broadPrefixes, fatal: true, waitSec: 10},
+			)
+		},
+	})
+}
+
+// testSweepVirtualBorderRouters deletes VBRs created by acceptance tests. A VBR still
+// attached to a CEN refuses to delete, so in the connect_peer cleanup chain this runs as
+// the entry after testSweepCenInstances, which detaches and deletes the CEN first.
+func testSweepVirtualBorderRouters(prefixes []string) error {
+	rawClient, err := sharedClientForRegion("")
+	if err != nil {
+		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+
+	// DescribeVirtualBorderRouters on 17E honours no filter parameter at all and rejects
+	// PageSize above 50, so every page is pulled and matched on name locally.
+	var allVbrs []VirtualBorderRouter
+	pageNumber := 1
+	for {
+		request := client.NewCommonRequest("GET", "Vpc", "2016-04-28", "DescribeVirtualBorderRouters", "")
+		request.QueryParams["PageNumber"] = fmt.Sprintf("%d", pageNumber)
+		request.QueryParams["PageSize"] = "50"
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			return fmt.Errorf("error listing VBRs: %s", err)
+		}
+		var response struct {
+			VirtualBorderRouterSet struct {
+				VirtualBorderRouterType []VirtualBorderRouter `json:"VirtualBorderRouterType"`
+			} `json:"VirtualBorderRouterSet"`
+		}
+		if err := json.Unmarshal(bresponse.GetHttpContentBytes(), &response); err != nil {
+			return fmt.Errorf("error parsing VBR list: %s", err)
+		}
+		allVbrs = append(allVbrs, response.VirtualBorderRouterSet.VirtualBorderRouterType...)
+		if len(response.VirtualBorderRouterSet.VirtualBorderRouterType) < 50 {
+			break
+		}
+		pageNumber++
+	}
+
+	leftover := []string{}
+	for _, vbr := range allVbrs {
+		matched := false
+		for _, prefix := range prefixes {
+			if strings.HasPrefix(vbr.Name, prefix) {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			continue
+		}
+		log.Printf("[INFO] Sweeping VBR: %s (%s)", vbr.Name, vbr.VbrId)
+		request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteVirtualBorderRouter", "")
+		request.QueryParams["VbrId"] = vbr.VbrId
+		if _, err := client.ProcessCommonRequest(request); err != nil {
+			log.Printf("[WARN] Error deleting VBR %s: %s", vbr.VbrId, err)
+			leftover = append(leftover, vbr.VbrId)
+		}
+	}
+
+	if len(leftover) > 0 {
+		return fmt.Errorf("VBR sweep left %d resource(s) behind: %s", len(leftover), strings.Join(leftover, ", "))
+	}
+	return nil
+}
 
 func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 	//	checkoutSupportedRegions(t, true, connectivity.VbrSupportRegions)

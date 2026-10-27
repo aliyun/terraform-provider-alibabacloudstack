@@ -8,6 +8,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+// This test case builds a whole chain in its dependency block: a CEN carrying a transit
+// router and a CIDR block, a VBR, a VBR attachment, a connect attachment and the peer
+// itself. Its leftovers are swept here with the prefixes this file owns, reusing the
+// cleanup functions defined in the CEN and VBR test files: a failed run otherwise strands
+// a transit router and a VBR that nothing else can reach.
+func init() {
+	resource.AddTestSweepers("alibabacloudstack_cen_transit_router_connect_peer", &resource.Sweeper{
+		Name: "alibabacloudstack_cen_transit_router_connect_peer",
+		F: func(region string) error {
+			return SweeperFunc(
+				sweeperEntry{fn: testSweepCenInstances, precise: []string{"tf-testaccceninstance48958"}, broad: broadPrefixes, fatal: true, waitSec: 10},
+				sweeperEntry{fn: testSweepVirtualBorderRouters, precise: []string{"tf-testAccTransitRouterConnectPeer"}},
+			)
+		},
+	})
+}
+
 func TestAccAlibabacloudStackCenTransitRouterConnectPeer_basic(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_cen_transit_router_connect_peer.default"
