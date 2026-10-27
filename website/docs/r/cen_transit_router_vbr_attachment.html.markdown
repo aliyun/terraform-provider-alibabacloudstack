@@ -53,6 +53,14 @@ The following arguments are supported:
 * `route_table_association_enabled` - (Optional, ForceNew) Specifies whether to enable route table association. Modifying this parameter will force the recreation of the resource.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 
+## Timeouts
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
+
+* `create` - (Defaults to 10 mins) Used when creating the VBR attachment, until it reaches the `Attached` status.
+* `update` - (Defaults to 5 mins) Used when updating the name or the description of the VBR attachment.
+* `delete` - (Defaults to 15 mins) Used when detaching the VBR attachment. Detaching runs an asynchronous CBN workflow that can take longer than 5 minutes, so the default is 15 minutes; increase it if your detach routinely takes longer.
+
 ## Attributes Reference
 
 The following attributes are exported:

@@ -20,7 +20,11 @@ func resourceAlibabacloudStackCenTransitRouterVbrAttachment() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Update: schema.DefaultTimeout(5 * time.Minute),
-			Delete: schema.DefaultTimeout(5 * time.Minute),
+			// Detaching a VBR attachment runs an asynchronous CBN workflow that often needs
+			// more than 5 minutes, and a too-short default makes every destroy fail even
+			// when the detach is merely slow. Create stays at 10m; callers who need longer
+			// can still override it through the timeouts block.
+			Delete: schema.DefaultTimeout(15 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"auto_publish_route_enabled": {

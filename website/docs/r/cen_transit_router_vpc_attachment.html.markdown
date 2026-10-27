@@ -92,6 +92,14 @@ The following arguments are supported:
     * `zone_id` - (Required) - the zone id
     
 
+## Timeouts
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
+
+  * `create` - (Defaults to 10 mins) - Used when creating the VPC attachment, until it reaches the `Attached` status
+  * `update` - (Defaults to 5 mins) - Used when updating the VPC attachment
+  * `delete` - (Defaults to 15 mins) - Used when detaching the VPC attachment, kept in step with the VBR attachment because detaching is the same asynchronous CBN workflow
+
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:

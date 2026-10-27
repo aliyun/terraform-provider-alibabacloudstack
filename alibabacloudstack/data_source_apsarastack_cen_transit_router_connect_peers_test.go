@@ -93,6 +93,10 @@ func TestAccAlibabacloudStackCenTransitRouterConnectPeersDataSource(t *testing.T
 }
 
 func dataSourceCenTransitRouterConnectPeersConfigDependence(name string) string {
+	// The VLAN must be random: a hardcoded id cannot be re-used while the VBR created by an
+	// earlier run is still attached (a VBR stuck in Detaching keeps its VLAN occupied), which
+	// makes the case fail at VBR creation instead of at the behaviour under test.
+	vlanId := getAccTestRandInt(1000, 2000)
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"
@@ -108,7 +112,7 @@ resource "alibabacloudstack_cen_instance" "default" {
 
 resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
   physical_connection_id = "%s"
-  vlan_id =                    100
+  vlan_id =                    %d
   local_gateway_ip =           "10.0.0.1"
   peer_gateway_ip =            "10.0.0.2"
   peering_subnet_mask =        "255.255.255.252"
@@ -135,5 +139,5 @@ resource "alibabacloudstack_cen_transit_router_connect_peer" "default" {
   cen_id                = "${alibabacloudstack_cen_transit_router_connect_attachment.default.cen_id}"
   connect_attachment_id = "${alibabacloudstack_cen_transit_router_connect_attachment.default.transit_router_attachment_id}"
 }
-`, name, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"))
+`, name, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"), vlanId)
 }
