@@ -284,6 +284,7 @@ func resourceAlibabacloudStackHologramInstanceRead(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_hologram_instance", "DescribeHologramInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
+	d.Set("instance_id", instance["InstanceId"])
 	d.Set("instance_name", instance["InstanceName"])
 	d.Set("zone_id", instance["ZoneId"])
 	d.Set("compute_type", instance["InstanceType"])
