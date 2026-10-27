@@ -40,8 +40,8 @@ func TestAccAlibabacloudStackHologramInstance_basic(t *testing.T) {
 					"zone_id":       "${data.alibabacloudstack_hologram_clusters.default.zone_id}",
 					"cpu":           "intel",
 					"node":          "2",
-					"vpc_id":        "${alibabacloudstack_vpc_vpc.default.id}",
-					"vswitch_id":    "${alibabacloudstack_vpc_vswitch.default.id}",
+					"vpc_id":        "${data.alibabacloudstack_vpcs.default.vpcs.0.id}",
+					"vswitch_id":    "${data.alibabacloudstack_vswitches.default.vswitches.0.id}",
 					"instance_name": "${var.name}",
 					"cluster":       "${data.alibabacloudstack_hologram_clusters.default.clusters.0.id}",
 				}),
@@ -106,8 +106,8 @@ func TestAccAlibabacloudStackHologramInstance_readOnly(t *testing.T) {
 					"zone_id":            "${alibabacloudstack_hologram_instance.standard.0.zone_id}",
 					"cpu":                "intel",
 					"node":               "2",
-					"vpc_id":             "${alibabacloudstack_vpc_vpc.default.id}",
-					"vswitch_id":         "${alibabacloudstack_vpc_vswitch.default.id}",
+					"vpc_id":             "${data.alibabacloudstack_vpcs.default.vpcs.0.id}",
+					"vswitch_id":         "${data.alibabacloudstack_vswitches.default.vswitches.0.id}",
 					"instance_name":      "${var.name}",
 					"cluster":            "${data.alibabacloudstack_hologram_clusters.default.clusters.0.id}",
 					"leader_instance_id": "${alibabacloudstack_hologram_instance.standard.0.id}",
@@ -146,13 +146,17 @@ variable "name" {
 	default = "%v"
 }
 
-%s
+data "alibabacloudstack_vpcs" "default" {}
 
-data "alibabacloudstack_hologram_clusters" "default" {
-  zone_id = sort(data.alibabacloudstack_zones.default.ids)[0]
+data "alibabacloudstack_vswitches" "default" {
+  vpc_id = data.alibabacloudstack_vpcs.default.vpcs.0.id
 }
 
-`, name, VSwitchCommonTestCase)
+data "alibabacloudstack_hologram_clusters" "default" {
+  zone_id = "cn-wulan-env2g1-amtest2001-a"
+}
+
+`, name)
 }
 
 func resourceHologramReadOnlyInstanceDependence(name string) string {
@@ -161,10 +165,14 @@ variable "name" {
 	default = "%v"
 }
 
-%s
+data "alibabacloudstack_vpcs" "default" {}
+
+data "alibabacloudstack_vswitches" "default" {
+  vpc_id = data.alibabacloudstack_vpcs.default.vpcs.0.id
+}
 
 data "alibabacloudstack_hologram_clusters" "default" {
-  zone_id = sort(data.alibabacloudstack_zones.default.ids)[0]
+  zone_id = "cn-wulan-env2g1-amtest2001-a"
 }
 
 resource "alibabacloudstack_hologram_instance" "standard" {
@@ -173,12 +181,12 @@ resource "alibabacloudstack_hologram_instance" "standard" {
 	zone_id = "${data.alibabacloudstack_hologram_clusters.default.zone_id}"
 	cpu = "intel"
 	node = "2"
-	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-	vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
+	vpc_id = "${data.alibabacloudstack_vpcs.default.vpcs.0.id}"
+	vswitch_id = "${data.alibabacloudstack_vswitches.default.vswitches.0.id}"
 	instance_name = "${var.name}${count.index}"
 	cluster = "${data.alibabacloudstack_hologram_clusters.default.clusters.0.id}"
 }
 
 
-`, name, VSwitchCommonTestCase)
+`, name)
 }
