@@ -40,8 +40,8 @@ func TestAccAlibabacloudStackHologramInstance_basic(t *testing.T) {
 					"zone_id":       "${data.alibabacloudstack_hologram_clusters.default.zone_id}",
 					"cpu":           "intel",
 					"node":          "2",
-					"vpc_id":        "${data.alibabacloudstack_vpcs.default.vpcs.0.id}",
-					"vswitch_id":    "${data.alibabacloudstack_vswitches.default.vswitches.0.id}",
+					"vpc_id":        "${alibabacloudstack_vpc_vpc.default.id}",
+					"vswitch_id":    "${alibabacloudstack_vpc_vswitch.default.id}",
 					"instance_name": "${var.name}",
 					"cluster":       "${data.alibabacloudstack_hologram_clusters.default.clusters.0.id}",
 				}),
@@ -106,8 +106,8 @@ func TestAccAlibabacloudStackHologramInstance_readOnly(t *testing.T) {
 					"zone_id":            "${alibabacloudstack_hologram_instance.standard.0.zone_id}",
 					"cpu":                "intel",
 					"node":               "2",
-					"vpc_id":             "${data.alibabacloudstack_vpcs.default.vpcs.0.id}",
-					"vswitch_id":         "${data.alibabacloudstack_vswitches.default.vswitches.0.id}",
+					"vpc_id":             "${alibabacloudstack_vpc_vpc.default.id}",
+					"vswitch_id":         "${alibabacloudstack_vpc_vswitch.default.id}",
 					"instance_name":      "${var.name}",
 					"cluster":            "${data.alibabacloudstack_hologram_clusters.default.clusters.0.id}",
 					"leader_instance_id": "${alibabacloudstack_hologram_instance.standard.0.id}",
@@ -146,10 +146,16 @@ variable "name" {
 	default = "%v"
 }
 
-data "alibabacloudstack_vpcs" "default" {}
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name = "${var.name}_vpc"
+  cidr_block = "172.16.0.0/16"
+}
 
-data "alibabacloudstack_vswitches" "default" {
-  vpc_id = data.alibabacloudstack_vpcs.default.vpcs.0.id
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  vswitch_name = "${var.name}_vsw"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block = "172.16.1.0/24"
+  zone_id = "cn-wulan-env2g1-amtest2001-a"
 }
 
 data "alibabacloudstack_hologram_clusters" "default" {
@@ -165,10 +171,16 @@ variable "name" {
 	default = "%v"
 }
 
-data "alibabacloudstack_vpcs" "default" {}
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name = "${var.name}_vpc"
+  cidr_block = "172.16.0.0/16"
+}
 
-data "alibabacloudstack_vswitches" "default" {
-  vpc_id = data.alibabacloudstack_vpcs.default.vpcs.0.id
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  vswitch_name = "${var.name}_vsw"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block = "172.16.1.0/24"
+  zone_id = "cn-wulan-env2g1-amtest2001-a"
 }
 
 data "alibabacloudstack_hologram_clusters" "default" {
@@ -181,8 +193,8 @@ resource "alibabacloudstack_hologram_instance" "standard" {
 	zone_id = "${data.alibabacloudstack_hologram_clusters.default.zone_id}"
 	cpu = "intel"
 	node = "2"
-	vpc_id = "${data.alibabacloudstack_vpcs.default.vpcs.0.id}"
-	vswitch_id = "${data.alibabacloudstack_vswitches.default.vswitches.0.id}"
+	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+	vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	instance_name = "${var.name}${count.index}"
 	cluster = "${data.alibabacloudstack_hologram_clusters.default.clusters.0.id}"
 }
