@@ -908,13 +908,13 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablePropagationsRequest(id 
 	return TransitRouterRouteTablePropagationsResponseObj, nil
 }
 
-func (s *CenService) WaitForAttachmentInstance(id string, status Status, timeout int) error {
+func (s *CenService) WaitForAttachmentInstance(id string, status Status, timeout time.Duration) error {
 	parts := strings.Split(id, COLON_SEPARATED)
 	cen_id := parts[0]
 	transit_router_id := parts[1]
 	attach_ment_id := parts[2]
 	var lastSeen string
-	stateConf := BuildStateConf([]string{}, []string{string(status)}, time.Duration(timeout)*time.Second, DefaultIntervalShort*time.Second, func() (interface{}, string, error) {
+	stateConf := BuildStateConf([]string{}, []string{string(status)}, timeout, DefaultIntervalShort*time.Second, func() (interface{}, string, error) {
 		instance, err := s.DoCbnDescribeTransitRouterAttachmentsRequest(cen_id + ":" + transit_router_id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
@@ -940,7 +940,7 @@ func (s *CenService) WaitForAttachmentInstance(id string, status Status, timeout
 		return instance, "", nil
 	})
 	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, lastSeen, string(status), errmsgs.ProviderERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), int(timeout.Seconds()), lastSeen, string(status), errmsgs.ProviderERROR)
 	}
 	return nil
 }

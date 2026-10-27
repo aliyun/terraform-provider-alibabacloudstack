@@ -17,6 +17,11 @@ import (
 
 func resourceAlibabacloudStackCenTransitRouterVpcAttachment() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(5 * time.Minute),
+			Delete: schema.DefaultTimeout(5 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"auto_publish_route_enabled": {
 				Type:     schema.TypeBool,
@@ -187,7 +192,7 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentCreate(d *schema.Reso
 	attachment_id := CbnCreateTransitRouterVpcAttachmentResponseObj.TransitRouterAttachmentId
 
 	d.SetId(fmt.Sprintf("%s:%s:%s:%s", d.Get("cen_id").(string), d.Get("transit_router_id").(string), attachment_id, d.Get("vpc_id").(string)))
-	err = cencen_instanceservice.WaitForAttachmentInstance(d.Id(), Attached, 120)
+	err = cencen_instanceservice.WaitForAttachmentInstance(d.Id(), Attached, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_cen_transit_router_vpc_attachment", "CreateTransitRouterVpcAttachment", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -197,6 +202,7 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentCreate(d *schema.Reso
 
 func resourceAlibabacloudStackCenTransitRouterVpcAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	cencen_instanceservice := CenService{client}
 	parts := strings.Split(d.Id(), COLON_SEPARATED)
 	attachment_id := parts[2]
 	// api: Cbn - 2017-09-12 - ModifyCenAttribute
@@ -258,6 +264,12 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentUpdate(d *schema.Reso
 					"alibabacloudstack_cen_transit_router_vpc_attachment", "UpdateTransitRouterVpcAttachmentZones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 		}
+		// 属性或可用区变更后 attachment 会进入 Modifying，等待回到 Attached
+		err := cencen_instanceservice.WaitForAttachmentInstance(d.Id(), Attached, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+				"alibabacloudstack_cen_transit_router_vpc_attachment", "UpdateTransitRouterVpcAttachmentAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
 	}
 	return nil
 }
@@ -265,19 +277,16 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentUpdate(d *schema.Reso
 func resourceAlibabacloudStackCenTransitRouterVpcAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cencen_instanceservice := CenService{client}
-	err := cencen_instanceservice.WaitForAttachmentInstance(d.Id(), Attached, 120)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_cen_transit_router_vpc_attachment", "CreateTransitRouterVpcAttachment", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
 	response, err := cencen_instanceservice.DoCbnDescribeTransitRouterVpcAttachmentsRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	parts := strings.Split(d.Id(), ":")
 	attachment_id := parts[2]
+	var found bool
 	for _, v := range response.TransitRouterAttachments {
 		if v.TransitRouterAttachmentId == attachment_id {
+			found = true
 			d.Set("transit_router_id", v.TransitRouterId)
 			d.Set("transit_router_attachment_id", v.TransitRouterAttachmentId)
 			d.Set("vpc_id", v.VpcId)
@@ -298,10 +307,14 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentRead(d *schema.Resour
 				})
 			}
 			d.Set("zone_mappings", zone_mappings)
-			break
+			return nil
 		}
 	}
 
+	if !found {
+		// ListTransitRouterVpcAttachments 已按 TransitRouterAttachmentId 精确过滤，未命中即资源已不存在
+		d.SetId("")
+	}
 	return nil
 }
 
@@ -457,15 +470,9 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentDelete(d *schema.Reso
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", "DeleteTransitRouterVpcAttachment", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	for i := 0; i < 40; i++ {
-		response, err := cencen_instanceservice.DoCbnDescribeTransitRouterVpcAttachmentsRequest(d.Id())
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		if len(response.TransitRouterAttachments) == 0 {
-			break
-		}
-		time.Sleep(3 * time.Second)
+	err = cencen_instanceservice.WaitForAttachmentInstance(d.Id(), Deleted, d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return errmsgs.WrapErrorf(err, "TransitRouterVpcAttachment %s is still Detaching after %s, manual intervention required", attach_ment_id, d.Timeout(schema.TimeoutDelete))
 	}
 	return nil
 }
