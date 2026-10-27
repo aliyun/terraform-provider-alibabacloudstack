@@ -141,7 +141,7 @@ func TestAccAlibabacloudStackHologramInstance_readOnly(t *testing.T) {
 }
 
 func resourceHologramInstanceDependence(name string) string {
-	return fmt.Sprintf(`
+	return fmt.Sprintf(DataZoneCommonTestCase+`
 variable "name" {
 	default = "%v"
 }
@@ -166,7 +166,7 @@ data "alibabacloudstack_hologram_clusters" "default" {
 }
 
 func resourceHologramReadOnlyInstanceDependence(name string) string {
-	return fmt.Sprintf(`
+	return fmt.Sprintf(DataZoneCommonTestCase+`
 variable "name" {
 	default = "%v"
 }
