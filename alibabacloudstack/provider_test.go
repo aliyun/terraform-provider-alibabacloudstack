@@ -569,8 +569,10 @@ func testAccPreCheckPhysicalConnection(t *testing.T) {
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	action := "DescribePhysicalConnections"
+	// PageSize is left to the server default: this API rejects values above 50
+	// with InvalidParameter, and the precheck only needs to know whether at least
+	// one physical connection is visible, so one page is always enough.
 	request := map[string]interface{}{
-		"PageSize":   100,
 		"PageNumber": 1,
 	}
 	response, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
