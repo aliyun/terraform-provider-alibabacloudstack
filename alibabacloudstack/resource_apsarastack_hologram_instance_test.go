@@ -141,47 +141,27 @@ func TestAccAlibabacloudStackHologramInstance_readOnly(t *testing.T) {
 }
 
 func resourceHologramInstanceDependence(name string) string {
-	return fmt.Sprintf(DataZoneCommonTestCase+`
+	return fmt.Sprintf(`
 variable "name" {
 	default = "%v"
 }
 
-resource "alibabacloudstack_vpc_vpc" "default" {
-  vpc_name = "${var.name}_vpc"
-  cidr_block = "172.16.0.0/16"
-}
-
-resource "alibabacloudstack_vpc_vswitch" "default" {
-  vswitch_name = "${var.name}_vsw"
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  cidr_block = "172.16.1.0/24"
-  zone_id = "cn-wulan-env2g1-amtest2001-a"
-}
+%s
 
 data "alibabacloudstack_hologram_clusters" "default" {
   zone_id = sort(data.alibabacloudstack_zones.default.ids)[0]
 }
 
-`, name)
+`, name, VSwitchCommonTestCase)
 }
 
 func resourceHologramReadOnlyInstanceDependence(name string) string {
-	return fmt.Sprintf(DataZoneCommonTestCase+`
+	return fmt.Sprintf(`
 variable "name" {
 	default = "%v"
 }
 
-resource "alibabacloudstack_vpc_vpc" "default" {
-  vpc_name = "${var.name}_vpc"
-  cidr_block = "172.16.0.0/16"
-}
-
-resource "alibabacloudstack_vpc_vswitch" "default" {
-  vswitch_name = "${var.name}_vsw"
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  cidr_block = "172.16.1.0/24"
-  zone_id = "cn-wulan-env2g1-amtest2001-a"
-}
+%s
 
 data "alibabacloudstack_hologram_clusters" "default" {
   zone_id = sort(data.alibabacloudstack_zones.default.ids)[0]
@@ -200,5 +180,5 @@ resource "alibabacloudstack_hologram_instance" "standard" {
 }
 
 
-`, name)
+`, name, VSwitchCommonTestCase)
 }
