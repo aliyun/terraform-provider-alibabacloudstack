@@ -1038,6 +1038,12 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 			return resource.RetryableError(err), retryTimes
 		}
 
+		// IdempotentParameterMismatch: regenerate ClientToken on retry
+		if errmsgs.IsExpectedErrors(err, "IdempotentParameterMismatch") && retryTimes > 0 {
+			retryTimes--
+			return resource.RetryableError(err), retryTimes
+		}
+
 		// Timeout or transient errors
 		if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, errmsgs.Throttling, errmsgs.LogClientTimeout, "ONS_SYSTEM_FLOW_CONTROL", "LockTimeout", "RequestTimeout", "asapi.server.timeout.socket") {
 			return resource.RetryableError(err), retryTimes
@@ -1112,7 +1118,6 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 		}
 	}
 	query["Product"] = popcode
-	query["ClientToken"] = buildClientToken(popcode, version, apiname)
 
 	var protocol string
 	if strings.ToLower(client.Config.Protocol) == "https" {
@@ -1144,6 +1149,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	retryTimes := 3
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+		query["ClientToken"] = buildClientToken(popcode, version, apiname)
 
 		var err error
 		// conn must be initialized before each request, as DoRequest will modify the content of conn, which will cause the configuration of conn to be invalid for the next request
@@ -1252,7 +1258,6 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		// remove in 3.21.0
 		request.QueryParams["AccountInfo"] = client.GetAccountInfo()
 	}
-	request.QueryParams["ClientToken"] = buildClientToken(request.Product, request.Version, request.ApiName)
 	if strings.HasPrefix(domain, "internal.asapi.") || strings.HasPrefix(domain, "public.asapi.") {
 		// asapi compatibility logic
 		// # asapi When using common SDK, pathpattern cannot be concatenated, otherwise an error will be reported
@@ -1297,6 +1302,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	retryTimes := 3
 	resource.Retry(5*time.Minute, func() *resource.RetryError {
+		request.QueryParams["ClientToken"] = buildClientToken(request.Product, request.Version, request.ApiName)
 		conn, connErr := client.WithProductSDKClient(popcode)
 		if connErr != nil {
 			return resource.NonRetryableError(connErr)

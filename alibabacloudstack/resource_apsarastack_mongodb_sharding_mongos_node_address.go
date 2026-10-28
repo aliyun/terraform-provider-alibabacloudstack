@@ -77,8 +77,8 @@ func resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddress() *schema
 
 	resource.CustomizeDiff = func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 		nodeId := d.Get("node_id").(string)
-		if !strings.HasPrefix(nodeId, "s-") {
-			return fmt.Errorf("node %s is not a mongos node", nodeId)
+		if nodeId == "" {
+			return fmt.Errorf("node_id is required")
 		}
 
 		if !d.Get("enable_private_connection").(bool) {
