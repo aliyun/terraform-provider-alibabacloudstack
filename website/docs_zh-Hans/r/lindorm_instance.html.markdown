@@ -86,7 +86,6 @@ resource "alibabacloudstack_lindorm_instance" "example" {
   engine_type        = "lindorm"
   instance_type      = "lindorm.g1.2c8g"
   core_spec          = "lindorm.g1.2c2g"
-  local_disk_spec    = "LV"
   vpc_id             = "${alibabacloudstack_vpc_vpc.default.id}"
   vswitch_id         = "${alibabacloudstack_vpc_vswitch.default.id}"
   standby_zone_id    = "<standby_zone_id>"
@@ -114,7 +113,6 @@ resource "alibabacloudstack_lindorm_instance" "example" {
 * `standby_zone_id` - （可选，变更时强制重建）备可用区ID。设置后实例以多可用区模式部署，`topology_type` 自动为 `multizone`。必须与 `standby_vswitch_id` 同时设置。
 * `standby_vswitch_id` - （可选，变更时强制重建）备可用区交换机ID。必须与 `standby_zone_id` 同时设置。
 * `core_spec` - （可选，变更时强制重建）实例的Core规格。
-* `local_disk_spec` - （可选，变更时强制重建）实例的本地磁盘规格。取值为 `mini` 时，`local_disk_size` 最小为 100。
 * `deletion_protection` - （可选）是否启用了删除保护。
 
 ## 属性参考

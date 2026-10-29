@@ -85,7 +85,6 @@ resource "alibabacloudstack_lindorm_instance" "example" {
   engine_type        = "lindorm"
   instance_type      = "lindorm.g1.2c8g"
   core_spec          = "lindorm.g1.2c2g"
-  local_disk_spec    = "LV"
   vpc_id             = "${alibabacloudstack_vpc_vpc.default.id}"
   vswitch_id         = "${alibabacloudstack_vpc_vswitch.default.id}"
   standby_zone_id    = "<standby_zone_id>"
@@ -113,7 +112,6 @@ The following arguments are supported:
 * `standby_zone_id` - (Optional, ForceNew) The standby zone ID. When specified, the instance is deployed in multi-zone mode and `topology_type` is automatically set to `multizone`. Must be specified together with `standby_vswitch_id`.
 * `standby_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the standby zone. Must be specified together with `standby_zone_id`.
 * `core_spec` - (Optional, ForceNew) The core specification of the instance.
-* `local_disk_spec` - (Optional, ForceNew) The local disk specification of the instance. When set to `mini`, `local_disk_size` must be at least 100.
 * `deletion_protection` - (Optional) Indicates whether deletion protection is enabled.
 
 ## Attributes Reference
