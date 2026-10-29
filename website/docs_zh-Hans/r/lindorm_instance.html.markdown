@@ -47,6 +47,7 @@ resource "alibabacloudstack_lindorm_instance" "example" {
   vpc_id          = "${alibabacloudstack_vpc_vpc.default.id}"
   vswitch_id      = "${alibabacloudstack_vpc_vswitch.default.id}"
   lindorm_num     = 2
+  local_disk_num  = 2
   local_disk_size = 400
 }
 ```
@@ -106,8 +107,9 @@ resource "alibabacloudstack_lindorm_instance" "example" {
 * `instance_type` - （必需）实例规格。
 * `vpc_id` - （必需，变更时强制重建）部署实例的专有网络ID。
 * `vswitch_id` - （必需，变更时强制重建）与指定专有网络关联的交换机ID。
-* `lindorm_num` - （必需）Lindorm节点数量。
+* `lindorm_num` - （必需）Lindorm节点数量。最小值：2，由服务端强校验。
 * `local_disk_size` - （必需，变更时强制重建）本地磁盘大小。单位：GiB。取值范围：100到5000。
+* `local_disk_num` - （可选）单节点本地磁盘数量。取值范围：1到10。默认值：1。仅当 `disk_category` 为 `HDD` 或 `SSD` 时生效；`disk_category` 为 `LV` 时单节点磁盘数由服务端固定为1。
 * `standby_zone_id` - （可选，变更时强制重建）备可用区ID。设置后实例以多可用区模式部署，`topology_type` 自动为 `multizone`。必须与 `standby_vswitch_id` 同时设置。
 * `standby_vswitch_id` - （可选，变更时强制重建）备可用区交换机ID。必须与 `standby_zone_id` 同时设置。
 * `core_spec` - （可选，变更时强制重建）实例的Core规格。

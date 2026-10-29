@@ -46,6 +46,7 @@ resource "alibabacloudstack_lindorm_instance" "example" {
   vpc_id          = "${alibabacloudstack_vpc_vpc.default.id}"
   vswitch_id      = "${alibabacloudstack_vpc_vswitch.default.id}"
   lindorm_num     = 2
+  local_disk_num  = 2
   local_disk_size = 400
 }
 ```
@@ -105,8 +106,9 @@ The following arguments are supported:
 * `instance_type` - (Required) The specification of the instance.
 * `vpc_id` - (Required, ForceNew) The ID of the VPC where you want to deploy the instance.
 * `vswitch_id` - (Required, ForceNew) The ID of the vSwitch that is associated with the specified VPC.
-* `lindorm_num` - (Required) The number of Lindorm nodes.
+* `lindorm_num` - (Required) The number of Lindorm nodes. Minimum value: 2, which is enforced by the server.
 * `local_disk_size` - (Required, ForceNew) The size of the local disk. Unit: GiB. Valid values: 100 to 5000.
+* `local_disk_num` - (Optional) The number of local disks per node. Valid values: 1 to 10. Default value: 1. Takes effect only when `disk_category` is `HDD` or `SSD`; when `disk_category` is `LV`, the number of disks per node is fixed to 1 by the server.
 * `standby_zone_id` - (Optional, ForceNew) The standby zone ID. When specified, the instance is deployed in multi-zone mode and `topology_type` is automatically set to `multizone`. Must be specified together with `standby_vswitch_id`.
 * `standby_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the standby zone. Must be specified together with `standby_zone_id`.
 * `core_spec` - (Optional, ForceNew) The core specification of the instance.
