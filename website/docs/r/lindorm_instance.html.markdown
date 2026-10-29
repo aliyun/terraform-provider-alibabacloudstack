@@ -25,31 +25,74 @@ data "alibabacloudstack_zones" "default" {
 }
 
 resource "alibabacloudstack_vpc_vpc" "default" {
-  vpc_name = "${var.name}_vpc"
+  vpc_name   = "${var.name}_vpc"
   cidr_block = "172.16.0.0/16"
 }
 
 resource "alibabacloudstack_vpc_vswitch" "default" {
-  description     = "modify_description"
-  vswitch_name   = "tf-testaccvpcvswitch97984"
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  vpc_id         = "${alibabacloudstack_vpc_vpc.default.id}"
-  cidr_block     = "172.16.0.0/24"
-  enable_ipv6    = true
+  vswitch_name = "${var.name}_vsw"
+  zone_id      = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  vpc_id       = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block   = "172.16.0.0/24"
 }
 
 resource "alibabacloudstack_lindorm_instance" "example" {
-  zone_id               = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  instance_alias        = "${var.name}"
-  cpu_brand             = "Intel"
-  disk_category         = "HHD"
-  engine_type           = "tsdb"
-  instance_type         = "lindorm.c.xlarge"
-  vpc_id                = "${alibabacloudstack_vpc_vpc.default.id}"
-  vswitch_id            = "${alibabacloudstack_vpc_vswitch.default.id}"
-  lindorm_num           = 2
-  local_disk_num        = 2
-  local_disk_size       = "400"
+  zone_id         = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  instance_alias  = "${var.name}"
+  cpu_brand       = "Intel"
+  disk_category   = "HDD"
+  engine_type     = "lindorm"
+  instance_type   = "lindorm.c.xlarge"
+  vpc_id          = "${alibabacloudstack_vpc_vpc.default.id}"
+  vswitch_id      = "${alibabacloudstack_vpc_vswitch.default.id}"
+  lindorm_num     = 2
+  local_disk_num  = 2
+  local_disk_size = "400"
+}
+```
+
+### Multi-Zone Usage
+
+```terraform
+variable "name" {
+  default = "tf-testacc-mz"
+}
+
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name   = "${var.name}_vpc"
+  cidr_block = "10.0.0.0/16"
+}
+
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  vswitch_name = "${var.name}_vsw"
+  vpc_id       = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block   = "10.0.1.0/24"
+  zone_id      = "<primary_zone_id>"
+}
+
+resource "alibabacloudstack_vpc_vswitch" "standby" {
+  vswitch_name = "${var.name}_vsw_standby"
+  vpc_id       = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block   = "10.0.2.0/24"
+  zone_id      = "<standby_zone_id>"
+}
+
+resource "alibabacloudstack_lindorm_instance" "example" {
+  zone_id            = "<primary_zone_id>"
+  instance_alias     = "${var.name}"
+  cpu_brand          = "Intel"
+  disk_category      = "LV"
+  engine_type        = "lindorm"
+  instance_type      = "lindorm.g1.2c8g"
+  core_spec          = "lindorm.g1.2c2g"
+  local_disk_spec    = "LV"
+  vpc_id             = "${alibabacloudstack_vpc_vpc.default.id}"
+  vswitch_id         = "${alibabacloudstack_vpc_vswitch.default.id}"
+  topology_type      = "multizone"
+  standby_zone_id    = "<standby_zone_id>"
+  standby_vswitch_id = "${alibabacloudstack_vpc_vswitch.standby.id}"
+  lindorm_num        = 3
+  local_disk_size    = "450"
 }
 ```
 
@@ -70,9 +113,9 @@ The following arguments are supported:
 * `local_disk_size` - (Required, ForceNew) The size of the local disk. Unit: GiB.
 * `topology_type` - (Optional, ForceNew) The topology type of the instance. Valid values: `1azone` (default), `multizone`.
 * `standby_zone_id` - (Optional, ForceNew) The standby zone ID, required when `topology_type` is `multizone`.
-* `arbiter_zone_id` - (Optional, ForceNew) The arbiter zone ID, required when `topology_type` is `multizone`.
 * `standby_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the standby zone.
-* `arbiter_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the arbiter zone.
+* `core_spec` - (Optional, ForceNew) The core specification of the instance.
+* `local_disk_spec` - (Optional, ForceNew) The local disk specification of the instance.
 * `deletion_protection` - (Optional) Indicates whether deletion protection is enabled.
 
 ## Attributes Reference
@@ -90,12 +133,11 @@ The following attributes are exported:
 * `switch_ssl_encryption_flag` - Indicates whether SSL encryption is enabled.
 * `ali_uid` - The UID of the Alibaba Cloud account.
 * `arch_version` - The architecture version of the instance.
-* `topology_type` - The topology type of the instance.
 
 ## Import
 
 Lindorm instance can be imported using the id, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_lindorm_instance.example li-12345678
+$ terraform import alibabacloudstack_lindorm_instance.example <id>
 ```
