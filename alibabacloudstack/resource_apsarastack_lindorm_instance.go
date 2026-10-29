@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -13,8 +14,9 @@ import (
 func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Minute),
-			Update: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(90 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
@@ -85,6 +87,16 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 			"lindorm_num": {
 				Type:     schema.TypeInt,
 				Required: true,
+			},
+			"core_spec": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"local_disk_spec": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"local_disk_num": {
 				Type:         schema.TypeInt,
@@ -159,7 +171,17 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
 	request := make(map[string]interface{})
-	request["TopologyType"] = d.Get("topology_type")
+	if d.Get("topology_type").(string) == "multizone" {
+		request["ClusterType"] = "lindorm_dual_zone"
+		if v, ok := d.GetOk("standby_zone_id"); ok {
+			request["Idc2ZoneId"] = v
+		}
+		if v, ok := d.GetOk("standby_vswitch_id"); ok {
+			request["Idc2VswitchId"] = v
+		}
+	} else {
+		request["ClusterType"] = "lindorm_single_zone"
+	}
 	request["ZoneId"] = d.Get("zone_id")
 	request["InstanceAlias"] = d.Get("instance_alias")
 	request["CpuBrand"] = d.Get("cpu_brand")
@@ -169,20 +191,26 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	request["VPCId"] = d.Get("vpc_id")
 	request["VSwitchId"] = d.Get("vswitch_id")
 	request["LindormNum"] = d.Get("lindorm_num")
-	request["LocalDiskSize"] = d.Get("local_disk_size")
+	if v, ok := d.GetOk("core_spec"); ok {
+		request["CoreSpec"] = v
+	}
+	if v, ok := d.GetOk("local_disk_spec"); ok {
+		request["LocalDiskSpecs"] = []map[string]string{{"SpecName": v.(string)}}
+	}
+	diskCategory := d.Get("disk_category").(string)
+	if sizeStr, ok := d.Get("local_disk_size").(string); ok && sizeStr != "" {
+		if size, err := strconv.Atoi(sizeStr); err == nil {
+			request["CoreDiskSize"] = size
+			request["CoreSingleStorage"] = size
+		}
+		if diskCategory == "SSD" || diskCategory == "HDD" {
+			request["InstanceStorage"] = sizeStr
+			if size, err := strconv.Atoi(sizeStr); err == nil {
+				request["LocalDiskSize"] = size
+			}
+		}
+	}
 	request["LocalDiskNum"] = d.Get("local_disk_num")
-	if v, ok := d.GetOk("standby_zone_id"); ok {
-		request["StandbyZoneId"] = v
-	}
-	if v, ok := d.GetOk("arbiter_zone_id"); ok {
-		request["ArbiterZoneId"] = v
-	}
-	if v, ok := d.GetOk("standby_vswitch_id"); ok {
-		request["StandbyVSwitchId"] = v
-	}
-	if v, ok := d.GetOk("arbiter_vswitch_id"); ok {
-		request["ArbiterVSwitchId"] = v
-	}
 	resp, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "CreateLindormInstance", "", nil, request, nil)
 	if err != nil {
 		return err
@@ -236,13 +264,16 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 			d.Set("engine_type", serviceType)
 		}
 	}
-	d.Set("standby_zone_id", data["StandbyZoneId"])
-	d.Set("arbiter_zone_id", data["ArbiterZoneId"])
-	d.Set("standby_vswitch_id", data["StandbyVSwitchId"])
-	d.Set("arbiter_vswitch_id", data["ArbiterVSwitchId"])
-	if archVer, ok := data["ArchVersion"].(string); ok {
-		d.Set("arch_version", archVer)
-		if archVer == "2.0" {
+	d.Set("standby_zone_id", data["Idc2ZoneId"])
+	d.Set("standby_vswitch_id", data["Idc2VswitchId"])
+	if clusterType, ok := data["ClusterType"].(string); ok {
+		if clusterType == "lindorm_dual_zone" {
+			d.Set("topology_type", "multizone")
+		} else {
+			d.Set("topology_type", "1azone")
+		}
+	} else if serviceType, ok := data["ServiceType"].(string); ok {
+		if serviceType == "lindorm_multizone" {
 			d.Set("topology_type", "multizone")
 		} else {
 			d.Set("topology_type", "1azone")

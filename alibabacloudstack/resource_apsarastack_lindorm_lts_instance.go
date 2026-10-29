@@ -7,13 +7,15 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Minute),
-			Update: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(90 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
@@ -37,6 +39,43 @@ func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
 			"lts_num": {
 				Type:     schema.TypeInt,
 				Required: true,
+			},
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"vswitch_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"topology_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "1azone",
+				ValidateFunc: validation.StringInSlice([]string{"1azone", "multizone"}, false),
+			},
+			"standby_zone_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"arbiter_zone_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"standby_vswitch_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"arbiter_vswitch_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"deletion_protection": {
 				Type:     schema.TypeBool,
@@ -63,6 +102,10 @@ func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"arch_version": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 
@@ -80,12 +123,34 @@ func resourceAlibabacloudStackLindormLtsInstanceCreate(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
 	request := make(map[string]interface{})
+	request["TopologyType"] = d.Get("topology_type")
+	if d.Get("topology_type").(string) == "multizone" {
+		request["ArchVersion"] = "2.0"
+	}
 	request["ZoneId"] = d.Get("zone_id")
 	request["InstanceAlias"] = d.Get("instance_alias")
 	request["CpuBrand"] = d.Get("cpu_brand")
 	request["LtsSpec"] = d.Get("instance_type")
 	request["LtsNum"] = d.Get("lts_num")
 	request["ClusterType"] = "lindorm-for-lts"
+	if v, ok := d.GetOk("vpc_id"); ok {
+		request["VPCId"] = v
+	}
+	if v, ok := d.GetOk("vswitch_id"); ok {
+		request["VSwitchId"] = v
+	}
+	if v, ok := d.GetOk("standby_zone_id"); ok {
+		request["StandbyZoneId"] = v
+	}
+	if v, ok := d.GetOk("arbiter_zone_id"); ok {
+		request["ArbiterZoneId"] = v
+	}
+	if v, ok := d.GetOk("standby_vswitch_id"); ok {
+		request["StandbyVSwitchId"] = v
+	}
+	if v, ok := d.GetOk("arbiter_vswitch_id"); ok {
+		request["ArbiterVSwitchId"] = v
+	}
 	resp, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "CreateLindormInstance", "", nil, request, nil)
 	if err != nil {
 		return err
@@ -123,8 +188,22 @@ func resourceAlibabacloudStackLindormLtsInstanceRead(d *schema.ResourceData, met
 	d.Set("create_time", data["CreateTime"])
 	d.Set("deletion_protection", data["DeletionProtection"])
 	d.Set("cpu_brand", data["CpuBrand"])
+	d.Set("vpc_id", data["VpcId"])
+	d.Set("vswitch_id", data["VswitchId"])
+	d.Set("standby_zone_id", data["StandbyZoneId"])
+	d.Set("arbiter_zone_id", data["ArbiterZoneId"])
+	d.Set("standby_vswitch_id", data["StandbyVSwitchId"])
+	d.Set("arbiter_vswitch_id", data["ArbiterVSwitchId"])
 	d.Set("service_type", data["ServiceType"])
 	d.Set("network_type", data["NetworkType"])
+	if archVer, ok := data["ArchVersion"].(string); ok {
+		d.Set("arch_version", archVer)
+		if archVer == "2.0" {
+			d.Set("topology_type", "multizone")
+		} else {
+			d.Set("topology_type", "1azone")
+		}
+	}
 	engineList := data["EngineList"].([]interface{})
 	if len(engineList) > 0 {
 		engineData := engineList[0].(map[string]interface{})

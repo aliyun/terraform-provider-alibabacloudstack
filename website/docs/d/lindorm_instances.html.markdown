@@ -63,3 +63,9 @@ The following attributes are exported:
   * `service_type` - The service type of the instance.
   * `engine_type` - The engine type of the instance.
   * `ali_uid` - The UID of the Alibaba Cloud account.
+  * `topology_type` - The topology type of the instance.
+  * `arch_version` - The architecture version of the instance.
+  * `standby_zone_id` - The standby zone ID.
+  * `arbiter_zone_id` - The arbiter zone ID.
+  * `standby_vswitch_id` - The vSwitch ID in the standby zone.
+  * `arbiter_vswitch_id` - The vSwitch ID in the arbiter zone.

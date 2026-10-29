@@ -62,3 +62,9 @@ output "instance_ids" {
   * `service_type` - 实例的服务类型。
   * `engine_type` - 实例的引擎类型。
   * `ali_uid` - 阿里云账户的UID。
+  * `topology_type` - 实例的拓扑类型。
+  * `arch_version` - 实例的架构版本。
+  * `standby_zone_id` - 备可用区ID。
+  * `arbiter_zone_id` - 仲裁可用区ID。
+  * `standby_vswitch_id` - 备可用区交换机ID。
+  * `arbiter_vswitch_id` - 仲裁可用区交换机ID。

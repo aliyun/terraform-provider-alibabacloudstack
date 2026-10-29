@@ -68,6 +68,11 @@ The following arguments are supported:
 * `lindorm_num` - (Required) The number of Lindorm nodes.
 * `local_disk_num` - (Optional) The number of local disks. Valid values: 1 to 10. Default value: 1.
 * `local_disk_size` - (Required, ForceNew) The size of the local disk. Unit: GiB.
+* `topology_type` - (Optional, ForceNew) The topology type of the instance. Valid values: `1azone` (default), `multizone`.
+* `standby_zone_id` - (Optional, ForceNew) The standby zone ID, required when `topology_type` is `multizone`.
+* `arbiter_zone_id` - (Optional, ForceNew) The arbiter zone ID, required when `topology_type` is `multizone`.
+* `standby_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the standby zone.
+* `arbiter_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the arbiter zone.
 * `deletion_protection` - (Optional) Indicates whether deletion protection is enabled.
 
 ## Attributes Reference
@@ -84,6 +89,8 @@ The following attributes are exported:
 * `switch_l_proxy_flag` - Indicates whether the L_Proxy switch is enabled.
 * `switch_ssl_encryption_flag` - Indicates whether SSL encryption is enabled.
 * `ali_uid` - The UID of the Alibaba Cloud account.
+* `arch_version` - The architecture version of the instance.
+* `topology_type` - The topology type of the instance.
 
 ## Import
 

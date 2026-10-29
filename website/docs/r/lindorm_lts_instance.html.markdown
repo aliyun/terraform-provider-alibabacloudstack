@@ -47,9 +47,16 @@ The following arguments are supported:
 
 * `zone_id` - (Required, ForceNew) The zone ID of the instance.
 * `instance_alias` - (Required) The alias of the instance.
-* `cpu_brand` - (Required, ForceNew) The CPU brand. 
+* `cpu_brand` - (Required, ForceNew) The CPU brand.
 * `instance_type` - (Required) The specification of the instance.
 * `lts_num` - (Required) The number of LTS nodes.
+* `vpc_id` - (Optional, ForceNew) The ID of the VPC where you want to deploy the instance.
+* `vswitch_id` - (Optional, ForceNew) The ID of the vSwitch that is associated with the specified VPC.
+* `topology_type` - (Optional, ForceNew) The topology type of the instance. Valid values: `1azone` (default), `multizone`.
+* `standby_zone_id` - (Optional, ForceNew) The standby zone ID, required when `topology_type` is `multizone`.
+* `arbiter_zone_id` - (Optional, ForceNew) The arbiter zone ID, required when `topology_type` is `multizone`.
+* `standby_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the standby zone.
+* `arbiter_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the arbiter zone.
 * `deletion_protection` - (Optional, Computed) Specifies whether to enable deletion protection for the instance. Default value: `false`.
 
 ## Attributes Reference
@@ -62,6 +69,8 @@ The following attributes are exported:
 * `create_time` - The creation time of the instance.
 * `service_type` - The service type of the instance.
 * `network_type` - The network type of the instance.
+* `arch_version` - The architecture version of the instance.
+* `topology_type` - The topology type of the instance.
 
 ## Import
 

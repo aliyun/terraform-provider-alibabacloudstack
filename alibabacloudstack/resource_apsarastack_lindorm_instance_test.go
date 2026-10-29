@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -112,32 +113,30 @@ func TestAccAlibabacloudStackLindormInstance_multiZone(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"zone_id":             "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"instance_alias":      "${var.name}",
-					"cpu_brand":           "Intel",
-					"disk_category":       "HDD",
-					"local_disk_size":     "200",
-					"engine_type":         "lindorm",
-					"instance_type":       "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[0].name}",
-					"vpc_id":              "${alibabacloudstack_vpc_vpc.default.id}",
-					"vswitch_id":          "${alibabacloudstack_vpc_vswitch.default.id}",
-					"topology_type":       "multizone",
-					"standby_zone_id":     "${data.alibabacloudstack_zones.default.zones.1.id}",
-					"arbiter_zone_id":     "${data.alibabacloudstack_zones.default.zones.2.id}",
-					"standby_vswitch_id":  "${alibabacloudstack_vpc_vswitch.standby.id}",
-					"arbiter_vswitch_id":  "${alibabacloudstack_vpc_vswitch.arbiter.id}",
-					"lindorm_num":         2,
-					"deletion_protection": "true",
+					"zone_id":            "${local.zone_id_1}",
+					"instance_alias":     "${var.name}",
+					"cpu_brand":          "Intel",
+					"disk_category":      "LV",
+					"local_disk_size":    "450",
+					"engine_type":        "lindorm",
+					"instance_type":      "lindorm.g1.2c8g",
+					"core_spec":          "lindorm.g1.2c2g",
+					"local_disk_spec":    "LV",
+					"vpc_id":             "${alibabacloudstack_vpc_vpc.default.id}",
+					"vswitch_id":         "${alibabacloudstack_vpc_vswitch.default.id}",
+					"topology_type":      "multizone",
+					"standby_zone_id":    "${local.zone_id_2}",
+					"standby_vswitch_id": "${alibabacloudstack_vpc_vswitch.standby.id}",
+					"lindorm_num":        3,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"instance_alias":      name,
-						"cpu_brand":           "Intel",
-						"engine_type":         "lindorm",
-						"topology_type":       "multizone",
-						"lindorm_num":         "2",
-						"instance_status":     "ACTIVATION",
-						"deletion_protection": "true",
+						"instance_alias":  name,
+						"cpu_brand":       "Intel",
+						"engine_type":     "lindorm",
+						"topology_type":   "multizone",
+						"lindorm_num":     "3",
+						"instance_status": "ACTIVATION",
 					}),
 				),
 			},
@@ -145,7 +144,7 @@ func TestAccAlibabacloudStackLindormInstance_multiZone(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"disk_category", "local_disk_num", "local_disk_size", "topology_type", "arch_version"},
+				ImportStateVerifyIgnore: []string{"disk_category", "local_disk_num", "local_disk_size", "topology_type", "arch_version", "deletion_protection"},
 			},
 		},
 	})
@@ -168,6 +167,21 @@ data "alibabacloudstack_lindorm_instance_types" "sortbycpu" {
 }
 
 func LindormInstanceCommonTestCaseMultiZone(name string) string {
+	zone1 := os.Getenv("ALIBABACLOUDSTACK_LINDORM_MULTIZONE1")
+	zone2 := os.Getenv("ALIBABACLOUDSTACK_LINDORM_MULTIZONE2")
+
+	var zone1Expr, zone2Expr string
+	if zone1 != "" {
+		zone1Expr = fmt.Sprintf(`"%s"`, zone1)
+	} else {
+		zone1Expr = `data.alibabacloudstack_zones.default.zones[0].id`
+	}
+	if zone2 != "" {
+		zone2Expr = fmt.Sprintf(`"%s"`, zone2)
+	} else {
+		zone2Expr = `data.alibabacloudstack_zones.default.zones[1].id`
+	}
+
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"
@@ -180,11 +194,28 @@ data "alibabacloudstack_lindorm_instance_types" "sortbycpu" {
 
 %s
 
+locals {
+  zone_id_1 = %s
+  zone_id_2 = %s
+}
+
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  vswitch_name = "${var.name}_vsw"
+  vpc_id       = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block   = "172.16.1.0/24"
+  zone_id      = "${local.zone_id_1}"
+  lifecycle {
+      ignore_changes = [
+        tags
+      ]
+  }
+}
+
 resource "alibabacloudstack_vpc_vswitch" "standby" {
   vswitch_name = "${var.name}_vsw_standby"
   vpc_id       = "${alibabacloudstack_vpc_vpc.default.id}"
   cidr_block   = "172.16.2.0/24"
-  zone_id      = "${data.alibabacloudstack_zones.default.zones.1.id}"
+  zone_id      = "${local.zone_id_2}"
   lifecycle {
       ignore_changes = [
         tags
@@ -192,17 +223,5 @@ resource "alibabacloudstack_vpc_vswitch" "standby" {
   }
 }
 
-resource "alibabacloudstack_vpc_vswitch" "arbiter" {
-  vswitch_name = "${var.name}_vsw_arbiter"
-  vpc_id       = "${alibabacloudstack_vpc_vpc.default.id}"
-  cidr_block   = "172.16.3.0/24"
-  zone_id      = "${data.alibabacloudstack_zones.default.zones.2.id}"
-  lifecycle {
-      ignore_changes = [
-        tags
-      ]
-  }
-}
-
-`, name, VSwitchCommonTestCase)
+`, name, DataZoneCommonTestCase+VpcCommonTestCase, zone1Expr, zone2Expr)
 }

@@ -31,6 +31,11 @@ func (s *LindormService) LindormInstanceStateRefreshFunc(id string, failStates [
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
+			// Treat 403 Forbidden as a transient error during instance creation
+			// (likely due to permission sync delay), keep polling as CREATING
+			if errmsgs.IsExpectedErrors(err, "Forbidden", "Forbidden.RAM") {
+				return nil, "CREATING", nil
+			}
 			return nil, "", errmsgs.WrapError(err)
 		}
 		instanceStatus := object["InstanceStatus"].(string)

@@ -1020,7 +1020,7 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 
 	if err != nil {
 		// Auth or invalid action errors with retry budget
-		if errmsgs.IsExpectedErrors(err, "Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable", "UnknownError") && retryTimes > 0 {
+		if errmsgs.IsExpectedErrors(err, "Forbidden", "Forbidden.RAM", "InvalidAction.NotFound", "ServiceUnavailable", "UnknownError") && retryTimes > 0 {
 			retryTimes--
 			return resource.RetryableError(err), retryTimes
 		}
@@ -1045,7 +1045,7 @@ func requestErrorHandler(api string, response map[string]interface{}, err error,
 		}
 
 		// Timeout or transient errors
-		if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, errmsgs.Throttling, errmsgs.LogClientTimeout, "ONS_SYSTEM_FLOW_CONTROL", "LockTimeout", "RequestTimeout", "asapi.server.timeout.socket") {
+		if errmsgs.IsExpectedErrors(err, errmsgs.ThrottlingUser, errmsgs.Throttling, errmsgs.LogClientTimeout, "ONS_SYSTEM_FLOW_CONTROL", "LockTimeout", "RequestTimeout", "asapi.server.timeout.socket", "InvalidTimeStamp.Expired") {
 			return resource.RetryableError(err), retryTimes
 		}
 
