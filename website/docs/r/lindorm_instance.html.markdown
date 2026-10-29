@@ -106,7 +106,7 @@ The following arguments are supported:
 * `vpc_id` - (Required, ForceNew) The ID of the VPC where you want to deploy the instance.
 * `vswitch_id` - (Required, ForceNew) The ID of the vSwitch that is associated with the specified VPC.
 * `lindorm_num` - (Required) The number of Lindorm nodes.
-* `local_disk_size` - (Required, ForceNew) The size of the local disk. Unit: GiB.
+* `local_disk_size` - (Required, ForceNew) The size of the local disk. Unit: GiB. Valid values: 100 to 5000.
 * `standby_zone_id` - (Optional, ForceNew) The standby zone ID. When specified, the instance is deployed in multi-zone mode and `topology_type` is automatically set to `multizone`. Must be specified together with `standby_vswitch_id`.
 * `standby_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the standby zone. Must be specified together with `standby_zone_id`.
 * `core_spec` - (Optional, ForceNew) The core specification of the instance.
