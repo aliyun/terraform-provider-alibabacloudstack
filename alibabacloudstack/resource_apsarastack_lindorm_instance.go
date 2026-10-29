@@ -10,6 +10,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackLindormInstance() *schema.Resource {
@@ -84,9 +85,10 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 				ForceNew: true,
 			},
 			"local_disk_size": {
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(100, 5000),
 			},
 			"instance_id": {
 				Type:     schema.TypeString,
