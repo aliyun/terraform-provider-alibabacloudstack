@@ -170,16 +170,13 @@ func LindormInstanceCommonTestCaseMultiZone(name string) string {
 	zone1 := os.Getenv("ALIBABACLOUDSTACK_LINDORM_MULTIZONE1")
 	zone2 := os.Getenv("ALIBABACLOUDSTACK_LINDORM_MULTIZONE2")
 
-	var zone1Expr, zone2Expr string
+	zoneExpr1 := "data.alibabacloudstack_zones.default.zones[0].id"
+	zoneExpr2 := "data.alibabacloudstack_zones.default.zones[1].id"
 	if zone1 != "" {
-		zone1Expr = fmt.Sprintf(`"%s"`, zone1)
-	} else {
-		zone1Expr = `data.alibabacloudstack_zones.default.zones[0].id`
+		zoneExpr1 = fmt.Sprintf("%q", zone1)
 	}
 	if zone2 != "" {
-		zone2Expr = fmt.Sprintf(`"%s"`, zone2)
-	} else {
-		zone2Expr = `data.alibabacloudstack_zones.default.zones[1].id`
+		zoneExpr2 = fmt.Sprintf("%q", zone2)
 	}
 
 	return fmt.Sprintf(`
@@ -194,6 +191,17 @@ data "alibabacloudstack_lindorm_instance_types" "sortbycpu" {
 
 %s
 
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name = "${var.name}_vpc"
+  cidr_block = "10.0.0.0/16"
+  lifecycle {
+      ignore_changes = [
+		secondary_cidr_blocks,
+		tags,
+      ]
+  }
+}
+
 locals {
   zone_id_1 = %s
   zone_id_2 = %s
@@ -202,7 +210,7 @@ locals {
 resource "alibabacloudstack_vpc_vswitch" "default" {
   vswitch_name = "${var.name}_vsw"
   vpc_id       = "${alibabacloudstack_vpc_vpc.default.id}"
-  cidr_block   = "172.16.1.0/24"
+  cidr_block   = "10.0.1.0/24"
   zone_id      = "${local.zone_id_1}"
   lifecycle {
       ignore_changes = [
@@ -214,7 +222,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 resource "alibabacloudstack_vpc_vswitch" "standby" {
   vswitch_name = "${var.name}_vsw_standby"
   vpc_id       = "${alibabacloudstack_vpc_vpc.default.id}"
-  cidr_block   = "172.16.2.0/24"
+  cidr_block   = "10.0.2.0/24"
   zone_id      = "${local.zone_id_2}"
   lifecycle {
       ignore_changes = [
@@ -223,5 +231,5 @@ resource "alibabacloudstack_vpc_vswitch" "standby" {
   }
 }
 
-`, name, DataZoneCommonTestCase+VpcCommonTestCase, zone1Expr, zone2Expr)
+`, name, DataZoneCommonTestCase, zoneExpr1, zoneExpr2)
 }

@@ -2,11 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -14,9 +16,9 @@ import (
 func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(90 * time.Minute),
-			Update: schema.DefaultTimeout(30 * time.Minute),
-			Delete: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(60 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(40 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
@@ -58,28 +60,17 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 				ForceNew: true,
 			},
 			"topology_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "1azone",
-				ValidateFunc: validation.StringInSlice([]string{"1azone", "multizone"}, false),
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "1azone",
+				ForceNew: true,
 			},
 			"standby_zone_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"arbiter_zone_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"standby_vswitch_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"arbiter_vswitch_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -198,8 +189,13 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 		request["LocalDiskSpecs"] = []map[string]string{{"SpecName": v.(string)}}
 	}
 	diskCategory := d.Get("disk_category").(string)
+	localDiskNum := d.Get("local_disk_num").(int)
+	request["LocalDiskNum"] = localDiskNum
+
+	var storageSize int
 	if sizeStr, ok := d.Get("local_disk_size").(string); ok && sizeStr != "" {
 		if size, err := strconv.Atoi(sizeStr); err == nil {
+			storageSize = size
 			request["CoreDiskSize"] = size
 			request["CoreSingleStorage"] = size
 		}
@@ -210,7 +206,16 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 			}
 		}
 	}
-	request["LocalDiskNum"] = d.Get("local_disk_num")
+
+	// lindormStore.storage 参数
+	request["lindormStore"] = map[string]interface{}{
+		"storage": map[string]interface{}{
+			"diskNum":      localDiskNum,
+			"storageSize":  storageSize,
+			"storageClass": diskCategory,
+		},
+	}
+
 	resp, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "CreateLindormInstance", "", nil, request, nil)
 	if err != nil {
 		return err
@@ -221,7 +226,12 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	}
 	d.SetId(instanceId.(string))
 	// Wait for instance to be active
-	stateConf := BuildStateConf([]string{"CREATING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutCreate), 60*time.Second, lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"CREATE_FAILED"}))
+	// 测试框架中 d.Timeout 可能返回 0，需兜底
+	timeout := d.Timeout(schema.TimeoutCreate)
+	if timeout <= 0 {
+		timeout = 120 * time.Minute
+	}
+	stateConf := BuildStateConf([]string{"CREATING"}, []string{"ACTIVATION"}, timeout, 60*time.Second, lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"CREATE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return err
 	}
@@ -249,41 +259,44 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 	d.Set("vpc_id", data["VpcId"])
 	d.Set("vswitch_id", data["VswitchId"])
 	d.Set("instance_storage", data["InstanceStorage"])
-	d.Set("deletion_protection", data["DeletionProtection"])
+	// DeletionProtection 在实例创建初期可能不返回，nil 时不要覆盖 state，避免触发不必要的 Update
+	if v, ok := data["DeletionProtection"]; ok && v != nil {
+		d.Set("deletion_protection", v)
+	}
 	d.Set("disk_usage", data["DiskUsage"])
 	d.Set("enable_fs", data["EnableFS"])
 	d.Set("switch_l_proxy_flag", data["SwitchLProxyFlag"])
 	d.Set("switch_ssl_encryption_flag", data["SwitchSSLEncryptionFlag"])
 	d.Set("ali_uid", data["AliUid"])
 	d.Set("cpu_brand", data["CpuBrand"])
-	// d.Set("disk_category", data["DiskCategory"])
-	if serviceType, ok := data["ServiceType"].(string); ok {
-		if serviceType == "lindorm_multizone" {
-			d.Set("engine_type", "lindorm")
-		} else {
-			d.Set("engine_type", serviceType)
-		}
+	// DiskCategory 在响应中可能为空（如 LV 类型），不强制写入避免 diff
+	if v, ok := data["DiskCategory"]; ok && v != nil && v != "" {
+		d.Set("disk_category", v)
 	}
-	d.Set("standby_zone_id", data["Idc2ZoneId"])
-	d.Set("standby_vswitch_id", data["Idc2VswitchId"])
-	if clusterType, ok := data["ClusterType"].(string); ok {
-		if clusterType == "lindorm_dual_zone" {
-			d.Set("topology_type", "multizone")
-		} else {
-			d.Set("topology_type", "1azone")
-		}
-	} else if serviceType, ok := data["ServiceType"].(string); ok {
-		if serviceType == "lindorm_multizone" {
-			d.Set("topology_type", "multizone")
-		} else {
-			d.Set("topology_type", "1azone")
-		}
+	// ServiceType 在多可用区场景下返回 "lindorm_dual_zone"，需映射回用户配置的 "lindorm"
+	engineType := data["ServiceType"]
+	if v, ok := engineType.(string); ok && v == "lindorm_dual_zone" {
+		engineType = "lindorm"
 	}
+	d.Set("engine_type", engineType)
 	engineList := data["EngineList"].([]interface{})
 	if len(engineList) > 0 {
 		engineData := engineList[0].(map[string]interface{})
 		d.Set("lindorm_num", engineData["CoreCount"])
 		d.Set("instance_type", engineData["Specification"])
+	}
+	// 多可用区场景下 API 可能返回 CoreSpec 和 LocalDiskSpecs
+	if v, ok := data["CoreSpec"]; ok && v != nil && v != "" {
+		d.Set("core_spec", v)
+	}
+	if v, ok := data["LocalDiskSpecs"]; ok && v != nil {
+		if specs, ok := v.([]interface{}); ok && len(specs) > 0 {
+			if specMap, ok := specs[0].(map[string]interface{}); ok {
+				if specName, ok := specMap["SpecName"]; ok && specName != nil && specName != "" {
+					d.Set("local_disk_spec", specName)
+				}
+			}
+		}
 	}
 	return nil
 }
@@ -291,6 +304,12 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
+
+	// 新创建的资源不应触发 Update，避免实例后台初始化期间报 Instance.IsUpdating
+	if d.IsNewResource() {
+		return nil
+	}
+
 	if d.HasChanges("instance_alias", "deletion_protection") {
 		reqQuery := map[string]interface{}{
 			"InstanceId":         d.Id(),
@@ -298,20 +317,34 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 			"DeletionProtection": d.Get("deletion_protection"),
 		}
 
-		if _, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpdateLindormInstanceAttribute", "", nil, reqQuery, nil); err != nil {
+		// 实例激活后后台可能仍在变更，遇到 Instance.IsUpdating 时等待并重试
+		updateTimeout := d.Timeout(schema.TimeoutUpdate)
+		if updateTimeout <= 0 {
+			updateTimeout = 20 * time.Minute
+		}
+		wait := connectivity.IncrementalWait(3*time.Second, 3*time.Second)
+		err := resource.Retry(updateTimeout, func() *resource.RetryError {
+			_, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpdateLindormInstanceAttribute", "", nil, reqQuery, nil)
+			if err != nil {
+				if errmsgs.IsExpectedErrors(err, "Instance.IsUpdating") {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			return nil
+		})
+		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_lindorm_instance", "UpdateLindormInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
 		// Wait for the instance to be updated
-		stateConf := BuildStateConf([]string{"UPDATING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutUpdate), 3*time.Second,
+		stateConf := BuildStateConf([]string{"UPDATING"}, []string{"ACTIVATION"}, updateTimeout, 3*time.Second,
 			lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"FAILED"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-	}
-	if d.IsNewResource() {
-		return nil
 	}
 
 	if d.HasChanges("instance_type", "lindorm_num") {
@@ -372,6 +405,7 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 func resourceAlibabacloudStackLindormInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	lindormService := LindormService{client}
 	reqQuery := map[string]interface{}{
 		"InstanceId": d.Id(),
 	}
@@ -380,6 +414,21 @@ func resourceAlibabacloudStackLindormInstanceDelete(d *schema.ResourceData, meta
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "ReleaseLindormInstance", errmsgs.AlibabacloudStackSdkGoERROR, "")
 	}
+
+	// Wait for the instance to be deleted
+	deleteTimeout := d.Timeout(schema.TimeoutDelete)
+	if deleteTimeout <= 0 {
+		deleteTimeout = 20 * time.Minute
+	}
+	stateConf := BuildStateConf([]string{"ACTIVATION", "DELETING", "CREATING"}, []string{}, deleteTimeout, 10*time.Second,
+		lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+
+	// 等待底层网络资源（ENI 等）完全释放，避免 VSwitch/VPC 删除时 DependencyViolation
+	log.Printf("[INFO] Lindorm instance %s deleted, waiting 5 minutes for underlying resources to be released...", d.Id())
+	time.Sleep(5 * time.Minute)
 
 	return nil
 }
