@@ -55,6 +55,33 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"topology_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "1azone",
+				ValidateFunc: validation.StringInSlice([]string{"1azone", "multizone"}, false),
+			},
+			"standby_zone_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"arbiter_zone_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"standby_vswitch_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"arbiter_vswitch_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"lindorm_num": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -71,6 +98,10 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 				ForceNew: true,
 			},
 			"instance_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"arch_version": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -128,7 +159,7 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
 	request := make(map[string]interface{})
-	request["TopologyType"] = "1azone"
+	request["TopologyType"] = d.Get("topology_type")
 	request["ZoneId"] = d.Get("zone_id")
 	request["InstanceAlias"] = d.Get("instance_alias")
 	request["CpuBrand"] = d.Get("cpu_brand")
@@ -140,6 +171,18 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	request["LindormNum"] = d.Get("lindorm_num")
 	request["LocalDiskSize"] = d.Get("local_disk_size")
 	request["LocalDiskNum"] = d.Get("local_disk_num")
+	if v, ok := d.GetOk("standby_zone_id"); ok {
+		request["StandbyZoneId"] = v
+	}
+	if v, ok := d.GetOk("arbiter_zone_id"); ok {
+		request["ArbiterZoneId"] = v
+	}
+	if v, ok := d.GetOk("standby_vswitch_id"); ok {
+		request["StandbyVSwitchId"] = v
+	}
+	if v, ok := d.GetOk("arbiter_vswitch_id"); ok {
+		request["ArbiterVSwitchId"] = v
+	}
 	resp, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "CreateLindormInstance", "", nil, request, nil)
 	if err != nil {
 		return err
@@ -186,7 +229,25 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 	d.Set("ali_uid", data["AliUid"])
 	d.Set("cpu_brand", data["CpuBrand"])
 	// d.Set("disk_category", data["DiskCategory"])
-	d.Set("engine_type", data["ServiceType"])
+	if serviceType, ok := data["ServiceType"].(string); ok {
+		if serviceType == "lindorm_multizone" {
+			d.Set("engine_type", "lindorm")
+		} else {
+			d.Set("engine_type", serviceType)
+		}
+	}
+	d.Set("standby_zone_id", data["StandbyZoneId"])
+	d.Set("arbiter_zone_id", data["ArbiterZoneId"])
+	d.Set("standby_vswitch_id", data["StandbyVSwitchId"])
+	d.Set("arbiter_vswitch_id", data["ArbiterVSwitchId"])
+	if archVer, ok := data["ArchVersion"].(string); ok {
+		d.Set("arch_version", archVer)
+		if archVer == "2.0" {
+			d.Set("topology_type", "multizone")
+		} else {
+			d.Set("topology_type", "1azone")
+		}
+	}
 	engineList := data["EngineList"].([]interface{})
 	if len(engineList) > 0 {
 		engineData := engineList[0].(map[string]interface{})

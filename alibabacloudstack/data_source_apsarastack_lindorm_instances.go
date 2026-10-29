@@ -87,6 +87,30 @@ func dataSourceAlibabacloudStackLindormInstances() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"topology_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"arch_version": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"standby_zone_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"arbiter_zone_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"standby_vswitch_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"arbiter_vswitch_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -138,18 +162,30 @@ func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, met
 		}
 
 		i := map[string]interface{}{
-			"id":               data["InstanceId"],
-			"cpu_brand":        data["CpuBrand"],
-			"instance_storage": data["InstanceStorage"],
-			"zone_id":          data["ZoneId"],
-			"instance_id":      data["InstanceId"],
-			"create_time":      data["CreateTime"],
-			"ascm_create_user": data["AscmCreateUser"],
-			"instance_alias":   data["InstanceAlias"],
-			"network_type":     data["NetworkType"],
-			"service_type":     data["ServiceType"],
-			"engine_type":      data["EngineType"],
-			"ali_uid":          data["AliUid"],
+			"id":                 data["InstanceId"],
+			"cpu_brand":          data["CpuBrand"],
+			"instance_storage":   data["InstanceStorage"],
+			"zone_id":            data["ZoneId"],
+			"instance_id":        data["InstanceId"],
+			"create_time":        data["CreateTime"],
+			"ascm_create_user":   data["AscmCreateUser"],
+			"instance_alias":     data["InstanceAlias"],
+			"network_type":       data["NetworkType"],
+			"service_type":       data["ServiceType"],
+			"engine_type":        data["EngineType"],
+			"ali_uid":            data["AliUid"],
+			"standby_zone_id":    data["StandbyZoneId"],
+			"arbiter_zone_id":    data["ArbiterZoneId"],
+			"standby_vswitch_id": data["StandbyVSwitchId"],
+			"arbiter_vswitch_id": data["ArbiterVSwitchId"],
+		}
+		if archVer, ok := data["ArchVersion"].(string); ok {
+			i["arch_version"] = archVer
+			if archVer == "2.0" {
+				i["topology_type"] = "multizone"
+			} else {
+				i["topology_type"] = "1azone"
+			}
 		}
 
 		datas = append(datas, i)
