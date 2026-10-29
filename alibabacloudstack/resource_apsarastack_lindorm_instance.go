@@ -10,7 +10,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackLindormInstance() *schema.Resource {
@@ -83,12 +82,6 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-			},
-			"local_disk_num": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Default:      1,
-				ValidateFunc: validation.IntBetween(1, 10),
 			},
 			"local_disk_size": {
 				Type:     schema.TypeInt,
@@ -182,8 +175,6 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 		request["CoreSpec"] = v
 	}
 	diskCategory := d.Get("disk_category").(string)
-	localDiskNum := d.Get("local_disk_num").(int)
-	request["LocalDiskNum"] = localDiskNum
 
 	size := d.Get("local_disk_size").(int)
 	storageSize := size
@@ -197,7 +188,6 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	// lindormStore.storage 参数
 	request["lindormStore"] = map[string]interface{}{
 		"storage": map[string]interface{}{
-			"diskNum":      localDiskNum,
 			"storageSize":  storageSize,
 			"storageClass": diskCategory,
 		},

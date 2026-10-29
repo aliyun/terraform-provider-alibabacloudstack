@@ -83,7 +83,7 @@ func TestAccAlibabacloudStackLindormInstance_basic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"disk_category", "local_disk_num", "local_disk_size", "arch_version"},
+				ImportStateVerifyIgnore: []string{"disk_category", "local_disk_size", "arch_version"},
 			},
 		},
 	})
@@ -142,7 +142,7 @@ func TestAccAlibabacloudStackLindormInstance_multiZone(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"disk_category", "local_disk_num", "local_disk_size", "topology_type", "arch_version", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"disk_category", "local_disk_size", "topology_type", "arch_version", "deletion_protection"},
 			},
 		},
 	})
