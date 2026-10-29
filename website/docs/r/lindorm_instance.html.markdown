@@ -47,7 +47,7 @@ resource "alibabacloudstack_lindorm_instance" "example" {
   vswitch_id      = "${alibabacloudstack_vpc_vswitch.default.id}"
   lindorm_num     = 2
   local_disk_num  = 2
-  local_disk_size = "400"
+  local_disk_size = 400
 }
 ```
 
@@ -88,11 +88,10 @@ resource "alibabacloudstack_lindorm_instance" "example" {
   local_disk_spec    = "LV"
   vpc_id             = "${alibabacloudstack_vpc_vpc.default.id}"
   vswitch_id         = "${alibabacloudstack_vpc_vswitch.default.id}"
-  topology_type      = "multizone"
   standby_zone_id    = "<standby_zone_id>"
   standby_vswitch_id = "${alibabacloudstack_vpc_vswitch.standby.id}"
   lindorm_num        = 3
-  local_disk_size    = "450"
+  local_disk_size    = 450
 }
 ```
 
@@ -111,11 +110,10 @@ The following arguments are supported:
 * `lindorm_num` - (Required) The number of Lindorm nodes.
 * `local_disk_num` - (Optional) The number of local disks. Valid values: 1 to 10. Default value: 1.
 * `local_disk_size` - (Required, ForceNew) The size of the local disk. Unit: GiB.
-* `topology_type` - (Optional, ForceNew) The topology type of the instance. Valid values: `1azone` (default), `multizone`.
-* `standby_zone_id` - (Optional, ForceNew) The standby zone ID, required when `topology_type` is `multizone`.
-* `standby_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the standby zone.
+* `standby_zone_id` - (Optional, ForceNew) The standby zone ID. When specified, the instance is deployed in multi-zone mode and `topology_type` is automatically set to `multizone`. Must be specified together with `standby_vswitch_id`.
+* `standby_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the standby zone. Must be specified together with `standby_zone_id`.
 * `core_spec` - (Optional, ForceNew) The core specification of the instance.
-* `local_disk_spec` - (Optional, ForceNew) The local disk specification of the instance.
+* `local_disk_spec` - (Optional, ForceNew) The local disk specification of the instance. When set to `mini`, `local_disk_size` must be at least 100.
 * `deletion_protection` - (Optional) Indicates whether deletion protection is enabled.
 
 ## Attributes Reference
@@ -133,6 +131,7 @@ The following attributes are exported:
 * `switch_ssl_encryption_flag` - Indicates whether SSL encryption is enabled.
 * `ali_uid` - The UID of the Alibaba Cloud account.
 * `arch_version` - The architecture version of the instance.
+* `topology_type` - The topology type of the instance. Valid values: `1azone`, `multizone`. It is automatically determined by whether `standby_zone_id` is set.
 
 ## Import
 

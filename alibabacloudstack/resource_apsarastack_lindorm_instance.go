@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
@@ -19,6 +20,15 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 			Create: schema.DefaultTimeout(60 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(40 * time.Minute),
+		},
+		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+			// mini 规格的本地磁盘最小为 100GB
+			if spec, ok := d.GetOk("local_disk_spec"); ok && spec.(string) == "mini" {
+				if size, ok := d.GetOk("local_disk_size"); ok && size.(int) < 100 {
+					return fmt.Errorf("local_disk_size must be at least 100 when local_disk_spec is 'mini', got %d", size.(int))
+				}
+			}
+			return nil
 		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
@@ -61,19 +71,19 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 			},
 			"topology_type": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "1azone",
-				ForceNew: true,
+				Computed: true,
 			},
 			"standby_zone_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				RequiredWith: []string{"standby_vswitch_id"},
 			},
 			"standby_vswitch_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				RequiredWith: []string{"standby_zone_id"},
 			},
 			"lindorm_num": {
 				Type:     schema.TypeInt,
@@ -96,7 +106,7 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 				ValidateFunc: validation.IntBetween(1, 10),
 			},
 			"local_disk_size": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true,
 			},
@@ -162,13 +172,14 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
 	request := make(map[string]interface{})
-	if d.Get("topology_type").(string) == "multizone" {
+	// topology_type 不由用户填写，根据 standby_zone_id 是否设置自动判定拓扑类型
+	topologyType := "1azone"
+	if v, ok := d.GetOk("standby_zone_id"); ok && v.(string) != "" {
+		topologyType = "multizone"
 		request["ClusterType"] = "lindorm_dual_zone"
-		if v, ok := d.GetOk("standby_zone_id"); ok {
-			request["Idc2ZoneId"] = v
-		}
-		if v, ok := d.GetOk("standby_vswitch_id"); ok {
-			request["Idc2VswitchId"] = v
+		request["Idc2ZoneId"] = v
+		if sv, ok := d.GetOk("standby_vswitch_id"); ok {
+			request["Idc2VswitchId"] = sv
 		}
 	} else {
 		request["ClusterType"] = "lindorm_single_zone"
@@ -185,26 +196,17 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("core_spec"); ok {
 		request["CoreSpec"] = v
 	}
-	if v, ok := d.GetOk("local_disk_spec"); ok {
-		request["LocalDiskSpecs"] = []map[string]string{{"SpecName": v.(string)}}
-	}
 	diskCategory := d.Get("disk_category").(string)
 	localDiskNum := d.Get("local_disk_num").(int)
 	request["LocalDiskNum"] = localDiskNum
 
-	var storageSize int
-	if sizeStr, ok := d.Get("local_disk_size").(string); ok && sizeStr != "" {
-		if size, err := strconv.Atoi(sizeStr); err == nil {
-			storageSize = size
-			request["CoreDiskSize"] = size
-			request["CoreSingleStorage"] = size
-		}
-		if diskCategory == "SSD" || diskCategory == "HDD" {
-			request["InstanceStorage"] = sizeStr
-			if size, err := strconv.Atoi(sizeStr); err == nil {
-				request["LocalDiskSize"] = size
-			}
-		}
+	size := d.Get("local_disk_size").(int)
+	storageSize := size
+	request["CoreDiskSize"] = size
+	request["CoreSingleStorage"] = size
+	if diskCategory == "SSD" || diskCategory == "HDD" {
+		request["InstanceStorage"] = strconv.Itoa(size)
+		request["LocalDiskSize"] = size
 	}
 
 	// lindormStore.storage 参数
@@ -225,6 +227,7 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 		return errmsgs.Error(fmt.Sprintf("Create lindorm instance failed %#v", resp))
 	}
 	d.SetId(instanceId.(string))
+	d.Set("topology_type", topologyType)
 	// Wait for instance to be active
 	// 测试框架中 d.Timeout 可能返回 0，需兜底
 	timeout := d.Timeout(schema.TimeoutCreate)
@@ -279,6 +282,14 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 		engineType = "lindorm"
 	}
 	d.Set("engine_type", engineType)
+	if v, ok := data["ArchVersion"].(string); ok && v != "" {
+		d.Set("arch_version", v)
+	}
+	if sv, ok := data["ServiceType"].(string); ok && sv == "lindorm_dual_zone" {
+		d.Set("topology_type", "multizone")
+	} else {
+		d.Set("topology_type", "1azone")
+	}
 	engineList := data["EngineList"].([]interface{})
 	if len(engineList) > 0 {
 		engineData := engineList[0].(map[string]interface{})

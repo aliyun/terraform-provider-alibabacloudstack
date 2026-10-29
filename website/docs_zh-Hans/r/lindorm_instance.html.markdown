@@ -48,7 +48,7 @@ resource "alibabacloudstack_lindorm_instance" "example" {
   vswitch_id      = "${alibabacloudstack_vpc_vswitch.default.id}"
   lindorm_num     = 2
   local_disk_num  = 2
-  local_disk_size = "400"
+  local_disk_size = 400
 }
 ```
 
@@ -89,11 +89,10 @@ resource "alibabacloudstack_lindorm_instance" "example" {
   local_disk_spec    = "LV"
   vpc_id             = "${alibabacloudstack_vpc_vpc.default.id}"
   vswitch_id         = "${alibabacloudstack_vpc_vswitch.default.id}"
-  topology_type      = "multizone"
   standby_zone_id    = "<standby_zone_id>"
   standby_vswitch_id = "${alibabacloudstack_vpc_vswitch.standby.id}"
   lindorm_num        = 3
-  local_disk_size    = "450"
+  local_disk_size    = 450
 }
 ```
 
@@ -112,11 +111,10 @@ resource "alibabacloudstack_lindorm_instance" "example" {
 * `lindorm_num` - （必需）Lindorm节点数量。
 * `local_disk_num` - （可选）本地磁盘数量。取值范围：1到10。默认值：1。
 * `local_disk_size` - （必需，变更时强制重建）本地磁盘大小。单位：GiB。
-* `topology_type` - （可选，变更时强制重建）实例拓扑类型。可选值：`1azone`（默认值）、`multizone`。
-* `standby_zone_id` - （可选，变更时强制重建）备可用区ID，`topology_type` 为 `multizone` 时必填。
-* `standby_vswitch_id` - （可选，变更时强制重建）备可用区交换机ID。
+* `standby_zone_id` - （可选，变更时强制重建）备可用区ID。设置后实例以多可用区模式部署，`topology_type` 自动为 `multizone`。必须与 `standby_vswitch_id` 同时设置。
+* `standby_vswitch_id` - （可选，变更时强制重建）备可用区交换机ID。必须与 `standby_zone_id` 同时设置。
 * `core_spec` - （可选，变更时强制重建）实例的Core规格。
-* `local_disk_spec` - （可选，变更时强制重建）实例的本地磁盘规格。
+* `local_disk_spec` - （可选，变更时强制重建）实例的本地磁盘规格。取值为 `mini` 时，`local_disk_size` 最小为 100。
 * `deletion_protection` - （可选）是否启用了删除保护。
 
 ## 属性参考
@@ -134,6 +132,7 @@ resource "alibabacloudstack_lindorm_instance" "example" {
 * `switch_ssl_encryption_flag` - 是否启用了SSL加密。
 * `ali_uid` - 阿里云账户的UID。
 * `arch_version` - 实例的架构版本。
+* `topology_type` - 实例的拓扑类型。取值：`1azone`、`multizone`。由是否设置 `standby_zone_id` 自动判定。
 
 ## 导入
 

@@ -132,7 +132,6 @@ func TestAccAlibabacloudStackLindormLtsInstance_multiZone(t *testing.T) {
 					"instance_type":       "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[0].name}",
 					"vpc_id":              "${alibabacloudstack_vpc_vpc.default.id}",
 					"vswitch_id":          "${alibabacloudstack_vpc_vswitch.default.id}",
-					"topology_type":       "multizone",
 					"standby_zone_id":     "${data.alibabacloudstack_zones.default.zones.1.id}",
 					"arbiter_zone_id":     "${data.alibabacloudstack_zones.default.zones.2.id}",
 					"standby_vswitch_id":  "${alibabacloudstack_vpc_vswitch.standby.id}",

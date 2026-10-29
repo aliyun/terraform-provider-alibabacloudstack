@@ -7,7 +7,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
@@ -51,16 +50,14 @@ func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
 				ForceNew: true,
 			},
 			"topology_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"standby_zone_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      "1azone",
-				ValidateFunc: validation.StringInSlice([]string{"1azone", "multizone"}, false),
-			},
-			"standby_zone_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				RequiredWith: []string{"standby_vswitch_id"},
 			},
 			"arbiter_zone_id": {
 				Type:     schema.TypeString,
@@ -68,9 +65,10 @@ func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
 				ForceNew: true,
 			},
 			"standby_vswitch_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				RequiredWith: []string{"standby_zone_id"},
 			},
 			"arbiter_vswitch_id": {
 				Type:     schema.TypeString,
@@ -123,10 +121,13 @@ func resourceAlibabacloudStackLindormLtsInstanceCreate(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
 	request := make(map[string]interface{})
-	request["TopologyType"] = d.Get("topology_type")
-	if d.Get("topology_type").(string) == "multizone" {
+	// topology_type 不由用户填写，根据 standby_zone_id 是否设置自动判定拓扑类型
+	topologyType := "1azone"
+	if v, ok := d.GetOk("standby_zone_id"); ok && v.(string) != "" {
+		topologyType = "multizone"
 		request["ArchVersion"] = "2.0"
 	}
+	request["TopologyType"] = topologyType
 	request["ZoneId"] = d.Get("zone_id")
 	request["InstanceAlias"] = d.Get("instance_alias")
 	request["CpuBrand"] = d.Get("cpu_brand")
@@ -160,6 +161,7 @@ func resourceAlibabacloudStackLindormLtsInstanceCreate(d *schema.ResourceData, m
 		return errmsgs.Error(fmt.Sprintf("Create lindorm instance failed %#v", resp))
 	}
 	d.SetId(instanceId.(string))
+	d.Set("topology_type", topologyType)
 	// Wait for instance to be active
 	stateConf := BuildStateConf([]string{"CREATING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutCreate), 60*time.Second, lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"CREATE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
@@ -196,13 +198,13 @@ func resourceAlibabacloudStackLindormLtsInstanceRead(d *schema.ResourceData, met
 	d.Set("arbiter_vswitch_id", data["ArbiterVSwitchId"])
 	d.Set("service_type", data["ServiceType"])
 	d.Set("network_type", data["NetworkType"])
-	if archVer, ok := data["ArchVersion"].(string); ok {
+	if archVer, ok := data["ArchVersion"].(string); ok && archVer != "" {
 		d.Set("arch_version", archVer)
-		if archVer == "2.0" {
-			d.Set("topology_type", "multizone")
-		} else {
-			d.Set("topology_type", "1azone")
-		}
+	}
+	if archVer, ok := data["ArchVersion"].(string); ok && archVer == "2.0" {
+		d.Set("topology_type", "multizone")
+	} else {
+		d.Set("topology_type", "1azone")
 	}
 	engineList := data["EngineList"].([]interface{})
 	if len(engineList) > 0 {
