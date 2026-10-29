@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"strconv"
@@ -20,15 +19,6 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 			Create: schema.DefaultTimeout(60 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(40 * time.Minute),
-		},
-		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-			// mini 规格的本地磁盘最小为 100GB
-			if spec, ok := d.GetOk("local_disk_spec"); ok && spec.(string) == "mini" {
-				if size, ok := d.GetOk("local_disk_size"); ok && size.(int) < 100 {
-					return fmt.Errorf("local_disk_size must be at least 100 when local_disk_spec is 'mini', got %d", size.(int))
-				}
-			}
-			return nil
 		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
@@ -90,11 +80,6 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 				Required: true,
 			},
 			"core_spec": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"local_disk_spec": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -296,18 +281,9 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 		d.Set("lindorm_num", engineData["CoreCount"])
 		d.Set("instance_type", engineData["Specification"])
 	}
-	// 多可用区场景下 API 可能返回 CoreSpec 和 LocalDiskSpecs
+	// 多可用区场景下 API 可能返回 CoreSpec
 	if v, ok := data["CoreSpec"]; ok && v != nil && v != "" {
 		d.Set("core_spec", v)
-	}
-	if v, ok := data["LocalDiskSpecs"]; ok && v != nil {
-		if specs, ok := v.([]interface{}); ok && len(specs) > 0 {
-			if specMap, ok := specs[0].(map[string]interface{}); ok {
-				if specName, ok := specMap["SpecName"]; ok && specName != nil && specName != "" {
-					d.Set("local_disk_spec", specName)
-				}
-			}
-		}
 	}
 	return nil
 }
