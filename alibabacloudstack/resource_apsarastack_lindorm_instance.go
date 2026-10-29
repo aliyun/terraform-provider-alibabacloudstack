@@ -84,11 +84,21 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"local_disk_size": {
+			"local_disk_spec": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"local_disk_num": {
 				Type:         schema.TypeInt,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntBetween(100, 5000),
+				Optional:     true,
+				Default:      1,
+				ValidateFunc: validation.IntBetween(1, 10),
+			},
+			"local_disk_size": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -161,8 +171,6 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 		if sv, ok := d.GetOk("standby_vswitch_id"); ok {
 			request["Idc2VswitchId"] = sv
 		}
-	} else {
-		request["ClusterType"] = "lindorm_single_zone"
 	}
 	request["ZoneId"] = d.Get("zone_id")
 	request["InstanceAlias"] = d.Get("instance_alias")
@@ -176,20 +184,32 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("core_spec"); ok {
 		request["CoreSpec"] = v
 	}
+	if v, ok := d.GetOk("local_disk_spec"); ok {
+		request["LocalDiskSpecs"] = []map[string]string{{"SpecName": v.(string)}}
+	}
 	diskCategory := d.Get("disk_category").(string)
+	localDiskNum := d.Get("local_disk_num").(int)
+	request["LocalDiskNum"] = localDiskNum
 
-	size := d.Get("local_disk_size").(int)
-	storageSize := size
-	request["CoreDiskSize"] = size
-	request["CoreSingleStorage"] = size
-	if diskCategory == "SSD" || diskCategory == "HDD" {
-		request["InstanceStorage"] = strconv.Itoa(size)
-		request["LocalDiskSize"] = size
+	var storageSize int
+	if sizeStr, ok := d.Get("local_disk_size").(string); ok && sizeStr != "" {
+		if size, err := strconv.Atoi(sizeStr); err == nil {
+			storageSize = size
+			request["CoreDiskSize"] = size
+			request["CoreSingleStorage"] = size
+		}
+		if diskCategory == "SSD" || diskCategory == "HDD" {
+			request["InstanceStorage"] = sizeStr
+			if size, err := strconv.Atoi(sizeStr); err == nil {
+				request["LocalDiskSize"] = size
+			}
+		}
 	}
 
 	// lindormStore.storage 参数
 	request["lindormStore"] = map[string]interface{}{
 		"storage": map[string]interface{}{
+			"diskNum":      localDiskNum,
 			"storageSize":  storageSize,
 			"storageClass": diskCategory,
 		},
@@ -259,23 +279,24 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 		engineType = "lindorm"
 	}
 	d.Set("engine_type", engineType)
-	if v, ok := data["ArchVersion"].(string); ok && v != "" {
-		d.Set("arch_version", v)
-	}
-	if sv, ok := data["ServiceType"].(string); ok && sv == "lindorm_dual_zone" {
-		d.Set("topology_type", "multizone")
-	} else {
-		d.Set("topology_type", "1azone")
-	}
 	engineList := data["EngineList"].([]interface{})
 	if len(engineList) > 0 {
 		engineData := engineList[0].(map[string]interface{})
 		d.Set("lindorm_num", engineData["CoreCount"])
 		d.Set("instance_type", engineData["Specification"])
 	}
-	// 多可用区场景下 API 可能返回 CoreSpec
+	// 多可用区场景下 API 可能返回 CoreSpec 和 LocalDiskSpecs
 	if v, ok := data["CoreSpec"]; ok && v != nil && v != "" {
 		d.Set("core_spec", v)
+	}
+	if v, ok := data["LocalDiskSpecs"]; ok && v != nil {
+		if specs, ok := v.([]interface{}); ok && len(specs) > 0 {
+			if specMap, ok := specs[0].(map[string]interface{}); ok {
+				if specName, ok := specMap["SpecName"]; ok && specName != nil && specName != "" {
+					d.Set("local_disk_spec", specName)
+				}
+			}
+		}
 	}
 	return nil
 }
