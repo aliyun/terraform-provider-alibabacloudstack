@@ -279,11 +279,9 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
 
-	// 新创建的资源不应触发 Update，避免实例后台初始化期间报 Instance.IsUpdating
-	if d.IsNewResource() {
-		return nil
-	}
-
+	// DeletionProtection 不在 CreateLindormInstance 的入参中（已核对环境注册的 API XML），
+	// 只能由 UpdateLindormInstanceAttribute 设置；setResourceFunc 的包装器在 create 成功后会自动
+	// 调用本函数，因此该分支必须放在新建判定之前，否则用户新建时配置的 deletion_protection 会被丢弃。
 	if d.HasChanges("instance_alias", "deletion_protection") {
 		reqQuery := map[string]interface{}{
 			"InstanceId":         d.Id(),
@@ -319,6 +317,12 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
+	}
+
+	// 变配类接口只针对已存在的资源，新建后的首次自动调用必须跳过，
+	// 避免实例后台仍在初始化时报 Instance.IsUpdating
+	if d.IsNewResource() {
+		return nil
 	}
 
 	if d.HasChanges("instance_type", "lindorm_num") {
