@@ -6,10 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -109,14 +112,29 @@ func resourceAlibabacloudStackRdsBackupCreate(d *schema.ResourceData, meta inter
 
 	request.QueryParams["DBInstanceId"] = instanceId
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	// An initial automatic backup job is triggered shortly after the instance is created; a manual
+	// CreateBackup issued during that window is rejected with BackupJobExists, so keep retrying
+	// until the automatic job finishes.
+	var bresponse *responses.CommonResponse
+	var err error
+	retryErr := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		response, rerr := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), response, request, request.QueryParams)
+		if rerr != nil {
+			if response == nil {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(rerr, "Process Common Request Failed"))
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if strings.Contains(rerr.Error(), "BackupJobExists") || strings.Contains(errmsg, "BackupJobExists") {
+				return resource.RetryableError(errmsgs.WrapErrorf(rerr, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_backup", "CreateBackup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(rerr, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_backup", "CreateBackup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_backup", "CreateBackup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		bresponse = response
+		return nil
+	})
+	if retryErr != nil {
+		return errmsgs.WrapError(retryErr)
 	}
 	
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &rdsCreatebackupResponse)
