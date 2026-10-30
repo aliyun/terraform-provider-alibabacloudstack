@@ -1,11 +1,11 @@
 package alibabacloudstack
 
 import (
-	"slices"
 	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -27,7 +27,6 @@ type PolardbService struct {
 type PolardbCheckaccountnameavailableResponse struct {
 	RequestId string `json:"RequestId"`
 }
-
 
 type PolardbDescribeaccountsResponse struct {
 	Accounts struct {
@@ -92,7 +91,6 @@ func (s *PolardbService) DescribeDBAccount(id string) (*PolardbDescribeaccountsR
 
 	return PolardbDescribeaccountsResponse, nil
 }
-
 
 type PolardbDescribedatabasesResponse struct {
 	Databases struct {
@@ -900,8 +898,8 @@ func (s *PolardbService) PolardbDBInstanceStateRefreshFunc(d *schema.ResourceDat
 		}
 
 		if slices.Contains(failStates, object.Items.DBInstance[0].DBInstanceStatus) {
-				return object, object.Items.DBInstance[0].DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Items.DBInstance[0].DBInstanceStatus))
-			}
+			return object, object.Items.DBInstance[0].DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Items.DBInstance[0].DBInstanceStatus))
+		}
 		return object, object.Items.DBInstance[0].DBInstanceStatus, nil
 	}
 }
@@ -918,8 +916,8 @@ func (s *PolardbService) PolardbDBInstanceTdeStateRefreshFunc(d *schema.Resource
 		}
 
 		if slices.Contains(failStates, object["TDEStatus"].(string)) {
-				return object, object["TDEStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["TDEStatus"].(string)))
-			}
+			return object, object["TDEStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["TDEStatus"].(string)))
+		}
 		return object, object["TDEStatus"].(string), nil
 	}
 }
@@ -940,7 +938,6 @@ func (s *PolardbService) DescribeDBInstanceTDE(id string) (map[string]interface{
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &result)
 	return result, nil
 }
-
 
 func (s *PolardbService) DescribeDBInstanceSSL(id string) (map[string]interface{}, error) {
 	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceSSL", "")
@@ -1310,7 +1307,6 @@ func (s *PolardbService) DoPolardbDescribebackupsRequest(id string) (*Polardbbac
 
 	return nil, errmsgs.Error(errmsgs.NotFoundWithResponse, id)
 }
-
 
 func (s *PolardbService) SetInstanceTags(d *schema.ResourceData) error {
 	if d.HasChange("tags") {
@@ -1989,7 +1985,6 @@ func (s *PolardbService) PolardbClusterAccountStateRefreshFunc(id string, failSt
 	}
 }
 
-
 func (s *PolardbService) DescribePolardbClusterDatabase(id string) (map[string]interface{}, error) {
 	parts := strings.SplitN(id, ":", 2)
 	if len(parts) != 2 {
@@ -2163,5 +2158,163 @@ func (s *PolardbService) PolardbAccountStateRefreshFunc(id string, failStates []
 			}
 		}
 		return object, object.Accounts.DBInstanceAccount[0].AccountStatus, nil
+	}
+}
+
+// ---------------------------------------------------------------------------
+// PolarDB cluster edition backup (polardb / 2017-08-01, keyed by DBClusterId).
+// The cluster edition exposes another API version and another parameter set than the
+// primary/standby edition (polardb / 2024-01-30, keyed by DBInstanceId), which rejects
+// DBClusterId with MissingDBInstanceId, so these helpers are kept apart from the
+// DoPolardbDescribebackup* family above instead of sharing it.
+// ---------------------------------------------------------------------------
+
+// polardbClusterBackupTimeLayout is the only time format DescribeBackups of the cluster
+// edition accepts; a value carrying seconds is rejected with InvalidStartTime.Malformed.
+const polardbClusterBackupTimeLayout = "2006-01-02T15:04Z"
+
+const polardbClusterBackupPageSize = 100
+
+// polardbClusterBackupLookupWindow is how far back DescribeBackups is queried when a
+// single backup set has to be located by its id. DescribeBackups of the cluster edition
+// makes StartTime and EndTime mandatory and ignores the BackupId request parameter, so
+// the backup sets are listed over a wide window and matched client-side. A window of
+// several years is accepted by the service.
+var polardbClusterBackupLookupWindow = 730 * 24 * time.Hour
+
+type PolardbClusterBackupData struct {
+	BackupMethod    string `json:"BackupMethod"`
+	BackupsLevel    string `json:"BackupsLevel"`
+	BackupMode      string `json:"BackupMode"`
+	BackupId        string `json:"BackupId"`
+	DBClusterId     string `json:"DBClusterId"`
+	IsAvail         int    `json:"IsAvail"`
+	BackupSetSize   int    `json:"BackupSetSize"`
+	StoreStatus     string `json:"StoreStatus"`
+	BackupStartTime string `json:"BackupStartTime"`
+	BackupEndTime   string `json:"BackupEndTime"`
+	ConsistentTime  int    `json:"ConsistentTime"`
+	BackupType      string `json:"BackupType"`
+	BackupStatus    string `json:"BackupStatus"`
+}
+
+type PolardbClusterDescribebackupsResponse struct {
+	Items struct {
+		Backup []PolardbClusterBackupData `json:"Backup"`
+	} `json:"Items"`
+	TotalRecordCount int    `json:"TotalRecordCount"`
+	PageRecordCount  int    `json:"PageRecordCount"`
+	RequestId        string `json:"RequestId"`
+	PageNumber       int    `json:"PageNumber"`
+}
+
+// DoPolardbClusterDescribebackupsRequest lists every backup set of a cluster whose
+// BackupStartTime falls inside the [start_time, end_time] window, walking the pages.
+func (s *PolardbService) DoPolardbClusterDescribebackupsRequest(db_cluster_id, start_time, end_time string) ([]PolardbClusterBackupData, error) {
+	backups := make([]PolardbClusterBackupData, 0)
+	page_number := 1
+	for {
+		request := s.client.NewCommonRequest("GET", "polardb", "2017-08-01", "DescribeBackups", "")
+		request.QueryParams["DBClusterId"] = db_cluster_id
+		request.QueryParams["StartTime"] = start_time
+		request.QueryParams["EndTime"] = end_time
+		request.QueryParams["PageSize"] = strconv.Itoa(polardbClusterBackupPageSize)
+		request.QueryParams["PageNumber"] = strconv.Itoa(page_number)
+
+		bresponse, err := s.client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_cluster_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+
+		response := &PolardbClusterDescribebackupsResponse{}
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), response)
+		if err != nil {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+
+		backups = append(backups, response.Items.Backup...)
+		if len(response.Items.Backup) < polardbClusterBackupPageSize {
+			break
+		}
+		page_number += 1
+	}
+	return backups, nil
+}
+
+// DescribePolardbClusterBackups lists the backup sets of a cluster over the lookup
+// window, ending a day in the future so that a backup whose job is still running when
+// Terraform polls is picked up as soon as it is registered.
+func (s *PolardbService) DescribePolardbClusterBackups(db_cluster_id string) ([]PolardbClusterBackupData, error) {
+	now := time.Now().UTC()
+	start_time := now.Add(-polardbClusterBackupLookupWindow).Format(polardbClusterBackupTimeLayout)
+	end_time := now.AddDate(0, 0, 1).Format(polardbClusterBackupTimeLayout)
+	return s.DoPolardbClusterDescribebackupsRequest(db_cluster_id, start_time, end_time)
+}
+
+// DescribePolardbClusterBackup locates the backup set addressed by "db_cluster_id:backup_id".
+func (s *PolardbService) DescribePolardbClusterBackup(id string) (*PolardbClusterBackupData, error) {
+	param, err := ParseResourceId(id, 2)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_cluster_backup", "DescribeBackups", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	backups, err := s.DescribePolardbClusterBackups(param[0])
+	if err != nil {
+		return nil, err
+	}
+	for i, v := range backups {
+		if v.BackupId == param[1] {
+			return &backups[i], nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("PolarDB cluster backup %s not found", id))
+}
+
+// filterNewPolardbClusterBackups keeps the backup sets whose id was not seen before the
+// CreateBackup request, and returns the most recent one of them. More than one backup set
+// can show up while the manual backup runs, because the automatic backup policy of the
+// cluster may finish a job of its own; the newest start time is the manual backup.
+func filterNewPolardbClusterBackups(backups []PolardbClusterBackupData, before_ids []string) *PolardbClusterBackupData {
+	var newest *PolardbClusterBackupData
+	for i, v := range backups {
+		if slices.Contains(before_ids, v.BackupId) {
+			continue
+		}
+		if newest == nil || v.BackupStartTime > newest.BackupStartTime {
+			newest = &backups[i]
+		}
+	}
+	return newest
+}
+
+// PolardbClusterBackupStateRefreshFunc waits for the backup set triggered by CreateBackup.
+// The BackupJobId returned by CreateBackup belongs to another id space than the
+// BackupJobId of DescribeBackupTasks and the BackupId of the finished backup set, so the
+// new backup set is recognized by comparing against the backup sets listed beforehand.
+// Any BackupStatus which is not a failure state is reported as polardbClusterBackupPending
+// so that the waiter keeps polling instead of failing on an unlisted intermediate state.
+func (s *PolardbService) PolardbClusterBackupStateRefreshFunc(db_cluster_id string, before_ids []string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		backups, err := s.DescribePolardbClusterBackups(db_cluster_id)
+		if err != nil {
+			return nil, "", errmsgs.WrapError(err)
+		}
+		backup := filterNewPolardbClusterBackups(backups, before_ids)
+		if backup == nil {
+			// The backup set is registered only once the job has uploaded the data,
+			// so report it as pending rather than as not found.
+			return &PolardbClusterBackupData{}, polardbClusterBackupPending, nil
+		}
+		if slices.Contains(failStates, backup.BackupStatus) {
+			return backup, backup.BackupStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, backup.BackupStatus))
+		}
+		if backup.BackupStatus == polardbClusterBackupSuccess {
+			return backup, polardbClusterBackupSuccess, nil
+		}
+		return backup, polardbClusterBackupPending, nil
 	}
 }
