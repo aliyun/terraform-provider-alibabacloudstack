@@ -82,7 +82,7 @@ PolarDB cluster backups can be imported with `terraform import` using the `db_cl
 format, separated by a colon:
 
 ```
-$ terraform import alibabacloudstack_polardb_cluster_backup.default pc-qj0jt53b6trb0443y:1793345712
+$ terraform import alibabacloudstack_polardb_cluster_backup.default pc-abc0abc0abc0abc00:1793345712
 ```
 
 ## Notes
