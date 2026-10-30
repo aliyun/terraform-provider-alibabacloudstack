@@ -112,7 +112,7 @@ resource "alibabacloudstack_lindorm_instance" "example" {
 * `local_disk_num` - （可选）单节点本地磁盘数量。取值范围：1到10。默认值：1。仅当 `disk_category` 为 `HDD` 或 `SSD` 时生效；`disk_category` 为 `LV` 时单节点磁盘数由服务端固定为1。
 * `standby_zone_id` - （可选，变更时强制重建）备可用区ID。设置后实例以多可用区模式部署，`topology_type` 自动为 `multizone`。必须与 `standby_vswitch_id` 同时设置。
 * `standby_vswitch_id` - （可选，变更时强制重建）备可用区交换机ID。必须与 `standby_zone_id` 同时设置。
-* `core_spec` - （可选，变更时强制重建）实例的Core规格。
+* `core_spec` - （可选，变更时强制重建）实例的Core规格。可通过 `engine_type` 设为 `store` 的 `alibabacloudstack_lindorm_instance_types` 数据源获取可用规格。
 * `deletion_protection` - （可选）是否启用了删除保护。
 
 ## 属性参考

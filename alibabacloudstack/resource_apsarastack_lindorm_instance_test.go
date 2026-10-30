@@ -120,7 +120,7 @@ func TestAccAlibabacloudStackLindormInstance_multiZone(t *testing.T) {
 					"local_disk_size":    450,
 					"engine_type":        "lindorm",
 					"instance_type":      "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[0].name}",
-					"core_spec":          "lindorm.g1.2c2g",
+					"core_spec":          "${data.alibabacloudstack_lindorm_instance_types.store.instance_types[0].name}",
 					"vpc_id":             "${alibabacloudstack_vpc_vpc.default.id}",
 					"vswitch_id":         "${alibabacloudstack_vpc_vswitch.default.id}",
 					"standby_zone_id":    "${local.zone_id_2}",
@@ -133,6 +133,7 @@ func TestAccAlibabacloudStackLindormInstance_multiZone(t *testing.T) {
 						"cpu_brand":       "Intel",
 						"engine_type":     "lindorm",
 						"topology_type":   "multizone",
+						"core_spec":       CHECKSET,
 						"lindorm_num":     "3",
 						"instance_status": "ACTIVATION",
 					}),
@@ -185,6 +186,10 @@ variable "name" {
 data "alibabacloudstack_lindorm_instance_types" "sortbycpu" {
 	sorted_by = "CPU"
 	engine_type = "lindorm"
+}
+
+data "alibabacloudstack_lindorm_instance_types" "store" {
+	engine_type = "store"
 }
 
 %s

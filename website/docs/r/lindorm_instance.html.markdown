@@ -111,7 +111,7 @@ The following arguments are supported:
 * `local_disk_num` - (Optional) The number of local disks per node. Valid values: 1 to 10. Default value: 1. Takes effect only when `disk_category` is `HDD` or `SSD`; when `disk_category` is `LV`, the number of disks per node is fixed to 1 by the server.
 * `standby_zone_id` - (Optional, ForceNew) The standby zone ID. When specified, the instance is deployed in multi-zone mode and `topology_type` is automatically set to `multizone`. Must be specified together with `standby_vswitch_id`.
 * `standby_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the standby zone. Must be specified together with `standby_zone_id`.
-* `core_spec` - (Optional, ForceNew) The core specification of the instance.
+* `core_spec` - (Optional, ForceNew) The core specification of the instance. Retrieve the available specifications from the `alibabacloudstack_lindorm_instance_types` data source with `engine_type` set to `store`.
 * `deletion_protection` - (Optional) Indicates whether deletion protection is enabled.
 
 ## Attributes Reference

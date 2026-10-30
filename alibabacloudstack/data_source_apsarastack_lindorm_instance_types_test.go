@@ -38,6 +38,13 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 		}),
 	}
 
+	// store 引擎的规格即 alibabacloudstack_lindorm_instance 中 core_spec 可取的值
+	storeEngineConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"engine_type": "store",
+		}),
+	}
+
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"cpu":         32,
@@ -72,7 +79,7 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 		existMapFunc: existLindormInstanceTypesMapFunc,
 		fakeMapFunc:  fakeLindormInstanceTypesMapFunc,
 	}
-	lindormInstanceTypesCheckInfo.dataSourceTestCheck(t, 0, cpuConf, MemoryConf, engineTypeConf, allConf)
+	lindormInstanceTypesCheckInfo.dataSourceTestCheck(t, 0, cpuConf, MemoryConf, engineTypeConf, storeEngineConf, allConf)
 }
 
 func dataSourceLindormInstanceTypesConfigDependence(name string) string {

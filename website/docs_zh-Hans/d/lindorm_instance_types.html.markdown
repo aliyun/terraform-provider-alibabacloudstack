@@ -65,7 +65,7 @@ output "sorted_instance_types" {
 以下参数被支持：
 
 * `ids` - (可选) 实例类型ID列表。
-* `engine_type` - (可选) 引擎类型。有效值: `lindorm`, `tsdb`, `solr`, `lts`。
+* `engine_type` - (可选) 引擎类型。有效值: `lindorm`, `tsdb`, `solr`, `lts`, `store`。`store` 返回的规格即可用于 `alibabacloudstack_lindorm_instance` 的 `core_spec` 参数。
 * `cpu` - (可选) CPU数量。
 * `memory` - (可选) 内存大小，单位GB。
 * `sorted_by` - (可选) 排序字段。有效值: `CPU`, `Memory`。

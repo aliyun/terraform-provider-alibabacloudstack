@@ -66,7 +66,7 @@ output "sorted_instance_types" {
 The following arguments are supported:
 
 * `ids` - (Optional) A list of instance type IDs.
-* `engine_type` - (Optional) The type of the engine. Valid values: `lindorm`, `tsdb`, `solr`, `lts`.
+* `engine_type` - (Optional) The type of the engine. Valid values: `lindorm`, `tsdb`, `solr`, `lts`, `store`. The specifications returned for `store` are the ones that can be used by the `core_spec` argument of `alibabacloudstack_lindorm_instance`.
 * `cpu` - (Optional) The number of CPUs.
 * `memory` - (Optional) The memory size in GB.
 * `sorted_by` - (Optional) Sorting field. Valid values: `CPU`, `Memory`.

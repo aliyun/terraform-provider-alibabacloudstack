@@ -27,7 +27,7 @@ func dataSourceAlibabacloudStackLindormInstanceTypes() *schema.Resource {
 			"engine_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"lindorm", "tsdb", "solr", "lts"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"lindorm", "tsdb", "solr", "lts", "store"}, false),
 			},
 			"cpu": {
 				Type:     schema.TypeInt,
@@ -96,12 +96,16 @@ func dataSourceAlibabacloudStackLindormInstanceTypesRead(d *schema.ResourceData,
 	}
 	lindorm_specs, err := jsonpath.Get("$.Data.LindormSpecs", response)
 	idsMap := getIdsStringFilter(d)
+	engineTypeFilter := d.Get("engine_type").(string)
 
 	ids := []string{}
 	types := []map[string]interface{}{}
 	for _, lindorm_spec := range lindorm_specs.([]interface{}) {
 		data := lindorm_spec.(map[string]interface{})
 		engineType := data["EngineType"].(string)
+		if engineTypeFilter != "" && engineType != engineTypeFilter {
+			continue
+		}
 		specs := data["Specs"].([]interface{})
 		for _, s := range specs {
 			spec := s.(map[string]interface{})
