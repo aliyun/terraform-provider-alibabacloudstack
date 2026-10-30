@@ -77,13 +77,7 @@ func resourceAlibabacloudStackPolardbxBackupCreate(d *schema.ResourceData, meta 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	instance_id := d.Get("instance_id").(string)
 	polardbx_service := PolardbXService{client}
-	task_exists, err := polardbx_service.CheckPolarDbXBackupTaskExists(instance_id)
-	if err != nil {
-		return err
-	}
-	if task_exists {
-		return errmsgs.WrapError(errmsgs.Error("There are already backup tasks in progress."))
-	}
+	var err error
 	// Bug#87449965: Backup set ids that already exist before the snapshot is created. The 17E backend returns "cb-*" string backup set ids,
 	// and the CreateBackup response may not carry a usable BackupSetId; when no id can be parsed from the response,
 	// the newly created backup set is located in DescribeBackupSetList via the diff of ids before and after creation.
@@ -105,6 +99,16 @@ func resourceAlibabacloudStackPolardbxBackupCreate(d *schema.ResourceData, meta 
 	var bresponse *responses.CommonResponse
 	backup_type := fmt.Sprint(d.Get("backup_type").(int))
 	retryErr := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		// Only one backup job may run on an instance at a time; the automatic backup triggered after the
+		// instance is created, as well as any previous manual backup, keeps a new CreateBackup away, so
+		// wait for the running job to finish instead of failing immediately.
+		task_exists, terr := polardbx_service.CheckPolarDbXBackupTaskExists(instance_id)
+		if terr != nil {
+			return resource.NonRetryableError(terr)
+		}
+		if task_exists {
+			return resource.RetryableError(errmsgs.Error("There are already backup tasks in progress."))
+		}
 		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "CreateBackup", "")
 		request.QueryParams["DBInstanceName"] = instance_id
 		request.QueryParams["BackupType"] = backup_type
