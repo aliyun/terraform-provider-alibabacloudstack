@@ -59,12 +59,12 @@ output "instance_ids" {
   * `ascm_create_user` - 创建实例的用户。
   * `instance_alias` - 实例别名。
   * `network_type` - 实例的网络类型。
-  * `service_type` - 实例的服务类型。
-  * `engine_type` - 实例的引擎类型。
+  * `service_type` - `GetLindormInstanceList` 接口返回的原始服务类型值，例如 `"lindorm"` 或 `"lindorm_dual_zone"`。
+  * `engine_type` - 归一化后的引擎类型，与 `alibabacloudstack_lindorm_instance` 的 `engine_type` 参数含义一致。多可用区实例（`lindorm_dual_zone`）统一报告为 `"lindorm"`。
   * `ali_uid` - 阿里云账户的UID。
-  * `topology_type` - 实例的拓扑类型。
-  * `arch_version` - 实例的架构版本。
-  * `standby_zone_id` - 备可用区ID。
-  * `arbiter_zone_id` - 仲裁可用区ID。
-  * `standby_vswitch_id` - 备可用区交换机ID。
-  * `arbiter_vswitch_id` - 仲裁可用区交换机ID。
+  * `topology_type` - 由 `service_type` 派生的拓扑类型。有效值：`"1azone"`（单可用区）或 `"multizone"`（双可用区）。
+  * `arch_version` - 架构版本。注意：`GetLindormInstanceList` 响应中并不包含此字段，因此该属性通常为空。
+  * `standby_zone_id` - 多可用区实例的备可用区 ID（来源于接口返回的 `Idc2ZoneId`）。单可用区实例该字段为空。
+  * `arbiter_zone_id` - 仲裁可用区 ID。列表接口当前不返回该字段，保留以备后续扩展。
+  * `standby_vswitch_id` - 备可用区交换机 ID（来源于接口返回的 `Idc2VSwitchId`）。单可用区实例或接口未返回该字段时为空。
+  * `arbiter_vswitch_id` - 仲裁可用区交换机 ID。列表接口当前不返回该字段，保留以备后续扩展。

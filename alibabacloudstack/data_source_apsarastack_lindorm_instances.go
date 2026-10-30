@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"regexp"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -80,7 +81,7 @@ func dataSourceAlibabacloudStackLindormInstances() *schema.Resource {
 							Computed: true,
 						},
 						"engine_type": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"ali_uid": {
@@ -127,14 +128,6 @@ func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, met
 		"Department": client.Department,
 		"RegionId":   client.RegionId,
 	}
-	response := make(map[string]interface{})
-	// Call request_params_handler
-
-	if v, ok := d.GetOk("instance_id"); ok {
-		request["InstanceId"] = v.(string)
-	}
-	// request["PageNumber"] = "10000"
-	// request["PageSize"] = "1"
 	response, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "GetLindormInstanceList", "", nil, request, nil)
 	if err != nil {
 		if response == nil {
@@ -144,53 +137,87 @@ func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, met
 	}
 	idsMap := getIdsStringFilter(d)
 
+	// InstanceList 在环境无实例时可能不存在；直接断言 nil 会 panic。
+	var instanceList []interface{}
+	if v, ok := response["InstanceList"]; ok && v != nil {
+		list, ok := v.([]interface{})
+		if !ok {
+			return fmt.Errorf("lindorm_instances: unexpected type %T for InstanceList in GetLindormInstanceList response", v)
+		}
+		instanceList = list
+	}
+
 	var ids []string
 	datas := make([]interface{}, 0)
-	for _, v := range response["InstanceList"].([]interface{}) {
-		data := v.(map[string]interface{})
-		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
-			r := regexp.MustCompile(description_regex.(string))
-			if !r.MatchString(data["InstanceAlias"].(string)) {
+	for _, v := range instanceList {
+		data, ok := v.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		// InstanceId 是过滤及输出的主键，缺失则跳过该条目。
+		instanceId, ok := data["InstanceId"].(string)
+		if !ok || instanceId == "" {
+			continue
+		}
+
+		if descriptionRegex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
+			r := regexp.MustCompile(descriptionRegex.(string))
+			alias, _ := data["InstanceAlias"].(string)
+			if !r.MatchString(alias) {
 				continue
 			}
 		}
 
 		if len(idsMap) > 0 {
-			if _, exist := idsMap[data["InstanceId"].(string)]; !exist {
+			if _, exist := idsMap[instanceId]; !exist {
 				continue
 			}
 		}
 
-		i := map[string]interface{}{
-			"id":                 data["InstanceId"],
-			"cpu_brand":          data["CpuBrand"],
-			"instance_storage":   data["InstanceStorage"],
-			"zone_id":            data["ZoneId"],
-			"instance_id":        data["InstanceId"],
-			"create_time":        data["CreateTime"],
-			"ascm_create_user":   data["AscmCreateUser"],
-			"instance_alias":     data["InstanceAlias"],
-			"network_type":       data["NetworkType"],
-			"service_type":       data["ServiceType"],
-			"engine_type":        data["EngineType"],
-			"ali_uid":            data["AliUid"],
-			"standby_zone_id":    data["StandbyZoneId"],
-			"arbiter_zone_id":    data["ArbiterZoneId"],
-			"standby_vswitch_id": data["StandbyVSwitchId"],
-			"arbiter_vswitch_id": data["ArbiterVSwitchId"],
+		// service_type: List 响应的原始值，例如 "lindorm_dual_zone" 或 "lindorm"。
+		serviceType, _ := data["ServiceType"].(string)
+		// engine_type: 与资源 Read 对齐——将 "lindorm_dual_zone" 归一化回基础引擎名 "lindorm"，
+		// 其余情况直接取 ServiceType 字符串值。
+		engineType := serviceType
+		if engineType == "lindorm_dual_zone" {
+			engineType = "lindorm"
 		}
-		if archVer, ok := data["ArchVersion"].(string); ok {
-			i["arch_version"] = archVer
-			if archVer == "2.0" {
-				i["topology_type"] = "multizone"
-			} else {
-				i["topology_type"] = "1azone"
-			}
+		// topology_type: 与资源 Read 同样从 ServiceType 派生；
+		// List 响应中无 ArchVersion 字段，不能用它判断拓扑。
+		topologyType := "1azone"
+		if serviceType == "lindorm_dual_zone" {
+			topologyType = "multizone"
+		}
+
+		i := map[string]interface{}{
+			"id":               instanceId,
+			"cpu_brand":        data["CpuBrand"],
+			"instance_storage": data["InstanceStorage"],
+			"zone_id":          data["ZoneId"],
+			"instance_id":      instanceId,
+			"create_time":      data["CreateTime"],
+			"ascm_create_user": data["AscmCreateUser"],
+			"instance_alias":   data["InstanceAlias"],
+			"network_type":     data["NetworkType"],
+			"service_type":     serviceType,
+			"engine_type":      engineType,
+			"ali_uid":          data["AliUid"],
+			// List 响应使用 Idc2ZoneId/Idc2VSwitchId（非 StandbyZoneId/StandbyVSwitchId）；
+			// 单可用区实例这两个字段不存在，结果为 nil → 空字符串（正常）。
+			"standby_zone_id":    data["Idc2ZoneId"],
+			"arbiter_zone_id":    data["ArbiterZoneId"],
+			"standby_vswitch_id": data["Idc2VSwitchId"],
+			"arbiter_vswitch_id": data["ArbiterVSwitchId"],
+			"topology_type":      topologyType,
+		}
+		// arch_version 在 List 响应中不存在；仅当有值时写入，否则保持零值。
+		if av, ok := data["ArchVersion"].(string); ok {
+			i["arch_version"] = av
 		}
 
 		datas = append(datas, i)
-
-		ids = append(ids, data["InstanceId"].(string))
+		ids = append(ids, instanceId)
 	}
 
 	d.SetId(dataResourceIdHash(ids))

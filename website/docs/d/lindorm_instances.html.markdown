@@ -60,12 +60,12 @@ The following attributes are exported:
   * `ascm_create_user` - The user who created the instance.
   * `instance_alias` - The alias of the instance.
   * `network_type` - The network type of the instance.
-  * `service_type` - The service type of the instance.
-  * `engine_type` - The engine type of the instance.
+  * `service_type` - The raw service type reported by `GetLindormInstanceList`, e.g. `"lindorm"` or `"lindorm_dual_zone"`.
+  * `engine_type` - The normalized engine name, consistent with the `engine_type` argument of `alibabacloudstack_lindorm_instance`. For multi-zone instances (`lindorm_dual_zone`) this is reported as `"lindorm"`.
   * `ali_uid` - The UID of the Alibaba Cloud account.
-  * `topology_type` - The topology type of the instance.
-  * `arch_version` - The architecture version of the instance.
-  * `standby_zone_id` - The standby zone ID.
-  * `arbiter_zone_id` - The arbiter zone ID.
-  * `standby_vswitch_id` - The vSwitch ID in the standby zone.
-  * `arbiter_vswitch_id` - The vSwitch ID in the arbiter zone.
+  * `topology_type` - The topology type derived from `service_type`. Valid values: `"1azone"` (single zone) or `"multizone"` (dual zone).
+  * `arch_version` - The architecture version. Note: this field is not present in the `GetLindormInstanceList` response and will be empty.
+  * `standby_zone_id` - The secondary zone ID for multi-zone instances (sourced from `Idc2ZoneId`). Empty for single-zone instances.
+  * `arbiter_zone_id` - The arbiter zone ID. Not returned by the list API; reserved for future use.
+  * `standby_vswitch_id` - The vSwitch ID in the standby zone (sourced from `Idc2VSwitchId`). Empty for single-zone instances or when the list API does not return it.
+  * `arbiter_vswitch_id` - The vSwitch ID in the arbiter zone. Not returned by the list API; reserved for future use.
