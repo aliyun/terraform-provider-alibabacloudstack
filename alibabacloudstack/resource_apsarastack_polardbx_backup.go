@@ -12,6 +12,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -62,7 +63,7 @@ func resourceAlibabacloudStackPolardbxBackup() *schema.Resource {
 			},
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(60 * time.Minute),
+			Create: schema.DefaultTimeout(20 * time.Minute),
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackPolardbxBackupCreate,
@@ -100,28 +101,30 @@ func resourceAlibabacloudStackPolardbxBackupCreate(d *schema.ResourceData, meta 
 	// Call request_params_handler
 
 	// An initial automatic backup job is triggered about 2.5 minutes after the instance is created; a manual CreateBackup at that time returns BackupJobExists.
-	// Poll and wait for the initial backup job to finish before retrying, to avoid conflicting with the initial automatic backup.
+	// Keep retrying until the initial automatic backup job finishes, within the create timeout.
 	var bresponse *responses.CommonResponse
 	backup_type := fmt.Sprint(d.Get("backup_type").(int))
-	retry_deadline := time.Now().Add(25 * time.Minute)
-	for {
+	retryErr := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "CreateBackup", "")
 		request.QueryParams["DBInstanceName"] = instance_id
 		request.QueryParams["BackupType"] = backup_type
-		bresponse, err = client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		response, rerr := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), response, request, request.QueryParams)
+		if rerr != nil {
+			if response == nil {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(rerr, "Process Common Request Failed"))
 			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			if (strings.Contains(err.Error(), "BackupJobExists") || strings.Contains(errmsg, "BackupJobExists")) && time.Now().Before(retry_deadline) {
-				time.Sleep(30 * time.Second)
-				continue
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if strings.Contains(rerr.Error(), "BackupJobExists") || strings.Contains(errmsg, "BackupJobExists") {
+				return resource.RetryableError(errmsgs.WrapErrorf(rerr, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(rerr, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		break
+		bresponse = response
+		return nil
+	})
+	if retryErr != nil {
+		return errmsgs.WrapError(retryErr)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbXCreatebackupResponseObj)
