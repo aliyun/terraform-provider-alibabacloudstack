@@ -80,7 +80,7 @@ func TestAccAlibabacloudStackLindormLtsInstance_basic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"arch_version"},
+				ImportStateVerifyIgnore: []string{"arch_version", "vpc_id", "vswitch_id"},
 			},
 		},
 	})
@@ -155,7 +155,7 @@ func TestAccAlibabacloudStackLindormLtsInstance_multiZone(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"arch_version"},
+				ImportStateVerifyIgnore: []string{"arch_version", "vpc_id", "vswitch_id", "standby_zone_id", "standby_vswitch_id", "arbiter_zone_id", "arbiter_vswitch_id"},
 			},
 		},
 	})

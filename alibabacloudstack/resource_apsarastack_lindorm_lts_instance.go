@@ -188,16 +188,34 @@ func resourceAlibabacloudStackLindormLtsInstanceRead(d *schema.ResourceData, met
 	d.Set("zone_id", data["ZoneId"])
 	d.Set("instance_status", data["InstanceStatus"])
 	d.Set("create_time", data["CreateTime"])
-	d.Set("deletion_protection", data["DeletionProtection"])
+	// DeletionProtection 在实例创建初期可能不返回，nil 时不要覆盖 state，避免触发不必要的 Update
+	if v, ok := data["DeletionProtection"]; ok && v != nil {
+		d.Set("deletion_protection", v)
+	}
 	d.Set("cpu_brand", data["CpuBrand"])
-	d.Set("vpc_id", data["VpcId"])
-	d.Set("vswitch_id", data["VswitchId"])
-	d.Set("standby_zone_id", data["StandbyZoneId"])
-	d.Set("arbiter_zone_id", data["ArbiterZoneId"])
-	d.Set("standby_vswitch_id", data["StandbyVSwitchId"])
-	d.Set("arbiter_vswitch_id", data["ArbiterVSwitchId"])
 	d.Set("service_type", data["ServiceType"])
 	d.Set("network_type", data["NetworkType"])
+	// GetLindormInstance 对 LTS 实例不返回 VpcId/VswitchId/Standby*/Arbiter* 等字段；
+	// 这些属性是 Optional+ForceNew，若 d.Set(nil) 会清空 state 导致下次 plan 非空并触发 replace。
+	// 仅在响应确实包含时写入，否则保持 Create 时已写入 state 的值。
+	if v, ok := data["VpcId"]; ok && v != nil {
+		d.Set("vpc_id", v)
+	}
+	if v, ok := data["VswitchId"]; ok && v != nil {
+		d.Set("vswitch_id", v)
+	}
+	if v, ok := data["StandbyZoneId"]; ok && v != nil {
+		d.Set("standby_zone_id", v)
+	}
+	if v, ok := data["ArbiterZoneId"]; ok && v != nil {
+		d.Set("arbiter_zone_id", v)
+	}
+	if v, ok := data["StandbyVSwitchId"]; ok && v != nil {
+		d.Set("standby_vswitch_id", v)
+	}
+	if v, ok := data["ArbiterVSwitchId"]; ok && v != nil {
+		d.Set("arbiter_vswitch_id", v)
+	}
 	if archVer, ok := data["ArchVersion"].(string); ok && archVer != "" {
 		d.Set("arch_version", archVer)
 	}
@@ -206,11 +224,13 @@ func resourceAlibabacloudStackLindormLtsInstanceRead(d *schema.ResourceData, met
 	} else {
 		d.Set("topology_type", "1azone")
 	}
-	engineList := data["EngineList"].([]interface{})
-	if len(engineList) > 0 {
-		engineData := engineList[0].(map[string]interface{})
-		d.Set("lts_num", engineData["CoreCount"])
-		d.Set("instance_type", engineData["Specification"])
+	if raw, ok := data["EngineList"]; ok && raw != nil {
+		if engineList, ok := raw.([]interface{}); ok && len(engineList) > 0 {
+			if engineData, ok := engineList[0].(map[string]interface{}); ok {
+				d.Set("lts_num", engineData["CoreCount"])
+				d.Set("instance_type", engineData["Specification"])
+			}
+		}
 	}
 	return nil
 }
