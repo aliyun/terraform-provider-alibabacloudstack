@@ -188,6 +188,10 @@ func resourceAlibabacloudStackRdsBackupRead(d *schema.ResourceData, meta interfa
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_rds_backup", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
+	if len(response.Items.Backup) == 0 {
+		d.SetId("")
+		return nil
+	}
 	data := response.Items.Backup[0]
 	d.Set("backup_db_names", data.BackupDBNames)
 
