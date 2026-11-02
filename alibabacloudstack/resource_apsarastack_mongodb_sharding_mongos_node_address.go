@@ -76,9 +76,13 @@ func resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddress() *schema
 	}
 
 	resource.CustomizeDiff = func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-		nodeId := d.Get("node_id").(string)
-		if nodeId == "" {
-			return fmt.Errorf("node_id is required")
+		// node_id 常引用上游资源的输出（如 sharding 实例的节点 id），plan 阶段该值仍是 unknown，
+		// 此时 d.Get 返回的是零值而非用户真实取值，必须跳过校验，否则 plan 必然失败。
+		if d.NewValueKnown("node_id") {
+			nodeId := d.Get("node_id").(string)
+			if !strings.HasPrefix(nodeId, "s-") {
+				return fmt.Errorf("node %s is not a mongos node", nodeId)
+			}
 		}
 
 		if !d.Get("enable_private_connection").(bool) {

@@ -61,9 +61,13 @@ func resourceAlibabacloudStackMongodbShardingInstanceCsNodeAddress() *schema.Res
 			if !d.Get("enable_private_connection").(bool) && d.Get("enable_public_connection").(bool) {
 				return fmt.Errorf("can not enable public connection with out private connection")
 			}
-			nodeId := d.Get("node_id").(string)
-			if nodeId != "" && !strings.HasPrefix(nodeId, "dds-") {
-				return fmt.Errorf("node %s is not a config service node", nodeId)
+			// node_id 常引用上游资源的输出（如 sharding 实例的节点 id），plan 阶段该值仍是 unknown，
+			// 此时 d.Get 返回的是零值而非用户真实取值，必须跳过校验，否则 plan 必然失败。
+			if d.NewValueKnown("node_id") {
+				nodeId := d.Get("node_id").(string)
+				if !strings.HasPrefix(nodeId, "dds-") {
+					return fmt.Errorf("node %s is not a config service node", nodeId)
+				}
 			}
 			return nil
 		},
