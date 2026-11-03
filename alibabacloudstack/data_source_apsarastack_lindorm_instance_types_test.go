@@ -47,8 +47,8 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"cpu":         32,
-			"memory":      64,
+			"cpu":         8,
+			"memory":      32,
 			"engine_type": "lindorm",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
