@@ -356,7 +356,12 @@ func resourceAlibabacloudStackVpcDelete(d *schema.ResourceData, meta interface{}
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			// 仅在存在下游依赖（如 VSwitch/NAT 未解绑）或服务端瞬态错误（5xx/限流）时重试，
+			// 其余错误立即失败，避免无差别重试拖慢销毁并掩盖真实错误。
+			if errmsgs.IsExpectedErrors(err, "DependencyViolation", "DependencyViolation.VSwitch") || errmsgs.NeedRetry(err) {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		content := map[string]interface{}{}
 		bresponse, _ := raw.(*vpc.DeleteVpcResponse)
