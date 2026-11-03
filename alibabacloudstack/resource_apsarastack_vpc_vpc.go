@@ -405,5 +405,16 @@ func buildAlibabacloudStackVpcArgs(d *schema.ResourceData, meta interface{}) *vp
 		request.VpcName = v.(string)
 	}
 
+	if v, ok := d.GetOk("tags"); ok {
+		tags := make([]vpc.CreateVpcTag, 0)
+		for key, value := range v.(map[string]interface{}) {
+			tags = append(tags, vpc.CreateVpcTag{
+				Key:   key,
+				Value: value.(string),
+			})
+		}
+		request.Tag = &tags
+	}
+
 	return request
 }
