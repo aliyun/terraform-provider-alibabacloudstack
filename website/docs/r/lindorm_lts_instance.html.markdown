@@ -52,10 +52,6 @@ The following arguments are supported:
 * `lts_num` - (Required) The number of LTS nodes.
 * `vpc_id` - (Optional, ForceNew) The ID of the VPC where you want to deploy the instance.
 * `vswitch_id` - (Optional, ForceNew) The ID of the vSwitch that is associated with the specified VPC.
-* `standby_zone_id` - (Optional, ForceNew) The standby zone ID. When specified, the instance is deployed in multi-zone mode and `topology_type` is automatically set to `multizone`. Must be specified together with `standby_vswitch_id`.
-* `arbiter_zone_id` - (Optional, ForceNew) The arbiter zone ID, used together with `standby_zone_id` in multi-zone mode.
-* `standby_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the standby zone. Must be specified together with `standby_zone_id`.
-* `arbiter_vswitch_id` - (Optional, ForceNew) The vSwitch ID in the arbiter zone.
 * `deletion_protection` - (Optional, Computed) Specifies whether to enable deletion protection for the instance. Default value: `false`.
 
 ## Attributes Reference
@@ -68,8 +64,6 @@ The following attributes are exported:
 * `create_time` - The creation time of the instance.
 * `service_type` - The service type of the instance.
 * `network_type` - The network type of the instance.
-* `arch_version` - The architecture version of the instance.
-* `topology_type` - The topology type of the instance. Valid values: `1azone`, `multizone`. It is automatically determined by whether `standby_zone_id` is set.
 
 ## Import
 

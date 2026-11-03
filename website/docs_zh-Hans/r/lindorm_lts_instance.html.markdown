@@ -52,10 +52,6 @@ resource "alibabacloudstack_lindorm_lts_instance" "example" {
 * `lts_num` - （必选）LTS 节点数量。
 * `vpc_id` - （可选，变更时强制重建）部署实例的专有网络ID。
 * `vswitch_id` - （可选，变更时强制重建）与指定专有网络关联的交换机ID。
-* `standby_zone_id` - （可选，变更时强制重建）备可用区ID。设置后实例以多可用区模式部署，`topology_type` 自动为 `multizone`。必须与 `standby_vswitch_id` 同时设置。
-* `arbiter_zone_id` - （可选，变更时强制重建）仲裁可用区ID，多可用区模式下与 `standby_zone_id` 配合使用。
-* `standby_vswitch_id` - （可选，变更时强制重建）备可用区交换机ID。必须与 `standby_zone_id` 同时设置。
-* `arbiter_vswitch_id` - （可选，变更时强制重建）仲裁可用区交换机ID。
 * `deletion_protection` - （可选，计算得出）是否为实例开启删除保护。默认值：`false`。
 
 ## 属性说明
@@ -68,8 +64,6 @@ resource "alibabacloudstack_lindorm_lts_instance" "example" {
 * `create_time` - 实例的创建时间。
 * `service_type` - 实例的服务类型。
 * `network_type` - 实例的网络类型。
-* `arch_version` - 实例的架构版本。
-* `topology_type` - 实例的拓扑类型。取值：`1azone`、`multizone`。由是否设置 `standby_zone_id` 自动判定。
 
 ## 导入资源
 

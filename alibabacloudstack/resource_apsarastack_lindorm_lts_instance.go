@@ -12,9 +12,9 @@ import (
 func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(90 * time.Minute),
-			Update: schema.DefaultTimeout(30 * time.Minute),
-			Delete: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(60 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(40 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
@@ -49,32 +49,6 @@ func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"topology_type": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"standby_zone_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				RequiredWith: []string{"standby_vswitch_id"},
-			},
-			"arbiter_zone_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"standby_vswitch_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				RequiredWith: []string{"standby_zone_id"},
-			},
-			"arbiter_vswitch_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"deletion_protection": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -100,10 +74,6 @@ func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"arch_version": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 
@@ -121,13 +91,8 @@ func resourceAlibabacloudStackLindormLtsInstanceCreate(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
 	request := make(map[string]interface{})
-	// topology_type 不由用户填写，根据 standby_zone_id 是否设置自动判定拓扑类型
-	topologyType := "1azone"
-	if v, ok := d.GetOk("standby_zone_id"); ok && v.(string) != "" {
-		topologyType = "multizone"
-		request["ArchVersion"] = "2.0"
-	}
-	request["TopologyType"] = topologyType
+	// LTS 实例不支持多可用区（云产品口径），固定按单可用区传参
+	request["TopologyType"] = "1azone"
 	request["ZoneId"] = d.Get("zone_id")
 	request["InstanceAlias"] = d.Get("instance_alias")
 	request["CpuBrand"] = d.Get("cpu_brand")
@@ -140,18 +105,6 @@ func resourceAlibabacloudStackLindormLtsInstanceCreate(d *schema.ResourceData, m
 	if v, ok := d.GetOk("vswitch_id"); ok {
 		request["VSwitchId"] = v
 	}
-	if v, ok := d.GetOk("standby_zone_id"); ok {
-		request["StandbyZoneId"] = v
-	}
-	if v, ok := d.GetOk("arbiter_zone_id"); ok {
-		request["ArbiterZoneId"] = v
-	}
-	if v, ok := d.GetOk("standby_vswitch_id"); ok {
-		request["StandbyVSwitchId"] = v
-	}
-	if v, ok := d.GetOk("arbiter_vswitch_id"); ok {
-		request["ArbiterVSwitchId"] = v
-	}
 	resp, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "CreateLindormInstance", "", nil, request, nil)
 	if err != nil {
 		return err
@@ -161,7 +114,6 @@ func resourceAlibabacloudStackLindormLtsInstanceCreate(d *schema.ResourceData, m
 		return errmsgs.Error(fmt.Sprintf("Create lindorm instance failed %#v", resp))
 	}
 	d.SetId(instanceId.(string))
-	d.Set("topology_type", topologyType)
 	// Wait for instance to be active
 	stateConf := BuildStateConf([]string{"CREATING"}, []string{"ACTIVATION"}, d.Timeout(schema.TimeoutCreate), 60*time.Second, lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"CREATE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
@@ -195,7 +147,7 @@ func resourceAlibabacloudStackLindormLtsInstanceRead(d *schema.ResourceData, met
 	d.Set("cpu_brand", data["CpuBrand"])
 	d.Set("service_type", data["ServiceType"])
 	d.Set("network_type", data["NetworkType"])
-	// GetLindormInstance 对 LTS 实例不返回 VpcId/VswitchId/Standby*/Arbiter* 等字段；
+	// GetLindormInstance 对 LTS 实例不返回 VpcId/VswitchId 字段；
 	// 这些属性是 Optional+ForceNew，若 d.Set(nil) 会清空 state 导致下次 plan 非空并触发 replace。
 	// 仅在响应确实包含时写入，否则保持 Create 时已写入 state 的值。
 	if v, ok := data["VpcId"]; ok && v != nil {
@@ -203,26 +155,6 @@ func resourceAlibabacloudStackLindormLtsInstanceRead(d *schema.ResourceData, met
 	}
 	if v, ok := data["VswitchId"]; ok && v != nil {
 		d.Set("vswitch_id", v)
-	}
-	if v, ok := data["StandbyZoneId"]; ok && v != nil {
-		d.Set("standby_zone_id", v)
-	}
-	if v, ok := data["ArbiterZoneId"]; ok && v != nil {
-		d.Set("arbiter_zone_id", v)
-	}
-	if v, ok := data["StandbyVSwitchId"]; ok && v != nil {
-		d.Set("standby_vswitch_id", v)
-	}
-	if v, ok := data["ArbiterVSwitchId"]; ok && v != nil {
-		d.Set("arbiter_vswitch_id", v)
-	}
-	if archVer, ok := data["ArchVersion"].(string); ok && archVer != "" {
-		d.Set("arch_version", archVer)
-	}
-	if archVer, ok := data["ArchVersion"].(string); ok && archVer == "2.0" {
-		d.Set("topology_type", "multizone")
-	} else {
-		d.Set("topology_type", "1azone")
 	}
 	if raw, ok := data["EngineList"]; ok && raw != nil {
 		if engineList, ok := raw.([]interface{}); ok && len(engineList) > 0 {
@@ -319,6 +251,7 @@ func resourceAlibabacloudStackLindormLtsInstanceUpdate(d *schema.ResourceData, m
 func resourceAlibabacloudStackLindormLtsInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	lindormService := LindormService{client}
 	reqQuery := map[string]interface{}{
 		"InstanceId": d.Id(),
 	}
@@ -326,6 +259,18 @@ func resourceAlibabacloudStackLindormLtsInstanceDelete(d *schema.ResourceData, m
 	_, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "ReleaseLindormInstance", "", nil, reqQuery, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "ReleaseLindormInstance", errmsgs.AlibabacloudStackSdkGoERROR, "")
+	}
+
+	// 与 lindorm_instance 对齐：等实例从 state 消失再返回，避免下游 VSwitch/VPC 立刻
+	// 删除时撞上 ENI 未释放导致的 DependencyViolation。
+	deleteTimeout := d.Timeout(schema.TimeoutDelete)
+	if deleteTimeout <= 0 {
+		deleteTimeout = 20 * time.Minute
+	}
+	stateConf := BuildStateConf([]string{"ACTIVATION", "DELETING", "CREATING"}, []string{}, deleteTimeout, 10*time.Second,
+		lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return nil
