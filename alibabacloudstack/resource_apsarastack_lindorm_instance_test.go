@@ -126,6 +126,14 @@ func TestAccAlibabacloudStackLindormInstance_multiZone(t *testing.T) {
 					"standby_zone_id":    "${local.zone_id_2}",
 					"standby_vswitch_id": "${alibabacloudstack_vpc_vswitch.standby.id}",
 					"lindorm_num":        3,
+					// Dual-zone instances provision far slower than single-zone and
+					// may exceed the resource's default create timeout, so override
+					// it here to give the ACTIVATION wait enough headroom.
+					"timeouts": []map[string]interface{}{
+						{
+							"create": "160m",
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
