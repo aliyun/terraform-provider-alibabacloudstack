@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -262,6 +261,13 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 	} else {
 		d.Set("topology_type", "1azone")
 	}
+	// 多可用区回读：云产品口径 idc1=主可用区、idc2=备可用区；单可用区场景响应不含该 key，不覆盖 state
+	if v, ok := data["Idc2ZoneId"]; ok && v != nil && v != "" {
+		d.Set("standby_zone_id", v)
+	}
+	if v, ok := data["Idc2VSwitchId"]; ok && v != nil && v != "" {
+		d.Set("standby_vswitch_id", v)
+	}
 	engineList := data["EngineList"].([]interface{})
 	if len(engineList) > 0 {
 		engineData := engineList[0].(map[string]interface{})
@@ -404,9 +410,7 @@ func resourceAlibabacloudStackLindormInstanceDelete(d *schema.ResourceData, meta
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	// 等待底层网络资源（ENI 等）完全释放，避免 VSwitch/VPC 删除时 DependencyViolation
-	log.Printf("[INFO] Lindorm instance %s deleted, waiting 5 minutes for underlying resources to be released...", d.Id())
-	time.Sleep(5 * time.Minute)
-
+	// 底层 ENI 释放带来的 VSwitch/VPC 依赖冲突，由 VSwitch/VPC 自身的 Delete 里
+	// resource.Retry(TimeoutDelete) 应对 DependencyViolation 类错误重试，此处不再硬编码等待。
 	return nil
 }
