@@ -133,5 +133,12 @@ variable "name" {
 }
 %s
 
+resource "alibabacloudstack_vpc_vpc" "tagged" {
+	vpc_name   = "${var.name}_tagged_vpc"
+	cidr_block = "172.17.0.0/16"
+	tags = {
+		filter = "${var.name}"
+	}
+}
 `, name, VSwitchCommonTestCase)
 }
