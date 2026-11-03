@@ -9,9 +9,19 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", dataSourceLindormInstanceTypesConfigDependence)
 
+	// id 形如 "<engine_type>:<name>"，取自 anyone 数据源查出的真实规格
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"${data.alibabacloudstack_lindorm_instance_types.anyone.instance_types.0.id}"},
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids": []string{"lindorm:fake.not.exist.spec"},
+		}),
+	}
+
 	cpuConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"cpu":    4,
+			"cpu":       "${data.alibabacloudstack_lindorm_instance_types.anyone.instance_types.0.cpu}",
 			"sorted_by": "Memory",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
@@ -23,7 +33,7 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 	MemoryConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"sorted_by": "CPU",
-			"memory": 8,
+			"memory":    "${data.alibabacloudstack_lindorm_instance_types.anyone.instance_types.0.memory}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"sorted_by": "CPU",
@@ -45,10 +55,11 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 		}),
 	}
 
+	// 过滤器取值来自上方 anyone 数据源查出的真实规格，避免写死环境差异的 cpu/memory 组合
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"cpu":         8,
-			"memory":      32,
+			"cpu":         "${data.alibabacloudstack_lindorm_instance_types.anyone.instance_types.0.cpu}",
+			"memory":      "${data.alibabacloudstack_lindorm_instance_types.anyone.instance_types.0.memory}",
 			"engine_type": "lindorm",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
@@ -59,6 +70,8 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 
 	var existLindormInstanceTypesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
+			"ids.#":                   CHECKSET,
+			"ids.0":                   CHECKSET,
 			"instance_types.#":        CHECKSET,
 			"instance_types.0.id":     CHECKSET,
 			"instance_types.0.cpu":    CHECKSET,
@@ -70,6 +83,7 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 
 	var fakeLindormInstanceTypesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
+			"ids.#":            "0",
 			"instance_types.#": "0",
 		}
 	}
@@ -79,10 +93,15 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 		existMapFunc: existLindormInstanceTypesMapFunc,
 		fakeMapFunc:  fakeLindormInstanceTypesMapFunc,
 	}
-	lindormInstanceTypesCheckInfo.dataSourceTestCheck(t, 0, cpuConf, MemoryConf, engineTypeConf, storeEngineConf, allConf)
+	lindormInstanceTypesCheckInfo.dataSourceTestCheck(t, 0, idsConf, cpuConf, MemoryConf, engineTypeConf, storeEngineConf, allConf)
 }
 
 func dataSourceLindormInstanceTypesConfigDependence(name string) string {
+	// 先查出 lindorm 引擎族的全量规格供各过滤步骤取用；限定 engine_type，
+	// 否则 instance_types.0 可能落在其它引擎族，叠加 cpu+memory+engine_type 后无法保证非空
 	return `
+data "alibabacloudstack_lindorm_instance_types" "anyone" {
+  engine_type = "lindorm"
+}
 `
 }
