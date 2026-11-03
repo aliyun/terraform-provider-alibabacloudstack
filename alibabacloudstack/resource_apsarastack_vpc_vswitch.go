@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -160,6 +161,11 @@ func resourceAlibabacloudStackSwitchRead(d *schema.ResourceData, meta interface{
 		d.Set("tags", tagsToMap(listTagResourcesObject))
 	}
 	d.Set("description", vswitch.Description)
+	rawVswitch, err := vpcService.DescribeVSwitchWithTeadsl(d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.Set("is_cgw", fmt.Sprint(rawVswitch["IsCgw"]) == "true")
 	return nil
 }
 
