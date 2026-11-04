@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"time"
 
@@ -181,6 +182,16 @@ func resourceAlibabacloudStackKmsKeyCreate(d *schema.ResourceData, meta interfac
 		}
 		return nil
 	})
+	if err != nil {
+		// ReBindResourceGroup failed after retries. The key has already been created.
+		// To avoid resource leakage, schedule deletion of the created key before
+		// returning the error.
+		log.Printf("[WARN] ReBindResourceGroup failed for key %s, cleaning up created key to avoid resource leakage", bresponse.KeyMetadata.KeyId)
+		if delErr := resourceAlibabacloudStackKmsKeyDelete(d, meta); delErr != nil {
+			return errmsgs.WrapError(fmt.Errorf("failed to move resource group and cleanup key: %v; cleanup error: %v", err, delErr))
+		}
+		return errmsgs.WrapError(err)
+	}
 
 	return nil
 }
