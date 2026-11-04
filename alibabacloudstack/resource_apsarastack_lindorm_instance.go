@@ -183,11 +183,13 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	// 磁盘容量按 disk_category 映射到服务端读不同的字段：
 	// LV -> storageClass=yoda-lvm，diskNum 固定 1，容量取 CoreDiskSize（数字，服务端补 "Gi"）
 	// HDD/SSD -> fast-disks(-ssd)，diskNum=LocalDiskNum，容量取 LocalDiskSize（带单位字符串）
-	// InstanceStorage 是服务端必传参数，不区分磁盘类型
+	// InstanceStorage 是服务端必传参数，不区分磁盘类型；只要 DiskCategory 非空它就会被
+	// 后续覆盖、进不了 CR，属兜底初值。因 VO 是 String 原样透传且 DiskCategory 可空，
+	// 这里统一拼 "G" 后缀下发，避免 DiskCategory 为空时纯数字被 K8s MustParse 成字节数。
 	diskCategory := d.Get("disk_category").(string)
 	size := d.Get("local_disk_size").(int)
 	request["CoreDiskSize"] = size
-	request["InstanceStorage"] = size
+	request["InstanceStorage"] = fmt.Sprintf("%dG", size)
 	if diskCategory == "SSD" || diskCategory == "HDD" {
 		request["LocalDiskSize"] = fmt.Sprintf("%dG", size)
 	}
