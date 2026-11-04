@@ -264,9 +264,6 @@ func resourceAlibabacloudStackLindormLtsInstanceDelete(d *schema.ResourceData, m
 	// 与 lindorm_instance 对齐：等实例从 state 消失再返回，避免下游 VSwitch/VPC 立刻
 	// 删除时撞上 ENI 未释放导致的 DependencyViolation。
 	deleteTimeout := d.Timeout(schema.TimeoutDelete)
-	if deleteTimeout <= 0 {
-		deleteTimeout = 20 * time.Minute
-	}
 	stateConf := BuildStateConf([]string{"ACTIVATION", "DELETING", "CREATING"}, []string{}, deleteTimeout, 10*time.Second,
 		lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
