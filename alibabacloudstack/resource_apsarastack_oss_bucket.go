@@ -134,7 +134,7 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tags": tagsSchema(),
+			"tags": ossBucketTagsSchema(),
 		},
 		// Use CustomizeDiff to add conditional validation
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
@@ -150,6 +150,35 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackOssBucketCreate, resourceAlibabacloudStackOssBucketRead, resourceAlibabacloudStackOssBucketUpdate, resourceAlibabacloudStackOssBucketDelete)
 	return resource
+}
+
+// ossBucketResourceGroupTagKey is the tag through which ASCM ties a bucket to the resource set it
+// belongs to. The provider owns it: the value is derived from the organization and the resource
+// group of the provider configuration, the bucket is created with it already carried by the
+// PutBucket request and every later tag write has to repeat it, because PutBucketTags replaces the
+// whole tag set. Read filters the tag out, so it never reaches the state and a template cannot
+// manage it through `tags`, which is also why the tag key is rejected there.
+const ossBucketResourceGroupTagKey = "ascm:tag/rg"
+
+// ossBucketResourceGroupTagValue builds the tag value as "1.<organizationId>.<resourceSetId>",
+// which is the shape ASCM itself writes; the tag condition of a materialized ASCM role policy
+// whitelists the values of the organization as "1.<organizationId>.*", so a bucket carrying no such
+// tag stays outside of the operations that policy grants even though the credential carries oss:*.
+func ossBucketResourceGroupTagValue(client *connectivity.AlibabacloudStackClient) string {
+	return fmt.Sprintf("1.%s.%s", client.Department, client.ResourceGroup)
+}
+
+func ossBucketTagsSchema() *schema.Schema {
+	tags := tagsSchema()
+	tags.ValidateFunc = func(v interface{}, k string) ([]string, []error) {
+		for key := range v.(map[string]interface{}) {
+			if key == ossBucketResourceGroupTagKey {
+				return nil, []error{fmt.Errorf("tags: %q is managed by the provider, which derives it from the organization and the resource group of the provider configuration; remove it from tags", ossBucketResourceGroupTagKey)}
+			}
+		}
+		return nil, nil
+	}
+	return tags
 }
 
 func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta interface{}) error {
@@ -205,6 +234,11 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 			Headers: map[string]string{
 				"Content-Type": "application/xml",
 				"x-oss-acl":    acl,
+				// The tag of the resource set is stamped while the bucket is created, so the new
+				// bucket is inside the tag condition of the ASCM role policies from the first second.
+				// Header name matches the console path: console-java-sdk OSSBucketOperation.createBucket
+				// puts CreateBucketRequest.tagging into "x-oss-bucket-tagging".
+				"x-oss-bucket-tagging": ossBucketResourceGroupTagKey + "=" + ossBucketResourceGroupTagValue(client),
 			},
 			Body: strings.NewReader(xmlBody),
 		}
@@ -258,20 +292,8 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 		log.Printf("[INFO] Successfully cleaned up bucket %s after ReBindResourceGroup failure", bucketName)
 		return errmsgs.WrapError(err)
 	}
-	tags := d.Get("tags").(map[string]interface{})
-	if len(tags) > 0 {
-		var tag_objs []OssTags
-		for k, v := range tags {
-			tag_objs = append(tag_objs, OssTags{
-				Key:   k,
-				Value: v.(string),
-			})
-		}
-		err = ossService.PutOssBucketTags(ossCluster, bucketName, tag_objs)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketTags", errmsgs.AlibabacloudStackOssGoSdk, err.Error()) // nolint
-		}
-	}
+	// The tag of the resource set came along with PutBucket, and the tags declared by the template
+	// are written by the update path, which CreateContext runs right after create.
 	return nil
 }
 
@@ -561,30 +583,26 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, bucketName, "PutBucketAcl", errmsgs.AlibabacloudStackOssGoSdk)
 		}
 	}
-	if d.IsNewResource() {
-		return nil
-	}
 	if d.HasChange("tags") {
 		tags := d.Get("tags").(map[string]interface{})
-		var tag_objs []OssTags
+		// PutBucketTags replaces the whole tag set, so the tag of the resource set, which Read never
+		// brings back into the state, has to be written again together with the tags of the template.
+		tag_objs := []OssTags{{
+			Key:   ossBucketResourceGroupTagKey,
+			Value: ossBucketResourceGroupTagValue(client),
+		}}
 		for k, v := range tags {
+			// A value left over in an older state must not be written beside the derived one as a
+			// second tag carrying the same key.
+			if k == ossBucketResourceGroupTagKey {
+				continue
+			}
 			tag_objs = append(tag_objs, OssTags{
 				Key:   k,
 				Value: v.(string),
 			})
 		}
-		if len(tag_objs) <= 0 {
-			err = ossService.DeleteBucketTags(ossCluster, bucketName)
-		} else {
-			var tag_objs []OssTags
-			for k, v := range tags {
-				tag_objs = append(tag_objs, OssTags{
-					Key:   k,
-					Value: v.(string),
-				})
-			}
-			err = ossService.PutOssBucketTags(ossCluster, bucketName, tag_objs)
-		}
+		err = ossService.PutOssBucketTags(ossCluster, bucketName, tag_objs)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketTags", errmsgs.AlibabacloudStackOssGoSdk, err.Error()) // nolint
 		}
