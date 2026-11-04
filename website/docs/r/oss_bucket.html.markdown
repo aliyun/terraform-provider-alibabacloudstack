@@ -11,7 +11,13 @@ description: |-
 Provides a resource to create an oss bucket and set its attribution.
 
 -> **NOTE:** The bucket namespace is shared by all users of the OSS system. Please set bucket name as unique as possible.
--> **Note:** Creating an OSS bucket requires organization administrator permissions, default resource set permissions under the current first-level organization, and permissions for the ascm.UpdateInstanceBelong API.
+
+-> **Note:** Supported credentials: the AK/SK of the target organization (primary account), or an ASCM user under the target organization that uses a properly configured custom role. The ASCM user has the following requirements:
+
+* Bare user AK/SK is not supported: OSS permissions are granted through the role instead of being attached directly to the user, so a properly configured custom role is required.
+* Cross-organization accounts (including the environment administrator account, admin) are not supported: OSS requests are rejected with `AccessDenied` ("Put bucket request is not resource owner.", EC 0003-00000202).
+* RAM roles are not supported: ASCM cannot resolve the identity of a RAM role session.
+* Required permissions: `oss:PutBucket`, `oss:GetBucketAcl`, `oss:PutBucketAcl`, `oss:GetBucketTags`, `oss:PutBucketTags`, `oss:DeleteBucketTags`, `oss:GetBucketLogging`, `oss:PutBucketLogging`, `oss:DeleteBucketLogging`, `oss:GetBucketEncryption`, `oss:PutBucketEncryption`, `oss:DeleteBucketEncryption`, `oss:GetBucketSync`, `oss:PutBucketSync`, `oss:DeleteBucketSync`, `oss:GetBucketStorageCapacity`, `oss:SetBucketStorageCapacity`, `oss:DeleteBucket`, and `ascm:UpdateInstanceBelong` (right after the bucket is created, the provider moves it into the resource set through the ASCM management plane; if that call fails, the created bucket is deleted and the create fails).
 
 ## Example Usage
 
@@ -39,6 +45,7 @@ The following arguments are supported:
 * `sse_algorithm` - (Optional) Encrypts files uploaded to OSS. It Can be "", "AES256", "SM4", and "KMS". Defaults to "private".
 * `kms_key_id` - (Optional) Required when sse_algorithm is KMS.
 * `bucket_sync` - (Optional)  Enables or disables bucket synchronization. Defaults to `true`.
+* `tags` - (Optional) A mapping of tags assigned to the bucket. The tag `ascm:tag/rg` is managed by the provider and must not be set in `tags`.
 
 ## Attributes Reference
 

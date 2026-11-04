@@ -12,7 +12,13 @@ description: |-
 使用Provider配置的凭证在指定的资源集编排对象存储服务（OSS）存储桶并设置其属性的资源。
 
 -> **注意:** OSS 系统中的存储桶命名空间是所有用户共享的。请尽量将存储桶名称设置为唯一值。
--> **注意:** 创建oss bucket 需要组织管理员权限,当前一级组织下默认资源集权限，及ascm.UpdateInstanceBelong接口权限
+
+-> **注意：** 支持的凭证：目标组织（主账号）的 AK/SK，或目标组织下 ASCM 侧的用户并使用配置正确的自定义角色。ASCM 侧的用户有如下要求：
+
+* 裸 AK/SK 不行：OSS 权限是通过角色授予的，而不是直接挂在用户上，须使用配置正确的自定义角色。
+* 跨组织账号不行（包括环境管理员账号 admin）：OSS 请求会被拒绝，报 `AccessDenied`（"Put bucket request is not resource owner."，EC 0003-00000202）。
+* RAM 角色不行：ASCM 无法识别 RAM 角色会话的身份。
+* 所需权限点：`oss:PutBucket`、`oss:GetBucketAcl`、`oss:PutBucketAcl`、`oss:GetBucketTags`、`oss:PutBucketTags`、`oss:DeleteBucketTags`、`oss:GetBucketLogging`、`oss:PutBucketLogging`、`oss:DeleteBucketLogging`、`oss:GetBucketEncryption`、`oss:PutBucketEncryption`、`oss:DeleteBucketEncryption`、`oss:GetBucketSync`、`oss:PutBucketSync`、`oss:DeleteBucketSync`、`oss:GetBucketStorageCapacity`、`oss:SetBucketStorageCapacity`、`oss:DeleteBucket`，以及 `ascm:UpdateInstanceBelong`（存储桶创建完成后，Provider 会通过 ASCM 管理面将其移入资源集；该调用失败时，刚创建的存储桶会被删除并返回错误）。
 
 
 ## 示例用法
@@ -41,6 +47,7 @@ resource "alibabacloudstack_oss_bucket" "demo" {
 * `sse_algorithm` - (可选) 加密上传到 OSS 的文件。它可以是 "", "AES256", "SM4" 和 "KMS"。默认为 ""。
 * `kms_key_id` - (可选) 当 `sse_algorithm` 为 KMS 时需要设置此参数，用于指定加密所使用的 KMS 密钥 ID。
 * `bucket_sync` - (可选) 启用或禁用存储桶同步功能。默认值为 `true`。
+* `tags` - (可选) 存储桶的标签映射。标签 `ascm:tag/rg` 由 provider 管理，不允许在 `tags` 中设置。
 
 ## 属性说明
 
