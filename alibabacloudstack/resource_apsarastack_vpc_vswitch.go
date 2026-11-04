@@ -161,11 +161,14 @@ func resourceAlibabacloudStackSwitchRead(d *schema.ResourceData, meta interface{
 		d.Set("tags", tagsToMap(listTagResourcesObject))
 	}
 	d.Set("description", vswitch.Description)
+	// is_cgw 只存在于原始响应（SDK 结构体未建模该字段），属补充回读；
+	// 这次额外查询失败时保留 state 中的既有值，不因它中断整个 Read。
 	rawVswitch, err := vpcService.DescribeVSwitchWithTeadsl(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
+	if err == nil {
+		d.Set("is_cgw", fmt.Sprint(rawVswitch["IsCgw"]) == "true")
+	} else {
+		log.Printf("[WARN] DescribeVSwitchWithTeadsl(%s) failed, keeping is_cgw from state: %v", d.Id(), err)
 	}
-	d.Set("is_cgw", fmt.Sprint(rawVswitch["IsCgw"]) == "true")
 	return nil
 }
 
