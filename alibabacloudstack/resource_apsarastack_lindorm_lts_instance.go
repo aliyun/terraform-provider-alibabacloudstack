@@ -98,13 +98,11 @@ func resourceAlibabacloudStackLindormLtsInstanceCreate(d *schema.ResourceData, m
 	request["CpuBrand"] = d.Get("cpu_brand")
 	request["LtsSpec"] = d.Get("instance_type")
 	request["LtsNum"] = d.Get("lts_num")
+	// LTS 实例不需要 VpcId/VSwitchId：这两个参数在网关、业务校验、编排、Get 回显
+	// 的全链路均不生效（传了也会被静默忽略），故 Create 不下发。
+	// ClusterType 的 "lts" 与废弃别名 "lindorm-for-lts" 服务端 equalsAny 都接受，
+	// 这里与控制台白屏保持一致使用 "lindorm-for-lts"。
 	request["ClusterType"] = "lindorm-for-lts"
-	if v, ok := d.GetOk("vpc_id"); ok {
-		request["VPCId"] = v
-	}
-	if v, ok := d.GetOk("vswitch_id"); ok {
-		request["VSwitchId"] = v
-	}
 	resp, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "CreateLindormInstance", "", nil, request, nil)
 	if err != nil {
 		return err
@@ -147,15 +145,6 @@ func resourceAlibabacloudStackLindormLtsInstanceRead(d *schema.ResourceData, met
 	d.Set("cpu_brand", data["CpuBrand"])
 	d.Set("service_type", data["ServiceType"])
 	d.Set("network_type", data["NetworkType"])
-	// GetLindormInstance 对 LTS 实例不返回 VpcId/VswitchId 字段；
-	// 这些属性是 Optional+ForceNew，若 d.Set(nil) 会清空 state 导致下次 plan 非空并触发 replace。
-	// 仅在响应确实包含时写入，否则保持 Create 时已写入 state 的值。
-	if v, ok := data["VpcId"]; ok && v != nil {
-		d.Set("vpc_id", v)
-	}
-	if v, ok := data["VswitchId"]; ok && v != nil {
-		d.Set("vswitch_id", v)
-	}
 	if raw, ok := data["EngineList"]; ok && raw != nil {
 		if engineList, ok := raw.([]interface{}); ok && len(engineList) > 0 {
 			if engineData, ok := engineList[0].(map[string]interface{}); ok {
