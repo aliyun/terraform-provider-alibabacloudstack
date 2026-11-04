@@ -117,7 +117,7 @@ func resourceAlibabacloudStackLindormInstance() *schema.Resource {
 			"deletion_protection": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				Default:  false,
 			},
 			"disk_usage": {
 				Type:     schema.TypeString,
@@ -203,11 +203,7 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	d.SetId(instanceId.(string))
 	d.Set("topology_type", topologyType)
 	// Wait for instance to be active
-	// 测试框架中 d.Timeout 可能返回 0，需兜底
 	timeout := d.Timeout(schema.TimeoutCreate)
-	if timeout <= 0 {
-		timeout = 120 * time.Minute
-	}
 	stateConf := BuildStateConf([]string{"CREATING"}, []string{"ACTIVATION"}, timeout, 60*time.Second, lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{"CREATE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return err
@@ -288,7 +284,15 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 	// DeletionProtection 不在 CreateLindormInstance 的入参中（已核对环境注册的 API XML），
 	// 只能由 UpdateLindormInstanceAttribute 设置；setResourceFunc 的包装器在 create 成功后会自动
 	// 调用本函数，因此该分支必须放在新建判定之前，否则用户新建时配置的 deletion_protection 会被丢弃。
-	if d.HasChanges("instance_alias", "deletion_protection") {
+	// instance_alias 已由 CreateLindormInstance 直接下发，故新建场景下本段 update 唯一有实际意义的用途
+	// 就是补设 deletion_protection；而新建时 d.HasChanges 恒为 true（旧 state 为空），若不加限定，会对一个
+	// 与服务端默认一致的 deletion_protection=false 发出空操作写请求，恰好撞上实例刚激活、后台仍在变更时的
+	// Instance.IsUpdating 窗口。因此新建时仅当 deletion_protection 被显式开启才执行，非新建（真实变配）时保持原有的按变更触发逻辑。
+	needUpdate := d.HasChanges("instance_alias", "deletion_protection")
+	if d.IsNewResource() {
+		needUpdate = d.Get("deletion_protection").(bool)
+	}
+	if needUpdate {
 		reqQuery := map[string]interface{}{
 			"InstanceId":         d.Id(),
 			"InstanceAlias":      d.Get("instance_alias"),
@@ -297,10 +301,7 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 
 		// 实例激活后后台可能仍在变更，遇到 Instance.IsUpdating 时等待并重试
 		updateTimeout := d.Timeout(schema.TimeoutUpdate)
-		if updateTimeout <= 0 {
-			updateTimeout = 20 * time.Minute
-		}
-		wait := connectivity.IncrementalWait(3*time.Second, 3*time.Second)
+		wait := connectivity.IncrementalWait(5*time.Second, 5*time.Second)
 		err := resource.Retry(updateTimeout, func() *resource.RetryError {
 			_, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "UpdateLindormInstanceAttribute", "", nil, reqQuery, nil)
 			if err != nil {
@@ -401,9 +402,6 @@ func resourceAlibabacloudStackLindormInstanceDelete(d *schema.ResourceData, meta
 
 	// Wait for the instance to be deleted
 	deleteTimeout := d.Timeout(schema.TimeoutDelete)
-	if deleteTimeout <= 0 {
-		deleteTimeout = 20 * time.Minute
-	}
 	stateConf := BuildStateConf([]string{"ACTIVATION", "DELETING", "CREATING"}, []string{}, deleteTimeout, 10*time.Second,
 		lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
