@@ -264,11 +264,15 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 	if v, ok := data["Idc2VSwitchId"]; ok && v != nil && v != "" {
 		d.Set("standby_vswitch_id", v)
 	}
-	engineList := data["EngineList"].([]interface{})
-	if len(engineList) > 0 {
-		engineData := engineList[0].(map[string]interface{})
-		d.Set("lindorm_num", engineData["CoreCount"])
-		d.Set("instance_type", engineData["Specification"])
+	// EngineList 在部分响应中可能缺失；与 LTS 资源一致，先判存在再做类型断言，
+	// 避免对 nil / 非 slice 直接断言导致 panic。
+	if raw, ok := data["EngineList"]; ok && raw != nil {
+		if engineList, ok := raw.([]interface{}); ok && len(engineList) > 0 {
+			if engineData, ok := engineList[0].(map[string]interface{}); ok {
+				d.Set("lindorm_num", engineData["CoreCount"])
+				d.Set("instance_type", engineData["Specification"])
+			}
+		}
 	}
 	// 多可用区场景下 API 可能返回 CoreSpec
 	if v, ok := data["CoreSpec"]; ok && v != nil && v != "" {
