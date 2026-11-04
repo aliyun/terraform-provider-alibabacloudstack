@@ -188,6 +188,71 @@ func (s *AscmService) DescribeAscmRamRole(id string) (role *AscmRoleData, err er
 	return nil, errmsgs.GetNotFoundErrorFromString("role " + did[0] + " not found")
 }
 
+// AscmRamRoleArnData is the RAM role that the ASCM control plane materializes for one
+// (organization, ASCM role, ASCM user) binding. Unlike the ROLETYPE_ASCM entries returned by
+// ListRoles, the role described here is registered in the RAM/STS backend, so its `arn` is the
+// identifier accepted by AssumeRole and the trust policy in `assumeRolePolicyDocument` decides
+// which principal is allowed to assume it.
+type AscmRamRoleArnData struct {
+	Arn                      string `json:"arn"`
+	RoleName                 string `json:"roleName"`
+	RoleID                   string `json:"roleId"`
+	Description              string `json:"description"`
+	RoleType                 string `json:"roleType"`
+	Product                  string `json:"product"`
+	Region                   string `json:"region"`
+	AliyunUserID             int    `json:"aliyunUserId"`
+	AssumeRolePolicyDocument string `json:"assumeRolePolicyDocument"`
+}
+
+type GetRamRoleAndRamPolicyResponse struct {
+	Code            string             `json:"code"`
+	Cost            int                `json:"cost"`
+	Data            AscmRamRoleArnData `json:"data"`
+	Message         string             `json:"message"`
+	Success         bool               `json:"success"`
+	AsapiSuccess    bool               `json:"asapiSuccess"`
+	AsapiErrorCode  string             `json:"asapiErrorCode"`
+	AsapiRequestID  string             `json:"asapiRequestId"`
+	EagleEyeTraceID string             `json:"eagleEyeTraceId"`
+	SuccessResponse bool               `json:"successResponse"`
+}
+
+// GetRamRoleAndRamPolicy reads the RAM role that ASCM materializes for the given role of the
+// authenticated account.
+//
+// The organization and the ASCM user are deliberately not parameters: the backend resolves both
+// from the caller's own identity - the organization is taken from the request context and the
+// user is the one the AccessKey belongs to. Reading a role of any other user is rejected with
+// `ascm.auth.NoPermission` ("can't get another user"), and reading a role that the caller does
+// not hold is rejected with `ascm.auth.EntityNotExist.User.Role`.
+func (s *AscmService) GetRamRoleAndRamPolicy(ascmRoleId int) (*AscmRamRoleArnData, error) {
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetRamRoleAndRamPolicy", "/ascm/auth/role/getRamRoleAndRamPolicy")
+	request.QueryParams["ascmRoleId"] = strconv.Itoa(ascmRoleId)
+
+	var resp = &GetRamRoleAndRamPolicyResponse{}
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, strconv.Itoa(ascmRoleId), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+
+	if resp.Code != "200" {
+		return nil, errmsgs.Error("GetRamRoleAndRamPolicy failed with code %s: %s", resp.Code, resp.Message)
+	}
+
+	return &resp.Data, nil
+}
+
 type AscmResourceGroupUser struct {
 	CurrentPage     int    `json:"currentPage"`
 	PageSize        int    `json:"pageSize"`
