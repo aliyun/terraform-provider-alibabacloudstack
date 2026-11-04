@@ -11,6 +11,12 @@ description: |-
 
 使用Provider配置的凭证在指定的资源集下编排加密主密钥 (CMK) 的别名。
 
+-> **注意：** 支持的凭证：目标组织（主账号）的 AK/SK，或目标组织下 ASCM 侧的用户并使用配置正确的自定义角色。ASCM 侧的用户有如下要求：
+
+* 裸 AK/SK 不行：KMS 权限是通过角色授予的，而不是直接挂在用户上，须使用配置正确的自定义角色。
+* 跨组织账号不行（包括环境管理员账号 admin）：KMS 请求会被拒绝，报 `Forbidden.NoPermission`。
+* RAM 角色不行：ASCM 无法识别 RAM 角色会话的身份。
+* 所需权限点：`kms:CreateAlias`、`kms:DescribeKey`、`kms:UpdateAlias`、`kms:DeleteAlias`。
 
 ## 示例用法
 

@@ -10,6 +10,13 @@ description: |-
 
 Encrypt a given plaintext with KMS. 
 
+-> **Note:** Supported credentials: the AK/SK of the target organization (primary account), or an ASCM user under the target organization that uses a properly configured custom role. The ASCM user has the following requirements:
+
+* Bare user AK/SK is not supported: KMS permissions are granted through the role instead of being attached directly to the user, so a properly configured custom role is required.
+* Cross-organization accounts (including the environment administrator account, admin) are not supported: KMS requests are rejected with `Forbidden.NoPermission`.
+* RAM roles are not supported: ASCM cannot resolve the identity of a RAM role session.
+* Required permission: `kms:Encrypt`.
+
 ~> **NOTE**: Using this data provider will allow you to conceal secret data within your resource definitions but does not take care of protecting that data in all Terraform logging and state output. Please take care to secure your secret data beyond just the Terraform configuration.
 
 ## Example Usage

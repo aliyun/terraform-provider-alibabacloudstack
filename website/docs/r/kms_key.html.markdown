@@ -10,7 +10,12 @@ description: |-
 
 A KMS key can help users to protect data security during transmission.
 
+-> **Note:** Supported credentials: the AK/SK of the target organization (primary account), or an ASCM user under the target organization that uses a properly configured custom role. The ASCM user has the following requirements:
 
+* Bare user AK/SK is not supported: KMS permissions are granted through the role instead of being attached directly to the user, so a properly configured custom role is required.
+* Cross-organization accounts (including the environment administrator account, admin) are not supported: KMS requests are rejected with `Forbidden.NoPermission`.
+* RAM roles are not supported: ASCM cannot resolve the identity of a RAM role session.
+* Required permissions: `kms:CreateKey`, `kms:DescribeKey`, `kms:EnableKey`, `kms:DisableKey`, `kms:UpdateKeyDescription`, `kms:UpdateRotationPolicy`, `kms:ScheduleKeyDeletion`, and `ascm:UpdateInstanceBelong` (right after the key is created, the provider moves it into the resource set through the ASCM management plane; if that call fails, the created key is scheduled for deletion and the create fails).
 
 ## Example Usage
 

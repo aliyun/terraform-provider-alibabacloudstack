@@ -11,6 +11,13 @@ description: |-
 使用Provider配置的凭证在指定的资源集编排KMS密钥。
 KMS密钥可以帮助用户在传输过程中保护数据安全。
 
+-> **注意：** 支持的凭证：目标组织（主账号）的 AK/SK，或目标组织下 ASCM 侧的用户并使用配置正确的自定义角色。ASCM 侧的用户有如下要求：
+
+* 裸 AK/SK 不行：KMS 权限是通过角色授予的，而不是直接挂在用户上，须使用配置正确的自定义角色。
+* 跨组织账号不行（包括环境管理员账号 admin）：KMS 请求会被拒绝，报 `Forbidden.NoPermission`。
+* RAM 角色不行：ASCM 无法识别 RAM 角色会话的身份。
+* 所需权限点：`kms:CreateKey`、`kms:DescribeKey`、`kms:EnableKey`、`kms:DisableKey`、`kms:UpdateKeyDescription`、`kms:UpdateRotationPolicy`、`kms:ScheduleKeyDeletion`，以及 `ascm:UpdateInstanceBelong`（密钥创建完成后，Provider 会通过 ASCM 管理面将其移入资源集；该调用失败时，已创建的密钥会被调度删除并返回错误）。
+
 ## 示例用法
 
 ### 基础用法
