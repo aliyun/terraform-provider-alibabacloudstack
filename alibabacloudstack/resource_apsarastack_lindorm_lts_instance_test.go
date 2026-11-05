@@ -95,5 +95,5 @@ data "alibabacloudstack_lindorm_instance_types" "sortbycpu" {
 	engine_type = "lts"
 }
 
-`, name, VSwitchCommonTestCase)
+`, name, DataZoneCommonTestCase)
 }
