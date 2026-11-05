@@ -50,8 +50,6 @@ The following arguments are supported:
 * `cpu_brand` - (Required, ForceNew) The CPU brand.
 * `instance_type` - (Required) The specification of the instance.
 * `lts_num` - (Required) The number of LTS nodes.
-* `vpc_id` - (Optional, ForceNew) The ID of the VPC where you want to deploy the instance.
-* `vswitch_id` - (Optional, ForceNew) The ID of the vSwitch that is associated with the specified VPC.
 * `deletion_protection` - (Optional, Computed) Specifies whether to enable deletion protection for the instance. Default value: `false`.
 
 ## Attributes Reference

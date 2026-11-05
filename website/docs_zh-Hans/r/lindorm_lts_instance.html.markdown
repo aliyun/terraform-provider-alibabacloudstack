@@ -50,8 +50,6 @@ resource "alibabacloudstack_lindorm_lts_instance" "example" {
 * `cpu_brand` - （必选，变更时强制重建）CPU 品牌。
 * `instance_type` - （必选）实例规格。
 * `lts_num` - （必选）LTS 节点数量。
-* `vpc_id` - （可选，变更时强制重建）部署实例的专有网络ID。
-* `vswitch_id` - （可选，变更时强制重建）与指定专有网络关联的交换机ID。
 * `deletion_protection` - （可选，计算得出）是否为实例开启删除保护。默认值：`false`。
 
 ## 属性说明

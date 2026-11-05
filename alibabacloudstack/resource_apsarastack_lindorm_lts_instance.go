@@ -39,16 +39,6 @@ func resourceAlibabacloudStackLindormLtsInstance() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"vpc_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"vswitch_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"deletion_protection": {
 				Type:     schema.TypeBool,
 				Optional: true,

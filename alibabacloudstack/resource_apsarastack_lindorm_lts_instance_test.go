@@ -35,8 +35,6 @@ func TestAccAlibabacloudStackLindormLtsInstance_basic(t *testing.T) {
 					"instance_alias":      "${var.name}",
 					"cpu_brand":           "Intel",
 					"instance_type":       "${data.alibabacloudstack_lindorm_instance_types.sortbycpu.instance_types[0].name}",
-					"vpc_id":              "${alibabacloudstack_vpc_vpc.default.id}",
-					"vswitch_id":          "${alibabacloudstack_vpc_vswitch.default.id}",
 					"lts_num":             2,
 					"deletion_protection": "true",
 				}),
@@ -76,10 +74,9 @@ func TestAccAlibabacloudStackLindormLtsInstance_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"vpc_id", "vswitch_id"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
