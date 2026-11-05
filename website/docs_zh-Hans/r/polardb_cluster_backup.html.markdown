@@ -77,7 +77,7 @@ resource "alibabacloudstack_polardb_cluster_backup" "default" {
 PolarDB 集群备份可使用 `db_cluster_id:backup_id` 格式（以冒号分隔）导入：
 
 ```
-$ terraform import alibabacloudstack_polardb_cluster_backup.default pc-abc0abc0abc0abc00:1793345712
+$ terraform import alibabacloudstack_polardb_cluster_backup.default <db_cluster_id>:<backup_id>
 ```
 
 ## 注意事项

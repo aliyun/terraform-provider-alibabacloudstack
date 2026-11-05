@@ -46,10 +46,6 @@ The following attributes are exported in addition to the arguments listed above:
   * `data_node_disk_size` - The disk size of the data nodes.
   * `data_node_disk_type` - The disk type of the data nodes.
   * `kibana_node_spec` - The specification of the Kibana nodes (only available when Kibana is enabled).
-  * `kibana_slb_address` - The SLB address of Kibana (only available when Kibana is enabled).
-  * `kibana_domain` - The domain name of Kibana (only available when Kibana is enabled).
-  * `kibana_protocol` - The protocol used by Kibana (only available when Kibana is enabled).
-  * `kibana_port` - The port number of Kibana (only available when Kibana is enabled).
   * `master_node_amount` - The number of dedicated master nodes in the Elasticsearch cluster (only available when dedicated master is enabled).
   * `master_node_spec` - The specification of the dedicated master nodes.
   * `master_node_disk_size` - The disk size of the dedicated master nodes.
@@ -57,4 +53,5 @@ The following attributes are exported in addition to the arguments listed above:
   * `client_node_amount` - The number of client nodes in the Elasticsearch cluster (only available when client nodes are enabled).
   * `client_node_spec` - The specification of the client nodes.
   * `vswitch_id` - The ID of the VSwitch in which the Elasticsearch instance is launched.
+  * `vpc_id` - The ID of the VPC to which the Elasticsearch instance belongs.
   * `status` - The status of the Elasticsearch instance.

@@ -46,10 +46,6 @@ data "alibabacloudstack_elasticsearch_instances" "default" {
   * `data_node_disk_size` - 数据节点的磁盘大小。
   * `data_node_disk_type` - 数据节点的磁盘类型。
   * `kibana_node_spec` - Kibana 节点的规格（仅在启用 Kibana 时可用）。
-  * `kibana_slb_address` - Kibana 的 SLB 地址（仅在启用 Kibana 时可用）。
-  * `kibana_domain` - Kibana 的域名（仅在启用 Kibana 时可用）。
-  * `kibana_protocol` - Kibana 使用的协议（仅在启用 Kibana 时可用）。
-  * `kibana_port` - Kibana 的端口号（仅在启用 Kibana 时可用）。
   * `master_node_amount` - 专用主节点数量（仅在启用专用主节点时可用）。
   * `master_node_spec` - 专用主节点的规格。
   * `master_node_disk_size` - 专用主节点的磁盘大小。
@@ -57,4 +53,5 @@ data "alibabacloudstack_elasticsearch_instances" "default" {
   * `client_node_amount` - 客户端节点数量（仅在启用客户端节点时可用）。
   * `client_node_spec` - 客户端节点的规格。
   * `vswitch_id` - 启动 Elasticsearch 实例的 VSwitch 的 ID。
+  * `vpc_id` - Elasticsearch 实例所属的 VPC 的 ID。
   * `status` - Elasticsearch 实例的状态。
