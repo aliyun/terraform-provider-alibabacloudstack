@@ -137,7 +137,7 @@ func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, met
 	}
 	idsMap := getIdsStringFilter(d)
 
-	// InstanceList 在环境无实例时可能不存在；直接断言 nil 会 panic。
+	// InstanceList may be absent when the environment has no instances; asserting nil directly would panic.
 	var instanceList []interface{}
 	if v, ok := response["InstanceList"]; ok && v != nil {
 		list, ok := v.([]interface{})
@@ -155,7 +155,7 @@ func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, met
 			continue
 		}
 
-		// InstanceId 是过滤及输出的主键，缺失则跳过该条目。
+		// InstanceId is the primary key for filtering and output; skip the entry if it is missing.
 		instanceId, ok := data["InstanceId"].(string)
 		if !ok || instanceId == "" {
 			continue
@@ -175,16 +175,16 @@ func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, met
 			}
 		}
 
-		// service_type: List 响应的原始值，例如 "lindorm_dual_zone" 或 "lindorm"。
+		// service_type: the raw value from the List response, e.g. "lindorm_dual_zone" or "lindorm".
 		serviceType, _ := data["ServiceType"].(string)
-		// engine_type: 与资源 Read 对齐——将 "lindorm_dual_zone" 归一化回基础引擎名 "lindorm"，
-		// 其余情况直接取 ServiceType 字符串值。
+		// engine_type: aligned with the resource Read; "lindorm_dual_zone" is normalized back to the base engine name "lindorm",
+		// and in all other cases the ServiceType string value is taken directly.
 		engineType := serviceType
 		if engineType == "lindorm_dual_zone" {
 			engineType = "lindorm"
 		}
-		// topology_type: 与资源 Read 同样从 ServiceType 派生；
-		// List 响应中无 ArchVersion 字段，不能用它判断拓扑。
+		// topology_type: derived from ServiceType, same as in the resource Read;
+		// the List response has no ArchVersion field, so it cannot be used to determine the topology.
 		topologyType := "1azone"
 		if serviceType == "lindorm_dual_zone" {
 			topologyType = "multizone"
@@ -203,15 +203,15 @@ func dataSourceAlibabacloudStackLindormInstancesRead(d *schema.ResourceData, met
 			"service_type":     serviceType,
 			"engine_type":      engineType,
 			"ali_uid":          data["AliUid"],
-			// List 响应使用 Idc2ZoneId/Idc2VSwitchId（非 StandbyZoneId/StandbyVSwitchId）；
-			// 单可用区实例这两个字段不存在，结果为 nil → 空字符串（正常）。
+			// The List response uses Idc2ZoneId/Idc2VSwitchId (not StandbyZoneId/StandbyVSwitchId);
+			// for single-zone instances these two fields are absent, so the result is nil -> empty string (expected).
 			"standby_zone_id":    data["Idc2ZoneId"],
 			"arbiter_zone_id":    data["ArbiterZoneId"],
 			"standby_vswitch_id": data["Idc2VSwitchId"],
 			"arbiter_vswitch_id": data["ArbiterVSwitchId"],
 			"topology_type":      topologyType,
 		}
-		// arch_version 在 List 响应中不存在；仅当有值时写入，否则保持零值。
+		// arch_version is not present in the List response; write it only when it has a value, otherwise keep the zero value.
 		if av, ok := data["ArchVersion"].(string); ok {
 			i["arch_version"] = av
 		}

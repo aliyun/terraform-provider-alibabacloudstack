@@ -156,7 +156,7 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
 	request := make(map[string]interface{})
-	// topology_type 不由用户填写，根据 standby_zone_id 是否设置自动判定拓扑类型
+	// topology_type is not filled in by the user; the topology type is determined automatically based on whether standby_zone_id is set
 	topologyType := "1azone"
 	if v, ok := d.GetOk("standby_zone_id"); ok && v.(string) != "" {
 		topologyType = "multizone"
@@ -180,12 +180,12 @@ func resourceAlibabacloudStackLindormInstanceCreate(d *schema.ResourceData, meta
 	}
 	request["LocalDiskNum"] = d.Get("local_disk_num")
 
-	// 磁盘容量按 disk_category 映射到服务端读不同的字段：
-	// LV -> storageClass=yoda-lvm，diskNum 固定 1，容量取 CoreDiskSize（数字，服务端补 "Gi"）
-	// HDD/SSD -> fast-disks(-ssd)，diskNum=LocalDiskNum，容量取 LocalDiskSize（带单位字符串）
-	// InstanceStorage 是服务端必传参数，不区分磁盘类型；只要 DiskCategory 非空它就会被
-	// 后续覆盖、进不了 CR，属兜底初值。因 VO 是 String 原样透传且 DiskCategory 可空，
-	// 这里统一拼 "G" 后缀下发，避免 DiskCategory 为空时纯数字被 K8s MustParse 成字节数。
+	// Disk capacity maps to different fields read by the server depending on disk_category:
+	// LV -> storageClass=yoda-lvm, diskNum fixed at 1, capacity taken from CoreDiskSize (a number; the server appends "Gi")
+	// HDD/SSD -> fast-disks(-ssd), diskNum=LocalDiskNum, capacity taken from LocalDiskSize (a string with a unit)
+	// InstanceStorage is a required server-side parameter regardless of disk type; as long as DiskCategory is non-empty it will be
+	// overridden downstream and never reach the CR, so it serves as a fallback initial value. Because the VO is a String passed through verbatim and DiskCategory can be empty,
+	// we always append a "G" suffix here, to avoid a bare number being MustParse'd as bytes by K8s when DiskCategory is empty.
 	diskCategory := d.Get("disk_category").(string)
 	size := d.Get("local_disk_size").(int)
 	request["CoreDiskSize"] = size
@@ -234,7 +234,7 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 	d.Set("vpc_id", data["VpcId"])
 	d.Set("vswitch_id", data["VswitchId"])
 	d.Set("instance_storage", data["InstanceStorage"])
-	// DeletionProtection 在实例创建初期可能不返回，nil 时不要覆盖 state，避免触发不必要的 Update
+	// DeletionProtection may not be returned early after instance creation; do not overwrite the state when it is nil, to avoid triggering an unnecessary Update
 	if v, ok := data["DeletionProtection"]; ok && v != nil {
 		d.Set("deletion_protection", v)
 	}
@@ -244,11 +244,11 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 	d.Set("switch_ssl_encryption_flag", data["SwitchSSLEncryptionFlag"])
 	d.Set("ali_uid", data["AliUid"])
 	d.Set("cpu_brand", data["CpuBrand"])
-	// DiskCategory 在响应中可能为空（如 LV 类型），不强制写入避免 diff
+	// DiskCategory may be empty in the response (e.g. for the LV type); do not force-write it, to avoid a diff
 	if v, ok := data["DiskCategory"]; ok && v != nil && v != "" {
 		d.Set("disk_category", v)
 	}
-	// ServiceType 在多可用区场景下返回 "lindorm_dual_zone"，需映射回用户配置的 "lindorm"
+	// ServiceType returns "lindorm_dual_zone" in multi-zone scenarios; map it back to the user-configured "lindorm"
 	engineType := data["ServiceType"]
 	if v, ok := engineType.(string); ok && v == "lindorm_dual_zone" {
 		engineType = "lindorm"
@@ -259,15 +259,15 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 	} else {
 		d.Set("topology_type", "1azone")
 	}
-	// 多可用区回读：云产品口径 idc1=主可用区、idc2=备可用区；单可用区场景响应不含该 key，不覆盖 state
+	// Multi-zone read back: per the cloud product's definition, idc1=primary zone and idc2=standby zone; in single-zone scenarios the response does not contain these keys, so the state is not overwritten
 	if v, ok := data["Idc2ZoneId"]; ok && v != nil && v != "" {
 		d.Set("standby_zone_id", v)
 	}
 	if v, ok := data["Idc2VSwitchId"]; ok && v != nil && v != "" {
 		d.Set("standby_vswitch_id", v)
 	}
-	// EngineList 在部分响应中可能缺失；与 LTS 资源一致，先判存在再做类型断言，
-	// 避免对 nil / 非 slice 直接断言导致 panic。
+	// EngineList may be missing in some responses; as with the LTS resource, check existence before doing the type assertion,
+	// to avoid a panic from asserting directly on nil / a non-slice.
 	if raw, ok := data["EngineList"]; ok && raw != nil {
 		if engineList, ok := raw.([]interface{}); ok && len(engineList) > 0 {
 			if engineData, ok := engineList[0].(map[string]interface{}); ok {
@@ -276,7 +276,7 @@ func resourceAlibabacloudStackLindormInstanceRead(d *schema.ResourceData, meta i
 			}
 		}
 	}
-	// 多可用区场景下 API 可能返回 CoreSpec
+	// The API may return CoreSpec in multi-zone scenarios
 	if v, ok := data["CoreSpec"]; ok && v != nil && v != "" {
 		d.Set("core_spec", v)
 	}
@@ -287,13 +287,13 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
 
-	// DeletionProtection 不在 CreateLindormInstance 的入参中（已核对环境注册的 API XML），
-	// 只能由 UpdateLindormInstanceAttribute 设置；setResourceFunc 的包装器在 create 成功后会自动
-	// 调用本函数，因此该分支必须放在新建判定之前，否则用户新建时配置的 deletion_protection 会被丢弃。
-	// instance_alias 已由 CreateLindormInstance 直接下发，故新建场景下本段 update 唯一有实际意义的用途
-	// 就是补设 deletion_protection；而新建时 d.HasChanges 恒为 true（旧 state 为空），若不加限定，会对一个
-	// 与服务端默认一致的 deletion_protection=false 发出空操作写请求，恰好撞上实例刚激活、后台仍在变更时的
-	// Instance.IsUpdating 窗口。因此新建时仅当 deletion_protection 被显式开启才执行，非新建（真实变配）时保持原有的按变更触发逻辑。
+	// DeletionProtection is not among the input parameters of CreateLindormInstance (verified against the API XML registered in the environment);
+	// it can only be set by UpdateLindormInstanceAttribute. The setResourceFunc wrapper automatically
+	// calls this function after a successful create, so this branch must come before the new-resource check, otherwise the deletion_protection configured at creation would be dropped.
+	// instance_alias is already sent directly by CreateLindormInstance, so in the create scenario the only practically meaningful use of this update block
+	// is to set deletion_protection. On create, d.HasChanges is always true (the old state is empty); without a guard, it would issue a no-op write request
+	// for deletion_protection=false that matches the server-side default, hitting exactly the Instance.IsUpdating window right after the instance
+	// activates while background changes are still running. Therefore, on create this runs only when deletion_protection is explicitly enabled; for non-create (real configuration changes), the original change-triggered logic is kept.
 	needUpdate := d.HasChanges("instance_alias", "deletion_protection")
 	if d.IsNewResource() {
 		needUpdate = d.Get("deletion_protection").(bool)
@@ -305,7 +305,7 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 			"DeletionProtection": d.Get("deletion_protection"),
 		}
 
-		// 实例激活后后台可能仍在变更，遇到 Instance.IsUpdating 时等待并重试
+		// Background changes may still be running after the instance activates; wait and retry on Instance.IsUpdating
 		updateTimeout := d.Timeout(schema.TimeoutUpdate)
 		wait := connectivity.IncrementalWait(5*time.Second, 5*time.Second)
 		err := resource.Retry(updateTimeout, func() *resource.RetryError {
@@ -332,8 +332,8 @@ func resourceAlibabacloudStackLindormInstanceUpdate(d *schema.ResourceData, meta
 		}
 	}
 
-	// 变配类接口只针对已存在的资源，新建后的首次自动调用必须跳过，
-	// 避免实例后台仍在初始化时报 Instance.IsUpdating
+	// Configuration-change APIs only apply to existing resources; the first automatic call after create must be skipped,
+	// to avoid Instance.IsUpdating while the instance is still initializing in the background
 	if d.IsNewResource() {
 		return nil
 	}
@@ -414,7 +414,7 @@ func resourceAlibabacloudStackLindormInstanceDelete(d *schema.ResourceData, meta
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	// 底层 ENI 释放带来的 VSwitch/VPC 依赖冲突，由 VSwitch/VPC 自身的 Delete 里
-	// resource.Retry(TimeoutDelete) 应对 DependencyViolation 类错误重试，此处不再硬编码等待。
+	// Dependency violations on VSwitch/VPC caused by underlying ENI release are handled by the
+	// resource.Retry(TimeoutDelete) in the VSwitch/VPC Delete itself, which retries DependencyViolation-class errors; no hardcoded wait here.
 	return nil
 }

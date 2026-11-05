@@ -81,17 +81,17 @@ func resourceAlibabacloudStackLindormLtsInstanceCreate(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lindormService := LindormService{client}
 	request := make(map[string]interface{})
-	// LTS 实例不支持多可用区（云产品口径），固定按单可用区传参
+	// LTS instances do not support multiple availability zones (per the cloud product's definition); parameters are always passed for a single availability zone
 	request["TopologyType"] = "1azone"
 	request["ZoneId"] = d.Get("zone_id")
 	request["InstanceAlias"] = d.Get("instance_alias")
 	request["CpuBrand"] = d.Get("cpu_brand")
 	request["LtsSpec"] = d.Get("instance_type")
 	request["LtsNum"] = d.Get("lts_num")
-	// LTS 实例不需要 VpcId/VSwitchId：这两个参数在网关、业务校验、编排、Get 回显
-	// 的全链路均不生效（传了也会被静默忽略），故 Create 不下发。
-	// ClusterType 的 "lts" 与废弃别名 "lindorm-for-lts" 服务端 equalsAny 都接受，
-	// 这里与控制台白屏保持一致使用 "lindorm-for-lts"。
+	// LTS instances do not need VpcId/VSwitchId: these two parameters take no effect
+	// end-to-end across the gateway, business validation, orchestration, or Get read back (they are silently ignored even if sent), so Create does not send them.
+	// The server-side equalsAny accepts both "lts" and the deprecated alias "lindorm-for-lts" for ClusterType;
+	// here "lindorm-for-lts" is used to stay consistent with the console UI.
 	request["ClusterType"] = "lindorm-for-lts"
 	resp, err := client.DoTeaRequest("POST", "hitsdb", "2020-06-15", "CreateLindormInstance", "", nil, request, nil)
 	if err != nil {
@@ -128,7 +128,7 @@ func resourceAlibabacloudStackLindormLtsInstanceRead(d *schema.ResourceData, met
 	d.Set("zone_id", data["ZoneId"])
 	d.Set("instance_status", data["InstanceStatus"])
 	d.Set("create_time", data["CreateTime"])
-	// DeletionProtection 在实例创建初期可能不返回，nil 时不要覆盖 state，避免触发不必要的 Update
+	// DeletionProtection may not be returned early after instance creation; do not overwrite the state when it is nil, to avoid triggering an unnecessary Update
 	if v, ok := data["DeletionProtection"]; ok && v != nil {
 		d.Set("deletion_protection", v)
 	}
@@ -240,8 +240,8 @@ func resourceAlibabacloudStackLindormLtsInstanceDelete(d *schema.ResourceData, m
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "ReleaseLindormInstance", errmsgs.AlibabacloudStackSdkGoERROR, "")
 	}
 
-	// 与 lindorm_instance 对齐：等实例从 state 消失再返回，避免下游 VSwitch/VPC 立刻
-	// 删除时撞上 ENI 未释放导致的 DependencyViolation。
+	// Aligned with lindorm_instance: wait until the instance disappears from state before returning, to avoid downstream VSwitch/VPC
+	// deletion immediately hitting DependencyViolation caused by unreleased ENIs.
 	deleteTimeout := d.Timeout(schema.TimeoutDelete)
 	stateConf := BuildStateConf([]string{"ACTIVATION", "DELETING", "CREATING"}, []string{}, deleteTimeout, 10*time.Second,
 		lindormService.LindormInstanceStateRefreshFunc(d.Id(), []string{}))

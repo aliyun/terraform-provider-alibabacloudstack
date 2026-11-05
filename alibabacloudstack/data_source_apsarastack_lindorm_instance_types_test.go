@@ -9,7 +9,7 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", dataSourceLindormInstanceTypesConfigDependence)
 
-	// id 形如 "<engine_type>:<name>"，取自 anyone 数据源查出的真实规格
+	// id has the form "<engine_type>:<name>", taken from a real spec queried via the anyone data source
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids": []string{"${data.alibabacloudstack_lindorm_instance_types.anyone.instance_types.0.id}"},
@@ -48,14 +48,14 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 		}),
 	}
 
-	// store 引擎的规格即 alibabacloudstack_lindorm_instance 中 core_spec 可取的值
+	// The specs of the store engine are exactly the values that core_spec can take in alibabacloudstack_lindorm_instance
 	storeEngineConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"engine_type": "store",
 		}),
 	}
 
-	// 过滤器取值来自上方 anyone 数据源查出的真实规格，避免写死环境差异的 cpu/memory 组合
+	// Filter values come from the real specs queried via the anyone data source above, avoiding hardcoded cpu/memory combinations that differ across environments
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"cpu":         "${data.alibabacloudstack_lindorm_instance_types.anyone.instance_types.0.cpu}",
@@ -97,8 +97,8 @@ func TestAccAlibabacloudStackLindormInstanceTypesDataSource(t *testing.T) {
 }
 
 func dataSourceLindormInstanceTypesConfigDependence(name string) string {
-	// 先查出 lindorm 引擎族的全量规格供各过滤步骤取用；限定 engine_type，
-	// 否则 instance_types.0 可能落在其它引擎族，叠加 cpu+memory+engine_type 后无法保证非空
+	// First query the full spec list of the lindorm engine family for the filter steps to use; engine_type is restricted,
+	// otherwise instance_types.0 could fall in another engine family, and combining cpu+memory+engine_type could not guarantee a non-empty result
 	return `
 data "alibabacloudstack_lindorm_instance_types" "anyone" {
   engine_type = "lindorm"

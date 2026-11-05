@@ -266,7 +266,7 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentUpdate(d *schema.Reso
 					"alibabacloudstack_cen_transit_router_vpc_attachment", "UpdateTransitRouterVpcAttachmentZones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 		}
-		// 属性或可用区变更后 attachment 会进入 Modifying，等待回到 Attached
+		// After an attribute or availability zone change the attachment enters Modifying; wait for it to return to Attached
 		err := cencen_instanceservice.WaitForAttachmentInstance(d.Id(), Attached, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
@@ -314,7 +314,7 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentRead(d *schema.Resour
 	}
 
 	if !found {
-		// ListTransitRouterVpcAttachments 已按 TransitRouterAttachmentId 精确过滤，未命中即资源已不存在
+		// ListTransitRouterVpcAttachments already filters exactly by TransitRouterAttachmentId; no match means the resource no longer exists
 		d.SetId("")
 	}
 	return nil

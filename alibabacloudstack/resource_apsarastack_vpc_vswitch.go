@@ -161,8 +161,8 @@ func resourceAlibabacloudStackSwitchRead(d *schema.ResourceData, meta interface{
 		d.Set("tags", tagsToMap(listTagResourcesObject))
 	}
 	d.Set("description", vswitch.Description)
-	// is_cgw 只存在于原始响应（SDK 结构体未建模该字段），属补充回读；
-	// 这次额外查询失败时保留 state 中的既有值，不因它中断整个 Read。
+	// is_cgw exists only in the raw response (the SDK struct does not model this field), so it is a supplementary read back;
+	// if this extra query fails, keep the existing value in state and do not abort the whole Read because of it.
 	rawVswitch, err := vpcService.DescribeVSwitchWithTeadsl(d.Id())
 	if err == nil {
 		d.Set("is_cgw", fmt.Sprint(rawVswitch["IsCgw"]) == "true")
@@ -249,9 +249,9 @@ func resourceAlibabacloudStackSwitchDelete(d *schema.ResourceData, meta interfac
 			if bresponse, ok := raw.(*vpc.DeleteVSwitchResponse); ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			// 仅在存在下游依赖（如刚释放实例的 ENI 未解绑）、操作过频限流（TaskConflict）
-			// 或服务端瞬态错误（5xx/Throttling）时重试，
-			// 其余错误立即失败，避免无差别重试拖慢销毁并掩盖真实错误。
+			// Retry only on downstream dependencies (e.g. ENIs of a just-released instance not yet detached),
+			// throttling from too-frequent operations (TaskConflict), or transient server-side errors (5xx/Throttling);
+			// fail immediately on other errors to avoid indiscriminate retries slowing down destruction and masking the real error.
 			if errmsgs.IsExpectedErrors(err, "DependencyViolation", "TaskConflict") || errmsgs.NeedRetry(err) {
 				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}

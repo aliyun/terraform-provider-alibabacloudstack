@@ -61,8 +61,8 @@ func resourceAlibabacloudStackMongodbShardingInstanceCsNodeAddress() *schema.Res
 			if !d.Get("enable_private_connection").(bool) && d.Get("enable_public_connection").(bool) {
 				return fmt.Errorf("can not enable public connection with out private connection")
 			}
-			// node_id 常引用上游资源的输出（如 sharding 实例的节点 id），plan 阶段该值仍是 unknown，
-			// 此时 d.Get 返回的是零值而非用户真实取值，必须跳过校验，否则 plan 必然失败。
+			// node_id often references the output of an upstream resource (e.g. the node id of a sharding instance); during plan this value is still unknown,
+			// and d.Get then returns the zero value rather than the user's real value, so validation must be skipped, otherwise plan would inevitably fail.
 			if d.NewValueKnown("node_id") {
 				nodeId := d.Get("node_id").(string)
 				if !strings.HasPrefix(nodeId, "dds-") {
