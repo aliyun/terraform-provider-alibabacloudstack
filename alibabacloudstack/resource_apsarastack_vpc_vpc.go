@@ -356,9 +356,9 @@ func resourceAlibabacloudStackVpcDelete(d *schema.ResourceData, meta interface{}
 			if ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			// 仅在存在下游依赖（如 VSwitch/NAT 未解绑）、操作过频限流（TaskConflict）
-			// 或服务端瞬态错误（5xx/Throttling）时重试，
-			// 其余错误立即失败，避免无差别重试拖慢销毁并掩盖真实错误。
+			// Retry only on downstream dependencies (e.g. VSwitch/NAT not yet detached),
+			// throttling from too-frequent operations (TaskConflict), or transient server-side errors (5xx/Throttling);
+			// fail immediately on other errors to avoid indiscriminate retries slowing down destruction and masking the real error.
 			if errmsgs.IsExpectedErrors(err, "DependencyViolation", "DependencyViolation.VSwitch", "TaskConflict") || errmsgs.NeedRetry(err) {
 				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
@@ -404,17 +404,6 @@ func buildAlibabacloudStackVpcArgs(d *schema.ResourceData, meta interface{}) *vp
 
 	if v, ok := connectivity.GetResourceDataOk(d, "vpc_name", "name"); ok {
 		request.VpcName = v.(string)
-	}
-
-	if v, ok := d.GetOk("tags"); ok {
-		tags := make([]vpc.CreateVpcTag, 0)
-		for key, value := range v.(map[string]interface{}) {
-			tags = append(tags, vpc.CreateVpcTag{
-				Key:   key,
-				Value: value.(string),
-			})
-		}
-		request.Tag = &tags
 	}
 
 	return request
