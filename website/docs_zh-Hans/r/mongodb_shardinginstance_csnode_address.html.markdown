@@ -1,10 +1,10 @@
 ﻿---
-subcategory: "云数据库 MongoDB" 
-layout: "alibabacloudstack" 
-page_title: "Alibabacloudstack: alibabacloudstack_mongodb_shardinginstance_csnode_address" 
+subcategory: "云数据库 MongoDB"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_mongodb_shardinginstance_csnode_address"
 sidebar_current: "docs-Alibabacloudstack-resource-mongodb-shardinginstance-csnode-address"
-description: |- 
-管理Mongodb分片实例cs节点的网络链接地址。
+description: |-
+  管理Mongodb分片实例cs节点的网络链接地址。
 ---
 
 # alibabacloudstack_mongodb_shardinginstance_csnode_address
