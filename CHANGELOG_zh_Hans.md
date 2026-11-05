@@ -1,3 +1,52 @@
+# 3.18.33
+
+## 新增
+
+1. PolarDB 集群版备份的编排能力（`alibabacloudstack_polardb_cluster_backup`）
+2. PolarDB 集群版备份列表的查询能力（`alibabacloudstack_polardb_cluster_backups`）
+3. ASCM 自定义角色对应 RAM 角色 ARN 的查询能力（`alibabacloudstack_account_ascm_custom_role_arn`）
+4. Lindorm 实例多可用区（双可用区）部署的编排能力：`alibabacloudstack_lindorm_instance` 支持 `standby_zone_id`/`standby_vswitch_id` 字段（需成对指定），并新增 `core_spec` 字段与 `topology_type`、`arch_version` 只读属性
+5. `alibabacloudstack_lindorm_instances` 数据源新增 `topology_type`、`arch_version`、`standby_zone_id`、`arbiter_zone_id`、`standby_vswitch_id`、`arbiter_vswitch_id` 输出属性
+6. `alibabacloudstack_elasticsearch_instances` 数据源 `instances` 新增 `vpc_id` 输出属性
+
+## 修复
+
+1. 修复 `alibabacloudstack_cen_transit_router_route_entry` 创建时 `transit_router_route_entry_next_hop_id` 被错误赋给 `Description` 请求参数、导致 Attachment 类型路由条目创建报 MissingParam 失败的问题
+2. 修复 `alibabacloudstack_cen_transit_router_vbr_attachment` / `alibabacloudstack_cen_transit_router_vpc_attachment` 的多个问题：创建请求缺少 `TransitRouterId` 参数；创建失败时重试循环吞掉真实错误；Read 在 attachment 未就绪时直接报错（现按 ID 精确查询、未命中即移出 state）；变配后不等待回到 Attached；删除等待超时消息不透出真实状态。两资源同时新增 `timeouts` 块（Create 10m / Update 5m / Delete 15m），Delete 默认超时放宽到 15 分钟并补充文档 Timeouts 段
+3. 修复 `alibabacloudstack_vpc_vswitch` 的 `is_cgw` 属性从不回读的问题（现通过原始响应回读；补充查询失败时保留 state 既有值，不中断 Read）
+4. 修复 `alibabacloudstack_vpc_vpc` / `alibabacloudstack_vpc_vswitch` 删除时无差别重试拖慢销毁并掩盖真实错误的问题：现仅对依赖冲突（DependencyViolation）、操作过频（TaskConflict）及服务端瞬态错误重试，其余错误立即失败
+5. 修复 `alibabacloudstack_oss_bucket` 以 ASCM 自定义角色凭证创建时 bucket 不归属指定资源集的问题：创建请求即携带 provider 托管的 `ascm:tag/rg` 资源集标签，后续标签写入自动保留该标签；`tags` 字段中显式设置 `ascm:tag/rg` 将在 plan 阶段报错
+6. 修复 `alibabacloudstack_kms_key` 创建后移入资源集（ReBindResourceGroup）失败时错误被吞、密钥泄漏残留的问题：现透出失败错误并自动对已创建的密钥计划删除
+7. 修复实例新建初期手动备份被平台初始自动备份任务拒绝（BackupJobExists）导致创建直接失败的问题，涉及 `alibabacloudstack_rds_backup`、`alibabacloudstack_polardb_backup`、`alibabacloudstack_polardbx_backup`：现均在 Create 超时窗口内自动重试；`alibabacloudstack_polardbx_backup` 的“已有备份任务进行中”前置检查同步改为可重试。另修复 `alibabacloudstack_rds_backup` Read 在备份列表为空时 `Backup[0]` 越界 panic
+8. 修复 `alibabacloudstack_polardb_readwrite_splitting_connection` Update/Delete 直接使用用户填写的 `connection_id` 作为 DBProxyEndpointId、与后端真实 endpoint ID 不一致时操作失败的问题：未填写时自动从后端解析真实 ID；Delete 等待语义由“等 Running”修正为“等代理 endpoint 消失”
+9. 修复 `alibabacloudstack_polardb_cluster_proxy_types` 数据源在新版 ASCM 下查不到规格、以及 `polar.o.maxscale.x2` 代系规格 `core_count` 解析失败导致整体报错的问题：resourceType 先按 `polardb-proxy` 查询、失败回退 `POLARDB`，`core_count` 从 proxyClassLabel 数字前缀解析，无法解析的条目跳过并告警
+10. 修复 `alibabacloudstack_lindorm_instances` 数据源字段映射错误：`engine_type` 原声明为整型但实际接收字符串（恒为零值），现改为字符串并将多可用区实例的 `lindorm_dual_zone` 归一化为 `lindorm`；同时修复环境无实例时响应缺 `InstanceList` 导致 Read panic
+11. 修复 `alibabacloudstack_lindorm_instance_types` 数据源 `engine_type` 过滤条件声明后实际不生效的问题，并支持 `store` 取值（返回可供 `alibabacloudstack_lindorm_instance` 的 `core_spec` 使用的规格）
+12. 修复 `alibabacloudstack_lindorm_instance` / `alibabacloudstack_lindorm_lts_instance` 的多个问题：Read 对缺失的 `EngineList`/`DeletionProtection` 直接类型断言导致 panic；创建时配置的 `deletion_protection` 被丢弃（创建接口不支持该参数，现创建后补设且仅显式开启时下发）；磁盘参数与 CreateLindormInstance 契约不符（LV 走 CoreDiskSize、HDD/SSD 走 LocalDiskSize/LocalDiskNum，InstanceStorage 统一带 G 单位下发）；删除不等待实例真正释放、导致紧随其后的 VSwitch/VPC 删除报 DependencyViolation；变配遇 Instance.IsUpdating 不重试
+13. 修复 `alibabacloudstack_slb_listener` 创建后立即读取因列表接口缓存未同步偶发 NotFound、触发 inconsistent-result-after-apply 报错的问题（创建后等待缓存同步）
+14. 修复 `alibabacloudstack_slb_servercertificate` 创建的多个问题：UploadServerCertificate 返回空证书 ID 时不再继续（原会 panic/产生错误 ID）；创建后等待证书 Available 并等待缓存同步；WaitForSlbServerCertificate 忙等循环与超时错误信息修正
+15. 修复 `alibabacloudstack_hologram_instance` Read 不回填 `instance_id` 属性的问题
+16. 修复 `alibabacloudstack_mongodb_sharding_instance_cs_node_address` / `..._mongos_node_address` / `..._shard_node_address` 在 `node_id` 引用上游资源输出（plan 阶段值未知）时前缀校验取到零值、导致 plan 必然失败的问题：现仅在 `node_id` 值已知时执行校验
+17. 修复 `alibabacloudstack_gpdb_instance_types` 数据源字段映射错误：`memory` 误用 CPU 解析函数、`engine_version` 误取 engineVersionLabel（现取 engineVersion），并回填 schema 已声明但从未赋值的 `engine` 属性
+18. 修复 `alibabacloudstack_elasticsearch_instances` 数据源在 ListInstance 响应缺失 `dataNode`/`haveKibana`/`masterConfiguration`/`networkConfig` 等字段时直接类型断言导致 Read panic 的问题
+19. 修复 `alibabacloudstack_log_project` 创建重试超时后未检查错误、Terraform 误认为创建成功而后续 Read 找不到资源的问题
+20. 修复 provider 幂等 Token 机制导致的偶发创建失败：ClientToken 原在重试循环外只生成一次且同秒内可能碰撞，现每次重试重新生成（UUID v7、超长 action 名截断）；`Forbidden`、`IdempotentParameterMismatch`、`InvalidTimeStamp.Expired` 纳入可重试错误（注：权限确实缺失的场景会在重试预算耗尽后才报错，失败耗时较此前变长）
+
+## 变更
+
+1. **（不兼容）** `alibabacloudstack_lindorm_instance` 的 `local_disk_size` 字段类型由字符串改为整数，并新增 100–5000（GiB）取值校验；存量配置中带单位或非数字的写法需改为纯数字
+2. `alibabacloudstack_lindorm_instance` 的 `deletion_protection` 字段由 Optional+Computed 改为 Optional+默认 `false`：未显式配置时不再采用后端返回值，创建时显式开启才会下发
+3. `alibabacloudstack_polardb_readwrite_splitting_connection` 的 `connection_id` 字段由 Required+ForceNew 放宽为 Optional+Computed：不填时由 provider 自动解析后端真实 endpoint ID（该字段同时被标记废弃，见「废弃」）
+4. 全 provider 超时机制标准化：约 50 个资源补充 `timeouts` 块声明（此前代码使用超时值但用户无法自定义，现可通过 `timeouts` 块覆盖，新声明默认 20 分钟）；修正多处 CRUD 等待用错超时常量（如 Update/Delete 等待误用 Create 超时）；部分资源默认超时调整为标准档位，例如 `alibabacloudstack_adb_dbcluster` Create/Delete 50→60 分钟、Update 72→60 分钟，`alibabacloudstack_alikafka_instance` Update 120→60 分钟，`alibabacloudstack_bastionhost_instance` Create 40→45 分钟，`alibabacloudstack_ecs_dedicatedhost` Create/Update 11→15 分钟，`alibabacloudstack_polardb_cluster_instance` Update/Delete 40→45 分钟，`alibabacloudstack_polardb_proxy` 与 `alibabacloudstack_rds_db_proxy` Create/Update 40→45 分钟，`alibabacloudstack_polardbx_backup` Create 60→20 分钟，`alibabacloudstack_expressconnect_virtualborderrouter` Update 2→5 分钟并新增 Delete 20 分钟，`alibabacloudstack_lindorm_instance` / `alibabacloudstack_lindorm_lts_instance` 新增 Create 60 / Update 20 / Delete 40 分钟
+5. **（不兼容）** 移除 23 条代码中从未引用的死超时声明（如 `alibabacloudstack_alikafka_topic` 整个 `timeouts` 块、`alibabacloudstack_bastionhost_instance` 的 Update/Delete、`alibabacloudstack_ecs_dedicatedhost` 的 Delete、`alibabacloudstack_cpfs_filesystem`、`alibabacloudstack_csb_project`、`alibabacloudstack_maxcompute_project`、`alibabacloudstack_rds_readonly_instance` 的 Delete 等）：存量配置若对这些资源显式书写了对应 `timeouts` 块，升级后将报错，需删除相应块（原声明本就不生效，删除无行为损失）
+6. 文档更新：`alibabacloudstack_oss_bucket` 与 KMS 资源（`kms_key`/`kms_alias`/`kms_secret`/`kms_ciphertext`）文档补充凭证与权限要求说明（支持的凭证类型、不支持裸用户 AK/SK、跨组织账号与 RAM 角色，及所需权限点清单）；`oss_bucket` 文档补充 `tags` 字段与托管标签说明；`lindorm_instance` 文档补充多可用区示例、`local_disk_num` 仅对 HDD/SSD 生效等磁盘契约说明；中英文文档同步
+
+## 废弃
+
+1. `alibabacloudstack_polardb_readwrite_splitting_connection` 的 `connection_id` 字段废弃：将在 3.21.0 版本变为只读（Computed）；显式填写时按原值透传，不填时由 provider 自动解析后端真实 endpoint ID
+
+---
+
 # 3.18.32
 
 ## 新增
