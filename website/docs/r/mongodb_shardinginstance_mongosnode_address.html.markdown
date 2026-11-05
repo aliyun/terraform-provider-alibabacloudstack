@@ -3,11 +3,11 @@ subcategory: "ApsaraDB for MongoDB"
 layout: "alibabacloudstack" 
 page_title: "Alibabacloudstack: alibabacloudstack_mongodb_shardinginstance_mongosnode_address" 
 description: |- 
-Manage Mongodb Sharding Instance CS Node Address.
+  Manage Mongodb Sharding Instance Mongos Node Address.
 ---
 
-# alibabacloudstack_mongodb_account
-Manage Mongodb Sharding Instance CS Node Address
+# alibabacloudstack_mongodb_shardinginstance_mongosnode_address
+Manage Mongodb Sharding Instance Mongos Node Address
 
 ## Example Usage
 ```hcl

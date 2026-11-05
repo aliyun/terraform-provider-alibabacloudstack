@@ -3,9 +3,9 @@ subcategory: "Elastic Compute Service"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_ramroleattachment"
 description: |-
-Provides a ECS Ramroleattachment resource to bind a RAM role to one or more ECS instances.
+  Provides a ECS Ramroleattachment resource to bind a RAM role to one or more ECS instances.
 
--> **NOTE:** This resource can also be referred to by the following alias: `alibabacloudstack_ram_role_attachment`
+  -> **NOTE:** This resource can also be referred to by the following alias: `alibabacloudstack_ram_role_attachment`
 ---
 
 # alibabacloudstack_ecs_ramroleattachment
