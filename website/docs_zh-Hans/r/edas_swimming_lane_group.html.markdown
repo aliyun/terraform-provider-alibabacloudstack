@@ -39,18 +39,10 @@ resource "alibabacloudstack_edas_swimming_lane_group" "example" {
 * `id` - 游泳道组的ID。
 * `group_id` - 游泳道组的组ID。
 
-## 导入
+## Import
 
 EDAS游泳道组可以使用id进行导入，例如
 
 ```bash
 $ terraform import alibabacloudstack_edas_swimming_lane_group.example logical_region_id:group_id
-```
-
-## Import
-
-alibabacloudstack_edas_swimming_lane_group 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_edas_swimming_lane_group.example <id>
 ```

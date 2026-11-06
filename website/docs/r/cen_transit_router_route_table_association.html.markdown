@@ -83,8 +83,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-alibabacloudstack_cen_transit_router_route_table_association can be imported using the id, e.g.
+alibabacloudstack_cen_transit_router_route_table_association can be imported using the composite ID in the format `<transit_router_route_table_id>:<transit_router_attachment_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_cen_transit_router_route_table_association.example <id>
+$ terraform import alibabacloudstack_cen_transit_router_route_table_association.example <transit_router_route_table_id>:<transit_router_attachment_id>
 ```

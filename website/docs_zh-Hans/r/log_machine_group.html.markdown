@@ -53,18 +53,10 @@ resource "alibabacloudstack_log_machine_group" "example" {
 * `identify_list` - 机器标识列表。例如，当 `identify_type` 设置为 `ip` 时，该列表包含具体的 IP 地址。
 * `topic` - 机器组主题。
 
-## 导入
+## Import
 
 日志机器组可以使用 id 导入，例如
 
 ```bash
 $ terraform import alibabacloudstack_log_machine_group.example tf-log:tf-machine-group
-```
-
-## Import
-
-alibabacloudstack_log_machine_group 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_log_machine_group.example <id>
 ```

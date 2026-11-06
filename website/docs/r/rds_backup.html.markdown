@@ -82,8 +82,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-alibabacloudstack_rds_backup can be imported using the id, e.g.
+alibabacloudstack_rds_backup can be imported using the composite ID in the format `<instance_id>:<backup_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_rds_backup.example <id>
+$ terraform import alibabacloudstack_rds_backup.example <instance_id>:<backup_id>
 ```

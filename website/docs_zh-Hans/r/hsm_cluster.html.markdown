@@ -102,14 +102,6 @@ resource "alibabacloudstack_hsm_cluster" "example" {
 
 * `id` - HSM集群的ID。
 
-## 导入
-
-可以使用id导入HSM集群，例如：
-
-```shell
-$ terraform import alibabacloudstack_hsm_cluster.example cl-abc123456
-```
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
@@ -118,8 +110,8 @@ $ terraform import alibabacloudstack_hsm_cluster.example cl-abc123456
 
 ## Import
 
-alibabacloudstack_hsm_cluster 可通过ID导入，例如：
+可以使用id导入HSM集群，例如：
 
 ```shell
-$ terraform import alibabacloudstack_hsm_cluster.example <id>
+$ terraform import alibabacloudstack_hsm_cluster.example cl-abc123456
 ```

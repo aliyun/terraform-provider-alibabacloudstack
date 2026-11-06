@@ -86,14 +86,6 @@ resource "alibabacloudstack_expressconnect_virtualborderrouter" "example" {
 
 * `update` - (默认为2分钟)用于更新虚拟边界路由器时。
 
-## 导入
-
-可以通过id导入Express Connect虚拟边界路由器，例如：
-
-```bash
-$ terraform import alibabacloudstack_expressconnect_virtualborderrouter.example <id>
-```
-
 ## Timeouts
 
 * `update` - （默认5分钟）更新资源时使用。
@@ -101,8 +93,8 @@ $ terraform import alibabacloudstack_expressconnect_virtualborderrouter.example 
 
 ## Import
 
-alibabacloudstack_expressconnect_virtualborderrouter 可通过ID导入，例如：
+可以通过id导入Express Connect虚拟边界路由器，例如：
 
-```shell
+```bash
 $ terraform import alibabacloudstack_expressconnect_virtualborderrouter.example <id>
 ```

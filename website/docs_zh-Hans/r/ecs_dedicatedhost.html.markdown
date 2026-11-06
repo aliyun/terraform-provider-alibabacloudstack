@@ -168,14 +168,6 @@ resource "alibabacloudstack_ecs_dedicated_host" "with_zone" {
 * `delete` - (默认为1分钟)用于删除专有宿主机时。
 * `update` - (默认为11分钟)用于更新专有宿主机时。
 
-## 导入
-
-ECS专有宿主机可以通过id导入，例如：
-
-```bash
-$ terraform import alibabacloudstack_ecs_dedicated_host.default dh-2zedmxxxx
-```
-
 ## Timeouts
 
 * `create` - （默认15分钟）创建资源时使用。
@@ -183,8 +175,8 @@ $ terraform import alibabacloudstack_ecs_dedicated_host.default dh-2zedmxxxx
 
 ## Import
 
-alibabacloudstack_ecs_dedicatedhost 可通过ID导入，例如：
+ECS专有宿主机可以通过id导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_ecs_dedicatedhost.example <id>
+```bash
+$ terraform import alibabacloudstack_ecs_dedicated_host.default dh-2zedmxxxx
 ```

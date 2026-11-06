@@ -123,8 +123,8 @@ resource "alibabacloudstack_polardb_database" "default" {
 
 ## Import
 
-alibabacloudstack_polardbx_database 可通过ID导入，例如：
+alibabacloudstack_polardbx_database 可以使用组合 ID 导入，格式为 `<instance_id>:<database_name>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_polardbx_database.example <id>
+$ terraform import alibabacloudstack_polardbx_database.example <instance_id>:<database_name>
 ```

@@ -156,8 +156,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-alibabacloudstack_apigateway_api can be imported using the id, e.g.
+alibabacloudstack_apigateway_api can be imported using the composite ID in the format `<group_id>:<api_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_apigateway_api.example <id>
+$ terraform import alibabacloudstack_apigateway_api.example <group_id>:<api_id>
 ```

@@ -52,8 +52,10 @@ The following attributes are exported:
 
 ## Import
 
-EDAS K8s Cluster can be imported using the cluster ID (the EDAS internal cluster ID returned after import), e.g.
+EDAS K8s Cluster can be imported using the cluster ID (the internal EDAS cluster ID returned after import), e.g.
 
+```shell
+$ terraform import alibabacloudstack_edas_k8s_cluster.example <cluster_id>
 ```
-$ terraform import alibabacloudstack_edas_k8s_cluster.example 81453e4b-4df0-4592-xxxx-b835a2eexxxx
-```
+
+The composite format `<namespace_id>:<cluster_id>` is also accepted. When only the cluster ID is given, the provider automatically looks up and fills in the namespace ID.

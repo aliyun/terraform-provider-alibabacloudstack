@@ -55,18 +55,10 @@ resource "alibabacloudstack_ehpc_job_template" "default" {
 * `id` - Terraform 中作业模板的资源 ID。它是作业模板的唯一标识符。
 * `re_runable` - 作业是否支持重新运行。返回 true 或 false，表示作业是否可以重新提交运行。
 
-## 导入
+## Import
 
 EHPC 作业模板可以使用 id 导入，例如：
 
 ```bash
-$ terraform import alibabacloudstack_ehpc_job_template.example <id>
-```
-
-## Import
-
-alibabacloudstack_ehpc_job_template 可通过ID导入，例如：
-
-```shell
 $ terraform import alibabacloudstack_ehpc_job_template.example <id>
 ```

@@ -137,5 +137,5 @@ resource "alibabacloudstack_mongodb_shardinginstance_csnode_address" "default" {
 alibabacloudstack_mongodb_shardinginstance_csnode_address 可通过ID导入，例如：
 
 ```shell
-$ terraform import alibabacloudstack_mongodb_shardinginstance_csnode_address.example <id>
+$ terraform import alibabacloudstack_mongodb_shardinginstance_csnode_address.example <db_instance_id>:<node_id>
 ```

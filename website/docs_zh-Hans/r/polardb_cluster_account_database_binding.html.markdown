@@ -101,18 +101,10 @@ resource "alibabacloudstack_polardb_cluster_account_database_binding" "example" 
 
 * `id` - 绑定的 ID，格式为 `{DBClusterId}:{AccountName}`。
 
-## 导入
+## Import
 
 可以使用 id 导入 PolarDB 集群账户数据库绑定，例如：
 
 ```bash
 $ terraform import alibabacloudstack_polardb_cluster_account_database_binding.example pc-12345678:test_account
-```
-
-## Import
-
-alibabacloudstack_polardb_cluster_account_database_binding 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_polardb_cluster_account_database_binding.example <id>
 ```

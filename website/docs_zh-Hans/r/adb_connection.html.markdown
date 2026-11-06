@@ -65,18 +65,10 @@ resource "alibabacloudstack_adb_connection" "default" {
   * `connection_string` - 用于访问ADB集群的完整连接字符串。
   * `ip_address` - 与连接字符串关联的IP地址。
 
-## 导入
+## Import
 
 ADB连接可以通过id导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_adb_connection.example am-12345678
-```
-
-## Import
-
-alibabacloudstack_adb_connection 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_adb_connection.example <id>
 ```

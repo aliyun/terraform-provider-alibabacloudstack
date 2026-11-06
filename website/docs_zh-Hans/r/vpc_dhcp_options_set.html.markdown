@@ -63,18 +63,10 @@ resource "alibabacloudstack_vpc_dhcp_options_set" "default" {
   * `dhcp_options_set_id` - DHCP 选项集的 ID
   * `status` - DHCP 选项集的状态。取值：`Available`、`Pending`、`Deleting`
 
-## 导入
+## Import
 
 DHCP 选项集可以使�?DhcpOptionsSetId 导入，例如：
 
 ```
 $ terraform import alibabacloudstack_vpc_dhcp_options_set.example dos-12345678
-```
-
-## Import
-
-alibabacloudstack_vpc_dhcp_options_set 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_vpc_dhcp_options_set.example <id>
 ```

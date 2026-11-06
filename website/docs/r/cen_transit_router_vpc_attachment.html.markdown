@@ -113,8 +113,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-alibabacloudstack_cen_transit_router_vpc_attachment can be imported using the id, e.g.
+alibabacloudstack_cen_transit_router_vpc_attachment can be imported using the composite ID in the format `<cen_id>:<transit_router_id>:<attachment_id>:<vpc_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_cen_transit_router_vpc_attachment.example <id>
+$ terraform import alibabacloudstack_cen_transit_router_vpc_attachment.example <cen_id>:<transit_router_id>:<attachment_id>:<vpc_id>
 ```

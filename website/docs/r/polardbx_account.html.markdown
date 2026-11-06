@@ -82,8 +82,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-alibabacloudstack_polardbx_account can be imported using the id, e.g.
+alibabacloudstack_polardbx_account can be imported using the composite ID in the format `<instance_id>:<account_name>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_polardbx_account.example <id>
+$ terraform import alibabacloudstack_polardbx_account.example <instance_id>:<account_name>
 ```

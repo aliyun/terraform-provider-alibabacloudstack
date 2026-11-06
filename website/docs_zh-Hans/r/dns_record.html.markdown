@@ -63,8 +63,8 @@ output "record" {
 
 ## Import
 
-alibabacloudstack_dns_record 可通过ID导入，例如：
+alibabacloudstack_dns_record 可以使用组合 ID 导入，格式为 `<zone_id>:<record_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_dns_record.example <id>
+$ terraform import alibabacloudstack_dns_record.example <zone_id>:<record_id>
 ```

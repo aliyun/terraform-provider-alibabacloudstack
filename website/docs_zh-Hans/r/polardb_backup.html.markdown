@@ -73,8 +73,8 @@ resource "alibabacloudstack_polardb_backup" "default" {
 
 ## Import
 
-alibabacloudstack_polardb_backup 可通过ID导入，例如：
+alibabacloudstack_polardb_backup 可以使用组合 ID 导入，格式为 `<db_instance_id>:<backup_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_polardb_backup.example <id>
+$ terraform import alibabacloudstack_polardb_backup.example <db_instance_id>:<backup_id>
 ```

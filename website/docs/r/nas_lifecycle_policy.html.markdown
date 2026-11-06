@@ -70,8 +70,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-alibabacloudstack_nas_lifecycle_policy can be imported using the id, e.g.
+alibabacloudstack_nas_lifecycle_policy can be imported using the composite ID in the format `<file_system_id>:<lifecycle_policy_name>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_nas_lifecycle_policy.example <id>
+$ terraform import alibabacloudstack_nas_lifecycle_policy.example <file_system_id>:<lifecycle_policy_name>
 ```

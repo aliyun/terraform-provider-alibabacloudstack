@@ -70,8 +70,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-alibabacloudstack_mongodb_account can be imported using the id, e.g.
+alibabacloudstack_mongodb_account can be imported using the composite ID in the format `<account_name>:<instance_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_mongodb_account.example <id>
+$ terraform import alibabacloudstack_mongodb_account.example <account_name>:<instance_id>
 ```

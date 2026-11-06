@@ -77,22 +77,14 @@ resource "alibabacloudstack_polardb_cluster_account" "example" {
 * `account_status` - 账户状态。
 * `account_password_valid_time` - 账户密码的有效期。
 
-## 导入
-
-可以使用 id 导入 PolarDB 集群账户，例如：
-
-```bash
-$ terraform import alibabacloudstack_polardb_cluster_account.example pc-12345678:test_account
-```
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
 
 ## Import
 
-alibabacloudstack_polardb_cluster_account 可通过ID导入，例如：
+可以使用 id 导入 PolarDB 集群账户，例如：
 
-```shell
-$ terraform import alibabacloudstack_polardb_cluster_account.example <id>
+```bash
+$ terraform import alibabacloudstack_polardb_cluster_account.example pc-12345678:test_account
 ```

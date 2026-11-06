@@ -39,8 +39,8 @@ resource "alibabacloudstack_data_works_user" "default" {
 
 ## Import
 
-alibabacloudstack_data_works_user 可通过ID导入，例如：
+alibabacloudstack_data_works_user 可以使用组合 ID 导入，格式为 `<project_id>:<user_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_data_works_user.example <id>
+$ terraform import alibabacloudstack_data_works_user.example <project_id>:<user_id>
 ```

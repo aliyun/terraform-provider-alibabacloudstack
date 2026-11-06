@@ -90,22 +90,14 @@ resource "alibabacloudstack_gpdb_account" "default" {
 
 * `create` - (默认为5分钟)用于创建账户时。
 
-## 导入
-
-GPDB账户可以使用ID导入，例如：
-
-```bash
-$ terraform import alicloud_gpdb_account.example <db_instance_id>:<account_name>
-```
-
 ## Timeouts
 
 * `create` - （默认5分钟）创建资源时使用。
 
 ## Import
 
-alibabacloudstack_gpdb_account 可通过ID导入，例如：
+GPDB账户可以使用ID导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_gpdb_account.example <id>
+```bash
+$ terraform import alicloud_gpdb_account.example <db_instance_id>:<account_name>
 ```

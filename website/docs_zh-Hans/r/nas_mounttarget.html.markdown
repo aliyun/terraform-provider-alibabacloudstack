@@ -88,8 +88,8 @@ resource "alibabacloudstack_nas_mounttarget" "default" {
 
 ## Import
 
-alibabacloudstack_nas_mounttarget 可通过ID导入，例如：
+alibabacloudstack_nas_mounttarget 可以使用组合 ID 导入，格式为 `<file_system_id>:<mount_target_domain>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_nas_mounttarget.example <id>
+$ terraform import alibabacloudstack_nas_mounttarget.example <file_system_id>:<mount_target_domain>
 ```

@@ -77,8 +77,8 @@ The following arguments are supported:
 
 ## Import
 
-alibabacloudstack_polardbx_database can be imported using the id, e.g.
+alibabacloudstack_polardbx_database can be imported using the composite ID in the format `<instance_id>:<database_name>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_polardbx_database.example <id>
+$ terraform import alibabacloudstack_polardbx_database.example <instance_id>:<database_name>
 ```

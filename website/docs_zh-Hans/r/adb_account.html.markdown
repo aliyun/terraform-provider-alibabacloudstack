@@ -53,8 +53,8 @@ resource "alibabacloudstack_adb_account" "default" {
 
 ## Import
 
-alibabacloudstack_adb_account 可通过ID导入，例如：
+alibabacloudstack_adb_account 可以使用组合 ID 导入，格式为 `<db_cluster_id>:<account_name>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_adb_account.example <id>
+$ terraform import alibabacloudstack_adb_account.example <db_cluster_id>:<account_name>
 ```

@@ -115,14 +115,6 @@ resource "alibabacloudstack_adb_db_cluster" "default" {
 * `port` - 集群的端口。
 * `zone_id` - 资源所在的可用区 ID。
 
-## 导入
-
-AnalyticDB for MySQL (ADB) DBCluster 可以通过 id 导入，例如
-
-```bash
-$ terraform import alibabacloudstack_adb_db_cluster.example <id>
-```
-
 ## Timeouts
 
 * `create` - （默认60分钟）创建资源时使用。
@@ -131,8 +123,8 @@ $ terraform import alibabacloudstack_adb_db_cluster.example <id>
 
 ## Import
 
-alibabacloudstack_adb_dbcluster 可通过ID导入，例如：
+AnalyticDB for MySQL (ADB) DBCluster 可以通过 id 导入，例如
 
-```shell
-$ terraform import alibabacloudstack_adb_dbcluster.example <id>
+```bash
+$ terraform import alibabacloudstack_adb_db_cluster.example <id>
 ```

@@ -44,8 +44,8 @@ The following attributes are exported:
 
 ## Import
 
-alibabacloudstack_ascm_ram_role can be imported using the id, e.g.
+alibabacloudstack_ascm_ram_role can be imported using the composite ID in the format `<role_name>:<role_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_ascm_ram_role.example <id>
+$ terraform import alibabacloudstack_ascm_ram_role.example <role_name>:<role_id>
 ```

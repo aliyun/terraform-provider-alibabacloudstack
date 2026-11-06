@@ -81,8 +81,8 @@ The following attributes are exported from the API response:
 
 ## Import
 
-alibabacloudstack_mqtt_topic can be imported using the id, e.g.
+alibabacloudstack_mqtt_topic can be imported using the composite ID in the format `<instance_id>:<topic>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_mqtt_topic.example <id>
+$ terraform import alibabacloudstack_mqtt_topic.example <instance_id>:<topic>
 ```

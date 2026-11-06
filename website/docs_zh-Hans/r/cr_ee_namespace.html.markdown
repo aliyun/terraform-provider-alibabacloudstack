@@ -45,18 +45,10 @@ resource "alibabacloudstack_cr_ee_namespace" "my-namespace" {
 
 * `id` - 资源 ID，格式为 `{instance_id}:{namespace}`。
 
-## 导入
+## Import
 
 容器镜像企业版命名空间可以使用 `instance_id` 和 `name` 通过冒号连接进行导入，例如：
 
 ```
 $ terraform import alibabacloudstack_cr_ee_namespace.example cri-xxx:my-namespace
-```
-
-## Import
-
-alibabacloudstack_cr_ee_namespace 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_cr_ee_namespace.example <id>
 ```

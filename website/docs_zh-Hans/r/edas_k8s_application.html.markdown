@@ -294,14 +294,6 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   * `type` - 挂载类型。
 * `package_version` - 部署包的版本号。
 
-## 导入
-
-EDAS k8s 应用程序可以通过以下方式导入，例如：
-
-```bash
-$ terraform import alibabacloudstack_edas_k8s_application.new_k8s_application application_id
-```
-
 ## Timeouts
 
 * `create` - （默认30分钟）创建资源时使用。
@@ -310,8 +302,8 @@ $ terraform import alibabacloudstack_edas_k8s_application.new_k8s_application ap
 
 ## Import
 
-alibabacloudstack_edas_k8s_application 可通过ID导入，例如：
+EDAS k8s 应用程序可以通过以下方式导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_edas_k8s_application.example <id>
+```bash
+$ terraform import alibabacloudstack_edas_k8s_application.new_k8s_application application_id
 ```

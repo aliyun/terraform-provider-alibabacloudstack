@@ -518,8 +518,8 @@ The following attributes are exported:
 
 ## Import
 
-alibabacloudstack_api_gateway_v2_mcpserver can be imported using the id, e.g.
+alibabacloudstack_api_gateway_v2_mcpserver can be imported using the composite ID in the format `<gw_instance_id>:<name>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_api_gateway_v2_mcpserver.example <id>
+$ terraform import alibabacloudstack_api_gateway_v2_mcpserver.example <gw_instance_id>:<name>
 ```

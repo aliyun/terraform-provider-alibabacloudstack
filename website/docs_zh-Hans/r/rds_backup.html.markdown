@@ -80,8 +80,8 @@ resource "alibabacloudstack_rds_backup" "default" {
 
 ## Import
 
-alibabacloudstack_rds_backup 可通过ID导入，例如：
+alibabacloudstack_rds_backup 可以使用组合 ID 导入，格式为 `<instance_id>:<backup_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_rds_backup.example <id>
+$ terraform import alibabacloudstack_rds_backup.example <instance_id>:<backup_id>
 ```

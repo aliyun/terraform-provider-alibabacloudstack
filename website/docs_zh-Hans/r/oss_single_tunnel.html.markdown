@@ -81,8 +81,8 @@ resource "alibabacloudstack_oss_single_tunnel" "default" {
 
 ## Import
 
-alibabacloudstack_oss_single_tunnel 可通过ID导入，例如：
+alibabacloudstack_oss_single_tunnel 可以使用组合 ID 导入，格式为 `<cluster>:<vpc_id>:<vip>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_oss_single_tunnel.example <id>
+$ terraform import alibabacloudstack_oss_single_tunnel.example <cluster>:<vpc_id>:<vip>
 ```

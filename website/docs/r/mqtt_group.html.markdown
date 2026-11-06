@@ -64,8 +64,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-alibabacloudstack_mqtt_group can be imported using the id, e.g.
+alibabacloudstack_mqtt_group can be imported using the composite ID in the format `<instance_id>:<group_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_mqtt_group.example <id>
+$ terraform import alibabacloudstack_mqtt_group.example <instance_id>:<group_id>
 ```

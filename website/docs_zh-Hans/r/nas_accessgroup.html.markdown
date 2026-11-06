@@ -69,18 +69,10 @@ resource "alibabacloudstack_nas_accessgroup" "default" {
 * `name` - 已废弃字段，用于权限组的名称。将在未来的版本中移除，请改用 `access_group_name`。
 * `type` - 已废弃字段，用于权限组的类型。将在未来的版本中移除，请改用 `access_group_type`。
 
-## 导入
+## Import
 
 可以使用 ID 导入 NAS 访问组，例如：
 
 ```bash
 $ terraform import alibabacloudstack_nas_accessgroup.foo tf_testAccNasConfig:standard
-```
-
-## Import
-
-alibabacloudstack_nas_accessgroup 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_nas_accessgroup.example <id>
 ```

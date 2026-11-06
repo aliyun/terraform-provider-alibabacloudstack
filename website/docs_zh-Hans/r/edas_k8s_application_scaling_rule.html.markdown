@@ -169,18 +169,10 @@ resource "alibabacloudstack_edas_k8s_application_scaling_rule" "example_behavior
 
 * `id` - 资源ID，格式为 `{app_id}:{scaling_rule_name}`。
 
-## 导入
+## Import
 
 EDAS K8s应用扩缩容规则可以通过ID导入，例如:
 
 ```bash
 $ terraform import alibabacloudstack_edas_k8s_application_scaling_rule.example your-app-id:scaling-rule-name
-```
-
-## Import
-
-alibabacloudstack_edas_k8s_application_scaling_rule 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_edas_k8s_application_scaling_rule.example <id>
 ```

@@ -82,8 +82,8 @@ resource "alibabacloudstack_mqtt_topic" "default" {
 
 ## Import
 
-alibabacloudstack_mqtt_topic 可通过ID导入，例如：
+alibabacloudstack_mqtt_topic 可以使用组合 ID 导入，格式为 `<instance_id>:<topic>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_mqtt_topic.example <id>
+$ terraform import alibabacloudstack_mqtt_topic.example <instance_id>:<topic>
 ```

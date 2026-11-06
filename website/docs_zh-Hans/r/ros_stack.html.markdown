@@ -170,14 +170,6 @@ resource "alibabacloudstack_ros_stack" "example" {
 * `id` - Terraform 中 Stack 的资源 ID。值为 `stack_id`。
 * `status` - 堆栈的状态。
 
-## 导入
-
-ROS 资源栈可以使用 StackId 导入，例如：
-
-```
-$ terraform import alibabacloudstack_ros_stack.example 5f5e9b2a-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-```
-
 ## Timeouts
 
 * `create` - （默认15分钟）创建资源时使用。
@@ -186,8 +178,8 @@ $ terraform import alibabacloudstack_ros_stack.example 5f5e9b2a-xxxx-xxxx-xxxx-x
 
 ## Import
 
-alibabacloudstack_ros_stack 可通过ID导入，例如：
+ROS 资源栈可以使用 StackId 导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_ros_stack.example <id>
+```
+$ terraform import alibabacloudstack_ros_stack.example 5f5e9b2a-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```

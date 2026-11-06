@@ -55,8 +55,8 @@ The following attributes are exported:
 
 ## Import
 
-alibabacloudstack_ascm_user_group_resource_set_binding can be imported using the id, e.g.
+alibabacloudstack_ascm_user_group_resource_set_binding can be imported using the composite ID in the format `<resource_set_id>:<user_group_id>:<ascm_role_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_ascm_user_group_resource_set_binding.example <id>
+$ terraform import alibabacloudstack_ascm_user_group_resource_set_binding.example <resource_set_id>:<user_group_id>:<ascm_role_id>
 ```

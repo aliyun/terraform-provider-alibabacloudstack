@@ -103,18 +103,10 @@ resource "alibabacloudstack_log_store" "example" {
   * `begin_key` - 分片范围的起始键值（MD5），包含在分片范围内。
   * `end_key` - 分片范围的结束键值（MD5），不包含在分片范围内。
 
-## 导入
+## Import
 
 日志库可以通过 ID 导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_log_store.example <project>:<name>
-```
-
-## Import
-
-alibabacloudstack_log_store 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_log_store.example <id>
 ```

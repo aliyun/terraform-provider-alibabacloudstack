@@ -72,18 +72,10 @@ resource "alibabacloudstack_alikafka_sasl_user" "default" {
 * `id` - 资源的ID。格式为 `<instance_id>:<username>`。
 * `type` - (计算得出，1.159.0版本及以上可用) 认证机制。有效值：`plain`，`scram`。
 
-## 导入
+## Import
 
 Alikafka SASL 用户可以通过ID导入，例如
 
 ```bash
 $ terraform import alibabacloudstack_alikafka_sasl_user.example <instance_id>:<username>
-```
-
-## Import
-
-alibabacloudstack_alikafka_sasl_user 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_alikafka_sasl_user.example <id>
 ```

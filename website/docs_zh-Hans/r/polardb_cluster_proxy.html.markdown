@@ -104,14 +104,6 @@ resource "alibabacloudstack_polardb_cluster_proxy" "default" {
   * `db_node_status` - 代理节点的状态。
   * `db_node_class` - 代理节点的规格。
 
-## 导入
-
-PolarDB 集群代理可以通过集群 ID 导入，例如：
-
-```
-$ terraform import alibabacloudstack_polardb_cluster_proxy.example pc-xxxxxxxxxxxx
-```
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
@@ -120,8 +112,8 @@ $ terraform import alibabacloudstack_polardb_cluster_proxy.example pc-xxxxxxxxxx
 
 ## Import
 
-alibabacloudstack_polardb_cluster_proxy 可通过ID导入，例如：
+PolarDB 集群代理可以通过集群 ID 导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_polardb_cluster_proxy.example <id>
+```
+$ terraform import alibabacloudstack_polardb_cluster_proxy.example pc-xxxxxxxxxxxx
 ```

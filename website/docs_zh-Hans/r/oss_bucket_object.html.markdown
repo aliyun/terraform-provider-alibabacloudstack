@@ -97,18 +97,10 @@ resource "alibabacloudstack_oss_bucket_object" "encrypted-object" {
 * `content_md5` - 对象内容的MD5哈希值。
 * `kms_key_id` - 用于服务端加密的KMS密钥ID(当`server_side_encryption`为`KMS`时)。
 
-## 导入
+## Import
 
 OSS存储桶对象可以使用复合ID导入，格式为`{oss_cluster}:{bucket}:{key}`，例如：
 
 ```shell
 $ terraform import alibabacloudstack_oss_bucket_object.example default:my-bucket:my-object-key
-```
-
-## Import
-
-alibabacloudstack_oss_bucket_object 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_oss_bucket_object.example <id>
 ```

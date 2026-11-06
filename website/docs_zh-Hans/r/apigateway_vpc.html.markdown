@@ -83,18 +83,10 @@ resource "alibabacloudstack_api_gateway_vpc_access" "default" {
 
 * `id` - API网关的VPC授权ID。它由`vpc_id`、`instance_id`和`port`的组合组成。
 
-### 导入
+## Import
 
 API Gateway VPC访问可以通过组合ID格式 `<NAME>:<VPC_ID>:<INSTANCE_ID>:<PORT>` 导入，例如：
 
 ```sh
 $ terraform import alibabacloudstack_api_gateway_vpc_access.example "my-vpc-name:vpc-aswcj19ajsz:i-ajdjfsdlf:8080"
 ``` 
-
-## Import
-
-alibabacloudstack_apigateway_vpc 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_apigateway_vpc.example <id>
-```

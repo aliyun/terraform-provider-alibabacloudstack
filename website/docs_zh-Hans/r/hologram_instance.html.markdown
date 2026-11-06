@@ -101,14 +101,6 @@ endpoints映射包含以下属性：
 * `vswitch_id` - 端点的交换机ID。
 * `vpc_instance_id` - 端点的专有网络实例ID。
 
-## 导入
-
-Hologram实例可以使用实例ID进行导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_hologram_instance.example <id>
-```
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
@@ -117,7 +109,7 @@ $ terraform import alibabacloudstack_hologram_instance.example <id>
 
 ## Import
 
-alibabacloudstack_hologram_instance 可通过ID导入，例如：
+Hologram实例可以使用实例ID进行导入，例如：
 
 ```shell
 $ terraform import alibabacloudstack_hologram_instance.example <id>

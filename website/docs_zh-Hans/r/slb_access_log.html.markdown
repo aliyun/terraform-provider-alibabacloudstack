@@ -191,8 +191,8 @@ resource "alibabacloudstack_slb_access_log" "default" {
 
 ## Import
 
-alibabacloudstack_slb_access_log 可通过ID导入，例如：
+alibabacloudstack_slb_access_log 可以使用组合 ID 导入，格式为 `<load_balancer_id>:<log_project>:<log_store>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_slb_access_log.example <id>
+$ terraform import alibabacloudstack_slb_access_log.example <load_balancer_id>:<log_project>:<log_store>
 ```

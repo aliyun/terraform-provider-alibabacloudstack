@@ -138,5 +138,5 @@ The following attributes are exported:
 alibabacloudstack_mongodb_shardinginstance_csnode_address can be imported using the id, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_mongodb_shardinginstance_csnode_address.example <id>
+$ terraform import alibabacloudstack_mongodb_shardinginstance_csnode_address.example <db_instance_id>:<node_id>
 ```

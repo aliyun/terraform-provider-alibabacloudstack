@@ -48,8 +48,8 @@ output "ramrole" {
 
 ## Import
 
-alibabacloudstack_ascm_ram_role 可通过ID导入，例如：
+alibabacloudstack_ascm_ram_role 可以使用组合 ID 导入，格式为 `<role_name>:<role_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_ascm_ram_role.example <id>
+$ terraform import alibabacloudstack_ascm_ram_role.example <role_name>:<role_id>
 ```

@@ -153,8 +153,8 @@ resource "alibabacloudstack_api_gateway_api" "default" {
 
 ## Import
 
-alibabacloudstack_apigateway_api 可通过ID导入，例如：
+alibabacloudstack_apigateway_api 可以使用组合 ID 导入，格式为 `<group_id>:<api_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_apigateway_api.example <id>
+$ terraform import alibabacloudstack_apigateway_api.example <group_id>:<api_id>
 ```

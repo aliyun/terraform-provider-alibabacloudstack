@@ -64,18 +64,10 @@ resource "alibabacloudstack_logtail_config" "example" {
 
 * `id` - Logtail配置的ID。格式为 `<project>:<logstore>:<config_name>`。
 
-## 导入
+## Import
 
 Logtail配置可以通过id导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_logtail_config.example tf-log:tf-log-store:tf-log-config
-```
-
-## Import
-
-alibabacloudstack_logtail_config 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_logtail_config.example <id>
 ```

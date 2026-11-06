@@ -58,3 +58,5 @@ ASCM 用户组角色绑定可以通过用户组 ID 导入，例如：
 ```
 $ terraform import alibabacloudstack_ascm_user_group_role_binding.example 12345
 ```
+
+也兼容 `group:` 前缀，例如 `group:12345`。

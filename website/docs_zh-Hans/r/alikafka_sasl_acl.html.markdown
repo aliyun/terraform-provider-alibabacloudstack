@@ -71,8 +71,8 @@ resource "alibabacloudstack_alikafka_sasl_acl" "default" {
 
 ## Import
 
-alibabacloudstack_alikafka_sasl_acl 可通过ID导入，例如：
+alibabacloudstack_alikafka_sasl_acl 可以使用组合 ID 导入，格式为 `<instance_id>:<username>:<acl_resource_type>:<acl_resource_name>:<acl_resource_pattern_type>:<acl_operation_type>:<host>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_alikafka_sasl_acl.example <id>
+$ terraform import alibabacloudstack_alikafka_sasl_acl.example <instance_id>:<username>:<acl_resource_type>:<acl_resource_name>:<acl_resource_pattern_type>:<acl_operation_type>:<host>
 ```

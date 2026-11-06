@@ -103,18 +103,10 @@ resource "alibabacloudstack_data_works_baseline" "default" {
 
 * `baseline_id` - 创建的基线 ID。
 
-## 导入
+## Import
 
 DataWorks 基线可以使用 `project_id` 和 `baseline_id`（以冒号分隔）导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_data_works_baseline.example 10000:100003
-```
-
-## Import
-
-alibabacloudstack_data_works_baseline 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_data_works_baseline.example <id>
 ```

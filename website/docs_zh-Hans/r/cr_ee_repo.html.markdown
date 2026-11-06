@@ -59,18 +59,10 @@ resource "alibabacloudstack_cr_ee_repo" "my-repo" {
 * `id` - 容器镜像企业版仓库的资源 ID。格式为 `{instance_id}:{namespace}:{repository}`。
 * `repo_id` - 容器镜像企业版仓库的唯一标识符（UUID）。
 
-## 导入
+## Import
 
 可以使用 `{instance_id}:{namespace}:{repository}` 导入容器镜像企业版仓库，例如：
 
 ```bash
 $ terraform import alibabacloudstack_cr_ee_repo.default `cri-xxx:my-namespace:my-repo`
-```
-
-## Import
-
-alibabacloudstack_cr_ee_repo 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_cr_ee_repo.example <id>
 ```

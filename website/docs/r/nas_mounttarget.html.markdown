@@ -90,8 +90,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-alibabacloudstack_nas_mounttarget can be imported using the id, e.g.
+alibabacloudstack_nas_mounttarget can be imported using the composite ID in the format `<file_system_id>:<mount_target_domain>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_nas_mounttarget.example <id>
+$ terraform import alibabacloudstack_nas_mounttarget.example <file_system_id>:<mount_target_domain>
 ```

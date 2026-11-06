@@ -112,18 +112,10 @@ resource "alibabacloudstack_log_alert" "example" {
 * `id` - 日志告警的ID。格式为 `<project>:<alert_name>`。
 * `mute_until` - 时间戳，在此之前关闭通知。
 
-## 导入
+## Import
 
 可以使用ID导入日志告警，例如：
 
 ```bash
 $ terraform import alibabacloudstack_log_alert.example tf-log:tf-log-alert
-```
-
-## Import
-
-alibabacloudstack_log_alert 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_log_alert.example <id>
 ```

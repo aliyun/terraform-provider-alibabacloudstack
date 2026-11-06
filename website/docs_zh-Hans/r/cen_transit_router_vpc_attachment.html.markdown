@@ -113,8 +113,8 @@ resource "alibabacloudstack_cen_transit_router_vpc_attachment" "default" {
 
 ## Import
 
-alibabacloudstack_cen_transit_router_vpc_attachment 可通过ID导入，例如：
+alibabacloudstack_cen_transit_router_vpc_attachment 可以使用组合 ID 导入，格式为 `<cen_id>:<transit_router_id>:<attachment_id>:<vpc_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_cen_transit_router_vpc_attachment.example <id>
+$ terraform import alibabacloudstack_cen_transit_router_vpc_attachment.example <cen_id>:<transit_router_id>:<attachment_id>:<vpc_id>
 ```

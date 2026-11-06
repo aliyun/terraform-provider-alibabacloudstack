@@ -85,18 +85,10 @@ resource "alibabacloudstack_hologram_instance_backup_policy" "example" {
 
 * `id` - 资源ID，与`instance_id`相同。
 
-## 导入
+## Import
 
 可以使用id（instance_id）导入Hologram实例备份策略，例如：
 
 ```shell
 $ terraform import alibabacloudstack_hologram_instance_backup_policy.example example-instance-id
-```
-
-## Import
-
-alibabacloudstack_hologram_instance_backup_policy 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_hologram_instance_backup_policy.example <id>
 ```

@@ -68,8 +68,8 @@ resource "alibabacloudstack_ots_instance_attachment" "default" {
 
 ## Import
 
-alibabacloudstack_ots_instanceattachment 可通过ID导入，例如：
+alibabacloudstack_ots_instanceattachment 可以使用组合 ID 导入，格式为 `<instance_name>:<instance_vpc_name>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_ots_instanceattachment.example <id>
+$ terraform import alibabacloudstack_ots_instanceattachment.example <instance_name>:<instance_vpc_name>
 ```

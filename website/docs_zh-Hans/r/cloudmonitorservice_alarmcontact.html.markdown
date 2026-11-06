@@ -74,18 +74,10 @@ resource "alibabacloudstack_cloudmonitorservice_alarmcontact" "example" {
 * `channels_sms` - 报警联系人的电话号码。
 * `describe` - 报警联系人的简要描述。
 
-## 导入
+## Import
 
 报警联系人可以通过ID导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_cloudmonitorservice_alarmcontact.example abc12345
-```
-
-## Import
-
-alibabacloudstack_cloudmonitorservice_alarmcontact 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_cloudmonitorservice_alarmcontact.example <id>
 ```

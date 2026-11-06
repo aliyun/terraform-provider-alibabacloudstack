@@ -54,8 +54,8 @@ The following attributes are exported:
 
 ## Import
 
-alibabacloudstack_cr_repo can be imported using the id, e.g.
+alibabacloudstack_cr_repo can be imported using the composite ID in the format `<repo_namespace>/<repo_name>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_cr_repo.example <id>
+$ terraform import alibabacloudstack_cr_repo.example <repo_namespace>/<repo_name>
 ```

@@ -82,18 +82,10 @@ resource "alibabacloudstack_data_works_remind" "default" {
 
 * `remind_id` - 创建的报警规则 ID。
 
-## 导入
+## Import
 
 DataWorks 自定义报警规则可以使用 `remind_id` 导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_data_works_remind.example 12345
-```
-
-## Import
-
-alibabacloudstack_data_works_remind 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_data_works_remind.example <id>
 ```

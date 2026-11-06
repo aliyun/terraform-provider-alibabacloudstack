@@ -122,6 +122,16 @@ resource "alibabacloudstack_polardbx_readonly_instance" "readonly" {
 * `public_connection_string` - 公网连接串（如果已启用）。
 * `public_connection_port` - 公网连接端口（如果已启用）。
 
+## Timeouts
+
+* `create` - （默认60分钟）创建资源时使用。
+* `update` - （默认30分钟）更新资源时使用。
+* `delete` - （默认10分钟）删除资源时使用。
+
 ## Import
 
-此资源不支持导入。
+PolarDB-X 只读实例可以使用实例 ID 进行导入，例如：
+
+```
+$ terraform import alibabacloudstack_polardbx_readonly_instance.example px-12345678
+```

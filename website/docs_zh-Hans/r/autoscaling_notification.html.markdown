@@ -95,8 +95,8 @@ resource "alibabacloudstack_autoscaling_notification" "default" {
 
 ## Import
 
-alibabacloudstack_autoscaling_notification 可通过ID导入，例如：
+alibabacloudstack_autoscaling_notification 可以使用组合 ID 导入，格式为 `<scaling_group_id>:<notification_arn>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_autoscaling_notification.example <id>
+$ terraform import alibabacloudstack_autoscaling_notification.example <scaling_group_id>:<notification_arn>
 ```

@@ -127,14 +127,6 @@ resource "alibabacloudstack_dts_synchronization_job" "default" {
 * `status` - 资源状态。有效值：`Synchronizing`，`Suspending`。
 * `synchronization_direction` - 同步方向。
 
-## 导入
-
-可以通过 id 导入 DTS 同步作业，例如：
-
-```bash
-$ terraform import alibabacloudstack_dts_synchronization_job.example <id>
-```
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
@@ -142,8 +134,8 @@ $ terraform import alibabacloudstack_dts_synchronization_job.example <id>
 
 ## Import
 
-alibabacloudstack_dts_synchronization_job 可通过ID导入，例如：
+可以通过 id 导入 DTS 同步作业，例如：
 
-```shell
+```bash
 $ terraform import alibabacloudstack_dts_synchronization_job.example <id>
 ```

@@ -109,17 +109,9 @@ resource "alibabacloudstack_arms_dispatch_rule" "default" {
 * `id` - Terraform 中告警分派规则的资源ID。
 * `status` - 告警分派规则的资源状态。
 
-## 导入
-
-应用实时监控服务(ARMS)告警联系人可以使用id导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_arms_dispatch_rule.example <id>
-```
-
 ## Import
 
-alibabacloudstack_arms_dispatch_rule 可通过ID导入，例如：
+应用实时监控服务(ARMS)告警联系人可以使用id导入，例如：
 
 ```shell
 $ terraform import alibabacloudstack_arms_dispatch_rule.example <id>

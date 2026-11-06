@@ -132,18 +132,10 @@ resource "alibabacloudstack_ess_attachment" "default" {
 * `instance_ids` - (必填) 已附加到伸缩组的“Attached”ECS实例的ID列表。
 * `force` - 是否强制删除“AutoCreated”ECS实例以释放伸缩组容量“MaxSize”。
 
-## 导入
+## Import
 
 ESS attachment 可以通过id或伸缩组id导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_ess_attachment.example asg-abc123456
-```
-
-## Import
-
-alibabacloudstack_ess_attachment 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_ess_attachment.example <id>
 ```

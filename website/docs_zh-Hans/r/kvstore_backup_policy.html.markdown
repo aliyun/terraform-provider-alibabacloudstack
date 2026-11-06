@@ -77,18 +77,10 @@ resource "alibabacloudstack_kvstore_backup_policy" "default" {
 * `backup_time` - 当前配置的备份时间（已弃用参数）。
 * `backup_period` - 当前配置的备份周期（已弃用参数）。
 
-## 导入
+## Import
 
 KVStore备份策略可以使用ID导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_kvstore_backup_policy.example r-abc12345678
-```
-
-## Import
-
-alibabacloudstack_kvstore_backup_policy 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_kvstore_backup_policy.example <id>
 ```

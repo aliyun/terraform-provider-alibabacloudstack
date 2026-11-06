@@ -88,18 +88,10 @@ resource "alibabacloudstack_log_store_index" "example" {
 * `full_text` - 全文索引的配置。
 * `field_search` - 字段搜索索引的列表配置。
 
-## 导入
+## Import
 
 日志库索引可以使用 id 导入，例如
 
 ```bash
 $ terraform import alibabacloudstack_log_store_index.example tf-log:tf-log-store
-```
-
-## Import
-
-alibabacloudstack_log_store_index 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_log_store_index.example <id>
 ```

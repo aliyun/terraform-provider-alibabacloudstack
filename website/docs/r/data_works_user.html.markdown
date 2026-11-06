@@ -38,8 +38,8 @@ No attributes are currently listed for this resource. If there are any computed 
 
 ## Import
 
-alibabacloudstack_data_works_user can be imported using the id, e.g.
+alibabacloudstack_data_works_user can be imported using the composite ID in the format `<project_id>:<user_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_data_works_user.example <id>
+$ terraform import alibabacloudstack_data_works_user.example <project_id>:<user_id>
 ```

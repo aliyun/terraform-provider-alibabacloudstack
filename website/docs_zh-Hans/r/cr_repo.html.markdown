@@ -56,8 +56,8 @@ resource "alibabacloudstack_cr_repo" "my-repo" {
 
 ## Import
 
-alibabacloudstack_cr_repo 可通过ID导入，例如：
+alibabacloudstack_cr_repo 可以使用组合 ID 导入，格式为 `<repo_namespace>/<repo_name>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_cr_repo.example <id>
+$ terraform import alibabacloudstack_cr_repo.example <repo_namespace>/<repo_name>
 ```

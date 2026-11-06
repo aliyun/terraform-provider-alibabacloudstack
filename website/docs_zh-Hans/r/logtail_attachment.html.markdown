@@ -90,18 +90,10 @@ resource "alibabacloudstack_logtail_attachment" "test" {
 
 * `id` - Logtail 绑定关系的 ID，格式为 `<project>:<logtail_config_name>:<machine_group_name>`。
 
-## 导入
+## Import
 
 Logtail 绑定关系可以使用项目名称、Logtail 配置名称和机器组名称（以冒号分隔）导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_logtail_attachment.example tf-log:tf-log-config:tf-log-machine-group
-```
-
-## Import
-
-alibabacloudstack_logtail_attachment 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_logtail_attachment.example <id>
 ```

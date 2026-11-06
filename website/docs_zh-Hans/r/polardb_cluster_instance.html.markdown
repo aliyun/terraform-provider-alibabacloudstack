@@ -115,14 +115,6 @@ resource "alibabacloudstack_polardb_cluster_instance" "default" {
 * `proxy_cpu_cores` - 集群实例的代理 CPU 核心数。
 * `pay_type` - 集群实例的付费类型。
 
-## 导入
-
-可以使用 id 导入 PolarDB 集群实例，例如：
-
-```bash
-$ terraform import alibabacloudstack_polardb_cluster_instance.example pc-12345678
-```
-
 ## Timeouts
 
 * `create` - （默认60分钟）创建资源时使用。
@@ -131,8 +123,8 @@ $ terraform import alibabacloudstack_polardb_cluster_instance.example pc-1234567
 
 ## Import
 
-alibabacloudstack_polardb_cluster_instance 可通过ID导入，例如：
+可以使用 id 导入 PolarDB 集群实例，例如：
 
-```shell
-$ terraform import alibabacloudstack_polardb_cluster_instance.example <id>
+```bash
+$ terraform import alibabacloudstack_polardb_cluster_instance.example pc-12345678
 ```

@@ -61,14 +61,6 @@ resource "alibabacloudstack_ots_instance" "foo" {
 * `tags` - 分配给 OTS 实例的标签映射。
 * `propreties` - OTS 实例的计算属性。
 
-## 导入
-
-OTS 实例可以使用实例 ID 或名称导入，例如：
-
-```bash
-$ terraform import alibabacloudstack_ots_instance.foo "my-ots-instance"
-``` 
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
@@ -77,8 +69,8 @@ $ terraform import alibabacloudstack_ots_instance.foo "my-ots-instance"
 
 ## Import
 
-alibabacloudstack_ots_instance 可通过ID导入，例如：
+OTS 实例可以使用实例 ID 或名称导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_ots_instance.example <id>
-```
+```bash
+$ terraform import alibabacloudstack_ots_instance.foo "my-ots-instance"
+``` 

@@ -72,14 +72,6 @@ resource "alibabacloudstack_polardb_cluster_backup" "default" {
 
   * `create` - （默认 20 分钟）用于触发备份作业并等待备份集生成。
 
-## 导入
-
-PolarDB 集群备份可使用 `db_cluster_id:backup_id` 格式（以冒号分隔）导入：
-
-```
-$ terraform import alibabacloudstack_polardb_cluster_backup.default <db_cluster_id>:<backup_id>
-```
-
 ## 注意事项
 
   * 销毁本资源不会删除备份集。备份集的生命周期由集群备份策略管理，参见
@@ -92,8 +84,8 @@ $ terraform import alibabacloudstack_polardb_cluster_backup.default <db_cluster_
 
 ## Import
 
-alibabacloudstack_polardb_cluster_backup 可通过ID导入，例如：
+PolarDB 集群备份可使用 `db_cluster_id:backup_id` 格式（以冒号分隔）导入：
 
-```shell
-$ terraform import alibabacloudstack_polardb_cluster_backup.example <id>
+```
+$ terraform import alibabacloudstack_polardb_cluster_backup.default <db_cluster_id>:<backup_id>
 ```

@@ -67,8 +67,8 @@ resource "alibabacloudstack_mqtt_group" "default" {
 
 ## Import
 
-alibabacloudstack_mqtt_group 可通过ID导入，例如：
+alibabacloudstack_mqtt_group 可以使用组合 ID 导入，格式为 `<instance_id>:<group_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_mqtt_group.example <id>
+$ terraform import alibabacloudstack_mqtt_group.example <instance_id>:<group_id>
 ```

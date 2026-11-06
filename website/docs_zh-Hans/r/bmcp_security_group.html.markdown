@@ -57,22 +57,14 @@ resource "alibabacloudstack_bmcp_security_group" "default" {
 - `create` - （默认 10 分钟）用于创建 BMCP 安全组。
 - `delete` - （默认 10 分钟）用于删除 BMCP 安全组。
 
-## 导入
-
-BMCP 安全组可以使用安全组 ID（sgId）进行导入，例如：
-
-```
-$ terraform import alibabacloudstack_bmcp_security_group.example sg-12345678
-```
-
 ## Timeouts
 
 * `delete` - （默认10分钟）删除资源时使用。
 
 ## Import
 
-alibabacloudstack_bmcp_security_group 可通过ID导入，例如：
+BMCP 安全组可以使用安全组 ID（sgId）进行导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_bmcp_security_group.example <id>
+```
+$ terraform import alibabacloudstack_bmcp_security_group.example sg-12345678
 ```

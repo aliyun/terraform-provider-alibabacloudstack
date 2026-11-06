@@ -58,14 +58,6 @@ resource "alibabacloudstack_vpc_ipv6_gateway" "example" {
 * `status` - 资源的状态。有效值：`Available`(可用)、`Pending`(等待中)和 `Deleting`(删除中)。
 * `spec` - 实际上当前所有 IPv6 网关均采用统一规格，尽管参数仍然保留，但其功能已被废弃。
 
-### 导入
-
-VPC IPv6 网关可以通过 id 导入，例如。
-
-```bash
-$ terraform import alibabacloudstack_vpc_ipv6_gateway.example <id>
-```
-
 ## Timeouts
 
 * `create` - （默认1分钟）创建资源时使用。
@@ -74,8 +66,8 @@ $ terraform import alibabacloudstack_vpc_ipv6_gateway.example <id>
 
 ## Import
 
-alibabacloudstack_vpc_ipv6gateway 可通过ID导入，例如：
+VPC IPv6 网关可以通过 id 导入，例如。
 
-```shell
-$ terraform import alibabacloudstack_vpc_ipv6gateway.example <id>
+```bash
+$ terraform import alibabacloudstack_vpc_ipv6_gateway.example <id>
 ```

@@ -94,18 +94,10 @@ resource "alibabacloudstack_csb_service" "service" {
 * `access_params_json` - 访问参数 JSON。
 * `route_conf_json` - 路由配置 JSON。
 
-## 导入
+## Import
 
 CSB 服务可以通过 `csb_id` 和 `service_id` 的组合导入，以冒号分隔，例如：
 
 ```
 $ terraform import alibabacloudstack_csb_service.example <csb_id>:<service_id>
-```
-
-## Import
-
-alibabacloudstack_csb_service 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_csb_service.example <id>
 ```

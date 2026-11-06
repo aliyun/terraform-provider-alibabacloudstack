@@ -58,8 +58,8 @@ output "binder" {
 
 ## Import
 
-alibabacloudstack_ascm_user_group_resource_set_binding 可通过ID导入，例如：
+alibabacloudstack_ascm_user_group_resource_set_binding 可以使用组合 ID 导入，格式为 `<resource_set_id>:<user_group_id>:<ascm_role_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_ascm_user_group_resource_set_binding.example <id>
+$ terraform import alibabacloudstack_ascm_user_group_resource_set_binding.example <resource_set_id>:<user_group_id>:<ascm_role_id>
 ```

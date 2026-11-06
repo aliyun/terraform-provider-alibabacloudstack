@@ -37,13 +37,6 @@ resource "alibabacloudstack_polardb_dbconnection" "default" {
 * `connection_string` - PolarDB实例的完整连接字符串，用于客户端连接数据库。
 * `ip_address` - 数据库连接的IP地址，表示PolarDB实例的访问入口地址。
 
-## 导入
-PolarDB数据库连接可以通过id导入，例如：
-
-```sh
-$ terraform import alibabacloudstack_polardb_dbconnection.example <instance_id>:<connection_prefix>
-```
-
 ## 示例：
 
 ```sh
@@ -58,8 +51,8 @@ $ terraform import alibabacloudstack_polardb_dbconnection.example polardb-instan
 
 ## Import
 
-alibabacloudstack_polardb_dbconnection 可通过ID导入，例如：
+PolarDB数据库连接可以通过id导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_polardb_dbconnection.example <id>
+```sh
+$ terraform import alibabacloudstack_polardb_dbconnection.example <instance_id>:<connection_prefix>
 ```

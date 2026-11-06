@@ -59,18 +59,10 @@ resource "alibabacloudstack_edas_swimming_lane" "example" {
 * `id` - 泳道 ID。格式为 `logical_region_id:group_id:lane_id`。
 * `lane_id` - 泳道在 EDAS 中的唯一标识。
 
-## 导入
+## Import
 
 EDAS 泳道可以使用 `logical_region_id:group_id:lane_id` 格式的 ID 导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_edas_swimming_lane.example cn-hangzhou:test:12345:88
-```
-
-## Import
-
-alibabacloudstack_edas_swimming_lane 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_edas_swimming_lane.example <id>
 ```

@@ -129,6 +129,14 @@ The following attributes are exported:
 * `public_connect_port` - Public connection port.
 * `private_connect_port` - Private connection port.
 
+## Timeouts
+
+* `update` - (Defaults to 20 mins) Used when update the resource.
+
 ## Import
 
-This resource does not support import.
+alibabacloudstack_mongodb_shardinginstance_shardnode_address can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_mongodb_shardinginstance_shardnode_address.example <db_instance_id>:<node_id>
+```

@@ -63,14 +63,6 @@ resource "alibabacloudstack_lindorm_lts_instance" "example" {
 * `service_type` - 实例的服务类型。
 * `network_type` - 实例的网络类型。
 
-## 导入资源
-
-Lindorm LTS 实例可以使用实例 ID 进行导入，例如：
-
-```bash
-$ terraform import alibabacloudstack_lindorm_lts_instance.example <id>
-```
-
 ## Timeouts
 
 * `create` - （默认60分钟）创建资源时使用。
@@ -79,8 +71,8 @@ $ terraform import alibabacloudstack_lindorm_lts_instance.example <id>
 
 ## Import
 
-alibabacloudstack_lindorm_lts_instance 可通过ID导入，例如：
+Lindorm LTS 实例可以使用实例 ID 进行导入，例如：
 
-```shell
+```bash
 $ terraform import alibabacloudstack_lindorm_lts_instance.example <id>
 ```

@@ -88,8 +88,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-alibabacloudstack_autoscaling_notification can be imported using the id, e.g.
+alibabacloudstack_autoscaling_notification can be imported using the composite ID in the format `<scaling_group_id>:<notification_arn>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_autoscaling_notification.example <id>
+$ terraform import alibabacloudstack_autoscaling_notification.example <scaling_group_id>:<notification_arn>
 ```

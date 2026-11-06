@@ -58,18 +58,10 @@ resource "alibabacloudstack_cr_ee_sync_rule" "default" {
 * `sync_direction` - 同步的方向，值为 `FROM` 或 `TO`。`FROM` 表示从源实例同步，`TO` 表示同步到目标实例。
 * `sync_scope` - 同步规则应用的范围，值为 `REPO` 或 `NAMESPACE`。`REPO` 表示同步范围为单个仓库，`NAMESPACE` 表示同步范围为整个命名空间。
 
-## 导入
+## Import
 
 容器镜像企业版同步规则可以使用其 ID 导入。格式为 `{instance_id}:{namespace_name}:{rule_id}`，例如：
 
 ```bash
 $ terraform import alibabacloudstack_cr_ee_sync_rule.default `cri-xxx:my-namespace:crsr-yyy`
-```
-
-## Import
-
-alibabacloudstack_cr_ee_sync_rule 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_cr_ee_sync_rule.example <id>
 ```

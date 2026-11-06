@@ -78,18 +78,10 @@ resource "alibabacloudstack_ots_table" "basic" {
 * `max_version` - 存储在此表中的最大版本数。
 * `deviation_cell_version_in_sec` - 表的最大版本偏移量。
 
-## 导入
+## Import
 
 OTS表可以使用id进行导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_ots_table.table "my-ots:ots_table"
-```
-
-## Import
-
-alibabacloudstack_ots_table 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_ots_table.example <id>
 ```

@@ -119,7 +119,12 @@ resource "alibabacloudstack_bmcp_cluster" "default" {
   * `use_origin_image` - 是否使用原始镜像。
   * `specification` - 规格字符串。
 
-## 导入
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
 
 BMCP 集群可以使用其 ID 导入，例如：
 
@@ -128,16 +133,3 @@ $ terraform import alibabacloudstack_bmcp_cluster.default bmcp-xxx
 ```
 
 注意：导入时，某些字段如 `password`、`is_create_cpfs_cluster`、`is_install_yundun_aegis`、`standard_vswitch_id`、`cluster_arch_type`、`machine_type` 和 `vswitch_id` 将在状态验证期间被忽略。
-
-## Timeouts
-
-* `create` - （默认20分钟）创建资源时使用。
-* `delete` - （默认20分钟）删除资源时使用。
-
-## Import
-
-alibabacloudstack_bmcp_cluster 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_bmcp_cluster.example <id>
-```

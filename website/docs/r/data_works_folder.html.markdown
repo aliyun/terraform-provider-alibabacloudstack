@@ -59,8 +59,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-alibabacloudstack_data_works_folder can be imported using the id, e.g.
+alibabacloudstack_data_works_folder can be imported using the composite ID in the format `<project_id>:<folder_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_data_works_folder.example <id>
+$ terraform import alibabacloudstack_data_works_folder.example <project_id>:<folder_id>
 ```

@@ -70,8 +70,8 @@ resource "alibabacloudstack_mongodb_backup" "default" {
 
 ## Import
 
-alibabacloudstack_mongodb_backup 可通过ID导入，例如：
+alibabacloudstack_mongodb_backup 可以使用组合 ID 导入，格式为 `<backup_id>&<db_instance_id>&<start_time>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_mongodb_backup.example <id>
+$ terraform import alibabacloudstack_mongodb_backup.example <backup_id>&<db_instance_id>&<start_time>
 ```

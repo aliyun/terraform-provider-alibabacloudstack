@@ -62,8 +62,8 @@ The following attributes are exported:
 
 ## Import
 
-alibabacloudstack_dns_record can be imported using the id, e.g.
+alibabacloudstack_dns_record can be imported using the composite ID in the format `<zone_id>:<record_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_dns_record.example <id>
+$ terraform import alibabacloudstack_dns_record.example <zone_id>:<record_id>
 ```

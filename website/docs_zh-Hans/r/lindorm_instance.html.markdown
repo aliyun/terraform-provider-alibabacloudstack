@@ -132,14 +132,6 @@ resource "alibabacloudstack_lindorm_instance" "example" {
 * `arch_version` - 实例的架构版本。
 * `topology_type` - 实例的拓扑类型。取值：`1azone`、`multizone`。由是否设置 `standby_zone_id` 自动判定。
 
-## 导入
-
-Lindorm实例可以使用ID进行导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_lindorm_instance.example <id>
-```
-
 ## Timeouts
 
 * `create` - （默认60分钟）创建资源时使用。
@@ -148,7 +140,7 @@ $ terraform import alibabacloudstack_lindorm_instance.example <id>
 
 ## Import
 
-alibabacloudstack_lindorm_instance 可通过ID导入，例如：
+Lindorm实例可以使用ID进行导入，例如：
 
 ```shell
 $ terraform import alibabacloudstack_lindorm_instance.example <id>

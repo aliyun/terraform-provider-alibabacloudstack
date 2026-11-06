@@ -78,8 +78,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-alibabacloudstack_mongodb_backup can be imported using the id, e.g.
+alibabacloudstack_mongodb_backup can be imported using the composite ID in the format `<backup_id>&<db_instance_id>&<start_time>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_mongodb_backup.example <id>
+$ terraform import alibabacloudstack_mongodb_backup.example <backup_id>&<db_instance_id>&<start_time>
 ```

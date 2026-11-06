@@ -245,18 +245,10 @@ resource "alibabacloudstack_api_gateway_v2_service" "default" {
 * `id` - 资源ID，格式为 `<gw_instance_id>^<service_id>`。
 * `service_id` - 服务ID。
 
-## 导入
+## Import
 
 API网关V2服务可以通过组合ID（gw_instance_id^service_id）导入，例如：
 
 ```
 $ terraform import alibabacloudstack_api_gateway_v2_service.example gw-inst-123456^svc-789012
-```
-
-## Import
-
-alibabacloudstack_api_gateway_v2_service 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_api_gateway_v2_service.example <id>
 ```

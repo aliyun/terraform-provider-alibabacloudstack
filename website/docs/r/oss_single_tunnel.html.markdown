@@ -78,8 +78,8 @@ The following attributes are exported as resource state (output-only attributes)
 
 ## Import
 
-alibabacloudstack_oss_single_tunnel can be imported using the id, e.g.
+alibabacloudstack_oss_single_tunnel can be imported using the composite ID in the format `<cluster>:<vpc_id>:<vip>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_oss_single_tunnel.example <id>
+$ terraform import alibabacloudstack_oss_single_tunnel.example <cluster>:<vpc_id>:<vip>
 ```

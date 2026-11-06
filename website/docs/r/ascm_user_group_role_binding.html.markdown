@@ -54,3 +54,5 @@ ASCM User Group Role Binding can be imported using the user group ID, e.g.
 ```
 $ terraform import alibabacloudstack_ascm_user_group_role_binding.example 12345
 ```
+
+The `group:` prefix is also accepted, e.g. `group:12345`.

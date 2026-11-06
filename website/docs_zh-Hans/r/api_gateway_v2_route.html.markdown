@@ -134,7 +134,7 @@ resource "alibabacloudstack_api_gateway_v2_route" "default" {
 
 * `route_id` - 路由ID。
 
-## 导入
+## Import
 
 API 网关 V2 路由可以通过资源 ID 导入，格式为 `<类型>:<网关实例ID>:<路由ID>`，例如：
 
@@ -143,11 +143,3 @@ $ terraform import alibabacloudstack_api_gateway_v2_route.example route:gw-12345
 ```
 
 -> **注意:** 如果是源路由（使用 `cascade_link_ids` 创建的路由），类型前缀应为 `sourceRoute` 而非 `route`。
-
-## Import
-
-alibabacloudstack_api_gateway_v2_route 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_api_gateway_v2_route.example <id>
-```

@@ -77,18 +77,10 @@ resource "alibabacloudstack_cen_vbr_health_check" "default" {
 * `delay` - 健康检查的延迟。
 * `packet_loss` - 健康检查的丢包率。
 
-## 导入
+## Import
 
 可以使用id导入CEN VBR健康检查，例如：
 
 ```bash
 $ terraform import alibabacloudstack_cen_vbr_health_check.default cen-abc123456:vbr-def789012
-```
-
-## Import
-
-alibabacloudstack_cen_vbr_health_check 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_cen_vbr_health_check.example <id>
 ```

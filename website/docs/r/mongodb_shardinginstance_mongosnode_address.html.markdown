@@ -131,10 +131,13 @@ The following attributes are exported:
 * `public_connect_string` - Public connection string.
 * `private_connect_string` - Private connection string.
 
-## Import
+## Timeouts
 
+* `update` - (Defaults to 20 mins) Used when update the resource.
+
+## Import
 alibabacloudstack_mongodb_shardinginstance_mongosnode_address can be imported using the id, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_mongodb_shardinginstance_mongosnode_address.example <id>
+$ terraform import alibabacloudstack_mongodb_shardinginstance_mongosnode_address.example <db_instance_id>:<node_id>
 ```

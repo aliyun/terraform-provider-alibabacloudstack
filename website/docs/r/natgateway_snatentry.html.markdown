@@ -76,8 +76,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-alibabacloudstack_natgateway_snatentry can be imported using the id, e.g.
+alibabacloudstack_natgateway_snatentry can be imported using the composite ID in the format `<snat_table_id>:<snat_entry_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_natgateway_snatentry.example <id>
+$ terraform import alibabacloudstack_natgateway_snatentry.example <snat_table_id>:<snat_entry_id>
 ```

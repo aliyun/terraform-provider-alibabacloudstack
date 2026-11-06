@@ -85,17 +85,10 @@ resource "alibabacloudstack_polardbx_backup_policy" "default" {
 * `cold_data_backup_interval` - 冷数据备份间隔。
 * `cold_data_backup_retention` - 冷数据备份保留周期。
 
-## 导入
+## Import
+
 可以使用PolarDBX实例ID导入PolarDBX备份策略，例如：
 
 ```bash
 $ terraform import alibabacloudstack_polardbx_backup_policy.example pxc-xxxx
-```
-
-## Import
-
-alibabacloudstack_polardbx_backup_policy 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_polardbx_backup_policy.example <id>
 ```

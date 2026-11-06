@@ -67,8 +67,8 @@ resource "alibabacloudstack_data_works_folder" "advanced" {
 
 ## Import
 
-alibabacloudstack_data_works_folder 可通过ID导入，例如：
+alibabacloudstack_data_works_folder 可以使用组合 ID 导入，格式为 `<project_id>:<folder_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_data_works_folder.example <id>
+$ terraform import alibabacloudstack_data_works_folder.example <project_id>:<folder_id>
 ```

@@ -47,18 +47,10 @@ resource "alibabacloudstack_api_gateway_app" "default" {
 
 * `id` - 应用的 ID，由 API 网关分配的唯一标识符。
 
-## 导入
+## Import
 
 API 网关应用可以使用应用 ID 导入，例如：
 
 ```
 $ terraform import alibabacloudstack_api_gateway_app.example 12345678
-```
-
-## Import
-
-alibabacloudstack_api_gateway_app 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_api_gateway_app.example <id>
 ```

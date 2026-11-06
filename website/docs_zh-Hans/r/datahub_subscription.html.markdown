@@ -56,8 +56,8 @@ resource "alibabacloudstack_datahub_subscription" "default" {
 
 ## Import
 
-alibabacloudstack_datahub_subscription 可通过ID导入，例如：
+alibabacloudstack_datahub_subscription 可以使用组合 ID 导入，格式为 `<project_name>:<topic_name>:<sub_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_datahub_subscription.example <id>
+$ terraform import alibabacloudstack_datahub_subscription.example <project_name>:<topic_name>:<sub_id>
 ```

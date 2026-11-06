@@ -192,22 +192,14 @@ resource "alibabacloudstack_api_gateway_v2_instance" "custom_example" {
 * `shared_instance` - 实例是否为共享实例。
 * `custom_deploy_config` - 自定义部署配置（仅适用于自定义部署模式）。
 
-## 导入
-
-可以使用实例 ID 导入 API 网关 V2 实例：
-
-```shell
-terraform import alibabacloudstack_api_gateway_v2_instance.example <instance_id>
-```
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
 
 ## Import
 
-alibabacloudstack_api_gateway_v2_instance 可通过ID导入，例如：
+可以使用实例 ID 导入 API 网关 V2 实例：
 
 ```shell
-$ terraform import alibabacloudstack_api_gateway_v2_instance.example <id>
+terraform import alibabacloudstack_api_gateway_v2_instance.example <instance_id>
 ```

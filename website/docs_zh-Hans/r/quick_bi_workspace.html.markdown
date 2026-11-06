@@ -43,22 +43,14 @@ resource "alibabacloudstack_quick_bi_workspace" "default" {
 
 * `workspace_id` - 工作区在 Terraform 中的资源 ID。
 
-## 导入
-
-Quick BI 工作区可以使用 id 导入，例如
-
-```bash
-$ terraform import alibabacloudstack_quick_bi_workspace.example <id>
-```
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
 
 ## Import
 
-alibabacloudstack_quick_bi_workspace 可通过ID导入，例如：
+Quick BI 工作区可以使用 id 导入，例如
 
-```shell
+```bash
 $ terraform import alibabacloudstack_quick_bi_workspace.example <id>
 ```

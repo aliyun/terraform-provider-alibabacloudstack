@@ -64,18 +64,10 @@ resource "alibabacloudstack_cpfs_file_system" "example" {
 * `encrypt_type` - (可回读，已弃�? 加密类型�?
 * `description` - (可回�? 文件系统描述�?
 
-## 导入
+## Import
 
 可以使用ID导入CPFS文件系统，例如：
 
 ```bash
 $ terraform import alibabacloudstack_cpfs_file_system.example 1337849c59
-```
-
-## Import
-
-alibabacloudstack_cpfs_file_system 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_cpfs_file_system.example <id>
 ```

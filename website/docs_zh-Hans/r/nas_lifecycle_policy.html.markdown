@@ -71,8 +71,8 @@ resource "alibabacloudstack_nas_lifecycle_policy" "default" {
 
 ## Import
 
-alibabacloudstack_nas_lifecycle_policy 可通过ID导入，例如：
+alibabacloudstack_nas_lifecycle_policy 可以使用组合 ID 导入，格式为 `<file_system_id>:<lifecycle_policy_name>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_nas_lifecycle_policy.example <id>
+$ terraform import alibabacloudstack_nas_lifecycle_policy.example <file_system_id>:<lifecycle_policy_name>
 ```

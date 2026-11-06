@@ -60,8 +60,8 @@ resource "alibabacloudstack_acm_configuration" "default" {
 
 ## Import
 
-alibabacloudstack_acm_configuration 可通过ID导入，例如：
+alibabacloudstack_acm_configuration 可以使用组合 ID 导入，格式为 `<data_id>:<group>:<namespace_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_acm_configuration.example <id>
+$ terraform import alibabacloudstack_acm_configuration.example <data_id>:<group>:<namespace_id>
 ```

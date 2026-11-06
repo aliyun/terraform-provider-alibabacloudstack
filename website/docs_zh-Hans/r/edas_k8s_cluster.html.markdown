@@ -48,22 +48,16 @@ resource "alibabacloudstack_edas_k8s_cluster" "default" {
 * `cs_cluster_id` - 要导入的容器服务 Kubernetes 集群的 ID。
 * `namespace_id` - 要导入的命名空间的 ID。
 
-## 导入
-
-EDAS K8s 集群可以使用集群 ID（导入后返回的 EDAS 内部集群 ID）导入，例如：
-
-```bash
-$ terraform import alibabacloudstack_edas_k8s_cluster.example 81453e4b-4df0-4592-xxxx-b835a2eexxxx
-```
-
 ## Timeouts
 
 * `delete` - （默认10分钟）删除资源时使用。
 
 ## Import
 
-alibabacloudstack_edas_k8s_cluster 可通过ID导入，例如：
+EDAS K8s 集群可以使用集群 ID（导入后返回的 EDAS 内部集群 ID）导入，例如：
 
 ```shell
-$ terraform import alibabacloudstack_edas_k8s_cluster.example <id>
+$ terraform import alibabacloudstack_edas_k8s_cluster.example <cluster_id>
 ```
+
+也可以使用复合格式 `<namespace_id>:<cluster_id>` 导入；仅提供集群 ID 时，provider 会自动查询并补全 namespace_id。

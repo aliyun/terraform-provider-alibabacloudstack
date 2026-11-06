@@ -57,8 +57,8 @@ The following arguments are supported:
 
 ## Import
 
-alibabacloudstack_acm_configuration can be imported using the id, e.g.
+alibabacloudstack_acm_configuration can be imported using the composite ID in the format `<data_id>:<group>:<namespace_id>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_acm_configuration.example <id>
+$ terraform import alibabacloudstack_acm_configuration.example <data_id>:<group>:<namespace_id>
 ```

@@ -73,18 +73,10 @@ resource "alibabacloudstack_polardb_cluster_database" "default" {
 * `engine` - 数据库引擎。
 * `db_status` - 数据库的状态。
 
-## 导入
+## Import
 
 可以使用 id 导入 PolarDB 集群数据库，例如：
 
 ```bash
 $ terraform import alibabacloudstack_polardb_cluster_database.example pc-12345678:test_database
-```
-
-## Import
-
-alibabacloudstack_polardb_cluster_database 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_polardb_cluster_database.example <id>
 ```

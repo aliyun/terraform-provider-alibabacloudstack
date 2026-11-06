@@ -51,18 +51,10 @@ resource "alibabacloudstack_quick_bi_user_group" "default" {
 
 * `id` - 资源 ID，格式为 `<user_group_id>:<account_id>`。
 
-## 导入
+## Import
 
 Quick BI 用户组成员可以使用 user_group_id 和 account_id 组合导入，例如
 
 ```bash
 $ terraform import alibabacloudstack_quick_bi_user_group_user.example <user_group_id>:<account_id>
-```
-
-## Import
-
-alibabacloudstack_quick_bi_user_group_user 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_quick_bi_user_group_user.example <id>
 ```

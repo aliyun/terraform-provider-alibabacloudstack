@@ -49,18 +49,10 @@ resource "alibabacloudstack_ecs_autosnapshotpolicy" "default" {
 * `name` - (**已弃用**) 自动快照策略的名称。自 1.63.0 版本起已弃用，请使用 `auto_snapshot_policy_name`。
 * `auto_snapshot_policy_name` - 自动快照策略的名称。
 
-## 导入
+## Import
 
 自动快照策略可以使用 ID 导入，例如：
 
 ```
 $ terraform import alibabacloudstack_snapshot_policy.example sp-12345678
-```
-
-## Import
-
-alibabacloudstack_ecs_autosnapshotpolicy 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_ecs_autosnapshotpolicy.example <id>
 ```

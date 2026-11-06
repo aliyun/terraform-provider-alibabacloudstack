@@ -84,14 +84,6 @@ resource "alibabacloudstack_ebs_diskreplicapair" "default" {
   * `last_recover_point` - 异步复制关系最近一次异步复制操作完成的时间戳。单位：秒。
   * `status` - 异步复制关系的状态。取值：`creating`、`created`、`syncing`、`normal`、`stopped`、`failovered`、`deleting`、`failed` 等。
 
-## 导入
-
-EBS 磁盘复制对可以使用复制对 ID 导入，例如：
-
-```
-$ terraform import alibabacloudstack_ebs_diskreplicapair.example rp-xxxxxxxxx
-```
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
@@ -99,8 +91,8 @@ $ terraform import alibabacloudstack_ebs_diskreplicapair.example rp-xxxxxxxxx
 
 ## Import
 
-alibabacloudstack_ebs_diskreplicapair 可通过ID导入，例如：
+EBS 磁盘复制对可以使用复制对 ID 导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_ebs_diskreplicapair.example <id>
+```
+$ terraform import alibabacloudstack_ebs_diskreplicapair.example rp-xxxxxxxxx
 ```

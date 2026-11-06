@@ -109,13 +109,6 @@ resource "alibabacloudstack_elasticsearch_instance" "default" {
 * `kibana_domain` - Kibana实例的域名。
 * `kibana_port` - Kibana实例的端口号。
 
-## 导入
-Elasticsearch实例可以使用ID进行导入，例如：
-
-```bash
-$ terraform import alibabacloudstack_elasticsearch_instance.example i-1234567890abcdef0
-```
-
 ## Timeouts
 
 * `create` - （默认120分钟）创建资源时使用。
@@ -124,8 +117,8 @@ $ terraform import alibabacloudstack_elasticsearch_instance.example i-1234567890
 
 ## Import
 
-alibabacloudstack_elasticsearch_instance 可通过ID导入，例如：
+Elasticsearch实例可以使用ID进行导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_elasticsearch_instance.example <id>
+```bash
+$ terraform import alibabacloudstack_elasticsearch_instance.example i-1234567890abcdef0
 ```

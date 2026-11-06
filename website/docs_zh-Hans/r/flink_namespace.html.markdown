@@ -58,18 +58,10 @@ resource "alibabacloudstack_flink_namespace" "default" {
 
 * `id` - Flink仓库命名空间的唯一标识符。其值与 `name` 参数相同。
 
+## Import
 
-## 导入
 Flink的命名空间可以使用ID进行导入，例如：
 
 ```
 $ terraform import alibabacloudstack_flink_namespace.default namespace_name
-```
-
-## Import
-
-alibabacloudstack_flink_namespace 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_flink_namespace.example <id>
 ```

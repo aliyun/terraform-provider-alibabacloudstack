@@ -188,8 +188,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-alibabacloudstack_slb_access_log can be imported using the id, e.g.
+alibabacloudstack_slb_access_log can be imported using the composite ID in the format `<load_balancer_id>:<log_project>:<log_store>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_slb_access_log.example <id>
+$ terraform import alibabacloudstack_slb_access_log.example <load_balancer_id>:<log_project>:<log_store>
 ```

@@ -54,14 +54,6 @@ resource "alibabacloudstack_redis_connection" "default" {
 * `update` - (默认2分钟) 用于更新Redis连接（直到达到初始`正常`状态）。
 * `delete` - (默认2分钟) 用于删除Redis连接（直到达到初始`正常`状态）。
 
-## 导入
-
-Redis连接可以使用实例ID进行导入，例如：
-
-```bash
-$ terraform import alibabacloudstack_redis_connection.example r-abc12345678
-```
-
 ## Timeouts
 
 * `create` - （默认5分钟）创建资源时使用。
@@ -70,8 +62,8 @@ $ terraform import alibabacloudstack_redis_connection.example r-abc12345678
 
 ## Import
 
-alibabacloudstack_redis_connection 可通过ID导入，例如：
+Redis连接可以使用实例ID进行导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_redis_connection.example <id>
+```bash
+$ terraform import alibabacloudstack_redis_connection.example r-abc12345678
 ```

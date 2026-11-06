@@ -35,18 +35,10 @@ resource "alibabacloudstack_ascm_resource_group_user_attachment" "default" {
 
 * `id` - 资源组用户绑定的 ID。格式为 `<rg_id>:<user_id>`。
 
-## 导入
+## Import
 
 资源组用户绑定可以通过资源组 ID 和用户 ID（以冒号分隔）导入，例如：
 
 ```
 $ terraform import alibabacloudstack_ascm_resource_group_user_attachment.example 12345:67890
-```
-
-## Import
-
-alibabacloudstack_ascm_resource_group_user_attachment 可通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_ascm_resource_group_user_attachment.example <id>
 ```

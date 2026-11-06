@@ -86,14 +86,6 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "example
 * `id` - 资源ID，格式为 `<group_ip_address>:<transit_router_multicast_domain_id>:<resource_type>:<key>`，其中当 `resource_type` 为 `VPC` 时 `<key>` 为 `network_interface_id`，当 `resource_type` 为 `Connect` 时 `<key>` 为 `connect_peer_id`。
 * `status` - 组播成员的状态。
 
-## 导入说明
-
-CEN转发路由器组播域成员可以通过ID导入，例如：
-
-```bash
-$ terraform import alibabacloudstack_cen_transit_router_multicast_domain_member.example 224.0.0.1:tr-mcast-domain-1234567890abcdef0:VPC:eni-1234567890abcdef0
-```
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
@@ -101,8 +93,8 @@ $ terraform import alibabacloudstack_cen_transit_router_multicast_domain_member.
 
 ## Import
 
-alibabacloudstack_cen_transit_router_multicast_domain_member 可通过ID导入，例如：
+CEN转发路由器组播域成员可以通过ID导入，例如：
 
-```shell
-$ terraform import alibabacloudstack_cen_transit_router_multicast_domain_member.example <id>
+```bash
+$ terraform import alibabacloudstack_cen_transit_router_multicast_domain_member.example 224.0.0.1:tr-mcast-domain-1234567890abcdef0:VPC:eni-1234567890abcdef0
 ```

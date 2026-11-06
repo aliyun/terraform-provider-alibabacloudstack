@@ -70,8 +70,8 @@ The following attributes are exported:
 
 ## Import
 
-alibabacloudstack_alikafka_sasl_acl can be imported using the id, e.g.
+alibabacloudstack_alikafka_sasl_acl can be imported using the composite ID in the format `<instance_id>:<username>:<acl_resource_type>:<acl_resource_name>:<acl_resource_pattern_type>:<acl_operation_type>:<host>`, e.g.
 
 ```shell
-$ terraform import alibabacloudstack_alikafka_sasl_acl.example <id>
+$ terraform import alibabacloudstack_alikafka_sasl_acl.example <instance_id>:<username>:<acl_resource_type>:<acl_resource_name>:<acl_resource_pattern_type>:<acl_operation_type>:<host>
 ```

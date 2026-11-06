@@ -128,6 +128,14 @@ resource "alibabacloudstack_mongodb_shardinginstance_shardnode_address" "default
 * `public_connect_port` - 公网链接地址端口
 * `private_connect_port` - 私网链接端口
 
+## Timeouts
+
+* `update` - （默认20分钟）更新资源时使用。
+
 ## Import
 
-此资源不支持导入。
+alibabacloudstack_mongodb_shardinginstance_shardnode_address 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_mongodb_shardinginstance_shardnode_address.example <db_instance_id>:<node_id>
+```

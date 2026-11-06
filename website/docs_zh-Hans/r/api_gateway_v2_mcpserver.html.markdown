@@ -519,8 +519,8 @@ resource "alibabacloudstack_api_gateway_v2_mcpserver" "default" {
 
 ## Import
 
-alibabacloudstack_api_gateway_v2_mcpserver 可通过ID导入，例如：
+alibabacloudstack_api_gateway_v2_mcpserver 可以使用组合 ID 导入，格式为 `<gw_instance_id>:<name>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_api_gateway_v2_mcpserver.example <id>
+$ terraform import alibabacloudstack_api_gateway_v2_mcpserver.example <gw_instance_id>:<name>
 ```

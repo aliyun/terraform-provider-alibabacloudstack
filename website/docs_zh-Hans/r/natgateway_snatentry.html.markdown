@@ -77,8 +77,8 @@ resource "alibabacloudstack_natgateway_snatentry" "default" {
 
 ## Import
 
-alibabacloudstack_natgateway_snatentry 可通过ID导入，例如：
+alibabacloudstack_natgateway_snatentry 可以使用组合 ID 导入，格式为 `<snat_table_id>:<snat_entry_id>`，例如：
 
 ```shell
-$ terraform import alibabacloudstack_natgateway_snatentry.example <id>
+$ terraform import alibabacloudstack_natgateway_snatentry.example <snat_table_id>:<snat_entry_id>
 ```

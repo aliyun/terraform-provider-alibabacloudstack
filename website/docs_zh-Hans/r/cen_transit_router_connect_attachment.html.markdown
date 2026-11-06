@@ -77,14 +77,6 @@ resource "alibabacloudstack_cen_transit_router_connect_attachment" "default" {
 * `transit_router_attachment_id` - 网络实例连接ID。
 * `transport_type` - 传输类型。
 
-## 导入
-
-CEN转发路由器连接附件可以通过ID导入，例如：
-
-```shell
-$ terraform import alibabacloudstack_cen_transit_router_connect_attachment.default cen-abc12345678900001:tr-abc12345678900001:tr-attach-abc12345678900001
-```
-
 ## Timeouts
 
 * `create` - （默认20分钟）创建资源时使用。
@@ -92,8 +84,8 @@ $ terraform import alibabacloudstack_cen_transit_router_connect_attachment.defau
 
 ## Import
 
-alibabacloudstack_cen_transit_router_connect_attachment 可通过ID导入，例如：
+CEN转发路由器连接附件可以通过ID导入，例如：
 
 ```shell
-$ terraform import alibabacloudstack_cen_transit_router_connect_attachment.example <id>
+$ terraform import alibabacloudstack_cen_transit_router_connect_attachment.default cen-abc12345678900001:tr-abc12345678900001:tr-attach-abc12345678900001
 ```
