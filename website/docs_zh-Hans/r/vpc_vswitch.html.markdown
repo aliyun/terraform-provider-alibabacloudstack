@@ -96,6 +96,11 @@ resource "alibabacloudstack_vpc_vswitch" "ipv6_vswitch" {
 * `description` - 交换机的描述。
 * `is_cgw` - 是否为CGW交换机。
 
+## Timeouts
+
+* `create` - （默认10分钟）创建资源时使用。
+* `delete` - （默认10分钟）删除资源时使用。
+
 ## Import
 
 VSwitch 可以使用 VSwitchId 导入，例如：

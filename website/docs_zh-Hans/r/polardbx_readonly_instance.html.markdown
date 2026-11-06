@@ -124,8 +124,4 @@ resource "alibabacloudstack_polardbx_readonly_instance" "readonly" {
 
 ## Import
 
-PolarDB-X 只读实例可以使用实例 ID 进行导入，例如：
-
-```
-$ terraform import alibabacloudstack_polardbx_readonly_instance.example px-12345678
-```
+此资源不支持导入。

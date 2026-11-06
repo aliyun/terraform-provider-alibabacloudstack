@@ -43,3 +43,11 @@ resource "alibabacloudstack_data_works_user_role_binding" "default" {
 * `user_id` - 阿里云账号ID。 
 
 ---
+
+## Import
+
+alibabacloudstack_data_works_user_role_binding 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_data_works_user_role_binding.example <id>
+```

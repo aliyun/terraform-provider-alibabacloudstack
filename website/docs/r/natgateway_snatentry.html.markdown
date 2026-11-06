@@ -73,3 +73,11 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the SNAT entry. The format is `<snat_table_id>:<snat_entry_id>`.
 * `snat_entry_id` - The unique identifier of the SNAT entry on the server.
+
+## Import
+
+alibabacloudstack_natgateway_snatentry can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_natgateway_snatentry.example <id>
+```

@@ -71,3 +71,11 @@ resource "alibabacloudstack_ecs_networkinterface" "default" {
 * `primary_ip_address` - 弹性网卡的主要私有IP地址。
 * `private_ips` - 分配给弹性网卡的所有私有IP地址列表，包括主要IP和任何次要IP。
 * `private_ips_count` - 分配给弹性网卡的私有IP地址总数，包括主要IP和任何次要IP。
+
+## Import
+
+alibabacloudstack_ecs_networkinterface 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ecs_networkinterface.example <id>
+```

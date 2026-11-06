@@ -85,3 +85,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the notification resource, which is composed of `scaling_group_id` and `notification_arn` in the format of `<scaling_group_id>:<notification_arn>`.
+
+## Import
+
+alibabacloudstack_autoscaling_notification can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_autoscaling_notification.example <id>
+```

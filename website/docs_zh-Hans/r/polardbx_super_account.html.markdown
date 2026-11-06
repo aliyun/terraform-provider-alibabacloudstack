@@ -120,3 +120,15 @@ resource "alibabacloudstack_polardbx_super_account" "default" {
 
 * `id` - 资源唯一标识符，与instance_id保持一致
 * `three_roles` - (布尔值) 是否启用三权分立功能。true表示已启用，false表示未启用
+
+## Timeouts
+
+* `update` - （默认20分钟）更新资源时使用。
+
+## Import
+
+alibabacloudstack_polardbx_super_account 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardbx_super_account.example <id>
+```

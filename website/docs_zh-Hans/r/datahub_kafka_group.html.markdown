@@ -58,3 +58,11 @@ resource "alibabacloudstack_datahub_kafka_group" "default" {
 
 * `id` - 资源ID，格式为`{ProjectName}:{GroupName}`。
 * `create_time` - Kafka组的创建时间，Unix时间戳（毫秒）。
+
+## Import
+
+alibabacloudstack_datahub_kafka_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_datahub_kafka_group.example <id>
+```

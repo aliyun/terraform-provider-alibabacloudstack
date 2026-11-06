@@ -36,3 +36,11 @@ resource "alibabacloudstack_data_works_user" "default" {
 ## 属性说明
 
 目前该资源没有列出任何属性。如果有需要添加的计算属性，可以在此处包含它们，并附上适当的描述和标记为 ``。
+
+## Import
+
+alibabacloudstack_data_works_user 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_data_works_user.example <id>
+```

@@ -36,3 +36,11 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The id of Container Registry namespace. The value is same as its name.
+
+## Import
+
+alibabacloudstack_cr_namespace can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cr_namespace.example <id>
+```

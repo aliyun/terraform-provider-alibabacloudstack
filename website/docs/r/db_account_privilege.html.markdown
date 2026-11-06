@@ -92,3 +92,11 @@ The following attributes are exported:
 * `id` - The current account resource ID. Composed of instance ID, account name and privilege with format `<instance_id>:<name>:<privilege>`.
 * `instance_id` - The ID of the instance where the account belongs. 
 * `data_base_instance_id` - The ID of the database instance. 
+
+## Import
+
+alibabacloudstack_db_account_privilege can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_db_account_privilege.example <id>
+```

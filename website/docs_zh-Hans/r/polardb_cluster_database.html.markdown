@@ -80,3 +80,11 @@ resource "alibabacloudstack_polardb_cluster_database" "default" {
 ```bash
 $ terraform import alibabacloudstack_polardb_cluster_database.example pc-12345678:test_database
 ```
+
+## Import
+
+alibabacloudstack_polardb_cluster_database 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_cluster_database.example <id>
+```

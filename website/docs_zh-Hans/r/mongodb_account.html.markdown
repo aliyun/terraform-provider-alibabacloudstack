@@ -66,3 +66,11 @@ resource "alibabacloudstack_mongodb_account" "default" {
 * `character_type` - 账户的角色类型
 * `status` - 账户状态
 * `account_type` - 账户类型
+
+## Import
+
+alibabacloudstack_mongodb_account 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_mongodb_account.example <id>
+```

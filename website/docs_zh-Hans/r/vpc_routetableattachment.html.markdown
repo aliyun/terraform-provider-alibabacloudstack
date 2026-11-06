@@ -62,3 +62,11 @@ resource "alibabacloudstack_vpc_routetableattachment" "default" {
 * `id` - 路由表绑定的唯一标识符。格式为 `<route_table_id>:<vswitch_id>`。
 * `route_table_id` - (计算得出) 与绑定关联的路由表的ID。
 * `vswitch_id` - (计算得出) 与绑定关联的交换机的ID。
+
+## Import
+
+alibabacloudstack_vpc_routetableattachment 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_vpc_routetableattachment.example <id>
+```

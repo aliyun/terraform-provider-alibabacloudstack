@@ -118,3 +118,11 @@ The following attributes are exported:
 * `id` - The resource ID of Prometheus Alert Rule. The value formats as `<cluster_id>:<prometheus_alert_rule_id>`.
 * `prometheus_alert_rule_id` - The first ID of the resource.
 * `status` -  The status of the resource. Valid values: `0`, `1`.
+
+## Import
+
+alibabacloudstack_arms_prometheus_alert_rule can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_arms_prometheus_alert_rule.example <id>
+```

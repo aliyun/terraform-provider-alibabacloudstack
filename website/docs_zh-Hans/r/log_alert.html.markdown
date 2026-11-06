@@ -119,3 +119,11 @@ resource "alibabacloudstack_log_alert" "example" {
 ```bash
 $ terraform import alibabacloudstack_log_alert.example tf-log:tf-log-alert
 ```
+
+## Import
+
+alibabacloudstack_log_alert 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_log_alert.example <id>
+```

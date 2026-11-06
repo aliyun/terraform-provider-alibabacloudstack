@@ -89,3 +89,11 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The unique identifier for the ENI attachment resource. It is formatted as `<network_interface_id>:<instance_id>`.
 * `instance_id` - (Computed) The ID of the ECS instance to which the elastic network interface (ENI) is attached. 
 * `network_interface_id` - (Computed) The ID of the elastic network interface (ENI) attached to the specified instance. 
+
+## Import
+
+alibabacloudstack_ecs_networkinterfaceattachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_networkinterfaceattachment.example <id>
+```

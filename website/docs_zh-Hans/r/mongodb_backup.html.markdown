@@ -67,3 +67,11 @@ resource "alibabacloudstack_mongodb_backup" "default" {
 * `end_time` - 备份结束时间。
 * `start_time` - 备份开始时间。
 * `status` - 资源状态。
+
+## Import
+
+alibabacloudstack_mongodb_backup 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_mongodb_backup.example <id>
+```

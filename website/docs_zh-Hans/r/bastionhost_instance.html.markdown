@@ -97,4 +97,14 @@ resource "alibabacloudstack_bastionhost_instance" "default" {
 * `name` - 实例的名称。
 * `description` - 实例的描述信息。
 
+## Timeouts
 
+* `create` - （默认45分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_bastionhost_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_bastionhost_instance.example <id>
+```

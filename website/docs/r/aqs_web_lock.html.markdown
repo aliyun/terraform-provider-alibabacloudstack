@@ -145,3 +145,11 @@ The following attributes are exported:
 * `service_code` - The service code, representing the code identifier of the Security Center service.
 * `service_detail` - The service details, containing detailed information about the Security Center service.
 * `service_status` - The service status, indicating the running status of the Security Center service.
+
+## Import
+
+alibabacloudstack_aqs_web_lock can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_aqs_web_lock.example <id>
+```

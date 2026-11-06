@@ -115,3 +115,11 @@ resource "alibabacloudstack_network_acl_entries" "default" {
 * `port` - 入站或出站条目的端口范围。
 * `protocol` - 入站或出站条目的协议。
 * `destination_cidr_ip` - 出站条目的目标 IP 地址。
+
+## Import
+
+alibabacloudstack_network_acl_entries 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_network_acl_entries.example <id>
+```

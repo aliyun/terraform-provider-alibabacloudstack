@@ -119,3 +119,11 @@ resource "alibabacloudstack_arms_prometheus_alert_rule" "example" {
 * `id` - Prometheus 告警规则的资源 ID。格式为 `<cluster_id>:<prometheus_alert_rule_id>`。
 * `prometheus_alert_rule_id` - 告警规则的唯一标识符。
 * `status` - 告警规则的状态。有效值：`0`（禁用），`1`（启用）。
+
+## Import
+
+alibabacloudstack_arms_prometheus_alert_rule 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_arms_prometheus_alert_rule.example <id>
+```

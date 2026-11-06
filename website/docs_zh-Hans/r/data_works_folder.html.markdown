@@ -64,3 +64,11 @@ resource "alibabacloudstack_data_works_folder" "advanced" {
 * `id` - 文件夹资源的唯一标识符。其值格式为 `<folder_id>:<project_id>`。
 
 * `folder_id` - 数据工坊项目内文件夹的唯一标识符。
+
+## Import
+
+alibabacloudstack_data_works_folder 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_data_works_folder.example <id>
+```

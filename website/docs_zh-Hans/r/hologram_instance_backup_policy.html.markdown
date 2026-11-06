@@ -92,3 +92,11 @@ resource "alibabacloudstack_hologram_instance_backup_policy" "example" {
 ```shell
 $ terraform import alibabacloudstack_hologram_instance_backup_policy.example example-instance-id
 ```
+
+## Import
+
+alibabacloudstack_hologram_instance_backup_policy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_hologram_instance_backup_policy.example <id>
+```

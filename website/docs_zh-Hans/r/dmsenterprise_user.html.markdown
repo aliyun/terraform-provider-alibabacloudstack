@@ -53,3 +53,11 @@ resource "alibabacloudstack_dmsenterprise_user" "default" {
 * `role_names` - 用户当前扮演的角色列表。
 * `status` - DMS Enterprise 用户的当前状态。
 * `mobile` - 用户的钉钉号或手机号码。
+
+## Import
+
+alibabacloudstack_dmsenterprise_user 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_dmsenterprise_user.example <id>
+```

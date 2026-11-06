@@ -81,3 +81,11 @@ resource "alibabacloudstack_universal_dns_record" "default" {
 * `id` - 资源ID，格式为{ZoneId}:{Id}。
 * `create_timestamp` - 创建时间戳（秒）。
 * `update_timestamp` - 修改时间戳（秒）。
+
+## Import
+
+alibabacloudstack_universal_dns_record 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_universal_dns_record.example <id>
+```

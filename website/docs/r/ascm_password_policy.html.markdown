@@ -36,3 +36,11 @@ The following arguments are supported:
 ## Attributes Reference
 
 The following attributes are exported:
+
+## Import
+
+alibabacloudstack_ascm_password_policy can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ascm_password_policy.example <id>
+```

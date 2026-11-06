@@ -51,3 +51,11 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the route table instance.
 * `route_table_name` - The name of the route table as specified by the `name` argument or auto-generated if not provided. 
+
+## Import
+
+alibabacloudstack_vpc_routetable can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_vpc_routetable.example <id>
+```

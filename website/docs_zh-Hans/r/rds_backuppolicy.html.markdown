@@ -130,3 +130,11 @@ resource "alibabacloudstack_rds_backuppolicy" "policy" {
   * **ByWeek**：按周。
   * **KeepAll**：保留所有。
 * `preferred_backup_period` - 优选备份周期。
+
+## Import
+
+alibabacloudstack_rds_backuppolicy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_rds_backuppolicy.example <id>
+```

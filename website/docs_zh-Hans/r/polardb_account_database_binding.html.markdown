@@ -76,3 +76,11 @@ resource "alibabacloudstack_polardbx_account_database_binding" "default" {
 * `database_privileges` - 账户的数据库权限。
     * `db_name` - 数据库名称。
     * `privilege` - 目标账户在数据库上的权限。
+
+## Import
+
+alibabacloudstack_polardb_account_database_binding 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_account_database_binding.example <id>
+```

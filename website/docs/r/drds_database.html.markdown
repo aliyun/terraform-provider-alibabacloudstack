@@ -118,6 +118,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `create_time` - The creation timestamp of the database in ISO 8601 format.
   * `status` - The status of the DRDS database.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 DRDS Database can be imported using the combination of `instance_id` and `drds_database_name`, formatted as `<instance_id>:<drds_database_name>`, e.g.

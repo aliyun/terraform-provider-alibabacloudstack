@@ -172,3 +172,11 @@ resource "alibabacloudstack_slb_backend_server" "default" {
 除了上述所有参数外，还导出以下属性：
 
 * `id` - 资源的ID，与`load_balancer_id`相同。
+
+## Import
+
+alibabacloudstack_slb_backend_server 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_slb_backend_server.example <id>
+```

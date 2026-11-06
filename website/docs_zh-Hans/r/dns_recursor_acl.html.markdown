@@ -64,3 +64,11 @@ DNS递归ACL策略可以通过ACL ID导入，例如：
 ```
 $ terraform import alibabacloudstack_dns_recursor_acl.example acl-12345678
 ```
+
+## Import
+
+alibabacloudstack_dns_recursor_acl 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_dns_recursor_acl.example <id>
+```

@@ -214,3 +214,17 @@ In addition to all arguments above, the following attributes are exported:
 * `maintain_time` - The maintenance time period of the instance.
 
 * `role_arn` - The Global Resource Descriptor (ARN) that authorizes the RDS cloud service account to access KMS.
+
+## Timeouts
+
+* `create` - (Defaults to 45 mins) Used when create the resource.
+* `update` - (Defaults to 30 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_rds_dbinstance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_rds_dbinstance.example <id>
+```

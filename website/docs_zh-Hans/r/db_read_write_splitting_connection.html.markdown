@@ -88,3 +88,16 @@ resource "alibabacloudstack_db_read_write_splitting_connection" "default" {
 * `id` - DB实例的ID。
 * `connection_string` - 连接实例字符串。
 * `port` - 内网连接端口。有效值范围：[3001-3999]。默认为3306。
+
+## Timeouts
+
+* `update` - （默认20分钟）更新资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_db_read_write_splitting_connection 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_db_read_write_splitting_connection.example <id>
+```

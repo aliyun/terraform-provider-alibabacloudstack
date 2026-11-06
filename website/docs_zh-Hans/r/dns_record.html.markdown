@@ -60,3 +60,11 @@ output "record" {
 * `lba_strategy` - 当前记录的负载均衡策略，例如 `ALL_RR` 或 `RATIO`。
 * `line_ids` - 与当前 DNS 记录关联的线路 ID 列表。
 * `remark` - 当前记录的备注信息，用于描述记录的具体用途。
+
+## Import
+
+alibabacloudstack_dns_record 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_dns_record.example <id>
+```

@@ -61,3 +61,11 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The unique identifier of the route table attachment. It is formatted as `<route_table_id>:<vswitch_id>`.  
 * `route_table_id` - (Computed) The ID of the route table associated with the attachment. 
 * `vswitch_id` - (Computed) The ID of the VSwitch associated with the attachment. 
+
+## Import
+
+alibabacloudstack_vpc_routetableattachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_vpc_routetableattachment.example <id>
+```

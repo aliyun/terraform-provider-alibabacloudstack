@@ -129,3 +129,11 @@ resource "alibabacloudstack_mongodb_shardinginstance_mongosnode_address" "defaul
 
 * `public_connect_string` - 公网链接地址
 * `private_connect_string` - 私网链接地址
+
+## Import
+
+alibabacloudstack_mongodb_shardinginstance_mongosnode_address 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_mongodb_shardinginstance_mongosnode_address.example <id>
+```

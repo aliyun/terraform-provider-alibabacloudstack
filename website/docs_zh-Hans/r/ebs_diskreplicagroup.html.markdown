@@ -61,3 +61,16 @@ resource "alibabacloudstack_ebs_diskreplicagroup" "default" {
   * `rpo` - 一致性复制组的RPO值。该参数以秒（s）为单位。
   * `replica_group_id` - 一致性复制组ID。
   * `status` - 一致性复制组的状态。可能值：- invalid：失效。该状态表示一致性复制组中复制对存在异常。- creating：创建中。- created：已创建。- create_failed：创建失败。- manual_syncing：单次同步中。如果是第一次单次同步，则同步中也显示为该状态。- syncing：同步中。主盘和从盘之间非第一次进行异步复制数据时，将处于该状态。- normal：正常。当异步复制的当前周期内数据复制完成时，将处于该状态。- stopping：停止中。- stopped：已停止。- stop_failed：停止失败。- failovering：故障切换中。- failovered：故障切换完成。- failover_failed：故障切换失败。- reprotecting：反向复制操作中。- reprotect_failed：反向复制失败。- deleting：删除中。- delete_failed：删除失败。- deleted：已删除。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_ebs_diskreplicagroup 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ebs_diskreplicagroup.example <id>
+```

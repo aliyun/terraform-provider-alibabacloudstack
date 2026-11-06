@@ -43,6 +43,10 @@ The following attributes are exported:
 
 * `workspace_id` - The resource ID in terraform of Workspace.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
 ## Import
 
 Quick BI Workspace can be imported using the id, e.g.

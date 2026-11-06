@@ -120,3 +120,11 @@ The following attributes are exported in addition to the arguments above:
 
 * `multi_stream` - Multi-stream configuration containing:
   * `instance_name` - Name of the stream group instance.
+
+## Import
+
+alibabacloudstack_polardbx_log_engine can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardbx_log_engine.example <id>
+```

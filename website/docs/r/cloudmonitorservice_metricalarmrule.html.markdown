@@ -84,3 +84,11 @@ In addition to all arguments above, the following attributes are exported:
 * `name` - Name of the alarm rule (deprecated, use `rule_name` instead).
 * `project` - Project associated with the alarm rule (deprecated, use `namespace` instead).
 * `metric` - Metric associated with the alarm rule (deprecated, use `metric_name` instead).
+
+## Import
+
+alibabacloudstack_cloudmonitorservice_metricalarmrule can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cloudmonitorservice_metricalarmrule.example <id>
+```

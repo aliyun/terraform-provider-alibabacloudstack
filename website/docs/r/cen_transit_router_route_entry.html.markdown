@@ -56,3 +56,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `transit_router_route_entry_id` - the transit router route entry ID of the transit router route entry.
   * `transit_router_route_entry_type` -the type of the transit router route entry.
   * `operational_mode` - the operational mode of the transit router route entry.
+
+## Import
+
+alibabacloudstack_cen_transit_router_route_entry can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cen_transit_router_route_entry.example <id>
+```

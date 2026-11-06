@@ -35,3 +35,11 @@ The following attributes are exported:
 * `id` - This ID of this resource. The value is same as `instance_id`. 
 * `domain_names` - Domain names bound to DNS instance.
 * `instance_id` - The id of the DNS instance.
+
+## Import
+
+alibabacloudstack_dns_domain_attachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_dns_domain_attachment.example <id>
+```

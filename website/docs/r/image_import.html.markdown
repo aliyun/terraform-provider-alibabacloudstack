@@ -53,15 +53,19 @@ The following arguments are supported:
 
 ## Timeouts
 
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
+* `create` - (Defaults to 120 mins) Used when create the resource.
 
-* `create` - (Defaults to 20 mins) Used when copying the image (until it reaches the initial `Available` status). 
-* `delete` - (Defaults to 20 mins) Used when terminating the image.
-   
-   
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - ID of the image.
 * `format` - Image format. Value range: When the `RAW`, `VHD`, `qcow2` is imported into the image, the system automatically detects the image format, whichever comes first. 
+
+## Import
+
+alibabacloudstack_image_import can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_image_import.example <id>
+```

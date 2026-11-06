@@ -115,3 +115,11 @@ The following attributes are exported:
 * `port` -  The port of the ingress or egress entry.
 * `protocol` -  The protocol of the ingress or egress entry.
 * `destination_cidr_ip` -  The destination ip of the egress entry.
+
+## Import
+
+alibabacloudstack_network_acl_entries can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_network_acl_entries.example <id>
+```

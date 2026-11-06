@@ -142,3 +142,17 @@ resource "alibabacloudstack_hbase_instance" "default" {
 * `maintain_end_time` - (计算) 维护时间段的结束时间(UTC 格式 `HH:mmZ`)。
 * `ip_white` - (计算) 集群的 IP 白名单。
 * `security_groups` - (计算) 与集群关联的安全组 ID 列表。
+
+## Timeouts
+
+* `create` - （默认30分钟）创建资源时使用。
+* `update` - （默认30分钟）更新资源时使用。
+* `delete` - （默认30分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_hbase_cluster 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_hbase_cluster.example <id>
+```

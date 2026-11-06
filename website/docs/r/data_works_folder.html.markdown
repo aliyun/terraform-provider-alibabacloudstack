@@ -56,3 +56,11 @@ In addition to all arguments above, the following attributes are exported:
 3. **Attributes Reference**:
    - Described the `id` attribute format explicitly.
    - Confirmed that `folder_id` is exported as part of the resource attributes.
+
+## Import
+
+alibabacloudstack_data_works_folder can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_data_works_folder.example <id>
+```

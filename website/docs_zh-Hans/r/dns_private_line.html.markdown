@@ -48,3 +48,11 @@ resource "alibabacloudstack_dns_private_line" "default" {
 
 * `id` - 云解析私有线路的ID。
 * `priority` - 云解析私有线路的优先级。1表示最高优先级，数值越大优先级越低。系统自动分配优先级值。
+
+## Import
+
+alibabacloudstack_dns_private_line 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_dns_private_line.example <id>
+```

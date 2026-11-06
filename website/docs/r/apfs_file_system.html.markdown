@@ -54,6 +54,12 @@ The following attributes are exported:
 * `metered_size` - The metered storage size, in GB. Represents the current actual storage usage.
 * `quota_size` - The quota size of the file system, in GB. Represents the maximum storage quota allocated by the system.
 
+## Timeouts
+
+* `create` - (Defaults to 30 mins) Used when create the resource.
+* `update` - (Defaults to 30 mins) Used when update the resource.
+* `delete` - (Defaults to 45 mins) Used when delete the resource.
+
 ## Import
 
 APFS File System can be imported using the FileSystemId, e.g.

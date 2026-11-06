@@ -125,3 +125,11 @@ resource "alibabacloudstack_cspprivate_hsm_group" "default" {
 * `status` - 密码机组的当前状态（如"uninitialized"表示未初始化）。
 * `update_time` - 密码机组的最后更新时间，格式为ISO 8601标准时间字符串。
 * `vpc_id` - 密码机组关联的VPC ID，表示HSM实例部署的网络环境。
+
+## Import
+
+alibabacloudstack_cspprivate_hsm_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cspprivate_hsm_group.example <id>
+```

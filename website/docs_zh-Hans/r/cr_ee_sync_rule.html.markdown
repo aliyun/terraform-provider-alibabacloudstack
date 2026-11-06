@@ -65,3 +65,11 @@ resource "alibabacloudstack_cr_ee_sync_rule" "default" {
 ```bash
 $ terraform import alibabacloudstack_cr_ee_sync_rule.default `cri-xxx:my-namespace:crsr-yyy`
 ```
+
+## Import
+
+alibabacloudstack_cr_ee_sync_rule 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cr_ee_sync_rule.example <id>
+```

@@ -49,3 +49,17 @@ $ terraform import alibabacloudstack_polardb_dbconnection.example <instance_id>:
 ```sh
 $ terraform import alibabacloudstack_polardb_dbconnection.example polardb-instance-123456:my_connection_prefix
 ```
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `update` - （默认20分钟）更新资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_polardb_dbconnection 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_dbconnection.example <id>
+```

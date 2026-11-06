@@ -79,3 +79,11 @@ resource "alibabacloudstack_adb_backup_policy" "policy" {
 
 * `id` - 当前备份策略资源 ID。它与 `db_cluster_id` 相同。
 * `backup_retention_period` - 数据备份文件保留的天数。此值固定为 7 天，无法修改。
+
+## Import
+
+alibabacloudstack_adb_backup_policy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_adb_backup_policy.example <id>
+```

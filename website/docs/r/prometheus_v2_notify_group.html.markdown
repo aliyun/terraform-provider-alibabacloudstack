@@ -57,3 +57,11 @@ The following attributes are exported:
 * `type` - The actual type of the notification group.
 * `webhook_header_params` - The actual effective set of Webhook request header parameters (exists only when `type` is `WEBHOOK`).
 * `webhook_url` - The actually configured Webhook URL address (exists only when `type` is `WEBHOOK`).
+
+## Import
+
+alibabacloudstack_prometheus_v2_notify_group can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_prometheus_v2_notify_group.example <id>
+```

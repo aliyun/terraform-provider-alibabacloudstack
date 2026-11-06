@@ -57,3 +57,11 @@ resource "alibabacloudstack_cloudfirewall_controlpolicyorder" "default" {
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - Terraform中的资源唯一标识符。它格式化为 `<acl_uuid>:<direction>`。
+
+## Import
+
+alibabacloudstack_cloudfirewall_controlpolicyorder 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cloudfirewall_controlpolicyorder.example <id>
+```

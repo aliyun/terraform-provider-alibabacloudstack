@@ -39,3 +39,15 @@ resource "alibabacloudstack_datahub_project" "default" {
   * `id` - DataHub 项目的 ID。它与 `name` 相同。
   * `create_time` - DataHub 项目的创建时间，以字符串格式的 UNIX 时间戳表示。
   * `last_modify_time` - DataHub 项目的最后修改时间，以字符串格式的 UNIX 时间戳表示。
+
+## Timeouts
+
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_datahub_project 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_datahub_project.example <id>
+```

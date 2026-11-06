@@ -40,3 +40,11 @@ resource "alibabacloudstack_router_interface_connection" "foo" {
 * `id` - 路由器接口 ID。其值等于 "interface_id"。
 * `opposite_router_id` - 另一侧路由器 ID。它必须属于指定的 "opposite_interface_owner_id" 账户。当字段 "opposite_interface_owner_id" 被指定时有效。
 * `opposite_interface_owner_id` - 另一侧路由器接口账户 ID。
+
+## Import
+
+alibabacloudstack_router_interface_connection 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_router_interface_connection.example <id>
+```

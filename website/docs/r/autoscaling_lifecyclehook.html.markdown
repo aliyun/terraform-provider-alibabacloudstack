@@ -150,3 +150,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `notification_metadata` - Fixed string information for the expansion of the activities of the wait state.
   * `heartbeat_timeout` - Life cycle linked to set the wait time for the FLEX group activities, will be the next step after the Timeout waiting for State action.
   * `default_result` - When scaling group contractile activity of elastic ( scale_in ) and multiple linked to the life cycle is triggered, defaultresult to abandon linked to the life cycle of trigger the end of the wait state, will end early will wait for the other early States.In other cases, the next
+
+## Import
+
+alibabacloudstack_autoscaling_lifecyclehook can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_autoscaling_lifecyclehook.example <id>
+```

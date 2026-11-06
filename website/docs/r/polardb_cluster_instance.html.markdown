@@ -114,6 +114,12 @@ The following attributes are exported:
 * `proxy_cpu_cores` - The proxy CPU cores of the cluster instance.
 * `pay_type` - The payment type of the cluster instance.
 
+## Timeouts
+
+* `create` - (Defaults to 60 mins) Used when create the resource.
+* `update` - (Defaults to 45 mins) Used when update the resource.
+* `delete` - (Defaults to 45 mins) Used when delete the resource.
+
 ## Import
 
 PolarDB cluster instance can be imported using the id, e.g.

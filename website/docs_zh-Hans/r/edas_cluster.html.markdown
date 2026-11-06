@@ -46,3 +46,11 @@ resource "alibabacloudstack_edas_cluster" "default" {
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - EDAS 集群的唯一标识符。它被制定为 `<cluster_id>`。
+
+## Import
+
+alibabacloudstack_edas_cluster 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_edas_cluster.example <id>
+```

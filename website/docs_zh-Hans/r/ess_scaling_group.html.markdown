@@ -125,3 +125,11 @@ resource "alibabacloudstack_ess_scaling_group" "default" {
 * `db_instance_ids` - ECS实例附加到的数据库实例ID。
 * `loadbalancer_ids` - ECS实例附加到的负载均衡实例ID。
 * `vswitch_ids` - 启动ECS实例的交换机ID。
+
+## Import
+
+alibabacloudstack_ess_scaling_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ess_scaling_group.example <id>
+```

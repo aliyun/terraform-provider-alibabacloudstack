@@ -79,6 +79,11 @@ resource "alibabacloudstack_expressconnect_vbr_pconn_association" "ipv6" {
   * `status` - VBR-PCCN 关联的状态。可能的值包括 `Creating`、`Associated`、`UnAssociating`。
   * `vlan_id` - VBR 的 VLAN ID。
 
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
 ## Import
 
 VBR-PCCN 关联可以使用 `physical_connection_id` 和 `vbr_id`（以冒号分隔）进行导入，例如：

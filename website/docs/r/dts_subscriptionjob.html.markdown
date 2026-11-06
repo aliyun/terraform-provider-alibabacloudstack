@@ -161,6 +161,11 @@ The following attributes are exported:
 * `subscription_data_type_ddl` - Whether to subscribe the DDL type of data.
 * `subscription_data_type_dml` - Whether to subscribe the DML type of data.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 5 mins) Used when update the resource.
+
 ## Import
 
 DTS Subscription Job can be imported using the id, e.g.

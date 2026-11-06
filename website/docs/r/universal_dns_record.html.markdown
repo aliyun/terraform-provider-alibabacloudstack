@@ -77,3 +77,11 @@ The following attributes are exported:
 * `id` - The resource ID, in the format {ZoneId}:{Id}.
 * `create_timestamp` - The creation timestamp (in seconds).
 * `update_timestamp` - The update timestamp (in seconds).
+
+## Import
+
+alibabacloudstack_universal_dns_record can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_universal_dns_record.example <id>
+```

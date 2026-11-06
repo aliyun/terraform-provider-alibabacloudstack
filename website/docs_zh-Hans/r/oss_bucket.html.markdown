@@ -72,3 +72,15 @@ $ terraform import alibabacloudstack_oss_bucket.example <oss_cluster>:<bucket>
 ```
 
 其中 `oss_cluster` 是 OSS 集群的 ID，`bucket` 是存储桶的名称。
+
+## Timeouts
+
+* `update` - （默认20分钟）更新资源时使用。
+
+## Import
+
+alibabacloudstack_oss_bucket 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_oss_bucket.example <id>
+```

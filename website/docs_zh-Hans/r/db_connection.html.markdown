@@ -73,3 +73,11 @@ resource "alibabacloudstack_db_connection" "foo" {
 * `port` - 连接实例端口。
 * `connection_string` - 连接实例字符串，包含完整的连接信息。
 * `ip_address` - 连接字符串的IP地址，表示该连接对应的公网IP。
+
+## Import
+
+alibabacloudstack_db_connection 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_db_connection.example <id>
+```

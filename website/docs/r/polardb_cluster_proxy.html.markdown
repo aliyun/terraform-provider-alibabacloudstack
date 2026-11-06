@@ -103,6 +103,12 @@ The following attributes are exported:
   * `db_node_status` - The status of the proxy node.
   * `db_node_class` - The specification of the proxy node.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 PolarDB cluster proxy can be imported using the cluster ID, e.g.

@@ -115,3 +115,17 @@ Elasticsearch实例可以使用ID进行导入，例如：
 ```bash
 $ terraform import alibabacloudstack_elasticsearch_instance.example i-1234567890abcdef0
 ```
+
+## Timeouts
+
+* `create` - （默认120分钟）创建资源时使用。
+* `update` - （默认120分钟）更新资源时使用。
+* `delete` - （默认120分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_elasticsearch_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_elasticsearch_instance.example <id>
+```

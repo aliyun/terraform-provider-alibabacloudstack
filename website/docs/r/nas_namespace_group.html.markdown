@@ -109,3 +109,11 @@ The following attributes are exported:
 * `create_time` - The creation time of the resource, in ISO 8601 standard format.
 * `member_id` - The member ID of the cross-domain mount orchestration, used for deletion operations.
 * `status` - The status of the resource, indicating the current enabled state of the mount orchestration.
+
+## Import
+
+alibabacloudstack_nas_namespace_group can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_nas_namespace_group.example <id>
+```

@@ -90,3 +90,15 @@ resource "alibabacloudstack_polardb_account" "default" {
   * `account_type` - 账号类型，取值范围如下：**Normal**：普通账号；**Super**：高权限账号。> 如果该参数留空，则默认创建**Super**账号。当集群为PolarDB O引擎或PolarDB PostgreSQL引擎时，每个集群允许创建多个高权限账号，高权限账号相比普通账号拥有更多权限，详情参见[创建数据库账号](~~68508~~)。当集群为PolarDB MySQL引擎时，每个集群最多只允许创建1个高权限账号，高权限账号相比普通账号拥有更多权限，详情参见[创建数据库账号](~~68508~~)。
   * `priv_exceeded` - 表示权限是否超出允许的限制。如果设置为`true`，表示权限超出限制。
   * `status` - 代表资源状态的资源属性字段。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_polardb_account 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_account.example <id>
+```

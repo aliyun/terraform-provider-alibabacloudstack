@@ -53,3 +53,11 @@ resource "alibabacloudstack_datahub_subscription" "default" {
   * `create_time` - DataHub订阅的创建时间。这是一个人类可读的字符串，而不是64位UTC时间戳。
   * `last_modify_time` - DataHub订阅的最后修改时间。最初，它与 `create_time` 相同。像 `create_time` 一样，它也是一个人类可读的字符串，而不是64位UTC时间戳。
   * `comment` - DataHub订阅的注释。最大长度为255个字符。 
+
+## Import
+
+alibabacloudstack_datahub_subscription 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_datahub_subscription.example <id>
+```

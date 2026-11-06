@@ -39,3 +39,15 @@ The following arguments are supported, sorted by type (Required → Recreate on 
 
 * `cascade_instance_id` - (Required, Recreate on Change) The cascade instance ID. Used to associate with the underlying cascade instance, must match an existing cascade instance ID in the API Gateway service. Cannot be modified after creation; changes will trigger resource recreation.
 * `instance_name` - (Required, Recreate on Change) The instance name. Length must be 1-128 characters, can contain letters, digits, hyphens (-), and underscores (_). Cannot be modified after creation; changes will trigger resource recreation.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
+## Import
+
+alibabacloudstack_api_gateway_v2_cascade_instance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_api_gateway_v2_cascade_instance.example <id>
+```

@@ -56,3 +56,11 @@ output "org" {
 导出以下属性：
 
 * `id` - 用户组用户的唯一标识符，通常为用户登录名。该属性可用于后续资源引用。
+
+## Import
+
+alibabacloudstack_ascm_usergroup_user 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ascm_usergroup_user.example <id>
+```

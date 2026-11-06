@@ -104,3 +104,11 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `id` - The resource ID in Terraform of Metric Rule Template.
 * `rest_version` - The version of the alert template.
+
+## Import
+
+alibabacloudstack_cloudmonitorservice_metricruletemplate can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cloudmonitorservice_metricruletemplate.example <id>
+```

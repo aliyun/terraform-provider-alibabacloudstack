@@ -99,6 +99,12 @@ resource "alibabacloudstack_mongodb_instance" "example" {
 * `public_connections` - Mongdodb的公网链接信息。
   * `connect_string` - 完整的连接字串.
 
+## Timeouts
+
+* `create` - （默认30分钟）创建资源时使用。
+* `update` - （默认30分钟）更新资源时使用。
+* `delete` - （默认30分钟）删除资源时使用。
+
 ## Import
 
 MongoDB 实例可以使用 DBInstanceId 进行导入，例如：

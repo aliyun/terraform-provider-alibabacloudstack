@@ -158,3 +158,11 @@ The following attributes are exported in addition to the arguments listed above:
 * `ari` - The unique identifier of the scaling rule.
 * `scaling_rule_aris` - The unique identifier list of the scaling rule.
 * `scaling_rule_name` - Name shown for the scaling rule. It must be 2-64 characters (English or Chinese), starting with numbers, English letters or Chinese characters, and can contain numbers, underscores `_`, hyphens `-`, and decimal points `.`. If this parameter is not specified, the default value will be the `ScalingRuleId`.
+
+## Import
+
+alibabacloudstack_autoscaling_scalingrule can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_autoscaling_scalingrule.example <id>
+```

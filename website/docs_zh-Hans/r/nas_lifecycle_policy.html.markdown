@@ -68,3 +68,11 @@ resource "alibabacloudstack_nas_lifecycle_policy" "default" {
 
 除了上述所有参数外，还导出了以下属性：
   * `create_time` - 代表创建时间的资源属性字段
+
+## Import
+
+alibabacloudstack_nas_lifecycle_policy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_nas_lifecycle_policy.example <id>
+```

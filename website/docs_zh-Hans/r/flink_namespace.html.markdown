@@ -65,3 +65,11 @@ Flink的命名空间可以使用ID进行导入，例如：
 ```
 $ terraform import alibabacloudstack_flink_namespace.default namespace_name
 ```
+
+## Import
+
+alibabacloudstack_flink_namespace 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_flink_namespace.example <id>
+```

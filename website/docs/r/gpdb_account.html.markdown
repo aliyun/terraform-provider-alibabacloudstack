@@ -89,6 +89,10 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 * `create` - (Defaults to 5 mins) Used when create the Account.
 
+## Timeouts
+
+* `create` - (Defaults to 5 mins) Used when create the resource.
+
 ## Import
 
 GPDB Account can be imported using the id, e.g.

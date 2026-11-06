@@ -148,3 +148,11 @@ resource "alibabacloudstack_ess_lifecycle_hook" "default" {
   * `notification_metadata` - 伸缩活动的等待状态的固定字符串信息。
   * `heartbeat_timeout` - 生命周期挂钩为伸缩组活动设置的等待时间(单位：秒)，等待状态超时后会执行下一步动作。
   * `default_result` - 当伸缩组发生弹性收缩活动(SCALE_IN)并触发多个生命周期挂钩时，DefaultResult为`ABANDON`的生命周期挂钩触发的等待状态结束时，会提前将其它对应的等待状态提前结束。其他情况下，下一步动作均以最后一个结束等待状态的下一步动作为准。
+
+## Import
+
+alibabacloudstack_autoscaling_lifecyclehook 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_autoscaling_lifecyclehook.example <id>
+```

@@ -75,3 +75,11 @@ The following attributes are exported in addition to the arguments listed above:
 * `primary_ip_address` - The primary private IP address of the ENI.
 * `private_ips` - List of all private IP addresses assigned to the ENI, including the primary IP and any secondary IPs.
 * `private_ips_count` - Total number of private IPs assigned to the ENI, including the primary IP and any secondary IPs.
+
+## Import
+
+alibabacloudstack_ecs_networkinterface can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_networkinterface.example <id>
+```

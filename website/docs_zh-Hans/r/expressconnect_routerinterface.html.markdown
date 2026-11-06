@@ -73,3 +73,11 @@ resource "alibabacloudstack_router_interface" "default" {
 * `opposite_interface_owner_id` - 对端路由器接口的所有者账户 ID。
 * `health_check_source_ip` - 健康检查包的源 IP 地址。
 * `health_check_target_ip` - 健康检查包的目标 IP 地址。
+
+## Import
+
+alibabacloudstack_expressconnect_routerinterface 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_expressconnect_routerinterface.example <id>
+```

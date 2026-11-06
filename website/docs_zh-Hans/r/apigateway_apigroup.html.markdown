@@ -82,3 +82,11 @@ API 网关组可以通过 ID 导入，例如：
 ```shell
 $ terraform import alibabacloudstack_apigateway_apigroup.example "ab2351f2ce904edaa8d92a0510832b91"
 ``` 
+
+## Import
+
+alibabacloudstack_apigateway_apigroup 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_apigateway_apigroup.example <id>
+```

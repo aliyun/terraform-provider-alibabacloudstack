@@ -27,3 +27,11 @@ The following attributes are exported:
 * `id` - Router interface ID. The value is equal to "interface_id".
 * `opposite_router_id` - Another side router ID. It must belong the specified "opposite_interface_owner_id" account. It is valid when field "opposite_interface_owner_id" is specified. 
 * `opposite_interface_owner_id` - Another side router interface account ID. 
+
+## Import
+
+alibabacloudstack_router_interface_connection can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_router_interface_connection.example <id>
+```

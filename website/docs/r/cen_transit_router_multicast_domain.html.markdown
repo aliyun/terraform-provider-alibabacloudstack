@@ -43,3 +43,11 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
   * `status` - the status of the multicast domain.
   * `transit_router_multicast_domain_id` - the id of the multicast domain.
+
+## Import
+
+alibabacloudstack_cen_transit_router_multicast_domain can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cen_transit_router_multicast_domain.example <id>
+```

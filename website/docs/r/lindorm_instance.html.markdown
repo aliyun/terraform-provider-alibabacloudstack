@@ -131,6 +131,12 @@ The following attributes are exported:
 * `arch_version` - The architecture version of the instance.
 * `topology_type` - The topology type of the instance. Valid values: `1azone`, `multizone`. It is automatically determined by whether `standby_zone_id` is set.
 
+## Timeouts
+
+* `create` - (Defaults to 60 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 40 mins) Used when delete the resource.
+
 ## Import
 
 Lindorm instance can be imported using the id, e.g.

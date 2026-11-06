@@ -92,8 +92,4 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-Distributed Relational Database Service (DRDS) can be imported using the id, e.g.
-
-```bash
-$ terraform import alibabacloudstack_drds_instance.example drds-abc123456
-```
+This resource does not support import.

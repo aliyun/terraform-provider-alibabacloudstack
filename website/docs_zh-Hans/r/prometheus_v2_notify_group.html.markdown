@@ -61,3 +61,11 @@ resource "alibabacloudstack_prometheus_v2_notify_group" "default" {
 * `type` - 通知组的实际类型。
 * `webhook_header_params` - 实际生效的Webhook请求头参数集合（仅当`type`为`WEBHOOK`时存在）。
 * `webhook_url` - 实际配置的Webhook URL地址（仅当`type`为`WEBHOOK`时存在）。
+
+## Import
+
+alibabacloudstack_prometheus_v2_notify_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_prometheus_v2_notify_group.example <id>
+```

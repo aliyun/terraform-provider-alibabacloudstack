@@ -180,3 +180,11 @@ ACK集群自动扩缩容配置可以使用集群ID导入，例如：
 ```
 $ terraform import alibabacloudstack_cs_autoscaling_config.example <cluster_id>
 ```
+
+## Import
+
+alibabacloudstack_cs_autoscaling_config 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cs_autoscaling_config.example <id>
+```

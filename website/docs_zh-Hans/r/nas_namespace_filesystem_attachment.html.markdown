@@ -71,3 +71,11 @@ resource "alibabacloudstack_nas_namespace_filesystem_attachment" "default" {
 * `storage_type` - 存储类型。可能的值包括：
   * `Capacity`：容量型
   * `Performance`：性能型
+
+## Import
+
+alibabacloudstack_nas_namespace_filesystem_attachment 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_nas_namespace_filesystem_attachment.example <id>
+```

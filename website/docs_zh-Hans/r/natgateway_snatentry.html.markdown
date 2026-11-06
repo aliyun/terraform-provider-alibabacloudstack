@@ -74,3 +74,11 @@ resource "alibabacloudstack_natgateway_snatentry" "default" {
 
 * `id` - SNAT条目的ID。格式为`<snat_table_id>:<snat_entry_id>`。
 * `snat_entry_id` - 服务器上的SNAT条目的唯一标识符。
+
+## Import
+
+alibabacloudstack_natgateway_snatentry 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_natgateway_snatentry.example <id>
+```

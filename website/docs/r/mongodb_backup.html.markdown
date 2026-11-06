@@ -75,3 +75,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `end_time` - Backup End Time
   * `start_time` - Backup Start Time
   * `status` - The status of the resource
+
+## Import
+
+alibabacloudstack_mongodb_backup can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_mongodb_backup.example <id>
+```

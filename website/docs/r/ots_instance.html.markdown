@@ -60,6 +60,12 @@ In addition to all arguments above, the following attributes are exported:
 * `tags` - A mapping of tags assigned to the OTS instance.
 * `propreties` - The computed properties of the OTS instance.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 OTS instance can be imported using the instance id or name, e.g.

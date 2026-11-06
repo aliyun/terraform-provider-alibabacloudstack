@@ -75,3 +75,11 @@ The following attributes are exported as resource state (output-only attributes)
 
 * `id` - Unique identifier of the resource, in the format `{cluster}:{vpc_id}:{vip}`.
 * `vip` - Assigned VPC intranet IP address. Automatically allocated by the system for OSS service endpoint access, in the format like `172.16.1.146`.
+
+## Import
+
+alibabacloudstack_oss_single_tunnel can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_oss_single_tunnel.example <id>
+```

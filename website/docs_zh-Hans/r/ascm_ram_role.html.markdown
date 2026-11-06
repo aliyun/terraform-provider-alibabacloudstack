@@ -45,3 +45,11 @@ output "ramrole" {
 
 * `id` - 用户的RAM角色名称。
 * `role_id` - RAM角色的ID。
+
+## Import
+
+alibabacloudstack_ascm_ram_role 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ascm_ram_role.example <id>
+```

@@ -100,6 +100,10 @@ In addition to all arguments above, the following attributes are exported:
 * `segment_instance_amount` - The number of segment instances.
 * `port` - The connection port.
 
+## Timeouts
+
+* `create` - (Defaults to 30 mins) Used when create the resource.
+
 ## Import
 
 GPDB DB Instance can be imported using the instance ID, e.g.

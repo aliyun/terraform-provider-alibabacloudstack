@@ -60,3 +60,11 @@ resource "alibabacloudstack_log_machine_group" "example" {
 ```bash
 $ terraform import alibabacloudstack_log_machine_group.example tf-log:tf-machine-group
 ```
+
+## Import
+
+alibabacloudstack_log_machine_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_log_machine_group.example <id>
+```

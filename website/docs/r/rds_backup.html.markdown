@@ -75,3 +75,15 @@ The following attributes are exported in addition to the arguments listed above:
   * `end_time` - The query end time must be later than the query start time in the format <I> yyyy-MM-dd</I> T <I> HH:mm</I> Z(UTC time).
   * `start_time` - The query start time, in the format <I> yyyy-MM-dd</I> T <I> HH:mm</I> Z(UTC time).
   * `status` - Backup status.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
+## Import
+
+alibabacloudstack_rds_backup can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_rds_backup.example <id>
+```

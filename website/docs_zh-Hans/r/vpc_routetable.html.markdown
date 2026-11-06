@@ -52,3 +52,11 @@ resource "alibabacloudstack_vpc_routetable" "default" {
 
 * `id` - 路由表实例的ID。
 * `route_table_name` - 由`name`参数指定或自动生成的路由表名称。如果未提供`name`参数，则会自动生成一个唯一的名称。
+
+## Import
+
+alibabacloudstack_vpc_routetable 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_vpc_routetable.example <id>
+```

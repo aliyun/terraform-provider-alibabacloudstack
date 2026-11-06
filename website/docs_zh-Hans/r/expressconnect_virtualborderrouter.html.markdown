@@ -93,3 +93,16 @@ resource "alibabacloudstack_expressconnect_virtualborderrouter" "example" {
 ```bash
 $ terraform import alibabacloudstack_expressconnect_virtualborderrouter.example <id>
 ```
+
+## Timeouts
+
+* `update` - （默认5分钟）更新资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_expressconnect_virtualborderrouter 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_expressconnect_virtualborderrouter.example <id>
+```

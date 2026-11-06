@@ -45,3 +45,11 @@ The following attributes are exported:
 * `objid` - The internal object ID (integer type) of the instance, used for API operation identification.
 * `push_gateway_url` - The access address for Push Gateway, used for receiving metric pushes.
 * `remote_write_url` - The access address for Remote Write, used for remote writing of monitoring data.
+
+## Import
+
+alibabacloudstack_prometheus_v2_instance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_prometheus_v2_instance.example <id>
+```

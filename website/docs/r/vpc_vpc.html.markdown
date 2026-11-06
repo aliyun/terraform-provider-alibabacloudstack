@@ -67,3 +67,16 @@ The following attributes are exported in addition to the arguments listed above:
   * `Pending`: The VPC is being configured.
   * `Available`: The VPC is available.
 * `vpc_name` - The name of the VPC.
+
+## Timeouts
+
+* `create` - (Defaults to 10 mins) Used when create the resource.
+* `delete` - (Defaults to 10 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_vpc_vpc can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_vpc_vpc.example <id>
+```

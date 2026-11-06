@@ -127,3 +127,11 @@ DMS 企业实例可以通过 host 和 port 导入，例如：
 ```bash
 $ terraform import alibabacloudstack_dms_enterprise_instance.example rm-uf648hgs7874xxxx.mysql.rds.aliyuncs.com:3306
 ```
+
+## Import
+
+alibabacloudstack_dmsenterprise_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_dmsenterprise_instance.example <id>
+```

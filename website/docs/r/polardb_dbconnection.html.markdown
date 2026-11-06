@@ -34,6 +34,12 @@ The following attributes are exported in addition to the arguments listed above:
 * `connection_string` - The connection string for the PolarDB instance.
 * `ip_address` - The IP address for the connection.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 PolarDB DB Connection can be imported using the id, e.g.
 

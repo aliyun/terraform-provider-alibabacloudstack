@@ -70,3 +70,16 @@ The following attributes are exported:
 * `status` - The statistical status of the directory. Possible values:
   * `Initializing`: Initializing.
   * `Normal`: Normal status.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+
+## Import
+
+alibabacloudstack_nas_dir_quota can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_nas_dir_quota.example <id>
+```

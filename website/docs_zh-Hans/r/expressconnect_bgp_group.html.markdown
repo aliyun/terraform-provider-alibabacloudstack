@@ -47,3 +47,17 @@ resource "alibabacloudstack_expressconnect_bgp_group" "default" {
   * `region_id` - BGP组所属的Region ID。
   * `route_limit` - 路由限制。
   * `status` - 代表资源状态的资源属性字段
+
+## Timeouts
+
+* `create` - （默认30分钟）创建资源时使用。
+* `update` - （默认30分钟）更新资源时使用。
+* `delete` - （默认30分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_expressconnect_bgp_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_expressconnect_bgp_group.example <id>
+```

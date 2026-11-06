@@ -65,3 +65,11 @@ resource "alibabacloudstack_kvstore_parameter_group" "default" {
 * `create_time` - 参数模板的创建时间，格式为ISO 8601标准时间（如"2026-01-20T07:27Z"）。
 * `is_dynamic` - 是否动态参数模板（1表示是，0表示否）。
 * `type` - 参数模板的类型标识。
+
+## Import
+
+alibabacloudstack_kvstore_parameter_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_kvstore_parameter_group.example <id>
+```

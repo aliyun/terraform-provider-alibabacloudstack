@@ -85,3 +85,16 @@ CEN转发路由器连接对等点可以使用ID导入，例如：
 ```bash
 $ terraform import alibabacloudstack_cen_transit_router_connect_peer.example cen-2cudwl7et3716ozh****:tr-attach-2cudwl7et3716ozh****:tr-cp-2cudwl7et3716ozh****
 ```
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_cen_transit_router_connect_peer 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cen_transit_router_connect_peer.example <id>
+```

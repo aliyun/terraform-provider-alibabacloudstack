@@ -84,6 +84,10 @@ The following attributes are exported in addition to the arguments listed above:
 * `ssl_vpn` - Indicates whether the SSL-VPN feature is enabled.
 * `ssl_max_connections` - The maximum number of concurrent SSL-VPN connections.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
 ## Import
 
 VPN Gateway can be imported using the VpnGatewayId, e.g.

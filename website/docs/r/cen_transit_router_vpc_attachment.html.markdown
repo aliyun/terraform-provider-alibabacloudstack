@@ -110,3 +110,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `status` - the status of vpc attachment instance
   * `transit_router_attachment_id` - the id of vpc attachment instance
   * `vpc_owner_id` - the vpc owner id
+
+## Import
+
+alibabacloudstack_cen_transit_router_vpc_attachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cen_transit_router_vpc_attachment.example <id>
+```

@@ -70,3 +70,11 @@ The following attributes are exported:
 
 * `id` - The ID of the network acl attachment. It is formatted as `<network_acl_id>:<a unique id>`.
 * `resources` - List of the resources associated with the network acl.  
+
+## Import
+
+alibabacloudstack_network_acl_attachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_network_acl_attachment.example <id>
+```

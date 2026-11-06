@@ -185,3 +185,11 @@ The following arguments are supported:
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
+
+## Import
+
+alibabacloudstack_slb_access_log can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_slb_access_log.example <id>
+```

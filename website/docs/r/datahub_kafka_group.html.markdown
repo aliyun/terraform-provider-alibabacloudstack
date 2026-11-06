@@ -56,3 +56,11 @@ The following attributes are exported:
 
 * `id` - The resource ID in the format `{ProjectName}:{GroupName}`.
 * `create_time` - The creation time of the Kafka group, in Unix timestamp (milliseconds).
+
+## Import
+
+alibabacloudstack_datahub_kafka_group can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_datahub_kafka_group.example <id>
+```

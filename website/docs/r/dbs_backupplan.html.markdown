@@ -80,3 +80,15 @@ In addition to all arguments above, the following attributes are exported:
    - Provided valid options for `backup_method`, `database_type`, `instance_class`, and `instance_type`.
 
 3. **Attributes Reference**: Clearly stated that `backup_plan_id` and `backup_plan_name` are exported attributes in addition to the arguments listed above.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
+## Import
+
+alibabacloudstack_dbs_backupplan can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_dbs_backupplan.example <id>
+```

@@ -64,3 +64,11 @@ resource "alibabacloudstack_mqtt_group" "default" {
 * `create_time` - 创建时间，Unix时间戳（毫秒）。
 * `independent_naming` - 是否启用独立命名空间（布尔值）。
 * `update_time` - 最后更新时间，Unix时间戳（毫秒）。
+
+## Import
+
+alibabacloudstack_mqtt_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_mqtt_group.example <id>
+```

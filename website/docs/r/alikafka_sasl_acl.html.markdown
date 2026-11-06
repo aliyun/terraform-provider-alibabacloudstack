@@ -67,3 +67,11 @@ The following attributes are exported:
 
 * `id` - The `key` of the resource supplied above. The value is formulated as `<instance_id>:<username>:<acl_resource_type>:<acl_resource_name>:<acl_resource_pattern_type>:<acl_operation_type>`.
 * `host` - The host of the acl.
+
+## Import
+
+alibabacloudstack_alikafka_sasl_acl can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_alikafka_sasl_acl.example <id>
+```

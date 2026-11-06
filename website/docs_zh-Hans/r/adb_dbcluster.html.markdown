@@ -122,3 +122,17 @@ AnalyticDB for MySQL (ADB) DBCluster 可以通过 id 导入，例如
 ```bash
 $ terraform import alibabacloudstack_adb_db_cluster.example <id>
 ```
+
+## Timeouts
+
+* `create` - （默认60分钟）创建资源时使用。
+* `update` - （默认60分钟）更新资源时使用。
+* `delete` - （默认60分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_adb_dbcluster 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_adb_dbcluster.example <id>
+```

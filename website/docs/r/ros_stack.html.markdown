@@ -136,6 +136,12 @@ The following attributes are exported in addition to the arguments listed above:
 * `id` - The resource ID in Terraform of Stack. Value as `stack_id`.
 * `status` - The status of the stack.
 
+## Timeouts
+
+* `create` - (Defaults to 15 mins) Used when create the resource.
+* `update` - (Defaults to 15 mins) Used when update the resource.
+* `delete` - (Defaults to 10 mins) Used when delete the resource.
+
 ## Import
 
 ROS Stack can be imported using the StackId, e.g.

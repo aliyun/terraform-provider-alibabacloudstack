@@ -60,3 +60,16 @@ The following attributes are exported in addition to the arguments listed above:
   * `rpo` - The RPO value of the consistent replication group.
   * `replica_group_id` - The ID of the consistent replication group.
   * `status` - The status of the consistent replication group. Possible values:-invalid: invalid. This state indicates that there is an exception to the replication pair in the consistent replication group.-creating: creating.-created: created.-create_failed: creation failed.-manual_syncing: in a single synchronization. If it is the first single synchronization, this status is also displayed in the synchronization.-syncing: synchronization. This state is the first time data is copied asynchronously between the master and slave disks.-normal: normal. When data replication is completed within the current cycle of asynchronous replication, it will be in this state.-stopping: stopping.-stopped: stopped.-stop_failed: Stop failed.-Failover: failover.-Failed: failover completed.-failover_failed: failover failed.-Reprotection: In reverse copy operation.-reprotect_failed: reverse replication failed.-deleting: deleting.-delete_failed: delete failed.-deleted: deleted.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_ebs_diskreplicagroup can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ebs_diskreplicagroup.example <id>
+```

@@ -82,3 +82,11 @@ resource "alibabacloudstack_cen_transit_router_route_table_association" "default
   * `resource_id` - 资源ID。
   * `resource_type` - 资源类型。
   * `status` - 转发路由表关联转发状态。
+
+## Import
+
+alibabacloudstack_cen_transit_router_route_table_association 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cen_transit_router_route_table_association.example <id>
+```

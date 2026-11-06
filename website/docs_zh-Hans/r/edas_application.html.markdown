@@ -69,6 +69,11 @@ resource "alibabacloudstack_edas_application" "default" {
 
 * `id` - 资源的 ID。其值为应用的 AppId。
 
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
 ## Import
 
 EDAS Application 可以通过 AppId 导入，例如：

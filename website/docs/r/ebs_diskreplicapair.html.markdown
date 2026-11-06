@@ -88,6 +88,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `last_recover_point` - The timestamp when data was last replicated from the primary disk to the secondary disk. Unit: seconds.
   * `status` - The status of the async replication pair. Valid values: `creating`, `created`, `syncing`, `normal`, `stopped`, `failovered`, `deleting`, `failed`, etc.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 EBS Disk Replica Pair can be imported using the replica pair ID, e.g.

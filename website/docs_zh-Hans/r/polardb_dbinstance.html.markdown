@@ -87,3 +87,17 @@ description: |-
   * `port` - 连接端口。
   * `maintain_time` - 实例可维护时间段，是UTC时间，+8小时才是控制台上显示的可维护时间段。
   * `role_arn` - 主账号授权POLARDB云服务账号访问KMS权限的全局资源描述符(ARN)。您可以通过[CheckCloudResourceAuthorized](~~446261~~)接口查看ARN信息。
+
+## Timeouts
+
+* `create` - （默认60分钟）创建资源时使用。
+* `update` - （默认45分钟）更新资源时使用。
+* `delete` - （默认45分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_polardb_dbinstance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_dbinstance.example <id>
+```

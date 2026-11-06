@@ -76,3 +76,11 @@ The following arguments are supported:
 * `database_privileges` - The Database permissions of the account.
     * `db_name` - The name of the database.
     * `privilege` - The permissions of the target account on the database.
+
+## Import
+
+alibabacloudstack_polardbx_account_database_binding can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardbx_account_database_binding.example <id>
+```

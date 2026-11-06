@@ -116,3 +116,11 @@ The following attributes are exported in addition to the arguments listed above:
 * `ssl_certificate_id` - SSL certificate ID.
 * `x_forwarded_for` - Whether to set additional HTTP Header field "X-Forwarded-For".
 * `listener_forward` - Whether to enable HTTP redirect to HTTPS.
+
+## Import
+
+alibabacloudstack_slb_listener can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_slb_listener.example <id>
+```

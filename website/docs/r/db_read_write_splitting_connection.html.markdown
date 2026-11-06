@@ -87,3 +87,16 @@ The following attributes are exported:
 * `id` - The Id of DB instance.
 * `connection_string` - Connection instance string.
 * `port` -  Intranet connection port. Valid value: [3001-3999]. Default to 3306.
+
+## Timeouts
+
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_db_read_write_splitting_connection can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_db_read_write_splitting_connection.example <id>
+```

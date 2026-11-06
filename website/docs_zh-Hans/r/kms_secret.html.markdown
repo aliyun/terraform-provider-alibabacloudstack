@@ -53,3 +53,11 @@ resource "alibabacloudstack_kms_secret" "default" {
 * `id` - 密钥的 ID。它与 `secret_name` 相同。
 * `arn` - 密钥的 Alibabacloudstack 资源名称 (ARN)。
 * `planned_delete_time` - 密钥计划被删除的时间（仅在密钥已安排删除时返回）。
+
+## Import
+
+alibabacloudstack_kms_secret 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_kms_secret.example <id>
+```

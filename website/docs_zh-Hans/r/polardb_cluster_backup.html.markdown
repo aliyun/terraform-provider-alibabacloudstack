@@ -85,3 +85,15 @@ $ terraform import alibabacloudstack_polardb_cluster_backup.default <db_cluster_
   * 销毁本资源不会删除备份集。备份集的生命周期由集群备份策略管理，参见
     [`alibabacloudstack_polardb_cluster_backup_policy`](/docs_zh-Hans/r/polardb_cluster_backup_policy.html.markdown)。
   * `backup_job_id` 仅对由 Terraform 创建的备份有效，导入的备份集该属性为空。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_polardb_cluster_backup 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_cluster_backup.example <id>
+```

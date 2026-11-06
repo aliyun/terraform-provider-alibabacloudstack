@@ -47,3 +47,16 @@ resource "alibabacloudstack_evpc_evpc" "default" {
 * `ascm_create_user` - 创建EVPC的用户。
 * `create_time` - EVPC的创建时间。
 * `update_time` - EVPC的最后更新时间。
+
+## Timeouts
+
+* `create` - （默认10分钟）创建资源时使用。
+* `delete` - （默认10分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_evpc_evpc 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_evpc_evpc.example <id>
+```

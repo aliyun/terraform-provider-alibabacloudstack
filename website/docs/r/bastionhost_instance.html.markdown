@@ -106,3 +106,15 @@ The following attributes are exported:
 * `description` - The description of the switch.
 
 
+
+## Timeouts
+
+* `create` - (Defaults to 45 mins) Used when create the resource.
+
+## Import
+
+alibabacloudstack_bastionhost_instance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_bastionhost_instance.example <id>
+```

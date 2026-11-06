@@ -90,3 +90,11 @@ resource "alibabacloudstack_datahub_topic" "tuple_example" {
 * `id` - DataHub 主题的 ID。它由项目名称和主题名称组成，格式为 `<project_name>:<name>`。
 * `create_time` - DataHub 主题的创建时间。这是一个人类可读的字符串，而不是 64 位 UTC 时间戳。
 * `last_modify_time` - DataHub 主题的最后修改时间。最初，它与 `create_time` 相同。它也是一个人类可读的字符串，而不是 64 位 UTC 时间戳。
+
+## Import
+
+alibabacloudstack_datahub_topic 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_datahub_topic.example <id>
+```

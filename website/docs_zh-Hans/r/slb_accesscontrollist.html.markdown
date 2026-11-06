@@ -61,3 +61,11 @@ resource "alibabacloudstack_slb_accesscontrollist" "default" {
   * `address_ip_version` - 关联的实例的IP类型。有效值为 `ipv4` 和 `ipv6`。
   * `name` - 已废弃的名称字段。
   * `ip_version` - 已废弃的IP版本字段。
+
+## Import
+
+alibabacloudstack_slb_accesscontrollist 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_slb_accesscontrollist.example <id>
+```

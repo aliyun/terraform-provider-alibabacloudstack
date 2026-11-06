@@ -75,6 +75,12 @@ resource "alibabacloudstack_gpdb_connection" "default" {
 * `connection_string` - 通过公网访问GPDB实例的完整连接字符串。
 * `ip_address` - 与公网连接字符串关联的公网IP地址。
 
+## Timeouts
+
+* `create` - （默认10分钟）创建资源时使用。
+* `update` - （默认10分钟）更新资源时使用。
+* `delete` - （默认10分钟）删除资源时使用。
+
 ## Import
 
 GPDB 公网连接可以使用 instance_id 和 connection_prefix 导入，例如：

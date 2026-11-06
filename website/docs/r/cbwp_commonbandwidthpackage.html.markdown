@@ -46,3 +46,11 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The ID of the common bandwidth package instance.
 * `bandwidth_package_name` - The name of the Internet Shared Bandwidth instance. The name must be 2 to 128 characters in length, and can contain letters, digits, underscores (`_`), and hyphens (`-`). The name must start with a letter.
 * `name` - The name of the Internet Shared Bandwidth instance. The name must be 2 to 128 characters in length, and can contain letters, digits, underscores (`_`), and hyphens (`-`). The name must start with a letter.
+
+## Import
+
+alibabacloudstack_cbwp_commonbandwidthpackage can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cbwp_commonbandwidthpackage.example <id>
+```

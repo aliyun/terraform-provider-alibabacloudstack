@@ -75,3 +75,11 @@ resource "alibabacloudstack_cloud_firewall_control_policy" "default" {
 ```
 $ terraform import alibabacloudstack_cloud_firewall_control_policy.example acl-12345678:out
 ```
+
+## Import
+
+alibabacloudstack_cloud_firewall_control_policy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cloud_firewall_control_policy.example <id>
+```

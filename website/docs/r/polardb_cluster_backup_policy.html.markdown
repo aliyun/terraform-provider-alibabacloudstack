@@ -118,3 +118,11 @@ The following attributes are exported:
 * `log_backup_another_region_region` - The region for log backups in another region.
 * `log_backup_another_region_retention_period` - The retention period for log backups in another region.
 * `enable_backup_log` - Whether log backup is enabled.
+
+## Import
+
+alibabacloudstack_polardb_cluster_backup_policy can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardb_cluster_backup_policy.example <id>
+```

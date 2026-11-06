@@ -94,6 +94,12 @@ The following attributes are exported in addition to the arguments listed above:
   * Terminated: Terminated.
 * `type` - The type of the physical connection. Default value is `VPC`.
 
+## Timeouts
+
+* `create` - (Defaults to 5 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 Express Connect Physical Connection can be imported using the PhysicalConnectionId, e.g.

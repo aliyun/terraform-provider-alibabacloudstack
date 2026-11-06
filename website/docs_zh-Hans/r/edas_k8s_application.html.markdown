@@ -301,3 +301,17 @@ EDAS k8s 应用程序可以通过以下方式导入，例如：
 ```bash
 $ terraform import alibabacloudstack_edas_k8s_application.new_k8s_application application_id
 ```
+
+## Timeouts
+
+* `create` - （默认30分钟）创建资源时使用。
+* `update` - （默认20分钟）更新资源时使用。
+* `delete` - （默认30分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_edas_k8s_application 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_edas_k8s_application.example <id>
+```

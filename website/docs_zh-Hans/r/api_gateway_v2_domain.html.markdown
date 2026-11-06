@@ -77,3 +77,11 @@ API 网关 V2 域名可以使用 ID 导入，例如：
 ```shell
 $ terraform import alibabacloudstack_api_gateway_v2_domain.example <instance_id>:<domain_id>
 ```
+
+## Import
+
+alibabacloudstack_api_gateway_v2_domain 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_api_gateway_v2_domain.example <id>
+```

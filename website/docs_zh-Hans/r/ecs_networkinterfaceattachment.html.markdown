@@ -106,3 +106,11 @@ resource "alibabacloudstack_network_interface_attachment" "default" {
 > **说明**: 
 > - `id` 是该资源的唯一标识符，用于在Terraform中引用该资源。
 > - 此属性可以用于其他依赖于此资源的模块或配置中。
+
+## Import
+
+alibabacloudstack_ecs_networkinterfaceattachment 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ecs_networkinterfaceattachment.example <id>
+```

@@ -118,3 +118,16 @@ The following attributes are exported:
 * `wafinstance_id` - ID of the WAF instance.
 * `instance_status` - Status of the WAF instance.
 * `instance_make_status` - Make status of the WAF instance.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+
+## Import
+
+alibabacloudstack_waf_instance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_waf_instance.example <id>
+```

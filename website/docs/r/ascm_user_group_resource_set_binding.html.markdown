@@ -52,3 +52,11 @@ The following attributes are exported:
 
 * `resource_set_id` - (Required) List of resource group id.
 * `user_group_id` - (Required) user group id.
+
+## Import
+
+alibabacloudstack_ascm_user_group_resource_set_binding can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ascm_user_group_resource_set_binding.example <id>
+```

@@ -175,3 +175,16 @@ ECS专有宿主机可以通过id导入，例如：
 ```bash
 $ terraform import alibabacloudstack_ecs_dedicated_host.default dh-2zedmxxxx
 ```
+
+## Timeouts
+
+* `create` - （默认15分钟）创建资源时使用。
+* `update` - （默认15分钟）更新资源时使用。
+
+## Import
+
+alibabacloudstack_ecs_dedicatedhost 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ecs_dedicatedhost.example <id>
+```

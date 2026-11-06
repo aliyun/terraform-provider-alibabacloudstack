@@ -87,6 +87,11 @@ The following attributes are exported:
 * `id` - The ID of the resource, formatted as `<group_ip_address>:<transit_router_multicast_domain_id>:<resource_type>:<key>`, where `<key>` is `network_interface_id` when `resource_type` is `VPC`, or `connect_peer_id` when `resource_type` is `Connect`.
 * `status` - The status of the multicast member.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 CEN transit router multicast domain member can be imported using the id, e.g.

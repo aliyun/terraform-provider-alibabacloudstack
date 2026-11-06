@@ -110,3 +110,11 @@ resource "alibabacloudstack_nas_namespace_group" "default" {
 * `create_time` - 资源创建时间，格式为ISO 8601标准时间。
 * `member_id` - 跨域挂载编排成员ID，用于删除操作。
 * `status` - 资源状态，表示当前挂载编排的启用状态。
+
+## Import
+
+alibabacloudstack_nas_namespace_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_nas_namespace_group.example <id>
+```

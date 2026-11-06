@@ -224,3 +224,11 @@ In addition to all arguments above, the following attributes are exported:
 * `key_pair_name` - The name of the key pair used to log in to the ECS instance.
 * `is_outdated` - Whether to use outdated instance types.
 * `key_name` - The name of the key pair used to log in to the ECS instance.
+
+## Import
+
+alibabacloudstack_ess_scaling_configuration can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ess_scaling_configuration.example <id>
+```

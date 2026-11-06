@@ -276,3 +276,17 @@ The following attributes are exported:
 * `worker_system_disk_performance_level` - The performance level of the worker node's system disk.
 * `is_enterprise_security_group` - Indicates whether an enterprise-level security group is used.
 * `cloud_monitor_flags` - Indicates whether cloud monitoring is enabled.
+
+## Timeouts
+
+* `create` - (Defaults to 90 mins) Used when create the resource.
+* `update` - (Defaults to 60 mins) Used when update the resource.
+* `delete` - (Defaults to 60 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_ack_cluster can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ack_cluster.example <id>
+```

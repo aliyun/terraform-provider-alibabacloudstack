@@ -515,3 +515,11 @@ The following attributes are exported:
   * `port` - The port of the service.
   * `version` - The version of the service.
   * `weight` - The weight of the service.
+
+## Import
+
+alibabacloudstack_api_gateway_v2_mcpserver can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_api_gateway_v2_mcpserver.example <id>
+```

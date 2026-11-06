@@ -53,3 +53,15 @@ resource "alibabacloudstack_image_copy" "default" {
 * `name` - 镜像名称（此字段为兼容性保留，建议使用`image_name`）。
 * `image_name` - 镜像名称。
 * `description` - 镜像描述。
+
+## Timeouts
+
+* `create` - （默认60分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_image_copy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_image_copy.example <id>
+```

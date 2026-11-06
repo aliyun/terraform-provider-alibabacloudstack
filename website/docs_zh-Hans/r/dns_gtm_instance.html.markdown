@@ -61,3 +61,11 @@ resource "alibabacloudstack_dns_gtm_instance" "default" {
 * `create_timestamp` - 创建时间戳（秒）。
 * `update_timestamp` - 修改时间戳（秒）。
 * `zone_name` - 域名名称。表示该调度实例所属的域名。
+
+## Import
+
+alibabacloudstack_dns_gtm_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_dns_gtm_instance.example <id>
+```

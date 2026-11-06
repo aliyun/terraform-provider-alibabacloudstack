@@ -111,3 +111,11 @@ HSM实例可以通过ID进行导入，例如：
 ```shell
 $ terraform import alibabacloudstack_cspprivate_hsm_instance.example <id>
 ```
+
+## Import
+
+alibabacloudstack_cspprivate_hsm_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cspprivate_hsm_instance.example <id>
+```

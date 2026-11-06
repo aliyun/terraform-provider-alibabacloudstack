@@ -43,3 +43,11 @@ MaxCompute CU 可以通过 CuId 导入，例如
 ```bash
 $ terraform import alibabacloudstack_maxcompute_cu.example <cu_id>
 ```
+
+## Import
+
+alibabacloudstack_maxcompute_cu 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_maxcompute_cu.example <id>
+```

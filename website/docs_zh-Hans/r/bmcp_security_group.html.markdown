@@ -64,3 +64,15 @@ BMCP 安全组可以使用安全组 ID（sgId）进行导入，例如：
 ```
 $ terraform import alibabacloudstack_bmcp_security_group.example sg-12345678
 ```
+
+## Timeouts
+
+* `delete` - （默认10分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_bmcp_security_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_bmcp_security_group.example <id>
+```

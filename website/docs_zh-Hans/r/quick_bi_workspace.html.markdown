@@ -50,3 +50,15 @@ Quick BI 工作区可以使用 id 导入，例如
 ```bash
 $ terraform import alibabacloudstack_quick_bi_workspace.example <id>
 ```
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_quick_bi_workspace 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_quick_bi_workspace.example <id>
+```

@@ -114,3 +114,11 @@ The following attributes are exported in addition to the arguments listed above:
 * `name` - The name of the VServer Group.
 * `vserver_group_name` - The name of the VServer Group.
 * `servers` - A list of ECS instances that have been added.
+
+## Import
+
+alibabacloudstack_slb_vservergroup can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_slb_vservergroup.example <id>
+```

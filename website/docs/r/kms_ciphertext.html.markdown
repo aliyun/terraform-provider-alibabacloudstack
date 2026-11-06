@@ -53,3 +53,7 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `ciphertext_blob` - The ciphertext of the data key encrypted with the primary CMK version.  
 * `sensitive` - Indicates whether the attribute is sensitive. This attribute is computed automatically.
+
+## Import
+
+This resource does not support import.

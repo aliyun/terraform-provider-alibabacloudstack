@@ -61,3 +61,11 @@ The following attributes are exported in addition to the arguments listed above:
 * `create_time` - Creation time, Unix timestamp in milliseconds.
 * `independent_naming` - Whether independent naming is enabled (boolean).
 * `update_time` - Last update time, Unix timestamp in milliseconds.
+
+## Import
+
+alibabacloudstack_mqtt_group can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_mqtt_group.example <id>
+```

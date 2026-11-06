@@ -73,3 +73,17 @@ resource "alibabacloudstack_graphdatabase_dbinstance" "default" {
 * `vpc_id` - 与DB实例关联的专有网络ID。
 * `zone_id` - DB实例所在的可用区ID。
 * `db_instance_ip_array` - 实例的IP白名单配置信息，包含白名单组的属性、名称及具体的IP地址或CIDR块列表。
+
+## Timeouts
+
+* `create` - （默认30分钟）创建资源时使用。
+* `update` - （默认60分钟）更新资源时使用。
+* `delete` - （默认1分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_graphdatabase_dbinstance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_graphdatabase_dbinstance.example <id>
+```

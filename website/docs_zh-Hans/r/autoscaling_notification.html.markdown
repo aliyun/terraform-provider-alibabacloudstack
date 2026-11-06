@@ -92,3 +92,11 @@ resource "alibabacloudstack_autoscaling_notification" "default" {
 除了上述所有参数外，还导出以下属性：
 
 * `id` - 通知资源的唯一标识符，由 `scaling_group_id` 和 `notification_arn` 组成，格式为 `<scaling_group_id>:<notification_arn>`。
+
+## Import
+
+alibabacloudstack_autoscaling_notification 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_autoscaling_notification.example <id>
+```

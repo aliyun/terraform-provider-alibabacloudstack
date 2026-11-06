@@ -138,3 +138,11 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
   * `create_time` - The creation time of the resource
   * `invocation_id` - Invocation ID
+
+## Import
+
+alibabacloudstack_ecs_invocation can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_invocation.example <id>
+```

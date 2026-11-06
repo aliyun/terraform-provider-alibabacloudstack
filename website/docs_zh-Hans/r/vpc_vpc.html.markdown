@@ -68,3 +68,16 @@ resource "alibabacloudstack_vpc_vpc" "default" {
   * `Pending`：VPC正在配置中。
   * `Available`：VPC可用。
 * `vpc_name` - VPC的名称。
+
+## Timeouts
+
+* `create` - （默认10分钟）创建资源时使用。
+* `delete` - （默认10分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_vpc_vpc 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_vpc_vpc.example <id>
+```

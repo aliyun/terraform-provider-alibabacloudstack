@@ -49,3 +49,11 @@ API网关V2证书可以使用证书ID进行导入，例如：
 ```shell
 $ terraform import alibabacloudstack_api_gateway_v2_certificate.example <instance_id:certificate_id>
 ```
+
+## Import
+
+alibabacloudstack_api_gateway_v2_certificate 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_api_gateway_v2_certificate.example <id>
+```

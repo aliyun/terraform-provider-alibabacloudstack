@@ -143,6 +143,11 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 * `delete` - (Defaults to 1 min) Used when deleting the dedicated host.
 * `update` - (Defaults to 11 mins) Used when updating the dedicated host.
 
+## Timeouts
+
+* `create` - (Defaults to 15 mins) Used when create the resource.
+* `update` - (Defaults to 15 mins) Used when update the resource.
+
 ## Import
 
 ECS dedicated host can be imported using the id, e.g.

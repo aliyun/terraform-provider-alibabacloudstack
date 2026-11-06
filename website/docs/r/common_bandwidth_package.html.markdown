@@ -70,3 +70,11 @@ The following attributes are exported in addition to the arguments listed above:
     * `allocation_id` - The ID of the instance of the public IP address.
     * `ip_address` - Public IP address.
   * `status` - The status of the Internet Shared Bandwidth instance. Default value: **Available * *.
+
+## Import
+
+alibabacloudstack_common_bandwidth_package can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_common_bandwidth_package.example <id>
+```

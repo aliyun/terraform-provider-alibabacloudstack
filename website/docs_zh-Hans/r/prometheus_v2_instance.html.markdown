@@ -48,3 +48,11 @@ resource "alibabacloudstack_prometheus_v2_instance" "default" {
 * `objid` - 实例的内部对象ID（整数类型），用于API操作标识。
 * `push_gateway_url` - Push Gateway的访问地址，用于接收监控指标推送。
 * `remote_write_url` - Remote Write的访问地址，用于远程写入监控数据。
+
+## Import
+
+alibabacloudstack_prometheus_v2_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_prometheus_v2_instance.example <id>
+```

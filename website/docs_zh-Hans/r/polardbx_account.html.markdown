@@ -80,3 +80,11 @@ resource "alibabacloudstack_polardbx_account" "default" {
 
 * `id` - 资源的唯一标识，格式为 `<instance_id>:<account_name>`
 * `description` - 账户描述
+
+## Import
+
+alibabacloudstack_polardbx_account 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardbx_account.example <id>
+```

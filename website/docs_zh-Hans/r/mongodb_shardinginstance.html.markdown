@@ -166,3 +166,15 @@ resource "alibabacloudstack_mongodb_sharding_instance" "default" {
 * `security_group_id` - 与实例关联的安全组 ID。
 * `tde_status` - 实例的透明数据加密状态。
 * `preferred_backup_time` - 实例的首选备份时间窗口。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_mongodb_shardinginstance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_mongodb_shardinginstance.example <id>
+```

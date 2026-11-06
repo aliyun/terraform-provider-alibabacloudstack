@@ -110,3 +110,17 @@ The following attributes are exported in addition to the arguments listed above:
   * `port` - Connection port.
   * `maintain_time` - Instance maintenance time period, which is the UTC time, +8 hours is the maintenance time period displayed on the console.
   * `role_arn` - The Global Resource Descriptor (ARN) that authorizes the POLARDB cloud service account to access KMS. You can view the ARN information by using the [CheckCloudResourceAuthorized](~~ 446261 ~~) interface.
+
+## Timeouts
+
+* `create` - (Defaults to 60 mins) Used when create the resource.
+* `update` - (Defaults to 45 mins) Used when update the resource.
+* `delete` - (Defaults to 45 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_polardb_dbinstance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardb_dbinstance.example <id>
+```

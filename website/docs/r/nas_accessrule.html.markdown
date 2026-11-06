@@ -57,3 +57,11 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of this resource. It is formatted as `<access_group_name>:<access_rule_id>`.
 * `access_rule_id` - The unique identifier for the NAS access rule.
+
+## Import
+
+alibabacloudstack_nas_accessrule can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_nas_accessrule.example <id>
+```

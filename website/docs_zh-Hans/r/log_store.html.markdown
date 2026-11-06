@@ -110,3 +110,11 @@ resource "alibabacloudstack_log_store" "example" {
 ```bash
 $ terraform import alibabacloudstack_log_store.example <project>:<name>
 ```
+
+## Import
+
+alibabacloudstack_log_store 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_log_store.example <id>
+```

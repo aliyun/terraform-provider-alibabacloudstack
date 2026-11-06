@@ -52,3 +52,16 @@ The following attributes are exported:
 * `db_instance_storage` - The instance storage.
 * `db_instance_storage_type` - The storage type of the instance.
 * `db_instance_description` - The description of the DB instance.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 30 mins) Used when update the resource.
+
+## Import
+
+alibabacloudstack_db_readonly_instance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_db_readonly_instance.example <id>
+```

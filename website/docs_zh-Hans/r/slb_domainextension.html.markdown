@@ -80,3 +80,11 @@ resource "alibabacloudstack_slb_domainextension" "default" {
 * `frontend_port` - SLB实例使用的HTTPS监听器的前端端口。
 * `listener_port` - SLB实例使用的HTTPS监听器的监听端口，与`frontend_port`相同。
 * `domain_extension_id` - 域扩展的唯一标识符。
+
+## Import
+
+alibabacloudstack_slb_domainextension 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_slb_domainextension.example <id>
+```

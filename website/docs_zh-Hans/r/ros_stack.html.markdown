@@ -177,3 +177,17 @@ ROS 资源栈可以使用 StackId 导入，例如：
 ```
 $ terraform import alibabacloudstack_ros_stack.example 5f5e9b2a-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
+
+## Timeouts
+
+* `create` - （默认15分钟）创建资源时使用。
+* `update` - （默认15分钟）更新资源时使用。
+* `delete` - （默认10分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_ros_stack 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ros_stack.example <id>
+```

@@ -68,3 +68,17 @@ OTS 实例可以使用实例 ID 或名称导入，例如：
 ```bash
 $ terraform import alibabacloudstack_ots_instance.foo "my-ots-instance"
 ``` 
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `update` - （默认20分钟）更新资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_ots_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ots_instance.example <id>
+```

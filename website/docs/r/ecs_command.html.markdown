@@ -52,3 +52,16 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The unique identifier of the ECS Command resource.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_ecs_command can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_command.example <id>
+```

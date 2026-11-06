@@ -79,3 +79,11 @@ Alikafka SASL 用户可以通过ID导入，例如
 ```bash
 $ terraform import alibabacloudstack_alikafka_sasl_user.example <instance_id>:<username>
 ```
+
+## Import
+
+alibabacloudstack_alikafka_sasl_user 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_alikafka_sasl_user.example <id>
+```

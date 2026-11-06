@@ -66,6 +66,12 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 * `update` - (Defaults to 1 minute) Used when updating the Ipv6 Gateway.
 * `delete` - (Defaults to 5 minutes) Used when deleting the Ipv6 Gateway.
 
+## Timeouts
+
+* `create` - (Defaults to 1 mins) Used when create the resource.
+* `update` - (Defaults to 1 mins) Used when update the resource.
+* `delete` - (Defaults to 5 mins) Used when delete the resource.
+
 ## Import
 
 VPC Ipv6 Gateway can be imported using the id, e.g.

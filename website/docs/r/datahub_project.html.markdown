@@ -41,6 +41,10 @@ In addition to all arguments above, the following attributes are exported:
 * `create_time` - The creation time of the DataHub project, represented as a UNIX timestamp in string format.
 * `last_modify_time` - The last modification time of the DataHub project, represented as a UNIX timestamp in string format.
 
+## Timeouts
+
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 DataHub projects can be imported using their `name` or ID. For example:

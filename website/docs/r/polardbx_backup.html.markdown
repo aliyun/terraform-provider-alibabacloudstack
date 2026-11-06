@@ -75,6 +75,10 @@ The following attributes are exported in addition to the arguments listed above:
   * `end_time` - The end time of the backup in UTC format.
   * `begin_time` - The start time of the backup in UTC format.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
 ## Import
 
 PolarDB-X Backup can be imported using the instance ID and backup set ID separated by a colon, e.g.

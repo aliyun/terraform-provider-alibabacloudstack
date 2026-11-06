@@ -76,6 +76,11 @@ The following attributes are exported:
 * `peer_id` - The ID of the transit router connect peer.
 * `region_id` - The region ID of the transit router connect peer.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 CEN transit router connect peer can be imported using the id, e.g.

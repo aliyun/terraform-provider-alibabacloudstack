@@ -71,3 +71,11 @@ In addition to all arguments above, the following attributes are exported:
    - Ensured that the `internet_charge_type` attribute is explicitly mentioned as an exported attribute for consistency.
 
 This updated documentation provides a more comprehensive and clear guide for users to understand and utilize the `alibabacloudstack_vpc_ipv6internetbandwidth` resource effectively.
+
+## Import
+
+alibabacloudstack_vpc_ipv6internetbandwidth can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_vpc_ipv6internetbandwidth.example <id>
+```

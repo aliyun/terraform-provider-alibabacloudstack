@@ -95,3 +95,11 @@ API Gateway VPC access can be imported using the combined ID format `<NAME>:<VPC
 ```sh
 $ terraform import alibabacloudstack_api_gateway_vpc_access.example "my-vpc-name:vpc-aswcj19ajsz:i-ajdjfsdlf:8080"
 ```
+
+## Import
+
+alibabacloudstack_apigateway_vpc can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_apigateway_vpc.example <id>
+```

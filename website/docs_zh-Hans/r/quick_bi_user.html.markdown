@@ -55,3 +55,11 @@ Quick BI 用户可以使用 id 导入，例如
 ```bash
 $ terraform import alibabacloudstack_quick_bi_user.example <id>
 ```
+
+## Import
+
+alibabacloudstack_quick_bi_user 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_quick_bi_user.example <id>
+```

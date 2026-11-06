@@ -52,3 +52,11 @@ resource "alibabacloudstack_cr_ee_namespace" "my-namespace" {
 ```
 $ terraform import alibabacloudstack_cr_ee_namespace.example cri-xxx:my-namespace
 ```
+
+## Import
+
+alibabacloudstack_cr_ee_namespace 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cr_ee_namespace.example <id>
+```

@@ -127,3 +127,16 @@ resource "alibabacloudstack_ecs_snapshot" "default" {
 * `id` - 快照的 ID。
 * `snapshot_name` - 快照的显示名称。长度为 2~128 个英文或中文字符。必须以大小写字母或中文开头，不能以 `http://` 或 `https://` 开头。可以包含数字、半角冒号 (:)、下划线 (_) 或者短划线 (-)。为防止和自动快照的名称冲突，不能以 `auto` 开头。
 * `description` - 快照的描述。长度为 2~256 个英文或中文字符，不能以 `http://` 或 `https://` 开头。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认5分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_ecs_snapshot 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ecs_snapshot.example <id>
+```

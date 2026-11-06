@@ -95,3 +95,11 @@ resource "alibabacloudstack_log_store_index" "example" {
 ```bash
 $ terraform import alibabacloudstack_log_store_index.example tf-log:tf-log-store
 ```
+
+## Import
+
+alibabacloudstack_log_store_index 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_log_store_index.example <id>
+```

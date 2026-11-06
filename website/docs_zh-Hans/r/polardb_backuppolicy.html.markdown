@@ -80,3 +80,11 @@ resource "alibabacloudstack_polardb_backuppolicy" "example" {
   * `status` - 当前备份策略的状态。
   * `last_backup_time` - 最近一次备份的时间戳。
   * `next_backup_time` - 下一次计划备份的时间戳。
+
+## Import
+
+alibabacloudstack_polardb_backuppolicy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_backuppolicy.example <id>
+```

@@ -71,3 +71,11 @@ Logtail配置可以通过id导入，例如：
 ```bash
 $ terraform import alibabacloudstack_logtail_config.example tf-log:tf-log-store:tf-log-config
 ```
+
+## Import
+
+alibabacloudstack_logtail_config 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_logtail_config.example <id>
+```

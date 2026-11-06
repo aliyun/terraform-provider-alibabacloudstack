@@ -84,3 +84,15 @@ resource "alibabacloudstack_polardb_cluster_account" "example" {
 ```bash
 $ terraform import alibabacloudstack_polardb_cluster_account.example pc-12345678:test_account
 ```
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_polardb_cluster_account 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_cluster_account.example <id>
+```

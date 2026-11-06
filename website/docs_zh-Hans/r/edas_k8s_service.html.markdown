@@ -103,3 +103,11 @@ EDAS k8s 应用程序可以按以下方式导入，例如：
 ```bash
 $ terraform import alibabacloudstack_edas_k8s_service.new_k8s_service "app_id:name"
 ```
+
+## Import
+
+alibabacloudstack_edas_k8s_service 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_edas_k8s_service.example <id>
+```

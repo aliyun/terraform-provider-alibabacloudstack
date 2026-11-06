@@ -79,3 +79,11 @@ resource "alibabacloudstack_mqtt_topic" "default" {
 * `status_name` - 主题状态名称。
 * `unit_flag` - 单元标志。
 * `update_time` - 主题最后更新时间（时间戳，单位毫秒）。
+
+## Import
+
+alibabacloudstack_mqtt_topic 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_mqtt_topic.example <id>
+```

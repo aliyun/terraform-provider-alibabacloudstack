@@ -51,3 +51,11 @@ The following attributes are exported:
   * `public` -  Domain of public endpoint.
   * `internal` -  Domain of internal endpoint, only in some regions.
   * `vpc` -  Domain of vpc endpoint.
+
+## Import
+
+alibabacloudstack_cr_repo can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cr_repo.example <id>
+```

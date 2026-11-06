@@ -66,3 +66,11 @@ The following attributes are exported:
 * `storage_type` - The storage type. Possible values:
   * `Capacity`: Capacity type
   * `Performance`: Performance type
+
+## Import
+
+alibabacloudstack_nas_namespace_filesystem_attachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_nas_namespace_filesystem_attachment.example <id>
+```

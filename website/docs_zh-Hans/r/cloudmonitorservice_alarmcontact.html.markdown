@@ -81,3 +81,11 @@ resource "alibabacloudstack_cloudmonitorservice_alarmcontact" "example" {
 ```bash
 $ terraform import alibabacloudstack_cloudmonitorservice_alarmcontact.example abc12345
 ```
+
+## Import
+
+alibabacloudstack_cloudmonitorservice_alarmcontact 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cloudmonitorservice_alarmcontact.example <id>
+```

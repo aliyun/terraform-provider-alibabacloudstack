@@ -44,3 +44,11 @@ The following arguments are supported:
 
 The following attributes are exported in addition to the arguments listed above:
   * `dedicated_host_cluster_id` - dedicated host cluster id
+
+## Import
+
+alibabacloudstack_ecs_dedicated_host_cluster can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_dedicated_host_cluster.example <id>
+```

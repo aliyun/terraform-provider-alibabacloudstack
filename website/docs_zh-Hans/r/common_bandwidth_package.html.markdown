@@ -71,3 +71,11 @@ resource "alibabacloudstack_natgateway_bandwidth_package" "default" {
     * `allocation_id` - 公网IP的实例ID�?
     * `ip_address` - 公网IP地址�?
   * `status` - 共享带宽实例的状态。默认取值：**Available**�?
+
+## Import
+
+alibabacloudstack_common_bandwidth_package 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_common_bandwidth_package.example <id>
+```

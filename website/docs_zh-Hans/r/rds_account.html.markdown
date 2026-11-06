@@ -104,3 +104,11 @@ resource "alibabacloudstack_rds_account" "default" {
 * `name` - 已废弃字段，建议使用 `account_name` 替代。
 * `type` - 已废弃字段，建议使用 `account_type` 替代。
 * `description` - 已废弃字段，建议使用 `account_description` 替代。
+
+## Import
+
+alibabacloudstack_rds_account 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_rds_account.example <id>
+```

@@ -104,6 +104,12 @@ The following attributes are exported in addition to the arguments listed above:
 * `public_connection_string` - The public connection string (if enabled).
 * `public_connection_port` - The public connection port (if enabled).
 
+## Timeouts
+
+* `create` - (Defaults to 60 mins) Used when create the resource.
+* `update` - (Defaults to 30 mins) Used when update the resource.
+* `delete` - (Defaults to 10 mins) Used when delete the resource.
+
 ## Import
 
 PolarDB-X instance can be imported using the instance ID, e.g.

@@ -59,3 +59,11 @@ In addition to all arguments above, the following attributes are exported:
    - Removed redundant information and ensured clarity in the exported attributes section. 
 
 This updated documentation provides a comprehensive guide for using the `alibabacloudstack_edas_cluster` resource effectively.
+
+## Import
+
+alibabacloudstack_edas_cluster can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_edas_cluster.example <id>
+```

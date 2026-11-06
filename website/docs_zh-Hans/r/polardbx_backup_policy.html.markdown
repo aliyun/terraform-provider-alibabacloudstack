@@ -91,3 +91,11 @@ resource "alibabacloudstack_polardbx_backup_policy" "default" {
 ```bash
 $ terraform import alibabacloudstack_polardbx_backup_policy.example pxc-xxxx
 ```
+
+## Import
+
+alibabacloudstack_polardbx_backup_policy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardbx_backup_policy.example <id>
+```

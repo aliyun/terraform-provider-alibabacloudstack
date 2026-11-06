@@ -107,3 +107,11 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
 
 * `remind_id` - The resource ID of Remind. The value formats as `<remind_id>:<$.ProjectId>`.
+
+## Import
+
+alibabacloudstack_data_works_remind can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_data_works_remind.example <id>
+```

@@ -103,6 +103,12 @@ The following attributes are exported:
 
 * `id` - The ID of the HSM cluster.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 HSM clusters can be imported using the id, e.g.

@@ -70,3 +70,17 @@ Lindorm LTS 实例可以使用实例 ID 进行导入，例如：
 ```bash
 $ terraform import alibabacloudstack_lindorm_lts_instance.example <id>
 ```
+
+## Timeouts
+
+* `create` - （默认60分钟）创建资源时使用。
+* `update` - （默认20分钟）更新资源时使用。
+* `delete` - （默认40分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_lindorm_lts_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_lindorm_lts_instance.example <id>
+```

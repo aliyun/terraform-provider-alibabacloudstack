@@ -122,3 +122,17 @@ resource "alibabacloudstack_polardb_cluster_instance" "default" {
 ```bash
 $ terraform import alibabacloudstack_polardb_cluster_instance.example pc-12345678
 ```
+
+## Timeouts
+
+* `create` - （默认60分钟）创建资源时使用。
+* `update` - （默认45分钟）更新资源时使用。
+* `delete` - （默认45分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_polardb_cluster_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_cluster_instance.example <id>
+```

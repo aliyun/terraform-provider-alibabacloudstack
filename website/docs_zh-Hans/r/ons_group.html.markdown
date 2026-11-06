@@ -56,3 +56,11 @@ resource "alibabacloudstack_ons_group" "default" {
 导出以下属性：
 
 * `id` - ONS组的唯一标识符，由GroupID和InstanceID组成。格式为`GroupID:InstanceID`，其中`GroupID`是组的ID，`InstanceID`是所属ONS实例的ID。
+
+## Import
+
+alibabacloudstack_ons_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ons_group.example <id>
+```

@@ -67,3 +67,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `character_type` - Account Of The Role Type
   * `status` - Account Status
   * `account_type` - the Account Type
+
+## Import
+
+alibabacloudstack_mongodb_account can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_mongodb_account.example <id>
+```

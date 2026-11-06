@@ -62,3 +62,11 @@ resource "alibabacloudstack_nas_namespace" "default" {
 * `create_time` - 命名空间创建的时间。遵循ISO 8601标准表示，返回格式：`yyyy-MM-ddTHH:mm:ssZ`。
 * `file_system_type` - 文件系统类型。默认值：`standard`，通用型NAS。
 * `mount_target_count` - 命名空间文件系统挂载点数量。
+
+## Import
+
+alibabacloudstack_nas_namespace 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_nas_namespace.example <id>
+```

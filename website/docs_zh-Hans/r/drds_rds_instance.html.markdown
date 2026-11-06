@@ -85,6 +85,12 @@ resource "alibabacloudstack_drds_rds_instance" "default" {
 * `create_time` - RDS 实例的创建时间。
 * `status` - RDS 实例的状态。有效值：`Creating`（创建中）、`Running`（运行中）、`Changing Specifications`（变更规格中）、`Deleting`（删除中）、`Stopping`（停止中）、`Stopped`（已停止）。
 
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `update` - （默认20分钟）更新资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
 ## Import
 
 DRDS RDS 实例可以使用组合 ID 进行导入，格式为 `<drds_instance_id>:<rds_instance_id>`，例如：

@@ -116,3 +116,11 @@ resource "alibabacloudstack_arms_dispatch_rule" "default" {
 ```shell
 $ terraform import alibabacloudstack_arms_dispatch_rule.example <id>
 ```
+
+## Import
+
+alibabacloudstack_arms_dispatch_rule 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_arms_dispatch_rule.example <id>
+```

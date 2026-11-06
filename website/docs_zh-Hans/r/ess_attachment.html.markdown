@@ -139,3 +139,11 @@ ESS attachment 可以通过id或伸缩组id导入，例如：
 ```bash
 $ terraform import alibabacloudstack_ess_attachment.example asg-abc123456
 ```
+
+## Import
+
+alibabacloudstack_ess_attachment 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ess_attachment.example <id>
+```

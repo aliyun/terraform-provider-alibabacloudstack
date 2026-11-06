@@ -66,3 +66,15 @@ resource "alibabacloudstack_polardb_backup" "default" {
   * `backup_scale` - 备份规模
   * `backup_status` - 备份状态
   * `backup_location` - 备份位置
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_polardb_backup 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_backup.example <id>
+```

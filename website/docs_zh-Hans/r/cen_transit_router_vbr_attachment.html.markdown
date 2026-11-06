@@ -67,6 +67,12 @@ resource "alibabacloudstack_cen_transit_router_vbr_attachment" "default" {
 * `status` - 转发路由器VBR附加项的状态。
 * `vbr_owner_id` - VBR所有者的阿里云账号ID。
 
+## Timeouts
+
+* `create` - （默认10分钟）创建资源时使用。
+* `update` - （默认5分钟）更新资源时使用。
+* `delete` - （默认15分钟）删除资源时使用。
+
 ## Import
 
 CEN转发路由器VBR附加项可以使用 cen_id、transit_router_id、transit_router_attachment_id 和 vbr_id（以冒号分隔）进行导入，例如：

@@ -123,3 +123,17 @@ resource "alibabacloudstack_redis_tairinstance" "default" {
   - `single`: 单副本
 * `architecture_type` - 实例的架构类型。有效值：`cluster`, `standard`, `rwsplit`。
 * `series` - 实例系列。
+
+## Timeouts
+
+* `create` - （默认45分钟）创建资源时使用。
+* `update` - （默认30分钟）更新资源时使用。
+* `delete` - （默认45分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_redis_tairinstance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_redis_tairinstance.example <id>
+```

@@ -75,7 +75,7 @@ The following attributes are exported:
 ## Timeouts
 
 * `create` - (Defaults to 60 mins) Used when create the resource.
-* `update` - (Defaults to 120 mins) Used when update the resource.
+* `update` - (Defaults to 60 mins) Used when update the resource.
 * `delete` - (Defaults to 30 mins) Used when delete the resource.
 
 ## Import

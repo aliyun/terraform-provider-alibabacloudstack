@@ -100,3 +100,16 @@ The following arguments are supported:
 
 The following attributes are exported in addition to the arguments listed above:
   * `ecc_info` - A list of ECU (Elastic Compute Unit) information for the application instances. This parameter specifies the ECUs that will be used for scaling the application.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_edas_application_scale can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_edas_application_scale.example <id>
+```

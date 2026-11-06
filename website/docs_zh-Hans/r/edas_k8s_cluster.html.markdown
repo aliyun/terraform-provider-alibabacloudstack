@@ -55,3 +55,15 @@ EDAS K8s 集群可以使用集群 ID（导入后返回的 EDAS 内部集群 ID�
 ```bash
 $ terraform import alibabacloudstack_edas_k8s_cluster.example 81453e4b-4df0-4592-xxxx-b835a2eexxxx
 ```
+
+## Timeouts
+
+* `delete` - （默认10分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_edas_k8s_cluster 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_edas_k8s_cluster.example <id>
+```

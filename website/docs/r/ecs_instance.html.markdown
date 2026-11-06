@@ -180,3 +180,17 @@ The following attributes are exported in addition to the arguments listed above:
 * `storage_set_id` - The ID of the storage set.
 * `storage_set_partition_number` - The number of partitions in the storage set.
 * `data_disks` - A list of data disks associated with the instance. Each item contains details about a specific data disk.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_ecs_instance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_instance.example <id>
+```

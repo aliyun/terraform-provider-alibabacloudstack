@@ -66,3 +66,15 @@ The following attributes are exported in addition to the arguments listed above:
   * `backup_scale` - The backup scale.
   * `backup_status` - The backup status.
   * `backup_location` - The backup location. 
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
+## Import
+
+alibabacloudstack_polardb_backup can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardb_backup.example <id>
+```

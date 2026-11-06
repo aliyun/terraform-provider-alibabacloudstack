@@ -61,3 +61,11 @@ The following attributes are exported:
 * `create_time` - The creation time of the parameter template, in ISO 8601 standard format (e.g., "2026-01-20T07:27Z").
 * `is_dynamic` - Whether the parameter template is dynamic (1 for yes, 0 for no).
 * `type` - The type identifier of the parameter template.
+
+## Import
+
+alibabacloudstack_kvstore_parameter_group can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_kvstore_parameter_group.example <id>
+```

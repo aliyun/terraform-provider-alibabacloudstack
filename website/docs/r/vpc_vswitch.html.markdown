@@ -95,6 +95,11 @@ The following attributes are exported:
 * `description` - The description of the vSwitch.
 * `is_cgw` - Indicates whether the vSwitch is a CGW vSwitch.
 
+## Timeouts
+
+* `create` - (Defaults to 10 mins) Used when create the resource.
+* `delete` - (Defaults to 10 mins) Used when delete the resource.
+
 ## Import
 
 VSwitch can be imported using the VSwitchId, e.g.

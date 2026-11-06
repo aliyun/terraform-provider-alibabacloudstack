@@ -84,3 +84,11 @@ PolarDB 数据库可以使用 `data_base_instance_id` 和 `data_base_name` 以�
 ```
 $ terraform import alibabacloudstack_polardb_database.example <data_base_instance_id>:<data_base_name>
 ```
+
+## Import
+
+alibabacloudstack_polardb_database 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_database.example <id>
+```

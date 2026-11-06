@@ -115,3 +115,17 @@ resource "alibabacloudstack_nas_namespace_mount_target" "default" {
 * `id` - 资源ID，格式为{NasNamespaceId:MountTargetDomain}。
 * `mount_target_domain` - 挂载点域名。
 * `vpc_id` - 专有网络ID。当网络类型是专有网络时，此字段有值。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `update` - （默认20分钟）更新资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_nas_namespace_mount_target 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_nas_namespace_mount_target.example <id>
+```

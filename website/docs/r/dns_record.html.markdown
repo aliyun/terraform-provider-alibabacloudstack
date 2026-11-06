@@ -59,3 +59,11 @@ The following attributes are exported:
 * `lba_strategy` - The record strategy.
 * `line_ids` -  The line IDs associated with the DNS record.
 * `remark` - The remark associated with the DNS record.
+
+## Import
+
+alibabacloudstack_dns_record can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_dns_record.example <id>
+```

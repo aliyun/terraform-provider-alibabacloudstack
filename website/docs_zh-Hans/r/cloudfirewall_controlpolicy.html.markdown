@@ -130,3 +130,11 @@ resource "alibabacloudstack_cloudfirewall_controlpolicy" "example" {
   - **group**：端口地址簿
 * `release` - 指定安全访问控制策略是否生效。
 * `source_ip` - 源IP地址。 
+
+## Import
+
+alibabacloudstack_cloudfirewall_controlpolicy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cloudfirewall_controlpolicy.example <id>
+```

@@ -106,3 +106,16 @@ resource "alibabacloudstack_edas_application_scale" "default" {
 
 除了上述所有参数外，还导出了以下属性：
   * `ecu_info` - 应用程序实例的ECU(弹性计算单元)信息列表。此参数指定将用于扩展应用程序的ECUs。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_edas_application_scale 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_edas_application_scale.example <id>
+```

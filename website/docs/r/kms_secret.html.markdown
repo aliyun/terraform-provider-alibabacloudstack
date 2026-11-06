@@ -52,3 +52,11 @@ The following arguments are supported:
 * `id` - The ID of the secret. It same with `secret_name`.
 * `arn` - The Alibabacloudstack Resource Name (ARN) of the secret.
 * `planned_delete_time` - The time when the secret is scheduled to be deleted.
+
+## Import
+
+alibabacloudstack_kms_secret can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_kms_secret.example <id>
+```

@@ -72,3 +72,11 @@ The following attributes are exported:
 * `port` - Connection instance port.
 * `connection_string` - Connection instance string. 
 * `ip_address` - The ip address of connection string.
+
+## Import
+
+alibabacloudstack_db_connection can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_db_connection.example <id>
+```

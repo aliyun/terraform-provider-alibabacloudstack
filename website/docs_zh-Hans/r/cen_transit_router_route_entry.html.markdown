@@ -58,3 +58,11 @@ resource "alibabacloudstack_cen_transit_router_route_entry" "default" {
   * `transit_router_route_entry_id` - 路由条目的ID。
   * `transit_router_route_entry_type` - 路由条目的类型。
   * `operational_mode` - 路由条目的操作模式。
+
+## Import
+
+alibabacloudstack_cen_transit_router_route_entry 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cen_transit_router_route_entry.example <id>
+```

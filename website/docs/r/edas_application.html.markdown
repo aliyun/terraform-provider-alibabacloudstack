@@ -68,6 +68,11 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the resource. The value is the application's AppId.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 EDAS Application can be imported using the AppId, e.g.

@@ -129,3 +129,11 @@ The following attributes are exported in addition to the arguments listed above:
   * **ByWeek**: Week.
   * **KeepAll**: Keep all.
 * `preferred_backup_period` - Preferred backup period.
+
+## Import
+
+alibabacloudstack_rds_backuppolicy can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_rds_backuppolicy.example <id>
+```

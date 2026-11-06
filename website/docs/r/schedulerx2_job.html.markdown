@@ -86,3 +86,11 @@ The following attributes are exported:
 
 * `id` - The ID of the job.
 * `execute_mode` - The execution mode of the job (in lowercase). The execution mode returned by the API is converted to lowercase.
+
+## Import
+
+alibabacloudstack_schedulerx2_job can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_schedulerx2_job.example <id>
+```

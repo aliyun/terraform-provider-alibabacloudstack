@@ -39,3 +39,16 @@ The following arguments are supported:
 
 The following attributes are exported in addition to the arguments listed above:
   * `storage_set_id` - storage set id
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_ecs_storageset can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_storageset.example <id>
+```

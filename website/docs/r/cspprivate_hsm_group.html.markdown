@@ -124,3 +124,11 @@ The following attributes are exported:
 * `status` - Current status of the HSM Group (e.g., "uninitialized" indicates not initialized).
 * `update_time` - Last update time of the HSM Group, in ISO 8601 standard time string format.
 * `vpc_id` - VPC ID associated with the HSM Group, representing the network environment where HSM instances are deployed.
+
+## Import
+
+alibabacloudstack_cspprivate_hsm_group can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cspprivate_hsm_group.example <id>
+```

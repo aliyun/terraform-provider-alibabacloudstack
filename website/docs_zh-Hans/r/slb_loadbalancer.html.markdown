@@ -78,3 +78,11 @@ resource "alibabacloudstack_slb_loadbalancer" "default" {
 * `address_type` - 负载均衡实例的地址类型。
 * `specification` - 服务器负载均衡实例的规格。
 * `vswitch_id` - 与负载均衡器关联的交换机ID。
+
+## Import
+
+alibabacloudstack_slb_loadbalancer 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_slb_loadbalancer.example <id>
+```

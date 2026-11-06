@@ -78,3 +78,11 @@ The following attributes are exported from the API response:
 * `status_name` - The status name of the topic.
 * `unit_flag` - The unit flag.
 * `update_time` - The last update time of the topic (timestamp in milliseconds).
+
+## Import
+
+alibabacloudstack_mqtt_topic can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_mqtt_topic.example <id>
+```

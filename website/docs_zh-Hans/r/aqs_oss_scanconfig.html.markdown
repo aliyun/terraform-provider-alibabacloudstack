@@ -74,3 +74,11 @@ AQS OSS扫描配置可以通过id导入，例如：
 ```shell
 $ terraform import alibabacloudstack_aqs_oss_scanconfig.example <id>
 ```
+
+## Import
+
+alibabacloudstack_aqs_oss_scanconfig 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_aqs_oss_scanconfig.example <id>
+```

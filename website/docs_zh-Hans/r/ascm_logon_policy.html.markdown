@@ -39,3 +39,11 @@ resource "alibabacloudstack_ascm_logon_policy" "login" {
 * `description` - 登录策略的描述信息。  
 * `rule` - 登录策略的规则，表示该策略是允许 (`ALLOW`) 还是拒绝 (`DENY`) 登录。  
 * `policy_id` - 创建的登录策略的唯一标识符（ID），可用于后续管理和引用该策略。
+
+## Import
+
+alibabacloudstack_ascm_logon_policy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ascm_logon_policy.example <id>
+```

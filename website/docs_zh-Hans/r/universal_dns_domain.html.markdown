@@ -43,3 +43,11 @@ resource "alibabacloudstack_universal_dns_domain" "default" {
 * `create_timestamp` - 创建时间戳（秒）。
 * `record_count` - 解析记录集总数。
 * `update_timestamp` - 修改时间戳（秒）。
+
+## Import
+
+alibabacloudstack_universal_dns_domain 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_universal_dns_domain.example <id>
+```

@@ -116,3 +116,15 @@ resource "alibabacloudstack_polardb_database" "default" {
 
   * `status` - 资源状态。
   * `data_base_instance_id` - 关联的PolarDB实例ID。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_polardbx_database 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardbx_database.example <id>
+```

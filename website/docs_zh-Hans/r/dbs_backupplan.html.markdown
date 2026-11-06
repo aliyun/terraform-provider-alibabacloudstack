@@ -69,3 +69,15 @@ resource "alibabacloudstack_dbs_backup_plan" "default" {
 
 * `backup_plan_id` - 备份计划的唯一标识符。
 * `backup_plan_name` - 备份计划的名称。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_dbs_backupplan 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_dbs_backupplan.example <id>
+```

@@ -66,3 +66,11 @@ EDAS 泳道可以使用 `logical_region_id:group_id:lane_id` 格式的 ID 导入
 ```bash
 $ terraform import alibabacloudstack_edas_swimming_lane.example cn-hangzhou:test:12345:88
 ```
+
+## Import
+
+alibabacloudstack_edas_swimming_lane 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_edas_swimming_lane.example <id>
+```

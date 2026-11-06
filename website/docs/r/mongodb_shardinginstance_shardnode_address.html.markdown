@@ -128,3 +128,7 @@ The following attributes are exported:
 * `private_connect_string` - Private connection string.
 * `public_connect_port` - Public connection port.
 * `private_connect_port` - Private connection port.
+
+## Import
+
+This resource does not support import.

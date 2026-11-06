@@ -118,3 +118,15 @@ The following attributes are exported:
 
 * `id` - Resource identifier (matches `instance_id`)
 * `three_roles` - (Boolean) Ternary authorization status. `true` = enabled, `false` = disabled
+
+## Timeouts
+
+* `update` - (Defaults to 20 mins) Used when update the resource.
+
+## Import
+
+alibabacloudstack_polardbx_super_account can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardbx_super_account.example <id>
+```

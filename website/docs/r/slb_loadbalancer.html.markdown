@@ -78,3 +78,11 @@ In addition to all arguments above, the following attributes are exported:
 * `address_type` - The address type of the load balancing instance.
 * `specification` - The specification of the Server Load Balancer instance.
 * `vswitch_id` - The ID of the VSwitch associated with the load balancer.
+
+## Import
+
+alibabacloudstack_slb_loadbalancer can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_slb_loadbalancer.example <id>
+```

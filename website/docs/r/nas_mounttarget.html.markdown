@@ -82,3 +82,16 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `id` - This ID of this resource. It is formatted to `<file_system_id>:<mount_target_domain>`. Before version 1.95.0, the value is `<mount_target_domain>`.
 * `status` - The current status of the Mount point, including `Active` and `Inactive`. You can use the file system only when the status is `Active`.
+
+## Timeouts
+
+* `create` - (Defaults to 5 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_nas_mounttarget can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_nas_mounttarget.example <id>
+```

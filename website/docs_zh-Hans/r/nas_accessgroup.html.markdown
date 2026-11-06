@@ -76,3 +76,11 @@ resource "alibabacloudstack_nas_accessgroup" "default" {
 ```bash
 $ terraform import alibabacloudstack_nas_accessgroup.foo tf_testAccNasConfig:standard
 ```
+
+## Import
+
+alibabacloudstack_nas_accessgroup 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_nas_accessgroup.example <id>
+```

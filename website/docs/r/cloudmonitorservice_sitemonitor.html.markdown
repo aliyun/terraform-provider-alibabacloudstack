@@ -87,3 +87,11 @@ In addition to all arguments above, the following attributes are exported:
 * `task_state` - The current state of the site monitoring task.
 * `create_time` - The timestamp indicating when the site monitoring task was created.
 * `update_time` - The timestamp indicating when the site monitoring task was last updated.
+
+## Import
+
+alibabacloudstack_cloudmonitorservice_sitemonitor can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cloudmonitorservice_sitemonitor.example <id>
+```

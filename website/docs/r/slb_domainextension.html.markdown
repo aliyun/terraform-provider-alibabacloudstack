@@ -78,3 +78,11 @@ In addition to all arguments above, the following attributes are exported:
 * `frontend_port` - The frontend port used by the HTTPS listener of the SLB instance.
 * `listener_port` - The listener port used by the HTTPS listener of the SLB instance. 
 * `domain_extension_id` - The unique identifier for the domain extension.
+
+## Import
+
+alibabacloudstack_slb_domainextension can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_slb_domainextension.example <id>
+```

@@ -60,6 +60,10 @@ The following attributes are exported:
 * `status` - The status of the synchronization instance.
 * `instance_class` - The specification of the migration or synchronization instance. The specifications supported by the migration instance: `xxlarge`, `xlarge`, `large`, `medium`, `small`. The specifications supported by the synchronization instance: `large`, `medium`, `small`, `micro`. For performance descriptions of different specifications, see [Data Migration Link Specifications](https://help.aliyun.com/document_detail/26606.html) and [Data Synchronization Link Specifications](https://help.aliyun.com/document_detail/26605.html).
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
 ## Import
 
 DTS Synchronization Instance can be imported using the id, e.g.

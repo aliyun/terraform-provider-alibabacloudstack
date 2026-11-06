@@ -87,3 +87,11 @@ resource "alibabacloudstack_schedulerx2_job" "example" {
 
 * `id` - 任务ID。
 * `execute_mode` - 任务执行模式（小写格式）。从API返回的执行模式会转换为小写格式。
+
+## Import
+
+alibabacloudstack_schedulerx2_job 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_schedulerx2_job.example <id>
+```

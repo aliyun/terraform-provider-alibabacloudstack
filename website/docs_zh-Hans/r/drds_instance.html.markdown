@@ -72,3 +72,17 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 除了上述列出的参数外，还导出以下属性：
 
 * `id` - DRDS实例ID。
+
+## Timeouts
+
+* `create` - （默认10分钟）创建资源时使用。
+* `update` - （默认5分钟）更新资源时使用。
+* `delete` - （默认10分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_drds_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_drds_instance.example <id>
+```

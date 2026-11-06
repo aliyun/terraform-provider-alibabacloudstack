@@ -54,3 +54,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The unique identifier of the resource in Terraform. It is formatted as `<acl_uuid>:<direction>`.
+
+## Import
+
+alibabacloudstack_cloudfirewall_controlpolicyorder can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cloudfirewall_controlpolicyorder.example <id>
+```

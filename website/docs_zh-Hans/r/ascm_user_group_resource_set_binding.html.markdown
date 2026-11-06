@@ -55,3 +55,11 @@ output "binder" {
 
 * `resource_set_id` - 资源集ID列表。表示当前绑定关系所关联的资源集。
 * `user_group_id` - 用户组ID。表示当前绑定关系所关联的用户组。
+
+## Import
+
+alibabacloudstack_ascm_user_group_resource_set_binding 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ascm_user_group_resource_set_binding.example <id>
+```

@@ -55,3 +55,10 @@ The following arguments are supported:
   * `beta_app_name` - (Optional) - The app name of the beta environment.
   * `beta_ips` - (Optional) - The IPs of the beta environment.
 
+## Import
+
+alibabacloudstack_acm_configuration can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_acm_configuration.example <id>
+```

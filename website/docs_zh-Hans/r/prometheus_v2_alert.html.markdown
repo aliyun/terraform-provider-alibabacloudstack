@@ -98,3 +98,11 @@ resource "alibabacloudstack_prometheus_v2_alert" "default" {
 * `trigger_period` - 检查周期的实际值。
 * `trigger_promql` - PromQL查询语句的实际值。
 * `trigger_severity` - 告警级别的实际值。
+
+## Import
+
+alibabacloudstack_prometheus_v2_alert 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_prometheus_v2_alert.example <id>
+```

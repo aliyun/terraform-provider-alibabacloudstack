@@ -51,3 +51,15 @@ The following attributes are exported:
 * `name` - The name of the image. 
 * `image_name` - The name of the image. 
 * `description` - The description of the image.
+
+## Timeouts
+
+* `create` - (Defaults to 60 mins) Used when create the resource.
+
+## Import
+
+alibabacloudstack_image_copy can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_image_copy.example <id>
+```

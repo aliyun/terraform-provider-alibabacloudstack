@@ -85,3 +85,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `end_time` - The time when the SSL client certificate expires.
   * `ssl_vpn_client_cert_id` - The ID of the SSL client certificate.
   * `status` - The status of the client certificate.
+
+## Import
+
+alibabacloudstack_vpngateway_sslvpnclientcert can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_vpngateway_sslvpnclientcert.example <id>
+```

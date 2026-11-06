@@ -153,6 +153,10 @@ The following attributes are exported in addition to the arguments listed above:
   * `create_time` - The time when the snapshot-consistent group was created.
   * `disk_ids` - The IDs of the cloud disks included in the snapshot-consistent group.
 
+## Timeouts
+
+* `create` - (Defaults to 10 mins) Used when create the resource.
+
 ## Import
 
 ECS Snapshot Group can be imported using the snapshot group ID, e.g.

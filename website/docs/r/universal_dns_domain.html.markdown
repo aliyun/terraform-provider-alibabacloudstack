@@ -40,3 +40,11 @@ The following attributes are exported:
 * `create_timestamp` - The creation timestamp in seconds.
 * `record_count` - The total number of DNS record sets.
 * `update_timestamp` - The update timestamp in seconds.
+
+## Import
+
+alibabacloudstack_universal_dns_domain can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_universal_dns_domain.example <id>
+```

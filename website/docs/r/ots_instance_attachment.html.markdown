@@ -66,3 +66,11 @@ In addition to all arguments above, the following attributes are exported:
 * `vpc_name` - The name of the VPC attached to the OTS instance.
 * `vswitch_id` - The ID of the VSwitch attached to the OTS instance.
 * `vpc_id` - The ID of the VPC attached to the OTS instance. This attribute is automatically derived from the `vswitch_id`.
+
+## Import
+
+alibabacloudstack_ots_instance_attachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ots_instance_attachment.example <id>
+```

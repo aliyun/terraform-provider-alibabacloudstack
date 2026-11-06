@@ -48,3 +48,11 @@ output "org" {
 * `user_group_id` - 用户组的ID，用于唯一标识该用户组。
 * `organization_id` - 用户所属的组织ID。
 * `role_ids` - 与该用户组关联的ASCM角色ID列表。
+
+## Import
+
+alibabacloudstack_ascm_user_group 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ascm_user_group.example <id>
+```

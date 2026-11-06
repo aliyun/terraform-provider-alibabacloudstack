@@ -109,3 +109,11 @@ The following attributes are exported:
 * `nexthop_type` - The next hop type.
 * `nexthop_id` - The route entry's next hop.
 * `router_id` - (Computed ) The ID of the router associated with the route entry.
+
+## Import
+
+alibabacloudstack_route_entry can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_route_entry.example <id>
+```

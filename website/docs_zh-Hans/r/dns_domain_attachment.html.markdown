@@ -37,3 +37,11 @@ resource "alibabacloudstack_dns_domain_attachment" "dns" {
 * `id` - 此资源的唯一标识符。其值与`instance_id`相同。
 * `domain_names` - 已成功绑定到DNS实例的域名列表。此属性反映实际绑定的域名情况。
 * `instance_id` - DNS实例的ID。用于标识所绑定的DNS服务实例。 
+
+## Import
+
+alibabacloudstack_dns_domain_attachment 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_dns_domain_attachment.example <id>
+```

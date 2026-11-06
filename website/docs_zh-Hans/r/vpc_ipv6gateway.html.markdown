@@ -65,3 +65,17 @@ VPC IPv6 网关可以通过 id 导入，例如。
 ```bash
 $ terraform import alibabacloudstack_vpc_ipv6_gateway.example <id>
 ```
+
+## Timeouts
+
+* `create` - （默认1分钟）创建资源时使用。
+* `update` - （默认1分钟）更新资源时使用。
+* `delete` - （默认5分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_vpc_ipv6gateway 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_vpc_ipv6gateway.example <id>
+```

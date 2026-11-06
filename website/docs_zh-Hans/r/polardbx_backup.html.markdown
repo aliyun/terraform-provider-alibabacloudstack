@@ -76,6 +76,10 @@ resource "alibabacloudstack_polardbx_backup" "default" {
   * `end_time` - 备份结束时间，UTC 格式。
   * `begin_time` - 备份开始时间，UTC 格式。
 
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
 ## Import
 
 PolarDB-X 备份可以使用实例 ID 和备份集 ID（用冒号分隔）导入，例如：

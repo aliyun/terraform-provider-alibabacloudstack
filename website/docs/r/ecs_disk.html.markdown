@@ -132,3 +132,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `false`: No automatic snapshot policy is applied to the cloud disk.
 
 Default value: `false`.
+
+## Import
+
+alibabacloudstack_ecs_disk can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_disk.example <id>
+```

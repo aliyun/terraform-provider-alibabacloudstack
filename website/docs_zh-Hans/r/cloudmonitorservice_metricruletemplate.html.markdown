@@ -104,3 +104,11 @@ resource "alibabacloudstack_cms_metric_rule_template" "default" {
 
 * `id` - Terraform 中 Metric Rule Template 的资源 ID。
 * `rest_version` - 警报模板的版本。
+
+## Import
+
+alibabacloudstack_cloudmonitorservice_metricruletemplate 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cloudmonitorservice_metricruletemplate.example <id>
+```

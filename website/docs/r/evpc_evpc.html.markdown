@@ -46,3 +46,16 @@ In addition to all arguments above, the following attributes are exported:
 * `ascm_create_user` - The user who created the EVPC.
 * `create_time` - The creation time of the EVPC.
 * `update_time` - The last update time of the EVPC.
+
+## Timeouts
+
+* `create` - (Defaults to 10 mins) Used when create the resource.
+* `delete` - (Defaults to 10 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_evpc_evpc can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_evpc_evpc.example <id>
+```

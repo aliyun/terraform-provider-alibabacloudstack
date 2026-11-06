@@ -52,3 +52,11 @@ resource "alibabacloudstack_cloudfw_address_book" "default" {
 * `global` - 全局标记。0表示非全局地址簿，1表示全局地址簿。
 * `group_uuid` - 地址簿唯一标识符，由云防火墙系统生成的UUID。
 * `reference_count` - 引用总计，表示该地址簿被规则引用的次数。
+
+## Import
+
+alibabacloudstack_cloudfw_address_book 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cloudfw_address_book.example <id>
+```

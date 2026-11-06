@@ -41,3 +41,11 @@ The following attributes are exported:
 
 * `id` - Ram Role Name of the user.
 * `role_id` - The ID of the ram role.
+
+## Import
+
+alibabacloudstack_ascm_ram_role can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ascm_ram_role.example <id>
+```

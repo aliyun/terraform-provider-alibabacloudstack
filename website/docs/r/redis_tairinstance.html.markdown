@@ -122,3 +122,17 @@ The following attributes are exported in addition to the arguments listed above:
   - `single`: Single copy
 * `architecture_type` - The architecture type of the instance. Valid values: `cluster`, `standard`, `rwsplit`.
 * `series` - The series of the instance.
+
+## Timeouts
+
+* `create` - (Defaults to 45 mins) Used when create the resource.
+* `update` - (Defaults to 30 mins) Used when update the resource.
+* `delete` - (Defaults to 45 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_redis_tairinstance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_redis_tairinstance.example <id>
+```

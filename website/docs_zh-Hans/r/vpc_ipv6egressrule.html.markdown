@@ -84,3 +84,16 @@ VPC IPv6 出口规则可以通过 id 导入，例如：
 ```bash
 $ terraform import alibabacloudstack_vpc_ipv6_egress_rule.example <ipv6_gateway_id>:<ipv6_egress_rule_id>
 ```
+
+## Timeouts
+
+* `create` - （默认1分钟）创建资源时使用。
+* `delete` - （默认1分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_vpc_ipv6egressrule 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_vpc_ipv6egressrule.example <id>
+```

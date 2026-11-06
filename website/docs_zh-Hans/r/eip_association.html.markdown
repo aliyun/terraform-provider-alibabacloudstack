@@ -130,3 +130,11 @@ resource "alibabacloudstack_eip_association" "default" {
   * **HaVip**：高可用虚拟IP。
   * **IpAddress**：IP地址。
   > 默认要绑定弹性公网IP的实例类型为**EcsInstance**，如果您需要绑定弹性公网IP的实例类型不为**EcsInstance**，则该值必填。
+
+## Import
+
+alibabacloudstack_eip_association 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_eip_association.example <id>
+```

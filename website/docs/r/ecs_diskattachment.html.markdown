@@ -130,3 +130,11 @@ The following attributes are exported in addition to the arguments listed above:
 * `instance_id` - ID of the Instance.
 * `disk_id` - ID of the Disk.
 * `device_name` - The device name exposed to the instance.
+
+## Import
+
+alibabacloudstack_ecs_diskattachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_diskattachment.example <id>
+```

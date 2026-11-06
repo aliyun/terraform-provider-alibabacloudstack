@@ -112,6 +112,12 @@ The following attributes are exported in addition to the arguments listed above:
   * This parameter is required when `file_system_type = extreme` or `file_system_type = cpfs`.
 * `kms_key_id` - The id of the KMS key used for encryption when `encrypt_type = 2`.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 Nas File System can be imported using the id, e.g.

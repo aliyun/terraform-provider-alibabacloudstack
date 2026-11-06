@@ -47,3 +47,17 @@ The following attributes are exported in addition to the arguments listed above:
   * `region_id` - The Region ID of the BGP group. For the list of Region IDs, see [Region and Zone](~~ 40654 ~~).
   * `route_limit` - Routing restrictions.
   * `status` - The status of the resource
+
+## Timeouts
+
+* `create` - (Defaults to 30 mins) Used when create the resource.
+* `update` - (Defaults to 30 mins) Used when update the resource.
+* `delete` - (Defaults to 30 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_expressconnect_bgp_group can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_expressconnect_bgp_group.example <id>
+```

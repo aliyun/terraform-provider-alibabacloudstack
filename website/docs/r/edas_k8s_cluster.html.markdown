@@ -46,6 +46,10 @@ The following attributes are exported:
 * `cs_cluster_id` - The ID of the Container Service Kubernetes cluster that you want to import.
 * `namespace_id` - The ID of the namespace where you want to import.
 
+## Timeouts
+
+* `delete` - (Defaults to 10 mins) Used when delete the resource.
+
 ## Import
 
 EDAS K8s Cluster can be imported using the cluster ID (the EDAS internal cluster ID returned after import), e.g.

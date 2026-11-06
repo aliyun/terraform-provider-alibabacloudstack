@@ -80,3 +80,16 @@ resource "alibabacloudstack_nas_mounttarget" "default" {
 
 * `id` - 此资源的ID。它格式化为 `<file_system_id>:<mount_target_domain>`。在版本1.95.0之前，该值为 `<mount_target_domain>`。
 * `status` - 挂载点的当前状态，包括 `Active` 和 `Inactive`。只有当状态为 `Active` 时，才能使用文件系统。此属性为只读，表示挂载点的实际状态。
+
+## Timeouts
+
+* `create` - （默认5分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_nas_mounttarget 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_nas_mounttarget.example <id>
+```

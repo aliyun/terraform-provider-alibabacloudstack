@@ -84,3 +84,11 @@ KVStore备份策略可以使用ID导入，例如：
 ```bash
 $ terraform import alibabacloudstack_kvstore_backup_policy.example r-abc12345678
 ```
+
+## Import
+
+alibabacloudstack_kvstore_backup_policy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_kvstore_backup_policy.example <id>
+```

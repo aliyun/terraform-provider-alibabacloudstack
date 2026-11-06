@@ -67,3 +67,17 @@ The following attributes are exported in addition to the arguments listed above:
   * `db_proxy_read_write_mode` - Proxy terminal mode, value:* **ReadWrite**: read/write mode.* **ReadOnly**: Read-only mode.
   * `db_proxy_instance_type` - Database proxy instance type, value:-**common**: General Purpose Agent-**exclusive**: exclusive proxy (default)
   * `db_proxy_service_status` - Database exclusive proxy function switch status, value:* **Startup**: Enable.* **Shutdown**: closed.
+
+## Timeouts
+
+* `create` - (Defaults to 45 mins) Used when create the resource.
+* `update` - (Defaults to 45 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_polardb_proxy can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardb_proxy.example <id>
+```

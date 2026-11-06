@@ -294,6 +294,12 @@ The following attributes are exported:
   * `type`: The type of mount.
 * `package_version` - The version number of the deployment package.
 
+## Timeouts
+
+* `create` - (Defaults to 30 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 30 mins) Used when delete the resource.
+
 ## Import
 
 EDAS k8s application can be imported as below, e.g.

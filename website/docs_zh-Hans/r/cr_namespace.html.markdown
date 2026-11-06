@@ -38,3 +38,11 @@ resource "alibabacloudstack_cr_namespace" "my-namespace" {
 
 * `id` - 容器镜像仓库命名空间的唯一标识符。其值与 `name` 参数相同。
 ```
+
+## Import
+
+alibabacloudstack_cr_namespace 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cr_namespace.example <id>
+```

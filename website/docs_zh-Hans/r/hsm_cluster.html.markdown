@@ -109,3 +109,17 @@ resource "alibabacloudstack_hsm_cluster" "example" {
 ```shell
 $ terraform import alibabacloudstack_hsm_cluster.example cl-abc123456
 ```
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `update` - （默认20分钟）更新资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_hsm_cluster 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_hsm_cluster.example <id>
+```

@@ -75,6 +75,11 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 * `create` - (Defaults to 1 minute) Used when creating the Ipv6 Egress Rule.
 * `delete` - (Defaults to 1 minute) Used when deleting the Ipv6 Egress Rule.
 
+## Timeouts
+
+* `create` - (Defaults to 1 mins) Used when create the resource.
+* `delete` - (Defaults to 1 mins) Used when delete the resource.
+
 ## Import
 
 VPC Ipv6 Egress Rule can be imported using the id, e.g.

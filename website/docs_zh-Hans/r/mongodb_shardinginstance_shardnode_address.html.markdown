@@ -127,3 +127,7 @@ resource "alibabacloudstack_mongodb_shardinginstance_shardnode_address" "default
 * `private_connect_string` - 私网链接地址
 * `public_connect_port` - 公网链接地址端口
 * `private_connect_port` - 私网链接端口
+
+## Import
+
+此资源不支持导入。

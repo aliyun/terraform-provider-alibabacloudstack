@@ -126,3 +126,11 @@ DRDS 账号可以使用 instance_id 和 account_name 进行导入，用冒号连
 ```
 $ terraform import alibabacloudstack_drds_account.example <instance_id>:<account_name>@%
 ```
+
+## Import
+
+alibabacloudstack_drds_account 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_drds_account.example <id>
+```

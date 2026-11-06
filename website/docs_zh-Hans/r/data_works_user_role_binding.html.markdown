@@ -49,3 +49,11 @@ DataWorks 用户角色绑定可以使用 `<role_code>:<project_id>:<user_id>` �
 ```
 $ terraform import alibabacloudstack_data_works_user_role_binding.example role_project_guest:10060:5225501456060119238
 ```
+
+## Import
+
+alibabacloudstack_data_works_user_role_binding 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_data_works_user_role_binding.example <id>
+```

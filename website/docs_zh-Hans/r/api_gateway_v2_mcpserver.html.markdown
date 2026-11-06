@@ -516,3 +516,11 @@ resource "alibabacloudstack_api_gateway_v2_mcpserver" "default" {
   * `port` - 服务端口。
   * `version` - 服务版本。
   * `weight` - 服务权重。
+
+## Import
+
+alibabacloudstack_api_gateway_v2_mcpserver 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_api_gateway_v2_mcpserver.example <id>
+```

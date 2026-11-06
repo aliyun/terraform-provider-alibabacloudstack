@@ -110,3 +110,17 @@ In addition to all arguments above, the following attributes are exported:
 * `network_acl_name` - The name of the network ACL.
 * `name` - Deprecated field, use `network_acl_name` instead.
 * `vpc_id` - (Computed) The ID of the associated VPC.
+
+## Timeouts
+
+* `create` - (Defaults to 10 mins) Used when create the resource.
+* `update` - (Defaults to 10 mins) Used when update the resource.
+* `delete` - (Defaults to 10 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_vpc_networkacl can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_vpc_networkacl.example <id>
+```

@@ -54,3 +54,11 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - GroupID and InstanceID of the ONS Group. The value is in format `GroupID:InstanceID`.
+
+## Import
+
+alibabacloudstack_ons_group can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ons_group.example <id>
+```

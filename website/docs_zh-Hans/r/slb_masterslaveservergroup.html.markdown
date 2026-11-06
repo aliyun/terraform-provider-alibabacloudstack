@@ -180,3 +180,11 @@ resource "alibabacloudstack_slb_master_slave_server_group" "default" {
 * `id` - 主备服务器组的ID。
 * `name` - 主备服务器组的名称。
 * `master_slave_server_group_name` - 主备服务器组的名称。
+
+## Import
+
+alibabacloudstack_slb_masterslaveservergroup 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_slb_masterslaveservergroup.example <id>
+```

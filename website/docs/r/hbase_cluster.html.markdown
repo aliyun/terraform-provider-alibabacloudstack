@@ -142,6 +142,12 @@ In addition to all arguments above, the following attributes are exported:
 * `ip_white` - (Computed) The whitelist of IP addresses for the cluster.
 * `security_groups` - (Computed) The list of security group IDs associated with the cluster.
 
+## Timeouts
+
+* `create` - (Defaults to 30 mins) Used when create the resource.
+* `update` - (Defaults to 30 mins) Used when update the resource.
+* `delete` - (Defaults to 30 mins) Used when delete the resource.
+
 ## Import
 
 HBase clusters can be imported using the `id`, e.g.

@@ -114,3 +114,17 @@ The following attributes are exported:
 * `id` - The resource ID in the format {NasNamespaceId:MountTargetDomain}.
 * `mount_target_domain` - The domain name of the mount target.
 * `vpc_id` - The ID of the VPC. This field has a value when the network type is VPC.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_nas_namespace_mount_target can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_nas_namespace_mount_target.example <id>
+```

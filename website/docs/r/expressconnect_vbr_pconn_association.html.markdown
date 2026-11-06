@@ -78,6 +78,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `status` - The status of the VBR-PCCN association. Valid values include `Creating`, `Associated`, `UnAssociating`.
   * `vlan_id` - The VLAN ID of the VBR.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 VBR-PCCN Association can be imported using the `physical_connection_id` and `vbr_id` separated by a colon, e.g.

@@ -102,6 +102,12 @@ The endpoints mapping supports the following:
 * `vswitch_id` - The VSwitch ID of the endpoint.
 * `vpc_instance_id` - The VPC instance ID of the endpoint.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 Hologram Instance can be imported using the id, e.g.

@@ -47,3 +47,16 @@ description: |-
 * `connection_string` - PolarDB数据库连接字符串。
 * `db_instance_description` - 数据库实例的描述。
 * `engine` - 数据库引擎类型。
+
+## Timeouts
+
+* `create` - （默认60分钟）创建资源时使用。
+* `update` - （默认45分钟）更新资源时使用。
+
+## Import
+
+alibabacloudstack_polardb_readonly_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_polardb_readonly_instance.example <id>
+```

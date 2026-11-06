@@ -188,3 +188,11 @@ resource "alibabacloudstack_slb_access_log" "default" {
 ## 属性参�?
 
 除了上述所有参数外，还导出了以下属性：
+
+## Import
+
+alibabacloudstack_slb_access_log 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_slb_access_log.example <id>
+```

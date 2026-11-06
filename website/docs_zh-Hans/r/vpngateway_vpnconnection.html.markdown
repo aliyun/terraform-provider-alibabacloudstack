@@ -137,3 +137,11 @@ VPN 连接可以使用 ID 导入，例如：
 ```bash
 $ terraform import alibabacloudstack_vpn_connection.example vco-abc123456
 ```
+
+## Import
+
+alibabacloudstack_vpngateway_vpnconnection 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_vpngateway_vpnconnection.example <id>
+```

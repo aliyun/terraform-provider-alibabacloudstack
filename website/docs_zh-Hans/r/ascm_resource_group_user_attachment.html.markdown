@@ -42,3 +42,11 @@ resource "alibabacloudstack_ascm_resource_group_user_attachment" "default" {
 ```
 $ terraform import alibabacloudstack_ascm_resource_group_user_attachment.example 12345:67890
 ```
+
+## Import
+
+alibabacloudstack_ascm_resource_group_user_attachment 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ascm_resource_group_user_attachment.example <id>
+```

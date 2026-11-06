@@ -84,6 +84,12 @@ The following attributes are exported in addition to the arguments listed above:
 * `create_time` - The creation time of the RDS instance.
 * `status` - The status of the RDS instance. Valid values: `Creating`, `Running`, `Changing Specifications`, `Deleting`, `Stopping`, `Stopped`.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 DRDS RDS Instance can be imported using the composite ID in the format `<drds_instance_id>:<rds_instance_id>`, e.g.

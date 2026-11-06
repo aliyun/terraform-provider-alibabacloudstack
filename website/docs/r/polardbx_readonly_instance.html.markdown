@@ -122,8 +122,4 @@ The following attributes are exported in addition to the arguments listed above:
 
 ## Import
 
-PolarDB-X read-only instance can be imported using the instance ID, e.g.
-
-```
-$ terraform import alibabacloudstack_polardbx_readonly_instance.example px-12345678
-```
+This resource does not support import.

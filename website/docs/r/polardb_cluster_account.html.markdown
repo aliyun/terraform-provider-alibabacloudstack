@@ -76,6 +76,10 @@ The following attributes are exported:
 * `account_status` - The status of the account.
 * `account_password_valid_time` - The validity period of the account password.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
 ## Import
 
 PolarDB cluster account can be imported using the id, e.g.

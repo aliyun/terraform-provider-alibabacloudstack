@@ -53,3 +53,11 @@ resource "alibabacloudstack_cr_repo" "my-repo" {
   * `public` - 公网访问域名。
   * `internal` - 内网访问域名，仅在部分区域可用。
   * `vpc` - VPC内网访问域名。
+
+## Import
+
+alibabacloudstack_cr_repo 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cr_repo.example <id>
+```

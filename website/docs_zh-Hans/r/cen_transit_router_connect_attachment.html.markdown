@@ -84,3 +84,16 @@ CEN转发路由器连接附件可以通过ID导入，例如：
 ```shell
 $ terraform import alibabacloudstack_cen_transit_router_connect_attachment.default cen-abc12345678900001:tr-abc12345678900001:tr-attach-abc12345678900001
 ```
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_cen_transit_router_connect_attachment 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cen_transit_router_connect_attachment.example <id>
+```

@@ -45,3 +45,11 @@ The following attributes are exported:
 
 * `id` - The ID of the DNS Global line.
 * `priority` - The priority of the DNS Global line. 1 indicates the highest priority, and a larger value indicates a lower priority. The system automatically assigns the priority value.
+
+## Import
+
+alibabacloudstack_dns_line can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_dns_line.example <id>
+```

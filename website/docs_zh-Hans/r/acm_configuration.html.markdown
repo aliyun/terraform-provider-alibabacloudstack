@@ -57,3 +57,11 @@ resource "alibabacloudstack_acm_configuration" "default" {
   * `beta_content` - (选填) - 发布到bate环境的配置内容。
   * `beta_app_name` - (选填) - 发布到bate环境的配置归属的应用名称。
   * `beta_ips` - (选填) - bate环境的 IPs。
+
+## Import
+
+alibabacloudstack_acm_configuration 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_acm_configuration.example <id>
+```

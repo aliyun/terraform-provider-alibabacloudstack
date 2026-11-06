@@ -153,3 +153,11 @@ In addition to all arguments above, the following attributes are exported:
 * `api_name` - The name of the API.
 * `force_nonce_check` - Whether nonce check is enabled for the API.
 * `description` - The description of the API.
+
+## Import
+
+alibabacloudstack_apigateway_api can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_apigateway_api.example <id>
+```

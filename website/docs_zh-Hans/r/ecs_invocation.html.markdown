@@ -149,3 +149,11 @@ Windows 实例默认由 System 用户执行。
 
 * `create_time` - 资源创建时间。
 * `invocation_id` - 执行记录的唯一标识 ID。
+
+## Import
+
+alibabacloudstack_ecs_invocation 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ecs_invocation.example <id>
+```

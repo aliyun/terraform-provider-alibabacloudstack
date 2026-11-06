@@ -53,3 +53,7 @@ output "alibabacloudstack_kms_ciphertext" {
 
 * `ciphertext_blob` - 使用主 CMK 版本加密的数据密钥的密文。
 * `sensitive` - 自动计算的属性，表示该属性是否为敏感信息。
+
+## Import
+
+此资源不支持导入。

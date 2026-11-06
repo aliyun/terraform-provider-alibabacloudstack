@@ -80,3 +80,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `resource_id` - the resource id.
   * `resource_type` - the resource type.
   * `status` - the transit route table association status.
+
+## Import
+
+alibabacloudstack_cen_transit_router_route_table_association can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cen_transit_router_route_table_association.example <id>
+```

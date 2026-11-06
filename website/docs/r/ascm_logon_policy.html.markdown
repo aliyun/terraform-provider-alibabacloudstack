@@ -38,3 +38,10 @@ The following attributes are exported:
 * `rule` - The Rule for the Logon Policy.
 * `policy_id` - The ID of the logon policy created.
 
+## Import
+
+alibabacloudstack_ascm_logon_policy can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ascm_logon_policy.example <id>
+```

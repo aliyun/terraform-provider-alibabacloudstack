@@ -158,3 +158,16 @@ The following attributes are exported in addition to the arguments listed above:
   * `ip_address` - The ip address of the HaVip. If not filled, the default will be assigned one from the vswitch.
   * `status` - The status of this resource instance.
   * `vpc_id` - The VPC ID to which the HaVip instance belongs
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_vpc_ha_vip can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_vpc_ha_vip.example <id>
+```

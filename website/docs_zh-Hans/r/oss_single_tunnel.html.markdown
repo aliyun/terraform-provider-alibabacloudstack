@@ -78,3 +78,11 @@ resource "alibabacloudstack_oss_single_tunnel" "default" {
 
 * `id` - 资源唯一标识，格式为`{cluster}:{vpc_id}:{vip}`。
 * `vip` - 分配的VPC内网IP地址。由系统自动分配，用于OSS服务端点访问，格式如`172.16.1.146`。
+
+## Import
+
+alibabacloudstack_oss_single_tunnel 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_oss_single_tunnel.example <id>
+```

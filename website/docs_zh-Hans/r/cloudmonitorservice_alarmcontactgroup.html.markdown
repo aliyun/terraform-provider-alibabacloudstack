@@ -42,3 +42,11 @@ resource "alibabacloudstack_cloudmonitorservice_alarmcontactgroup" "default" {
 
 * `id` - 报警联系组的ID。它由阿里云自动生成，可用于资源识别。
 * `enable_subscribed` - 指示是否为报警联系组启用了每周订阅通知。此属性反映了当前设置的状态。
+
+## Import
+
+alibabacloudstack_cloudmonitorservice_alarmcontactgroup 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cloudmonitorservice_alarmcontactgroup.example <id>
+```

@@ -61,3 +61,11 @@ The following attributes are exported:
 * `create_time` - The time when the namespace was created. Follows the ISO 8601 standard, in the format: `yyyy-MM-ddTHH:mm:ssZ`.
 * `file_system_type` - The type of the file system. Default value: `standard`, which indicates General-purpose NAS.
 * `mount_target_count` - The number of mount targets for the namespace file system.
+
+## Import
+
+alibabacloudstack_nas_namespace can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_nas_namespace.example <id>
+```

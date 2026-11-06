@@ -38,3 +38,11 @@ The following attributes are exported:
 
 * `id` - Ram policy Name of the user.
 * `ram_id` - The ID of the ram policy.  Exported attribute indicating the unique identifier for the RAM policy.
+
+## Import
+
+alibabacloudstack_ascm_ram_policy can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ascm_ram_policy.example <id>
+```

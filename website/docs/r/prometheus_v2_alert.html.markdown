@@ -97,3 +97,11 @@ In addition to all arguments above, the following attributes are exported:
 * `trigger_period` - The actual value of the check period.
 * `trigger_promql` - The actual value of the PromQL query statement.
 * `trigger_severity` - The actual value of the alert severity level.
+
+## Import
+
+alibabacloudstack_prometheus_v2_alert can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_prometheus_v2_alert.example <id>
+```

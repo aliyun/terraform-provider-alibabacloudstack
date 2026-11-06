@@ -125,3 +125,11 @@ The following attributes are exported:
 * `db_instance_ids` - The db instances id which the ECS instance attached to.
 * `loadbalancer_ids` - The slb instances id which the ECS instance attached to.
 * `vswitch_ids` - The vswitches id in which the ECS instance launched.
+
+## Import
+
+alibabacloudstack_ess_scaling_group can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ess_scaling_group.example <id>
+```

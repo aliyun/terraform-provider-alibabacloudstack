@@ -83,3 +83,11 @@ In addition to all arguments above, the following attributes are exported:
 * `snat_table_ids` - The ID of the SNAT table automatically created by the NAT gateway.
 * `forward_table_ids` - The ID of the Destination Network Address Translation (DNAT) table automatically created by the NAT gateway.
 * `bandwidth_packages` - The details of the bandwidth packages associated with the NAT gateway.  
+
+## Import
+
+alibabacloudstack_natgateway_natgateway can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_natgateway_natgateway.example <id>
+```

@@ -273,3 +273,17 @@ resource "alibabacloudstack_cs_kubernetes" "k8s" {
 * `worker_system_disk_performance_level` - 工作节点系统盘的性能级别。
 * `is_enterprise_security_group` - 是否使用企业级安全组。
 * `cloud_monitor_flags` - 是否启用云监控。
+
+## Timeouts
+
+* `create` - （默认90分钟）创建资源时使用。
+* `update` - （默认60分钟）更新资源时使用。
+* `delete` - （默认60分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_ack_cluster 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ack_cluster.example <id>
+```

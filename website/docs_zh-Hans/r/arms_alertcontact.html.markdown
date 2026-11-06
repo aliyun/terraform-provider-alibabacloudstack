@@ -46,3 +46,11 @@ resource "alibabacloudstack_arms_alertcontact" "default" {
 
 * `id` - 警报联系人的ID。它由阿里云自动生成，并唯一标识该警报联系人。
 * `alert_contact_name` - 警报联系人的名称。这是您阿里巴巴云账户内警报联系人的唯一标识符。
+
+## Import
+
+alibabacloudstack_arms_alertcontact 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_arms_alertcontact.example <id>
+```

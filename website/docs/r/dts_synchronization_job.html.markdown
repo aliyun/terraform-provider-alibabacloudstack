@@ -127,6 +127,11 @@ The following attributes are exported:
 * `status` - The status of the resource. Valid values: `Synchronizing`, `Suspending`.
 * `synchronization_direction` - Synchronization direction.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 10 mins) Used when update the resource.
+
 ## Import
 
 DTS Synchronization Job can be imported using the id, e.g.

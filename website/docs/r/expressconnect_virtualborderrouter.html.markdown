@@ -86,6 +86,11 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 * `update` - (Defaults to 2 mins) Used when updating the Virtual Border Router.
 
+## Timeouts
+
+* `update` - (Defaults to 5 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 Express Connect Virtual Border Router can be imported using the id, e.g.

@@ -77,6 +77,11 @@ The following attributes are exported:
 * `connection_string` - The connection string of the read/write splitting endpoint.
 * `port` - The port number of the read/write splitting endpoint.
 
+## Timeouts
+
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 PolarDB Read/Write Splitting Connection can be imported using the instance ID, e.g.

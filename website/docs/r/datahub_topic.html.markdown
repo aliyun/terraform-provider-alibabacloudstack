@@ -85,3 +85,11 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The ID of the DataHub topic. It is composed of the project name and the topic name, formatted as `<project_name>:<name>`.
 * `create_time` - The creation time of the DataHub topic. It is a human-readable string rather than a 64-bit UTC timestamp.
 * `last_modify_time` - The last modification time of the DataHub topic. Initially, it is the same as the `create_time`. It is also a human-readable string rather than a 64-bit UTC timestamp.
+
+## Import
+
+alibabacloudstack_datahub_topic can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_datahub_topic.example <id>
+```

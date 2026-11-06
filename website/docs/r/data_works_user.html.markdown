@@ -35,3 +35,11 @@ The following arguments are supported:
 ## Attributes Reference
 
 No attributes are currently listed for this resource. If there are any computed attributes in the map that need to be added, they can be included here with the appropriate description and marked as ``.
+
+## Import
+
+alibabacloudstack_data_works_user can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_data_works_user.example <id>
+```

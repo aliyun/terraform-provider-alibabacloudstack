@@ -170,3 +170,11 @@ resource "alibabacloudstack_slb_rule" "default" {
 * `health_check_connect_port` - 后端服务器的健康检查端口。有效范围：[1-65535]。若为空且 `HealthCheck` 为 `on`，表明默认使用监听后端端口配置。
 * `healthy_threshold` - 表示健康检查成功的结果阈值。
 * `unhealthy_threshold` - 表示健康检查失败的结果阈值。
+
+## Import
+
+alibabacloudstack_slb_rule 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_slb_rule.example <id>
+```

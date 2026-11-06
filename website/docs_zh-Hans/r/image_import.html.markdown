@@ -65,3 +65,15 @@ resource "alibabacloudstack_image_import" "this" {
 
 * `id` - 镜像ID。
 * `format` - 镜像格式。值范围：当导入 `RAW`, `VHD`, `qcow2` 格式的镜像时，系统会自动检测镜像格式，以最先检测到的为准。
+
+## Timeouts
+
+* `create` - （默认120分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_image_import 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_image_import.example <id>
+```

@@ -109,3 +109,11 @@ resource "alibabacloudstack_route_entry" "foo" {
 * `nexthop_type` - 下一跳类型。
 * `nexthop_id` - 路由条目的下一跳。
 * `router_id` - (计算) 与路由条目关联的路由器 ID。
+
+## Import
+
+alibabacloudstack_route_entry 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_route_entry.example <id>
+```

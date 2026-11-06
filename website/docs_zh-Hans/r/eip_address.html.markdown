@@ -57,3 +57,11 @@ resource "alibabacloudstack_eip_address" "default" {
   - **Releasing**：释放中。
 * `ip_address` - 分配给EIP的弹性IP地址。
 * `name` - EIP实例的名称。该名称可以包含2到128个字符，必须仅包含字母数字字符或连字符(例如“-”、“.”、“_”)，并且不能以连字符开头或结尾，也不能以`http://`或`https://`开头
+
+## Import
+
+alibabacloudstack_eip_address 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_eip_address.example <id>
+```

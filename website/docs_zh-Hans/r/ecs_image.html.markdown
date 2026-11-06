@@ -153,3 +153,15 @@ resource "alibabacloudstack_image_share_permission" "default" {
   * `format` - 磁盘的文件系统格式。
   * `import_oss_bucket` - 如果镜像是通过OSS导入的，则显示对应的OSS存储桶名称。
   * `import_oss_object` - 如果镜像是通过OSS导入的，则显示对应的OSS对象名称。
+
+## Timeouts
+
+* `create` - （默认30分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_ecs_image 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ecs_image.example <id>
+```

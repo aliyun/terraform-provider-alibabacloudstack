@@ -47,3 +47,16 @@ The following attributes are exported:
 * `connection_string` - PolarDB database connection string.
 * `db_instance_description` - The description of the DB instance .
 * `engine` - Database engine type .
+
+## Timeouts
+
+* `create` - (Defaults to 60 mins) Used when create the resource.
+* `update` - (Defaults to 45 mins) Used when update the resource.
+
+## Import
+
+alibabacloudstack_polardb_readonly_instance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardb_readonly_instance.example <id>
+```

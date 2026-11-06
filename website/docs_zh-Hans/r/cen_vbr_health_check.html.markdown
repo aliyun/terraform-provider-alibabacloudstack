@@ -84,3 +84,11 @@ resource "alibabacloudstack_cen_vbr_health_check" "default" {
 ```bash
 $ terraform import alibabacloudstack_cen_vbr_health_check.default cen-abc123456:vbr-def789012
 ```
+
+## Import
+
+alibabacloudstack_cen_vbr_health_check 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cen_vbr_health_check.example <id>
+```

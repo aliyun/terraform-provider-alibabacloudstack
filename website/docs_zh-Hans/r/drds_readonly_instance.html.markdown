@@ -1,7 +1,7 @@
 ---
 subcategory: "分布式关系型数据库"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_drds_instance"
+page_title: "Alibabacloudstack: alibabacloudstack_drds_readonly_instance"
 sidebar_current: "docs-Alibabacloudstack-drds-instance"
 description: |- 
   编排云原生分布式数据库（Drds）实例
@@ -84,3 +84,7 @@ resource "alibabacloudstack_drds_readonly_instance" "default" {
 除了上述列出的参数外，还导出以下属性：
 
 * `id` - DRDS实例ID。
+
+## Import
+
+此资源不支持导入。

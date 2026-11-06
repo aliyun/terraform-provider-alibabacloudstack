@@ -85,3 +85,11 @@ OTS表可以使用id进行导入，例如：
 ```bash
 $ terraform import alibabacloudstack_ots_table.table "my-ots:ots_table"
 ```
+
+## Import
+
+alibabacloudstack_ots_table 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ots_table.example <id>
+```

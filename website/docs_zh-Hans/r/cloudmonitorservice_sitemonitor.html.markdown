@@ -88,3 +88,11 @@ resource "alibabacloudstack_cloudmonitorservice_sitemonitor" "default" {
 * `task_state` - 站点监控任务的当前状态。
 * `create_time` - 表示站点监控任务创建时间的时间戳。
 * `update_time` - 表示站点监控任务最后更新时间的时间戳。
+
+## Import
+
+alibabacloudstack_cloudmonitorservice_sitemonitor 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cloudmonitorservice_sitemonitor.example <id>
+```

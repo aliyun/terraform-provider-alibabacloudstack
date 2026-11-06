@@ -78,3 +78,15 @@ The following attributes are exported in addition to the arguments listed above:
   * `account_type` - Account type. The value range is as follows:-**Normal**: Normal account.-**Super**: a highly privileged account.> * If this parameter is left blank, the **Super** account is created by default.* When the cluster is PolarDB O engine or PolarDB PostgreSQL engine, each cluster can create multiple high-permission accounts. High-permission accounts have more permissions than normal accounts. For more information about creating database accounts, see [create database accounts](~~ 68508 ~~).* When the cluster is the PolarDB MySQL engine, each cluster can only create one high-permission account at most. High-permission accounts have more permissions than normal accounts. For more information about creating database accounts, see [create database accounts](~~ 68508 ~~).
   * `priv_exceeded` -  Indicates whether the privileges exceed the allowed limits.
   * `status` - The status of the resource
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
+## Import
+
+alibabacloudstack_polardb_account can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardb_account.example <id>
+```

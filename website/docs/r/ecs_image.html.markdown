@@ -147,3 +147,15 @@ In addition to all arguments above, the following attributes are exported:
 * `image_name` - The name of the image.
 * `description` - The description of the image.
 * `disk_device_mapping` - The disk device mappings associated with the image.
+
+## Timeouts
+
+* `create` - (Defaults to 30 mins) Used when create the resource.
+
+## Import
+
+alibabacloudstack_ecs_image can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_image.example <id>
+```

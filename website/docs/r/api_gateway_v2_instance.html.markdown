@@ -190,6 +190,10 @@ The following attributes are exported:
 * `shared_instance` - Whether the instance is shared.
 * `custom_deploy_config` - Custom deployment configuration (only available for custom deploy mode).
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
 ## Import
 
 API Gateway V2 instances can be imported using the instance ID:

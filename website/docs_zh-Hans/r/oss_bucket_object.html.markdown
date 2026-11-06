@@ -104,3 +104,11 @@ OSS存储桶对象可以使用复合ID导入，格式为`{oss_cluster}:{bucket}:
 ```shell
 $ terraform import alibabacloudstack_oss_bucket_object.example default:my-bucket:my-object-key
 ```
+
+## Import
+
+alibabacloudstack_oss_bucket_object 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_oss_bucket_object.example <id>
+```

@@ -67,3 +67,11 @@ Reject: 拒绝匹配的路由通过�?
   * `description` - 路由策略的描述�?
   * `route_map_id` - 路由策略的ID�?
   * `status` - 路由策略的状态
+
+## Import
+
+alibabacloudstack_cen_route_map 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cen_route_map.example <id>
+```

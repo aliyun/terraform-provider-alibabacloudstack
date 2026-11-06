@@ -40,3 +40,16 @@ resource "alibabacloudstack_ecs_ebs_storage_set" "default" {
 
 除了上述参数外，还导出了以下属性：
   * `storage_set_id` - 存储集ID。这是创建存储集后自动生成的唯一标识符，可用于后续操作中引用该存储集。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_ecs_storageset 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ecs_storageset.example <id>
+```

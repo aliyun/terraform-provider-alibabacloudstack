@@ -214,3 +214,17 @@ resource "alibabacloudstack_rds_dbinstance" "default2" {
 * `maintain_time` - 实例的维护时间段。
 
 * `role_arn` - 授权RDS云服务账号访问KMS的全局资源标识符(ARN)。
+
+## Timeouts
+
+* `create` - （默认45分钟）创建资源时使用。
+* `update` - （默认30分钟）更新资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_rds_dbinstance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_rds_dbinstance.example <id>
+```

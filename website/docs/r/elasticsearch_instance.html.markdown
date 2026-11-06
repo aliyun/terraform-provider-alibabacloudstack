@@ -109,6 +109,12 @@ The following attributes are exported -
 * `kibana_domain` - The domain name of the Kibana instance.
 * `kibana_port` - The port number of the Kibana instance.
 
+## Timeouts
+
+* `create` - (Defaults to 120 mins) Used when create the resource.
+* `update` - (Defaults to 120 mins) Used when update the resource.
+* `delete` - (Defaults to 120 mins) Used when delete the resource.
+
 ## Import
 Elasticsearch instances can be imported using the id, e.g.
 

@@ -79,3 +79,11 @@ ALIKAFKA 主题可以使用 id 导入，例如：
 ```bash
 $ terraform import alibabacloudstack_alikafka_topic.topic alikafka_post-cn-123455abc:topicName
 ```
+
+## Import
+
+alibabacloudstack_alikafka_topic 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_alikafka_topic.example <id>
+```

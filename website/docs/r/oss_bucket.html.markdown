@@ -61,6 +61,10 @@ The following attributes are exported:
 * `storage_class` -  The storage class of the bucket.
 * `vpclist` -  The list of accessible VPCs for the bucket.
 
+## Timeouts
+
+* `update` - (Defaults to 20 mins) Used when update the resource.
+
 ## Import
 
 OSS bucket can be imported using the id, e.g.

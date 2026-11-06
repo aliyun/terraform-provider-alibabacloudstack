@@ -150,3 +150,11 @@ resource "alibabacloudstack_api_gateway_api" "default" {
 * `api_name` - API 的名称。
 * `force_nonce_check` - 是否为 API 启用了 nonce 检查。
 * `description` - API 的描述信息。
+
+## Import
+
+alibabacloudstack_apigateway_api 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_apigateway_api.example <id>
+```

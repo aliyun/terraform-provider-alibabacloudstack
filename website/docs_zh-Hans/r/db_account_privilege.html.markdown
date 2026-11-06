@@ -92,3 +92,11 @@ resource "alibabacloudstack_db_account_privilege" "privilege" {
 * `id` - 当前账户资源ID。由实例ID、账户名称和权限组成，格式为 `<instance_id>:<name>:<privilege>`。
 * `instance_id` - 账户所属实例的ID。
 * `data_base_instance_id` - 数据库实例的ID。此属性与 `instance_id` 类似，但可能在某些情况下提供额外的信息。
+
+## Import
+
+alibabacloudstack_db_account_privilege 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_db_account_privilege.example <id>
+```

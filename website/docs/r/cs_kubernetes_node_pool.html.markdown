@@ -307,3 +307,17 @@ The following attributes are exported:
 * `internet_max_bandwidth_out` - The maximum outbound bandwidth for the public network. Unit: Mbit/s. Valid values: 0 to 100.
 * `spot_strategy` - The preemption policy for the pay-as-you-go instance. Valid value `SpotWithPriceLimit`.
 * `node_count` - The worker node number of the node pool.
+
+## Timeouts
+
+* `create` - (Defaults to 90 mins) Used when create the resource.
+* `update` - (Defaults to 60 mins) Used when update the resource.
+* `delete` - (Defaults to 60 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_cs_kubernetes_node_pool can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cs_kubernetes_node_pool.example <id>
+```

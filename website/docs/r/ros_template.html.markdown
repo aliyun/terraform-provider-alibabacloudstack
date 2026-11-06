@@ -68,3 +68,11 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the ROS Template resource. This value is equivalent to `template_id`.
 * `template_id` - The unique identifier for the ROS Template.
+
+## Import
+
+alibabacloudstack_ros_template can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ros_template.example <id>
+```

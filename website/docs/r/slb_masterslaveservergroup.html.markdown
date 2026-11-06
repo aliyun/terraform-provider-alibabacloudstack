@@ -179,3 +179,11 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The ID of the master-slave server group.
 * `name` - The name of the master-slave server group.
 * `master_slave_server_group_name` - The name of the primary/secondary server group.
+
+## Import
+
+alibabacloudstack_slb_masterslaveservergroup can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_slb_masterslaveservergroup.example <id>
+```

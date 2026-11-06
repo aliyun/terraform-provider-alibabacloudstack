@@ -71,3 +71,14 @@ The following arguments are supported:
   * `database_name` - (Required) - Name of the database.
   * `mode` - (Optional) - Mode of the database. Valid values: `auto` and `drds`.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
+## Import
+
+alibabacloudstack_polardbx_database can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardbx_database.example <id>
+```

@@ -73,3 +73,15 @@ resource "alibabacloudstack_rds_backup" "default" {
 * `end_time` - 查询结束时间，必须晚于开始时间，格式为 <I> yyyy-MM-dd </I> T <I> HH:mm </I> Z (UTC 时间)。
 * `start_time` - 查询开始时间，格式为 <I> yyyy-MM-dd </I> T <I> HH:mm </I> Z (UTC 时间)。
 * `status` - 备份状态。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_rds_backup 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_rds_backup.example <id>
+```

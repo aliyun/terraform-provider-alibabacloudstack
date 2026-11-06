@@ -65,3 +65,11 @@ resource "alibabacloudstack_ots_instance_attachment" "default" {
 * `vpc_name` - 附加到OTS实例的VPC的名称。
 * `vswitch_id` - 附加到OTS实例的交换机的ID。
 * `vpc_id` - 附加到OTS实例的VPC的ID。此属性是从`vswitch_id`自动派生的。
+
+## Import
+
+alibabacloudstack_ots_instanceattachment 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ots_instanceattachment.example <id>
+```

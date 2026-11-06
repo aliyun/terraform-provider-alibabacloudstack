@@ -63,6 +63,12 @@ The following attributes are exported:
 * `service_type` - The service type of the instance.
 * `network_type` - The network type of the instance.
 
+## Timeouts
+
+* `create` - (Defaults to 60 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 40 mins) Used when delete the resource.
+
 ## Import
 
 Lindorm LTS Instance can be imported using the id, e.g.

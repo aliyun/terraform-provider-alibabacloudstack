@@ -57,3 +57,11 @@ The following attributes are exported from the API response:
 * `create_timestamp` - The creation timestamp in seconds.
 * `update_timestamp` - The update timestamp in seconds.
 * `zone_name` - The domain name. Represents the domain to which the scheduling instance belongs.
+
+## Import
+
+alibabacloudstack_dns_gtm_instance can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_dns_gtm_instance.example <id>
+```

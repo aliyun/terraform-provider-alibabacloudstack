@@ -104,3 +104,17 @@ resource "alibabacloudstack_cen_transit_router_vpc_attachment" "default" {
   * `status` - vpc附件实例的状态
   * `transit_router_attachment_id` - vpc附件实例的ID
   * `vpc_owner_id` - vpc所有者ID
+
+## Timeouts
+
+* `create` - （默认10分钟）创建资源时使用。
+* `update` - （默认5分钟）更新资源时使用。
+* `delete` - （默认15分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_cen_transit_router_vpc_attachment 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cen_transit_router_vpc_attachment.example <id>
+```

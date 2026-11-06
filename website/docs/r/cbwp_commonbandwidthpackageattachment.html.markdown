@@ -85,3 +85,11 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The unique identifier of the attachment. It is formatted as `<bandwidth_package_id>:<instance_id>`.
 * `status` - The status of the attachment. Possible values include `Attached` and `Detached`.
 * `creation_time` - The time when the attachment was created. This is useful for tracking the lifecycle of the attachment.
+
+## Import
+
+alibabacloudstack_cbwp_commonbandwidthpackageattachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cbwp_commonbandwidthpackageattachment.example <id>
+```

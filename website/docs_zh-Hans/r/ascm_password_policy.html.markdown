@@ -41,3 +41,11 @@ resource "alibabacloudstack_ascm_password_policy" "default"{
 * `id` - 资源的唯一标识符。
 * `policy_name` - 密码策略名称。
 * `policy_details` - 密码策略的具体配置信息。
+
+## Import
+
+alibabacloudstack_ascm_password_policy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ascm_password_policy.example <id>
+```

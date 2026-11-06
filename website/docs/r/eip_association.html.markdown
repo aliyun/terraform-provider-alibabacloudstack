@@ -129,3 +129,11 @@ In addition to all arguments above, the following attributes are exported:
   * **HaVip**: HAVIP
   * **IpAddress**: IP address
   > The default value is **EcsInstance**. If the instance with which you want to associate the EIP is not an ECS instance, this parameter is required.
+
+## Import
+
+alibabacloudstack_eip_association can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_eip_association.example <id>
+```

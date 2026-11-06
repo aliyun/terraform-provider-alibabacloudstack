@@ -334,3 +334,11 @@ In addition to all arguments above, the following attributes are exported:
 
 
 * `id` - The ID of the resource, which is the same as the `load_balancer_id`.
+
+## Import
+
+alibabacloudstack_slb_backend_server can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_slb_backend_server.example <id>
+```

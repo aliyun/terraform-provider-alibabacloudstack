@@ -69,3 +69,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `connection_id` - The unique identifier of the connection. This value is in the format `<connection_id>:<$.ProjectId>`.
+
+## Import
+
+alibabacloudstack_data_works_connection can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_data_works_connection.example <id>
+```

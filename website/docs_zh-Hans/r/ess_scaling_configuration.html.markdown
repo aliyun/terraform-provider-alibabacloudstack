@@ -225,3 +225,11 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 * `is_outdated` - 是否使用过时的实例类型。
 
 * `key_name` - 用于登录ECS实例的密钥对名称。
+
+## Import
+
+alibabacloudstack_ess_scaling_configuration 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ess_scaling_configuration.example <id>
+```

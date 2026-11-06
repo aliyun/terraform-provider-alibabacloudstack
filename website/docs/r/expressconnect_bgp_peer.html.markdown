@@ -76,6 +76,12 @@ The following attributes are exported in addition to the arguments listed above:
   * `description` - The description of the BGP peer.
   * `auth_key` - The authentication key of the BGP peer.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 Express Connect BGP Peer can be imported using the BGP peer ID, e.g.

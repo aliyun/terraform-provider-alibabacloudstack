@@ -63,6 +63,11 @@ The following attributes are exported:
 
 * `id` - The ID of the VBR failover group.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 Express Connect VBR HA can be imported using the VBR HA ID (e.g. `vbrha-xxxxxxxxx`), e.g.

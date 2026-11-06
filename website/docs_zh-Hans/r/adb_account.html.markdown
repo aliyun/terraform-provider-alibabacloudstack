@@ -50,3 +50,11 @@ resource "alibabacloudstack_adb_account" "default" {
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 账户的唯一标识符。它由实例ID和账户名称组成，格式为 `<instance_id>:<account_name>`。
+
+## Import
+
+alibabacloudstack_adb_account 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_adb_account.example <id>
+```

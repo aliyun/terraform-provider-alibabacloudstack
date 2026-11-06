@@ -91,3 +91,16 @@ EBS 磁盘复制对可以使用复制对 ID 导入，例如：
 ```
 $ terraform import alibabacloudstack_ebs_diskreplicapair.example rp-xxxxxxxxx
 ```
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_ebs_diskreplicapair 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ebs_diskreplicapair.example <id>
+```

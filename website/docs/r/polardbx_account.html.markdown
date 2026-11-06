@@ -79,3 +79,11 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `id` - The unique identifier of the resource, formatted as `<instance_id>:<account_name>`
 * `description` - The description of the account
+
+## Import
+
+alibabacloudstack_polardbx_account can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardbx_account.example <id>
+```

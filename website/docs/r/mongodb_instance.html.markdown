@@ -102,6 +102,12 @@ The following attributes are exported in addition to the arguments listed above:
 * `public_connections` -  Public connection information for MongoDB.
   * `connect_string` - Complete connection string.
 
+## Timeouts
+
+* `create` - (Defaults to 30 mins) Used when create the resource.
+* `update` - (Defaults to 30 mins) Used when update the resource.
+* `delete` - (Defaults to 30 mins) Used when delete the resource.
+
 ## Import
 
 MongoDB instance can be imported using the DBInstanceId, e.g.

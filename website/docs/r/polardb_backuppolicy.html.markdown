@@ -52,3 +52,11 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above: 
 
   * `backup_log` - (Computed) Log backup switch. Value: **Enable | Disabled **
+
+## Import
+
+alibabacloudstack_polardb_backuppolicy can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_polardb_backuppolicy.example <id>
+```

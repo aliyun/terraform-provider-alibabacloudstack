@@ -75,3 +75,11 @@ ASCM 服务 RAM 角色可以使用 organization_id 和 product_name 以 `<organi
 ```
 $ terraform import alibabacloudstack_ascm_ram_service_role.example 1:ECS
 ```
+
+## Import
+
+alibabacloudstack_ascm_ram_service_role 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ascm_ram_service_role.example <id>
+```

@@ -109,3 +109,11 @@ This is the unique identifier of the API group to which the specified API belong
 #### `stage_name`
 
 This specifies the stage where the application is authorized to access the API. Valid values are `"RELEASE"`, `"TEST"`, and `"PRE"`. This field is mandatory and cannot be modified after creation (`ForceNew`).
+
+## Import
+
+alibabacloudstack_api_gateway_app_attachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_api_gateway_app_attachment.example <id>
+```

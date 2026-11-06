@@ -66,3 +66,11 @@ resource "alibabacloudstack_cr_ee_repo" "my-repo" {
 ```bash
 $ terraform import alibabacloudstack_cr_ee_repo.default `cri-xxx:my-namespace:my-repo`
 ```
+
+## Import
+
+alibabacloudstack_cr_ee_repo 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_cr_ee_repo.example <id>
+```

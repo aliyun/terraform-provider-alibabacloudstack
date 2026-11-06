@@ -126,3 +126,16 @@ The following attributes are exported in addition to the arguments listed above:
 * `id` - The ID of the snapshot.
 * `snapshot_name` - The name of the snapshot. The name must be 2 to 128 characters in length. It must start with a letter and cannot start with `http://` or `https://`. It can contain letters, digits, colons (:), underscores (\_), and hyphens (-). It cannot start with `auto` because snapshots whose names start with `auto` are recognized as automatic snapshots.
 * `description` - The description of the snapshot. The description must be 2 to 256 characters in length and cannot start with `http://` or `https://`.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 5 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_ecs_snapshot can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_snapshot.example <id>
+```

@@ -117,3 +117,11 @@ resource "alibabacloudstack_slb_listener" "default" {
 * `ssl_certificate_id` - SSL证书ID。
 * `x_forwarded_for` - 是否设置额外的HTTP Header字段 "X-Forwarded-For"。
 * `listener_forward` - 是否启用HTTP重定向到HTTPS。
+
+## Import
+
+alibabacloudstack_slb_listener 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_slb_listener.example <id>
+```

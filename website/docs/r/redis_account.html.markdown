@@ -111,3 +111,15 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The unique identifier of the account. It is composed of the instance ID and the account name in the format `<instance_id>:<account_name>`.
 * `description` - The description of the account.
 * `account_description` - The description of the account (same as `description`). 
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+
+## Import
+
+alibabacloudstack_redis_account can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_redis_account.example <id>
+```

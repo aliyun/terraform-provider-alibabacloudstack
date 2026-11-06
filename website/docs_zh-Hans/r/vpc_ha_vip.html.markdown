@@ -171,3 +171,16 @@ resource "alibabacloudstack_vpc_ha_vip" "default" {
   * `ip_address` - HaVip的私网IP地址
   * `status` - 代表资源实例的状态
   * `vpc_id` - HaVip实例所属的VPC ID
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_vpc_ha_vip 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_vpc_ha_vip.example <id>
+```

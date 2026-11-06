@@ -90,3 +90,11 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The ID of the app attachment of api gateway., formatted as `<group_id>:<api_id>:<app_id>:<stage_name>`.
+
+## Import
+
+alibabacloudstack_api_gateway_app_attachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_api_gateway_app_attachment.example <id>
+```

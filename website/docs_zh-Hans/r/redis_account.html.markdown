@@ -105,3 +105,15 @@ resource "alibabacloudstack_redis_account" "default" {
 * `id` - 账户的唯一标识符。它由实例 ID 和账户名称组成，格式为 `<instance_id>:<account_name>`。
 * `description` - 账号备注信息。
 * `account_description` - 账号备注信息（与 `description` 相同）。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+
+## Import
+
+alibabacloudstack_redis_account 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_redis_account.example <id>
+```

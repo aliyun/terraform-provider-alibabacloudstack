@@ -73,6 +73,11 @@ The following attributes are exported:
 * `transit_router_attachment_id` - The ID of the network instance connection.
 * `transport_type` - The transport type.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 CEN transit router connect attachment can be imported using the ID, e.g.

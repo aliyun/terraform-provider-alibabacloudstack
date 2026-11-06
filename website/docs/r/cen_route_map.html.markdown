@@ -65,3 +65,11 @@ The following attributes are exported in addition to the arguments listed above:
   * `description` - description of the route map.
   * `route_map_id` - the id of route map.
   * `status` - the status of route map.
+
+## Import
+
+alibabacloudstack_cen_route_map can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_cen_route_map.example <id>
+```

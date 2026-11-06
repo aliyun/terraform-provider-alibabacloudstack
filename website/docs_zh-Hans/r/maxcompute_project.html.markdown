@@ -78,3 +78,11 @@ MaxCompute 项目可以使用 *名称* 或 ID 导入，例如
 ```bash
 $ terraform import alibabacloudstack_maxcompute_project.example tf_maxcompute_project
 ```
+
+## Import
+
+alibabacloudstack_maxcompute_project 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_maxcompute_project.example <id>
+```

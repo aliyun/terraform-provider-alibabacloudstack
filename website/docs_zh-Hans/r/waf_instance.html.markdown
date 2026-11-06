@@ -110,3 +110,16 @@ resource "alibabacloudstack_waf_instance" "default" {
 * `wafinstance_id` - WAF 实例的 ID。
 * `instance_status` - WAF 实例的状态。
 * `instance_make_status` - WAF 实例的生成状态。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `update` - （默认20分钟）更新资源时使用。
+
+## Import
+
+alibabacloudstack_waf_instance 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_waf_instance.example <id>
+```

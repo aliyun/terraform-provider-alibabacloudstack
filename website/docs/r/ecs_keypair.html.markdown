@@ -51,3 +51,11 @@ In addition to all arguments above, the following attributes are exported:
 * `key_pair_name` - The name of the key pair.
 * `finger_print` - The fingerprint of the key pair. The message-digest algorithm 5 (MD5) is used based on the public key fingerprint format defined in RFC 4716. For more information, see [RFC 4716](https://tools.ietf.org/html/rfc4716).
 * `key_name` - Name of the key pair.
+
+## Import
+
+alibabacloudstack_ecs_keypair can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ecs_keypair.example <id>
+```

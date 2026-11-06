@@ -66,3 +66,16 @@ resource "alibabacloudstack_ecs_command" "complex" {
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - ECS Command 资源的唯一标识符。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_ecs_command 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ecs_command.example <id>
+```

@@ -49,3 +49,11 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
 
 * `id` - The unique identifier of the account. It is composed of the instance ID and the account name in the format `<instance_id>:<account_name>`.
+
+## Import
+
+alibabacloudstack_adb_account can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_adb_account.example <id>
+```

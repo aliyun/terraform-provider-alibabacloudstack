@@ -118,6 +118,11 @@ In addition to all arguments above, the following attributes are exported:
   * `use_origin_image` - Whether to use the original image.
   * `specification` - The specification string.
 
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
 ## Import
 
 BMCP Cluster can be imported using the id, e.g.

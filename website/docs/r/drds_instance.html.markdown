@@ -79,6 +79,12 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `id` - The DRDS instance ID.
 
+## Timeouts
+
+* `create` - (Defaults to 10 mins) Used when create the resource.
+* `update` - (Defaults to 5 mins) Used when update the resource.
+* `delete` - (Defaults to 10 mins) Used when delete the resource.
+
 ## Import
 
 Distributed Relational Database Service (DRDS) can be imported using the id, e.g.

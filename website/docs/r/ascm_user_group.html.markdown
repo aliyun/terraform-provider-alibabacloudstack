@@ -46,3 +46,11 @@ The following attributes are exported:
 * `user_group_id` - ID of the user group.
 * `organization_id` - User Organization ID.
 * `role_ids` - ascm role id.
+
+## Import
+
+alibabacloudstack_ascm_user_group can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ascm_user_group.example <id>
+```

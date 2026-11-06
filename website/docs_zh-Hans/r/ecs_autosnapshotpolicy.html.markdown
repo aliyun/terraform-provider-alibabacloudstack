@@ -56,3 +56,11 @@ resource "alibabacloudstack_ecs_autosnapshotpolicy" "default" {
 ```
 $ terraform import alibabacloudstack_snapshot_policy.example sp-12345678
 ```
+
+## Import
+
+alibabacloudstack_ecs_autosnapshotpolicy 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_ecs_autosnapshotpolicy.example <id>
+```

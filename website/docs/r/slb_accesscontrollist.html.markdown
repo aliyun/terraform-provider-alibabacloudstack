@@ -62,3 +62,11 @@ In addition to all arguments above, the following attributes are exported:
 * `address_ip_version` - The IP version. Valid values: `ipv4` and `ipv6`.
 * `name` - The deprecated name field.
 * `ip_version` - The deprecated IP version field.
+
+## Import
+
+alibabacloudstack_slb_accesscontrollist can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_slb_accesscontrollist.example <id>
+```

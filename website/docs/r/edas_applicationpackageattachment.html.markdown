@@ -99,3 +99,16 @@ The following arguments are supported:
 
 The following attributes are exported in addition to the arguments listed above:
   * `last_package_version` - The version of the last deployed package. This can be useful for tracking and verifying the version history of deployments.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_edas_applicationpackageattachment can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_edas_applicationpackageattachment.example <id>
+```

@@ -55,3 +55,17 @@ In addition to all arguments above, the following attributes are exported:
    - Ensured the attribute description aligns with the expected behavior of the resource.
 
 This updated documentation provides a comprehensive guide for using the `alibabacloudstack_dataworks_project` resource, making it easier for users to understand and implement in their Terraform configurations.
+
+## Timeouts
+
+* `create` - (Defaults to 20 mins) Used when create the resource.
+* `update` - (Defaults to 20 mins) Used when update the resource.
+* `delete` - (Defaults to 20 mins) Used when delete the resource.
+
+## Import
+
+alibabacloudstack_data_works_project can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_data_works_project.example <id>
+```

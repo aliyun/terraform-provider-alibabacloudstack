@@ -89,3 +89,11 @@ resource "alibabacloudstack_api_gateway_app_attachment" "default" {
 导出以下属性：
 
 * `id` - API网关应用绑定的唯一标识符，格式为 `<group_id>:<api_id>:<app_id>:<stage_name>`。此ID可用于后续资源的引用或查询。
+
+## Import
+
+alibabacloudstack_api_gateway_app_attachment 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_api_gateway_app_attachment.example <id>
+```

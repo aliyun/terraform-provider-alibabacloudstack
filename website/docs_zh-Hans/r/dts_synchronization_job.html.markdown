@@ -134,3 +134,16 @@ resource "alibabacloudstack_dts_synchronization_job" "default" {
 ```bash
 $ terraform import alibabacloudstack_dts_synchronization_job.example <id>
 ```
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `update` - （默认10分钟）更新资源时使用。
+
+## Import
+
+alibabacloudstack_dts_synchronization_job 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_dts_synchronization_job.example <id>
+```

@@ -74,6 +74,12 @@ In addition to all arguments above, the following attributes are exported:
 * `connection_string` - The complete connection string for accessing the GPDB instance via the public network.
 * `ip_address` - The public IP address associated with the public connection string.
 
+## Timeouts
+
+* `create` - (Defaults to 10 mins) Used when create the resource.
+* `update` - (Defaults to 10 mins) Used when update the resource.
+* `delete` - (Defaults to 10 mins) Used when delete the resource.
+
 ## Import
 
 GPDB public connection can be imported using the instance_id and connection_prefix, e.g.

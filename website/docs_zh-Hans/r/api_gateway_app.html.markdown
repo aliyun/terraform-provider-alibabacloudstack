@@ -54,3 +54,11 @@ API 网关应用可以使用应用 ID 导入，例如：
 ```
 $ terraform import alibabacloudstack_api_gateway_app.example 12345678
 ```
+
+## Import
+
+alibabacloudstack_api_gateway_app 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_api_gateway_app.example <id>
+```

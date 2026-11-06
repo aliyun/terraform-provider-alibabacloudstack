@@ -99,3 +99,11 @@ resource "alibabacloudstack_oos_execution" "default" {
 * `template_version` - 用于执行的OOS模板的具体版本号。
 * `update_date` - 表示执行最后一次更新时间的时间戳。
 * `safety_check` - 指定执行的安全检查模式。这确保在继续执行之前满足某些条件。
+
+## Import
+
+alibabacloudstack_oos_execution 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_oos_execution.example <id>
+```

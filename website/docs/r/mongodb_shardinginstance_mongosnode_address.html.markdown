@@ -130,3 +130,11 @@ The following attributes are exported:
 
 * `public_connect_string` - Public connection string.
 * `private_connect_string` - Private connection string.
+
+## Import
+
+alibabacloudstack_mongodb_shardinginstance_mongosnode_address can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_mongodb_shardinginstance_mongosnode_address.example <id>
+```

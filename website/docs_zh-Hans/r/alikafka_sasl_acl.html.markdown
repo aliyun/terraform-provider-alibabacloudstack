@@ -68,3 +68,11 @@ resource "alibabacloudstack_alikafka_sasl_acl" "default" {
 
 * `id` - 资源提供的`key`。其值由 `<instance_id>:<username>:<acl_resource_type>:<acl_resource_name>:<acl_resource_pattern_type>:<acl_operation_type>` 组成。
 * `host` - ACL的主机。此属性显示在创建ACL时指定的主机值。
+
+## Import
+
+alibabacloudstack_alikafka_sasl_acl 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_alikafka_sasl_acl.example <id>
+```

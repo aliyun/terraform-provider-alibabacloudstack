@@ -55,3 +55,11 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - Login Name of the usergroup_user.
+
+## Import
+
+alibabacloudstack_ascm_usergroup_user can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_ascm_usergroup_user.example <id>
+```

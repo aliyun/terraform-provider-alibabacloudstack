@@ -90,3 +90,11 @@ API Gateway VPC访问可以通过组合ID格式 `<NAME>:<VPC_ID>:<INSTANCE_ID>:<
 ```sh
 $ terraform import alibabacloudstack_api_gateway_vpc_access.example "my-vpc-name:vpc-aswcj19ajsz:i-ajdjfsdlf:8080"
 ``` 
+
+## Import
+
+alibabacloudstack_apigateway_vpc 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_apigateway_vpc.example <id>
+```

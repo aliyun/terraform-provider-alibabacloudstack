@@ -61,3 +61,17 @@ Redis连接可以使用实例ID进行导入，例如：
 ```bash
 $ terraform import alibabacloudstack_redis_connection.example r-abc12345678
 ```
+
+## Timeouts
+
+* `create` - （默认5分钟）创建资源时使用。
+* `update` - （默认5分钟）更新资源时使用。
+* `delete` - （默认5分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_redis_connection 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_redis_connection.example <id>
+```

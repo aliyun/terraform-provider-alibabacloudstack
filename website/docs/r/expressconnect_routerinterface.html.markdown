@@ -72,3 +72,11 @@ In addition to all arguments above, the following attributes are exported:
 * `opposite_interface_owner_id` - The ID of the account that owns the peer router interface.
 * `health_check_source_ip` - The source IP address for the health check packet.
 * `health_check_target_ip` - The target IP address for the health check packet.
+
+## Import
+
+alibabacloudstack_expressconnect_routerinterface can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_expressconnect_routerinterface.example <id>
+```

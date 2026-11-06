@@ -40,3 +40,17 @@ resource "alibabacloudstack_data_works_project" "default" {
 除了上述所有参数外，还导出以下属性：
 
 * `project_id` - DataWorks项目的唯一标识符（ID）。此属性是在项目创建后自动生成的，可以用于在其他资源中引用该项目。
+
+## Timeouts
+
+* `create` - （默认20分钟）创建资源时使用。
+* `update` - （默认20分钟）更新资源时使用。
+* `delete` - （默认20分钟）删除资源时使用。
+
+## Import
+
+alibabacloudstack_data_works_project 可通过ID导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_data_works_project.example <id>
+```

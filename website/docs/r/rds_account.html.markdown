@@ -102,3 +102,11 @@ In addition to all arguments above, the following attributes are exported:
 * `name` - Deprecated field, use `account_name` instead.
 * `type` - Deprecated field, use `account_type` instead.
 * `description` - Deprecated field, use `account_description` instead.
+
+## Import
+
+alibabacloudstack_rds_account can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_rds_account.example <id>
+```

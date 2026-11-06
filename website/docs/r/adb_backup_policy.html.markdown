@@ -80,3 +80,11 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The current backup policy resource ID. It is the same as `db_cluster_id`.
 * `backup_retention_period` - The number of days for which data backup files are retained. This value is fixed at 7 days and cannot be modified.
+
+## Import
+
+alibabacloudstack_adb_backup_policy can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_adb_backup_policy.example <id>
+```

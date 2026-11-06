@@ -67,3 +67,11 @@ The following arguments are supported:
 
 The following attributes are exported in addition to the arguments listed above:
   * `create_time` - The creation time of the resource
+
+## Import
+
+alibabacloudstack_nas_lifecycle_policy can be imported using the id, e.g.
+
+```shell
+$ terraform import alibabacloudstack_nas_lifecycle_policy.example <id>
+```
