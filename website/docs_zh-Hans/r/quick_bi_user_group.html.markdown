@@ -41,7 +41,7 @@ resource "alibabacloudstack_quick_bi_user_group" "example" {
 
 * `user_group_id` - 用户组在 Terraform 中的资源 ID，用于唯一标识该用户组。
 
-## Import
+## 存量资源纳管
 
 Quick BI 用户组可以使用 id 导入，例如
 

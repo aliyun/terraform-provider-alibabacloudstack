@@ -53,7 +53,7 @@ resource "alibabacloudstack_cloudfw_address_book" "default" {
 * `group_uuid` - 地址簿唯一标识符，由云防火墙系统生成的UUID。
 * `reference_count` - 引用总计，表示该地址簿被规则引用的次数。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cloudfw_address_book 可通过ID导入，例如：
 

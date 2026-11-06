@@ -98,7 +98,7 @@ resource "alibabacloudstack_ecs_keypairattachment" "attachment" {
 * `key_name` - 已成功绑定到实例的 SSH 密钥对名称。
 * `instance_ids` - SSH 密钥对已成功绑定的 ECS 实例 ID 列表。
 
-## Import
+## 存量资源纳管
 
 ECS 密钥对绑定可以通过密钥对名称和实例 ID 组合导入，格式为 `<key_name>:<instance_ids>`，例如：
 

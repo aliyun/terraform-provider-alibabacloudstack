@@ -39,7 +39,7 @@ resource "alibabacloudstack_cr_namespace" "my-namespace" {
 * `id` - 容器镜像仓库命名空间的唯一标识符。其值与 `name` 参数相同。
 ```
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cr_namespace 可通过ID导入，例如：
 

@@ -93,7 +93,7 @@ resource "alibabacloudstack_db_account_privilege" "privilege" {
 * `instance_id` - 账户所属实例的ID。
 * `data_base_instance_id` - 数据库实例的ID。此属性与 `instance_id` 类似，但可能在某些情况下提供额外的信息。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_db_account_privilege 可通过ID导入，例如：
 

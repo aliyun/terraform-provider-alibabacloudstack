@@ -76,7 +76,7 @@ resource "alibabacloudstack_ros_template" "from_url" {
 * `id` - ROS模板资源的ID。此值等同于 `template_id`。
 * `template_id` - ROS模板的唯一标识符。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ros_template 可通过ID导入，例如：
 

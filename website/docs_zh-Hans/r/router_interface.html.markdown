@@ -92,7 +92,7 @@ resource "alibabacloudstack_router_interface" "initiating_side" {
 * `opposite_interface_owner_id` - 另一侧路由器接口账号 ID。
 * `status` - 路由器接口状态。常见状态：`Idle`（空闲）、`Waiting`（等待中）、`Active`（激活）、`Inactive`（未激活）。
 
-## Import
+## 存量资源纳管
 
 路由器接口可以使用 router_interface_id 导入，例如：
 

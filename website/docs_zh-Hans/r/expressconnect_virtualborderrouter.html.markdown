@@ -80,18 +80,12 @@ resource "alibabacloudstack_expressconnect_virtualborderrouter" "example" {
 * `min_tx_interval` - 配置BFD报文的发送间隔。取值范围：**200～1000**，单位为ms。
 * `status` - 资源状态。
 
-### 超时设置
-
-`timeouts` 块允许您为某些操作指定 [超时时间](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts)：
-
-* `update` - (默认为2分钟)用于更新虚拟边界路由器时。
-
-## Timeouts
+## 超时配置
 
 * `update` - （默认5分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 可以通过id导入Express Connect虚拟边界路由器，例如：
 

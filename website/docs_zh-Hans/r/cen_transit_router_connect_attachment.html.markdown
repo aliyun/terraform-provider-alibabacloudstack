@@ -77,12 +77,12 @@ resource "alibabacloudstack_cen_transit_router_connect_attachment" "default" {
 * `transit_router_attachment_id` - 网络实例连接ID。
 * `transport_type` - 传输类型。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 CEN转发路由器连接附件可以通过ID导入，例如：
 

@@ -47,7 +47,7 @@ resource "alibabacloudstack_edas_cluster" "default" {
 
 * `id` - EDAS 集群的唯一标识符。它被制定为 `<cluster_id>`。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_edas_cluster 可通过ID导入，例如：
 

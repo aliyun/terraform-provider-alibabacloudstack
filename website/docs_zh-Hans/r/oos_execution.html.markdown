@@ -100,7 +100,7 @@ resource "alibabacloudstack_oos_execution" "default" {
 * `update_date` - 表示执行最后一次更新时间的时间戳。
 * `safety_check` - 指定执行的安全检查模式。这确保在继续执行之前满足某些条件。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_oos_execution 可通过ID导入，例如：
 

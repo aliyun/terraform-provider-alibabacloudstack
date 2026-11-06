@@ -63,11 +63,11 @@ resource "alibabacloudstack_bcmp_security_group" "default" {
 - `create` - （默认 10 分钟）用于创建 BMCP 安全组。
 - `delete` - （默认 10 分钟）用于删除 BMCP 安全组。
 
-## Timeouts
+## 超时配置
 
 * `delete` - （默认10分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 BMCP 安全组可以使用安全组 ID（sgId）进行导入，例如：
 

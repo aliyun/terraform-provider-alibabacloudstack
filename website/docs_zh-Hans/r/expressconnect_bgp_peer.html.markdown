@@ -77,13 +77,13 @@ resource "alibabacloudstack_expressconnect_bgp_peer" "default" {
   * `description` - BGP 邻居的描述。
   * `auth_key` - BGP 邻居的认证密钥。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 高速通道 BGP 邻居可以使用 BGP 邻居 ID 导入，例如：
 

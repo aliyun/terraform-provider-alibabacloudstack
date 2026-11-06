@@ -47,7 +47,7 @@ resource "alibabacloudstack_arms_alert_contact_group" "default" {
 
 * `id` - 告警联系组的唯一标识符（ID）。此 ID 在创建时自动生成，并可用于将资源导入 Terraform。
 
-## Import
+## 存量资源纳管
 
 告警联系人组可以使用 ContactGroupId 导入，例如：
 

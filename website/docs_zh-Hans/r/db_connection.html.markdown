@@ -74,7 +74,7 @@ resource "alibabacloudstack_db_connection" "foo" {
 * `connection_string` - 连接实例字符串，包含完整的连接信息。
 * `ip_address` - 连接字符串的IP地址，表示该连接对应的公网IP。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_db_connection 可通过ID导入，例如：
 

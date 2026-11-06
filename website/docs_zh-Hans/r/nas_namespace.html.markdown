@@ -63,7 +63,7 @@ resource "alibabacloudstack_nas_namespace" "default" {
 * `file_system_type` - 文件系统类型。默认值：`standard`，通用型NAS。
 * `mount_target_count` - 命名空间文件系统挂载点数量。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_nas_namespace 可通过ID导入，例如：
 

@@ -38,7 +38,7 @@ resource "alibabacloudstack_dns_domain_attachment" "dns" {
 * `domain_names` - 已成功绑定到DNS实例的域名列表。此属性反映实际绑定的域名情况。
 * `instance_id` - DNS实例的ID。用于标识所绑定的DNS服务实例。 
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_dns_domain_attachment 可通过ID导入，例如：
 

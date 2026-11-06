@@ -69,7 +69,7 @@ resource "alibabacloudstack_slb_servercertificate" "default" {
 * `name` - 服务器证书的名称(已过时,请使用 `server_certificate_name`)。
 * `server_certificate_name` - 创建时指定的服务器证书的名称。
 
-## Import
+## 存量资源纳管
 
 SLB 服务器证书可以使用 ServerCertificateId 导入，例如：
 

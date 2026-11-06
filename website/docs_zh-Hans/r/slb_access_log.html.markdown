@@ -189,7 +189,7 @@ resource "alibabacloudstack_slb_access_log" "default" {
 
 除了上述所有参数外，还导出了以下属性：
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_slb_access_log 可以使用组合 ID 导入，格式为 `<load_balancer_id>:<log_project>:<log_store>`，例如：
 

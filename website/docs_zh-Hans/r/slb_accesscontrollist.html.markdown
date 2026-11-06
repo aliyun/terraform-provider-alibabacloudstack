@@ -62,7 +62,7 @@ resource "alibabacloudstack_slb_accesscontrollist" "default" {
   * `name` - 已废弃的名称字段。
   * `ip_version` - 已废弃的IP版本字段。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_slb_accesscontrollist 可通过ID导入，例如：
 

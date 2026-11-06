@@ -46,7 +46,7 @@ resource "alibabacloudstack_ecs_deployment_set" "default" {
 
 * `id` - 部署集的ID。
 
-## Import
+## 存量资源纳管
 
 ECS 部署集可以通过 DeploymentSetId 导入，例如：
 

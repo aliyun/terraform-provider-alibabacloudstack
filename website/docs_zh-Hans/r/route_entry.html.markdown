@@ -110,7 +110,7 @@ resource "alibabacloudstack_route_entry" "foo" {
 * `nexthop_id` - 路由条目的下一跳。
 * `router_id` - (计算) 与路由条目关联的路由器 ID。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_route_entry 可通过ID导入，例如：
 

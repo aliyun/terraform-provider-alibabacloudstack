@@ -62,12 +62,12 @@ resource "alibabacloudstack_expressconnect_vbr_ha" "default" {
 
 * `id` - VBR 快速倒换组 ID。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 高速通道 VBR 快速倒换组可以使用 VBR HA ID（例如 `vbrha-xxxxxxxxx`）进行导入，例如：
 

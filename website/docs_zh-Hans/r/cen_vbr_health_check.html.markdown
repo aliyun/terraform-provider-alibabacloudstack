@@ -77,7 +77,7 @@ resource "alibabacloudstack_cen_vbr_health_check" "default" {
 * `delay` - 健康检查的延迟。
 * `packet_loss` - 健康检查的丢包率。
 
-## Import
+## 存量资源纳管
 
 可以使用id导入CEN VBR健康检查，例如：
 

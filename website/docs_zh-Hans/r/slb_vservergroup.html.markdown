@@ -116,7 +116,7 @@ resource "alibabacloudstack_slb_vservergroup" "default" {
 * `vserver_group_name` - VServer组的名称。
 * `servers` - 已经添加的ECS实例列表，包含每个实例的`server_ids`、`port`、`weight`和`type`信息。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_slb_vservergroup 可通过ID导入，例如：
 

@@ -75,7 +75,7 @@ resource "alibabacloudstack_oos_template" "default" {
 * `updated_by` - 最后更新模板的用户。这对审计目的很有用。
 * `updated_date` - 模板最后一次更新的时间。这有助于跟踪随时间对模板所做的更改。
 
-## Import
+## 存量资源纳管
 
 运维编排模板可以使用 template_name 导入，例如：
 

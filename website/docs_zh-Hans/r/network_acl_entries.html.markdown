@@ -116,7 +116,7 @@ resource "alibabacloudstack_network_acl_entries" "default" {
 * `protocol` - 入站或出站条目的协议。
 * `destination_cidr_ip` - 出站条目的目标 IP 地址。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_network_acl_entries 可通过ID导入，例如：
 

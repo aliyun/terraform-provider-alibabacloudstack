@@ -89,7 +89,7 @@ resource "alibabacloudstack_vpc_ipv6_internet_bandwidth" "default" {
   - `SecurityLocked`：由于安全原因，资源被锁定。
 - **`internet_charge_type`**：再次确认资源的计费方式，确保配置的一致性。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_vpc_ipv6internetbandwidth 可通过ID导入，例如：
 

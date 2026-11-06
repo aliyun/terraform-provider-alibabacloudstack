@@ -80,7 +80,7 @@ resource "alibabacloudstack_cloudfw_vpc_control_policy" "default" {
 * `order` - 策略当前顺序值（用于策略优先级排序）。
 * `source_group_cidrs` - 源地址组CIDR列表（当`source_type`为`group`时返回）。
 
-## Import
+## 存量资源纳管
 
 云防火墙VPC控制策略可以使用ID（格式：`<acl_uuid>:<direction>`）导入，例如：
 

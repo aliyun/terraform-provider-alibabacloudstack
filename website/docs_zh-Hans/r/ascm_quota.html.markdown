@@ -111,7 +111,7 @@ NAS
 
 * `total_amount`: 100
 
-## Import
+## 存量资源纳管
 
 ASCM 配额可以使用 ProductName、QuotaType 和 QuotaTypeId 按格式 `ProductName:QuotaType:QuotaTypeId` 进行导入，例如：
 

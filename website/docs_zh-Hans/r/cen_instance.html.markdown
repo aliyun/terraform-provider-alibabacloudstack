@@ -49,7 +49,7 @@ resource "alibabacloudstack_cen_instance" "default" {
 * `status` - CEN实例状态�?
 * `transit_router_id` - 转发路由器ID�?
 
-## Import
+## 存量资源纳管
 
 CEN实例可以使用CenId导入，例如：
 

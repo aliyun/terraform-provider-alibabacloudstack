@@ -44,7 +44,7 @@ resource "alibabacloudstack_ascm_ram_policy_for_role" "default" {
 
 此资源目前未定义任何输出属性。
 
-## Import
+## 存量资源纳管
 
 ASCM RAM策略角色绑定可以使用 ram_policy_id 和 role_id 导入，以冒号分隔，例如：
 

@@ -153,11 +153,11 @@ resource "alibabacloudstack_ecs_snapshot_group" "default" {
   * `create_time` - 快照一致性组的创建时间。
   * `disk_ids` - 快照一致性组中包含的云盘 ID。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认10分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 ECS 快照一致性组可以使用快照一致性组 ID 进行导入，例如：
 

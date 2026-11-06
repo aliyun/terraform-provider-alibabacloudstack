@@ -160,20 +160,12 @@ resource "alibabacloudstack_ecs_dedicated_host" "with_zone" {
   * `Redeploying`: 宿主机恢复中。
   默认值：`Available`。
 
-### 超时
-
-`timeouts`块允许您为某些动作指定[超时](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts)：
-
-* `create` - (默认为11分钟)用于创建专有宿主机时。
-* `delete` - (默认为1分钟)用于删除专有宿主机时。
-* `update` - (默认为11分钟)用于更新专有宿主机时。
-
-## Timeouts
+## 超时配置
 
 * `create` - （默认15分钟）创建资源时使用。
 * `update` - （默认15分钟）更新资源时使用。
 
-## Import
+## 存量资源纳管
 
 ECS专有宿主机可以通过id导入，例如：
 

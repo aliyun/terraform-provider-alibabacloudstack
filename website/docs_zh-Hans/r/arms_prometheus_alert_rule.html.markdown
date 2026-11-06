@@ -120,7 +120,7 @@ resource "alibabacloudstack_arms_prometheus_alert_rule" "example" {
 * `prometheus_alert_rule_id` - 告警规则的唯一标识符。
 * `status` - 告警规则的状态。有效值：`0`（禁用），`1`（启用）。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_arms_prometheus_alert_rule 可通过ID导入，例如：
 

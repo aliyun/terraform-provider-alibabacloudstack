@@ -77,11 +77,11 @@ resource "alibabacloudstack_polardb_cluster_account" "example" {
 * `account_status` - 账户状态。
 * `account_password_valid_time` - 账户密码的有效期。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 可以使用 id 导入 PolarDB 集群账户，例如：
 

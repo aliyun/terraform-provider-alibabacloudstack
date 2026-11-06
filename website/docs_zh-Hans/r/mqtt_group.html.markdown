@@ -65,7 +65,7 @@ resource "alibabacloudstack_mqtt_group" "default" {
 * `independent_naming` - 是否启用独立命名空间（布尔值）。
 * `update_time` - 最后更新时间，Unix时间戳（毫秒）。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_mqtt_group 可以使用组合 ID 导入，格式为 `<instance_id>:<group_id>`，例如：
 

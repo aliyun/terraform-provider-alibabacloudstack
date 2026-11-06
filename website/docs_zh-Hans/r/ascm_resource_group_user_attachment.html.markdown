@@ -35,7 +35,7 @@ resource "alibabacloudstack_ascm_resource_group_user_attachment" "default" {
 
 * `id` - 资源组用户绑定的 ID。格式为 `<rg_id>:<user_id>`。
 
-## Import
+## 存量资源纳管
 
 资源组用户绑定可以通过资源组 ID 和用户 ID（以冒号分隔）导入，例如：
 

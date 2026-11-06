@@ -43,7 +43,7 @@ resource "alibabacloudstack_prometheus_v2_contact" "default" {
 
 * `id` - 联系人的唯一系统标识ID，由Prometheus服务自动生成。
 
-## Import
+## 存量资源纳管
 
 联系人可以使用联系人 ID 进行导入，例如：
 

@@ -171,7 +171,7 @@ resource "alibabacloudstack_slb_rule" "default" {
 * `healthy_threshold` - 表示健康检查成功的结果阈值。
 * `unhealthy_threshold` - 表示健康检查失败的结果阈值。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_slb_rule 可通过ID导入，例如：
 

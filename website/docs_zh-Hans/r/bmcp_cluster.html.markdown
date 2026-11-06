@@ -119,12 +119,12 @@ resource "alibabacloudstack_bmcp_cluster" "default" {
   * `use_origin_image` - 是否使用原始镜像。
   * `specification` - 规格字符串。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 BMCP 集群可以使用其 ID 导入，例如：
 

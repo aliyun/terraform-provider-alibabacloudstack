@@ -46,21 +46,13 @@ resource "alibabacloudstack_redis_connection" "default" {
 * `id` - Redis实例的ID，与 `instance_id` 相同。
 * `connection_string` - Redis实例的完整连接字符串。
 
-### 超时配置
-
-`timeouts` 块允许您为某些操作指定[超时时间](https://www.terraform.io/docs/configuration/resources.html#operation-timeouts)：
-
-* `create` - (默认2分钟) 用于创建Redis连接（直到达到初始`正常`状态）。
-* `update` - (默认2分钟) 用于更新Redis连接（直到达到初始`正常`状态）。
-* `delete` - (默认2分钟) 用于删除Redis连接（直到达到初始`正常`状态）。
-
-## Timeouts
+## 超时配置
 
 * `create` - （默认5分钟）创建资源时使用。
 * `update` - （默认5分钟）更新资源时使用。
 * `delete` - （默认5分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 Redis连接可以使用实例ID进行导入，例如：
 

@@ -74,7 +74,7 @@ resource "alibabacloudstack_cloudmonitorservice_alarmcontact" "example" {
 * `channels_sms` - 报警联系人的电话号码。
 * `describe` - 报警联系人的简要描述。
 
-## Import
+## 存量资源纳管
 
 报警联系人可以通过ID导入，例如：
 

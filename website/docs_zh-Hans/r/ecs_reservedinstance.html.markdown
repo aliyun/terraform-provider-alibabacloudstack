@@ -76,7 +76,7 @@ alibabacloudstack_ecs_reservedinstance 资源允许您管理您的预留实例�
 * `resource_group_id` - 资源组 ID。
 * `reserved_instance_id` - 预留实例的 ID。
 
-## Import
+## 存量资源纳管
 
 云服务器 ECS 预留实例可以使用预留实例 ID 导入，例如：
 

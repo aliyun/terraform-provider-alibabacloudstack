@@ -55,7 +55,7 @@ resource "alibabacloudstack_ascm_user" "default" {
 * `role_ids` - 分配给用户的角色 ID 列表。
 * `organization_id` - 用户所属的组织 ID。自 provider 版本 1.0.32 起已废弃。
 
-## Import
+## 存量资源纳管
 
 ASCM 用户可以通过 `login_name` 进行导入，例如：
 

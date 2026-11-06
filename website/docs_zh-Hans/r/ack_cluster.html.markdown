@@ -274,13 +274,13 @@ resource "alibabacloudstack_cs_kubernetes" "k8s" {
 * `is_enterprise_security_group` - 是否使用企业级安全组。
 * `cloud_monitor_flags` - 是否启用云监控。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认90分钟）创建资源时使用。
 * `update` - （默认60分钟）更新资源时使用。
 * `delete` - （默认60分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ack_cluster 可通过ID导入，例如：
 

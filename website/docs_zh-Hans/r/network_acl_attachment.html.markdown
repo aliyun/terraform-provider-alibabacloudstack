@@ -71,7 +71,7 @@ resource "alibabacloudstack_network_acl_attachment" "default" {
 * `id` - 网络ACL关联的唯一标识符。格式为 `<network_acl_id>:<一个唯一ID>`。
 * `resources` - 与网络ACL关联的资源列表。该列表包含所有成功绑定到网络ACL的资源信息。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_network_acl_attachment 可通过ID导入，例如：
 

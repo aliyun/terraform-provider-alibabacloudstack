@@ -77,7 +77,7 @@ resource "alibabacloudstack_polardbx_account_database_binding" "default" {
     * `db_name` - 数据库名称。
     * `privilege` - 目标账户在数据库上的权限。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_polardb_account_database_binding 可通过ID导入，例如：
 

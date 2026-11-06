@@ -94,7 +94,7 @@ resource "alibabacloudstack_csb_service" "service" {
 * `access_params_json` - 访问参数 JSON。
 * `route_conf_json` - 路由配置 JSON。
 
-## Import
+## 存量资源纳管
 
 CSB 服务可以通过 `csb_id` 和 `service_id` 的组合导入，以冒号分隔，例如：
 

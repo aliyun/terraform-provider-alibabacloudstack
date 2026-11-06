@@ -63,13 +63,13 @@ resource "alibabacloudstack_lindorm_lts_instance" "example" {
 * `service_type` - 实例的服务类型。
 * `network_type` - 实例的网络类型。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认60分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认40分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 Lindorm LTS 实例可以使用实例 ID 进行导入，例如：
 

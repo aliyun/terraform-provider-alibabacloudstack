@@ -40,11 +40,11 @@ resource "alibabacloudstack_datahub_project" "default" {
   * `create_time` - DataHub 项目的创建时间，以字符串格式的 UNIX 时间戳表示。
   * `last_modify_time` - DataHub 项目的最后修改时间，以字符串格式的 UNIX 时间戳表示。
 
-## Timeouts
+## 超时配置
 
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_datahub_project 可通过ID导入，例如：
 

@@ -68,7 +68,7 @@ resource "alibabacloudstack_mongodb_backup" "default" {
 * `start_time` - 备份开始时间。
 * `status` - 资源状态。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_mongodb_backup 可以使用组合 ID 导入，格式为 `<backup_id>&<db_instance_id>&<start_time>`，例如：
 

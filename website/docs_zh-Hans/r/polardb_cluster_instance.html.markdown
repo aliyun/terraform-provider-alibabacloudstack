@@ -115,13 +115,13 @@ resource "alibabacloudstack_polardb_cluster_instance" "default" {
 * `proxy_cpu_cores` - 集群实例的代理 CPU 核心数。
 * `pay_type` - 集群实例的付费类型。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认60分钟）创建资源时使用。
 * `update` - （默认45分钟）更新资源时使用。
 * `delete` - （默认45分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 可以使用 id 导入 PolarDB 集群实例，例如：
 

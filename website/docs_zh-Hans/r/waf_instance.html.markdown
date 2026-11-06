@@ -111,12 +111,12 @@ resource "alibabacloudstack_waf_instance" "default" {
 * `instance_status` - WAF 实例的状态。
 * `instance_make_status` - WAF 实例的生成状态。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_waf_instance 可通过ID导入，例如：
 

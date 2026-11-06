@@ -91,7 +91,7 @@ resource "alibabacloudstack_api_gateway_v2_route_group" "default" {
 * `group_id` - 路由分组唯一标识ID。
 * `update_time` - 路由分组的最后更新时间，格式为 "YYYY-MM-DD HH:MM:SS"。
 
-## Import
+## 存量资源纳管
 
 API网关V2路由分组可以使用 instance_id 和 group_id（用冒号分隔）进行导入，例如：
 

@@ -78,7 +78,7 @@ resource "alibabacloudstack_mqtt_instance" "default" {
 * `store_type` - 存储类型。
 * `cluster_name` - 集群名称。注意：此属性不会通过Read API返回，在import验证时会被忽略。
 
-## Import
+## 存量资源纳管
 
 MQTT实例可以使用实例ID导入，例如
 

@@ -40,7 +40,7 @@ resource "alibabacloudstack_vpngateway_customergateway" "default" {
 * `id` - 客户网关实例的唯一标识符(ID)。
 * `customer_gateway_name` - 实际设置的客户网关名称。
 
-## Import
+## 存量资源纳管
 
 VPN 客户网关可以使用客户网关 ID 进行导入，例如：
 

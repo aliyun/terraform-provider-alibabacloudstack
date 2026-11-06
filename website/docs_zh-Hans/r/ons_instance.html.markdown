@@ -59,7 +59,7 @@ output "inst" {
 * `cluster` - 此属性表示与实例关联的集群。
 * `remark` - 此属性表示实例的备注。
 
-## Import
+## 存量资源纳管
 
 ONS Instance 可以使用 InstanceId 导入，例如：
 

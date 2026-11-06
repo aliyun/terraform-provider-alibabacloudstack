@@ -139,7 +139,7 @@ resource "alibabacloudstack_api_gateway_v2_service_source" "example" {
 * `source_type_name` - 服务来源类型名称。
 * `update_time` - 服务来源最后更新时间。
 
-## Import
+## 存量资源纳管
 
 API网关v2服务来源可以使用 `instance_id` 和 `source_id` 导入，两者用冒号分隔，例如：
 

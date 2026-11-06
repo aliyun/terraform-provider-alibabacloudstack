@@ -58,7 +58,7 @@ resource "alibabacloudstack_flink_namespace" "default" {
 
 * `id` - Flink仓库命名空间的唯一标识符。其值与 `name` 参数相同。
 
-## Import
+## 存量资源纳管
 
 Flink的命名空间可以使用ID进行导入，例如：
 

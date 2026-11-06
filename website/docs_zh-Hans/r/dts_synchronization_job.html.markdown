@@ -127,12 +127,12 @@ resource "alibabacloudstack_dts_synchronization_job" "default" {
 * `status` - 资源状态。有效值：`Synchronizing`，`Suspending`。
 * `synchronization_direction` - 同步方向。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认10分钟）更新资源时使用。
 
-## Import
+## 存量资源纳管
 
 可以通过 id 导入 DTS 同步作业，例如：
 

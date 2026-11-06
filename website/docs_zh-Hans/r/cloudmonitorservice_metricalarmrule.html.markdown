@@ -90,7 +90,7 @@ resource "alibabacloudstack_cloudmonitorservice_metricalarmrule" "default" {
 * `project` - 报警规则关联的项目（已弃用，请改用`namespace`）。
 * `metric` - 报警规则关联的指标（已弃用，请改用`metric_name`）。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cloudmonitorservice_metricalarmrule 可通过ID导入，例如：
 

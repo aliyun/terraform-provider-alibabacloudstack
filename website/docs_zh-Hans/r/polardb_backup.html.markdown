@@ -67,11 +67,11 @@ resource "alibabacloudstack_polardb_backup" "default" {
   * `backup_status` - 备份状态
   * `backup_location` - 备份位置
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_polardb_backup 可以使用组合 ID 导入，格式为 `<db_instance_id>:<backup_id>`，例如：
 

@@ -49,7 +49,7 @@ resource "alibabacloudstack_bcmp_keypair" "publickey" {
 
 > **注意：** `resource_group` 属性在 Schema 中已定义，但当前 API 读取操作未对其赋值。
 
-## Import
+## 存量资源纳管
 
 BCMP 密钥对可以使用密钥对名称进行导入，例如：
 

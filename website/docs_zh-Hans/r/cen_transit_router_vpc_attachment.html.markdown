@@ -105,13 +105,13 @@ resource "alibabacloudstack_cen_transit_router_vpc_attachment" "default" {
   * `transit_router_attachment_id` - vpc附件实例的ID
   * `vpc_owner_id` - vpc所有者ID
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认10分钟）创建资源时使用。
 * `update` - （默认5分钟）更新资源时使用。
 * `delete` - （默认15分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cen_transit_router_vpc_attachment 可以使用组合 ID 导入，格式为 `<cen_id>:<transit_router_id>:<attachment_id>:<vpc_id>`，例如：
 

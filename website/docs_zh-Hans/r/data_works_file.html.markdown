@@ -82,7 +82,7 @@ resource "alibabacloudstack_data_works_file" "default" {
 
 * `file_id` - 数据工坊项目内文件的唯一标识符。
 
-## Import
+## 存量资源纳管
 
 DataWorks 文件可以使用 project_id 和 file_id 进行导入，两者用冒号分隔，例如：
 

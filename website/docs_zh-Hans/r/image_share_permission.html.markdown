@@ -42,7 +42,7 @@ resource "alibabacloudstack_image_share_permission" "default" {
 * `image_id` - 源镜像ID。
 * `account_id` - 阿里云账号ID。用于指定要与之共享镜像的目标阿里云账户。
 
-## Import
+## 存量资源纳管
 
 镜像共享权限可以使用 `image_id:account_id` 进行导入，例如：
 

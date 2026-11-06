@@ -51,7 +51,7 @@ resource "alibabacloudstack_adb_account" "default" {
 
 * `id` - 账户的唯一标识符。它由实例ID和账户名称组成，格式为 `<instance_id>:<account_name>`。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_adb_account 可以使用组合 ID 导入，格式为 `<db_cluster_id>:<account_name>`，例如：
 

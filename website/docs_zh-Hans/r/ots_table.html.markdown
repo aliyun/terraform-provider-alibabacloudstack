@@ -78,7 +78,7 @@ resource "alibabacloudstack_ots_table" "basic" {
 * `max_version` - 存储在此表中的最大版本数。
 * `deviation_cell_version_in_sec` - 表的最大版本偏移量。
 
-## Import
+## 存量资源纳管
 
 OTS表可以使用id进行导入，例如：
 

@@ -66,7 +66,7 @@ resource "alibabacloudstack_kvstore_parameter_group" "default" {
 * `is_dynamic` - 是否动态参数模板（1表示是，0表示否）。
 * `type` - 参数模板的类型标识。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_kvstore_parameter_group 可通过ID导入，例如：
 

@@ -81,7 +81,7 @@ resource "alibabacloudstack_polardbx_account" "default" {
 * `id` - 资源的唯一标识，格式为 `<instance_id>:<account_name>`
 * `description` - 账户描述
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_polardbx_account 可以使用组合 ID 导入，格式为 `<instance_id>:<account_name>`，例如：
 

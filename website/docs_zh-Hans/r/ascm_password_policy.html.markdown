@@ -42,7 +42,7 @@ resource "alibabacloudstack_ascm_password_policy" "default"{
 * `policy_name` - 密码策略名称。
 * `policy_details` - 密码策略的具体配置信息。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ascm_password_policy 可通过ID导入，例如：
 

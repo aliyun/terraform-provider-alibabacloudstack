@@ -53,7 +53,7 @@ resource "alibabacloudstack_ecs_keypair" "publickey" {
 * `finger_print` - 密钥对的指纹。根据RFC 4716定义的公钥指纹格式，采用MD5信息摘要算法。更多详情，请参见[RFC 4716](https://tools.ietf.org/html/rfc4716)。
 * `key_name` - 密钥对的名称。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ecs_keypair 可通过ID导入，例如：
 

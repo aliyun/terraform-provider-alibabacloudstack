@@ -78,12 +78,12 @@ resource "alibabacloudstack_polardb_readwrite_splitting_connection" "default" {
 * `connection_string` - 读写分离终端的连接地址。
 * `port` - 读写分离终端的端口号。
 
-## Timeouts
+## 超时配置
 
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 PolarDB读写分离连接可以通过实例ID导入，例如：
 

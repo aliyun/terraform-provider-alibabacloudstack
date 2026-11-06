@@ -65,7 +65,7 @@ resource "alibabacloudstack_dns_private_domain" "default" {
 
 * `update_timestamp` - 修改时间戳（秒）。
 
-## Import
+## 存量资源纳管
 
 DNS Private Domain 可以使用 ID 导入，例如：
 

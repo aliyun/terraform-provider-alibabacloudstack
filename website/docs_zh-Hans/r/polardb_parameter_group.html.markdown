@@ -53,7 +53,7 @@ resource "alibabacloudstack_polardb_parameter_group" "default" {
   * `created` - 参数模板的创建时间。
   * `modified` - 参数模板的最后修改时间。
 
-## Import
+## 存量资源纳管
 
 PolarDB 参数模板可以使用参数模板 ID 导入，例如：
 

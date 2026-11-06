@@ -80,7 +80,7 @@ resource "alibabacloudstack_common_bandwidth_package" "advanced" {
 * `bandwidth_package_name` - 共享带宽实例的名称。长度为 2~128 个字符，必须以字母或中文开头，可包含数字、半角句点 (`.`)、下划线 (`_`) 和短划线 (`-`)。但不能以 `http://` 或 `https://` 开头。
 * `name` - 共享带宽实例的名称。长度为 2~128 个字符，可以包含字母、数字、下划线 (`_`) 和连字符 (`-`)。名称必须以字母开头。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cbwp_commonbandwidthpackage 可通过ID导入，例如：
 

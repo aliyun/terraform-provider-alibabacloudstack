@@ -517,7 +517,7 @@ resource "alibabacloudstack_api_gateway_v2_mcpserver" "default" {
   * `version` - 服务版本。
   * `weight` - 服务权重。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_api_gateway_v2_mcpserver 可以使用组合 ID 导入，格式为 `<gw_instance_id>:<name>`，例如：
 

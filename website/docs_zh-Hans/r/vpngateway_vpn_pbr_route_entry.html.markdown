@@ -76,7 +76,7 @@ resource "alibabacloudstack_vpngateway_vpn_pbr_route_entry" "default" {
   * `create_time` - VPN PBR路由条目的创建时间。
   * `status` - VPN PBR路由条目的状态。
 
-## Import
+## 存量资源纳管
 
 VPN PBR路由条目可以使用组合ID进行导入，例如：
 

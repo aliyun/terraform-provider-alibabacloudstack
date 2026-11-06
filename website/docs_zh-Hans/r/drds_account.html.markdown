@@ -119,7 +119,7 @@ resource "alibabacloudstack_drds_account" "default" {
   * `host` - 可以访问数据库的IP地址。<note>**%**表示任何IP地址都能访问。</note>
   * `account_type` - 账号类型。**0** 表示高级账号。**1** 表示普通账号。
 
-## Import
+## 存量资源纳管
 
 DRDS 账号可以使用 instance_id 和 account_name 进行导入，用冒号连接，例如：
 

@@ -98,7 +98,7 @@ output "Custom_role" {
 * `role_id` - 自定义角色的内部 ID。
 * `role_name` - 自定义角色的名称。
 
-## Import
+## 存量资源纳管
 
 ASCM 自定义角色可以使用角色名称和角色 ID（以冒号分隔）进行导入，例如：
 

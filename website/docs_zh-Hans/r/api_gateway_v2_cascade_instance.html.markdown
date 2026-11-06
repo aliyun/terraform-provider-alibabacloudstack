@@ -44,11 +44,11 @@ resource "alibabacloudstack_api_gateway_v2_cascade_instance" "default" {
 * `cascade_instance_id` - (必填, 变更时重建) 级联实例ID。用于关联底层级联实例，必须与API网关服务中已存在的级联实例ID一致。创建后无法修改，变更将导致资源重建。
 * `instance_name` - (必填, 变更时重建) 实例名称。长度为1-128字符，可包含字母、数字、短划线（-）和下划线（_）。创建后无法修改，变更将导致资源重建。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_api_gateway_v2_cascade_instance 可通过ID导入，例如：
 

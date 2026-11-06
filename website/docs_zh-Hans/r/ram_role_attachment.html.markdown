@@ -106,7 +106,7 @@ resource "alibabacloudstack_ram_role_attachment" "default" {
 
 * `id` - 资源的 ID。格式为 `<role_name>:<instance_ids>`，其中 `instance_ids` 是用双引号括起来的逗号分隔的 ECS 实例 ID 列表。
 
-## Import
+## 存量资源纳管
 
 RAM 角色附加资源可以使用 role_name 和 instance_ids（用冒号连接）进行导入，例如：
 

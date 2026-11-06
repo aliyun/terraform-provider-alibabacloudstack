@@ -84,7 +84,7 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_association" "de
 除上述参数外，还导出以下属性：
   * `status` - 资源的状态。
 
-## Import
+## 存量资源纳管
 
 CEN 转发路由器组播域关联可以通过 transit_router_attachment_id、transit_router_multicast_domain_id 和 vswitch_id 使用冒号分隔来导入，例如：
 

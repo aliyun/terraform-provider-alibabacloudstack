@@ -65,7 +65,7 @@ resource "alibabacloudstack_adb_connection" "default" {
   * `connection_string` - 用于访问ADB集群的完整连接字符串。
   * `ip_address` - 与连接字符串关联的IP地址。
 
-## Import
+## 存量资源纳管
 
 ADB连接可以通过id导入，例如：
 

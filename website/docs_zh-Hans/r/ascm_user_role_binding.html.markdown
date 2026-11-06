@@ -64,7 +64,7 @@ resource "alibabacloudstack_ascm_user_role_binding" "default" {
 * `login_name` - 用户的登录名。
 * `role_ids` - 已绑定到用户的角色 ID 列表。
 
-## Import
+## 存量资源纳管
 
 ASCM 用户角色绑定可以通过资源 ID 导入。ID 格式取决于资源的创建方式：
 

@@ -75,7 +75,7 @@ resource "alibabacloudstack_apigateway_apigroup" "default" {
 * `api_group_name` - API 网关组的名称。
 * `name` - 已废弃字段，表示 API 网关组的名称。请改用 `api_group_name`。
 
-## Import
+## 存量资源纳管
 
 API 网关组可以通过 ID 导入，例如：
 

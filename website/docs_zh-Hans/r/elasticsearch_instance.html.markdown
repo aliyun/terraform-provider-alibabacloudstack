@@ -109,13 +109,13 @@ resource "alibabacloudstack_elasticsearch_instance" "default" {
 * `kibana_domain` - Kibana实例的域名。
 * `kibana_port` - Kibana实例的端口号。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认120分钟）创建资源时使用。
 * `update` - （默认120分钟）更新资源时使用。
 * `delete` - （默认120分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 Elasticsearch实例可以使用ID进行导入，例如：
 

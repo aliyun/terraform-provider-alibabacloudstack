@@ -80,7 +80,7 @@ resource "alibabacloudstack_mqtt_topic" "default" {
 * `unit_flag` - 单元标志。
 * `update_time` - 主题最后更新时间（时间戳，单位毫秒）。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_mqtt_topic 可以使用组合 ID 导入，格式为 `<instance_id>:<topic>`，例如：
 

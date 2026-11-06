@@ -48,11 +48,11 @@ resource "alibabacloudstack_edas_k8s_cluster" "default" {
 * `cs_cluster_id` - 要导入的容器服务 Kubernetes 集群的 ID。
 * `namespace_id` - 要导入的命名空间的 ID。
 
-## Timeouts
+## 超时配置
 
 * `delete` - （默认10分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 EDAS K8s 集群可以使用集群 ID（导入后返回的 EDAS 内部集群 ID）导入，例如：
 

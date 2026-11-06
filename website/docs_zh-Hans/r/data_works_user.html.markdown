@@ -37,7 +37,7 @@ resource "alibabacloudstack_data_works_user" "default" {
 
 目前该资源没有列出任何属性。如果有需要添加的计算属性，可以在此处包含它们，并附上适当的描述和标记为 ``。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_data_works_user 可以使用组合 ID 导入，格式为 `<project_id>:<user_id>`，例如：
 

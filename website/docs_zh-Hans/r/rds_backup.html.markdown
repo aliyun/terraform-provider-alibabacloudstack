@@ -74,11 +74,11 @@ resource "alibabacloudstack_rds_backup" "default" {
 * `start_time` - 查询开始时间，格式为 <I> yyyy-MM-dd </I> T <I> HH:mm </I> Z (UTC 时间)。
 * `status` - 备份状态。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_rds_backup 可以使用组合 ID 导入，格式为 `<instance_id>:<backup_id>`，例如：
 

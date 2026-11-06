@@ -59,14 +59,6 @@ resource "alibabacloudstack_gpdb_connection" "default" {
 * `connection_prefix` - （选填，变更时强制重建，计算值）：公网连接字符串的前缀。它必须以字母开头，并且只能包含小写字母、数字和下划线（`_`）。长度不能超过30个字符。如果不指定，默认为`<instance_id>-tf`。
 * `port` - （选填）：公网连接的端口号。有效值范围从`1000`到`65534`。默认值是`3306`。
 
-### 超时设置
-
-`timeouts`块允许您为某些操作指定[超时](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts)：
-
-* `create` - （默认`10分钟`）用于创建公网连接。
-* `update` - （默认`10分钟`）用于更新公网连接。
-* `delete` - （默认`10分钟`）用于删除公网连接。
-
 ## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
@@ -75,13 +67,13 @@ resource "alibabacloudstack_gpdb_connection" "default" {
 * `connection_string` - 通过公网访问GPDB实例的完整连接字符串。
 * `ip_address` - 与公网连接字符串关联的公网IP地址。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认10分钟）创建资源时使用。
 * `update` - （默认10分钟）更新资源时使用。
 * `delete` - （默认10分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 GPDB 公网连接可以使用 instance_id 和 connection_prefix 导入，例如：
 

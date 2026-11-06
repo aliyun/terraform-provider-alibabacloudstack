@@ -85,11 +85,11 @@ resource "alibabacloudstack_vpngateway_vpngateway" "default" {
 * `ssl_vpn` - 是否开启了 SSL-VPN 功能。
 * `ssl_max_connections` - 最大 SSL-VPN 并发连接数。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 VPN Gateway 可以使用 VpnGatewayId 导入，例如：
 

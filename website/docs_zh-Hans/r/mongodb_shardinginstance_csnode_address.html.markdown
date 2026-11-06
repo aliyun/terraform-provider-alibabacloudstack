@@ -128,11 +128,11 @@ resource "alibabacloudstack_mongodb_shardinginstance_csnode_address" "default" {
 * `public_connect_port` - 公网链接地址端口
 * `private_connect_port` - 私网链接端口
 
-## Timeouts
+## 超时配置
 
 * `update` - （默认20分钟）更新资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_mongodb_shardinginstance_csnode_address 可通过ID导入，例如：
 

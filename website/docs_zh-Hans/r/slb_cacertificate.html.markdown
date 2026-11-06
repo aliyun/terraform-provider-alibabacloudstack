@@ -64,7 +64,7 @@ resource "alibabacloudstack_slb_cacertificate" "file_example" {
 - **name**: CA证书的名称。
 - **ca_certificate_name**: CA证书的名称。
 
-## Import
+## 存量资源纳管
 
 SLB CA证书可以使用 `CACertificateId` 进行导入，例如：
 

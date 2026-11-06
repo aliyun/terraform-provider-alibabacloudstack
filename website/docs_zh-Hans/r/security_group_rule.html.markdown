@@ -75,7 +75,7 @@ resource "alibabacloudstack_security_group_rule" "allow_all_tcp" {
 * `priority` - 规则优先级。
 * `description` - 安全组规则的描述。
 
-## Import
+## 存量资源纳管
 
 安全组规则可以使用组合 ID 进行导入，例如：
 

@@ -45,7 +45,7 @@ resource "alibabacloudstack_cr_ee_namespace" "my-namespace" {
 
 * `id` - 资源 ID，格式为 `{instance_id}:{namespace}`。
 
-## Import
+## 存量资源纳管
 
 容器镜像企业版命名空间可以使用 `instance_id` 和 `name` 通过冒号连接进行导入，例如：
 

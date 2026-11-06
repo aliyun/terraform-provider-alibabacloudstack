@@ -49,7 +49,7 @@ resource "alibabacloudstack_prometheus_v2_instance" "default" {
 * `push_gateway_url` - Push Gateway的访问地址，用于接收监控指标推送。
 * `remote_write_url` - Remote Write的访问地址，用于远程写入监控数据。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_prometheus_v2_instance 可通过ID导入，例如：
 

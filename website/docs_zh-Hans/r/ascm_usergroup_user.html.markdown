@@ -57,7 +57,7 @@ output "org" {
 
 * `id` - 用户组用户的唯一标识符，通常为用户登录名。该属性可用于后续资源引用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ascm_usergroup_user 可通过ID导入，例如：
 

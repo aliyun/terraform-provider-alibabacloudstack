@@ -94,7 +94,7 @@ resource "alibabacloudstack_hsm_instance" "default" {
   * `8`：已停用。
 * `vendor_name` - 密码机实例所用设备的设备厂商名称。
 
-## Import
+## 存量资源纳管
 
 密码机实例可以使用 instance_id 导入，例如：
 

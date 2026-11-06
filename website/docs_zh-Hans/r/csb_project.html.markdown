@@ -54,7 +54,7 @@ resource "alibabacloudstack_csb_project" "project" {
 * `owner_id` - CSB 项目的拥有者 ID。
 * `api_num` - CSB 项目中已发布的 API 数量。
 
-## Import
+## 存量资源纳管
 
 CSB Project 可以使用 `csb_id` 和 `project_name` 的组合进行导入，格式为 `csb_id:project_name`，例如：
 

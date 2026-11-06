@@ -129,7 +129,7 @@ resource "alibabacloudstack_disk" "default" {
   - false：未设置。
   默认值：false。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ecs_disk 可通过ID导入，例如：
 

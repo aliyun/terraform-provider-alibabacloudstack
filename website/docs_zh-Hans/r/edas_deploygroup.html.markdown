@@ -64,7 +64,7 @@ resource "alibabacloudstack_edas_deploy_group" "default" {
 
 此属性有助于识别部署组的配置及其在 EDAS 环境中的功能。
 
-## Import
+## 存量资源纳管
 
 EDAS 部署组可以通过资源 ID 导入，ID 格式为 `<app_id>:<group_name>:<group_id>`，例如：
 

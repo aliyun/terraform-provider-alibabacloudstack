@@ -115,13 +115,13 @@ resource "alibabacloudstack_db_proxy" "default" {
   * `db_proxy_instance_type` - 数据库代理实例类型，取值：- **common**：通用型代理- **exclusive**：独享型代理（默认值）
   * `db_proxy_service_status` - 数据库独享代理功能开关状态，取值：* **Startup**：开启。* **Shutdown**：关闭。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认45分钟）创建资源时使用。
 * `update` - （默认45分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_polardb_proxy 可通过ID导入，例如：
 

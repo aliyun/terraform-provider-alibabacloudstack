@@ -56,7 +56,7 @@ output "binder" {
 * `resource_set_id` - 资源集ID列表。表示当前绑定关系所关联的资源集。
 * `user_group_id` - 用户组ID。表示当前绑定关系所关联的用户组。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ascm_user_group_resource_set_binding 可以使用组合 ID 导入，格式为 `<resource_set_id>:<user_group_id>:<ascm_role_id>`，例如：
 

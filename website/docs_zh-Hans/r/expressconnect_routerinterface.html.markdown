@@ -74,7 +74,7 @@ resource "alibabacloudstack_router_interface" "default" {
 * `health_check_source_ip` - 健康检查包的源 IP 地址。
 * `health_check_target_ip` - 健康检查包的目标 IP 地址。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_expressconnect_routerinterface 可通过ID导入，例如：
 

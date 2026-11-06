@@ -48,7 +48,7 @@ resource "alibabacloudstack_expressconnect_bgp_network" "default" {
 * `id` - BGP 网络的 ID。格式为 `<dst_cidr_block>:<router_id>`。
 * `status` - BGP 网络的状态。
 
-## Import
+## 存量资源纳管
 
 高速通道 BGP 网络可以使用 ID 导入，例如：
 

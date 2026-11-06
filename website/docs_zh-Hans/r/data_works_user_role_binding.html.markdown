@@ -42,7 +42,7 @@ resource "alibabacloudstack_data_works_user_role_binding" "default" {
 
 * `id` - 资源绑定的 ID。格式为 `<role_code>:<project_id>:<user_id>`。
 
-## Import
+## 存量资源纳管
 
 DataWorks 用户角色绑定可以使用 `<role_code>:<project_id>:<user_id>` 格式的复合 ID 进行导入，例如：
 

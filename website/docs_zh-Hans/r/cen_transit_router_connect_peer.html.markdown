@@ -78,12 +78,12 @@ resource "alibabacloudstack_cen_transit_router_connect_peer" "default" {
 * `peer_id` - 转发路由器连接对等点的ID。
 * `region_id` - 转发路由器连接对等点的区域ID。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 CEN转发路由器连接对等点可以使用ID导入，例如：
 

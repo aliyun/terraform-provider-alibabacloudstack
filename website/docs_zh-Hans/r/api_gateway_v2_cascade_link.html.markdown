@@ -70,7 +70,7 @@ resource "alibabacloudstack_api_gateway_v2_cascade_link" "default" {
 * `id` - 级联链路的唯一ID，与`link_id`值相同。
 * `link_id` - 级联链路的系统生成ID，用于唯一标识该资源。
 
-## Import
+## 存量资源纳管
 
 API网关V2级联链路可以使用 linkId 进行导入，例如：
 

@@ -109,7 +109,7 @@ resource "alibabacloudstack_arms_dispatch_rule" "default" {
 * `id` - Terraform 中告警分派规则的资源ID。
 * `status` - 告警分派规则的资源状态。
 
-## Import
+## 存量资源纳管
 
 应用实时监控服务(ARMS)告警联系人可以使用id导入，例如：
 

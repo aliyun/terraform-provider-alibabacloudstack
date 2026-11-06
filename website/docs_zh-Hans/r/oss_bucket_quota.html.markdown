@@ -43,7 +43,7 @@ resource "alibabacloudstack_oss_bucket_quota" "default" {
 * `oss_cluster` - 返回 OSS 集群名称。
 * `quota` - 返回 OSS 存储桶的存储配额，单位为兆字节（MB）。此值与设置时的值一致，表示当前存储桶的存储限制。
 
-## Import
+## 存量资源纳管
 
 OSS Bucket Quota 可以使用 `oss_cluster:bucket` 格式导入，例如：
 

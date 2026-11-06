@@ -72,7 +72,7 @@ resource "alibabacloudstack_alikafka_sasl_user" "default" {
 * `id` - 资源的ID。格式为 `<instance_id>:<username>`。
 * `type` - (计算得出，1.159.0版本及以上可用) 认证机制。有效值：`plain`，`scram`。
 
-## Import
+## 存量资源纳管
 
 Alikafka SASL 用户可以通过ID导入，例如
 

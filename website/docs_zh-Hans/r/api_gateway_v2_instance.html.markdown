@@ -192,11 +192,11 @@ resource "alibabacloudstack_api_gateway_v2_instance" "custom_example" {
 * `shared_instance` - 实例是否为共享实例。
 * `custom_deploy_config` - 自定义部署配置（仅适用于自定义部署模式）。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 可以使用实例 ID 导入 API 网关 V2 实例：
 

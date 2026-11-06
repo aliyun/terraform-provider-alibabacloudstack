@@ -54,7 +54,7 @@ resource "alibabacloudstack_cr_repo" "my-repo" {
   * `internal` - 内网访问域名，仅在部分区域可用。
   * `vpc` - VPC内网访问域名。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cr_repo 可以使用组合 ID 导入，格式为 `<repo_namespace>/<repo_name>`，例如：
 

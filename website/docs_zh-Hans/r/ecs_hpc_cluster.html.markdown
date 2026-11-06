@@ -45,7 +45,7 @@ resource "alibabacloudstack_ecs_hpc_cluster" "example" {
 * `name` - (输出) HPC集群名称。
 * `description` - (输出) HPC集群的描述信息。
 
-## Import
+## 存量资源纳管
 
 ECS HPC Cluster 可以通过 HpcClusterId 导入，例如：
 

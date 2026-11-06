@@ -99,7 +99,7 @@ resource "alibabacloudstack_prometheus_v2_alert" "default" {
 * `trigger_promql` - PromQL查询语句的实际值。
 * `trigger_severity` - 告警级别的实际值。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_prometheus_v2_alert 可通过ID导入，例如：
 

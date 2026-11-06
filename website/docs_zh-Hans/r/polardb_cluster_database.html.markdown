@@ -73,7 +73,7 @@ resource "alibabacloudstack_polardb_cluster_database" "default" {
 * `engine` - 数据库引擎。
 * `db_status` - 数据库的状态。
 
-## Import
+## 存量资源纳管
 
 可以使用 id 导入 PolarDB 集群数据库，例如：
 

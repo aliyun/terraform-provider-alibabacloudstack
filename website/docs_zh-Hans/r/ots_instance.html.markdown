@@ -61,13 +61,13 @@ resource "alibabacloudstack_ots_instance" "foo" {
 * `tags` - 分配给 OTS 实例的标签映射。
 * `propreties` - OTS 实例的计算属性。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 OTS 实例可以使用实例 ID 或名称导入，例如：
 

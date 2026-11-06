@@ -64,7 +64,7 @@ resource "alibabacloudstack_logtail_config" "example" {
 
 * `id` - Logtail配置的ID。格式为 `<project>:<logstore>:<config_name>`。
 
-## Import
+## 存量资源纳管
 
 Logtail配置可以通过id导入，例如：
 

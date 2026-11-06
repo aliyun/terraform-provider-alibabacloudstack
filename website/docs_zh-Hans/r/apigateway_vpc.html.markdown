@@ -83,7 +83,7 @@ resource "alibabacloudstack_api_gateway_vpc_access" "default" {
 
 * `id` - API网关的VPC授权ID。它由`vpc_id`、`instance_id`和`port`的组合组成。
 
-## Import
+## 存量资源纳管
 
 API Gateway VPC访问可以通过组合ID格式 `<NAME>:<VPC_ID>:<INSTANCE_ID>:<PORT>` 导入，例如：
 

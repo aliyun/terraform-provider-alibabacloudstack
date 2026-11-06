@@ -118,7 +118,7 @@ resource "alibabacloudstack_slb_listener" "default" {
 * `x_forwarded_for` - 是否设置额外的HTTP Header字段 "X-Forwarded-For"。
 * `listener_forward` - 是否启用HTTP重定向到HTTPS。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_slb_listener 可通过ID导入，例如：
 

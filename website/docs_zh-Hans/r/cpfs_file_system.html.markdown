@@ -64,7 +64,7 @@ resource "alibabacloudstack_cpfs_file_system" "example" {
 * `encrypt_type` - (可回读，已弃�? 加密类型�?
 * `description` - (可回�? 文件系统描述�?
 
-## Import
+## 存量资源纳管
 
 可以使用ID导入CPFS文件系统，例如：
 

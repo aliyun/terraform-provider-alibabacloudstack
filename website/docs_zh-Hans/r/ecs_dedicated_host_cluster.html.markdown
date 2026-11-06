@@ -46,7 +46,7 @@ resource "alibabacloudstack_ecs_dedicated_host_cluster" "default" {
 除了上述所有参数外，还导出了以下属性：
   * `dedicated_host_cluster_id` - 专有宿主机集群ID
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ecs_dedicated_host_cluster 可通过ID导入，例如：
 

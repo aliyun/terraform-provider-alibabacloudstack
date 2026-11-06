@@ -41,13 +41,13 @@ resource "alibabacloudstack_data_works_project" "default" {
 
 * `project_id` - DataWorks项目的唯一标识符（ID）。此属性是在项目创建后自动生成的，可以用于在其他资源中引用该项目。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_data_works_project 可通过ID导入，例如：
 

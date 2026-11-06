@@ -114,7 +114,7 @@ resource "alibabacloudstack_dns_gtm_access_strategy" "default" {
 * `in_use_gtm_address_pool_id` - 当前使用的地址池 ID。
 * `in_use_gtm_address_pool_name` - 当前使用的地址池名称。
 
-## Import
+## 存量资源纳管
 
 DNS GTM 访问策略可以使用 GTM 实例 ID 和访问策略 ID（以冒号分隔）进行导入，例如
 

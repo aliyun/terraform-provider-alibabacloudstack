@@ -54,7 +54,7 @@ resource "alibabacloudstack_cen_transit_router_route_table" "default" {
   * `transit_router_route_table_type` - 路由表类型。
   * `status` - 路由表的状态。
 
-## Import
+## 存量资源纳管
 
 转发路由器路由表可以使用 `transit_router_id` 和 `transit_router_route_table_id` 组合导入，格式为 `<transit_router_id>:<transit_router_route_table_id>`，例如：
 

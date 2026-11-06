@@ -63,7 +63,7 @@ resource "alibabacloudstack_vpc_dhcp_options_set" "default" {
   * `dhcp_options_set_id` - DHCP 选项集的 ID
   * `status` - DHCP 选项集的状态。取值：`Available`、`Pending`、`Deleting`
 
-## Import
+## 存量资源纳管
 
 DHCP 选项集可以使�?DhcpOptionsSetId 导入，例如：
 

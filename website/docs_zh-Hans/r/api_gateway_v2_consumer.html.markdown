@@ -176,7 +176,7 @@ resource "alibabacloudstack_api_gateway_v2_consumer" "default" {
 * `token` - 生成的访问令牌，不同认证方式生成的令牌格式不同。
 * `use_white_list` - 是否启用白名单，`true`表示启用，`false`表示禁用。
 
-## Import
+## 存量资源纳管
 
 API 网关 V2 消费者可以使用 `{prefix}:{gwInstanceId}:{appId}` 格式导入，例如：
 

@@ -40,7 +40,7 @@ resource "alibabacloudstack_ascm_logon_policy" "login" {
 * `rule` - 登录策略的规则，表示该策略是允许 (`ALLOW`) 还是拒绝 (`DENY`) 登录。  
 * `policy_id` - 创建的登录策略的唯一标识符（ID），可用于后续管理和引用该策略。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ascm_logon_policy 可通过ID导入，例如：
 

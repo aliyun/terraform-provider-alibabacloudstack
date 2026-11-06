@@ -62,7 +62,7 @@ resource "alibabacloudstack_dns_gtm_instance" "default" {
 * `update_timestamp` - 修改时间戳（秒）。
 * `zone_name` - 域名名称。表示该调度实例所属的域名。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_dns_gtm_instance 可通过ID导入，例如：
 

@@ -131,7 +131,7 @@ resource "alibabacloudstack_cloudfirewall_controlpolicy" "example" {
 * `release` - 指定安全访问控制策略是否生效。
 * `source_ip` - 源IP地址。 
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cloudfirewall_controlpolicy 可通过ID导入，例如：
 

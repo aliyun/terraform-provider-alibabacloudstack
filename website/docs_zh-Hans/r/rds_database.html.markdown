@@ -86,7 +86,7 @@ resource "alibabacloudstack_rds_database" "default" {
 * `character_set` - 数据库的字符集。
 * `description` - 数据库的描述。
 
-## Import
+## 存量资源纳管
 
 RDS 数据库可以使用实例 ID 和数据库名称进行导入，以冒号 (`:`) 分隔，例如：
 

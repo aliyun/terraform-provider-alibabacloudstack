@@ -101,13 +101,13 @@ endpoints映射包含以下属性：
 * `vswitch_id` - 端点的交换机ID。
 * `vpc_instance_id` - 端点的专有网络实例ID。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 Hologram实例可以使用实例ID进行导入，例如：
 

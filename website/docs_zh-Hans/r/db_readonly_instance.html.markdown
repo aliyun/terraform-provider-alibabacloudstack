@@ -53,12 +53,12 @@ description: |-
 * `db_instance_storage_type` - 实例存储类型。
 * `db_instance_description` - 数据库实例的描述。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认30分钟）更新资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_db_readonly_instance 可通过ID导入，例如：
 

@@ -118,12 +118,12 @@ resource "alibabacloudstack_drds_database" "default" {
   * `create_time` - 数据库创建时间（ISO 8601 格式）。
   * `status` - 数据库状态。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 DRDS 数据库可以使用 `instance_id` 和 `drds_database_name` 的组合进行导入，格式为 `<instance_id>:<drds_database_name>`，例如：
 

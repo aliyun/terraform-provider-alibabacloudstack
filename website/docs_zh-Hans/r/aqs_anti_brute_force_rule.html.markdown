@@ -122,7 +122,7 @@ resource "alibabacloudstack_aqs_anti_brute_force_rule" "default" {
 * `enable_smart_rule` - 是否启用智能规则。
 * `machine_count` - 关联的机器数量。
 
-## Import
+## 存量资源纳管
 
 安骑士主机防暴力破解规则可以通过规则ID导入，例如：
 

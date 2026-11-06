@@ -181,7 +181,7 @@ resource "alibabacloudstack_slb_master_slave_server_group" "default" {
 * `name` - 主备服务器组的名称。
 * `master_slave_server_group_name` - 主备服务器组的名称。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_slb_masterslaveservergroup 可通过ID导入，例如：
 

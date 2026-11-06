@@ -48,7 +48,7 @@ resource "alibabacloudstack_bms_keypair" "default" {
 * `private_key` - 私钥内容（敏感信息），仅在创建时返回，后续读取将为空。格式为PEM格式的RSA私钥。
 * `public_key` - 公钥内容，格式为SSH公钥格式。如果创建时提供了公钥，则返回提供的公钥；如果系统自动生成，则返回生成的公钥。
 
-## Import
+## 存量资源纳管
 
 BMS 密钥对可以使用密钥对名称导入，例如：
 

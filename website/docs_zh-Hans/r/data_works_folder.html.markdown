@@ -65,7 +65,7 @@ resource "alibabacloudstack_data_works_folder" "advanced" {
 
 * `folder_id` - 数据工坊项目内文件夹的唯一标识符。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_data_works_folder 可以使用组合 ID 导入，格式为 `<project_id>:<folder_id>`，例如：
 

@@ -148,7 +148,7 @@ resource "alibabacloudstack_aqs_web_lock" "default" {
 * `service_detail` - 服务详情，包含安骑士服务的详细信息。
 * `service_status` - 服务状态，表示安骑士服务的运行状态。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_aqs_web_lock 可通过ID导入，例如：
 

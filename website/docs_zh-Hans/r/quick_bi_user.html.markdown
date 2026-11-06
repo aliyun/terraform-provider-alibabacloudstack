@@ -48,7 +48,7 @@ resource "alibabacloudstack_quick_bi_user" "example" {
 
 * `id` - Terraform 中的 User 资源 ID。此 ID 是用户在系统中的唯一标识符。
 
-## Import
+## 存量资源纳管
 
 Quick BI 用户可以使用 id 导入，例如
 

@@ -117,11 +117,11 @@ resource "alibabacloudstack_polardb_database" "default" {
   * `status` - 资源状态。
   * `data_base_instance_id` - 关联的PolarDB实例ID。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_polardbx_database 可以使用组合 ID 导入，格式为 `<instance_id>:<database_name>`，例如：
 

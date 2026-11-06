@@ -95,13 +95,13 @@ resource "alibabacloudstack_expressconnect_physicalconnection" "default" {
   * Terminated：已终止
 * `type` - 物理专线的类型。默认值为 `VPC`。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认5分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 高速物理通道资源可以通过 PhysicalConnectionId 进行导入，例如：
 

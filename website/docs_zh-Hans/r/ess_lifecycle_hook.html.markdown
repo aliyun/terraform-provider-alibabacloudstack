@@ -99,7 +99,7 @@ resource "alibabacloudstack_ess_lifecycle_hook" "foo" {
 
 * `notification_metadata` - 生命周期挂钩被触发时发送的附加信息。
 
-## Import
+## 存量资源纳管
 
 弹性伸缩生命周期挂钩可以使用生命周期挂钩 ID 进行导入，例如：
 

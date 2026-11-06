@@ -46,7 +46,7 @@ resource "alibabacloudstack_oss_bucket_kms" "default" {
 * `sse_algorithm` - 服务器端加密算法。此属性返回当前存储桶使用的服务器端加密算法。
 * `kms_master_key_id` - 用于加密的 KMS 主密钥 ID。此属性返回当前存储桶中用于加密的 KMS 主密钥 ID。
 
-## Import
+## 存量资源纳管
 
 OSS Bucket KMS 可以通过 `oss_cluster:bucket_name` 格式导入，例如：
 

@@ -129,13 +129,13 @@ resource "alibabacloudstack_network_acl" "default" {
 * `name` - 已废弃字段，建议使用`network_acl_name`代替。
 * `vpc_id` - (计算得出) - 关联的VPC的ID。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认10分钟）创建资源时使用。
 * `update` - （默认10分钟）更新资源时使用。
 * `delete` - （默认10分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_vpc_networkacl 可通过ID导入，例如：
 

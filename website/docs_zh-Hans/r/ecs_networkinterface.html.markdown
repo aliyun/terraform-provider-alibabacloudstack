@@ -72,7 +72,7 @@ resource "alibabacloudstack_ecs_networkinterface" "default" {
 * `private_ips` - 分配给弹性网卡的所有私有IP地址列表，包括主要IP和任何次要IP。
 * `private_ips_count` - 分配给弹性网卡的私有IP地址总数，包括主要IP和任何次要IP。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ecs_networkinterface 可通过ID导入，例如：
 

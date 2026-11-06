@@ -84,12 +84,12 @@ resource "alibabacloudstack_ebs_diskreplicapair" "default" {
   * `last_recover_point` - 异步复制关系最近一次异步复制操作完成的时间戳。单位：秒。
   * `status` - 异步复制关系的状态。取值：`creating`、`created`、`syncing`、`normal`、`stopped`、`failovered`、`deleting`、`failed` 等。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 EBS 磁盘复制对可以使用复制对 ID 导入，例如：
 

@@ -44,7 +44,7 @@ resource "alibabacloudstack_data_works_user_role_binding" "default" {
 
 ---
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_data_works_user_role_binding 可通过ID导入，例如：
 

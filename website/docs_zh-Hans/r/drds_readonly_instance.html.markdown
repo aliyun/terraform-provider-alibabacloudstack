@@ -2,14 +2,14 @@
 subcategory: "分布式关系型数据库"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_readonly_instance"
-sidebar_current: "docs-Alibabacloudstack-drds-instance"
+sidebar_current: "docs-Alibabacloudstack-resource-drds-readonly-instance"
 description: |- 
-  编排云原生分布式数据库（Drds）实例
+  编排云原生分布式数据库（Drds）只读实例
 ---
 
-# alibabacloudstack_drds_instance
+# alibabacloudstack_drds_readonly_instance
 
-使用Provider配置的凭证在指定的资源集下编排云原生分布式数据库（Drds）实例。
+使用Provider配置的凭证在指定的资源集下编排云原生分布式数据库（Drds）只读实例。
 
 ## 示例用法
 
@@ -78,13 +78,13 @@ resource "alibabacloudstack_drds_readonly_instance" "default" {
 
 * `id` - DRDS实例ID。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认10分钟）创建资源时使用。
 * `update` - （默认5分钟）更新资源时使用。
 * `delete` - （默认10分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_drds_readonly_instance 可通过ID导入，例如：
 

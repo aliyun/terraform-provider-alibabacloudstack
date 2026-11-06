@@ -72,7 +72,7 @@ resource "alibabacloudstack_data_works_connection" "default" {
 
   * `connection_id` - 连接的唯一标识符。此值格式为 `<connection_id>:<$.ProjectId>`，其中 `<connection_id>` 是系统自动生成的唯一连接ID，而 `<$.ProjectId>` 是对应的项目ID。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_data_works_connection 可通过ID导入，例如：
 

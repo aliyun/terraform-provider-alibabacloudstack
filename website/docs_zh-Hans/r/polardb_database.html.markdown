@@ -77,7 +77,7 @@ resource "alibabacloudstack_polardb_database" "default" {
 
   * `status` - 数据库状态。
 
-## Import
+## 存量资源纳管
 
 PolarDB 数据库可以使用 `data_base_instance_id` 和 `data_base_name` 以冒号分隔进行导入，例如：
 

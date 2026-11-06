@@ -59,7 +59,7 @@ resource "alibabacloudstack_cen_transit_router_route_entry" "default" {
   * `transit_router_route_entry_type` - 路由条目的类型。
   * `operational_mode` - 路由条目的操作模式。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cen_transit_router_route_entry 可以使用组合 ID 导入，格式为 `<transit_router_route_table_id>:<route_entry_id>`，例如：
 

@@ -62,11 +62,11 @@ resource "alibabacloudstack_dts_synchronizationinstance" "default" {
 * `status` - 同步实例的状态。
 * `instance_class` - 迁移或同步实例的规格。迁移实例支持的规格：`xxlarge`, `xlarge`, `large`, `medium`, `small`。同步实例支持的规格：`large`, `medium`, `small`, `micro`。关于不同规格的性能描述，请参见[数据迁移链路规格说明](https://help.aliyun.com/document_detail/26606.html)和[数据同步链路规格说明](https://help.aliyun.com/document_detail/26605.html)。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_dts_synchronization_instance 可通过ID导入，例如：
 

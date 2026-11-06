@@ -105,7 +105,7 @@ resource "alibabacloudstack_rds_account" "default" {
 * `type` - 已废弃字段，建议使用 `account_type` 替代。
 * `description` - 已废弃字段，建议使用 `account_description` 替代。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_rds_account 可以使用组合 ID 导入，格式为 `<db_instance_id>:<account_name>`，例如：
 

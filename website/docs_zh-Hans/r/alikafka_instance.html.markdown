@@ -73,13 +73,13 @@ resource "alibabacloudstack_alikafka_instance" "default" {
 * `sasl_ssl_endpoint` - 实例的SASL_SSL访问端点（域名模式）。
 * `status` - 实例状态。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认60分钟）创建资源时使用。
 * `update` - （默认60分钟）更新资源时使用。
 * `delete` - （默认30分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 可通过ID导入AliKafka实例，例如：
 

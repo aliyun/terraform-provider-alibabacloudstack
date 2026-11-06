@@ -72,7 +72,7 @@ resource "alibabacloudstack_ess_scalinggroup_vserver_groups" "default" {
 
 * `id` - ESS vserver 组绑定资源的唯一标识符，格式为 `<scaling_group_id>`。
 
-## Import
+## 存量资源纳管
 
 ESS Scaling Group VServer Groups 可以使用 scaling_group_id 导入，例如：
 

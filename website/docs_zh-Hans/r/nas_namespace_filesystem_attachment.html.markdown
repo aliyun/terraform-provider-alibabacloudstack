@@ -72,7 +72,7 @@ resource "alibabacloudstack_nas_namespace_filesystem_attachment" "default" {
   * `Capacity`：容量型
   * `Performance`：性能型
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_nas_namespace_filesystem_attachment 可通过ID导入，例如：
 

@@ -82,7 +82,7 @@ resource "alibabacloudstack_universal_dns_record" "default" {
 * `create_timestamp` - 创建时间戳（秒）。
 * `update_timestamp` - 修改时间戳（秒）。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_universal_dns_record 可通过ID导入，例如：
 

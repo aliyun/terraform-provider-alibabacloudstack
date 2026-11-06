@@ -60,26 +60,19 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 * `instance_charge_type` - (可选，变更时重建) 计费类型。有效值为`PrePaid`(预付费)和`PostPaid`(后付费)。默认为`PostPaid`。
 * `vswitch_id` - (必填，变更时重建) 要启动的交换机ID。
 
-### 超时时间
-
-`timeouts` 块允许您指定某些操作的 [超时时间](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts)：
-
-* `create` - (默认为10分钟)用于创建DRDS实例(直到其达到运行状态)。
-* `delete` - (默认为10分钟)用于终止DRDS实例。
-
 ## 属性说明
 
 除了上述列出的参数外，还导出以下属性：
 
 * `id` - DRDS实例ID。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认10分钟）创建资源时使用。
 * `update` - （默认5分钟）更新资源时使用。
 * `delete` - （默认10分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_drds_instance 可通过ID导入，例如：
 

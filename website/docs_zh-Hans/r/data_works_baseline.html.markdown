@@ -103,7 +103,7 @@ resource "alibabacloudstack_data_works_baseline" "default" {
 
 * `baseline_id` - 创建的基线 ID。
 
-## Import
+## 存量资源纳管
 
 DataWorks 基线可以使用 `project_id` 和 `baseline_id`（以冒号分隔）导入，例如：
 

@@ -84,7 +84,7 @@ resource "alibabacloudstack_forward_entry" "default" {
 * `forward_entry_id` - 转发条目在服务端的唯一标识符。
 * `forward_entry_name` - 转发条目的名称。如果未明确设置，服务端可能返回默认值。
 
-## Import
+## 存量资源纳管
 
 转发条目可以使用转发表 ID 和转发条目 ID（以冒号分隔）进行导入，例如：
 

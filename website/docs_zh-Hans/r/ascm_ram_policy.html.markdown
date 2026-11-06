@@ -39,7 +39,7 @@ output "rampolicy" {
 * `id` - RAM策略的唯一标识符，通常与策略名称一致。
 * `ram_id` - RAM策略的ID，表示该策略在系统中的唯一标识，可用于后续管理和引用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ascm_ram_policy 可通过ID导入，例如：
 

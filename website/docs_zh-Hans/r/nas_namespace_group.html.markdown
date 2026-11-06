@@ -111,7 +111,7 @@ resource "alibabacloudstack_nas_namespace_group" "default" {
 * `member_id` - 跨域挂载编排成员ID，用于删除操作。
 * `status` - 资源状态，表示当前挂载编排的启用状态。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_nas_namespace_group 可通过ID导入，例如：
 

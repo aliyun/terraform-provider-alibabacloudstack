@@ -68,7 +68,7 @@ resource "alibabacloudstack_ascm_organization" "default" {
     * `privilege_id` - 权限ID。
     * `ram_role_id` - RAM角色ID。
 
-## Import
+## 存量资源纳管
 
 ASCM 服务 RAM 角色可以使用 organization_id 和 product_name 以 `<organization_id>:<product_name>` 格式导入，例如：
 

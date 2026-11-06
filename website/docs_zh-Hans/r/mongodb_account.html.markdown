@@ -67,7 +67,7 @@ resource "alibabacloudstack_mongodb_account" "default" {
 * `status` - 账户状态
 * `account_type` - 账户类型
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_mongodb_account 可以使用组合 ID 导入，格式为 `<account_name>:<instance_id>`，例如：
 

@@ -59,7 +59,7 @@ resource "alibabacloudstack_cr_ee_repo" "my-repo" {
 * `id` - 容器镜像企业版仓库的资源 ID。格式为 `{instance_id}:{namespace}:{repository}`。
 * `repo_id` - 容器镜像企业版仓库的唯一标识符（UUID）。
 
-## Import
+## 存量资源纳管
 
 可以使用 `{instance_id}:{namespace}:{repository}` 导入容器镜像企业版仓库，例如：
 

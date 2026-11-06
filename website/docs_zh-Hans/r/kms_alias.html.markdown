@@ -49,7 +49,7 @@ resource "alibabacloudstack_kms_alias" "alias" {
 
 * `id` - 别名的唯一标识符，用于标识该别名资源。
 
-## Import
+## 存量资源纳管
 
 KMS Alias 可以使用 alias_name 导入，例如:
 

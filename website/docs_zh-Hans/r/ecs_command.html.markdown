@@ -67,12 +67,12 @@ resource "alibabacloudstack_ecs_command" "complex" {
 
 * `id` - ECS Command 资源的唯一标识符。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ecs_command 可通过ID导入，例如：
 

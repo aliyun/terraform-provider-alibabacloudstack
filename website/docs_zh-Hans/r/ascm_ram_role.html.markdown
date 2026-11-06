@@ -46,7 +46,7 @@ output "ramrole" {
 * `id` - 用户的RAM角色名称。
 * `role_id` - RAM角色的ID。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ascm_ram_role 可以使用组合 ID 导入，格式为 `<role_name>:<role_id>`，例如：
 

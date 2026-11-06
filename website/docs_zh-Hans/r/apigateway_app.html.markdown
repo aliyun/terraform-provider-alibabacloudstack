@@ -103,7 +103,7 @@ resource "alibabacloudstack_api_gateway_app_attachment" "default" {
 
 * `id` - API网关的应用绑定ID，格式为 `<group_id>:<api_id>:<app_id>:<stage_name>`。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_apigateway_app 可通过ID导入，例如：
 

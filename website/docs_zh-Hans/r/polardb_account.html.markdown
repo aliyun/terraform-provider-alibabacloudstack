@@ -91,11 +91,11 @@ resource "alibabacloudstack_polardb_account" "default" {
   * `priv_exceeded` - 表示权限是否超出允许的限制。如果设置为`true`，表示权限超出限制。
   * `status` - 代表资源状态的资源属性字段。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_polardb_account 可以使用组合 ID 导入，格式为 `<db_instance_id>:<account_name>`，例如：
 

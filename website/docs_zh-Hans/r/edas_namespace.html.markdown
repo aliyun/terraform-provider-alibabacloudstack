@@ -50,7 +50,7 @@ resource "alibabacloudstack_edas_namespace" "default" {
 * `id` - 命名空间在 Terraform 中的唯一标识符（ID）。
 * `tenant_id` - 命名空间的租户ID。
 
-## Timeouts
+## 超时配置
 
 `timeouts` 块允许您为某些操作指定超时时间：
 
@@ -58,7 +58,7 @@ resource "alibabacloudstack_edas_namespace" "default" {
 * `delete` - （默认 1 分钟）删除命名空间时使用。
 * `update` - （默认 1 分钟）更新命名空间时使用。
 
-## Import
+## 存量资源纳管
 
 EDAS 命名空间可以使用命名空间 ID 进行导入，例如：
 

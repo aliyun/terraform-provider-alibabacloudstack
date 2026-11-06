@@ -169,7 +169,7 @@ resource "alibabacloudstack_edas_k8s_application_scaling_rule" "example_behavior
 
 * `id` - 资源ID，格式为 `{app_id}:{scaling_rule_name}`。
 
-## Import
+## 存量资源纳管
 
 EDAS K8s应用扩缩容规则可以通过ID导入，例如:
 

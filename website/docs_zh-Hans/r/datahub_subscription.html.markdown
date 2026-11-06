@@ -54,7 +54,7 @@ resource "alibabacloudstack_datahub_subscription" "default" {
   * `last_modify_time` - DataHub订阅的最后修改时间。最初，它与 `create_time` 相同。像 `create_time` 一样，它也是一个人类可读的字符串，而不是64位UTC时间戳。
   * `comment` - DataHub订阅的注释。最大长度为255个字符。 
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_datahub_subscription 可以使用组合 ID 导入，格式为 `<project_name>:<topic_name>:<sub_id>`，例如：
 

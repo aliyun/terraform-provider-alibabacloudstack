@@ -78,11 +78,11 @@ resource "alibabacloudstack_polardb_cluster_backup" "default" {
     [`alibabacloudstack_polardb_cluster_backup_policy`](/docs_zh-Hans/r/polardb_cluster_backup_policy.html.markdown)。
   * `backup_job_id` 仅对由 Terraform 创建的备份有效，导入的备份集该属性为空。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 PolarDB 集群备份可使用 `db_cluster_id:backup_id` 格式（以冒号分隔）导入：
 

@@ -62,7 +62,7 @@ resource "alibabacloudstack_prometheus_v2_notify_group" "default" {
 * `webhook_header_params` - 实际生效的Webhook请求头参数集合（仅当`type`为`WEBHOOK`时存在）。
 * `webhook_url` - 实际配置的Webhook URL地址（仅当`type`为`WEBHOOK`时存在）。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_prometheus_v2_notify_group 可通过ID导入，例如：
 

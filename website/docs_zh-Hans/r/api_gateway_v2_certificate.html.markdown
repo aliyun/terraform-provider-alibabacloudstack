@@ -42,7 +42,7 @@ resource "alibabacloudstack_api_gateway_v2_certificate" "example" {
 * `create_time` - 证书的创建时间。
 * `update_time` - 证书的最后更新时间。
 
-## Import
+## 存量资源纳管
 
 API网关V2证书可以使用证书ID进行导入，例如：
 

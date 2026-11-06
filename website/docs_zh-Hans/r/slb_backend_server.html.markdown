@@ -173,7 +173,7 @@ resource "alibabacloudstack_slb_backend_server" "default" {
 
 * `id` - 资源的ID，与`load_balancer_id`相同。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_slb_backend_server 可通过ID导入，例如：
 

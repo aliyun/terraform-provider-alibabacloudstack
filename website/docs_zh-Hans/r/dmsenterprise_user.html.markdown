@@ -54,7 +54,7 @@ resource "alibabacloudstack_dmsenterprise_user" "default" {
 * `status` - DMS Enterprise 用户的当前状态。
 * `mobile` - 用户的钉钉号或手机号码。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_dmsenterprise_user 可通过ID导入，例如：
 

@@ -61,7 +61,7 @@ resource "alibabacloudstack_api_gateway_v2_signature" "default" {
 * `sig_scheme_id` - 签名方案唯一标识ID。
 * `update_time` - 签名方案最后更新时间，格式为`YYYY-MM-DD HH:mm:ss`。
 
-## Import
+## 存量资源纳管
 
 API 网关 V2 签名可以使用 `{idpre}:{gwInstanceId}:{sigSchemeId}` 格式的资源 ID 进行导入，例如：
 

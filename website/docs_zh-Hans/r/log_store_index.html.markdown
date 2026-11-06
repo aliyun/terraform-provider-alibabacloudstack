@@ -88,7 +88,7 @@ resource "alibabacloudstack_log_store_index" "example" {
 * `full_text` - 全文索引的配置。
 * `field_search` - 字段搜索索引的列表配置。
 
-## Import
+## 存量资源纳管
 
 日志库索引可以使用 id 导入，例如
 

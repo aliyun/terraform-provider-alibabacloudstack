@@ -68,7 +68,7 @@ resource "alibabacloudstack_cloud_firewall_control_policy" "default" {
 * `id` - 资源 ID。格式为 `<acl_uuid>:<direction>`。
 * `acl_uuid` - 访问控制策略的唯一标识符。
 
-## Import
+## 存量资源纳管
 
 云防火墙访问控制策略可以使用 `acl_uuid` 和 `direction` 导入，例如：
 

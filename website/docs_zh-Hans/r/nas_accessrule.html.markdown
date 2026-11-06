@@ -59,7 +59,7 @@ resource "alibabacloudstack_nas_accessrule" "default" {
 * `id` - 此资源的 ID。格式为 `<access_group_name>:<access_rule_id>`。
 * `access_rule_id` - NAS 访问规则的唯一标识符。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_nas_accessrule 可通过ID导入，例如：
 

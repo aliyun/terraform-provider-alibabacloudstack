@@ -58,7 +58,7 @@ resource "alibabacloudstack_dns_gtm_addresspool" "default" {
 
 * `id` - 地址池的ID。
 
-## Import
+## 存量资源纳管
 
 云解析全局调度地址池可以使用地址池 ID 导入，例如：
 

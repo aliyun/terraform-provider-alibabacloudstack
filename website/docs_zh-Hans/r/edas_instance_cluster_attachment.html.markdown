@@ -176,7 +176,7 @@ resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
 * `ecu_map` - 实例与ECU（弹性计算单元）的映射关系。键为实例ID，值为ECU ID。
 * `cluster_member_ids` - 每个实例关联的集群成员ID映射。键为实例ID，值为集群成员ID。
 
-## Import
+## 存量资源纳管
 
 EDAS Instance Cluster Attachment 可以使用 cluster_id 和 instance_ids 导入，格式为 `cluster_id:instance_id1,instance_id2,...`，例如：
 

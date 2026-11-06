@@ -63,11 +63,11 @@ resource "alibabacloudstack_oss_bucket" "demo" {
 * `storage_class` - 存储桶的存储类别，例如 `Standard`、`IA` 或 `Archive`。
 * `vpclist` - 存储桶允许访问的 VPC 列表。
 
-## Timeouts
+## 超时配置
 
 * `update` - （默认20分钟）更新资源时使用。
 
-## Import
+## 存量资源纳管
 
 OSS 存储桶可以使用以下导入命令导入：
 

@@ -68,7 +68,7 @@ Reject: 拒绝匹配的路由通过�?
   * `route_map_id` - 路由策略的ID�?
   * `status` - 路由策略的状态
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cen_route_map 可通过ID导入，例如：
 

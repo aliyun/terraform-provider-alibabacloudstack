@@ -77,7 +77,7 @@ resource "alibabacloudstack_kvstore_backup_policy" "default" {
 * `backup_time` - 当前配置的备份时间（已弃用参数）。
 * `backup_period` - 当前配置的备份周期（已弃用参数）。
 
-## Import
+## 存量资源纳管
 
 KVStore备份策略可以使用ID导入，例如：
 

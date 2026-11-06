@@ -63,7 +63,7 @@ resource "alibabacloudstack_ons_topic" "default" {
 
 * `id` - ONS 主题的主题和实例 ID。格式为 `Topic:InstanceID`，其中 `Topic` 是主题名称，`InstanceID` 是实例 ID。
 
-## Import
+## 存量资源纳管
 
 可以使用 topic 和 instance_id 导入 ONS Topic，例如
 

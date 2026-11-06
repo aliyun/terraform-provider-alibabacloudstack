@@ -73,7 +73,7 @@ resource "alibabacloudstack_schedulerx2_workflow" "example" {
 * `id` - 工作流ID（与`workflow_id`相同）。
 * `workflow_id` - 工作流ID（系统自动生成的唯一标识）。
 
-## Import
+## 存量资源纳管
 
 Schedulerx2工作流可以使用工作流ID导入，例如：
 

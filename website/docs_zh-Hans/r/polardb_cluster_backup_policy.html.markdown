@@ -118,7 +118,7 @@ resource "alibabacloudstack_polardb_cluster_backup_policy" "example" {
 * `log_backup_another_region_retention_period` - 另一个区域的日志备份保留周期（天）。
 * `enable_backup_log` - 是否启用日志备份。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_polardb_cluster_backup_policy 可通过ID导入，例如：
 

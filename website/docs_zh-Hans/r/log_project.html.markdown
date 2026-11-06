@@ -50,7 +50,7 @@ resource "alibabacloudstack_log_project" "example" {
 * `description` - 日志项目的描述信息。与创建或更新时提供的 `description` 参数一致。
 * `cluster_name` - 日志项目所在的集群名称。
 
-## Import
+## 存量资源纳管
 
 日志项目可以使用 name 进行导入，例如：
 

@@ -51,7 +51,7 @@ output "binder" {
 * `user_group_id` - 用户组 ID。
 * `role_ids` - 实际绑定到用户组的角色 ID 列表。
 
-## Import
+## 存量资源纳管
 
 ASCM 用户组角色绑定可以通过用户组 ID 导入，例如：
 

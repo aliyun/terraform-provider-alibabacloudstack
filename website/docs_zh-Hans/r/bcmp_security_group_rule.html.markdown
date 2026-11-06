@@ -92,7 +92,7 @@ resource "alibabacloudstack_bcmp_security_group_rule" "with_source_sg" {
 * `source_security_group_id` - 源安全组的 ID。
 * `description` - 规则的描述。
 
-## Import
+## 存量资源纳管
 
 BCMP 安全组规则可以使用 `<security_group_id>:<sgr_id>:<type>` 导入，例如：
 

@@ -96,7 +96,7 @@ resource "alibabacloudstack_edas_k8s_service" "default" {
 * `nodeip_list` - 服务的节点 IP 列表。
 * `allow_edit` - 表示该服务是否允许编辑。
 
-## Import
+## 存量资源纳管
 
 EDAS k8s 应用程序可以按以下方式导入，例如：
 

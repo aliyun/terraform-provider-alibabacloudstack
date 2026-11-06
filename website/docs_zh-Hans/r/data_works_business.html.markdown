@@ -42,7 +42,7 @@ resource "alibabacloudstack_data_works_business" "example" {
 
 * `business_id` - 数据工坊项目内业务流程的唯一标识符。
 
-## Import
+## 存量资源纳管
 
 DataWorks业务流程可以通过 project_id 和 business_id 进行导入，两者之间用冒号分隔，例如：
 

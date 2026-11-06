@@ -101,12 +101,12 @@ resource "alibabacloudstack_application_deployment" "default" {
 除了上述参数外，还导出以下属性：
   * `last_package_version` - 最后一次成功部署的应用程序包版本号。此属性可用于跟踪和验证部署的历史版本信息。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_edas_applicationpackageattachment 可通过ID导入，例如：
 

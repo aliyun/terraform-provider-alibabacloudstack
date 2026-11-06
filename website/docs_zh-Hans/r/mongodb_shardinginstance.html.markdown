@@ -167,11 +167,11 @@ resource "alibabacloudstack_mongodb_sharding_instance" "default" {
 * `tde_status` - 实例的透明数据加密状态。
 * `preferred_backup_time` - 实例的首选备份时间窗口。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_mongodb_shardinginstance 可通过ID导入，例如：
 

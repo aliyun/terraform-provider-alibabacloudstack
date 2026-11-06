@@ -70,19 +70,12 @@ resource "alibabacloudstack_vpc_ipv6_egress_rule" "default" {
 * `status` - 资源的状态。有效值：`Available`（可用）、`Pending`（等待中）和 `Deleting`（删除中）。
 * `instance_type` - 实例类型，表示需要设置出口规则的实例类型。取值为 `Ipv6Address`（默认值），表示一个 IPv6 地址。
 
-### 超时设置
-
-`timeouts` 块允许您为某些操作指定 [超时](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts)：
-
-* `create` - (默认为 1 分钟)用于创建 IPv6 出口规则时。
-* `delete` - (默认为 1 分钟)用于删除 IPv6 出口规则时。
-
-## Timeouts
+## 超时配置
 
 * `create` - （默认1分钟）创建资源时使用。
 * `delete` - （默认1分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 VPC IPv6 出口规则可以通过 id 导入，例如：
 

@@ -84,17 +84,11 @@ resource "alibabacloudstack_gpdb_account" "default" {
 * `id` - 账户的资源ID。格式为 `<db_instance_id>:<account_name>`。
 * `status` - 账户的状态。有效值为：`Active`（活跃）、`Creating`（创建中）和 `Deleting`（删除中）。
 
-### 超时时间
-
-`timeouts` 块允许您为某些操作指定 [超时时间](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts)：
-
-* `create` - (默认为5分钟)用于创建账户时。
-
-## Timeouts
+## 超时配置
 
 * `create` - （默认5分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 GPDB账户可以使用ID导入，例如：
 

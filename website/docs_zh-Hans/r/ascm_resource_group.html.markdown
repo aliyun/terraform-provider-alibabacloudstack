@@ -47,7 +47,7 @@ output "rg" {
 * `rg_id` - 资源组的内部 ID（API 返回的 ID）。
 * `organization_id` - 资源组所属的组织 ID。
 
-## Import
+## 存量资源纳管
 
 ASCM 资源组可以通过组织 ID 和资源组 ID（用冒号分隔）导入，例如：
 

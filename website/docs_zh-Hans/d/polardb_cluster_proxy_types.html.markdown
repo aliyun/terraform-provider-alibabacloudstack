@@ -39,6 +39,6 @@ data "alibabacloudstack_polardb_cluster_proxy_types" "default" {
   * `id` - 代理类型 ID。
   * `core_count` - CPU 核数。
 
-## Import
+## 存量资源纳管
 
 数据源不支持 Import 操作。

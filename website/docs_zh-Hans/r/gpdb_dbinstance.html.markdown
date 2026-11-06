@@ -100,11 +100,11 @@ resource "alibabacloudstack_gpdb_dbinstance" "example" {
 * `instance_group_count` - 节点组数量。
 * `port` - 连接端口。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认30分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 GPDB实例可以使用实例ID导入，例如：
 

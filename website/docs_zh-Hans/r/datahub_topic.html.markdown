@@ -91,7 +91,7 @@ resource "alibabacloudstack_datahub_topic" "tuple_example" {
 * `create_time` - DataHub 主题的创建时间。这是一个人类可读的字符串，而不是 64 位 UTC 时间戳。
 * `last_modify_time` - DataHub 主题的最后修改时间。最初，它与 `create_time` 相同。它也是一个人类可读的字符串，而不是 64 位 UTC 时间戳。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_datahub_topic 可通过ID导入，例如：
 

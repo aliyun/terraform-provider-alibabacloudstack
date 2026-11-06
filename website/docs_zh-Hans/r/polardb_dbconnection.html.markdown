@@ -43,13 +43,13 @@ resource "alibabacloudstack_polardb_dbconnection" "default" {
 $ terraform import alibabacloudstack_polardb_dbconnection.example polardb-instance-123456:my_connection_prefix
 ```
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 PolarDB数据库连接可以通过id导入，例如：
 

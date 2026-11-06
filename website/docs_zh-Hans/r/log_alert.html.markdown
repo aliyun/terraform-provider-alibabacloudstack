@@ -112,7 +112,7 @@ resource "alibabacloudstack_log_alert" "example" {
 * `id` - 日志告警的ID。格式为 `<project>:<alert_name>`。
 * `mute_until` - 时间戳，在此之前关闭通知。
 
-## Import
+## 存量资源纳管
 
 可以使用ID导入日志告警，例如：
 

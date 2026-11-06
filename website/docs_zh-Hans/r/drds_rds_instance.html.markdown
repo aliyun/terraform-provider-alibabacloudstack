@@ -68,14 +68,6 @@ resource "alibabacloudstack_drds_rds_instance" "default" {
 * `db_instance_storage` - （必填）RDS 实例的存储容量，单位：GB。
 * `force_remove` - （可选）销毁时是否强制删除 RDS 实例。有效值：`true`、`false`。默认值为 `false`。
 
-### 超时
-
-`timeouts` 块允许您为某些操作指定[超时](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts)：
-
-* `create` - （默认 20 分钟）创建 DRDS RDS 实例时使用（直到达到运行状态）。
-* `update` - （默认 20 分钟）更新 DRDS RDS 实例规格时使用。
-* `delete` - （默认 20 分钟）删除 DRDS RDS 实例时使用。
-
 ## 属性说明
 
 除上述参数外，还导出以下属性：
@@ -85,13 +77,13 @@ resource "alibabacloudstack_drds_rds_instance" "default" {
 * `create_time` - RDS 实例的创建时间。
 * `status` - RDS 实例的状态。有效值：`Creating`（创建中）、`Running`（运行中）、`Changing Specifications`（变更规格中）、`Deleting`（删除中）、`Stopping`（停止中）、`Stopped`（已停止）。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 DRDS RDS 实例可以使用组合 ID 进行导入，格式为 `<drds_instance_id>:<rds_instance_id>`，例如：
 

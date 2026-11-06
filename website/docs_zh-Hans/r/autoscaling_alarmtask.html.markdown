@@ -151,7 +151,7 @@ resource "alibabacloudstack_autoscaling_alarmtask" "foo" {
 * `state` - (已弃用) 请使用 `alarm_trigger_state` 代替。
 * `dimensions` - (已弃用) 报警关联指标的维度。
 
-## Import
+## 存量资源纳管
 
 ESS 告警任务可以通过告警任务 ID 导入，例如：
 

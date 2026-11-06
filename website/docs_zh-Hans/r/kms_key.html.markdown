@@ -68,7 +68,7 @@ resource "alibabacloudstack_kms_key" "key" {
 * `next_rotation_date` - 下次轮换计划执行的时间。
 * `rotation_interval` - 自动密钥轮换的周期。
 
-## Import
+## 存量资源纳管
 
 KMS Key 可以使用 key ID 进行导入，例如：
 

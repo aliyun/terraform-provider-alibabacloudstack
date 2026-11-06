@@ -48,12 +48,12 @@ resource "alibabacloudstack_evpc_evpc" "default" {
 * `create_time` - EVPC的创建时间。
 * `update_time` - EVPC的最后更新时间。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认10分钟）创建资源时使用。
 * `delete` - （默认10分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_evpc_evpc 可通过ID导入，例如：
 

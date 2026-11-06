@@ -52,7 +52,7 @@ resource "alibabacloudstack_dns_forward_domain" "default" {
 * `create_timestamp` - 创建时间戳（秒）。
 * `update_timestamp` - 修改时间戳（秒）。
 
-## Import
+## 存量资源纳管
 
 转发域名可以使用资源 ID 进行导入，例如：
 

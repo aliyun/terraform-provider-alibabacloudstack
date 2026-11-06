@@ -85,7 +85,7 @@ resource "alibabacloudstack_polardbx_backup_policy" "default" {
 * `cold_data_backup_interval` - 冷数据备份间隔。
 * `cold_data_backup_retention` - 冷数据备份保留周期。
 
-## Import
+## 存量资源纳管
 
 可以使用PolarDBX实例ID导入PolarDBX备份策略，例如：
 

@@ -36,7 +36,7 @@ resource "alibabacloudstack_maxcompute_cu" "example" {
 导出以下属性：
 * `id` - MaxCompute CU 的 ID。
 
-## Import
+## 存量资源纳管
 
 MaxCompute CU 可以通过 CuId 导入，例如
 

@@ -86,12 +86,12 @@ resource "alibabacloudstack_cen_transit_router_multicast_domain_member" "example
 * `id` - 资源ID，格式为 `<group_ip_address>:<transit_router_multicast_domain_id>:<resource_type>:<key>`，其中当 `resource_type` 为 `VPC` 时 `<key>` 为 `network_interface_id`，当 `resource_type` 为 `Connect` 时 `<key>` 为 `connect_peer_id`。
 * `status` - 组播成员的状态。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 CEN转发路由器组播域成员可以通过ID导入，例如：
 

@@ -104,7 +104,7 @@ resource "alibabacloudstack_cspprivate_hsm_instance" "default" {
 * `port` - HSM实例的端口。
 * `status` - HSM实例的状态。
 
-## Import
+## 存量资源纳管
 
 HSM实例可以通过ID进行导入，例如：
 

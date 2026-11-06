@@ -53,7 +53,7 @@ resource "alibabacloudstack_autoscaling_scheduled_task" "default" {
 
 * `id` - 定时任务ID。
 
-## Import
+## 存量资源纳管
 
 弹性伸缩定时任务可以通过定时任务ID导入，例如：
 

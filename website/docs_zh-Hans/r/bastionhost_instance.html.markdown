@@ -97,11 +97,11 @@ resource "alibabacloudstack_bastionhost_instance" "default" {
 * `name` - 实例的名称。
 * `description` - 实例的描述信息。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认45分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_bastionhost_instance 可通过ID导入，例如：
 

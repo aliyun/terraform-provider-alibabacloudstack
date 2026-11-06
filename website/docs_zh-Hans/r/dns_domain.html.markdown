@@ -38,7 +38,7 @@ resource "alibabacloudstack_dns_domain" "default" {
 * `domain_id` - 域名ID。
 * `domain_name` - 域名名称。
 
-## Import
+## 存量资源纳管
 
 DNS域名可以通过 `domain_name` 和 `domain_id` 用冒号分隔进行导入，例如：
 

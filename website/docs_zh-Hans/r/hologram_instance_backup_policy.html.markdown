@@ -85,7 +85,7 @@ resource "alibabacloudstack_hologram_instance_backup_policy" "example" {
 
 * `id` - 资源ID，与`instance_id`相同。
 
-## Import
+## 存量资源纳管
 
 可以使用id（instance_id）导入Hologram实例备份策略，例如：
 

@@ -66,13 +66,7 @@ resource "alibabacloudstack_alikafka_topic" "default" {
 
 * `id` - 资源的唯一标识符。其值被制定为 `<instance_id>:<topic>`。
 
-### 超时时间
-
-`timeouts` 块允许您为某些操作指定 [超时时间](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts)：
-
-* `create` - (默认为 10 分钟)用于创建主题(直到它达到初始 `Running` 状态)。
-
-## Import
+## 存量资源纳管
 
 ALIKAFKA 主题可以使用 id 导入，例如：
 

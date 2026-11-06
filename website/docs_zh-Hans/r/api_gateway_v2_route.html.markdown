@@ -134,7 +134,7 @@ resource "alibabacloudstack_api_gateway_v2_route" "default" {
 
 * `route_id` - 路由ID。
 
-## Import
+## 存量资源纳管
 
 API 网关 V2 路由可以通过资源 ID 导入，格式为 `<类型>:<网关实例ID>:<路由ID>`，例如：
 

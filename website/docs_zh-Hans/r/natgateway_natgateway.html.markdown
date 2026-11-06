@@ -86,7 +86,7 @@ resource "alibabacloudstack_nat_gateway" "default" {
   * `forward_table_ids` - NAT网关自动创建的目的地网络地址转换(DNAT)表的ID。
   * `bandwidth_packages` - 与NAT网关关联的带宽包详细信息。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_natgateway_natgateway 可通过ID导入，例如：
 

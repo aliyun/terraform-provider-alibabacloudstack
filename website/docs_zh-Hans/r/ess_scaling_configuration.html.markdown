@@ -226,7 +226,7 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 
 * `key_name` - 用于登录ECS实例的密钥对名称。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ess_scaling_configuration 可通过ID导入，例如：
 

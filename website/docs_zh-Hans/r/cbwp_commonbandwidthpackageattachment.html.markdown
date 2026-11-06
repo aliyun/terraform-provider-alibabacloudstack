@@ -99,7 +99,7 @@ resource "alibabacloudstack_common_bandwidth_package_attachment" "eip2_attachmen
 * `status` - 附件的状态。可能的值包括 `Attached`（已绑定） 和 `Detached`（未绑定）。
 * `creation_time` - 附件创建的时间。这对于跟踪附件的生命周期非常有用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cbwp_commonbandwidthpackageattachment 可通过ID导入，例如：
 

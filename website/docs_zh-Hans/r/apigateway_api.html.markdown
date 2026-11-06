@@ -151,7 +151,7 @@ resource "alibabacloudstack_api_gateway_api" "default" {
 * `force_nonce_check` - 是否为 API 启用了 nonce 检查。
 * `description` - API 的描述信息。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_apigateway_api 可以使用组合 ID 导入，格式为 `<group_id>:<api_id>`，例如：
 

@@ -39,7 +39,7 @@ resource "alibabacloudstack_edas_swimming_lane_group" "example" {
 * `id` - 游泳道组的ID。
 * `group_id` - 游泳道组的组ID。
 
-## Import
+## 存量资源纳管
 
 EDAS游泳道组可以使用id进行导入，例如
 

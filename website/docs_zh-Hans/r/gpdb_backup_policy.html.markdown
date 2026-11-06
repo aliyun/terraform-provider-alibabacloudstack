@@ -98,7 +98,7 @@ resource "alibabacloudstack_gpdb_backup_policy" "default" {
 * `preferred_backup_time` - 数据备份时间。
 * `recovery_point_period` - 恢复点频次。
 
-## Import
+## 存量资源纳管
 
 GPDB 备份策略可以使用 DBInstanceId 进行导入，例如：
 

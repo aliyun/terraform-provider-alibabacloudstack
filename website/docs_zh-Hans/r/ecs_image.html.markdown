@@ -134,11 +134,6 @@ resource "alibabacloudstack_image_share_permission" "default" {
   - `true`: 强制删除自定义镜像，无论该镜像当前是否被其他实例使用。
   - `false`: 在删除镜像之前验证该镜像是否未被任何其他实例使用。
 
-### 超时时间
-
-* `create` - (默认为10分钟)用于创建镜像(直到达到初始“可用”状态)。
-* `delete` - (默认为10分钟)用于终止镜像。
-
 ## 属性说明
 
 除了上述所有参数外，还导出以下属性：
@@ -154,11 +149,11 @@ resource "alibabacloudstack_image_share_permission" "default" {
   * `import_oss_bucket` - 如果镜像是通过OSS导入的，则显示对应的OSS存储桶名称。
   * `import_oss_object` - 如果镜像是通过OSS导入的，则显示对应的OSS对象名称。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认30分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ecs_image 可通过ID导入，例如：
 

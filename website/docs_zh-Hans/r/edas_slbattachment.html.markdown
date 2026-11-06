@@ -52,7 +52,7 @@ resource "alibabacloudstack_edas_slbattachment" "default" {
   * `Expired`: 实例已过期。
 * `vswitch_id` - 与SLB实例关联的VPC中的交换机ID。
 
-## Import
+## 存量资源纳管
 
 EDAS SLB Attachment 可以通过 app_id 和 slb_id 使用冒号分隔来导入，例如：
 

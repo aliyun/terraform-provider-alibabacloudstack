@@ -90,7 +90,7 @@ resource "alibabacloudstack_vpngateway_ssl_vpnserver" "default" {
 * `create_time` - SSL-VPN 服务器创建时间。
 * `internet_ip` - SSL-VPN 服务器的公网 IP 地址。
 
-## Import
+## 存量资源纳管
 
 SSL-VPN 服务器可以使用 `ssl_vpn_server_id` 导入，例如：
 

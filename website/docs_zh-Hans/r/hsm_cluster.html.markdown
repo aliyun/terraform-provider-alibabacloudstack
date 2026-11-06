@@ -102,13 +102,13 @@ resource "alibabacloudstack_hsm_cluster" "example" {
 
 * `id` - HSM集群的ID。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 可以使用id导入HSM集群，例如：
 

@@ -131,7 +131,7 @@ resource "alibabacloudstack_eip_association" "default" {
   * **IpAddress**：IP地址。
   > 默认要绑定弹性公网IP的实例类型为**EcsInstance**，如果您需要绑定弹性公网IP的实例类型不为**EcsInstance**，则该值必填。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_eip_association 可通过ID导入，例如：
 

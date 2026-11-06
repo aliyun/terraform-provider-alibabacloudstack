@@ -69,12 +69,12 @@ resource "alibabacloudstack_vpc_vpc" "default" {
   * `Available`：VPC可用。
 * `vpc_name` - VPC的名称。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认10分钟）创建资源时使用。
 * `delete` - （默认10分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_vpc_vpc 可通过ID导入，例如：
 

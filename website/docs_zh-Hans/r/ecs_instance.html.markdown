@@ -180,13 +180,13 @@ resource "alibabacloudstack_ecs_instance" "default" {
 * `storage_set_partition_number` - 存储集中的分区数量。
 * `data_disks` - 与实例关联的数据盘列表。每个项包含有关特定数据盘的详细信息。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ecs_instance 可通过ID导入，例如：
 

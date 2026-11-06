@@ -132,7 +132,7 @@ resource "alibabacloudstack_ecs_diskattachment" "default" {
 * `disk_id` - 磁盘的 ID。
 * `device_name` - 暴露给实例的设备名称。这是实际分配给实例的设备名称，可能与配置中的 `device_name` 参数一致，也可能由系统自动分配。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ecs_diskattachment 可通过ID导入，例如：
 

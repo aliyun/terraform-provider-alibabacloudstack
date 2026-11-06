@@ -161,7 +161,7 @@ resource "alibabacloudstack_autoscaling_scalingrule" "default" {
 * `scaling_rule_aris` - 伸缩规则的唯一标识符列表。
 * `scaling_rule_name` - 伸缩规则的名称，2~64个英文或中文字符，以数字、大小字母或中文开头，可包含数字、下划线(_)、连字符(-)或点号(.)。同一用户账号同一地域同一伸缩组内唯一。如果没有指定该参数，默认为`ScalingRuleId`的值。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_autoscaling_scalingrule 可通过ID导入，例如：
 

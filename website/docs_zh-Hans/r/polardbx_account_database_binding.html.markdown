@@ -98,7 +98,7 @@ resource "alibabacloudstack_polardbx_account_database_binding" "default" {
     * `db_name` - (必填) - 数据库的名称。
     * `privilege` - (必填) - 目标账户在数据库上的权限。取值：ReadOnly（只读）、ReadWrite（读写）、DMLOnly（仅 DML）、DDLOnly（仅 DDL）。
 
-## Import
+## 存量资源纳管
 
 PolarDBX Account Database Binding 可以使用 instance_id 和 account_name 进行导入，例如：
 

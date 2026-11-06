@@ -70,11 +70,11 @@ resource "alibabacloudstack_dbs_backup_plan" "default" {
 * `backup_plan_id` - 备份计划的唯一标识符。
 * `backup_plan_name` - 备份计划的名称。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_dbs_backupplan 可通过ID导入，例如：
 

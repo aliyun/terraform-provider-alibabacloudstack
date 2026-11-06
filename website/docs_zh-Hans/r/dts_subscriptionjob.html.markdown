@@ -155,12 +155,12 @@ resource "alibabacloudstack_dts_subscription_job" "default" {
 * `subscription_data_type_ddl` - 是否订阅DDL类型的数据。
 * `subscription_data_type_dml` - 是否订阅DML类型的数据。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认5分钟）更新资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_dts_subscriptionjob 可通过ID导入，例如：
 

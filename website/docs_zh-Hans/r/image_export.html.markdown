@@ -49,10 +49,10 @@ resource "alibabacloudstack_image_export" "default" {
 * `id` - 镜像的ID。
 * `oss_object` - 导出的OSS Object名称。格式为 `<image_id>_system.raw.tar.gz`，如果指定了 `oss_prefix`，则格式为 `<oss_prefix>_<image_id>_system.raw.tar.gz`。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 此资源不支持导入。

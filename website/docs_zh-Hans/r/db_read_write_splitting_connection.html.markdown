@@ -89,12 +89,12 @@ resource "alibabacloudstack_db_read_write_splitting_connection" "default" {
 * `connection_string` - 连接实例字符串。
 * `port` - 内网连接端口。有效值范围：[3001-3999]。默认为3306。
 
-## Timeouts
+## 超时配置
 
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_db_read_write_splitting_connection 可通过ID导入，例如：
 

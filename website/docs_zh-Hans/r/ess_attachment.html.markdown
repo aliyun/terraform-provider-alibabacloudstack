@@ -132,7 +132,7 @@ resource "alibabacloudstack_ess_attachment" "default" {
 * `instance_ids` - (必填) 已附加到伸缩组的“Attached”ECS实例的ID列表。
 * `force` - 是否强制删除“AutoCreated”ECS实例以释放伸缩组容量“MaxSize”。
 
-## Import
+## 存量资源纳管
 
 ESS attachment 可以通过id或伸缩组id导入，例如：
 

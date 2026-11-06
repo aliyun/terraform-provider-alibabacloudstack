@@ -58,7 +58,7 @@ resource "alibabacloudstack_acm_configuration" "default" {
   * `beta_app_name` - (选填) - 发布到bate环境的配置归属的应用名称。
   * `beta_ips` - (选填) - bate环境的 IPs。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_acm_configuration 可以使用组合 ID 导入，格式为 `<data_id>:<group>:<namespace_id>`，例如：
 

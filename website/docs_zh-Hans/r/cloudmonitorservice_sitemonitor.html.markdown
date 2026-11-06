@@ -89,7 +89,7 @@ resource "alibabacloudstack_cloudmonitorservice_sitemonitor" "default" {
 * `create_time` - 表示站点监控任务创建时间的时间戳。
 * `update_time` - 表示站点监控任务最后更新时间的时间戳。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cloudmonitorservice_sitemonitor 可通过ID导入，例如：
 

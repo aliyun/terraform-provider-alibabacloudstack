@@ -103,7 +103,7 @@ resource "alibabacloudstack_log_store" "example" {
   * `begin_key` - 分片范围的起始键值（MD5），包含在分片范围内。
   * `end_key` - 分片范围的结束键值（MD5），不包含在分片范围内。
 
-## Import
+## 存量资源纳管
 
 日志库可以通过 ID 导入，例如：
 

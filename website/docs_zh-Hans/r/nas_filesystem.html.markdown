@@ -102,13 +102,13 @@ resource "alibabacloudstack_nas_file_system" "foo" {
 * `capacity` - 文件系统的容量（由 API 返回）。
 * `kms_key_id` - 用于加密的KMS密钥ID（由 API 返回）。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_nas_filesystem 可通过ID导入，例如：
 

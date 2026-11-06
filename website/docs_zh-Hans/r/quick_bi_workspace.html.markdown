@@ -43,11 +43,11 @@ resource "alibabacloudstack_quick_bi_workspace" "default" {
 
 * `workspace_id` - 工作区在 Terraform 中的资源 ID。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 Quick BI 工作区可以使用 id 导入，例如
 

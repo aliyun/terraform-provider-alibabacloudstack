@@ -82,7 +82,7 @@ resource "alibabacloudstack_data_works_remind" "default" {
 
 * `remind_id` - 创建的报警规则 ID。
 
-## Import
+## 存量资源纳管
 
 DataWorks 自定义报警规则可以使用 `remind_id` 导入，例如：
 

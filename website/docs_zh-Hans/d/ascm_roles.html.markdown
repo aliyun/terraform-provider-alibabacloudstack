@@ -67,6 +67,6 @@ output "roles" {
     * `assume_role_policy_document` - RAM 授权角色的信任策略文档。
     * `organization_visibility` - 角色的组织可见性范围。
 
-## 导入
+## 存量资源纳管
 
 此数据源为只读数据源，不支持导入。

@@ -130,7 +130,7 @@ resource "alibabacloudstack_vpn_connection" "default" {
     * `ipsec_lifetime` - SA 生命周期。
   * `status` - 资源的状态。
 
-## Import
+## 存量资源纳管
 
 VPN 连接可以使用 ID 导入，例如：
 

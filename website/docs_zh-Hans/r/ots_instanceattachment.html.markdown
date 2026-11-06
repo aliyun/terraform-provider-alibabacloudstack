@@ -66,7 +66,7 @@ resource "alibabacloudstack_ots_instance_attachment" "default" {
 * `vswitch_id` - 附加到OTS实例的交换机的ID。
 * `vpc_id` - 附加到OTS实例的VPC的ID。此属性是从`vswitch_id`自动派生的。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ots_instanceattachment 可以使用组合 ID 导入，格式为 `<instance_name>:<instance_vpc_name>`，例如：
 

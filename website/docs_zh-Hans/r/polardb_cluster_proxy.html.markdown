@@ -104,13 +104,13 @@ resource "alibabacloudstack_polardb_cluster_proxy" "default" {
   * `db_node_status` - 代理节点的状态。
   * `db_node_class` - 代理节点的规格。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认20分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 PolarDB 集群代理可以通过集群 ID 导入，例如：
 

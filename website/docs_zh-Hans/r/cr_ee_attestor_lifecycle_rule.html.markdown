@@ -78,7 +78,7 @@ resource "alibabacloudstack_cr_ee_attestor_lifecycle_rule" "default" {
 * `rule_id` - 保留策略规则ID。
 * `schedule` - 调度方式。固定为`MANUAL`表示手动执行规则。
 
-## Import
+## 存量资源纳管
 
 镜像生命周期规则可以使用 instance_id 和 rule_id 进行导入，两者之间用冒号分隔，例如：
 

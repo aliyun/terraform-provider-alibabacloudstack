@@ -54,7 +54,7 @@ resource "alibabacloudstack_kms_secret" "default" {
 * `arn` - 密钥的 Alibabacloudstack 资源名称 (ARN)。
 * `planned_delete_time` - 密钥计划被删除的时间（仅在密钥已安排删除时返回）。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_kms_secret 可通过ID导入，例如：
 

@@ -93,7 +93,7 @@ resource "alibabacloudstack_autoscaling_notification" "default" {
 
 * `id` - 通知资源的唯一标识符，由 `scaling_group_id` 和 `notification_arn` 组成，格式为 `<scaling_group_id>:<notification_arn>`。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_autoscaling_notification 可以使用组合 ID 导入，格式为 `<scaling_group_id>:<notification_arn>`，例如：
 

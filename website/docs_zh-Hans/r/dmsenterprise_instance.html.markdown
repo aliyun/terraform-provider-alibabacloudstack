@@ -120,7 +120,7 @@ resource "alibabacloudstack_dms_enterprise_instance" "default" {
 * `status` - 实例状态。
 * `state` - (已废弃) 字段 `state` 从版本 1.100.0 起已被废弃，建议使用 `status` 替代。
 
-## Import
+## 存量资源纳管
 
 DMS 企业实例可以通过 host 和 port 导入，例如：
 

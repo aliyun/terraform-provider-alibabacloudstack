@@ -95,7 +95,7 @@ resource "alibabacloudstack_security_group" "tagged_group" {
 
 * `tags` - (可选) 要分配给资源的标签映射。每个标签由键值对组成。标签键必须在资源内唯一。
 
-## Import
+## 存量资源纳管
 
 安全组可以使用 SecurityGroupId 导入，例如：
 

@@ -39,7 +39,7 @@ resource "alibabacloudstack_ascm_organization" "default" {
 * `primary_key` - 组织关联的主键。
 * `aliyunid` - 组织关联的 Aliyun ID。
 
-## Import
+## 存量资源纳管
 
 ASCM 组织可以通过组织 ID 导入，例如：
 

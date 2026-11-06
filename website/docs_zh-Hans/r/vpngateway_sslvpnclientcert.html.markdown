@@ -87,7 +87,7 @@ resource "alibabacloudstack_vpngateway_sslvpnclientcert" "default" {
 * `ssl_vpn_client_cert_id` - SSL 客户端证书的 ID。
 * `status` - 客户端证书的状态。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_vpngateway_sslvpnclientcert 可通过ID导入，例如：
 

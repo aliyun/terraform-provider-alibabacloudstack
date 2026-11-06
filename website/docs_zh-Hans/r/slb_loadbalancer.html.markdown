@@ -79,7 +79,7 @@ resource "alibabacloudstack_slb_loadbalancer" "default" {
 * `specification` - 服务器负载均衡实例的规格。
 * `vswitch_id` - 与负载均衡器关联的交换机ID。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_slb_loadbalancer 可通过ID导入，例如：
 

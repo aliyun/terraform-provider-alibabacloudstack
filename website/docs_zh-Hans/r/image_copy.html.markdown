@@ -54,11 +54,11 @@ resource "alibabacloudstack_image_copy" "default" {
 * `image_name` - 镜像名称。
 * `description` - 镜像描述。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认60分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_image_copy 可通过ID导入，例如：
 

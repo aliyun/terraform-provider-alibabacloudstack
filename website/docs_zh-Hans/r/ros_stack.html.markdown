@@ -170,13 +170,13 @@ resource "alibabacloudstack_ros_stack" "example" {
 * `id` - Terraform 中 Stack 的资源 ID。值为 `stack_id`。
 * `status` - 堆栈的状态。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认15分钟）创建资源时使用。
 * `update` - （默认15分钟）更新资源时使用。
 * `delete` - （默认10分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 ROS 资源栈可以使用 StackId 导入，例如：
 

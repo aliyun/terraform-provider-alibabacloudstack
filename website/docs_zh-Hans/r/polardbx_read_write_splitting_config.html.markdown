@@ -45,7 +45,7 @@ The following attributes are exported:
 
 * `id` - 资源的 ID，与 db_instance_id 相同。
 
-## Import
+## 存量资源纳管
 
 可以使用 DB 实例 ID 导入 PolarDBX 读写分离配置，例如：
 

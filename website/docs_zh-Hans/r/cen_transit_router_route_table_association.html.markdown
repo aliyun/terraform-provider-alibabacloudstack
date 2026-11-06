@@ -83,7 +83,7 @@ resource "alibabacloudstack_cen_transit_router_route_table_association" "default
   * `resource_type` - 资源类型。
   * `status` - 转发路由表关联转发状态。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cen_transit_router_route_table_association 可以使用组合 ID 导入，格式为 `<transit_router_route_table_id>:<transit_router_attachment_id>`，例如：
 

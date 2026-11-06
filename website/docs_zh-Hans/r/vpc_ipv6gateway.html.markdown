@@ -42,14 +42,6 @@ resource "alibabacloudstack_vpc_ipv6_gateway" "example" {
 * `spec` - (可选) IPv6 网关的版本。有效值包括：`Small`(默认值)，表示免费版；`Medium`，表示企业版；`Large`，表示增强企业版。需要注意的是，不同版本的 IPv6 网关具有不同的吞吐能力，具体请参见 [IPv6 网关版本](https://www.alibabacloud.com/help/doc-detail/98926.htm)。
 * `vpc_id` - (必填，变更时重建) 要为其创建 IPv6 网关的虚拟私有云 (VPC) 的 ID。
 
-### 超时时间
-
-`timeouts` 块允许您为某些操作指定 [超时时间](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts)：
-
-* `create` - (默认为 1 分钟)用于创建 IPv6 网关时。
-* `update` - (默认为 1 分钟)用于更新 IPv6 网关时。
-* `delete` - (默认为 5 分钟)用于删除 IPv6 网关时。
-
 ## 属性说明
 
 除了上述参数外，还导出以下属性：
@@ -58,13 +50,13 @@ resource "alibabacloudstack_vpc_ipv6_gateway" "example" {
 * `status` - 资源的状态。有效值：`Available`(可用)、`Pending`(等待中)和 `Deleting`(删除中)。
 * `spec` - 实际上当前所有 IPv6 网关均采用统一规格，尽管参数仍然保留，但其功能已被废弃。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认1分钟）创建资源时使用。
 * `update` - （默认1分钟）更新资源时使用。
 * `delete` - （默认5分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 VPC IPv6 网关可以通过 id 导入，例如。
 

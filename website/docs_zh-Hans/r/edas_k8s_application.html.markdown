@@ -294,13 +294,13 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   * `type` - 挂载类型。
 * `package_version` - 部署包的版本号。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认30分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认30分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 EDAS k8s 应用程序可以通过以下方式导入，例如：
 

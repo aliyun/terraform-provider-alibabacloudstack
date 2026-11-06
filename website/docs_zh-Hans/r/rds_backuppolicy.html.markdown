@@ -131,7 +131,7 @@ resource "alibabacloudstack_rds_backuppolicy" "policy" {
   * **KeepAll**：保留所有。
 * `preferred_backup_period` - 优选备份周期。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_rds_backuppolicy 可通过ID导入，例如：
 

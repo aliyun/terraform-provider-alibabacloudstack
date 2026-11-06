@@ -177,7 +177,7 @@ resource "alibabacloudstack_ess_scheduled_task" "default" {
   * `task_enabled` - 表明定时任务是否已启用。
   * `scaling_group_id` - 定时任务所属的伸缩组ID。
 
-## Import
+## 存量资源纳管
 
 弹性伸缩定时任务可以通过 ScheduledTaskId 导入，例如：
 

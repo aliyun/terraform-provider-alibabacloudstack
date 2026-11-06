@@ -75,7 +75,7 @@ resource "alibabacloudstack_natgateway_snatentry" "default" {
 * `id` - SNAT条目的ID。格式为`<snat_table_id>:<snat_entry_id>`。
 * `snat_entry_id` - 服务器上的SNAT条目的唯一标识符。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_natgateway_snatentry 可以使用组合 ID 导入，格式为 `<snat_table_id>:<snat_entry_id>`，例如：
 

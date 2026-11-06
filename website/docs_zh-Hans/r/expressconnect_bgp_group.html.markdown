@@ -48,13 +48,13 @@ resource "alibabacloudstack_expressconnect_bgp_group" "default" {
   * `route_limit` - 路由限制。
   * `status` - 代表资源状态的资源属性字段
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认30分钟）创建资源时使用。
 * `update` - （默认30分钟）更新资源时使用。
 * `delete` - （默认30分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_expressconnect_bgp_group 可通过ID导入，例如：
 

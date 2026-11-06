@@ -156,7 +156,7 @@ resource "alibabacloudstack_api_gateway_v2_k8s_cluster" "default" {
 * `id` - K8s集群的ID，由API网关服务生成的唯一标识符。
 * `cluster_type` - K8s集群类型，可能的值包括"container-service"(容器服务集群)或"self-built"(自建集群)。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_api_gateway_v2_k8s_cluster 可通过ID导入，例如：
 

@@ -77,7 +77,7 @@ resource "alibabacloudstack_schedulerx2_app_group" "example" {
 * `id` - 应用组ID。
 * `app_key` - 应用密钥，用于应用认证。
 
-## Import
+## 存量资源纳管
 
 SchedulerX2 应用组可以使用 AppGroupId 导入，例如：
 

@@ -106,11 +106,11 @@ resource "alibabacloudstack_redis_account" "default" {
 * `description` - 账号备注信息。
 * `account_description` - 账号备注信息（与 `description` 相同）。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认20分钟）创建资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_redis_account 可通过ID导入，例如：
 

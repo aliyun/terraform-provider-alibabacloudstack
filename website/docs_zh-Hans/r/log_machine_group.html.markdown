@@ -53,7 +53,7 @@ resource "alibabacloudstack_log_machine_group" "example" {
 * `identify_list` - 机器标识列表。例如，当 `identify_type` 设置为 `ip` 时，该列表包含具体的 IP 地址。
 * `topic` - 机器组主题。
 
-## Import
+## 存量资源纳管
 
 日志机器组可以使用 id 导入，例如
 

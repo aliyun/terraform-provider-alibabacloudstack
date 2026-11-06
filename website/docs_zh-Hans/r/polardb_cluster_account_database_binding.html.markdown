@@ -101,7 +101,7 @@ resource "alibabacloudstack_polardb_cluster_account_database_binding" "example" 
 
 * `id` - 绑定的 ID，格式为 `{DBClusterId}:{AccountName}`。
 
-## Import
+## 存量资源纳管
 
 可以使用 id 导入 PolarDB 集群账户数据库绑定，例如：
 

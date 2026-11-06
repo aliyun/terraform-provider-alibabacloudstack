@@ -97,7 +97,7 @@ resource "alibabacloudstack_oss_bucket_object" "encrypted-object" {
 * `content_md5` - 对象内容的MD5哈希值。
 * `kms_key_id` - 用于服务端加密的KMS密钥ID(当`server_side_encryption`为`KMS`时)。
 
-## Import
+## 存量资源纳管
 
 OSS存储桶对象可以使用复合ID导入，格式为`{oss_cluster}:{bucket}:{key}`，例如：
 

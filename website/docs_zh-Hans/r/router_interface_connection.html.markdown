@@ -41,7 +41,7 @@ resource "alibabacloudstack_router_interface_connection" "foo" {
 * `opposite_router_id` - 另一侧路由器 ID。它必须属于指定的 "opposite_interface_owner_id" 账户。当字段 "opposite_interface_owner_id" 被指定时有效。
 * `opposite_interface_owner_id` - 另一侧路由器接口账户 ID。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_router_interface_connection 可通过ID导入，例如：
 

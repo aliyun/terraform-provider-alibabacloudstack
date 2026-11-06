@@ -61,7 +61,7 @@ output "record" {
 * `line_ids` - 与当前 DNS 记录关联的线路 ID 列表。
 * `remark` - 当前记录的备注信息，用于描述记录的具体用途。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_dns_record 可以使用组合 ID 导入，格式为 `<zone_id>:<record_id>`，例如：
 

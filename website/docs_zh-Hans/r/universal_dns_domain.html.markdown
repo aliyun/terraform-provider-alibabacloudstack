@@ -44,7 +44,7 @@ resource "alibabacloudstack_universal_dns_domain" "default" {
 * `record_count` - 解析记录集总数。
 * `update_timestamp` - 修改时间戳（秒）。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_universal_dns_domain 可通过ID导入，例如：
 

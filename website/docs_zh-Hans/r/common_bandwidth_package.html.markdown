@@ -72,7 +72,7 @@ resource "alibabacloudstack_natgateway_bandwidth_package" "default" {
     * `ip_address` - 公网IP地址�?
   * `status` - 共享带宽实例的状态。默认取值：**Available**�?
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_common_bandwidth_package 可通过ID导入，例如：
 

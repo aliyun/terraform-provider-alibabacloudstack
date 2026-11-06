@@ -67,7 +67,7 @@ resource "alibabacloudstack_aqs_oss_scanconfig" "example" {
 
 * `id` - 资源ID。
 
-## Import
+## 存量资源纳管
 
 AQS OSS扫描配置可以通过id导入，例如：
 

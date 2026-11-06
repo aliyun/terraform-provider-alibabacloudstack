@@ -121,7 +121,7 @@ resource "alibabacloudstack_polardbx_log_engine" "default" {
   * `multi_stream` - 开通多流配置。
     * "instance_name" - 流组实例名。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_polardbx_log_engine 可通过ID导入，例如：
 

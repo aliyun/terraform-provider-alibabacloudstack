@@ -132,13 +132,13 @@ resource "alibabacloudstack_lindorm_instance" "example" {
 * `arch_version` - 实例的架构版本。
 * `topology_type` - 实例的拓扑类型。取值：`1azone`、`multizone`。由是否设置 `standby_zone_id` 自动判定。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认60分钟）创建资源时使用。
 * `update` - （默认20分钟）更新资源时使用。
 * `delete` - （默认40分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 Lindorm实例可以使用ID进行导入，例如：
 

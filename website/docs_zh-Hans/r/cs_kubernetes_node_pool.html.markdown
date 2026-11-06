@@ -309,13 +309,13 @@ tags {
 * `spot_strategy` - 按量付费实例的抢占策略。有效值 `SpotWithPriceLimit`。
 * `node_count` - 节点池的工作节点数量。
 
-## Timeouts
+## 超时配置
 
 * `create` - （默认90分钟）创建资源时使用。
 * `update` - （默认60分钟）更新资源时使用。
 * `delete` - （默认60分钟）删除资源时使用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_cs_kubernetes_node_pool 可通过ID导入，例如：
 

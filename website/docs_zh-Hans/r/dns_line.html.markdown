@@ -49,7 +49,7 @@ resource "alibabacloudstack_dns_line" "default" {
 * `id` - 云解析全局线路的ID。
 * `priority` - 云解析全局线路的优先级。1表示最高优先级，数值越大优先级越低。系统自动分配优先级值。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_dns_line 可通过ID导入，例如：
 

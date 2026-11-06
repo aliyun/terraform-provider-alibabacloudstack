@@ -80,7 +80,7 @@ resource "alibabacloudstack_dns_private_record" "default" {
 
 * `id` - 资源 ID，格式为 `{ZoneId}:{Id}`。
 
-## Import
+## 存量资源纳管
 
 DNS 私有解析记录可以通过 ZoneId 和 RecordId 导入，格式为 `{ZoneId}:{Id}`，例如：
 

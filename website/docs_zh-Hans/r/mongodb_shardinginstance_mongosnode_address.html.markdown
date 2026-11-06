@@ -130,11 +130,11 @@ resource "alibabacloudstack_mongodb_shardinginstance_mongosnode_address" "defaul
 * `public_connect_string` - 公网链接地址
 * `private_connect_string` - 私网链接地址
 
-## Timeouts
+## 超时配置
 
 * `update` - （默认20分钟）更新资源时使用。
 
-## Import
+## 存量资源纳管
 alibabacloudstack_mongodb_shardinginstance_mongosnode_address 可通过ID导入，例如：
 
 ```shell

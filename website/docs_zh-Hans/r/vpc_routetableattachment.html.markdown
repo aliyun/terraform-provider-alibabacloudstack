@@ -63,7 +63,7 @@ resource "alibabacloudstack_vpc_routetableattachment" "default" {
 * `route_table_id` - (计算得出) 与绑定关联的路由表的ID。
 * `vswitch_id` - (计算得出) 与绑定关联的交换机的ID。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_vpc_routetableattachment 可通过ID导入，例如：
 

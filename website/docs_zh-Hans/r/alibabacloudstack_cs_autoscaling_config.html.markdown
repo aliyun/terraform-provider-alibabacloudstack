@@ -173,7 +173,7 @@ resource "alibabacloudstack_cs_autoscaling_config" "default" {
 
 * `id` - 资源的ID，与 `cluster_id` 相同。
 
-## Import
+## 存量资源纳管
 
 ACK集群自动扩缩容配置可以使用集群ID导入，例如：
 

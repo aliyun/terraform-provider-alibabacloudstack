@@ -57,7 +57,7 @@ resource "alibabacloudstack_dns_recursor_acl" "default" {
 
 * `id` - ACL策略的ID。
 
-## Import
+## 存量资源纳管
 
 DNS递归ACL策略可以通过ACL ID导入，例如：
 

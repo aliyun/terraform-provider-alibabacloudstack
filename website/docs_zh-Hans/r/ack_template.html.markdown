@@ -71,7 +71,7 @@ resource "alibabacloudstack_ack_template" "example" {
 * `ali_uid` - 阿里云 UID。
 * `updated` - 模板更新时间。
 
-## Import
+## 存量资源纳管
 
 ACK 模板可以使用模板 ID 导入，例如：
 

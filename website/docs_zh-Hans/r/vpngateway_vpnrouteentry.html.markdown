@@ -80,7 +80,7 @@ resource "alibabacloudstack_vpn_route_entry" "default" {
 
 * `id` - VPN路由条目的唯一标识符。它由`VpnGatewayId`、`NextHop`和`RouteDest`组合而成，用于唯一标识一个路由条目。
 
-## Import
+## 存量资源纳管
 
 VPN路由条目可以使用 `vpn_gateway_id:next_hop:route_dest` 进行导入，例如：
 

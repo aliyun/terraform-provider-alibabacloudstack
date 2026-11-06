@@ -71,7 +71,7 @@ resource "alibabacloudstack_maxcompute_project" "default" {
 * `quota_id` - MaxCompute 项目的配额 ID。
 * `disk` - MaxCompute 项目的磁盘大小。
 
-## Import
+## 存量资源纳管
 
 MaxCompute 项目可以使用 *名称* 或 ID 导入，例如
 

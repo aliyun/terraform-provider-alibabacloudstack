@@ -49,7 +49,7 @@ output "org" {
 * `organization_id` - 用户所属的组织ID。
 * `role_ids` - 与该用户组关联的ASCM角色ID列表。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_ascm_user_group 可通过ID导入，例如：
 

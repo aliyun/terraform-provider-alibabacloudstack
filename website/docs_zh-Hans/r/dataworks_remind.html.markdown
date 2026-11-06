@@ -92,7 +92,7 @@ resource "alibabacloudstack_data_works_remind" "default" {
 * `remind_id` - 自定义提醒规则 ID。格式为 `<remind_id>:<$.ProjectId>`。
 * `use_flag` - 规则开关状态，表示当前规则是否启用。
 
-## Import
+## 存量资源纳管
 
 alibabacloudstack_data_works_remind 可通过ID导入，例如：
 
