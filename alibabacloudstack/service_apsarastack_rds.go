@@ -662,6 +662,7 @@ func (s *RdsService) ModifyDBBackupPolicy(d *schema.ResourceData, updateForData,
 		request.LocalLogRetentionHours = localLogRetentionHours
 		request.LocalLogRetentionSpace = localLogRetentionSpace
 		request.HighSpaceUsageProtection = highSpaceUsageProtection
+		request.BackupRetentionPeriod = retentionPeriod
 		request.BackupPolicyMode = "LogBackupPolicy"
 		request.LogBackupRetentionPeriod = logBackupRetentionPeriod
 
