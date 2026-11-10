@@ -84,11 +84,11 @@ func dataSourceAlibabacloudStackKVStoreZoneRead(d *schema.ResourceData, meta int
 		return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available zones for KVStore"))
 	}
 	for _, zone := range response.RegionIds.KVStoreRegion {
-		if multi && strings.Contains(zone.ZoneIds, MULTI_IZ_SYMBOL) {
+		if multi && (strings.Contains(zone.ZoneIds, MULTI_IZ_SYMBOL) || strings.Contains(zone.ZoneIds, ",")) {
 			zoneIds = append(zoneIds, zone.ZoneIds)
 			continue
 		}
-		if !multi && !strings.Contains(zone.ZoneIds, MULTI_IZ_SYMBOL) {
+		if !multi && !strings.Contains(zone.ZoneIds, MULTI_IZ_SYMBOL) && !strings.Contains(zone.ZoneIds, ",") {
 			zoneIds = append(zoneIds, zone.ZoneIds)
 		}
 	}
@@ -109,9 +109,13 @@ func dataSourceAlibabacloudStackKVStoreZoneRead(d *schema.ResourceData, meta int
 		}
 	} else {
 		for _, zoneId := range zoneIds {
+			multiZoneIds := splitMultiZoneId(zoneId)
+			if len(multiZoneIds) == 0 && strings.Contains(zoneId, ",") {
+				multiZoneIds = strings.Split(zoneId, ",")
+			}
 			mapping := map[string]interface{}{
 				"id":             zoneId,
-				"multi_zone_ids": splitMultiZoneId(zoneId),
+				"multi_zone_ids": multiZoneIds,
 			}
 			s = append(s, mapping)
 		}

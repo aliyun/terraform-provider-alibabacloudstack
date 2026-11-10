@@ -87,6 +87,12 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
 				ConflictsWith: []string{"zone_id"},
 			},
+			"secondary_zone_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The secondary availability zone ID. If specified, a multi-zone instance is created; otherwise, a single-zone instance is created.",
+			},
 			"instance_charge_type": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
@@ -289,6 +295,12 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 
 	if v, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && Trim(v.(string)) != "" {
 		request["ZoneId"] = Trim(v.(string))
+	}
+	if v, ok := d.GetOk("secondary_zone_id"); ok && v.(string) != "" {
+		request["SecondaryZoneId"] = v.(string)
+		request["ZoneType"] = "multi"
+	} else {
+		request["ZoneType"] = "single"
 	}
 	request["NetworkType"] = strings.ToUpper(string(Classic))
 	if vswitchId, ok := d.GetOk("vswitch_id"); ok && vswitchId.(string) != "" {
@@ -634,6 +646,7 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 		d.Set("series", "community")
 	}
 	connectivity.SetResourceData(d, object.ZoneId, "zone_id", "availability_zone")
+	d.Set("secondary_zone_id", object.SecondaryZoneId)
 	d.Set("instance_type", object.InstanceType)
 	d.Set("vswitch_id", object.VSwitchId)
 	d.Set("connection_domain", object.ConnectionDomain)
