@@ -1,10 +1,10 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -128,7 +128,9 @@ func resourceAlibabacloudStackDBBackupPolicy() *schema.Resource {
 
 func resourceAlibabacloudStackDBBackupPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(d.Get("instance_id").(string))
-	return resourceAlibabacloudStackDBBackupPolicyUpdate(d, meta)
+	// The backup policy is applied by the auto-chained update that setResourceFunc
+	// invokes right after create returns.
+	return nil
 }
 
 func resourceAlibabacloudStackDBBackupPolicyRead(d *schema.ResourceData, meta interface{}) error {
@@ -206,7 +208,7 @@ func resourceAlibabacloudStackDBBackupPolicyUpdate(d *schema.ResourceData, meta 
 		}
 		if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 			if err := rdsService.ModifyDBBackupPolicy(d, updateForData, updateForLog); err != nil {
-				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus ...) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus...) {
 					return resource.RetryableError(err)
 				}
 				return resource.NonRetryableError(err)
