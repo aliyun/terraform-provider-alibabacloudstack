@@ -75,6 +75,48 @@ func TestAccAlibabacloudStackDBBackupPolicy_basic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				// 17E rejects any LogBackupPolicy-mode change to
+				// log_backup_retention_period and local_log_retention_space
+				// (InvalidParameters.Malformed, in both directions), so the log
+				// branch is exercised through local_log_retention_hours only.
+				Config: testAccConfig(map[string]interface{}{
+					"backup_retention_period":   "30",
+					"local_log_retention_hours": "12",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"backup_retention_period":     "30",
+						"preferred_backup_period.#":   "2",
+						"preferred_backup_time":       "18:00Z-19:00Z",
+						"enable_backup_log":           "true",
+						"log_backup_retention_period": "34",
+						"local_log_retention_hours":   "12",
+						"high_space_usage_protection": "Enable",
+					}),
+				),
+			},
+			{
+				// log_backup_frequency stays unasserted: the provider only sends
+				// it for SQLServer with LogInterval, and the describe response
+				// never returns it, so the state remains empty on MySQL.
+				Config: testAccConfig(map[string]interface{}{
+					"compress_type": "1",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"backup_retention_period":     "30",
+						"preferred_backup_period.#":   "2",
+						"preferred_backup_time":       "18:00Z-19:00Z",
+						"enable_backup_log":           "true",
+						"log_backup_retention_period": "34",
+						"local_log_retention_hours":   "12",
+						"high_space_usage_protection": "Enable",
+						"local_log_retention_space":   "30",
+						"compress_type":               "1",
+					}),
+				),
+			},
 		},
 	})
 }
