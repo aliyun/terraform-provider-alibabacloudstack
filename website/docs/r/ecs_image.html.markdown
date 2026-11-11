@@ -129,15 +129,6 @@ The following arguments are supported:
 * `disk_device_mapping` - (Optional, ForceNew) Description of the system disk and snapshots under the image. Conflicts with `snapshot_id` and `instance_id`. Each `disk_device_mapping` supports the following:
   * `size` - (Optional, ForceNew) Specifies the size of the disk in the combined custom image, in GiB. Value range: 5 to 2000.
   * `snapshot_id` - (Optional, ForceNew) Specifies the snapshot used to create the combined custom image.
-* `force` - (Optional) Indicates whether to force delete the custom image. Default is `false`.
-  - `true`: Force deletes the custom image, regardless of whether the image is currently being used by other instances.
-  - `false`: Verifies that the image is not currently in use by any other instances before deleting the image.
-* `tags` - (Optional) A mapping of tags to assign to the resource.
-
-### Timeouts
-
-* `create` - (Defaults to 10 mins) Used when creating the image (until it reaches the initial `Available` status).
-* `delete` - (Defaults to 10 mins) Used when terminating the image.
 
 ## Attributes Reference
 

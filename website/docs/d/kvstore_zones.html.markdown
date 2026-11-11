@@ -26,9 +26,9 @@ output "kvstore_zones" {
 
 The following arguments are supported:
 
-* `multi` - (Optional) Indicate whether the zones can be used in a multi AZ configuration. Default to `false`. Multi AZ is usually used to launch KVStore instances.
+* `multi` - (Optional) Indicate whether the zones can be used in a multi AZ configuration. Default to `false`. Multi AZ is usually used to launch KVStore instances. When set to `true`, zone entries whose zone IDs are in the `MAZ` form or contain comma-separated zone IDs are returned.
 * `instance_charge_type` - (Optional) Filter the results by a specific instance charge type. Valid values: `PrePaid` and `PostPaid`. Default to `PostPaid`.
-* `ids` - (Optional) A list of zone IDs.
+* `output_file` - (Optional, Deprecated) The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.
 
 ## Attributes Reference
 
@@ -37,5 +37,4 @@ The following attributes are exported in addition to the arguments listed above:
 * `ids` - A list of zone IDs.
 * `zones` - A list of availability zones. Each element contains the following attributes:
   * `id` - ID of the zone.
-  * `multi_zone_ids` - A list of zone ids in which the multi zone.
-  * `zones` - A list of availability zones.
+  * `multi_zone_ids` - A list of the individual zone IDs that compose the multi-zone ID. Both `MAZ`-style multi-zone IDs and comma-separated zone IDs are recognized and split into this list.
