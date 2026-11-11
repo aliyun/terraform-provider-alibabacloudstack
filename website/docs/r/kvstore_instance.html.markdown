@@ -106,7 +106,7 @@ The following arguments are supported:
 * `instance_class` - (Required) The instance class of the KVStore instance.
 * `tair_instance_name` - (Optional) The name of the instance. It must be between 2 and 128 characters in length. Conflicts with `instance_name`.
 * `instance_name` - (Optional, Deprecated) Field 'instance_name' is deprecated and will be removed in a future release. Please use new field `tair_instance_name` instead. Conflicts with `tair_instance_name`.
-* `password` - (Optional, Sensitive) The password used to connect to the instance. If not specified, the instance can be accessed only after a password is set.
+* `password` - (Optional, Sensitive) The password used to connect to the instance. The password must be 8 to 32 characters long and contain at least three of the following character types: uppercase letters, lowercase letters, digits, and special characters (! @ # $ % ^ & * ( ) _ + - =). If not specified, the instance can be accessed only after a password is set.
 * `kms_encrypted_password` - (Optional) An KMS encrypted password used for the instance. If `password` is specified, this field will be ignored.
 * `kms_encryption_context` - (Optional) An encryption context used to decrypt `kms_encrypted_password`. This is valid only when `kms_encrypted_password` is set.
 * `engine_version` - (Optional, ForceNew) The database engine version. Default value is `5.0`.

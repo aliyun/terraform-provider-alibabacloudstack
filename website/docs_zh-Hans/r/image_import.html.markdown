@@ -41,13 +41,12 @@ resource "alibabacloudstack_image_import" "this" {
 * `description` - (可选) 镜像的描述。长度为2到256个英文或中文字符，不能以http: //和https: //开头。
 * `image_name` - (可选) 镜像名称。长度为2 ~ 128个英文或中文字符。必须以英文字母或中文开头，不能以http: //和https: //开头。可以包含数字、冒号(:)、下划线(_)或连字符(-)。
 * `license_type` - (可选, 变更时重建) 镜像导入后用于激活操作系统的许可证类型。默认值：`Auto`。有效值：`Auto`, `Aliyun`, `BYOL`。
-* `platform` - (可选, 变更时重建) 指定在使用数据盘快照作为系统盘的数据源创建镜像时，系统盘的操作系统平台。有效值：`CentOS`, `Ubuntu`, `SUSE`, `OpenSUSE`, `Debian`, `CoreOS`, `Windows Server 2003`, `Windows Server 2008`, `Windows Server 2012`, `Windows 7`，默认值为 `Others Linux`, `Customized Linux`。
+* `platform` - (可选, 变更时重建) 指定在使用数据盘快照作为系统盘的数据源创建镜像时，系统盘的操作系统平台。有效值：`CentOS`, `RedHat`, `Fedora`, `Fedora CoreOS`, `Anolis`, `CentOS Stream`, `AlmaLinux`, `Rocky Linux`, `Ubuntu`, `Debian`, `SUSE`, `OpenSUSE`, `Aliyun`, `Kylin`, `UOS`, `CoreOS`, `Customized Linux`, `Others Linux`, `Windows Server 2003`, `Windows Server 2008`, `Windows Server 2012`, `Windows Server 2016`, `Windows Server 2019`, `Windows Server 2022`, `Windows 7`, `FreeBSD`。默认值为`Ubuntu`。
 * `os_type` - (可选, 变更时重建) 操作系统平台类型。有效值：`windows`，默认值为 `linux`。
 * `disk_device_mapping` - (必填, 变更时重建) 镜像下的系统盘和快照的描述。
-  * `device` - (可选, 变更时重建) 自定义镜像中的磁盘N的名称。
-  * `disk_image_size` - (可选, 变更时重建) 分辨率大小。必须确保系统盘空间 ≥ 文件系统空间。范围：当n = 1时，系统盘：5 ~ 500GiB，当n = 2 ~ 17时，即数据盘：5 ~ 1000GiB，当临时导入时，系统自动检测大小，以检测结果为准。
+  * `disk_image_size` - (可选, 变更时重建) 分辨率大小。必须确保系统盘空间 ≥ 文件系统空间。范围：当n = 1时，系统盘：5 ~ 500GiB，当n = 2 ~ 17时，即数据盘：5 ~ 1000GiB，当临时导入时，系统自动检测大小，以检测结果为准。默认值为`5`。
   * `format` - (可选, 变更时重建) 镜像格式。值范围：当导入 `RAW`, `VHD`, `qcow2` 格式的镜像时，系统会自动检测镜像格式，以最先检测到的为准。
-  * `oss_bucket` - (可选) 保存导出的OSS桶。
+  * `oss_bucket` - (可选, 变更时重建) 保存导出的OSS桶。
   * `oss_object` - (可选, 变更时重建) OSS对象的文件名。
 
 -> **NOTE:** `disk_device_mapping` 是一个列表，它的第一个元素将被用作系统盘，其他元素将被用作数据盘。
@@ -64,7 +63,7 @@ resource "alibabacloudstack_image_import" "this" {
 以下属性将会导出：
 
 * `id` - 镜像ID。
-* `format` - 镜像格式。值范围：当导入 `RAW`, `VHD`, `qcow2` 格式的镜像时，系统会自动检测镜像格式，以最先检测到的为准。
+* `disk_device_mapping` - 镜像的磁盘设备映射。每个映射的`format`将在镜像导入完成后被检测并导出。
 
 ## 超时配置
 

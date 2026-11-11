@@ -130,9 +130,6 @@ resource "alibabacloudstack_image_share_permission" "default" {
 * `disk_device_mapping` - (选填, 变更时重建) - 镜像下的系统盘和快照的描述。与`snapshot_id`和`instance_id`冲突。每个`disk_device_mapping`支持以下内容：
   * `size` - (选填, 变更时重建) - 指定组合自定义镜像中磁盘的大小，单位为GiB。取值范围：5到2000。
   * `snapshot_id` - (选填, 变更时重建) - 指定用于创建组合自定义镜像的快照。
-* `force` - (选填) - 是否强制删除自定义镜像。默认为`false`。
-  - `true`: 强制删除自定义镜像，无论该镜像当前是否被其他实例使用。
-  - `false`: 在删除镜像之前验证该镜像是否未被任何其他实例使用。
 
 ## 属性说明
 
