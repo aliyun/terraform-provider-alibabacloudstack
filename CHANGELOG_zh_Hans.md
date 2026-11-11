@@ -1,3 +1,23 @@
+# 3.18.34
+
+## 新增
+
+1. Redis（KVStore）实例多可用区（双可用区）部署的编排能力：`alibabacloudstack_kvstore_instance` 支持 `secondary_zone_id` 字段，指定后创建多可用区实例（变更该字段将强制重建资源）
+
+## 修复
+
+1. 修复 `alibabacloudstack_db_backup_policy` 在 LogBackupPolicy 模式下的 ModifyBackupPolicy 请求未携带 `backup_retention_period` 参数、导致日志备份策略更新不自洽的问题（现与 DataBackupPolicy 请求形态对齐）
+2. 修复 `alibabacloudstack_db_backup_policy` 创建时重复下发 ModifyBackupPolicy 请求的问题：此前 Create 直接调用更新，与 setResourceFunc 自动链式触发的更新叠加，每次创建重复发送 4 个请求；现 Create 仅认领实例 ID，策略由链式更新统一下发，请求数减半为 2 个（Data + Log）
+3. 修复 `alibabacloudstack_kvstore_instance` 偶发创建失败：实例创建初期的瞬态 `Forbidden.RAM` 错误现自动重试（最多 5 次、间隔 10 秒）；`INTERRUPTED` 状态现视为创建中的瞬态状态继续等待，不再判定为失败
+4. 修复 `alibabacloudstack_kvstore_zones` 数据源在后端以逗号分隔返回多可用区 ID 时无法识别多可用区条目、导致 `multi` 过滤条件与 `multi_zone_ids` 输出不准确的问题
+5. 修复 ECS 按 ID 查询镜像被固定限定为仅查自有镜像（ImageOwnerAlias=self）、引用非自有镜像（如系统镜像、共享镜像）时报镜像不存在的问题，影响 `alibabacloudstack_ecs_image`、`alibabacloudstack_image_import` 等资源
+
+## 变更
+
+1. 文档全面补齐：为全部资源的中英文文档补充 Import 与 Timeouts 章节，统一中文 Import/Timeouts 标题写法，修正部分文档 frontmatter YAML 缩进，清理误放在数据源目录下的资源文档，并补充缺失的 `alibabacloudstack_cen_transit_router_multicast_domain_members` 数据源文档
+
+---
+
 # 3.18.33
 
 ## 新增

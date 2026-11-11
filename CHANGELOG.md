@@ -1,3 +1,23 @@
+# 3.18.34
+
+## Added
+
+1. Orchestration support for multi-zone (dual-zone) deployment of Redis (KVStore) instances: `alibabacloudstack_kvstore_instance` now supports the `secondary_zone_id` field; specifying it creates a multi-zone instance (changing this field forces resource re-creation)
+
+## Fixed
+
+1. Fixed the LogBackupPolicy-mode ModifyBackupPolicy request of `alibabacloudstack_db_backup_policy` not carrying the `backup_retention_period` parameter, leaving the log backup policy update incomplete (now aligned with the DataBackupPolicy request shape)
+2. Fixed `alibabacloudstack_db_backup_policy` sending duplicate ModifyBackupPolicy requests on create: previously Create invoked the update directly, which overlapped with the update auto-chained by setResourceFunc, sending 4 requests per create; Create now only claims the instance ID and lets the auto-chained update apply the policy, halving the requests to 2 (Data + Log)
+3. Fixed sporadic creation failures of `alibabacloudstack_kvstore_instance`: transient `Forbidden.RAM` errors during instance provisioning are now retried automatically (up to 5 times at 10-second intervals); the `INTERRUPTED` state is now treated as a transient provisioning state and waited out instead of being treated as a failure
+4. Fixed the `alibabacloudstack_kvstore_zones` data source not recognizing multi-zone entries when the backend returns multiple zone IDs separated by commas, causing inaccurate `multi` filtering and `multi_zone_ids` output
+5. Fixed ECS image lookup by ID being hardcoded to self-owned images only (ImageOwnerAlias=self), causing image-not-found errors when referencing non-self images (e.g. system or shared images); affects resources such as `alibabacloudstack_ecs_image` and `alibabacloudstack_image_import`
+
+## Changes
+
+1. Comprehensive documentation completion: added Import and Timeouts sections to all resource docs in both Chinese and English, unified the Chinese Import/Timeouts headings, fixed frontmatter YAML indentation in several docs, removed resource docs misplaced under data source directories, and added the missing `alibabacloudstack_cen_transit_router_multicast_domain_members` data source doc
+
+---
+
 # 3.18.33
 
 ## Added
