@@ -30,19 +30,34 @@ func (s *KvstoreService) DescribeKVstoreInstance(id string) (*r_kvstore.DBInstan
 	request := r_kvstore.CreateDescribeInstanceAttributeRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
-	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
-		return rkvClient.DescribeInstanceAttribute(request)
-	})
-	bresponse, ok := raw.(*r_kvstore.DescribeInstanceAttributeResponse)
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
-			return instance, errmsgs.GetNotFoundErrorFromString(id + ": KVstoreInstance Not Found!")
+
+	var raw interface{}
+	var err error
+	var bresponse *r_kvstore.DescribeInstanceAttributeResponse
+	var ok bool
+
+	// Retry on Forbidden.RAM error, as the instance may be temporarily inaccessible during provisioning
+	for i := 0; i < 5; i++ {
+		raw, err = s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
+			return rkvClient.DescribeInstanceAttribute(request)
+		})
+		bresponse, ok = raw.(*r_kvstore.DescribeInstanceAttributeResponse)
+		if err != nil {
+			if errmsgs.IsExpectedErrors(err, "InvalidInstanceId.NotFound") {
+				return instance, errmsgs.GetNotFoundErrorFromString(id + ": KVstoreInstance Not Found!")
+			}
+			if errmsgs.IsExpectedErrors(err, "Forbidden.RAM") && i < 4 {
+				log.Printf("[WARN] DescribeKVstoreInstance %s got Forbidden.RAM, retrying (%d/5)...", id, i+1)
+				time.Sleep(10 * time.Second)
+				continue
+			}
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		break
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if len(bresponse.Instances.DBInstanceAttribute) <= 0 {
@@ -109,6 +124,11 @@ func (s *KvstoreService) RdsKvstoreInstanceStateRefreshFunc(id string, failState
 			return nil, "", errmsgs.WrapError(err)
 		}
 
+		// Treat INTERRUPTED as a transient state during provisioning, continue waiting
+		if object.InstanceStatus == "INTERRUPTED" {
+			return object, "Creating", nil
+		}
+
 		for _, failState := range failStates {
 			if object.InstanceStatus == failState {
 				return object, object.InstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.InstanceStatus))
@@ -117,7 +137,6 @@ func (s *KvstoreService) RdsKvstoreInstanceStateRefreshFunc(id string, failState
 		return object, object.InstanceStatus, nil
 	}
 }
-
 
 func (s *KvstoreService) DescribeParameters(id string) (*r_kvstore.DescribeParametersResponse, error) {
 	response := &r_kvstore.DescribeParametersResponse{}
@@ -442,7 +461,6 @@ func (s *KvstoreService) DescribeKvstoreConnection(id string) (object r_kvstore.
 	return object, errmsgs.GetNotFoundErrorFromString("KvstoreConnection Not Found")
 }
 
-
 func (s *KvstoreService) DescribeInstanceSSL(id string) (map[string]interface{}, error) {
 	request := s.client.NewCommonRequest("POST", "R-kvstore", "2015-01-01", "DescribeInstanceSSL", "")
 	request.QueryParams["InstanceId"] = id
@@ -461,7 +479,6 @@ func (s *KvstoreService) DescribeInstanceSSL(id string) (map[string]interface{},
 }
 
 // DescribeInstanceTDEStatus
-
 
 func (s *KvstoreService) DescribeInstanceTDEStatus(id string) (map[string]interface{}, error) {
 	request := s.client.NewCommonRequest("POST", "R-kvstore", "2015-01-01", "DescribeInstanceTDEStatus", "")
