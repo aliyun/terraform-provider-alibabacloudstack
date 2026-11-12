@@ -877,6 +877,7 @@ resource "alibabacloudstack_ecs_instance" "default" {
   instance_name        = "${var.name}_ecs"
   vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
   zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
+  password             = "Test@123456"
   is_outdated          = false
   lifecycle {
     ignore_changes = [
