@@ -1420,7 +1420,9 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		smaster = append(smaster, MasterNodes)
 		master_instance_types = append(master_instance_types, k.InstanceType)
 	}
-	d.Set("image_id", masternodes[0].ImageID)
+	if len(masternodes) > 0 {
+		d.Set("image_id", masternodes[0].ImageID)
+	}
 	d.Set("master_nodes", smaster)
 	d.Set("master_instance_types", master_instance_types)
 	d.Set("master_count", len(smaster))
