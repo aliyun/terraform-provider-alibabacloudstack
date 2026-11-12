@@ -2,11 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -69,16 +71,54 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate(d *schema.Reso
 		"InstanceIds": strings.Join(aString, ","),
 	}
 	edasService := EdasService{client}
-	_, err := client.DoTeaRequest("POST", "Edas", "2017-08-01", "InstallAgent", "/pop/v5/ecss/install_agent", nil, request, nil)
 	id := fmt.Sprintf("%s:%s", clusterId, strings.Join(aString, ","))
 	d.SetId(id)
-	time.Sleep(time.Duration(30) * time.Second)
-	if err != nil {
-		_, e := edasService.DescribeClusterMember(id)
-		if e != nil {
-			return errmsgs.WrapError(err)
+
+	// Retry InstallAgent for transient errors like 503
+	var installErr error
+	_ = resource.Retry(3*time.Minute, func() *resource.RetryError {
+		_, installErr = client.DoTeaRequest("POST", "Edas", "2017-08-01", "InstallAgent", "/pop/v5/ecss/install_agent", nil, request, nil)
+		if installErr != nil {
+			log.Printf("[DEBUG] InstallAgent error for %s: %v", id, installErr)
+			if errmsgs.NeedRetry(installErr) {
+				return resource.RetryableError(installErr)
+			}
+			return resource.NonRetryableError(installErr)
 		}
+		return nil
+	})
+	if installErr != nil {
+		return errmsgs.WrapError(installErr)
 	}
+
+	// Wait until all instances appear in cluster member list
+	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
+		objects, e := edasService.DescribeClusterMember(id)
+		if e != nil {
+			log.Printf("[DEBUG] DescribeClusterMember error for %s: %v", id, e)
+			if errmsgs.NotFoundError(e) || errmsgs.NeedRetry(e) {
+				return resource.RetryableError(e)
+			}
+			return resource.NonRetryableError(e)
+		}
+		instanceIdstr := strings.Join(aString, ",")
+		foundCount := 0
+		for _, v := range objects {
+			member := v.(map[string]interface{})
+			if ecsId, ok := member["EcsId"].(string); ok && strings.Contains(instanceIdstr, ecsId) {
+				foundCount++
+			}
+		}
+		log.Printf("[DEBUG] DescribeClusterMember for %s: total members=%d, found=%d/%d", id, len(objects), foundCount, len(aString))
+		if foundCount < len(aString) {
+			return resource.RetryableError(fmt.Errorf("waiting for all instances to be attached to cluster, found %d/%d", foundCount, len(aString)))
+		}
+		return nil
+	})
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+
 	return nil
 }
 
