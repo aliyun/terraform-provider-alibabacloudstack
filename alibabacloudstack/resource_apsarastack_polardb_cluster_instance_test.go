@@ -67,7 +67,7 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parameters", "sub_category"},
+				ImportStateVerifyIgnore: []string{"parameters", "sub_category", "cpu_type", "db_minor_version", "imci_num", "ip_version_selected_type"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -259,6 +259,79 @@ func TestAccAlibabacloudStackPolardbClusterInstance_basic0(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackPolardbClusterInstance_local(t *testing.T) {
+	var v map[string]interface{}
+
+	resourceId := "alibabacloudstack_polardb_cluster_instance.default"
+	ra := resourceAttrInit(resourceId, map[string]string{})
+
+	serviceFunc := func() interface{} {
+		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribePolardbClusterInstance")
+
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tfacc-polardb-local-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceoPolardbClusterInstanceLocalDependence)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t, resourceId)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"db_cluster_description":   "${var.name}",
+					"zone_id":                  "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"db_type":                  "MySQL",
+					"db_version":               "8.0",
+					"db_minor_version":         "8.0.2",
+					"hot_standby_cluster":      "standby",
+					"storage_type":             "local_ssd",
+					"storage_space":            "100",
+					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
+					"db_node_class":            "${data.alibabacloudstack_polardb_cluster_instance_types.default.instance_types.0.id}",
+					"sub_category":             "normal_exclusive",
+					"cpu_type":                 "hygon",
+					"imci_num":                 "0",
+					"orca":                     "OFF",
+					"ip_version_selected_type": "IPv4",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"db_cluster_description":   name,
+						"db_type":                  "MySQL",
+						"db_version":               "8.0",
+						"db_minor_version":         "8.0.2",
+						"hot_standby_cluster":      "standby",
+						"storage_type":             "local_ssd",
+						"storage_space":            "100",
+						"vswitch_id":               CHECKSET,
+						"db_node_class":            CHECKSET,
+						"sub_category":             "normal_exclusive",
+						"cpu_type":                 "hygon",
+						"imci_num":                 "0",
+						"orca":                     "OFF",
+						"ip_version_selected_type": "IPv4",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parameters", "sub_category", "cpu_type", "db_minor_version", "imci_num", "ip_version_selected_type"},
+			},
+		},
+	})
+}
+
 func resourceoPolardbClusterInstanceDependence(name string) string {
 
 	return fmt.Sprintf(`
@@ -284,6 +357,26 @@ data "alibabacloudstack_polardb_cluster_instance_types" "default" {
   db_version = "${var.db_version}"
   sorted_by = "CPU"
   sub_category = "normal_exclusive"
+}
+
+ `, name, VSwitchCommonTestCase)
+}
+
+func resourceoPolardbClusterInstanceLocalDependence(name string) string {
+	return fmt.Sprintf(`
+
+variable "name" {
+  default = "%s"
+}
+
+%s
+
+data "alibabacloudstack_polardb_cluster_instance_types" "default" {
+  db_type      = "MySQL"
+  db_version   = "8.0"
+  sorted_by    = "CPU"
+  sub_category = "normal_exclusive"
+  cpu_type     = "hygon"
 }
 
  `, name, VSwitchCommonTestCase)

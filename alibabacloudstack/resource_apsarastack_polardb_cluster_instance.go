@@ -50,6 +50,11 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"db_minor_version": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"sub_category": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -76,12 +81,25 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 				Default:      0,
 				ValidateFunc: validation.IntAtLeast(0),
 			},
-			//			"proxy_type": {
-			//				Type:         schema.TypeString,
-			//				Optional:     true,
-			//				Computed:     true,
-			//				ValidateFunc: validation.StringInSlice([]string{"proxy_exclusive", "proxy_off"}, false),
-			//			},
+			"imci_num": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+				Default:  0,
+			},
+			"orca": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"ON", "OFF"}, false),
+			},
+			"ip_version_selected_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "IPv4",
+				ValidateFunc: validation.StringInSlice([]string{"IPv4", "IPv6", "IPv4AndIPv6"}, false),
+			},
 			"storage_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -263,10 +281,6 @@ func resourceAlibabacloudStackPolardbClusterInstance() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"proxy_cpu_cores": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"security_ips_groups": {
 				Type:     schema.TypeMap,
 				Elem:     schema.TypeString,
@@ -394,9 +408,18 @@ func resourceAlibabacloudStackPolardbClusterInstanceCreate(d *schema.ResourceDat
 	request["DBNodeNum"] = dbNodeNum
 	request["DBClusterDescription"] = d.Get("db_cluster_description").(string)
 	// Required and optional parameters from schema
-	//	if v, ok := d.GetOk("proxy_type"); ok {
-	//		request["ProxyType"] = v.(string)
-	//	}
+	if v, ok := d.GetOk("db_minor_version"); ok {
+		request["DBMinorVersion"] = v.(string)
+	}
+	if v, ok := d.GetOk("imci_num"); ok {
+		request["ImciNum"] = v.(int)
+	}
+	if v, ok := d.GetOk("orca"); ok {
+		request["Orca"] = v.(string)
+	}
+	if v, ok := d.GetOk("ip_version_selected_type"); ok {
+		request["IPVersionSelectedType"] = v.(string)
+	}
 	if v, ok := d.GetOk("storage_type"); ok {
 		request["StorageType"] = v.(string)
 	}
@@ -409,18 +432,6 @@ func resourceAlibabacloudStackPolardbClusterInstanceCreate(d *schema.ResourceDat
 	if v, ok := d.GetOk("cpu_type"); ok {
 		request["CpuType"] = v.(string)
 	}
-	//	if v, ok := d.GetOk("db_instance_net_type"); ok {
-	//		request["DBInstanceNetType"] = v.(int)
-	//	}
-	//	if v, ok := d.GetOk("vswitch_zone_id"); ok {
-	//		request["VswitchZoneId"] = v.(string)
-	//	}
-	//	if v, ok := d.GetOk("cidr_block"); ok {
-	//		request["CidrBlock"] = v.(string)
-	//	}
-	//	if v, ok := d.GetOk("ipv6_cidr_block"); ok {
-	//		request["Ipv6CidrBlock"] = v.(string)
-	//	}
 	// Call CreateDBCluster API
 	resp, err := client.DoTeaRequest("POST", "polardb", "2017-08-01", "CreateDBCluster", "", nil, request, nil)
 	if err != nil {
@@ -466,6 +477,9 @@ func resourceAlibabacloudStackPolardbClusterInstanceRead(d *schema.ResourceData,
 	d.Set("db_cluster_network_type", object["DBClusterNetworkType"])
 	d.Set("storage_max", object["StorageMax"])
 	d.Set("db_version", object["DBVersion"])
+	if v, ok := object["DBMinorVersion"]; ok {
+		d.Set("db_minor_version", v)
+	}
 	var writeNodeNum, readonlyNodeNum int
 	standby := "off"
 	if v, ok := object["DBNodes"].([]interface{}); ok {
@@ -521,23 +535,31 @@ func resourceAlibabacloudStackPolardbClusterInstanceRead(d *schema.ResourceData,
 	}
 	d.Set("tags", tags)
 	//	d.Set("blktag_total", object["BlktagTotal"])
-	d.Set("storage_type", strings.ToUpper(object["StorageType"].(string)))
+	d.Set("storage_type", object["StorageType"])
 	d.Set("architecture", object["Architecture"])
 	d.Set("db_cluster_status", object["DBClusterStatus"])
 	d.Set("vswitch_id", object["VSwitchId"])
 	d.Set("db_cluster_description", object["DBClusterDescription"])
-	d.Set("proxy_cpu_cores", object["ProxyCpuCores"])
+	if v, ok := object["CpuType"]; ok {
+		d.Set("cpu_type", v)
+	}
+	if v, ok := object["ImciNum"]; ok {
+		d.Set("imci_num", v)
+	}
+	if v, ok := object["Orca"]; ok {
+		d.Set("orca", v)
+	}
+	if v, ok := object["IPVersionSelectedType"]; ok {
+		d.Set("ip_version_selected_type", v)
+	}
 	d.Set("lock_mode", object["LockMode"])
-	//	d.Set("inode_total", object["InodeTotal"])
 	storageSpace := object["StorageSpace"].(json.Number)
 	if spaceValue, err := storageSpace.Int64(); err == nil {
 		storage_space := spaceValue / 1024 / 1024 / 1024
 		d.Set("storage_space", int(storage_space))
 	}
 	d.Set("creation_time", object["CreationTime"])
-	// d.Set("sub_category", object["SubCategory"])
 	d.Set("sql_size", object["SQLSize"])
-	//	d.Set("proxy_type", object["ProxyType"])
 	d.Set("vip", object["Vip"])
 
 	// Get security IPs from DescribeDBClusterAccessWhitelist
