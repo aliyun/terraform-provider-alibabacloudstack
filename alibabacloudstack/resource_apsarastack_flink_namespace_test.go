@@ -55,10 +55,10 @@ func testSweepFlinkNamespace(prefixes []string) error {
 	}
 	log.Printf("namespace ray %v", ns)
 	for _, n := range ns {
-		requestBody := map[string]interface{}{
+		requestQuery := map[string]interface{}{
 			"name": n,
 		}
-		_, err := client.DoTeaRequest("DELETE", "ververica", "2020-05-01", "CreateNamespace", "/flink/namespace/create", nil, nil, requestBody)
+		_, err := client.DoTeaRequest("DELETE", "ververica", "2020-05-01", "DeleteNamespace", "/flink/namespace/delete", nil, requestQuery, nil)
 		if err != nil {
 			return err
 		}
