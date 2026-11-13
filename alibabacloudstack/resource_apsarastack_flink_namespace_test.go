@@ -108,6 +108,9 @@ func TestAccAlibabacloudStackFlinkNamespace_Basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				// DescribeNamespaces response contains no Uid field, so
+				// owner_uid cannot be re-read after import.
+				ImportStateVerifyIgnore: []string{"owner_uid"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
