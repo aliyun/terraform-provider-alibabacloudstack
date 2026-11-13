@@ -340,12 +340,16 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		log.Print("Encryption key condition passed")
 		arnrole, err = PolardbService.CheckCloudResourceAuthorized()
 		if err != nil {
-			return errmsgs.WrapErrorf(err, "CheckCloudResourceAuthorized", "CheckCloudResourceAuthorized", errmsgs.AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapError(err)
 		}
 	} else if EncryptionKey == "" && encryption {
-		return errmsgs.WrapErrorf(nil, "Add EncryptionKey or Set encryption to false", "CheckCloudResourceAuthorized", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(errmsgs.Error(
+			"Invalid parameter combination: \"tde_status\" is true but \"encryption_key\" is empty. Please set \"encryption_key\" to a valid KMS encryption key, or set \"tde_status\" to false."),
+			errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_dbinstance", "Create", errmsgs.ProviderERROR)
 	} else if EncryptionKey != "" && !encryption {
-		return errmsgs.WrapErrorf(nil, "Set encryption to true", "CheckCloudResourceAuthorized", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(errmsgs.Error(
+			"Invalid parameter combination: \"encryption_key\" is set but \"tde_status\" is false. Please set \"tde_status\" to true to enable encryption, or remove \"encryption_key\"."),
+			errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_dbinstance", "Create", errmsgs.ProviderERROR)
 	} else {
 		log.Print("Encryption key condition failed")
 	}
