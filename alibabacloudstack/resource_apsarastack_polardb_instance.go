@@ -373,7 +373,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		// check vswitchId in zone
 		vsw, err := vpcService.DescribeVSwitch(vswitchId)
 		if err != nil {
-			return nil
+			return errmsgs.WrapError(err)
 		}
 
 		if ZoneId == "" {
