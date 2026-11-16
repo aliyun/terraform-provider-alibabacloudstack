@@ -202,22 +202,22 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Default:  false,
 				Optional: true,
 			},
-			"security_hardening_os": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"soc_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"tee_enable": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "After enabling the security sandbox, ensure a data disk no smaller than 200 GiB is mounted with the mount directory set to /fluid to guarantee normal operation of the checkpoint recovery feature.",
-			},
+			// "security_hardening_os": {
+			// 	Type:     schema.TypeBool,
+			// 	Optional: true,
+			// 	Default:  false,
+			// },
+			// "soc_enabled": {
+			// 	Type:     schema.TypeBool,
+			// 	Optional: true,
+			// 	Default:  false,
+			// },
+			// "tee_enable": {
+			// 	Type:        schema.TypeBool,
+			// 	Optional:    true,
+			// 	Default:     false,
+			// 	Description: "After enabling the security sandbox, ensure a data disk no smaller than 200 GiB is mounted with the mount directory set to /fluid to guarantee normal operation of the checkpoint recovery feature.",
+			// },
 			"num_of_nodes": {
 				Type:         schema.TypeInt,
 				Default:      0,
@@ -915,10 +915,10 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"enable": false,
 	}
 	defnodepool["auto_scaling"] = auto_scaling
-	tee_config := map[string]interface{}{
-		"tee_enable": d.Get("tee_enable").(bool),
-	}
-	defnodepool["tee_config"] = tee_config
+	// tee_config := map[string]interface{}{
+	// 	"tee_enable": d.Get("tee_enable").(bool),
+	// }
+	// defnodepool["tee_config"] = tee_config
 	scaling_group := map[string]interface{}{
 		"platform":                      d.Get("platform").(string),
 		"vpc_id":                        d.Get("vpc_id").(string),
@@ -929,8 +929,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"system_disk_performance_level": d.Get("worker_system_disk_performance_level").(string),
 		"internet_max_bandwidth_out":    0,
 		"rds_instances":                 []string{},
-		"security_hardening_os":         d.Get("security_hardening_os").(bool),
-		"soc_enabled":                   d.Get("soc_enabled").(bool),
+		// "security_hardening_os":         d.Get("security_hardening_os").(bool),
+		// "soc_enabled":                   d.Get("soc_enabled").(bool),
 	}
 	if v, ok := d.GetOk("work_image_id"); ok && v.(string) != "" {
 		scaling_group["image_id"] = v.(string)
@@ -1071,8 +1071,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		body["master_data_disks"] = masterDataDisks
 	}
 
-	body["security_hardening_os"] = d.Get("security_hardening_os").(bool)
-	body["soc_enabled"] = d.Get("soc_enabled").(bool)
+	// body["security_hardening_os"] = d.Get("security_hardening_os").(bool)
+	// body["soc_enabled"] = d.Get("soc_enabled").(bool)
 
 	// v3.18.3 Sp01 does not support this parameter to encrypt worker nodes
 	// if v, ok := d.GetOk("worker_disk_encrypted"); ok && v.(bool) {
@@ -1154,7 +1154,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 	noUpdatesAllowedCheck(d, []string{
 		"name", "master_disk_size", "master_disk_category", "master_disk_encrypt_algorithm",
 		"master_disk_kms_key_id", "master_disk_encrypted", "master_data_disks", "delete_protection",
-		"security_hardening_os", "soc_enabled", "tee_enable",
+		// "security_hardening_os", "soc_enabled", "tee_enable",
 		"worker_disk_size", "worker_disk_category", "worker_disk_encrypt_algorithm",
 		"worker_disk_kms_key_id", "worker_disk_encrypted", "worker_data_disks",
 		"pod_vswitch_ids", "pod_cidr", "service_cidr", "node_cidr_mask",
@@ -1381,8 +1381,8 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	if object.ControlPlaneConfig.SystemDiskSize > 0 {
 		d.Set("master_disk_size", object.ControlPlaneConfig.SystemDiskSize)
 	}
-	d.Set("security_hardening_os", object.ControlPlaneConfig.SecurityHardeningOs)
-	d.Set("soc_enabled", object.ControlPlaneConfig.SocEnabled)
+	// d.Set("security_hardening_os", object.ControlPlaneConfig.SecurityHardeningOs)
+	// d.Set("soc_enabled", object.ControlPlaneConfig.SocEnabled)
 	// runtime will be set from nodepool if available, fallback to cluster
 	if (object.Runtime != "" || object.RuntimeVersion != "") && nodepoolid == "" {
 		runtime := []map[string]interface{}{
@@ -1504,7 +1504,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 			}
 			d.Set("runtime", runtime)
 		}
-		d.Set("tee_enable", nodepool.TeeConfig.TeeEnable)
+		// d.Set("tee_enable", nodepool.TeeConfig.TeeEnable)
 		sworker := make([]map[string]interface{}, 0)
 		clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
 		if err != nil && !errmsgs.NotFoundError(err) {

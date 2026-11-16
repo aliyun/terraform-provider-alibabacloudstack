@@ -59,7 +59,6 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"master_disk_category": "${local.disk_category}",
 					"image_id":             "${data.alibabacloudstack_images.ack.images.0.id}",
 					"work_image_id":        "${data.alibabacloudstack_images.ack.images.0.id}",
-					"work_image_type":      "AliyunLinux3",
 					// "image_type":                          "AliyunLinux4ContainerOptimized",
 					"master_disk_size":             "120",
 					"master_instance_types":        []string{"${local.ack_instance_type}", "${local.ack_instance_type}", "${local.ack_instance_type}"},
@@ -331,6 +330,7 @@ func resourceCsK8sConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
+}
 
 %s
 
