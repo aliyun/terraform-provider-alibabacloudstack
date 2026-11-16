@@ -331,6 +331,13 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 }
 
 func resourcePolardbInstanceClassicConfigDependence(engine string) func(string) string {
+	return polardbInstanceConfigDependence(engine, true)
+}
+
+// polardbInstanceConfigDependence renders the scaffolding shared by the primary/standby instance
+// tests. withKmsKey adds the KMS key consumed by the encryption related steps; tests that do not
+// encrypt skip it.
+func polardbInstanceConfigDependence(engine string, withKmsKey bool) func(string) string {
 	var parameterGroup string
 	// Skip parameter group creation due to service instability in test environments
 	// if engine  == "MySQL" {
@@ -345,6 +352,11 @@ func resourcePolardbInstanceClassicConfigDependence(engine string) func(string) 
 	// 	}`
 	// }
 	return func(name string) string {
+		kmsKey := ""
+		if withKmsKey {
+			kmsKey = GetKeyFromEnvTestCase()
+		}
+
 		return fmt.Sprintf(`
 
 variable "name" {
@@ -377,7 +389,7 @@ locals {
 
 %s
 
-`, name, engine, SecurityGroupCommonTestCase, GetKeyFromEnvTestCase(), parameterGroup)
+`, name, engine, SecurityGroupCommonTestCase, kmsKey, parameterGroup)
 	}
 }
 
