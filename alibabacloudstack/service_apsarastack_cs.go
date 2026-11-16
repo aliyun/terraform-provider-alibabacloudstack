@@ -806,6 +806,8 @@ type ClusterObject struct {
 		SystemDiskSnapshotPolicyID string   `json:"system_disk_snapshot_policy_id"`
 		NodeNameMode               string   `json:"node_name_mode"`
 		ImageType                  string   `json:"image_type"`
+		SecurityHardeningOs        bool     `json:"security_hardening_os"`
+		SocEnabled                 bool     `json:"soc_enabled"`
 	} `json:"control_plane_config"`
 	OperationPolicy map[string]interface{} `json:"operation_policy"`
 	NodePools       []struct {

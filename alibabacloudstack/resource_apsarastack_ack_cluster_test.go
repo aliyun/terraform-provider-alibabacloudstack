@@ -85,6 +85,8 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":                    name,
+						"work_image_id":           CHECKSET,
+						"work_image_type":         "AliyunLinux3",
 						"nodepool_id":             CHECKSET,
 						"vpc_id":                  CHECKSET,
 						"pod_cidr":                CHECKSET,
