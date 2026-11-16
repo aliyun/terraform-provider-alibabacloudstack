@@ -269,15 +269,17 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			"work_image_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"work_image_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			// 			"worker_data_disk_size": {
 			// 				Type:             schema.TypeInt,
 			// 				Optional:         true,
-			// 				Default:          40,
+			// 				Default:          40,@
 			// 				ValidateFunc:     validation.IntBetween(20, 32768),
 			// 				DiffSuppressFunc: workerDataDiskSizeSuppressFunc,
 			// 			},
@@ -1427,7 +1429,6 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 			d.Set("key_name", nodepool.ScalingGroup.KeyPair)
 		}
 		if nodepool.ScalingGroup.ImageID != "" {
-			d.Set("image_id", nodepool.ScalingGroup.ImageID)
 			d.Set("work_image_id", nodepool.ScalingGroup.ImageID)
 		}
 		if nodepool.ScalingGroup.ImageType != "" {

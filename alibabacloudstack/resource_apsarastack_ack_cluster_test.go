@@ -58,6 +58,8 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"master_count":         "3",
 					"master_disk_category": "${local.disk_category}",
 					"image_id":             "${data.alibabacloudstack_images.ack.images.0.id}",
+					"work_image_id":        "${data.alibabacloudstack_images.ack.images.0.id}",
+					"work_image_type":      "AliyunLinux3",
 					// "image_type":                          "AliyunLinux4ContainerOptimized",
 					"master_disk_size":             "120",
 					"master_instance_types":        []string{"${local.ack_instance_type}", "${local.ack_instance_type}", "${local.ack_instance_type}"},
@@ -85,16 +87,19 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":                    name,
+						"image_id":                CHECKSET,
 						"work_image_id":           CHECKSET,
-						"work_image_type":         "AliyunLinux3",
+						"work_image_type":         CHECKSET,
 						"nodepool_id":             CHECKSET,
 						"vpc_id":                  CHECKSET,
 						"pod_cidr":                CHECKSET,
 						"service_cidr":            CHECKSET,
 						"version":                 CHECKSET,
 						"delete_protection":       "false",
+						"enable_ssh":              "true",
 						"worker_instance_types.#": "1",
 						"worker_vswitch_ids.#":    "1",
+						"master_disk_category":    CHECKSET,
 						"worker_disk_category":    CHECKSET,
 						"worker_disk_size":        "120",
 						"cpu_policy":              "none",
@@ -129,6 +134,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"new_nat_gateway", "slb_internet_enabled", "timeout_mins",
 					"master_disk_encrypt_algorithm", "worker_disk_encrypt_algorithm",
 					"master_disk_kms_key_id",
+					"work_image_id", "work_image_type",
 				},
 			},
 			{
@@ -325,7 +331,6 @@ func resourceCsK8sConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
-}
 
 %s
 
