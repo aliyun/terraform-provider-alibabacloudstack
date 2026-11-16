@@ -1050,7 +1050,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		for _, value := range data.([]interface{}) {
 			disk := value.(map[string]interface{})
 			diskMap := map[string]interface{}{
-				"size":                    disk["size"].(int),
+				"size":                    fmt.Sprintf("%d", disk["size"].(int)),
 				"category":                disk["category"].(string),
 				"encrypted":               fmt.Sprintf("%t", disk["encrypted"].(bool)),
 				"auto_snapshot_policy_id": disk["auto_snapshot_policy_id"].(string),
@@ -1159,6 +1159,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 		"worker_disk_kms_key_id", "worker_disk_encrypted", "worker_data_disks",
 		"pod_vswitch_ids", "pod_cidr", "service_cidr", "node_cidr_mask",
 		"new_nat_gateway", "enable_ssh", "node_port_range", "image_id",
+		"work_image_id", "work_image_type",
 		"version", "cluster_type", "os_type", "platform", "cpu_policy",
 		"proxy_mode", "addons", "slb_internet_enabled", "master_instance_types",
 		"master_vswitch_ids", "worker_instance_types", "worker_vswitch_ids",
