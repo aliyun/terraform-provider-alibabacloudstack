@@ -203,6 +203,8 @@ The following arguments are supported:
 * `format_disk` - (Optional) After selecting this option, if data disks have been attached to the specified ECS instances and the file system of the last data disk is uninitialized, the system automatically formats the last data disk to ext4 and mounts the data disk to `/var/lib/docker` and `/var/lib/kubelet`. The original data on the disk will be cleared. Make sure that you back up data in advance. If no data disk is mounted on the ECS instance, no new data disk will be purchased. Default is `false`.
 * `image_id` - (Optional) Custom Image support. Must be based on CentOS7 or AliyunLinux2.
 * `image_type` - (Optional) The OS image type of the worker nodes. Default is `AliyunLinux3`.
+* `work_image_id` - (Optional) The custom image used by worker nodes. It cannot be modified after the cluster is created. If you do not specify it, the image used by the cluster is returned.
+* `work_image_type` - (Optional) The OS image type of the worker nodes. It cannot be modified after the cluster is created. If you do not specify it, the image type used by the cluster is returned. If you specify it, you must pass the exact image type value returned by the backend, because the backend may normalize the value you pass (for example, normalize `AliyunLinux3` to `AliyunLinux4ContainerOptimized`). Passing a value that differs from the normalized one causes a persistent diff and the update is rejected.
 * `timeout_mins` - (Optional) Backend service time-out time; unit: minute. Default is 60.
 * `delete_protection` - (Optional) Whether the instance should have delete protection.
 * `kms_encryption_context` - (Optional) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating a CS Kubernetes with `kms_encrypted_password`. See [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm). It is valid when `kms_encrypted_password` is set.
@@ -231,6 +233,16 @@ If you want to use `Flannel` as CNI network plugin, you need to specify the `pod
 * `master_disk_size` - (Optional) The system disk size of master nodes. Valid range: [20~500] in GB. Default is 20.
 * `master_instance_types` - (Required) The instance type of master nodes. Specify one type for single AZ Cluster, three types for MultiAZ Cluster.
 * `master_system_disk_performance_level` - (Optional) Performance level of the master node's system disk.
+* `master_data_disks` - (Optional) The configurations of the data disks that are mounted to master nodes. It cannot be modified after the cluster is created.
+  * `size` - (Optional) The data disk size of master nodes. Unit: GB.
+  * `category` - (Optional) The data disk category of master nodes.
+  * `encrypted` - (Optional) Specifies whether disk encryption is enabled.
+  * `kms_key_id` - (Optional) The ID of the KMS key used by the data disk.
+  * `auto_snapshot_policy_id` - (Optional) The ID of the policy that is used to back up the data disk.
+  * `performance_level` - (Optional) The performance level of the data disk.
+  * `auto_format` - (Optional) Specifies whether to automatically format the data disk.
+  * `file_system` - (Optional) The file system of the data disk.
+  * `mount_target` - (Optional) The mount target of the data disk.
 
 ### Worker Params
 

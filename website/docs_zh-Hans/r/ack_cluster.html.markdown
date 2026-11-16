@@ -203,6 +203,8 @@ resource "alibabacloudstack_cs_kubernetes" "k8s" {
 * `format_disk` - (选填) 选择此选项后，如果已将数据盘附加到指定的 ECS 实例并且最后一个数据盘的文件系统未初始化，系统将自动将最后一个数据盘格式化为 ext4 并挂载到 `/var/lib/docker` 和 `/var/lib/kubelet`。磁盘上的原始数据将被清除。请确保提前备份数据。如果没有在 ECS 实例上挂载数据盘，则不会购买新的数据盘。默认为 `false`。
 * `image_id` - (选填) 自定义镜像支持。必须基于 CentOS7 或 AliyunLinux2。
 * `image_type` - (选填) 工作节点操作系统镜像类型。默认为 `AliyunLinux3`。
+* `work_image_id` - (选填) 工作节点使用的自定义镜像。集群创建后不可修改。如果不指定，将返回集群实际使用的镜像。
+* `work_image_type` - (选填) 工作节点的操作系统镜像类型。集群创建后不可修改。如果不指定，将返回集群实际使用的镜像类型。如果指定，必须传入后端返回的精确镜像类型值，因为后端可能对您传入的值进行归一化（例如将 `AliyunLinux3` 归一化为 `AliyunLinux4ContainerOptimized`）。传入与归一化后不一致的值会产生持续 diff，且更新会被拒绝。
 * `timeout_mins` - (选填) 后端服务超时时间；单位：分钟。默认为 60。
 * `delete_protection` - (选填) 实例是否应具有删除保护。
 * `kms_encryption_context` - (选填) 用于在创建或更新 CS Kubernetes 前解密 `kms_encrypted_password` 的 KMS 加密上下文。有关更多信息，请参阅 [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm)。当设置了 `kms_encrypted_password` 时有效。
@@ -228,6 +230,16 @@ resource "alibabacloudstack_cs_kubernetes" "k8s" {
 * `master_disk_size` - (选填) 主节点的系统盘大小。有效范围：[20~500] GB。默认为 20。
 * `master_instance_types` - (必填) 主节点的实例类型。对于单 AZ 集群，指定一种类型；对于多 AZ 集群，指定三种类型。
 * `master_system_disk_performance_level` - (选填) 主节点系统盘的性能级别。
+* `master_data_disks` - (选填) 挂载到主节点的数据盘配置。集群创建后不可修改。
+  * `size` - (选填) 主节点的数据盘大小。单位：GB。
+  * `category` - (选填) 主节点的数据盘类别。
+  * `encrypted` - (选填) 是否启用磁盘加密。
+  * `kms_key_id` - (选填) 数据盘使用的 KMS 密钥 ID。
+  * `auto_snapshot_policy_id` - (选填) 用于备份数据盘的策略 ID。
+  * `performance_level` - (选填) 数据盘的性能级别。
+  * `auto_format` - (选填) 是否自动格式化数据盘。
+  * `file_system` - (选填) 数据盘的文件系统。
+  * `mount_target` - (选填) 数据盘的挂载点。
 
 ### Worker 参数
 
