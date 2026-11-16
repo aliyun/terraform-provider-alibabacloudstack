@@ -59,6 +59,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"master_disk_category": "${local.disk_category}",
 					"image_id":             "${data.alibabacloudstack_images.ack.images.0.id}",
 					"work_image_id":        "${data.alibabacloudstack_images.ack.images.0.id}",
+					"work_image_type":      "AliyunLinux4ContainerOptimized",
 					"master_data_disks": []map[string]interface{}{
 						{
 							"size":       100,
@@ -96,7 +97,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 						"name":                           name,
 						"image_id":                       CHECKSET,
 						"work_image_id":                  CHECKSET,
-						"work_image_type":                CHECKSET,
+						"work_image_type":                "AliyunLinux4ContainerOptimized",
 						"nodepool_id":                    CHECKSET,
 						"vpc_id":                         CHECKSET,
 						"pod_cidr":                       CHECKSET,
