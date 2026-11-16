@@ -1101,32 +1101,35 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				allNodeName = append(allNodeName, value.NodeName)
 			}
 			count := oldValue - newValue
+			if count > len(allNodeName) {
+				count = len(allNodeName)
+			}
 			removeNodesName := allNodeName[:count]
 			if len(removeNodesName) > 0 {
-			}
-			req := client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", fmt.Sprintf("/api/v2/clusters/%s/nodes/remove", d.Id()))
-			body := fmt.Sprintf("{\"%s\":%t,\"%s\":%t,\"%s\":%q}",
-				"release_node", true,
-				"drain_node", true,
-				"nodes", removeNodesName,
-			)
-			log.Printf("[DEBUG]RemoveClusterNodes Request body: %s", body)
-			req.SetContent([]byte(body))
-			req.Headers["x-acs-content-type"] = "application/json"
-			var resp *responses.CommonResponse
-			if err := invoker.Run(func() error {
-				resp, err = client.ProcessCommonRequest(req)
-				return err
-			}); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, nodepoolid, "DeleteKubernetesClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			if resp.IsSuccess() == false {
-				//return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
-				return err
-			}
-			stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(resourceNodepoolId, []string{"deleting", "failed"}))
-			if _, err := stateConf.WaitForState(); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				req := client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", fmt.Sprintf("/api/v2/clusters/%s/nodes/remove", d.Id()))
+				body := fmt.Sprintf("{\"%s\":%t,\"%s\":%t,\"%s\":%q}",
+					"release_node", true,
+					"drain_node", true,
+					"nodes", removeNodesName,
+				)
+				log.Printf("[DEBUG]RemoveClusterNodes Request body: %s", body)
+				req.SetContent([]byte(body))
+				req.Headers["x-acs-content-type"] = "application/json"
+				var resp *responses.CommonResponse
+				if err := invoker.Run(func() error {
+					resp, err = client.ProcessCommonRequest(req)
+					return err
+				}); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, nodepoolid, "DeleteKubernetesClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
+				}
+				if resp.IsSuccess() == false {
+					//return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
+					return err
+				}
+				stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(resourceNodepoolId, []string{"deleting", "failed"}))
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
 			}
 			if newValue == 0 {
 				// If the number of worker nodes is 0, delete the default node pool
@@ -1403,8 +1406,8 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 					sworker = append(sworker, WorkerNodes)
 				}
 			}
-			d.Set("worker_nodes", sworker)
 		}
+		d.Set("worker_nodes", sworker)
 	} else {
 		d.Set("num_of_nodes", 0)
 	}
@@ -1490,7 +1493,7 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteCluster", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	stateConf := BuildStateConf([]string{"running", "deleting", "initial"}, []string{""}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"delete_failed"}))
+	stateConf := BuildStateConf([]string{"running", "deleting", "initial"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"delete_failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
