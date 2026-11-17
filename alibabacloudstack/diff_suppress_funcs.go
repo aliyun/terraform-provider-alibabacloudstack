@@ -316,24 +316,36 @@ func archiveBackupPeriodDiffSuppressFunc(k, old, new string, d *schema.ResourceD
 
 	return true
 }
+
+// forceUpdateSafe reads force_update defensively: the key may be absent from
+// the resource schema, in which case d.Get returns nil and a direct type
+// assertion would panic during destroy plan.
+func forceUpdateSafe(d *schema.ResourceData) bool {
+	forceUpdate, ok := d.Get("force_update").(bool)
+	if !ok {
+		return false
+	}
+	return forceUpdate
+}
+
 func csForceUpdateSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	// many cs args are not returning from the server
 	// if this is a new resource, allow the diff
 	// args with this suppress func will always suppress the diff, unless user specified force_update
 	log.Printf("key %s, old %s, new %s, isnew %v, id %s", k, old, new, d.IsNewResource(), d.Id())
-	return !(d.Id() == "") && !d.Get("force_update").(bool)
+	return !(d.Id() == "") && !forceUpdateSafe(d)
 }
 func workerDataDiskSizeSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	_, ok := d.GetOk("worker_data_disk_category")
-	return !ok || !(d.Id() == "") && !d.Get("force_update").(bool)
+	return !ok || !(d.Id() == "") && !forceUpdateSafe(d)
 }
 
 func csKubernetesMasterPostPaidDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("master_instance_charge_type").(string) == "PostPaid" || !(d.Id() == "") && !d.Get("force_update").(bool)
+	return d.Get("master_instance_charge_type").(string) == "PostPaid" || !(d.Id() == "") && !forceUpdateSafe(d)
 }
 
 func csKubernetesWorkerPostPaidDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("worker_instance_charge_type").(string) == "PostPaid" || !(d.Id() == "") && !d.Get("force_update").(bool)
+	return d.Get("worker_instance_charge_type").(string) == "PostPaid" || !(d.Id() == "") && !forceUpdateSafe(d)
 }
 
 func imageIdSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
@@ -343,7 +355,7 @@ func imageIdSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 
 	// if we want to change cluster's image_id to default, we have to find out what the default image_id is,
 	// then fill that image_id in this field.
-	return new == "" || !(d.Id() == "") && !d.Get("force_update").(bool)
+	return new == "" || !(d.Id() == "") && !forceUpdateSafe(d)
 }
 func cmsClientInfoSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	for _, v := range d.Get("escalations_info").([]interface{}) {
