@@ -443,3 +443,135 @@ locals {
 }
 
 var CsK8sMap = map[string]string{}
+
+func TestAccAlibabacloudStackCsK8s_CustomImage(t *testing.T) {
+	var v *ClusterObject
+	resourceId := "alibabacloudstack_cs_kubernetes.k8s"
+	ra := resourceAttrInit(resourceId, CsK8sMap)
+	serviceFunc := func() interface{} {
+		return &CsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeCsKubernetes")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("tf-testAccK8sCustomImg%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCsK8sCustomImageConfigDependence)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t, resourceId)
+		},
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"runtime": []map[string]interface{}{
+						{"name": "containerd", "version": "2.1.5"},
+					},
+					"addons": []map[string]interface{}{
+						{
+							"name": "flannel",
+						},
+					},
+					"name":                 "${var.name}",
+					"version":              "1.36.2-aliyun.1",
+					"os_type":              "linux",
+					"platform":             "AliyunLinux",
+					"timeout_mins":         "60",
+					"vpc_id":               "${alibabacloudstack_vpc_vpc.default.id}",
+					"master_count":         "3",
+					"master_disk_category": "${local.disk_category}",
+					"image_id":             "${alibabacloudstack_image.custom.id}",
+					"work_image_id":        "${alibabacloudstack_image.custom.id}",
+					"work_image_type":      "AliyunLinux4ContainerOptimized",
+					"master_data_disks": []map[string]interface{}{
+						{
+							"size":       100,
+							"category":   "cloud_pperf",
+							"encrypted":  true,
+							"kms_key_id": "${alibabacloudstack_kms_key.default.id}",
+						},
+					},
+					"master_disk_size":             "120",
+					"master_instance_types":        []string{"${local.ack_instance_type}", "${local.ack_instance_type}", "${local.ack_instance_type}"},
+					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
+					"num_of_nodes":                 "1",
+					"worker_disk_category":         "${local.disk_category}",
+					"worker_disk_size":             "120",
+					"worker_instance_types":        []string{"${local.ack_instance_type}"},
+					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
+					"enable_ssh":                   "${var.enable_ssh}",
+					"password":                     "${random_password.password.0.result}",
+					"delete_protection":            "false",
+					"pod_cidr":                     "${var.pod_cidr}",
+					"service_cidr":                 "${var.service_cidr}",
+					"node_cidr_mask":               "${var.node_cidr_mask}",
+					"is_enterprise_security_group": "true",
+					"new_nat_gateway":              "false",
+					"slb_internet_enabled":         "false",
+					"proxy_mode":                   "ipvs",
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "acceptance test",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name":                         name,
+						"image_id":                     "${alibabacloudstack_image.custom.id}",
+						"work_image_id":                "${alibabacloudstack_image.custom.id}",
+						"work_image_type":              "AliyunLinux4ContainerOptimized",
+						"nodepool_id":                  CHECKSET,
+						"vpc_id":                       CHECKSET,
+						"num_of_nodes":                 "1",
+						"master_nodes.#":               "3",
+						"master_count":                 "3",
+						"delete_protection":            "false",
+						"is_enterprise_security_group": "true",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"num_of_nodes": "2",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"num_of_nodes":  "2",
+						"image_id":      "${alibabacloudstack_image.custom.id}",
+						"work_image_id": "${alibabacloudstack_image.custom.id}",
+					}),
+				),
+			},
+		},
+	})
+}
+
+func resourceCsK8sCustomImageConfigDependence(name string) string {
+	return resourceCsK8sConfigDependence(name) + `
+resource "alibabacloudstack_ecs_instance" "image_base" {
+  image_id             = data.alibabacloudstack_images.ack.images[0].id
+  instance_type        = local.ack_instance_type
+  system_disk_category = local.disk_category
+  system_disk_size     = 40
+  security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
+  instance_name        = "${var.name}_image_base"
+  vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
+  password             = random_password.password[0].result
+  is_outdated          = false
+}
+
+resource "alibabacloudstack_image" "custom" {
+  instance_id = alibabacloudstack_ecs_instance.image_base.id
+  image_name  = "${var.name}_custom"
+  description = "custom image for ack cluster acceptance test"
+  timeouts {
+    create = "60m"
+  }
+}
+`
+}
