@@ -1281,6 +1281,12 @@ func DeleteAllPoolNodes(d *schema.ResourceData, meta interface{}) error {
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
+		// RemoveClusterNodes puts the cluster into removing; wait it back before
+		// DeleteClusterNodepool, which is rejected while the cluster is removing.
+		clusterStateConf := BuildStateConf([]string{"removing", "deleting", "scaling"}, []string{"running", "active"}, d.Timeout(schema.TimeoutDelete), 30*time.Second, csService.CsKubernetesInstanceStateRefreshFunc(clusterId, []string{"failed", "delete_failed"}))
+		if _, err := clusterStateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, clusterId)
+		}
 	}
 	return nil
 }
