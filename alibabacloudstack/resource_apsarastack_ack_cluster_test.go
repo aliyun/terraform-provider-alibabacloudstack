@@ -551,8 +551,14 @@ resource "alibabacloudstack_ecs_instance" "image_base" {
   is_outdated          = false
 }
 
+resource "alibabacloudstack_ecs_snapshot" "image_base" {
+  disk_id       = alibabacloudstack_ecs_instance.image_base.system_disk_id
+  snapshot_name = "${var.name}_snap"
+  description   = "system disk snapshot for ack custom image test"
+}
+
 resource "alibabacloudstack_image" "custom" {
-  instance_id = alibabacloudstack_ecs_instance.image_base.id
+  snapshot_id = alibabacloudstack_ecs_snapshot.image_base.id
   image_name  = "${var.name}_custom"
   description = "custom image for ack cluster acceptance test"
   timeouts {
