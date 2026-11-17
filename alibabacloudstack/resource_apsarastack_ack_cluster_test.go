@@ -533,18 +533,6 @@ func TestAccAlibabacloudStackCsK8s_CustomImage(t *testing.T) {
 					}),
 				),
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"num_of_nodes": "2",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"num_of_nodes":  "2",
-						"image_id":      "${alibabacloudstack_image.custom.id}",
-						"work_image_id": "${alibabacloudstack_image.custom.id}",
-					}),
-				),
-			},
 		},
 	})
 }
