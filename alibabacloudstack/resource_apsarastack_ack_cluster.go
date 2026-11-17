@@ -925,6 +925,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	}
 	if v, ok := d.GetOk("work_image_id"); ok && v.(string) != "" {
 		scaling_group["image_id"] = v.(string)
+	} else if v, ok := d.GetOk("image_id"); ok && v.(string) != "" {
+		scaling_group["image_id"] = v.(string)
 	}
 	if v, ok := d.GetOk("work_image_type"); ok && v.(string) != "" {
 		scaling_group["image_type"] = v.(string)
