@@ -485,6 +485,7 @@ func TestAccAlibabacloudStackCsK8s_CustomImage(t *testing.T) {
 					"vpc_id":               "${alibabacloudstack_vpc_vpc.default.id}",
 					"master_count":         "3",
 					"master_disk_category": "${local.disk_category}",
+					"image_id":             "${alibabacloudstack_image.custom.id}",
 					"work_image_id":        "${alibabacloudstack_image.custom.id}",
 					"master_data_disks": []map[string]interface{}{
 						{
@@ -520,6 +521,7 @@ func TestAccAlibabacloudStackCsK8s_CustomImage(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":                         name,
+						"image_id":                     "${alibabacloudstack_image.custom.id}",
 						"work_image_id":                "${alibabacloudstack_image.custom.id}",
 						"nodepool_id":                  CHECKSET,
 						"vpc_id":                       CHECKSET,
@@ -538,6 +540,7 @@ func TestAccAlibabacloudStackCsK8s_CustomImage(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"num_of_nodes":  "2",
+						"image_id":      "${alibabacloudstack_image.custom.id}",
 						"work_image_id": "${alibabacloudstack_image.custom.id}",
 					}),
 				),
