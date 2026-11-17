@@ -253,14 +253,6 @@ func PostPaidDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	return strings.ToLower(d.Get("instance_charge_type").(string)) == "postpaid"
 }
 
-func ArchitectureTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	if strings.ToLower(d.Get("series").(string)) == "enterprise" && new == "rwsplit" {
-		return false
-	} else {
-		return true
-	}
-}
-
 func NodeTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if strings.ToLower(d.Get("series").(string)) == "enterprise" && new == "readone" {
 		return false
@@ -335,28 +327,24 @@ func csForceUpdateSuppressFunc(k, old, new string, d *schema.ResourceData) bool 
 	log.Printf("key %s, old %s, new %s, isnew %v, id %s", k, old, new, d.IsNewResource(), d.Id())
 	return !(d.Id() == "") && !forceUpdateSafe(d)
 }
-func workerDataDiskSizeSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	_, ok := d.GetOk("worker_data_disk_category")
-	return !ok || !(d.Id() == "") && !forceUpdateSafe(d)
-}
 
-func csKubernetesMasterPostPaidDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("master_instance_charge_type").(string) == "PostPaid" || !(d.Id() == "") && !forceUpdateSafe(d)
-}
+// func workerDataDiskSizeSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+// 	_, ok := d.GetOk("worker_data_disk_category")
+// 	return !ok || !(d.Id() == "") && !forceUpdateSafe(d)
+// }
 
-func csKubernetesWorkerPostPaidDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("worker_instance_charge_type").(string) == "PostPaid" || !(d.Id() == "") && !forceUpdateSafe(d)
-}
 
-func imageIdSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	// setting image_id is not recommended, but is needed by some users.
-	// when image_id is left blank, server will set a random default to it, we only know the default value after creation.
-	// we suppress diff here to prevent unintentional force new action.
 
-	// if we want to change cluster's image_id to default, we have to find out what the default image_id is,
-	// then fill that image_id in this field.
-	return new == "" || !(d.Id() == "") && !forceUpdateSafe(d)
-}
+// func imageIdSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+// 	// setting image_id is not recommended, but is needed by some users.
+// 	// when image_id is left blank, server will set a random default to it, we only know the default value after creation.
+// 	// we suppress diff here to prevent unintentional force new action.
+//
+// 	// if we want to change cluster's image_id to default, we have to find out what the default image_id is,
+// 	// then fill that image_id in this field.
+// 	return new == "" || !(d.Id() == "") && !forceUpdateSafe(d)
+// }
+
 func cmsClientInfoSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	for _, v := range d.Get("escalations_info").([]interface{}) {
 		mapping := v.(map[string]interface{})
