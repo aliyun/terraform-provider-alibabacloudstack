@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -312,28 +311,11 @@ func archiveBackupPeriodDiffSuppressFunc(k, old, new string, d *schema.ResourceD
 // forceUpdateSafe reads force_update defensively: the key may be absent from
 // the resource schema, in which case d.Get returns nil and a direct type
 // assertion would panic during destroy plan.
-func forceUpdateSafe(d *schema.ResourceData) bool {
-	forceUpdate, ok := d.Get("force_update").(bool)
-	if !ok {
-		return false
-	}
-	return forceUpdate
-}
-
-func csForceUpdateSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	// many cs args are not returning from the server
-	// if this is a new resource, allow the diff
-	// args with this suppress func will always suppress the diff, unless user specified force_update
-	log.Printf("key %s, old %s, new %s, isnew %v, id %s", k, old, new, d.IsNewResource(), d.Id())
-	return !(d.Id() == "") && !forceUpdateSafe(d)
-}
 
 // func workerDataDiskSizeSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 // 	_, ok := d.GetOk("worker_data_disk_category")
 // 	return !ok || !(d.Id() == "") && !forceUpdateSafe(d)
 // }
-
-
 
 // func imageIdSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 // 	// setting image_id is not recommended, but is needed by some users.

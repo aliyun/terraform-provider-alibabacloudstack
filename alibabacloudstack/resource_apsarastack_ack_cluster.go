@@ -126,11 +126,10 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(1, 63),
 			},
 			"master_disk_size": {
-				Type:             schema.TypeInt,
-				Optional:         true,
-				Default:          40,
-				ValidateFunc:     validation.IntBetween(40, 500),
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      40,
+				ValidateFunc: validation.IntBetween(40, 500),
 			},
 			"master_disk_category": {
 				Type:     schema.TypeString,
@@ -138,7 +137,6 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Default:  DiskCloudSSD,
 				ValidateFunc: validation.StringInSlice([]string{
 					string(DiskCloudEfficiency), string(DiskCloudSSD), string(DiskCloudPPERF), string(DiskCloudSPERF)}, false),
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
 			},
 			"master_disk_encrypt_algorithm": {
 				Type:         schema.TypeString,
@@ -377,25 +375,21 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringMatch(regexp.MustCompile(`^vsw-[a-z0-9]*$`), "should start with 'vsw-'."),
 				},
-				MaxItems:         10,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
-				ConflictsWith:    []string{"pod_cidr"},
+				MaxItems:      10,
+				ConflictsWith: []string{"pod_cidr"},
 			},
 			// Flannel network
 			"pod_cidr": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"service_cidr": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"node_cidr_mask": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"new_nat_gateway": {
 				Type:     schema.TypeBool,
@@ -403,11 +397,10 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Default:  true,
 			},
 			"password": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Sensitive:        true,
-				ConflictsWith:    []string{"kms_encrypted_password", "key_name"},
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"kms_encrypted_password", "key_name"},
 			},
 			"key_name": {
 				Type:             schema.TypeString,
@@ -434,10 +427,9 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			// 				DiffSuppressFunc: csForceUpdateSuppressFunc,
 			// 			},
 			"enable_ssh": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:          false,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"node_port_range": {
 				Type:     schema.TypeString,
@@ -519,10 +511,9 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				},
 			},
 			"slb_internet_enabled": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:          true,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
 			},
 			// computed parameters
 			"kube_config": {
@@ -1159,6 +1150,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 		"worker_disk_kms_key_id", "worker_disk_encrypted", "worker_data_disks",
 		"pod_vswitch_ids", "pod_cidr", "service_cidr", "node_cidr_mask",
 		"new_nat_gateway", "enable_ssh", "node_port_range", "image_id",
+		"password", "kms_encrypted_password", "kms_encryption_context",
 		"work_image_id", "work_image_type",
 		"version", "cluster_type", "os_type", "platform", "cpu_policy",
 		"proxy_mode", "addons", "slb_internet_enabled", "master_instance_types",
