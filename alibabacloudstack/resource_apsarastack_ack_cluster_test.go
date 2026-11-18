@@ -518,10 +518,12 @@ func TestAccAlibabacloudStackCsK8s_CustomImage(t *testing.T) {
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(resourceId, "image_id", "alibabacloudstack_image.custom", "id"),
+					resource.TestCheckResourceAttrPair(resourceId, "work_image_id", "alibabacloudstack_image.custom", "id"),
 					testAccCheck(map[string]string{
 						"name":                         name,
-						"image_id":                     "${alibabacloudstack_image.custom.id}",
-						"work_image_id":                "${alibabacloudstack_image.custom.id}",
+						"image_id":                     CHECKSET,
+						"work_image_id":                CHECKSET,
 						"nodepool_id":                  CHECKSET,
 						"vpc_id":                       CHECKSET,
 						"num_of_nodes":                 "1",
