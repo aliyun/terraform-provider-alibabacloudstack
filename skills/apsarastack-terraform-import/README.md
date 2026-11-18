@@ -1,69 +1,69 @@
-# 阿里云专有云资源 Terraform 导入 (apsarastack-terraform-import)
+# Alibaba Cloud ApsaraStack Resource Terraform Import (apsarastack-terraform-import)
 
-将阿里云专有云（ApsaraStack）账号下的现有资源导入到 Terraform 管理。自动执行环境检查、资源发现、HCL 生成、state 导入等操作。
+Import existing resources under an Alibaba Cloud ApsaraStack account into Terraform management. Automatically performs environment checks, resource discovery, HCL generation, state import, and more.
 
-> **注意**：本 Skill 面向阿里云专有云环境（ApsaraStack），使用 `aliyun/alibabacloudstack` Provider。公有云环境请使用对应的公有云导入 Skill。
+> **Note**: This skill is designed for the Alibaba Cloud ApsaraStack environment, using the `aliyun/alibabacloudstack` Provider. For public cloud environments, please use the corresponding public cloud import skill.
 
-## 功能概述
+## Feature Overview
 
-- **环境检查**：自动检测 apsara-cli、Terraform、Python3 等工具安装状态
-- **认证配置**：支持环境变量、CLI 配置文件、ECS RAM 角色等多种认证方式
-- **资源发现**：通过 ResourceCenter API 或原生产品 API 批量查询资源
-- **依赖分析**：构建资源依赖图，按正确顺序导入
-- **HCL 生成**：自动生成 Terraform 资源配置代码
-- **State 导入**：执行 terraform import 将资源纳入管理
-- **增量同步**：支持已有工作目录的增量资源同步
+- **Environment Check**: Automatically detects the installation status of tools such as apsara-cli, Terraform, and Python3
+- **Authentication Configuration**: Supports multiple authentication methods including environment variables, CLI configuration files, and ECS RAM roles
+- **Resource Discovery**: Batch query resources via ResourceCenter API or native product APIs
+- **Dependency Analysis**: Builds resource dependency graphs and imports in the correct order
+- **HCL Generation**: Automatically generates Terraform resource configuration code
+- **State Import**: Executes `terraform import` to bring resources under management
+- **Incremental Sync**: Supports incremental resource sync for existing working directories
 
-## 支持模式
+## Supported Modes
 
-- **一次性迁移**：完整执行环境检查到验证的全流程
-- **增量同步**：在已有 Terraform 工作目录基础上，同步新增/删除/变更的资源
+- **One-time Migration**: Complete end-to-end process from environment check to validation
+- **Incremental Sync**: Sync newly added / deleted / changed resources based on an existing Terraform working directory
 
-## 目录结构
+## Directory Structure
 
 ```
 .
 ├── .qoder-plugin/
-│   └── plugin.json          # 插件清单
+│   └── plugin.json          # Plugin manifest
 ├── skills/
 │   └── apsarastack-terraform-import/
-│       ├── SKILL.md          # Skill 主定义文件
+│       ├── SKILL.md          # Main skill definition file
 │       ├── examples/
-│       │   └── provider.tf   # Provider 配置示例
+│       │   └── provider.tf   # Provider configuration example
 │       └── references/
-│           ├── api-commands.md      # apsara-cli 命令速查
-│           ├── dependency-rules.md  # 资源依赖规则
-│           ├── incremental-sync.md  # 增量同步详细流程
-│           ├── ram-policies.md      # RAM 权限参考
-│           ├── resource-hub-api.md  # ResourceCenter API 指南
-│           ├── resource-types.md    # 资源类型映射表
-│           ├── state-management.md  # terraform state 命令参考
-│           └── terraform-patterns.md # HCL 代码模板与常见修复
+│           ├── api-commands.md      # apsara-cli command quick reference
+│           ├── dependency-rules.md  # Resource dependency rules
+│           ├── incremental-sync.md  # Detailed incremental sync workflow
+│           ├── ram-policies.md      # RAM permission references
+│           ├── resource-hub-api.md  # ResourceCenter API guide
+│           ├── resource-types.md    # Resource type mapping table
+│           ├── state-management.md  # terraform state command reference
+│           └── terraform-patterns.md # HCL code templates and common fixes
 └── README.md
 ```
 
-## 来源
+## Source
 
-- **原始仓库**：https://github.com/aliyun/alibabacloud-aiops-skills
-- **Skill 路径**：skills/migrationom/solutions/apsarastack-terraform-import
-- **Agent Explorer**：https://agentexplorer.aliyuncs.com
+- **Original Repository**: https://github.com/aliyun/alibabacloud-aiops-skills
+- **Skill Path**: skills/migrationom/solutions/apsarastack-terraform-import
+- **Agent Explorer**: https://agentexplorer.aliyuncs.com
 
-## 触发条件
+## Trigger Conditions
 
-当用户提到以下关键词时，该 skill 将被激活：
+This skill will be activated when the user mentions the following keywords:
 
-- 导入专有云资源到 Terraform
-- terraform import 专有云
+- Import ApsaraStack resources to Terraform
 - terraform import ApsaraStack
-- 将现有专有云资源纳入 Terraform 管理
-- 阿里云专有云资源迁移 Terraform
-- 生成 terraform state
+- terraform import ApsaraStack
+- Bring existing ApsaraStack resources into Terraform management
+- Alibaba Cloud ApsaraStack resource migration to Terraform
+- Generate terraform state
 - import alibabacloudstack resources
-- 阿里云专有云 IaC 迁移
-- 阿里云专有云 Terraform 导入
+- Alibaba Cloud ApsaraStack IaC migration
+- Alibaba Cloud ApsaraStack Terraform import
 
-## 支持范围
+## Supported Scope
 
-理论上支持 alibabacloudstack provider 中任何具有 Read 方法的资源。
-预置了约 50 种常见资源类型的验证命令、HCL 模板和导入 ID 格式：
-VPC、ECS、SLB、OSS、RDS、Redis、MongoDB、PolarDB、NAT Gateway、EIP、Security Group、VSwitch、DNS、RAM、ACK、FC 等。
+Theoretically supports any resource in the alibabacloudstack provider that has a Read method.
+Pre-configured with verified API discovery commands, HCL templates, and import ID formats for approximately 50 common resource types:
+VPC, ECS, SLB, OSS, RDS, Redis, MongoDB, PolarDB, NAT Gateway, EIP, Security Group, VSwitch, DNS, RAM, ACK, FC, etc.
