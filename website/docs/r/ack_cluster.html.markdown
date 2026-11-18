@@ -190,7 +190,7 @@ The following arguments are supported:
 * `user_data` - (Optional) User-defined data for instances. Windows instances support batch and PowerShell scripts. If your script file is larger than 1 KB, we recommend that you upload the script to Object Storage Service (OSS) and pull it through the internal endpoint of your OSS bucket.
 * `instances` - (Optional) A list of instances that can be attached as worker nodes in the same VPC.
 * `os_type` - (Optional) The operating system of the nodes that run pods, its valid values are either `Linux` or `Windows`. Default is `Linux`.
-* `platform` - (Optional) The architecture of the nodes that run pods. Default is `CentOS`.
+* `platform` - (Optional, Deprecated) The architecture of the nodes that run pods. Default is `CentOS`. This field is deprecated and will become read-only (Computed) in version 3.21.0, then removed in a future version; changes to this field are ignored.
 * `security_group_id` - (Optional) The ID of the security group to which the ECSs in the cluster belong. Conflicts with `is_enterprise_security_group`.
 * `is_enterprise_security_group` - (Optional) Specifies whether an advanced security group is automatically created. You must set either the `security_group_id` or `is_enterprise_security_group` parameter.
 * `runtime` - (Optional) The platform on which the clusters are going to run.

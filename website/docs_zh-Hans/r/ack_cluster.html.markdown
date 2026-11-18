@@ -190,7 +190,7 @@ resource "alibabacloudstack_cs_kubernetes" "k8s" {
 * `user_data` - (选填) 实例的用户定义数据。Windows 实例支持批处理和 PowerShell 脚本。如果您的脚本文件大于 1 KB，建议将其上传到对象存储服务 (OSS)，并通过 OSS 存储桶的内部端点拉取它。
 * `instances` - (选填) 可以作为工作节点附加到同一 VPC 的实例列表。
 * `os_type` - (选填) 运行 pod 的节点的操作系统类型，其有效值为 `Linux` 或 `Windows`。默认为 `Linux`。
-* `platform` - (选填) 运行 pod 的节点架构。默认为 `CentOS`。
+* `platform` - (选填，已废弃) 运行 pod 的节点架构。默认为 `CentOS`。该字段已废弃，将在 3.21.0 版本变为只读（Computed），后续版本下线；现忽略该字段的变更。
 * `security_group_id` - (选填) 集群所属的 ECS 的安全组 ID。与 `is_enterprise_security_group` 冲突。
 * `is_enterprise_security_group` - (选填) 是否自动创建高级安全组。必须设置 `security_group_id` 或 `is_enterprise_security_group` 参数之一。
 * `runtime` - (选填) 集群运行的平台。

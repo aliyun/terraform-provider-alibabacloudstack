@@ -469,9 +469,11 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Default:  OsType,
 			},
 			"platform": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  Platform,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          Platform,
+				Deprecated:       "The field `platform` is deprecated and will become read-only (Computed) in version 3.21.0, then removed in a future version. Changes to this field are ignored.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool { return true },
 			},
 			// cpu policy options of kubelet
 			"cpu_policy": {
@@ -1154,7 +1156,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 		"new_nat_gateway", "enable_ssh", "node_port_range", "image_id",
 		"password", "kms_encrypted_password", "kms_encryption_context",
 		"work_image_id", "work_image_type",
-		"version", "cluster_type", "os_type", "platform", "cpu_policy",
+		"version", "cluster_type", "os_type", "cpu_policy",
 		"proxy_mode", "addons", "slb_internet_enabled", "master_instance_types",
 		"master_vswitch_ids", "worker_instance_types", "worker_vswitch_ids",
 		"instances", "format_disk", "keep_instance_name", "master_count",
