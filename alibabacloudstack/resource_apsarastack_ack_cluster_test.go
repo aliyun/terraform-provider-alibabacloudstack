@@ -489,10 +489,9 @@ func TestAccAlibabacloudStackCsK8s_CustomImage(t *testing.T) {
 					"work_image_id":        "${alibabacloudstack_image.custom.id}",
 					"master_data_disks": []map[string]interface{}{
 						{
-							"size":       100,
-							"category":   "cloud_pperf",
-							"encrypted":  true,
-							"kms_key_id": "${alibabacloudstack_kms_key.default.id}",
+							"size":      100,
+							"category":  "cloud_pperf",
+							"encrypted": false,
 						},
 					},
 					"master_disk_size":             "120",
