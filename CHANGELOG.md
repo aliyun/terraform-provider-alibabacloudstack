@@ -1,3 +1,38 @@
+# 3.18.35
+
+## Added
+
+1. Orchestration and query support for Lindorm instance engine connection details (`alibabacloudstack_lindorm_connection`): returns `engine_username`, `engine_password` and `net_info_list` (connection string, port, network type) for a given `instance_id` and `engine_type`, and enables or disables public network access of the engine through the `classic_network` field
+2. `alibabacloudstack_ack_cluster` now supports the `master_data_disks` field to configure the data disks attached to master nodes, including `size`, `category`, `encrypted`, `kms_key_id`, `auto_snapshot_policy_id`, `performance_level`, `auto_format`, `file_system` and `mount_target` (cannot be modified after the cluster is created)
+3. `alibabacloudstack_ack_cluster` now supports the `work_image_id` and `work_image_type` fields to specify and read back the custom image and image type actually used by worker nodes (cannot be modified after the cluster is created)
+4. `alibabacloudstack_polardb_cluster_instance` now supports the `db_minor_version`, `imci_num`, `orca` (`ON`/`OFF`) and `ip_version_selected_type` (`IPv4`/`IPv6`/`IPv4AndIPv6`) fields (none of them can be modified after creation)
+
+## Fixed
+
+1. Fixed `alibabacloudstack_ack_cluster` panicking while reading the master node image ID when DescribeClusterMasterNodes returns an empty array
+2. Fixed the worker node image handling of `alibabacloudstack_ack_cluster`: `work_image_id`/`work_image_type` now take precedence and fall back to `image_id`/`image_type` when unset, and no image parameter is sent when neither is configured (previously the default `image_type` was always sent and overrode the backend default image selection)
+3. Fixed `alibabacloudstack_ack_cluster` scale-in via `num_of_nodes` hitting an out-of-range slice error when the number of nodes to remove exceeded the actual node list: the count is now capped at the removable nodes and RemoveClusterNodes is skipped when there is nothing to remove
+4. Fixed `alibabacloudstack_ack_cluster` / `alibabacloudstack_cs_kubernetes_node_pool` not waiting for cluster state transitions during deletion: `removing` is now an accepted intermediate state for cluster Delete, and after all nodes are removed from a node pool the provider waits for the cluster to return from `removing`/`scaling` to `running`/`active` before deleting the node pool, which is otherwise rejected
+5. Fixed `alibabacloudstack_flink_namespace` Read panicking on direct type assertions when the backend response is missing `Name`/`GuaranteeQuota`/`CpuBrand`/`Uid`; each attribute is now set only when present
+6. Fixed `alibabacloudstack_edas_instance_cluster_attachment` returning after a plain 30-second sleep while instances were still not attached: transient InstallAgent errors (e.g. 503) are now retried for up to 3 minutes and the cluster member list is polled until all instances are attached (up to 10 minutes)
+7. Fixed `alibabacloudstack_polardb_dbinstance` silently ignoring a DescribeVSwitch failure during create and continuing with incorrect parameters; the real error is now surfaced
+8. Fixed the misleading validation errors of `alibabacloudstack_polardb_dbinstance` for encryption parameter combinations: `tde_status` set to `true` with an empty `encryption_key`, or `encryption_key` set while `tde_status` is `false`, now states exactly how to correct the parameters
+
+## Changes
+
+1. Cleaned up the diff suppression that never took effect on `alibabacloudstack_ack_cluster`: `master_disk_size`, `master_disk_category`, `master_vswitch_ids`, `pod_cidr`, `service_cidr`, `node_cidr_mask`, `password`, `enable_ssh` and `slb_internet_enabled` no longer reference a suppression function (the `force_update` field it read was never defined in the resource schema, so the suppression never applied). The behavior of these fields is unchanged; their changes already appear in `terraform plan` and trigger updates
+2. Read of `alibabacloudstack_ack_cluster` no longer writes the image ID returned by the node pool into `image_id` and writes it into `work_image_id` instead (`image_id` keeps only the configured value)
+3. `alibabacloudstack_ack_cluster` now treats `password`, `kms_encrypted_password`, `kms_encryption_context`, `master_data_disks`, `work_image_id` and `work_image_type` as non-updatable fields and returns an error when they change; `platform` is dropped from that list since it is deprecated and its changes are now ignored uniformly
+4. The `cpu_type` of `alibabacloudstack_flink_namespace` now accepts `Intel`, `AMD`, `ARM` and `Hygon` instead of `Intel` only
+5. The `storage_type` of `alibabacloudstack_polardb_cluster_instance` is no longer upper-cased on read-back and keeps the raw backend value
+6. The read-only attribute `proxy_cpu_cores` has been removed from `alibabacloudstack_polardb_cluster_instance`; templates referencing it must drop the reference
+
+## Deprecations
+
+1. Deprecated the `platform` field of `alibabacloudstack_ack_cluster`: changes to this field are ignored, it becomes read-only (Computed) in version 3.21.0 and will be removed in a future version
+
+---
+
 # 3.18.34
 
 ## Added

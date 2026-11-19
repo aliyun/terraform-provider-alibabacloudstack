@@ -1,3 +1,38 @@
+# 3.18.35
+
+## 新增
+
+1. Lindorm 实例引擎连接信息的编排与查询能力（`alibabacloudstack_lindorm_connection`）：按 `instance_id` 与 `engine_type` 读取 `engine_username`、`engine_password`、`net_info_list`（连接地址、端口、网络类型），并支持通过 `classic_network` 字段开通或关闭该引擎的公网访问
+2. `alibabacloudstack_ack_cluster` 支持 `master_data_disks` 字段，为 master 节点配置数据盘的 `size`、`category`、`encrypted`、`kms_key_id`、`auto_snapshot_policy_id`、`performance_level`、`auto_format`、`file_system`、`mount_target`（集群创建后不可修改）
+3. `alibabacloudstack_ack_cluster` 支持 `work_image_id`、`work_image_type` 字段，用于指定并回读 worker 节点实际使用的自定义镜像 ID 与镜像类型（集群创建后不可修改）
+4. `alibabacloudstack_polardb_cluster_instance` 支持 `db_minor_version`（内核小版本）、`imci_num`（IMCI 列存只读节点数）、`orca`（`ON`/`OFF`）、`ip_version_selected_type`（`IPv4`/`IPv6`/`IPv4AndIPv6`）字段（均为创建后不可修改）
+
+## 修复
+
+1. 修复 `alibabacloudstack_ack_cluster` 在 DescribeClusterMasterNodes 返回空数组时读取 master 节点镜像 ID 触发 panic 的问题
+2. 修复 `alibabacloudstack_ack_cluster` worker 节点镜像参数的下发与回退逻辑：`work_image_id`/`work_image_type` 优先生效，未指定时回退 `image_id`/`image_type`，两者均未填写时不再向后端下发镜像参数（此前无条件下发默认 `image_type`，会覆盖后端默认的镜像选择）
+3. 修复 `alibabacloudstack_ack_cluster` 通过 `num_of_nodes` 缩容时待删除节点数可能超出实际节点列表、导致切片越界报错的问题：现按实际可删除节点数截断，且无可删除节点时不再发起 RemoveClusterNodes 请求
+4. 修复 `alibabacloudstack_ack_cluster` / `alibabacloudstack_cs_kubernetes_node_pool` 删除流程未等待集群状态迁移的问题：集群 Delete 的中间态补充 `removing`；节点池删除全部节点后等待集群从 `removing`/`scaling` 回到 `running`/`active` 再删除节点池，避免集群处于 `removing` 时 DeleteClusterNodepool 被拒绝
+5. 修复 `alibabacloudstack_flink_namespace` 在后端响应缺失 `Name`/`GuaranteeQuota`/`CpuBrand`/`Uid` 字段时因直接类型断言导致 Read panic 的问题（现逐字段判空后回填）
+6. 修复 `alibabacloudstack_edas_instance_cluster_attachment` 创建仅固定等待 30 秒、实例尚未完成挂载即返回的问题：现对 InstallAgent 的瞬态错误（如 503）自动重试（最长 3 分钟），并轮询集群成员列表直到全部实例挂载完成（最长 10 分钟）
+7. 修复 `alibabacloudstack_polardb_dbinstance` 创建时 VSwitch 查询失败被静默忽略（直接返回 nil）、导致带错误参数继续创建的问题，现透出真实错误
+8. 修正 `alibabacloudstack_polardb_dbinstance` 加密参数组合校验的误导性报错：`tde_status` 为 `true` 但 `encryption_key` 为空、或 `encryption_key` 已填写但 `tde_status` 为 `false` 时，现明确提示应如何调整参数
+
+## 变更
+
+1. 清理 `alibabacloudstack_ack_cluster` 中从未实际生效的 diff 抑制配置：`master_disk_size`、`master_disk_category`、`master_vswitch_ids`、`pod_cidr`、`service_cidr`、`node_cidr_mask`、`password`、`enable_ssh`、`slb_internet_enabled` 不再挂载抑制函数（该抑制函数读取的 `force_update` 字段本就未在资源 schema 中定义，抑制从未生效）。上述字段的变更行为不变，仍会正常出现在 `terraform plan` 中并触发更新
+2. `alibabacloudstack_ack_cluster` 的 Read 不再将节点池返回的镜像 ID 写入 `image_id`，改为写入 `work_image_id`（`image_id` 仅保留用户配置值）
+3. `alibabacloudstack_ack_cluster` 将 `password`、`kms_encrypted_password`、`kms_encryption_context`、`master_data_disks`、`work_image_id`、`work_image_type` 明确为不可更新字段，变更这些字段将直接报错提示不支持更新；同时 `platform` 移出该名单（该字段已废弃，其变更统一被忽略）
+4. `alibabacloudstack_flink_namespace` 的 `cpu_type` 取值由仅 `Intel` 扩展为 `Intel`、`AMD`、`ARM`、`Hygon`
+5. `alibabacloudstack_polardb_cluster_instance` 的 `storage_type` 回读不再强制转换为大写，按后端返回值原样回填
+6. `alibabacloudstack_polardb_cluster_instance` 移除只读属性 `proxy_cpu_cores`，模板中对该属性的引用需一并删除
+
+## 废弃
+
+1. 废弃 `alibabacloudstack_ack_cluster` 的 `platform` 字段：对该字段的修改将被忽略，计划于 3.21.0 变为只读（Computed），后续版本移除
+
+---
+
 # 3.18.34
 
 ## 新增
