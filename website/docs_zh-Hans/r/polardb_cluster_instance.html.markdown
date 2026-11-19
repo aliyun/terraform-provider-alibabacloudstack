@@ -57,11 +57,15 @@ resource "alibabacloudstack_polardb_cluster_instance" "default" {
 
 * `db_type` - (必填, 变更后新建) 数据库引擎类型。有效值：[MySQL](file://d:\terraform\terraform-provider-apsarastack\alibabacloudstack\extension_rds.go#L5-L5)、`PolarDB_PG`、`PolarDB_PPAS`。
 * `db_version` - (必填, 变更后新建) 数据库引擎版本。
+* `db_minor_version` - (可选, 变更后新建) 集群实例的内核小版本。
 * `db_node_class` - (必填) 集群实例的节点类别。
 * `zone_id` - (必填, 变更后新建) 集群实例的可用区 ID。
 * `vpc_id` - (必填, 变更后新建) 专有网络 ID。
 * `vswitch_id` - (必填, 变更后新建) 交换机 ID。
 * `db_cluster_description` - (可选) 集群实例的描述。
+* `imci_num` - (可选, 变更后新建) IMCI（列存索引）只读节点数量。默认值：0。
+* `orca` - (可选, 变更后新建) 是否开启 Orca。有效值：`ON`、`OFF`。
+* `ip_version_selected_type` - (可选, 变更后新建) 集群实例选择的 IP 版本。有效值：`IPv4`、`IPv6`、`IPv4AndIPv6`。默认值：`IPv4`。
 * `storage_type` - (可选, 变更后新建) 集群实例的存储类型。
 * `storage_space` - (可选, 变更后新建) 集群实例的存储空间。
 * `readonly_node_num` - (可选) 只读节点数量。有效值：0 到 15。
@@ -112,7 +116,6 @@ resource "alibabacloudstack_polardb_cluster_instance" "default" {
 * `lock_mode` - 集群实例的锁定模式。
 * `creation_time` - 集群实例的创建时间。
 * `sql_size` - 集群实例的 SQL 大小。
-* `proxy_cpu_cores` - 集群实例的代理 CPU 核心数。
 * `pay_type` - 集群实例的付费类型。
 
 ## 超时配置

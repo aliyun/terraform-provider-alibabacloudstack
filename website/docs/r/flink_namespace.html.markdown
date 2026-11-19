@@ -48,7 +48,7 @@ The following arguments are supported:
 
 * `name` - (Required, ForceNew) Name of Flink Registry namespace. 
 * `cu` - (Required) Integer. Guaranteed Resources for Cpu.
-* `cpu_type` - (Required, ForceNew) The CPU type of the resource. Valid values: `Intel`.
+* `cpu_type` - (Required, ForceNew) The CPU type of the resource. Valid values: `Intel`, `AMD`, `ARM`, `Hygon`.
 * `owner_uid` - (Optional, ForceNew) Owner ID for this Namesapce.
 
 ## Attributes Reference

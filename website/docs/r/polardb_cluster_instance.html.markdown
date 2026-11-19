@@ -56,11 +56,15 @@ The following arguments are supported:
 
 * `db_type` - (Required, ForceNew) The database engine type. Valid values: [MySQL](file://d:\terraform\terraform-provider-apsarastack\alibabacloudstack\extension_rds.go#L5-L5), `PolarDB_PG`, `PolarDB_PPAS`.
 * `db_version` - (Required, ForceNew) The database engine version.
+* `db_minor_version` - (Optional, ForceNew) The minor engine version of the cluster instance.
 * `db_node_class` - (Required) The node class of the cluster instance.
 * `zone_id` - (Required, ForceNew) The zone ID of the cluster instance.
 * `vpc_id` - (Required, ForceNew) The ID of the VPC.
 * `vswitch_id` - (Required, ForceNew) The ID of the vSwitch.
 * `db_cluster_description` - (Optional) The description of the cluster instance.
+* `imci_num` - (Optional, ForceNew) The number of IMCI (In-Memory Column Index) column-oriented read-only nodes. Default is `0`.
+* `orca` - (Optional, ForceNew) Specifies whether to enable the Orca feature. Valid values: `ON`, `OFF`.
+* `ip_version_selected_type` - (Optional, ForceNew) The IP version selected for the cluster instance. Valid values: `IPv4`, `IPv6`, `IPv4AndIPv6`. Default is `IPv4`.
 * `storage_type` - (Optional, ForceNew) The storage type of the cluster instance.
 * `storage_space` - (Optional, ForceNew) The storage space of the cluster instance.
 * `readonly_node_num` - (Optional) The number of read-only nodes. Valid values: 0 to 15.
@@ -111,7 +115,6 @@ The following attributes are exported:
 * `lock_mode` - The lock mode of the cluster instance.
 * `creation_time` - The creation time of the cluster instance.
 * `sql_size` - The SQL size of the cluster instance.
-* `proxy_cpu_cores` - The proxy CPU cores of the cluster instance.
 * `pay_type` - The payment type of the cluster instance.
 
 ## Timeouts

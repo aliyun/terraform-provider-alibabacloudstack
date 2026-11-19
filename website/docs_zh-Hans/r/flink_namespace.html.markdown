@@ -49,7 +49,7 @@ resource "alibabacloudstack_flink_namespace" "default" {
 
 * `name` - (必填，变更时重建) 仓库命名空间的名称。
 * `cu` -  (必填) 仓库命名空间保留的资源数量。
-* `cpu_type` - (必填，变更时重建) 资源CPU类型。有效值：`Intel`。
+* `cpu_type` - (必填，变更时重建) 资源CPU类型。有效值：`Intel`、`AMD`、`ARM`、`Hygon`。
 * `owner_uid` -  (可选，变更时重建) 仓库命名空间管理员Id。
 
 ## 属性说明
